@@ -1,1 +1,0 @@
-timely.define([],function(){var e=function(){return!1},t=function(e){},n=function(){return""},r=function(e){},i=function(e){},s=function(){return!0};return{is_ready:e,init:t,get_field_name:n,reload:r,destroy:i,check_field:s}});
