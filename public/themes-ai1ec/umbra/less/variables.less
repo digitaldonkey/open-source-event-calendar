@@ -4,16 +4,21 @@
 // This overrides and extends variables definitions from Bootstrap's
 // variables.less. Change these variables to modify the look of the calendar.
 //
+@gray-darker:            lighten(#000, 13.5%); // #222
+@gray-dark:              lighten(#000, 20%);   // #333
+@gray:                   lighten(#000, 33.5%); // #555
+@gray-light:             lighten(#000, 60%);   // #999
+@gray-lighter:           lighten(#000, 93.5%); // #eee
 
 @import "bootstrap/variables.less";
 @import "user-variable-map.less";
 
 @text-muted:                 mix( @text-color, @body-bg, 60% );
-@headings-color:             @grayLight;
+@headings-color:             @gray-light;
 @dropdown-link-active-bg:    mix( @body-bg, @link-color, 20% );
 @state-info-text:            #418CC7;
 
-@table-bg-accent:            @gray-darkest;
+@table-bg-accent:            @gray-darker;
 @table-bg-hover:             @gray-darker;
 @table-border-color:         @gray-darker;
 

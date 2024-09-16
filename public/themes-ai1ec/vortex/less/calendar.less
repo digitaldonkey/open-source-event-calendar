@@ -13,7 +13,12 @@
 
 // General calendar styles.
 #ai1ec-container {
-	clear: both;
+	&:after {
+		// clearfix.
+		content: '';
+		display: table;
+		clear: both;
+	}
 }
 
 // Calendar view container.
@@ -655,7 +660,7 @@ table.ai1ec-oneday-view-original {
 		border: 1px solid @event-border;
 		border-radius: 0.5em;
 		clear: right;
-		margin: @font-size-base / 2 0;
+		margin: (@font-size-base / 2) 0;
 		overflow: hidden;
 		position: relative;
 		padding: 0.6em;
@@ -665,7 +670,7 @@ table.ai1ec-oneday-view-original {
 			overflow: visible;
 			width: 100%;
 			& + .ai1ec-event {
-				margin: 0 0 @font-size-base / 2 0;
+				margin: 0 0 (@font-size-base / 2) 0;
 			}
 		}
 		&.ai1ec-expanded {

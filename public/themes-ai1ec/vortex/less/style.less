@@ -1,4 +1,3 @@
-//
 // @file
 //
 // CSS declarations for all parts of a WordPress site in which the All-in-One
@@ -489,6 +488,19 @@ input.ai1ec-timepicker[readonly] {
 // ========================
 // = Namespaced overrides =
 // ========================
+#ai1ec-container {
+  max-width: var(--wp--style--global--wide-size);
+	.ai1ec-agenda-view {
+		max-width: var(--wp--style--global--wide-size);
+	}
+	.ai1ec-agenda-view {
+		padding-right: var(--wp--style--root--padding-right);
+		padding-left: var(--wp--style--root--padding-left);
+	}
+	.ai1ec-month-view .ai1ec-day-stretcher {
+		// only empty.
+	}
+}
 
 .timely {
 	//
@@ -499,10 +511,15 @@ input.ai1ec-timepicker[readonly] {
 	// .timely, not body.
 	margin: 0;
 	font-family: @font-family-base;
+
 	font-size: @font-size-base;
-	line-height: @line-height-base;
+	font-size: var(--wp--preset--font-size--small);
+	//line-height: @line-height-base;
+	line-height: 1.55;
+
 	color: @text-color;
 	word-wrap: break-word;
+	//outline: 4px solid cyan;
 
 	a {
 		border: none;
@@ -687,7 +704,6 @@ input.ai1ec-timepicker[readonly] {
 .ai1ec-allday-badge {
 	background: @allday-badge-color;
 	border-radius: 0.9em;
-	.ai1ec-box-shadow( @shadow );
 	color: @event-stub-allday-text;
 	display: inline-block;
 	font-size: 0.85em;
@@ -809,7 +825,7 @@ a.ai1ec-custom-filter {
 		);
 		filter: none\9; // IE8 doesn't get how to do this gradient for some reason
 		line-height: 1.2em;
-		margin: @font-size-base / 2 0.75em;
+		margin: (@font-size-base / 2) 0.75em;
 		overflow: hidden;
 		text-align: center;
 		text-shadow: 0 1px 0 @text-emboss;
@@ -883,7 +899,7 @@ a.ai1ec-custom-filter {
 	// Agenda widget view events.
 	.ai1ec-event {
 		clear: right;
-		margin: @font-size-base / 2 0 @font-size-base / 2 4.8em;
+		margin: (@font-size-base / 2) 0 @font-size-base / 2 4.8em;
 		padding: 0;
 		position: relative;
 		> a {
