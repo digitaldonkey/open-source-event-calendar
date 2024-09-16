@@ -7,8 +7,7 @@
 		</p>
 	{% else %}
 		{% for date, date_info in dates %}
-			<div class="ai1ec-date
-				{% if date_info.today is not empty %}ai1ec-today{% endif %}">
+			<div class="ai1ec-date{% if date_info.today is not empty %} ai1ec-today{% endif %}">
 				<a class="ai1ec-date-title ai1ec-load-view"
 					href="{{ date_info.href | e('html_attr') }}"
 					{{ data_type | raw }}>

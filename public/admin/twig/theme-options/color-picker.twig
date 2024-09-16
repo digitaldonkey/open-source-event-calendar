@@ -1,7 +1,7 @@
 {% extends "theme-options/base_option.twig" %}
 
 {% block variable %}
-{% spaceless %}
+{% apply spaceless %}
 <div class="ai1ec-col-sm-6 ai1ec-col-xs-9">
   <div class="ai1ec-input-group color colorpickers"
     data-color="{{ value }}"
@@ -13,6 +13,6 @@
     </span>
   </div>
 </div>
-{% endspaceless %}
+{% endapply %}
 {% endblock %}
 

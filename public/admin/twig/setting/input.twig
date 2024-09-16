@@ -10,7 +10,7 @@
 {% endif %}
 
 	{% from 'form-elements/input.twig' import input %}
-	{% spaceless %}
+	{% apply spaceless %}
 	{{ input( id, id, value, input_type, input_args ) }}
 
 
@@ -29,7 +29,7 @@
 			</span>
 		</div>
 	{% endif %}
-	{% endspaceless %}
+	{% endapply %}
 </div>
 
 {% if help is defined %}

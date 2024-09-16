@@ -16,8 +16,7 @@
 				{% set tag_for_days = 'span' %}
 			{% endif %}
 			{% for date, date_info in dates %}
-				<div class="ai1ec-date
-					{% if date_info.today is not empty %}ai1ec-today{% endif %}">
+				<div class="ai1ec-date{% if date_info.today is not empty %} ai1ec-today{% endif %}">
 					<{{ tag_for_days }} class="ai1ec-date-title ai1ec-load-view"
 						href="{{ date_info.href | e('html_attr') }}">
 						<div class="ai1ec-month">{{ date | month }}</div>

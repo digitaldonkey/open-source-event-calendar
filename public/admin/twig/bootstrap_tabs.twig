@@ -7,7 +7,7 @@
 		ai1ec-nav-tabs
 	{% endif %}">
 
-	{% for id, data in tabs if data.name is defined %}
+	{% for id, data in tabs %}
 		{% if data.items is defined %}
 			<li class="ai1ec-dropdown">
 				<a href="#" data-toggle="ai1ec-dropdown">
@@ -45,7 +45,7 @@
 	{% endfor %}
 </div>
 
+{% if stacked %}</div></div>{% endif %}
+
 {% block extra_html %}
 {% endblock %}
-
-{% if stacked %}</div></div>{% endif %}
