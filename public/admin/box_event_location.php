@@ -1,76 +1,76 @@
 <div class="ai1ec-panel-heading">
 	<a data-toggle="ai1ec-collapse"
-		data-parent="#ai1ec-add-new-event-accordion"
-		href="#ai1ec-event-location-box">
+		data-parent="#osec-add-new-event-accordion"
+		href="#osec-event-location-box">
 		<i class="ai1ec-fa ai1ec-fa-map-marker ai1ec-fa-fw"></i>
-		<?php _e( 'Event location details', AI1EC_PLUGIN_NAME ); ?>
+		<?php _e( 'Event location details', OSEC_TXT_DOM ); ?>
 	</a>
 </div>
-<div id="ai1ec-event-location-box" class="ai1ec-panel-collapse ai1ec-collapse">
+<div id="osec-event-location-box" class="ai1ec-panel-collapse ai1ec-collapse">
 	<div class="ai1ec-panel-body">
 		<div class="ai1ec-row">
 			<div class="ai1ec-col-md-8 ai1ec-col-lg-6">
 				<table class="ai1ec-form ai1ec-location-form">
 					<tbody>
-						<?php echo $select_venue; ?>
+						<?php echo $pre_venue_html; ?>
 						<tr>
 							<td class="ai1ec-first">
-								<label for="ai1ec_venue">
-									<?php _e( 'Venue name:', AI1EC_PLUGIN_NAME ); ?>
+								<label for="osec_venue">
+									<?php _e( 'Venue name:', OSEC_TXT_DOM ); ?>
 								</label>
 							</td>
 							<td>
-								<input type="text" name="ai1ec_venue" id="ai1ec_venue"
+								<input type="text" name="osec_venue" id="osec_venue"
 									class="ai1ec-form-control"
 									value="<?php echo esc_attr( $venue ); ?>">
 							</td>
 						</tr>
 						<tr>
 							<td>
-								<label for="ai1ec_address">
-									<?php _e( 'Address:', AI1EC_PLUGIN_NAME ); ?>
+								<label for="osec_address">
+									<?php _e( 'Address:', OSEC_TXT_DOM ); ?>
 								</label>
 							</td>
 							<td>
-								<input type="text" name="ai1ec_address" id="ai1ec_address"
+								<input type="text" name="osec_address" id="osec_address"
 									class="ai1ec-form-control"
 									value="<?php echo esc_attr( $address ); ?>">
 							</td>
 						</tr>
 						<tr>
 							<td colspan="2">
-								<label for="ai1ec_input_coordinates">
-									<input type="checkbox" value="1" name="ai1ec_input_coordinates"
-										id="ai1ec_input_coordinates" <?php echo $coordinates; ?>>
-									<?php _e( 'Input Coordinates', AI1EC_PLUGIN_NAME ); ?>
+								<label for="osec_input_coordinates">
+									<input type="checkbox" value="1" name="osec_input_coordinates"
+										id="osec_input_coordinates" <?php echo $coordinates; ?>>
+									<?php _e( 'Input Coordinates', OSEC_TXT_DOM ); ?>
 								</label>
 							</td>
 						</tr>
-						<?php echo $save_venue; ?>
+						<?php echo $post_venue_html; ?>
 					</tbody>
 				</table>
-				<table id="ai1ec_table_coordinates" class="ai1ec-form ai1ec-location-form">
+				<table id="osec_table_coordinates" class="ai1ec-form ai1ec-location-form">
 					<tbody>
 						<tr>
 							<td class="ai1ec-first">
-								<label for="ai1ec_latitude">
-									<?php _e( 'Latitude:', AI1EC_PLUGIN_NAME ); ?>
+								<label for="osec_latitude">
+									<?php _e( 'Latitude:', OSEC_TXT_DOM ); ?>
 								</label>
 							</td>
 							<td>
-								<input type="text" name="ai1ec_latitude" id="ai1ec_latitude"
+								<input type="text" name="osec_latitude" id="osec_latitude"
 									class="ai1ec-coordinates ai1ec-form-control"
 									value="<?php echo $latitude; ?>">
 							</td>
 						</tr>
 						<tr>
 							<td>
-								<label for="ai1ec_longitude">
-									<?php _e( 'Longitude:', AI1EC_PLUGIN_NAME ); ?>
+								<label for="osec_longitude">
+									<?php _e( 'Longitude:', OSEC_TXT_DOM ); ?>
 								</label>
 							</td>
 							<td>
-								<input type="text" name="ai1ec_longitude" id="ai1ec_longitude"
+								<input type="text" name="osec_longitude" id="osec_longitude"
 									class="ai1ec-coordinates ai1ec-form-control"
 									value="<?php echo $longitude; ?>">
 							</td>
@@ -79,21 +79,21 @@
 				</table>
 			</div>
 			<div class="ai1ec-col-md-4 ai1ec-col-lg-6">
-				<label for="ai1ec_google_map">
-					<input type="checkbox" value="1" name="ai1ec_google_map"
-						id="ai1ec_google_map" <?php echo $google_map; ?>>
-					<?php _e( 'Show Map', AI1EC_PLUGIN_NAME ); ?>
+				<label for="osec_google_map">
+					<input type="checkbox" value="1" name="osec_google_map"
+						id="osec_google_map" <?php echo $google_map; ?>>
+					<?php _e( 'Show Map', OSEC_TXT_DOM ); ?>
 				</label>
 				<div class="ai1ec-map-preview
 					<?php echo $show_map ? 'ai1ec-map-visible' : ''; ?>">
-					<div id="ai1ec_map_canvas"></div>
+					<div id="osec_map_canvas"></div>
 				</div>
 			</div>
 		</div>
-		<input type="hidden" name="ai1ec_city" id="ai1ec_city" value="<?php echo esc_attr( $city ); ?>">
-		<input type="hidden" name="ai1ec_province" id="ai1ec_province" value="<?php echo esc_attr( $province ); ?>">
-		<input type="hidden" name="ai1ec_postal_code" id="ai1ec_postal_code" value="<?php echo esc_attr( $postal_code ); ?>">
-		<input type="hidden" name="ai1ec_country" id="ai1ec_country" value="<?php echo esc_attr( $country ); ?>">
-		<input type="hidden" name="ai1ec_country_short" id="ai1ec_country_short" value="">
+		<input type="hidden" name="osec_city" id="osec_city" value="<?php echo esc_attr( $city ); ?>">
+		<input type="hidden" name="osec_province" id="osec_province" value="<?php echo esc_attr( $province ); ?>">
+		<input type="hidden" name="osec_postal_code" id="osec_postal_code" value="<?php echo esc_attr( $postal_code ); ?>">
+		<input type="hidden" name="osec_country" id="osec_country" value="<?php echo esc_attr( $country ); ?>">
+		<input type="hidden" name="osec_country_short" id="osec_country_short" value="">
 	</div>
 </div>

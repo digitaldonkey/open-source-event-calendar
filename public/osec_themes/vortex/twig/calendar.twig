@@ -1,0 +1,27 @@
+{% autoescape false %}
+<div id="osec-container"
+	 class="ai1ec-main-container {{ osec_calendar_classes }}">
+	{{ OSEC_PAGE_CONTENT_PLACEHOLDER }}
+	<div id="ai1ec-calendar" class="timely ai1ec-calendar">
+		{% if above_calendar is not empty %}
+			{{ above_calendar }}
+		{% endif %}
+		{{ filter_menu }}
+		<div id="osec-calendar-view-container" class="osec-calendar-view-container">
+			<div id="osec-calendar-view-loading"
+				 class="ai1ec-loading osec-calendar-view-loading"></div>
+			<div id="osec-calendar-view" class="osec-calendar-view">
+				{{ view }}
+			</div>
+		</div>
+		<div class="ai1ec-subscribe-container ai1ec-pull-right ai1ec-btn-group">
+			{{ subscribe_buttons }}
+		</div>
+		{% if after_calendar is not empty %}
+			{{ after_calendar }}
+		{% endif %}
+	</div>
+</div>
+{% endautoescape %}
+
+

@@ -1,0 +1,58 @@
+<div class="ai1ec-col-sm-12">
+    <h3>Cache status</h3>
+    <p>Caches used in given order.</p>
+    <div class="ai1ec-pre-scrollable">
+        <table class="ai1ec-table">
+            <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">is_available</th>
+                <th scope="col">is_curren_cache
+                <th scope="col">Constant</th>
+                <th scope="col">Notes</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for cache in available_caches %}
+                <tr>
+                    <th scope="row">{{ cache.name }}</th>
+                    <td class="ai1ec-text-center {% if cache.is_available %}success{% else %}warning{% endif %}">
+                        {% if cache.is_available %}✔{% else %}X{% endif %}
+                    </td>
+                    <td class="ai1ec-text-center {% if cache.is_curren_cache %}success{% else %}warning{% endif %}">
+                        {% if cache.is_curren_cache %}✔{% else %}✖{% endif %}
+                    </td>
+                    <td class="">
+                        {{ cache.constant }}
+                    </td>
+                    <td>{{ cache.notes|raw }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h3>Twig Cache</h3>
+    <p>Twig requires a writeable file cache.</p>
+
+    <ul class="ai1ec-fa-ul">
+        <li id="osec-cache-scan-success"
+            class="ai1ec-text-success{% if twig_cache_available == false %} ai1ec-hide{% endif %}">
+            <i class="ai1ec-fa ai1ec-fa-li ai1ec-fa-check-circle"></i>
+            {{ text.okcache | raw }}
+        </li>
+        <li id="osec-cache-scan-danger"
+            class="ai1ec-text-danger{% if twig_cache_available == true %} ai1ec-hide{% endif %}">
+            <i class="ai1ec-fa ai1ec-fa-li ai1ec-fa-times-circle"></i>
+            {{ text.nocache | raw }}
+            <button class="ai1ec-btn ai1ec-btn-default ai1ec-btn-xs" id="ai1ec-button-refresh"
+                    data-loading-text="&lt;i class=&quot;ai1ec-fa ai1ec-fa-fw ai1ec-fa-refresh ai1ec-fa-spin&quot;&gt;&lt;/i&gt; {{ text.rescan }}">
+                <i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-refresh"></i>
+                {{ text.refresh | raw }}
+            </button>
+        </li>
+    </ul>
+    <div class="ai1ec-pre-scrollable">
+        <code>{{ twig_path }}</code>
+    </div>
+</div>

@@ -1,11 +1,9 @@
-
 //
 // Load core variables and mixins
 // --------------------------------------------------
 
 @import "variables.less";
 @import "mixins.less";
-
 
 
 //
@@ -19,14 +17,14 @@
 .ai1ec-btn-info,
 .ai1ec-btn-warning,
 .ai1ec-btn-danger {
-  text-shadow: 0 -1px 0 rgba(0,0,0,.2);
-  @shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 1px 1px rgba(0,0,0,.075);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, .2);
+  @shadow: inset 0 1px 0 rgba(255, 255, 255, .15), 0 1px 1px rgba(0, 0, 0, .075);
   .ai1ec-box-shadow(@shadow);
 
   // Reset the shadow
   &:active,
   &.ai1ec-active {
-    .ai1ec-box-shadow(inset 0 3px 5px rgba(0,0,0,.125));
+    .ai1ec-box-shadow(inset 0 3px 5px rgba(0, 0, 0, .125));
   }
 }
 
@@ -38,7 +36,7 @@
   border-color: darken(@btn-color, 14%);
 
   &:hover,
-  &:focus  {
+  &:focus {
     background-color: darken(@btn-color, 12%);
     background-position: 0 -15px;
   }
@@ -60,13 +58,31 @@
 }
 
 // Apply the mixin to the buttons
-.ai1ec-btn-default { .ai1ec-btn-styles(@btn-default-bg); text-shadow: 0 1px 0 #fff; border-color: #ccc; }
-.ai1ec-btn-primary { .ai1ec-btn-styles(@btn-primary-bg); }
-.ai1ec-btn-success { .ai1ec-btn-styles(@btn-success-bg); }
-.ai1ec-btn-warning { .ai1ec-btn-styles(@btn-warning-bg); }
-.ai1ec-btn-danger  { .ai1ec-btn-styles(@btn-danger-bg); }
-.ai1ec-btn-info    { .ai1ec-btn-styles(@btn-info-bg); }
+.ai1ec-btn-default {
+  .ai1ec-btn-styles(@btn-default-bg);
+  text-shadow: 0 1px 0 #fff;
+  border-color: #ccc;
+}
 
+.ai1ec-btn-primary {
+  .ai1ec-btn-styles(@btn-primary-bg);
+}
+
+.ai1ec-btn-success {
+  .ai1ec-btn-styles(@btn-success-bg);
+}
+
+.ai1ec-btn-warning {
+  .ai1ec-btn-styles(@btn-warning-bg);
+}
+
+.ai1ec-btn-danger {
+  .ai1ec-btn-styles(@btn-danger-bg);
+}
+
+.ai1ec-btn-info {
+  .ai1ec-btn-styles(@btn-info-bg);
+}
 
 
 //
@@ -75,9 +91,8 @@
 
 .ai1ec-thumbnail,
 .ai1ec-img-thumbnail {
-  .ai1ec-box-shadow(0 1px 2px rgba(0,0,0,.075));
+  .ai1ec-box-shadow(0 1px 2px rgba(0, 0, 0, .075));
 }
-
 
 
 //
@@ -89,13 +104,13 @@
   #gradient > .ai1ec-vertical(@start-color: @dropdown-link-hover-bg; @end-color: darken(@dropdown-link-hover-bg, 5%));
   background-color: darken(@dropdown-link-hover-bg, 5%);
 }
+
 .ai1ec-dropdown-menu > .ai1ec-active > a,
 .ai1ec-dropdown-menu > .ai1ec-active > a:hover,
 .ai1ec-dropdown-menu > .ai1ec-active > a:focus {
   #gradient > .ai1ec-vertical(@start-color: @dropdown-link-active-bg; @end-color: darken(@dropdown-link-active-bg, 5%));
   background-color: darken(@dropdown-link-active-bg, 5%);
 }
-
 
 
 //
@@ -107,17 +122,18 @@
   #gradient > .ai1ec-vertical(@start-color: lighten(@navbar-default-bg, 10%); @end-color: @navbar-default-bg);
   .ai1ec-reset-filter(); // Remove gradient in IE<10 to fix bug where dropdowns don't get triggered
   border-radius: @navbar-border-radius;
-  @shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 1px 5px rgba(0,0,0,.075);
+  @shadow: inset 0 1px 0 rgba(255, 255, 255, .15), 0 1px 5px rgba(0, 0, 0, .075);
   .ai1ec-box-shadow(@shadow);
 
   .ai1ec-navbar-nav > .ai1ec-active > a {
     #gradient > .ai1ec-vertical(@start-color: darken(@navbar-default-bg, 5%); @end-color: darken(@navbar-default-bg, 2%));
-    .ai1ec-box-shadow(inset 0 3px 9px rgba(0,0,0,.075));
+    .ai1ec-box-shadow(inset 0 3px 9px rgba(0, 0, 0, .075));
   }
 }
+
 .ai1ec-navbar-brand,
 .ai1ec-navbar-nav > li > a {
-  text-shadow: 0 1px 0 rgba(255,255,255,.25);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .25);
 }
 
 // Inverted navbar
@@ -127,12 +143,12 @@
 
   .ai1ec-navbar-nav > .ai1ec-active > a {
     #gradient > .ai1ec-vertical(@start-color: @navbar-inverse-bg; @end-color: lighten(@navbar-inverse-bg, 2.5%));
-    .ai1ec-box-shadow(inset 0 3px 9px rgba(0,0,0,.25));
+    .ai1ec-box-shadow(inset 0 3px 9px rgba(0, 0, 0, .25));
   }
 
   .ai1ec-navbar-brand,
   .ai1ec-navbar-nav > li > a {
-    text-shadow: 0 -1px 0 rgba(0,0,0,.25);
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, .25);
   }
 }
 
@@ -144,15 +160,14 @@
 }
 
 
-
 //
 // Alerts
 // --------------------------------------------------
 
 // Common styles
 .ai1ec-alert {
-  text-shadow: 0 1px 0 rgba(255,255,255,.2);
-  @shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 2px rgba(0,0,0,.05);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .2);
+  @shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 1px 2px rgba(0, 0, 0, .05);
   .ai1ec-box-shadow(@shadow);
 }
 
@@ -163,11 +178,21 @@
 }
 
 // Apply the mixin to the alerts
-.ai1ec-alert-success    { .ai1ec-alert-styles(@alert-success-bg); }
-.ai1ec-alert-info       { .ai1ec-alert-styles(@alert-info-bg); }
-.ai1ec-alert-warning    { .ai1ec-alert-styles(@alert-warning-bg); }
-.ai1ec-alert-danger     { .ai1ec-alert-styles(@alert-danger-bg); }
+.ai1ec-alert-success {
+  .ai1ec-alert-styles(@alert-success-bg);
+}
 
+.ai1ec-alert-info {
+  .ai1ec-alert-styles(@alert-info-bg);
+}
+
+.ai1ec-alert-warning {
+  .ai1ec-alert-styles(@alert-warning-bg);
+}
+
+.ai1ec-alert-danger {
+  .ai1ec-alert-styles(@alert-danger-bg);
+}
 
 
 //
@@ -185,12 +210,25 @@
 }
 
 // Apply the mixin to the progress bars
-.ai1ec-progress-bar            { .ai1ec-progress-bar-styles(@progress-bar-bg); }
-.ai1ec-progress-bar-success    { .ai1ec-progress-bar-styles(@progress-bar-success-bg); }
-.ai1ec-progress-bar-info       { .ai1ec-progress-bar-styles(@progress-bar-info-bg); }
-.ai1ec-progress-bar-warning    { .ai1ec-progress-bar-styles(@progress-bar-warning-bg); }
-.ai1ec-progress-bar-danger     { .ai1ec-progress-bar-styles(@progress-bar-danger-bg); }
+.ai1ec-progress-bar {
+  .ai1ec-progress-bar-styles(@progress-bar-bg);
+}
 
+.ai1ec-progress-bar-success {
+  .ai1ec-progress-bar-styles(@progress-bar-success-bg);
+}
+
+.ai1ec-progress-bar-info {
+  .ai1ec-progress-bar-styles(@progress-bar-info-bg);
+}
+
+.ai1ec-progress-bar-warning {
+  .ai1ec-progress-bar-styles(@progress-bar-warning-bg);
+}
+
+.ai1ec-progress-bar-danger {
+  .ai1ec-progress-bar-styles(@progress-bar-danger-bg);
+}
 
 
 //
@@ -199,8 +237,9 @@
 
 .ai1ec-list-group {
   border-radius: @border-radius-base;
-  .ai1ec-box-shadow(0 1px 2px rgba(0,0,0,.075));
+  .ai1ec-box-shadow(0 1px 2px rgba(0, 0, 0, .075));
 }
+
 .ai1ec-list-group-item.ai1ec-active,
 .ai1ec-list-group-item.ai1ec-active:hover,
 .ai1ec-list-group-item.ai1ec-active:focus {
@@ -210,14 +249,13 @@
 }
 
 
-
 //
 // Panels
 // --------------------------------------------------
 
 // Common styles
 .ai1ec-panel {
-  .ai1ec-box-shadow(0 1px 2px rgba(0,0,0,.05));
+  .ai1ec-box-shadow(0 1px 2px rgba(0, 0, 0, .05));
 }
 
 // Mixin for generating new styles
@@ -226,13 +264,29 @@
 }
 
 // Apply the mixin to the panel headings only
-.ai1ec-panel-default > .ai1ec-panel-heading   { .ai1ec-panel-heading-styles(@panel-default-heading-bg); }
-.ai1ec-panel-primary > .ai1ec-panel-heading   { .ai1ec-panel-heading-styles(@panel-primary-heading-bg); }
-.ai1ec-panel-success > .ai1ec-panel-heading   { .ai1ec-panel-heading-styles(@panel-success-heading-bg); }
-.ai1ec-panel-info > .ai1ec-panel-heading      { .ai1ec-panel-heading-styles(@panel-info-heading-bg); }
-.ai1ec-panel-warning > .ai1ec-panel-heading   { .ai1ec-panel-heading-styles(@panel-warning-heading-bg); }
-.ai1ec-panel-danger > .ai1ec-panel-heading    { .ai1ec-panel-heading-styles(@panel-danger-heading-bg); }
+.ai1ec-panel-default > .ai1ec-panel-heading {
+  .ai1ec-panel-heading-styles(@panel-default-heading-bg);
+}
 
+.ai1ec-panel-primary > .ai1ec-panel-heading {
+  .ai1ec-panel-heading-styles(@panel-primary-heading-bg);
+}
+
+.ai1ec-panel-success > .ai1ec-panel-heading {
+  .ai1ec-panel-heading-styles(@panel-success-heading-bg);
+}
+
+.ai1ec-panel-info > .ai1ec-panel-heading {
+  .ai1ec-panel-heading-styles(@panel-info-heading-bg);
+}
+
+.ai1ec-panel-warning > .ai1ec-panel-heading {
+  .ai1ec-panel-heading-styles(@panel-warning-heading-bg);
+}
+
+.ai1ec-panel-danger > .ai1ec-panel-heading {
+  .ai1ec-panel-heading-styles(@panel-danger-heading-bg);
+}
 
 
 //
@@ -242,6 +296,6 @@
 .ai1ec-well {
   #gradient > .ai1ec-vertical(@start-color: darken(@well-bg, 5%); @end-color: @well-bg);
   border-color: darken(@well-bg, 10%);
-  @shadow: inset 0 1px 3px rgba(0,0,0,.05), 0 1px 0 rgba(255,255,255,.1);
+  @shadow: inset 0 1px 3px rgba(0, 0, 0, .05), 0 1px 0 rgba(255, 255, 255, .1);
   .ai1ec-box-shadow(@shadow);
 }

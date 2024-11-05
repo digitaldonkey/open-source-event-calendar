@@ -1,7 +1,5 @@
 <div class="wrap">
 
-	<?php screen_icon(); ?>
-
 	<h2><?php echo $page->title; ?></h2>
 
 	<div id="poststuff">
@@ -11,11 +9,11 @@
 
 			<div class="metabox-holder">
 				<div class="post-box-container left-side timely">
-					<?php $template_adapter->display_meta_box( $page->meta_box_id, 'left-side', null ); ?>
+					<?php $template_adapter->display_meta_box( $page->meta_box_id, 'left-side', NULL ); ?>
 				</div>
 			</div>
 		</form>
 
-	</div><!-- #poststuff -->
+	</div>
 
-</div><!-- .wrap -->
+</div>

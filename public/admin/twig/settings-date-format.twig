@@ -1,0 +1,73 @@
+<fieldset>
+    <legend class="screen-reader-text">
+        <span>Time Format	Short</span>
+    </legend>
+    {% for format in time_formats %}
+        <label>
+            {% apply spaceless %}
+                <input type='radio' name="{{ id }}"
+                   value="{{format.escaped}}"
+                   {% if current_format == format.raw %}checked="checked"{% endif %}
+                    onchange="const el = jQuery('#{{ id }}_custom'); el.val('{{ format.raw }}'); el.trigger('input');"
+                />
+                &nbsp;<span class="date-time-text format-i18n">{{ format.example }}</span>
+                <code>{{ format.escaped }}</code>
+            {% endapply %}
+        </label>
+        <br />
+    {% endfor %}
+    <label for="{{ id }}_custom_radio">
+        {% apply spaceless %}
+        <input type="radio" name="{{ id }}" id="{{ id }}_custom_radio" value="custom"
+           {% if is_custom %}checked="checked"{% endif %}
+        />
+        <span class="date-time-text date-time-custom-text"> {{ custom_label }}
+            <span class="screen-reader-text">{{ custom_accessibility }}</span>
+        </span>
+            <label for="{{ id }}_custom" class="screen-reader-text">
+                {{ custom_accessibility_label }}
+            </label>
+            <input type="text" name="{{ id }}_custom" id="{{ id }}_custom" value="{{current_format}}" class="small-text"
+                onfocus="console.log(document.getElementById('{{ id }}_custom_radio').checked = true)"
+{#                onchange="document.getElementById('{{ id }}_custom_format_example').innerHTML = date(document.getElementById('{{ id }}_custom').value)"#}
+            />
+            <br />
+            <p><strong>{{ preview_label }}</strong>
+                &nbsp;<span class="example" id="{{ id }}_custom_format_example">{{ current_format_example }}</span>
+                <span class='spinner'></span>
+            </p>
+        {% endapply %}
+    </label>
+</fieldset>
+
+
+<script>
+
+/* Excerpt from wp-admin/includes/options.php */
+jQuery( function($) {
+
+    $('input[name="{{ id }}_custom"]').on('input', function () {
+        var format = $(this),
+            fieldset = format.closest('fieldset'),
+            example = fieldset.find('.example'),
+            spinner = fieldset.find('.spinner');
+
+        // Debounce the event callback while users are typing.
+        clearTimeout($.data(this, 'timer'));
+        $(this).data('timer', setTimeout(function () {
+            // If custom date is not empty.
+            if (format.val()) {
+                spinner.addClass('is-active');
+
+                $.post(ajaxurl, {
+                    action: 'date_format_custom' === format.attr('name') ? 'date_format' : 'time_format',
+                    date: format.val()
+                }, function (d) {
+                    spinner.removeClass('is-active');
+                    example.text(d);
+                });
+            }
+        }, 500));
+    });
+})
+</script>

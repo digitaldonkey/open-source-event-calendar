@@ -1,85 +1,87 @@
-// Post type icon in title area
-#icon-edit,
-#icon-post {
-	&.icon32-posts-ai1ec_event {
-		background: url(../img/timely-post-type.png) no-repeat center center;
-	}
-}
 
-// Nav menu icon (legacy versions of WP)
-#menu-posts-ai1ec_event.menu-icon-post div.wp-menu-image {
-	background-image: url(../img/timely-admin-menu.png);
-}
+// All day badge.
 
 .ai1ec-allday-badge {
-	.ai1ec-label;
-	.ai1ec-label-default;
+  .ai1ec-label;
+  .ai1ec-label-default;
 }
 
 // Notices
 .ai1ec-message .button {
-	vertical-align: baseline !important;
+  vertical-align: baseline !important;
 }
 
 // Category colors
 .ai1ec-color-swatch,
 .ai1ec-color-swatch-empty {
-	display: inline-block;
-	height: 6px;
-	margin: 0 1px;
-	padding: 1px;
-	width: 6px;
+  display: inline-block;
+  height: 6px;
+  margin: 0 1px;
+  padding: 1px;
+  width: 6px;
 }
+
 .ai1ec-color-swatch {
-	border-radius: 4px;
-	opacity: 0.8;
-	filter: alpha(opacity=80);
-	border-color: rgba(0,0,0,0.5);
+  border-radius: 4px;
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+  border-color: rgba(0, 0, 0, 0.5);
 }
 
 // Taxonomies
 .ai1ec-taxonomy-header {
-	padding: 0 2px 0;
-	i {
-		font-size: 1.15em;
-		line-height: 1em;
-	}
-	> h1 {
-		margin: 18px 0 15px;
-	}
-	> .ai1ec-nav {
-		margin-bottom: 9px !important;
-	}
+  padding: 0 2px 0;
+
+  i {
+    font-size: 1.15em;
+    line-height: 1em;
+  }
+
+  > h1 {
+    margin: 18px 0 15px;
+  }
+
+  > .ai1ec-nav {
+    margin-bottom: 9px !important;
+  }
 }
-.ai1ec_event_page_all-in-one-event-calendar-custom-filter-group-menu,
-.edit-tags-php.post-type-ai1ec_event {
-	.wrap {
-		> h2 {
-			margin-top: 118px;
-		}
-		> .ai1ec-taxonomy-header + h2 {
-			margin-top: 0;
-		}
-	}
+
+
+// TODO
+//   - As we don't seem tho have a H2 here I think this can get lost
+.ai1ec_event_page_osec-admin-custom-filter-group-menu,
+.edit-tags-php.post-type-ai1ec_event {  // Edit Tags page
+
+  .wrap {
+    > h2 {
+      margin-top: 118px;
+    }
+
+    > .ai1ec-taxonomy-header + h2 {
+      margin-top: 0;
+    }
+  }
 }
 
 // Category image upload
 .at-upload_image_button {
-	width: auto !important;
+  width: auto !important;
 }
-#ai1ec_category_imag_preview {
-	max-width: 200px;
-	max-height: 200px;
-	display: block;
-	margin-bottom: 5px;
+
+#osec_category_imag_preview {
+  max-width: 200px;
+  max-height: 200px;
+  display: block;
+  margin-bottom: 5px;
 }
-.ai1ec_category_small_image_preview {
-	max-width: 50px;
-	max-height: 50px;
+
+.osec_category_small_image_preview {
+  max-width: 50px;
+  max-height: 50px;
 }
 
 // Normal-looking bullet lists
 .ai1ec-prose ul {
-	list-style-type: disc;
-	padding-left: 40px;
+  list-style-type: disc;
+  padding-left: 40px;
 }

@@ -48,17 +48,30 @@
   width: @width;
   height: @height;
 }
+
 .ai1ec-square(@size) {
   .ai1ec-size(@size; @size);
 }
 
 // Placeholder text
 .ai1ec-placeholder(@color: @input-color-placeholder) {
-  &:-moz-placeholder            { color: @color; } // Firefox 4-18
-  &::-moz-placeholder           { color: @color;   // Firefox 19+
-                                  opacity: 1; } // See https://github.ai1ec-com/twbs/bootstrap/pull/11526
-  &:-ms-input-placeholder       { color: @color; } // Internet Explorer 10+
-  &::-webkit-input-placeholder  { color: @color; } // Safari and Chrome
+  &:-moz-placeholder {
+    color: @color;
+  }
+  // Firefox 4-18
+  &::-moz-placeholder {
+    color: @color; // Firefox 19+
+    opacity: 1;
+  }
+  // See https://github.ai1ec-com/twbs/bootstrap/pull/11526
+  &:-ms-input-placeholder {
+    color: @color;
+  }
+  // Internet Explorer 10+
+  &::-webkit-input-placeholder {
+    color: @color;
+  }
+  // Safari and Chrome
 }
 
 // Text overflow
@@ -86,11 +99,11 @@
   background-color: transparent;
   border: 0;
 }
+
 // New mixin to use as of v3.0.1
 .ai1ec-text-hide() {
   .ai1ec-hide-text();
 }
-
 
 
 // CSS3 PROPERTIES
@@ -99,133 +112,148 @@
 // EventSingleView side border-radius
 .ai1ec-border-top-radius(@radius) {
   border-top-right-radius: @radius;
-   border-top-left-radius: @radius;
+  border-top-left-radius: @radius;
 }
+
 .ai1ec-border-right-radius(@radius) {
   border-bottom-right-radius: @radius;
-     border-top-right-radius: @radius;
+  border-top-right-radius: @radius;
 }
+
 .ai1ec-border-bottom-radius(@radius) {
   border-bottom-right-radius: @radius;
-   border-bottom-left-radius: @radius;
+  border-bottom-left-radius: @radius;
 }
+
 .ai1ec-border-left-radius(@radius) {
   border-bottom-left-radius: @radius;
-     border-top-left-radius: @radius;
+  border-top-left-radius: @radius;
 }
 
 // Drop shadows
 .ai1ec-box-shadow(@shadow) {
   -webkit-box-shadow: @shadow; // iOS <4.3 & Android <4.1
-          box-shadow: @shadow;
+  box-shadow: @shadow;
 }
 
 // Transitions
 .ai1ec-transition(@transition) {
   -webkit-transition: @transition;
-          transition: @transition;
+  transition: @transition;
 }
+
 .ai1ec-transition-property(@transition-property) {
   -webkit-transition-property: @transition-property;
-          transition-property: @transition-property;
+  transition-property: @transition-property;
 }
+
 .ai1ec-transition-delay(@transition-delay) {
   -webkit-transition-delay: @transition-delay;
-          transition-delay: @transition-delay;
+  transition-delay: @transition-delay;
 }
+
 .ai1ec-transition-duration(@transition-duration) {
   -webkit-transition-duration: @transition-duration;
-          transition-duration: @transition-duration;
+  transition-duration: @transition-duration;
 }
+
 .ai1ec-transition-transform(@transition) {
   -webkit-transition: -webkit-transform @transition;
-     -moz-transition: -moz-transform @transition;
-       -o-transition: -o-transform @transition;
-          transition: transform @transition;
+  -moz-transition: -moz-transform @transition;
+  -o-transition: -o-transform @transition;
+  transition: transform @transition;
 }
 
 // Transformations
 .ai1ec-rotate(@degrees) {
   -webkit-transform: rotate(@degrees);
-      -ms-transform: rotate(@degrees); // IE9+
-          transform: rotate(@degrees);
+  -ms-transform: rotate(@degrees); // IE9+
+  transform: rotate(@degrees);
 }
+
 .ai1ec-scale(@ratio) {
   -webkit-transform: scale(@ratio);
-      -ms-transform: scale(@ratio); // IE9+
-          transform: scale(@ratio);
+  -ms-transform: scale(@ratio); // IE9+
+  transform: scale(@ratio);
 }
+
 .ai1ec-translate(@x; @y) {
   -webkit-transform: translate(@x, @y);
-      -ms-transform: translate(@x, @y); // IE9+
-          transform: translate(@x, @y);
+  -ms-transform: translate(@x, @y); // IE9+
+  transform: translate(@x, @y);
 }
+
 .ai1ec-skew(@x; @y) {
   -webkit-transform: skew(@x, @y);
-      -ms-transform: skewX(@x) skewY(@y); // See https://github.ai1ec-com/twbs/bootstrap/issues/4885; IE9+
-          transform: skew(@x, @y);
+  -ms-transform: skewX(@x) skewY(@y); // See https://github.ai1ec-com/twbs/bootstrap/issues/4885; IE9+
+  transform: skew(@x, @y);
 }
+
 .ai1ec-translate3d(@x; @y; @z) {
   -webkit-transform: translate3d(@x, @y, @z);
-          transform: translate3d(@x, @y, @z);
+  transform: translate3d(@x, @y, @z);
 }
 
 .ai1ec-rotateX(@degrees) {
   -webkit-transform: rotateX(@degrees);
-      -ms-transform: rotateX(@degrees); // IE9+
-          transform: rotateX(@degrees);
+  -ms-transform: rotateX(@degrees); // IE9+
+  transform: rotateX(@degrees);
 }
+
 .ai1ec-rotateY(@degrees) {
   -webkit-transform: rotateY(@degrees);
-      -ms-transform: rotateY(@degrees); // IE9+
-          transform: rotateY(@degrees);
+  -ms-transform: rotateY(@degrees); // IE9+
+  transform: rotateY(@degrees);
 }
+
 .ai1ec-perspective(@perspective) {
   -webkit-perspective: @perspective;
-     -moz-perspective: @perspective;
-          perspective: @perspective;
+  -moz-perspective: @perspective;
+  perspective: @perspective;
 }
+
 .ai1ec-perspective-origin(@perspective) {
   -webkit-perspective-origin: @perspective;
-     -moz-perspective-origin: @perspective;
-          perspective-origin: @perspective;
+  -moz-perspective-origin: @perspective;
+  perspective-origin: @perspective;
 }
+
 .ai1ec-transform-origin(@origin) {
   -webkit-transform-origin: @origin;
-     -moz-transform-origin: @origin;
-          transform-origin: @origin;
+  -moz-transform-origin: @origin;
+  transform-origin: @origin;
 }
 
 // Animations
 .ai1ec-animation(@animation) {
   -webkit-animation: @animation;
-          animation: @animation;
+  animation: @animation;
 }
 
 // Backface visibility
 // Prevent browsers from flickering when using CSS 3D transforms.
 // Default value is `visible`, but can be changed to `hidden`
-.ai1ec-backface-visibility(@visibility){
+.ai1ec-backface-visibility(@visibility) {
   -webkit-backface-visibility: @visibility;
-     -moz-backface-visibility: @visibility;
-          backface-visibility: @visibility;
+  -moz-backface-visibility: @visibility;
+  backface-visibility: @visibility;
 }
 
 // Box sizing
 .ai1ec-box-sizing(@boxmodel) {
   -webkit-box-sizing: @boxmodel;
-     -moz-box-sizing: @boxmodel;
-          box-sizing: @boxmodel;
+  -moz-box-sizing: @boxmodel;
+  box-sizing: @boxmodel;
 }
 
 // User select
 // For selecting text on the page
 .ai1ec-user-select(@select) {
   -webkit-user-select: @select;
-     -moz-user-select: @select;
-      -ms-user-select: @select; // IE10+
-       -o-user-select: @select;
-          user-select: @select;
+  -moz-user-select: @select;
+  -ms-user-select: @select; // IE10+
+  -o-user-select: @select;
+  user-select: @select;
 }
 
 // Resize anything
@@ -237,21 +265,21 @@
 // CSS3 Content Columns
 .ai1ec-content-columns(@column-count; @column-gap: @grid-gutter-width) {
   -webkit-column-count: @column-count;
-     -moz-column-count: @column-count;
-          column-count: @column-count;
+  -moz-column-count: @column-count;
+  column-count: @column-count;
   -webkit-column-gap: @column-gap;
-     -moz-column-gap: @column-gap;
-          column-gap: @column-gap;
+  -moz-column-gap: @column-gap;
+  column-gap: @column-gap;
 }
 
 // Optional hyphenation
 .ai1ec-hyphens(@mode: auto) {
   word-wrap: break-word;
   -webkit-hyphens: @mode;
-     -moz-hyphens: @mode;
-      -ms-hyphens: @mode; // IE10+
-       -o-hyphens: @mode;
-          hyphens: @mode;
+  -moz-hyphens: @mode;
+  -ms-hyphens: @mode; // IE10+
+  -o-hyphens: @mode;
+  hyphens: @mode;
 }
 
 // Opacity
@@ -261,7 +289,6 @@
   @opacity-ie: (@opacity * 100);
   filter: ~"alpha(opacity=@{opacity-ie})";
 }
-
 
 
 // GRADIENTS
@@ -274,10 +301,10 @@
   // Creates two color stops, start and end, by specifying a color and position for each color stop.
   // Color stops are not available in IE9 and below.
   .ai1ec-horizontal(@start-color: #555; @end-color: #333; @start-percent: 0%; @end-percent: 100%) {
-    background-image: -webkit-linear-gradient(left, color-stop(@start-color @start-percent), color-stop(@end-color @end-percent)); // Safari 5.1-6, Chrome 10+
-    background-image:  linear-gradient(to right, @start-color @start-percent, @end-color @end-percent); // Standard, IE10, Firefox 16+, Opera 12.10+, Safari 7+, Chrome 26+
+    background-image: -webkit-linear-gradient(to left, color-stop(@start-color @start-percent), color-stop(@end-color @end-percent)); // Safari 5.1-6, Chrome 10+
+    background-image: linear-gradient(to right, @start-color @start-percent, @end-color @end-percent); // Standard, IE10, Firefox 16+, Opera 12.10+, Safari 7+, Chrome 26+
     background-repeat: repeat-x;
-    filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=1)",argb(@start-color),argb(@end-color))); // IE9 and down
+    filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=1)", argb(@start-color), argb(@end-color))); // IE9 and down
   }
 
   // Vertical gradient, from top to bottom
@@ -285,10 +312,10 @@
   // Creates two color stops, start and end, by specifying a color and position for each color stop.
   // Color stops are not available in IE9 and below.
   .ai1ec-vertical(@start-color: #555; @end-color: #333; @start-percent: 0%; @end-percent: 100%) {
-    background-image: -webkit-linear-gradient(top, @start-color @start-percent, @end-color @end-percent);  // Safari 5.1-6, Chrome 10+
+    background-image: -webkit-linear-gradient(to bottom, @start-color @start-percent, @end-color @end-percent); // Safari 5.1-6, Chrome 10+
     background-image: linear-gradient(to bottom, @start-color @start-percent, @end-color @end-percent); // Standard, IE10, Firefox 16+, Opera 12.10+, Safari 7+, Chrome 26+
     background-repeat: repeat-x;
-    filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=0)",argb(@start-color),argb(@end-color))); // IE9 and down
+    filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=0)", argb(@start-color), argb(@end-color))); // IE9 and down
   }
 
   .ai1ec-directional(@start-color: #555; @end-color: #333; @deg: 45deg) {
@@ -300,13 +327,13 @@
     background-image: -webkit-linear-gradient(left, @start-color, @mid-color @color-stop, @end-color);
     background-image: linear-gradient(to right, @start-color, @mid-color @color-stop, @end-color);
     background-repeat: no-repeat;
-    filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=1)",argb(@start-color),argb(@end-color))); // IE9 and down, gets no color-stop at all for proper fallback
+    filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=1)", argb(@start-color), argb(@end-color))); // IE9 and down, gets no color-stop at all for proper fallback
   }
   .ai1ec-vertical-three-colors(@start-color: #00b3ee; @mid-color: #7a43b6; @color-stop: 50%; @end-color: #c3325f) {
     background-image: -webkit-linear-gradient(@start-color, @mid-color @color-stop, @end-color);
     background-image: linear-gradient(@start-color, @mid-color @color-stop, @end-color);
     background-repeat: no-repeat;
-    filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=0)",argb(@start-color),argb(@end-color))); // IE9 and down, gets no color-stop at all for proper fallback
+    filter: e(%("progid:DXImageTransform.Microsoft.gradient(startColorstr='%d', endColorstr='%d', GradientType=0)", argb(@start-color), argb(@end-color))); // IE9 and down, gets no color-stop at all for proper fallback
   }
   .ai1ec-radial(@inner-color: #555; @outer-color: #333) {
     background-image: -webkit-radial-gradient(circle, @inner-color, @outer-color);
@@ -328,7 +355,6 @@
 }
 
 
-
 // Retina images
 //
 // Short retina mixin for setting background-image and -size
@@ -336,13 +362,7 @@
 .ai1ec-img-retina(@file-1x; @file-2x; @width-1x; @height-1x) {
   background-image: url("@{file-1x}");
 
-  @media
-  only screen and (-webkit-min-device-pixel-ratio: 2),
-  only screen and (   min--moz-device-pixel-ratio: 2),
-  only screen and (     -o-min-device-pixel-ratio: 2/1),
-  only screen and (        min-device-pixel-ratio: 2),
-  only screen and (                min-resolution: 192dpi),
-  only screen and (                min-resolution: 2dppx) {
+  @media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (   min--moz-device-pixel-ratio: 2), only screen and (     -o-min-device-pixel-ratio: 2/1), only screen and (        min-device-pixel-ratio: 2), only screen and (                min-resolution: 192dpi), only screen and (                min-resolution: 2dppx) {
     background-image: url("@{file-2x}");
     background-size: @width-1x @height-1x;
   }
@@ -453,7 +473,7 @@
   .ai1ec-open .ai1ec-dropdown-toggle& {
     color: @color;
     background-color: darken(@background, 8%);
-        border-color: darken(@border, 12%);
+    border-color: darken(@border, 12%);
   }
   &:active,
   &.ai1ec-active,
@@ -469,7 +489,7 @@
     &:active,
     &.ai1ec-active {
       background-color: @background;
-          border-color: @border;
+      border-color: @border;
     }
   }
 
@@ -497,12 +517,14 @@
       padding: @padding-vertical @padding-horizontal;
       font-size: @font-size;
     }
+
     &:first-child {
       > a,
       > span {
         .ai1ec-border-left-radius(@border-radius);
       }
     }
+
     &:last-child {
       > a,
       > span {
@@ -547,17 +569,25 @@
 // More easily include all the states for responsive-utilities.less.
 .ai1ec-responsive-visibility() {
   display: block !important;
-  table&  { display: table; }
-  tr&     { display: table-row !important; }
+  table& {
+    display: table;
+  }
+  tr& {
+    display: table-row !important;
+  }
   th&,
-  td&     { display: table-cell !important; }
+  td& {
+    display: table-cell !important;
+  }
 }
 
 .ai1ec-responsive-invisibility() {
-    &,
+  &,
   tr&,
   th&,
-  td& { display: none !important; }
+  td& {
+    display: none !important;
+  }
 }
 
 
@@ -568,14 +598,14 @@
 .ai1ec-container-fixed() {
   margin-right: auto;
   margin-left: auto;
-  padding-left:  (@grid-gutter-width / 2);
+  padding-left: (@grid-gutter-width / 2);
   padding-right: (@grid-gutter-width / 2);
   .ai1ec-clearfix();
 }
 
 // Creates a wrapper for a series of columns
 .ai1ec-make-row(@gutter: @grid-gutter-width) {
-  margin-left:  (@gutter / -2);
+  margin-left: (@gutter / -2);
   margin-right: (@gutter / -2);
   .ai1ec-clearfix();
 }
@@ -588,7 +618,7 @@
   // Prevent columns from collapsing when empty
   min-height: 1px;
   // Inner gutter via padding
-  padding-left:  (@gutter / 2);
+  padding-left: (@gutter / 2);
   padding-right: (@gutter / 2);
 }
 
@@ -598,7 +628,7 @@
   // Prevent columns from collapsing when empty
   min-height: 1px;
   // Inner gutter via padding
-  padding-left:  (@gutter / 2);
+  padding-left: (@gutter / 2);
   padding-right: (@gutter / 2);
 
   // Calculate width based on number of columns available
@@ -614,11 +644,13 @@
     margin-left: percentage((@columns / @grid-columns));
   }
 }
+
 .ai1ec-make-sm-column-push(@columns) {
   @media (min-width: @screen-sm-min) {
     left: percentage((@columns / @grid-columns));
   }
 }
+
 .ai1ec-make-sm-column-pull(@columns) {
   @media (min-width: @screen-sm-min) {
     right: percentage((@columns / @grid-columns));
@@ -631,7 +663,7 @@
   // Prevent columns from collapsing when empty
   min-height: 1px;
   // Inner gutter via padding
-  padding-left:  (@gutter / 2);
+  padding-left: (@gutter / 2);
   padding-right: (@gutter / 2);
 
   // Calculate width based on number of columns available
@@ -647,11 +679,13 @@
     margin-left: percentage((@columns / @grid-columns));
   }
 }
+
 .ai1ec-make-md-column-push(@columns) {
   @media (min-width: @screen-md) {
     left: percentage((@columns / @grid-columns));
   }
 }
+
 .ai1ec-make-md-column-pull(@columns) {
   @media (min-width: @screen-md-min) {
     right: percentage((@columns / @grid-columns));
@@ -664,7 +698,7 @@
   // Prevent columns from collapsing when empty
   min-height: 1px;
   // Inner gutter via padding
-  padding-left:  (@gutter / 2);
+  padding-left: (@gutter / 2);
   padding-right: (@gutter / 2);
 
   // Calculate width based on number of columns available
@@ -680,11 +714,13 @@
     margin-left: percentage((@columns / @grid-columns));
   }
 }
+
 .ai1ec-make-lg-column-push(@columns) {
   @media (min-width: @screen-lg-min) {
     left: percentage((@columns / @grid-columns));
   }
 }
+
 .ai1ec-make-lg-column-pull(@columns) {
   @media (min-width: @screen-lg-min) {
     right: percentage((@columns / @grid-columns));
@@ -713,7 +749,7 @@
       // Prevent columns from collapsing when empty
       min-height: 1px;
       // Inner gutter via padding
-      padding-left:  (@grid-gutter-width / 2);
+      padding-left: (@grid-gutter-width / 2);
       padding-right: (@grid-gutter-width / 2);
     }
   }
@@ -742,16 +778,19 @@
     width: percentage((@index / @grid-columns));
   }
 }
+
 .ai1ec-calc-grid(@index, @class, @type) when (@type = push) {
   .ai1ec-col-@{class}-push-@{index} {
     left: percentage((@index / @grid-columns));
   }
 }
+
 .ai1ec-calc-grid(@index, @class, @type) when (@type = pull) {
   .ai1ec-col-@{class}-pull-@{index} {
     right: percentage((@index / @grid-columns));
   }
 }
+
 .ai1ec-calc-grid(@index, @class, @type) when (@type = offset) {
   .ai1ec-col-@{class}-offset-@{index} {
     margin-left: percentage((@index / @grid-columns));
@@ -778,16 +817,16 @@
   .ai1ec-radio,
   .ai1ec-checkbox,
   .ai1ec-radio-inline,
-  .ai1ec-checkbox-inline  {
+  .ai1ec-checkbox-inline {
     color: @text-color;
   }
   // Set the border and box shadow on specific inputs to match
   .ai1ec-form-control {
     border-color: @border-color;
-    .ai1ec-box-shadow(inset 0 1px 1px rgba(0,0,0,.075)); // Redeclare so transitions work
+    .ai1ec-box-shadow(inset 0 1px 1px rgba(0, 0, 0, .075)); // Redeclare so transitions work
     &:focus {
       border-color: darken(@border-color, 10%);
-      @shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 6px lighten(@border-color, 20%);
+      @shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 6px lighten(@border-color, 20%);
       .ai1ec-box-shadow(@shadow);
     }
   }

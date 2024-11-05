@@ -1,0 +1,22 @@
+<?php
+/**
+ * You may override by providing a constants-local.php at plugin root dir.
+ *
+ * For a comprehensive list  of Constants see constants.php.
+ *
+ * Local constants supersede.
+ */
+function osec_initiate_constants_local($osec_base_dir, $osec_base_url) {
+
+  if (!defined('OSEC_DEBUG')) {
+    define('OSEC_DEBUG', TRUE);
+  }
+
+  /**
+   * Set TRUE if you want to PURGE ALL DATA on uninstall.
+  */
+  if (!defined('OSEC_UNINSTALL_PLUGIN_DATA')) {
+    define(
+      'OSEC_UNINSTALL_PLUGIN_DATA', FALSE);
+  }
+}

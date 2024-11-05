@@ -1,0 +1,21 @@
+Index: src/Util/SortFactory.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/Util/SortFactory.php b/src/Util/SortFactory.php
+--- a/src/Util/SortFactory.php
++++ b/src/Util/SortFactory.php	(date 1726734645942)
+@@ -78,10 +78,10 @@
+             if( empty( $b->srtk[$k] )) {
+                 return 1;
+             }
+-            $aKey = ctype_digit( $a->srtk[$k] )
++            $aKey = ctype_digit( (string) $a->srtk[$k] )
+                 ? str_pad((string) $a->srtk[$k], 20, '0', STR_PAD_LEFT )
+                 : (string) $a->srtk[$k];
+-            $bKey = ctype_digit( $b->srtk[$k] )
++            $bKey = ctype_digit( (string) $b->srtk[$k] )
+                 ? str_pad((string) $b->srtk[$k], 20, '0', STR_PAD_LEFT )
+                 : (string)$b->srtk[$k];
+             $sortStat = strcmp( $aKey, $bKey );

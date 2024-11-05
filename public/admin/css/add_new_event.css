@@ -1,23 +1,29 @@
 /* Event details meta box arrow and handle fix */
 
-.js #ai1ec_event .handlediv:before {
-	content: '\f142';
-	right: 12px;
-	font: 400 20px/1 dashicons;
-	speak: none;
-	display: inline-block;
-	padding: 8px 10px;
-	top: 0;
-	position: relative;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	text-decoration: none!important;
+.js #osec_event .order-lower-indicator:before,
+.js #osec_event .order-higher-indicator:before,
+.js #osec_event .toggle-indicator:before {
+    /*content: '\f142';*/
+    right: 12px;
+    font: normal 20px/1 dashicons;
+    speak: none;
+    display: inline-block;
+    padding: 8px 10px;
+    top: 0;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-decoration: none !important;
 }
-.js #ai1ec_event.closed .handlediv:before {
-	content: '\f140';
+.js #osec_event .toggle-indicator:before {
+    content: '\f142';
 }
-.js #ai1ec_event .hndle {
-	cursor: default;
+.js #osec_event.closed .toggle-indicator:before {
+    content: '\f140';
+}
+
+.js #osec_event .hndle {
+    cursor: default;
 }
 
 /* General form attributes */
@@ -25,31 +31,38 @@
 /* Add/edit event form hidden by default to that DOM can be rearranged without
 	 flashing of unstyled content. */
 .icon32-posts-ai1ec_event ~ #post {
-	visibility: hidden;
+    visibility: hidden;
 }
+
 .icon32-posts-ai1ec_event ~ #post.ai1ec-visible {
-	visibility: visible;
+    visibility: visible;
 }
-#ai1ec-time-and-date-box .ai1ec-panel-body {
-	min-height: 200px;
+
+#osec-time-and-date-box .ai1ec-panel-body {
+    min-height: 200px;
 }
+
 .ai1ec-form, .ai1ec-form-nested {
-	width: 100%;
-	margin-bottom: 1em;
+    width: 100%;
+    margin-bottom: 1em;
 }
+
 .ai1ec-form td.ai1ec-first, .ai1ec-form-nested td.ai1ec-first {
-	width: 8.5em;
+    width: 8.5em;
 }
+
 .ai1ec-first-padding {
-	padding-left: 8.5em;
+    padding-left: 8.5em;
 }
+
 .ai1ec-form label,
 .ai1ec-form-nested label {
-	font-weight: normal;
-	margin-bottom: 0;
+    font-weight: normal;
+    margin-bottom: 0;
 }
+
 .ai1ec-form td, .ai1ec-form-nested td {
-	line-height: 1.5em;
+    line-height: 1.5em;
 }
 
 /**
@@ -57,74 +70,80 @@
  */
 
 .timely .ai1ec-date-input {
-	background: no-repeat url(../img/date-field-icon.png) 95% 40%;
-	display: inline-block;
-	width: 8.5em;
+    background: no-repeat url(../img/date-field-icon.png) 95% 40%;
+    display: inline-block;
+    width: 8.5em;
 }
+
 .timely .ai1ec-time-input {
-	display: inline-block;
-	width: 6em;
+    display: inline-block;
+    width: 6em;
 }
 
 .timely .ai1ec-input-warn {
-	border-color: red;
-	background-color: #f5f5f5;
+    border-color: red;
+    background-color: #f5f5f5;
 }
 
 /* Recurrence fields */
-#ai1ec_repeat_text a,
-#ai1ec_exclude_text a,
-#ai1ec_exclude-dates-input {
-	text-decoration: none;
-	border-bottom: 1px dashed red;
-}
-#ai1ec_exclude_text {
-	margin-right: 20px;
+#osec_repeat_text a,
+#osec_exclude_text a,
+#osec_exclude-dates-input {
+    text-decoration: none;
+    border-bottom: 1px dashed red;
 }
 
-#ai1ec_venue,
-#ai1ec_address,
-#ai1ec_cost,
-#ai1ec_contact_name,
-#ai1ec_contact_phone,
-#ai1ec_contact_email,
-#ai1ec_contact_url,
-#ai1ec_ticket_url {
-	width: 100%;
-	max-width: 24em;
+#osec_exclude_text {
+    margin-right: 20px;
 }
-#ai1ec-event-location-box {
-	overflow: hidden;
+
+#osec_venue,
+#osec_address,
+#osec_cost,
+#osec_contact_name,
+#osec_contact_phone,
+#osec_contact_email,
+#osec_contact_url,
+#osec_ticket_url {
+    width: 100%;
+    max-width: 24em;
+}
+
+#osec-event-location-box {
+    overflow: hidden;
 }
 
 /* Google map */
 .ai1ec-map-preview {
-	border: 1px solid #ddd;
-	opacity: 0.25;
-	pointer-events: none;
-	width: 100%;
+    border: 1px solid #ddd;
+    opacity: 0.25;
+    pointer-events: none;
+    width: 100%;
 }
+
 .ai1ec-map-preview.ai1ec-map-visible {
-	opacity: 1;
-	pointer-events: auto;
+    opacity: 1;
+    pointer-events: auto;
 }
-#ai1ec_map_canvas {
-	width: 100%;
-	height: 155px;
+
+#osec_map_canvas {
+    width: 100%;
+    height: 155px;
 }
 
 /* Coordinates */
-#ai1ec_table_coordinates {
-	width: 100%;
+#osec_table_coordinates {
+    width: 100%;
 }
-#ai1ec_table_coordinates input {
-	max-width: 312px;
+
+#osec_table_coordinates input {
+    max-width: 312px;
 }
 
 /* Bottom publish button */
-.ai1ec_bottom_publish {
-	min-width: 80px;
-	text-align: center;
+.osec_additional_publish_button {
+    min-width: 80px;
+    text-align: center;
 }
 
 /**
@@ -132,99 +151,119 @@
  */
 
 .calendricalDatePopup, .calendricalTimePopup {
-	z-index: 2;
+    z-index: 2;
 }
+
 .calendricalDatePopup {
-	background: white;
-	border: solid 1px #999999;
-	padding: 2px;
-	text-align: center;
-	width: 200px;
+    background: white;
+    border: solid 1px #999999;
+    padding: 2px;
+    text-align: center;
+    width: 200px;
 }
+
 .calendricalDatePopup table {
-	border-collapse: collapse;
-	width: 200px;
+    border-collapse: collapse;
+    width: 200px;
 }
+
 .calendricalDatePopup table .monthCell {
-	padding: 2px 0;
+    padding: 2px 0;
 }
+
 .calendricalDatePopup table .monthCell a {
-	display: block;
-	float: left;
-	line-height: 20px;
+    display: block;
+    float: left;
+    line-height: 20px;
 }
+
 .calendricalDatePopup table .monthCell .prevMonth, .calendricalDatePopup table .monthCell .nextMonth {
-	width: 24px;
+    width: 24px;
 }
+
 .calendricalDatePopup table .monthCell .monthName {
-	width: 150px;
+    width: 150px;
 }
+
 .calendricalDatePopup table a {
-	text-decoration: none !important; padding: 0;
+    text-decoration: none !important;
+    padding: 0;
 }
+
 .calendricalDatePopup table th {
-	text-align: center;
+    text-align: center;
 }
+
 .calendricalDatePopup table td {
-	text-align: center;
-	font-size: 12px;
-	padding: 0;
-	font-family: inherit;
+    text-align: center;
+    font-size: 12px;
+    padding: 0;
+    font-family: inherit;
 }
+
 .calendricalDatePopup table td a {
-	display: block;
-	color: black;
-	padding: 2px 3px;
+    display: block;
+    color: black;
+    padding: 2px 3px;
 }
+
 .calendricalDatePopup table td a:hover {
-	background: #ccccff;
-	border: none;
-	padding: 2px 3px;
+    background: #ccccff;
+    border: none;
+    padding: 2px 3px;
 }
+
 .calendricalDatePopup table td.today a {
-	background: #f8f8c0;
+    background: #f8f8c0;
 }
+
 .calendricalDatePopup table td.selected a {
-	background: #ccccff;
+    background: #ccccff;
 }
+
 .calendricalDatePopup table td.today_selected a {
-	background: #f8f8c0;
-	border: solid 1px #dddd66;
-	padding: 1px 2px;
+    background: #f8f8c0;
+    border: solid 1px #dddd66;
+    padding: 1px 2px;
 }
+
 .calendricalDatePopup table td.nonMonth a {
-	color: #999999;
+    color: #999999;
 }
 
 .calendricalTimePopup {
-	background: white;
-	border: solid 1px #999999;
-	width: 110px;
-	height: 130px;
-	overflow: auto;
+    background: white;
+    border: solid 1px #999999;
+    width: 110px;
+    height: 130px;
+    overflow: auto;
 }
+
 .calendricalTimePopup ul {
-	margin: 0 !important;
-	padding: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
+
 .calendricalTimePopup ul li {
-	list-style: none !important;
-	padding: 0 !important;
-	margin: 0;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0;
 }
+
 .calendricalTimePopup ul li a, .calendricalTimePopup ul li a:visited {
-	text-indent: 10px;
-	padding: 4px;
-	display: block;
-	color: black;
-	text-decoration: none !important;
+    text-indent: 10px;
+    padding: 4px;
+    display: block;
+    color: black;
+    text-decoration: none !important;
 }
+
 .calendricalTimePopup ul li a:hover, .calendricalTimePopup ul li.selected a {
-	background: #ccccff;
+    background: #ccccff;
 }
 
 .calendricalEndTimePopup {
-	width: 200px;
+    width: 200px;
 }
 
 
@@ -233,69 +272,74 @@
  */
 
 /* Recurrence tabs styling override */
-.timely #ai1ec_repeat_box .ai1ec-nav-pills > li + li {
-	margin-left: 0;
+.timely #osec_repeat_box .ai1ec-nav-pills > li + li {
+    margin-left: 0;
 }
-#ai1ec_repeat_box .ai1ec-nav > .ai1ec-col-xs-3 {
-	padding: 0 8px;
+
+#osec_repeat_box .ai1ec-nav > .ai1ec-col-xs-3 {
+    padding: 0 8px;
 }
-.timely #ai1ec_repeat_box .ai1ec-nav > li > a {
-	padding: 10px 0;
+
+.timely #osec_repeat_box .ai1ec-nav > li > a {
+    padding: 10px 0;
 }
 
 /* Range input (from jQuery Tools) */
 
 /* slider root element */
 .ai1ec-slider {
-	background:#eee;
-	height:0.4em;
-	position:relative;
-	cursor:pointer;
-	border:1px solid #ccc;
-	width:8.8em;
-	margin: 0.7em 0.25em 0 0;
-	float:left;
-	clear:right;
-	border-radius:3px;
-	-moz-border-radius:3px;
-	-webkit-border-radius:3px;
+    background: #eee;
+    height: 0.4em;
+    position: relative;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    width: 8.8em;
+    margin: 0.7em 0.25em 0 0;
+    float: left;
+    clear: right;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
 }
+
 /* progress bar (enabled with progress: true) */
 .ai1ec-progress {
-	display: none;
+    display: none;
 }
+
 /* drag handle */
 .timely .ai1ec-handle {
-	background:#fff;
-	height: 1em;
-	width: 1em;
-	top: -0.5em;
-	margin-top: 1px;
-	position: absolute;
-	z-index: 0;
-	display: block;
-	border: 1px solid #ccc;
-	cursor:move;
-	border-radius: 0.25em;
-	-webkit-box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-	-moz-box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-	-ms-box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-	-o-box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-	box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    background: #fff;
+    height: 1em;
+    width: 1em;
+    top: -0.5em;
+    margin-top: 1px;
+    position: absolute;
+    z-index: 0;
+    display: block;
+    border: 1px solid #ccc;
+    cursor: move;
+    border-radius: 0.25em;
+    -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    -ms-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    -o-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
+
 /* the input field */
 .ai1ec-range {
-	text-align:center;
-	width:3em;
-	border: 1px solid #dfdfdf;
-	background: #fff;
-	border-radius: 4px;
-	-moz-border-radius: 4px;
-	-webkit-border-radius: 4px;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	-ms-box-sizing: border-box;
-	box-sizing: border-box;
+    text-align: center;
+    width: 3em;
+    border: 1px solid #dfdfdf;
+    background: #fff;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 /**
@@ -303,56 +347,54 @@
  */
 
 .ai1ec-btn-group-grid > .ai1ec-pull-left {
-	padding: 0 0.5em 0.5em 0;
-	width: 14.2%;
+    padding: 0 0.5em 0.5em 0;
+    width: 14.2%;
 }
-#ai1ec_yearly_date_select > .ai1ec-pull-left {
-	width: 16.6%;
+
+#osec_yearly_date_select > .ai1ec-pull-left {
+    width: 16.6%;
 }
 
 .ai1ec-info-text {
-	font-size: 10px;
-	float: left;
+    font-size: 10px;
+    float: left;
 }
 
 .ai1ec-cost-label {
-	vertical-align: top;
-	margin-top: 5px;
+    vertical-align: top;
+    margin-top: 5px;
 }
-#ai1ec_cost {
-	-webkit-transition: width 0.2s, padding 0.2s, opacity 0.2s;
-	-moz-transition: width 0.2s, padding 0.2s, opacity 0.2s;
-	-ms-transition: width 0.2s, padding 0.2s, opacity 0.2s;
-	-o-transition: width 0.2s, padding 0.2s, opacity 0.2s;
-	transition: width 0.2s, padding 0.2s, opacity 0.2s;
+
+#osec_cost {
+    -webkit-transition: width 0.2s, padding 0.2s, opacity 0.2s;
+    -moz-transition: width 0.2s, padding 0.2s, opacity 0.2s;
+    -ms-transition: width 0.2s, padding 0.2s, opacity 0.2s;
+    -o-transition: width 0.2s, padding 0.2s, opacity 0.2s;
+    transition: width 0.2s, padding 0.2s, opacity 0.2s;
 }
-#ai1ec_cost.ai1ec-hidden {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	opacity: 0;
-	padding: 0;
-	width: 0;
+
+#osec_cost.ai1ec-hidden {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    opacity: 0;
+    padding: 0;
+    width: 0;
 }
 
 #s2id_timezone-select {
-	width: 172px;
-	margin: 0;
+    width: 172px;
+    margin: 0;
 }
 
-#ai1ec_event_banner > .inside > p {
-	margin-bottom: 0 !important;
-}
-.ai1ec-banner-image-frame .edit-attachment {
-	display: none !important;
+#osec_rec_dates_list {
+    line-height: 1.7em;
 }
 
-#ai1ec_rec_dates_list {
-	line-height: 1.7em;
+#osec_recurrence_calendar .ai1ec-datepicker-inline {
+    width: auto;
 }
-#ai1ec_recurrence_calendar .ai1ec-datepicker-inline {
-	width: auto;
-}
-#ai1ec_recurrence_calendar .ai1ec-datepicker-inline table {
-	width: 100%;
+
+#osec_recurrence_calendar .ai1ec-datepicker-inline table {
+    width: 100%;
 }

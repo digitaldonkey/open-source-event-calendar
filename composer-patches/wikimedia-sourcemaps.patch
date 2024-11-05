@@ -1,0 +1,20 @@
+Index: lib/Less/SourceMap/Generator.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lib/Less/SourceMap/Generator.php b/lib/Less/SourceMap/Generator.php
+--- a/lib/Less/SourceMap/Generator.php	
++++ b/lib/Less/SourceMap/Generator.php	
+@@ -206,9 +206,8 @@
+ 			'original_column' => $originalColumn,
+ 			'source_file' => $fileInfo['currentUri']
+ 		];
+-
+-		$this->sources[$fileInfo['currentUri']] = $fileInfo['filename'];
+-	}
++    $this->sources[$fileInfo['currentUri']] = $fileInfo['currentUri'];
++  }
+ 
+ 	/**
+ 	 * Generates the JSON source map

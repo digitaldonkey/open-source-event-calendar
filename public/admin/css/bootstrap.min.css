@@ -5078,26 +5078,14 @@ Version: 3.3.1 Timestamp: Wed Feb 20 09:57:22 PST 2013
   -ms-user-select: none;
   user-select: none;
   background-color: #fff;
-  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eeeeee), color-stop(0.5, #ffffff));
-  background-image: -webkit-linear-gradient(center bottom, #eeeeee 0%, #ffffff 50%);
-  background-image: -moz-linear-gradient(center bottom, #eeeeee 0%, #ffffff 50%);
-  background-image: -o-linear-gradient(bottom, #eeeeee 0%, #ffffff 50%);
-  background-image: -ms-linear-gradient(top, #ffffff 0%, #eeeeee 50%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#eeeeee', GradientType=0);
-  background-image: linear-gradient(top, #ffffff 0%, #eeeeee 50%);
+  background-image: linear-gradient(to top, #ffffff 0%, #eeeeee 50%);
 }
 .select2-container.select2-drop-above .select2-choice {
   border-bottom-color: #aaa;
   -webkit-border-radius: 0 0 4px 4px;
   -moz-border-radius: 0 0 4px 4px;
   border-radius: 0 0 4px 4px;
-  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eeeeee), color-stop(0.9, #ffffff));
-  background-image: -webkit-linear-gradient(center bottom, #eeeeee 0%, #ffffff 90%);
-  background-image: -moz-linear-gradient(center bottom, #eeeeee 0%, #ffffff 90%);
-  background-image: -o-linear-gradient(bottom, #eeeeee 0%, #ffffff 90%);
-  background-image: -ms-linear-gradient(top, #eeeeee 0%, #ffffff 90%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#eeeeee', GradientType=0);
-  background-image: linear-gradient(top, #eeeeee 0%, #ffffff 90%);
+  background-image: linear-gradient(to bottom, #eeeeee 0%, #ffffff 90%);
 }
 .select2-container .select2-choice span {
   margin-right: 26px;
@@ -5176,13 +5164,7 @@ Version: 3.3.1 Timestamp: Wed Feb 20 09:57:22 PST 2013
   -moz-background-clip: padding;
   background-clip: padding-box;
   background: #ccc;
-  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #cccccc), color-stop(0.6, #eeeeee));
-  background-image: -webkit-linear-gradient(center bottom, #cccccc 0%, #eeeeee 60%);
-  background-image: -moz-linear-gradient(center bottom, #cccccc 0%, #eeeeee 60%);
-  background-image: -o-linear-gradient(bottom, #cccccc 0%, #eeeeee 60%);
-  background-image: -ms-linear-gradient(top, #cccccc 0%, #eeeeee 60%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#cccccc', GradientType=0);
-  background-image: linear-gradient(top, #cccccc 0%, #eeeeee 60%);
+  background-image: linear-gradient(to bottom, #cccccc 0%, #eeeeee 60%);
 }
 .select2-container .select2-choice div b {
   display: block;
@@ -5223,24 +5205,14 @@ Version: 3.3.1 Timestamp: Wed Feb 20 09:57:22 PST 2013
   -moz-box-shadow: none;
   box-shadow: none;
   background: #ffffff url('../img/select2.png') no-repeat 100% -22px;
-  background: url('../img/select2.png') no-repeat 100% -22px, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, #ffffff), color-stop(0.99, #eeeeee));
-  background: url('../img/select2.png') no-repeat 100% -22px, -webkit-linear-gradient(center bottom, #ffffff 85%, #eeeeee 99%);
-  background: url('../img/select2.png') no-repeat 100% -22px, -moz-linear-gradient(center bottom, #ffffff 85%, #eeeeee 99%);
-  background: url('../img/select2.png') no-repeat 100% -22px, -o-linear-gradient(bottom, #ffffff 85%, #eeeeee 99%);
-  background: url('../img/select2.png') no-repeat 100% -22px, -ms-linear-gradient(top, #ffffff 85%, #eeeeee 99%);
-  background: url('../img/select2.png') no-repeat 100% -22px, linear-gradient(top, #ffffff 85%, #eeeeee 99%);
+  background: url('../img/select2.png') no-repeat 100% -22px, linear-gradient(to bottom, #ffffff 85%, #eeeeee 99%);
 }
 .select2-drop.select2-drop-above .select2-search input {
   margin-top: 4px;
 }
 .select2-search input.select2-active {
   background: #ffffff url('../img/ajax-loader-small.gif') no-repeat 100%;
-  background: url('../img/ajax-loader-small.gif') no-repeat 100%, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, #ffffff), color-stop(0.99, #eeeeee));
-  background: url('../img/ajax-loader-small.gif') no-repeat 100%, -webkit-linear-gradient(center bottom, #ffffff 85%, #eeeeee 99%);
-  background: url('../img/ajax-loader-small.gif') no-repeat 100%, -moz-linear-gradient(center bottom, #ffffff 85%, #eeeeee 99%);
-  background: url('../img/ajax-loader-small.gif') no-repeat 100%, -o-linear-gradient(bottom, #ffffff 85%, #eeeeee 99%);
-  background: url('../img/ajax-loader-small.gif') no-repeat 100%, -ms-linear-gradient(top, #ffffff 85%, #eeeeee 99%);
-  background: url('../img/ajax-loader-small.gif') no-repeat 100%, linear-gradient(top, #ffffff 85%, #eeeeee 99%);
+  background-image: url('../img/ajax-loader-small.gif') no-repeat 100%, linear-gradient(to bottom, #ffffff 85%, #eeeeee 99%);
 }
 .select2-container-active .select2-choice,
 .select2-container-active .select2-choices {
@@ -5262,13 +5234,7 @@ Version: 3.3.1 Timestamp: Wed Feb 20 09:57:22 PST 2013
   -moz-border-radius-bottomright: 0;
   border-bottom-right-radius: 0;
   background-color: #eee;
-  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #ffffff), color-stop(0.5, #eeeeee));
-  background-image: -webkit-linear-gradient(center bottom, #ffffff 0%, #eeeeee 50%);
-  background-image: -moz-linear-gradient(center bottom, #ffffff 0%, #eeeeee 50%);
-  background-image: -o-linear-gradient(bottom, #ffffff 0%, #eeeeee 50%);
-  background-image: -ms-linear-gradient(top, #ffffff 0%, #eeeeee 50%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#ffffff', GradientType=0);
-  background-image: linear-gradient(top, #ffffff 0%, #eeeeee 50%);
+  background-image: linear-gradient(to bottom, #ffffff 0%, #eeeeee 50%);
 }
 .select2-dropdown-open .select2-choice div {
   background: transparent;
@@ -5403,12 +5369,7 @@ disabled look for disabled choices in the results dropdown
   cursor: text;
   overflow: hidden;
   background-color: #fff;
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(1%, #eeeeee), color-stop(15%, #ffffff));
-  background-image: -webkit-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
-  background-image: -moz-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
-  background-image: -o-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
-  background-image: -ms-linear-gradient(top, #eeeeee 1%, #ffffff 15%);
-  background-image: linear-gradient(top, #eeeeee 1%, #ffffff 15%);
+  background-image: linear-gradient(to bottom, #eeeeee 1%, #ffffff 15%);
 }
 .select2-locked {
   padding: 3px 5px 3px 5px !important;
@@ -5475,13 +5436,7 @@ disabled look for disabled choices in the results dropdown
   -ms-user-select: none;
   user-select: none;
   background-color: #e4e4e4;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#f4f4f4', GradientType=0);
-  background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(20%, #f4f4f4), color-stop(50%, #f0f0f0), color-stop(52%, #e8e8e8), color-stop(100%, #eeeeee));
-  background-image: -webkit-linear-gradient(top, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eeeeee 100%);
-  background-image: -moz-linear-gradient(top, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eeeeee 100%);
-  background-image: -o-linear-gradient(top, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eeeeee 100%);
-  background-image: -ms-linear-gradient(top, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eeeeee 100%);
-  background-image: linear-gradient(top, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eeeeee 100%);
+  background-image: linear-gradient(to bottom, #f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eeeeee 100%);
 }
 .select2-container-multi .select2-choices .select2-search-choice span {
   cursor: default;
@@ -6594,11 +6549,11 @@ ul.ai1ec-dropdown-menu li {
 .ai1ec-modal-open .ai1ec-geo-ac-results {
   z-index: 2040;
 }
-#icon-edit.icon32-posts-ai1ec_event,
-#icon-post.icon32-posts-ai1ec_event {
-  background: url(../img/timely-post-type.png) no-repeat center center;
-}
-#menu-posts-ai1ec_event.menu-icon-post div.wp-menu-image {
+/*#icon-edit.icon32-posts-ai1ec_event,*/
+/*#icon-post.icon32-posts-ai1ec_event {*/
+/*  background: url(../img/timely-post-type.png) no-repeat center center;*/
+/*}*/
+#menu-posts-osec_event.menu-icon-post div.wp-menu-image {
   background-image: url(../img/timely-admin-menu.png);
 }
 .ai1ec-allday-badge {
@@ -6661,24 +6616,24 @@ ul.ai1ec-dropdown-menu li {
 .ai1ec-taxonomy-header > .ai1ec-nav {
   margin-bottom: 9px !important;
 }
-.ai1ec_event_page_all-in-one-event-calendar-custom-filter-group-menu .wrap > h2,
+.ai1ec_event_page_osec-admin-custom-filter-group-menu .wrap > h2,
 .edit-tags-php.post-type-ai1ec_event .wrap > h2 {
   margin-top: 118px;
 }
-.ai1ec_event_page_all-in-one-event-calendar-custom-filter-group-menu .wrap > .ai1ec-taxonomy-header + h2,
+.ai1ec_event_page_osec-admin-custom-filter-group-menu .wrap > .ai1ec-taxonomy-header + h2,
 .edit-tags-php.post-type-ai1ec_event .wrap > .ai1ec-taxonomy-header + h2 {
   margin-top: 0;
 }
 .at-upload_image_button {
   width: auto !important;
 }
-#ai1ec_category_imag_preview {
+#osec_category_imag_preview {
   max-width: 200px;
   max-height: 200px;
   display: block;
   margin-bottom: 5px;
 }
-.ai1ec_category_small_image_preview {
+.osec_category_small_image_preview {
   max-width: 50px;
   max-height: 50px;
 }

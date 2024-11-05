@@ -1,0 +1,386 @@
+<?php
+
+namespace Osec\Http\Request;
+
+use ArrayAccess;
+use Osec\Bootstrap\App;
+use Osec\Bootstrap\OsecBaseClass;
+use Osec\Exception\BootstrapException;
+
+/**
+ * Abstract request parsing class.
+ *
+ * @since      2.0
+ *
+ * @replaces Ai1ec_Abstract_Query
+ * @author     Time.ly Network Inc.
+ */
+abstract class QueryAbstract extends OsecBaseClass implements ArrayAccess {
+	/**
+	 * @var array Request array to parse
+	 */
+	protected $_request = null;
+
+	/**
+	 * @var array Parsing rules map
+	 */
+	protected ?array $_rules = null;
+
+	/**
+	 * @var array Parsed values
+	 */
+	protected $_parsed = null;
+
+	/**
+	 * @var array Indicator - whereas parsing was finished
+	 */
+	protected $_ready = false;
+
+	/**
+	 * Constructor
+	 *
+	 * Store locally copy of arguments array
+	 *
+	 * @param  App  $app
+	 * @param  ?array  $argv  Arguments to be parsed [optional=null]
+	 */
+	public function __construct( App $app, ?array $argv = null ) {
+		parent::__construct( $app );
+		if ( null === $argv ) {
+			$argv = self::getArgsFromRequestUri( $_SERVER[ 'REQUEST_URI' ] );
+//            $request_uri = explode('?', (string) $_SERVER[ 'REQUEST_URI' ]);
+//            $request_uri = urldecode($request_uri[ 0 ]);
+//            $argv = trim($request_uri, '/');
+//            if (($arg_start = strpos($argv, '/')) > 0) {
+//                $argv = substr($argv, $arg_start + 1);
+//            }
+//            $arg_list = explode('/', $argv);
+//            $argv = [];
+//            foreach ($arg_list as $arg) {
+//                if (($colon = strpos($arg, OSEC_URI_DIRECTION_SEPARATOR)) > 0) {
+//                    $argv[ substr($arg, 0, $colon) ] = substr($arg, $colon + 1);
+//                }
+//            }
+		}
+		$this->_rules   = [];
+		$this->_request = $argv;
+	}
+
+	/*
+	 * Extracts args from string.
+	 *
+	 * @param string $requestUri String like $_SERVER[ 'REQUEST_URI' ].
+	 */
+	private static function getArgsFromRequestUri( string $requestUri ) : array {
+		$argv  = [];
+		$uri_0 = explode( '?', (string) $requestUri );
+		$uri   = trim( urldecode( $uri_0[ 0 ] ), '/' );
+		if ( ( $arg_start = strpos( $uri, '/' ) ) > 0 ) {
+			$uri = substr( $uri, $arg_start + 1 );
+		}
+		foreach ( explode( '/', $uri ) as $arg ) {
+			if ( ( $colon = strpos( $arg, OSEC_URI_DIRECTION_SEPARATOR ) ) > 0 ) {
+				$argv[ substr( $arg, 0, $colon ) ] = substr( $arg, $colon + 1 );
+			}
+		}
+
+		return $argv;
+	}
+
+	/**
+	 * parse method
+	 *
+	 * Parse request values given rules array
+	 *
+	 * @return bool Success
+	 */
+	public function parse() : bool {
+		if ( ! isset( $this->_request[ 'ai1ec' ] ) ) {
+			$this->_request[ 'ai1ec' ] = [];
+		}
+		foreach ( $this->_rules as $field => $options ) {
+			$value = $options[ 'default' ];
+			if ( ( $ext_var = $this->_get_var( $field ) ) ) {
+				$value = $this->_sane_value(
+					$ext_var,
+					$options
+				);
+			} elseif ( $options[ 'mandatory' ] ) {
+				$this->_parsed = [];
+
+				return false;
+			}
+			if ( $options[ 'is_list' ] ) {
+				$value = (array) $value;
+			}
+			$this->_parsed[ $field ] = $value;
+			if ( ! isset( $this->_request[ 'ai1ec' ][ $field ] ) ) {
+				$this->_request[ 'ai1ec' ][ $field ] = $value;
+			}
+		}
+		$this->_ready = true;
+
+		return true;
+	}
+
+	/**
+	 * @param $name
+	 * @param  string  $prefix
+	 *
+	 * @return bool|mixed|null
+	 * @throws BootstrapException
+	 */
+	protected function _get_var( $name, $prefix = '' ) {
+		$name     = $this->_name_without_prefix( $name );
+		$use_name = $prefix . $name;
+		if ( isset( $this->_request[ $use_name ] ) ) {
+			return $this->_request[ $use_name ];
+		}
+
+		$result = WordpressAdaptor::factory( $this->app )->variable( $use_name );
+		if ( null === $result || false === $result ) {
+			$defined_prefix = $this->_get_prefix();
+			if ( '' === $prefix && $defined_prefix !== $prefix ) {
+				return $this->_get_var( $name, $defined_prefix );
+			}
+		}
+
+		return $result;
+	}
+
+	protected function _name_without_prefix( $name ) {
+		$prefix = $this->_get_prefix();
+		$length = strlen( (string) $prefix );
+		if ( 0 === strncmp( (string) $name, (string) $prefix, $length ) ) {
+			return substr( (string) $name, $length );
+		}
+
+		return $name;
+	}
+
+	/**
+	 * Return prefix that shall be used to access values
+	 */
+	abstract protected function _get_prefix();
+
+	/**
+	 * _sane_value method
+	 *
+	 * Parse single input value according to processing rules.
+	 * Relies on {@see self::_type_cast()} for value conversion.
+	 *
+	 * @param  mixed  $input  Original request value
+	 * @param  array  $options  Type definition options
+	 *
+	 * @return mixed Sanitized value
+	 */
+	protected function _sane_value( mixed $input, array $options ) {
+		$sane_value = null;
+		if ( $options[ 'is_list' ] ) {
+			$value      = explode( $options[ 'list_sep' ], (string) $input );
+			$sane_value = [];
+			foreach ( $value as $element ) {
+				$cast_element = $this->_type_cast( $element, $options );
+				if ( ! empty( $cast_element ) ) {
+					$sane_value[] = $cast_element;
+				}
+			}
+		} else {
+			$sane_value = $this->_type_cast( $input, $options );
+		}
+
+		return $sane_value;
+	}
+
+	/**
+	 * _type_cast method
+	 *
+	 * Cast value to given type.
+	 * Non-PHP type 'enum' is accepted
+	 *
+	 * @param  mixed  $value  Value to cast
+	 * @param  array  $options  Type definition options
+	 *
+	 * @return mixed Casted value
+	 */
+	protected function _type_cast( mixed $value, array $options ) {
+		if ( 'enum' === $options[ 'type' ] ) {
+			if ( in_array( $value, $options[ 'list_sep' ] ) ) {
+				return $value;
+			}
+
+			return null;
+		}
+		$cast  = $this->_valid_type( $options[ 'type' ] );
+		$value = $cast( $value );
+
+		return $value;
+	}
+
+	/**
+	 * _sane_value method
+	 *
+	 * Check if given type definition is valid.
+	 * Return sanitizer function name (if applicable) for valid type.
+	 *
+	 * @param  string  $name  Type name to use
+	 *
+	 * @return string|bool Name of sanitization function or false
+	 */
+	protected function _valid_type( $name ) {
+		static $map = [
+			'int'     => 'intval',
+			'integer' => 'intval',
+			'float'   => 'floatval',
+			'double'  => 'floatval',
+			'real'    => 'floatval',
+			'string'  => 'strval',
+			'enum'    => null
+		];
+		if ( ! isset( $map[ $name ] ) ) {
+			return false;
+		}
+
+		return $map[ $name ];
+	}
+
+	/**
+	 * Get parsed values map.
+	 *
+	 * @param  array  $name_list  List of values to pull
+	 * If associative value is encountered - *key* is used to pull
+	 * request entity, and *value* to store it in returned map.
+	 *
+	 * @return array Parsed values map
+	 */
+	public function get_dict( array $name_list ) {
+		$dictionary = [];
+		foreach ( $name_list as $alias => $name ) {
+			if ( is_int( $alias ) ) {
+				$alias = $name;
+			}
+			$value = $this->get( $name );
+			if ( empty( $value ) ) {
+				$value = $this->get( $alias );
+			}
+			$dictionary[ $alias ] = $value;
+		}
+
+		return $dictionary;
+	}
+
+	/**
+	 * Get parsed value
+	 *
+	 * @param  string  $name  Name of value to pull
+	 *
+	 * @return array|bool Parsed value
+	 */
+	public function get( string $name ) {
+		if ( ! $this->_ready ) {
+			return false;
+		}
+		if ( ! isset( $this->_parsed[ $name ] ) ) {
+			return false;
+		}
+
+		return $this->_parsed[ $name ];
+	}
+
+	/**
+	 * Check if the request is empry ( that means we are accessing the calendare page without parameters )
+	 *
+	 * @return boolean
+	 */
+	public function is_empty_request() {
+		return empty( $this->_request );
+	}
+
+	/**
+	 * @overload ArrayAccess::offsetExists()
+	 */
+	public function offsetExists( $offset ) : bool {
+		return false !== $this->get( $offset );
+	}
+
+	/**
+	 * @overload ArrayAccess::offsetGet()
+	 */
+	public function offsetGet( $offset ) : mixed {
+		return $this->get_scalar( $offset );
+	}
+
+	/**
+	 * Get scalar value representation
+	 *
+	 * @return array Parsed value converted to scalar
+	 */
+	public function get_scalar( $name ) : mixed {
+		$value = $this->get( $name );
+		if ( ! is_scalar( $value ) ) {
+			$value = implode( $this->_rules[ $name ][ 'list_sep' ], $value );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * @overload ArrayAccess::offsetSet()
+	 */
+	public function offsetSet( $offset, $value ) : void {
+		// not implemented and will not be
+	}
+
+	/**
+	 * @overload ArrayAccess::offsetUnset()
+	 */
+	public function offsetUnset( $offset ) : void {
+		// not implemented and will not be
+	}
+
+	/**
+	 * Add argument parsing rule
+	 *
+	 * @param  string  $field  Name of field to parse
+	 * @param  bool  $mandatory  Set to true for mandatory fields
+	 * @param  string  $type  Type of field
+	 * @param  mixed  $default  Default value to use if one is not present
+	 * @param  string|bool  $list_sep  Set to list separator (i.e. ',') if it is a
+	 *                               list or false if value is not a list value.
+	 *                               For 'enum' set to array of values.
+	 *
+	 * @return bool Success
+	 */
+	public function add_rule(
+		$field,
+		$mandatory = true,
+		$type = 'int',
+		mixed $default = null,
+		$list_sep = false
+	) {
+		if ( ! is_scalar( $field ) ) {
+			return false;
+		}
+		if ( false === $this->_valid_type( $type ) ) {
+			return false;
+		}
+		$mandatory = (bool) $mandatory;
+		$is_list   = false !== $list_sep && is_scalar( $list_sep );
+		$field     = $this->_name_without_prefix( $field );
+		$prefix    = $this->_get_prefix();
+		$record    = compact(
+			'field',
+			'mandatory',
+			'type',
+			'default',
+			'is_list',
+			'list_sep'
+		);
+		// ? => emit notice, if field is already defined
+		$this->_rules[ $field ]           = $record;
+		$this->_rules[ $prefix . $field ] = $record;
+		$this->_ready                     = false;
+
+		return true;
+	}
+}

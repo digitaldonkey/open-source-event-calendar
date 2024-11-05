@@ -20,6 +20,7 @@
       position: relative;
       display: block;
       padding: @nav-link-padding;
+
       &:hover,
       &:focus {
         text-decoration: none;
@@ -75,6 +76,7 @@
 // Give the tabs something to sit on
 .ai1ec-nav-tabs {
   border-bottom: 1px solid @nav-tabs-border-color;
+
   > li {
     float: left;
     // Make the list-items overlay the bottom border
@@ -86,6 +88,7 @@
       line-height: @line-height-base;
       border: 1px solid transparent;
       border-radius: @border-radius-base @border-radius-base 0 0;
+
       &:hover {
         border-color: @nav-tabs-link-hover-border-color @nav-tabs-link-hover-border-color @nav-tabs-border-color;
       }
@@ -104,6 +107,7 @@
       }
     }
   }
+
   // pulling this in mainly for less shorthand
   &.ai1ec-nav-justified {
     .ai1ec-nav-justified();
@@ -122,6 +126,7 @@
     > a {
       border-radius: @nav-pills-border-radius;
     }
+
     + li {
       margin-left: 2px;
     }
@@ -143,6 +148,7 @@
 .ai1ec-nav-stacked {
   > li {
     float: none;
+
     + li {
       margin-top: 2px;
       margin-left: 0; // no need for this gap between nav items
@@ -162,7 +168,8 @@
 
   > li {
     float: none;
-     > a {
+
+    > a {
       text-align: center;
       margin-bottom: 5px;
     }
@@ -177,6 +184,7 @@
     > li {
       display: table-cell;
       width: 1%;
+
       > a {
         margin-bottom: 0;
       }
@@ -207,6 +215,7 @@
       border-bottom: 1px solid @nav-tabs-justified-link-border-color;
       border-radius: @border-radius-base @border-radius-base 0 0;
     }
+
     > .ai1ec-active > a,
     > .ai1ec-active > a:hover,
     > .ai1ec-active > a:focus {
@@ -224,6 +233,7 @@
   > .ai1ec-tab-pane {
     display: none;
   }
+
   > .ai1ec-active {
     display: block;
   }

@@ -9,7 +9,7 @@
   background-color: @panel-bg;
   border: 1px solid transparent;
   border-radius: @panel-border-radius;
-  .ai1ec-box-shadow(0 1px 1px rgba(0,0,0,.05));
+  .ai1ec-box-shadow(0 1px 1px rgba(0, 0, 0, .05));
 }
 
 // Panel contents
@@ -35,6 +35,7 @@
       &:first-child {
         .ai1ec-border-top-radius(0);
       }
+
       // But keep it for the last one
       &:last-child {
         border-bottom: 0;
@@ -42,6 +43,7 @@
     }
   }
 }
+
 // Collapse space between when there's no additional content.
 .ai1ec-panel-heading + .ai1ec-list-group {
   .ai1ec-list-group-item:first-child {
@@ -60,17 +62,21 @@
   > .ai1ec-table-responsive > .ai1ec-table {
     margin-bottom: 0;
   }
+
   > .ai1ec-panel-body + .ai1ec-table,
   > .ai1ec-panel-body + .ai1ec-table-responsive {
     border-top: 1px solid @table-border-color;
   }
+
   > .ai1ec-table > tbody:first-child th,
   > .ai1ec-table > tbody:first-child td {
     border-top: 0;
   }
+
   > .ai1ec-table-bordered,
   > .ai1ec-table-responsive > .ai1ec-table-bordered {
     border: 0;
+
     > thead,
     > tbody,
     > tfoot {
@@ -79,6 +85,7 @@
         > td:first-child {
           border-left: 0;
         }
+
         > th:last-child,
         > td:last-child {
           border-right: 0;
@@ -91,6 +98,7 @@
       }
     }
   }
+
   > .ai1ec-table-responsive {
     border: 0;
     margin-bottom: 0;
@@ -148,12 +156,15 @@
 
   .ai1ec-panel-heading {
     border-bottom: 0;
+
     + .ai1ec-panel-collapse .ai1ec-panel-body {
       border-top: 1px solid @panel-inner-border;
     }
   }
+
   .ai1ec-panel-footer {
     border-top: 0;
+
     + .ai1ec-panel-collapse .ai1ec-panel-body {
       border-bottom: 1px solid @panel-inner-border;
     }
@@ -165,18 +176,23 @@
 .ai1ec-panel-default {
   .ai1ec-panel-variant(@panel-default-border; @panel-default-text; @panel-default-heading-bg; @panel-default-border);
 }
+
 .ai1ec-panel-primary {
   .ai1ec-panel-variant(@panel-primary-border; @panel-primary-text; @panel-primary-heading-bg; @panel-primary-border);
 }
+
 .ai1ec-panel-success {
   .ai1ec-panel-variant(@panel-success-border; @panel-success-text; @panel-success-heading-bg; @panel-success-border);
 }
+
 .ai1ec-panel-warning {
   .ai1ec-panel-variant(@panel-warning-border; @panel-warning-text; @panel-warning-heading-bg; @panel-warning-border);
 }
+
 .ai1ec-panel-danger {
   .ai1ec-panel-variant(@panel-danger-border; @panel-danger-text; @panel-danger-heading-bg; @panel-danger-border);
 }
+
 .ai1ec-panel-info {
   .ai1ec-panel-variant(@panel-info-border; @panel-info-text; @panel-info-heading-bg; @panel-info-border);
 }

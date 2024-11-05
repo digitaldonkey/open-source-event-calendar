@@ -1,0 +1,83 @@
+diff -uraBN src/helpers/SG_iCal_Line.php sg-i-calendar/src/helpers/SG_iCal_Line.php
+--- src/helpers/SG_iCal_Line.php	2020-03-11 18:41:34.000000000 +0100
++++ sg-i-calendar/src/helpers/SG_iCal_Line.php	2024-07-04 20:14:02.436570032 +0200
+@@ -118,15 +118,15 @@
+ 	/**
+ 	 * @see ArrayAccess.offsetExists
+ 	 */
+-	public function offsetExists( $param ) {
+-		return isset($this->params[ strtolower($param) ]);
++  public function offsetExists(mixed $offset): bool {
++		return isset($this->params[ strtolower($offset) ]);
+ 	}
+ 
+ 	/**
+ 	 * @see ArrayAccess.offsetGet
+ 	 */
+-	public function offsetGet( $param ) {
+-		$index = strtolower($param);
++  public function offsetGet(mixed $offset): mixed {
++		$index = strtolower($offset);
+ 		if (isset($this->params[ $index ])) {
+ 			return $this->params[ $index ];
+ 		}
+@@ -136,19 +136,15 @@
+ 	 * Disabled ArrayAccess requirement
+ 	 * @see ArrayAccess.offsetSet
+ 	 */
+-	public function offsetSet( $param, $val ) {
+-		return false;
+-	}
++  public function offsetSet(mixed $offset, mixed $value): void {}
+ 
+ 	/**
+ 	 * Disabled ArrayAccess requirement
+ 	 * @see ArrayAccess.offsetUnset
+ 	 */
+-	public function offsetUnset( $param ) {
+-		return false;
+-	}
++  public function offsetUnset(mixed $offset): void {}
+ 
+-	/**
++  /**
+ 	 * toString method.
+ 	 * @see getData()
+ 	 */
+@@ -159,14 +155,14 @@
+ 	/**
+ 	 * @see Countable.count
+ 	 */
+-	public function count() {
++	public function count(): int {
+ 		return count($this->params);
+ 	}
+ 
+ 	/**
+ 	 * @see IteratorAggregate.getIterator
+ 	 */
+-	public function getIterator() {
++	public function getIterator(): \Traversable {
+ 		return new ArrayIterator($this->params);
+ 	}
+ }
+diff -uraBN src/helpers/SG_iCal_Recurrence.php sg-i-calendar/src/helpers/SG_iCal_Recurrence.php
+--- src/helpers/SG_iCal_Recurrence.php	2020-03-11 18:41:34.000000000 +0100
++++ sg-i-calendar/src/helpers/SG_iCal_Recurrence.php	2024-07-04 20:10:32.464213492 +0200
+@@ -70,7 +70,7 @@
+ 
+ 		//loop through the properties in the line and set their associated
+ 		//member variables
+-		foreach ($recurProperties as $property) {
++		foreach (array_filter($recurProperties) as $property) {
+ 			$nameAndValue = explode('=', $property);
+ 
+ 			//need the lower-case name for setting the member variable
+@@ -222,4 +222,5 @@
+ 	public function getWkst() {
+ 		return $this->getMember('wkst');
+ 	}
+-}
+\ No newline at end of file
++
++}

@@ -1,0 +1,53 @@
+{
+    "name": "tho/all-in-one-event-calendar",
+    "type": "wordpress-plugin",
+    "require": {
+        "ext-curl": "*",
+        "twig/twig": "^3.10",
+        "mrclay/minify": "^4.0",
+        "wikimedia/less.php": "^5.0",
+        "kigkonsult/icalcreator": "~2.40.0",
+        "louis1021/sg-i-calendar": "dev-master"
+    },
+    "license": "GPL-v2",
+    "autoload": {
+        "psr-4": {
+            "Osec\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Osec\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "digitaldonkey",
+            "email": "tho@donkeymedia.eu"
+        }
+    ],
+    "require-dev": {
+        "cweagans/composer-patches": "~1.0",
+        "phpunit/phpunit": "^9.6",
+        "yoast/phpunit-polyfills": "^2.0",
+        "symfony/debug-bundle": "^7.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "cweagans/composer-patches": true
+        }
+    },
+    "extra": {
+        "patches": {
+            "louis1021/sg-i-calendar": {
+                "PHP 8.1.x compatibility fixes": "composer-patches/louis1021--sg-i-calendar.patch"
+            },
+            "wikimedia/less.php": {
+                "Fix source map paths": "composer-patches/wikimedia-sourcemaps.patch"
+            },
+            "kigkonsult/icalcreator": {
+                "Fix ctype_digit() deprecation notices": "composer-patches/kigkonsult_icalcreator_2.40.0.patch"
+            }
+        }
+    }
+}

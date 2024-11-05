@@ -29,7 +29,10 @@
     .ai1ec-translate(0, -25%);
     .ai1ec-transition-transform(~"0.3s ease-out");
   }
-  &.ai1ec-in .ai1ec-modal-dialog { .ai1ec-translate(0, 0)}
+
+  &.ai1ec-in .ai1ec-modal-dialog {
+    .ai1ec-translate(0, 0)
+  }
 }
 
 // Shell div to position the modal with bottom padding
@@ -47,7 +50,7 @@
   border: 1px solid @modal-content-fallback-border-color; //old browsers fallback (ie8 etc)
   border: 1px solid @modal-content-border-color;
   border-radius: @border-radius-large;
-  .ai1ec-box-shadow(0 3px 9px rgba(0,0,0,.5));
+  .ai1ec-box-shadow(0 3px 9px rgba(0, 0, 0, .5));
   background-clip: padding-box;
   // Remove focus outline from opened modal
   outline: none;
@@ -63,8 +66,13 @@
   z-index: (@zindex-modal-background - 10);
   background-color: @modal-backdrop-bg;
   // Fade for backdrop
-  &.ai1ec-fade { .ai1ec-opacity(0); }
-  &.ai1ec-in { .ai1ec-opacity(.5); }
+  &.ai1ec-fade {
+    .ai1ec-opacity(0);
+  }
+
+  &.ai1ec-in {
+    .ai1ec-opacity(.5);
+  }
 }
 
 // Modal header
@@ -74,6 +82,7 @@
   border-bottom: 1px solid @modal-header-border-color;
   min-height: (@modal-title-padding + @modal-title-line-height);
 }
+
 // Close icon
 .ai1ec-modal-header .ai1ec-close {
   margin-top: -2px;
@@ -105,10 +114,12 @@
     margin-left: 5px;
     margin-bottom: 0; // account for input[type="submit"] which gets the bottom margin like all other inputs
   }
+
   // but override that for button groups
   .ai1ec-btn-group .ai1ec-btn + .ai1ec-btn {
     margin-left: -1px;
   }
+
   // and override it for block buttons as well
   .ai1ec-btn-block + .ai1ec-btn-block {
     margin-left: 0;
@@ -122,8 +133,9 @@
     width: 600px;
     margin: 30px auto;
   }
+
   .ai1ec-modal-content {
-    .ai1ec-box-shadow(0 5px 15px rgba(0,0,0,.5));
+    .ai1ec-box-shadow(0 5px 15px rgba(0, 0, 0, .5));
   }
 
 }

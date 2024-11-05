@@ -1,84 +1,84 @@
 <div class="ai1ec-panel-heading">
 	<a data-toggle="ai1ec-collapse"
-		data-parent="#ai1ec-add-new-event-accordion"
-		href="#ai1ec-time-and-date-box">
+		data-parent="#osec-add-new-event-accordion"
+		href="#osec-time-and-date-box">
 		<i class="ai1ec-fa ai1ec-fa-clock-o ai1ec-fa-fw"></i>
-		<?php _e( 'Event date and time', AI1EC_PLUGIN_NAME ); ?>
+		<?php _e( 'Event date and time', OSEC_TXT_DOM ); ?>
 	</a>
 </div>
-<div id="ai1ec-time-and-date-box"
+<div id="osec-time-and-date-box"
 	class="ai1ec-panel-collapse ai1ec-collapse ai1ec-in">
 	<div class="ai1ec-panel-body">
-		<?php wp_nonce_field( 'ai1ec', AI1EC_POST_TYPE ); ?>
+		<?php wp_nonce_field( 'ai1ec', OSEC_POST_TYPE ); ?>
 		<?php if ( $instance_id ) : ?>
 			<input type="hidden"
-				name="ai1ec_instance_id"
-				id="ai1ec_instance-id"
+				name="osec_instance_id"
+				id="osec_instance-id"
 				value="<?php echo $instance_id; ?>">
 		<?php endif; ?>
 		<table class="ai1ec-form">
 			<tbody>
 				<tr>
 					<td colspan="2">
-						<label for="ai1ec_all_day_event">
-							<input type="checkbox" name="ai1ec_all_day_event"
-								id="ai1ec_all_day_event" value="1" <?php echo $all_day_event; ?>>
-							<?php _e( 'All-day event', AI1EC_PLUGIN_NAME ); ?>
+						<label for="osec_all_day_event">
+							<input type="checkbox" name="osec_all_day_event"
+								id="osec_all_day_event" value="1" <?php echo $all_day_event; ?>>
+							<?php _e( 'All-day event', OSEC_TXT_DOM ); ?>
 						</label>
 					</td>
 				</tr>
 				<tr>
 					<td colspan="2">
-						<label for="ai1ec_instant_event">
-							<input type="checkbox" name="ai1ec_instant_event"
-								id="ai1ec_instant_event" value="1" <?php echo $instant_event; ?>>
-							<?php _e( 'No end time', AI1EC_PLUGIN_NAME ); ?>
+						<label for="osec_instant_event">
+							<input type="checkbox" name="osec_instant_event"
+								id="osec_instant_event" value="1" <?php echo $instant_event; ?>>
+							<?php _e( 'No end time', OSEC_TXT_DOM ); ?>
 						</label>
 					</td>
 				</tr>
 				<tr>
 					<td class="ai1ec-first">
-						<label for="ai1ec_start-date-input">
-							<?php _e( 'Start date / time', AI1EC_PLUGIN_NAME ); ?>:
+						<label for="osec_start-date-input">
+							<?php _e( 'Start date / time', OSEC_TXT_DOM ); ?>:
 						</label>
 					</td>
 					<td>
 						<input type="text" class="ai1ec-date-input ai1ec-form-control"
-							id="ai1ec_start-date-input">
+							id="osec_start-date-input">
 						<input type="text" class="ai1ec-time-input ai1ec-form-control"
-							id="ai1ec_start-time-input">
+							id="osec_start-time-input">
 						<input type="hidden"
-							name="ai1ec_start_time"
-							id="ai1ec_start-time"
+							name="osec_start_time"
+							id="osec_start-time"
 							value="<?php echo $start->format_to_javascript( true ); ?>">
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<label for="ai1ec_end-date-input">
-							<?php _e( 'End date / time', AI1EC_PLUGIN_NAME ); ?>:
+						<label for="osec_end-date-input">
+							<?php _e( 'End date / time', OSEC_TXT_DOM ); ?>:
 						</label>
 					</td>
 					<td>
 						<input type="text" class="ai1ec-date-input ai1ec-form-control"
-							id="ai1ec_end-date-input">
+							id="osec_end-date-input">
 						<input type="text" class="ai1ec-time-input ai1ec-form-control"
-							id="ai1ec_end-time-input">
+							id="osec_end-time-input">
 						<input type="hidden"
-							name="ai1ec_end_time"
-							id="ai1ec_end-time"
+							name="osec_end_time"
+							id="osec_end-time"
 							value="<?php echo $end->format_to_javascript( true ); ?>">
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<label for="ai1ec_end-date-input">
-							<?php _e( 'Time zone', AI1EC_PLUGIN_NAME ); ?>:
+						<label for="osec_end-date-input">
+							<?php _e( 'Time zone', OSEC_TXT_DOM ); ?>:
 						</label>
 					</td>
 					<td>
-						<select name="ai1ec_timezone_name" id="timezone-select">
-							<option value=""><?php _e( 'Choose your time zone', AI1EC_PLUGIN_NAME ); ?></option>
+						<select name="osec_timezone_name" id="timezone-select">
+							<option value=""><?php _e( 'Choose your time zone', OSEC_TXT_DOM ); ?></option>
 						<?php foreach ( $timezones_list as $group => $timezones ) : ?>
 							<optgroup label="<?php echo $group;?>">
 						<?php
@@ -99,46 +99,46 @@
 				?>
 				<tr<?php echo $recurrence_attr; ?>>
 					<td>
-						<input type="checkbox" name="ai1ec_repeat" id="ai1ec_repeat"
+						<input type="checkbox" name="osec_repeat" id="osec_repeat"
 								value="1"
 								<?php echo $repeating_event ? 'checked' : ''; ?>>
-						<input type="hidden" name="ai1ec_rrule" id="ai1ec_rrule"
+						<input type="hidden" name="osec_rrule" id="osec_rrule"
 								value="<?php echo $rrule; ?>">
-						<label for="ai1ec_repeat" id="ai1ec_repeat_label">
-							<?php _e( 'Repeat', AI1EC_PLUGIN_NAME );
+						<label for="osec_repeat" id="osec_repeat_label">
+							<?php _e( 'Repeat', OSEC_TXT_DOM );
 								echo $repeating_event ? ':' : '...'; ?>
 						</label>
 					</td>
 					<td>
-						<div id="ai1ec_repeat_text" class="ai1ec_rule_text">
-							<a href="#ai1ec_repeat_box"><?php echo $rrule_text; ?></a>
+						<div id="osec_repeat_text" class="osec_rule_text">
+							<a href="#osec_repeat_box"><?php echo $rrule_text; ?></a>
 						</div>
 					</td>
 				</tr>
 				<tr<?php echo $recurrence_attr; ?>>
 					<td>
-						<input type="checkbox" name="ai1ec_exclude" id="ai1ec_exclude"
+						<input type="checkbox" name="osec_exclude" id="osec_exclude"
 								value="1"
 								<?php echo $exclude_event ? 'checked' : ''; ?>
 								<?php echo $repeating_event ? '' : 'disabled'; ?>>
-						<input type="hidden" name="ai1ec_exrule" id="ai1ec_exrule"
+						<input type="hidden" name="osec_exrule" id="osec_exrule"
 								value="<?php echo $exrule; ?>">
-						<label for="ai1ec_exclude" id="ai1ec_exclude_label">
-							<?php _e( 'Exclude', AI1EC_PLUGIN_NAME );
+						<label for="osec_exclude" id="osec_exclude_label">
+							<?php _e( 'Exclude', OSEC_TXT_DOM );
 								echo $exclude_event ? ':' : '...'; ?>
 						</label>
 					</td>
 					<td>
-						<div id="ai1ec_exclude_text" class="ai1ec_rule_text">
-							<a href="#ai1ec_exclude_box"><?php echo $exrule_text; ?></a>
+						<div id="osec_exclude_text" class="osec_rule_text">
+							<a href="#osec_exclude_box"><?php echo $exrule_text; ?></a>
 						</div>
 						<span class="ai1ec-info-text">
-							(<?php _e( 'Choose a rule for exclusion', AI1EC_PLUGIN_NAME ); ?>)
+							(<?php _e( 'Choose a rule for exclusion', OSEC_TXT_DOM ); ?>)
 						</span>
 					</td>
 				</tr>
 				<?php // Recurrence modal skeleton ?>
-				<div id="ai1ec_repeat_box" class="ai1ec-modal ai1ec-fade">
+				<div id="osec_repeat_box" class="ai1ec-modal ai1ec-fade">
 					<div class="ai1ec-modal-dialog">
 						<div class="ai1ec-loading ai1ec-modal-content">
 							<div class="ai1ec-modal-body ai1ec-text-center">

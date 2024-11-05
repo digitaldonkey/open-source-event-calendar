@@ -37,13 +37,11 @@
 <div class="ai1ec-col-md-6">
 	<p><strong>{{ text_paste | raw }}</strong></p>
 	<pre id="ai1ec-superwidget-code" class="ai1ec-autoselect"
-		 data-widget-url="{{ siteurl | e('html_attr') }}?ai1ec_js_widget"></pre>
+		 data-widget-url="{{ siteurl | e('html_attr') }}?osec_legacy_widget"></pre>
 	<div class="ai1ec-alert ai1ec-alert-info">
 		<i class="ai1ec-fa ai1ec-fa-info-circle ai1ec-fa-fw"></i>
-		{{ text_updated_code
-			| format( 'http://time.ly/document/manage-add-ons/embed-calendar-sites-super-widget/' )
-			| raw }}
+		{{ text_updated_code }}
 	</div>
 </div>
 <h2 id="widget-preview-title">{{ text_preview }}</h2>
-<div id="ai1ec-superwidget-preview" class="ai1ec-well ai1ec-hidden"></div>
+<div id="osec-widget-preview" class="ai1ec-well ai1ec-hidden"></div>

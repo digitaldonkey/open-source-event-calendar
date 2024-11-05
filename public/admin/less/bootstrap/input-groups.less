@@ -29,10 +29,15 @@
 
 .ai1ec-input-group-lg > .ai1ec-form-control,
 .ai1ec-input-group-lg > .ai1ec-input-group-addon,
-.ai1ec-input-group-lg > .ai1ec-input-group-btn > .ai1ec-btn { .ai1ec-input-lg(); }
+.ai1ec-input-group-lg > .ai1ec-input-group-btn > .ai1ec-btn {
+  .ai1ec-input-lg();
+}
+
 .ai1ec-input-group-sm > .ai1ec-form-control,
 .ai1ec-input-group-sm > .ai1ec-input-group-addon,
-.ai1ec-input-group-sm > .ai1ec-input-group-btn > .ai1ec-btn { .ai1ec-input-sm(); }
+.ai1ec-input-group-sm > .ai1ec-input-group-btn > .ai1ec-btn {
+  .ai1ec-input-sm();
+}
 
 
 // Display as table-cell
@@ -46,6 +51,7 @@
     border-radius: 0;
   }
 }
+
 // Addon and addon wrapper for buttons
 .ai1ec-input-group-addon,
 .ai1ec-input-group-btn {
@@ -73,6 +79,7 @@
     font-size: @font-size-small;
     border-radius: @border-radius-small;
   }
+
   &.ai1ec-input-lg {
     padding: @padding-large-vertical @padding-large-horizontal;
     font-size: @font-size-large;
@@ -94,9 +101,11 @@
 .ai1ec-input-group-btn:last-child > .ai1ec-btn:not(:last-child):not(.ai1ec-dropdown-toggle) {
   .ai1ec-border-right-radius(0);
 }
+
 .ai1ec-input-group-addon:first-child {
   border-right: 0;
 }
+
 .ai1ec-input-group .ai1ec-form-control:last-child,
 .ai1ec-input-group-addon:last-child,
 .ai1ec-input-group-btn:last-child > .ai1ec-btn,
@@ -104,6 +113,7 @@
 .ai1ec-input-group-btn:first-child > .ai1ec-btn:not(:first-child) {
   .ai1ec-border-left-radius(0);
 }
+
 .ai1ec-input-group-addon:last-child {
   border-left: 0;
 }
@@ -118,16 +128,19 @@
   &:first-child > .ai1ec-btn {
     margin-right: -1px;
   }
+
   &:last-child > .ai1ec-btn {
     margin-left: -1px;
   }
 }
+
 .ai1ec-input-group-btn > .ai1ec-btn {
   position: relative;
   // Jankily prevent input button groups from wrapping
   + .ai1ec-btn {
     margin-left: -4px;
   }
+
   // Bring the "active" button to the front
   &:hover,
   &:active {

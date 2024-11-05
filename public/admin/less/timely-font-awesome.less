@@ -6,22 +6,23 @@
 
 // Variables & variable overrides
 @import "font-awesome/variables";
-@fa-font-path:  "../font";
+
+@fa-font-path: "../font";
 @fa-css-prefix: ai1ec-fa;
 
 @import "font-awesome/mixins";
 
 // Namespace the font name instead of importing path.less directly.
 @font-face {
-	font-family: 'Timely_FontAwesome';
-	src: url('@{fa-font-path}/fontawesome-webfont.eot?v=@{fa-version}');
-	src: url('@{fa-font-path}/fontawesome-webfont.eot?#iefix&v=@{fa-version}') format('embedded-opentype'),
-		url('@{fa-font-path}/fontawesome-webfont.woff?v=@{fa-version}') format('woff'),
-		url('@{fa-font-path}/fontawesome-webfont.ttf?v=@{fa-version}') format('truetype'),
-		url('@{fa-font-path}/fontawesome-webfont.svg?v=@{fa-version}#fontawesomeregular') format('svg');
-//  src: url('@{fa-font-path}/FontAwesome.otf') format('opentype'); // used when developing fonts
-	font-weight: normal;
-	font-style: normal;
+  font-family: 'Timely_FontAwesome';
+  src: url('@{fa-font-path}/fontawesome-webfont.eot?v=@{fa-version}');
+  src: url('@{fa-font-path}/fontawesome-webfont.eot?#iefix&v=@{fa-version}') format('embedded-opentype'),
+  url('@{fa-font-path}/fontawesome-webfont.woff?v=@{fa-version}') format('woff'),
+  url('@{fa-font-path}/fontawesome-webfont.ttf?v=@{fa-version}') format('truetype'),
+  url('@{fa-font-path}/fontawesome-webfont.svg?v=@{fa-version}#fontawesomeregular') format('svg');
+  //  src: url('@{fa-font-path}/FontAwesome.otf') format('opentype'); // used when developing fonts
+  font-weight: normal;
+  font-style: normal;
 }
 
 @import "font-awesome/core";
@@ -34,20 +35,24 @@
 
 // Other overrides
 .@{fa-css-prefix} {
-	font-family: Timely_FontAwesome;
+  font-family: Timely_FontAwesome;
 }
+
 ul.ai1ec-fa-ul {
-	list-style-type: none;
+  list-style-type: none;
 }
+
 a.ai1ec-fa.ai1ec-hide {
-	display: none;
+  display: none;
 }
+
 .timely small.ai1ec-fa-stack {
-	font-size: 90%;
-	height: 1.6em;
-	vertical-align: -11%;
+  font-size: 90%;
+  height: 1.6em;
+  vertical-align: -11%;
 }
+
 .ai1ec-fa-stack .ai1ec-icon-timely {
-	left: 0.05em;
-	top: -0.05em;
+  left: 0.05em;
+  top: -0.05em;
 }

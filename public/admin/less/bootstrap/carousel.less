@@ -28,7 +28,9 @@
 
   > .ai1ec-active,
   > .ai1ec-next,
-  > .ai1ec-prev { display: block; }
+  > .ai1ec-prev {
+    display: block;
+  }
 
   > .ai1ec-active {
     left: 0;
@@ -44,9 +46,11 @@
   > .ai1ec-next {
     left: 100%;
   }
+
   > .ai1ec-prev {
     left: -100%;
   }
+
   > .ai1ec-next.ai1ec-left,
   > .ai1ec-prev.ai1ec-right {
     left: 0;
@@ -55,6 +59,7 @@
   > .ai1ec-active.ai1ec-left {
     left: -100%;
   }
+
   > .ai1ec-active.ai1ec-right {
     left: 100%;
   }
@@ -82,6 +87,7 @@
   &.ai1ec-left {
     #gradient > .ai1ec-horizontal(@start-color: rgba(0,0,0,.5); @end-color: rgba(0,0,0,.0001));
   }
+
   &.ai1ec-right {
     left: auto;
     right: 0;
@@ -107,17 +113,20 @@
     z-index: 5;
     display: inline-block;
   }
+
   .ai1ec-icon-prev,
   .ai1ec-glyphicon-chevron-left {
     left: 50%;
   }
+
   .ai1ec-icon-next,
   .ai1ec-glyphicon-chevron-right {
     right: 50%;
   }
+
   .ai1ec-icon-prev,
   .ai1ec-icon-next {
-    width:  20px;
+    width: 20px;
     height: 20px;
     margin-top: -10px;
     margin-left: -10px;
@@ -126,12 +135,13 @@
 
   .ai1ec-icon-prev {
     &:before {
-      content: '\2039';// SINGLE LEFT-POINTING ANGLE QUOTATION MARK (U+2039)
+      content: '\2039'; // SINGLE LEFT-POINTING ANGLE QUOTATION MARK (U+2039)
     }
   }
+
   .ai1ec-icon-next {
     &:before {
-      content: '\203a';// SINGLE RIGHT-POINTING ANGLE QUOTATION MARK (U+203A)
+      content: '\203a'; // SINGLE RIGHT-POINTING ANGLE QUOTATION MARK (U+203A)
     }
   }
 }
@@ -154,7 +164,7 @@
 
   li {
     display: inline-block;
-    width:  10px;
+    width: 10px;
     height: 10px;
     margin: 1px;
     text-indent: -999px;
@@ -170,11 +180,12 @@
     //
     // For IE8, we set solid black as it doesn't support `rgba()`. For IE9, we
     // set alpha transparency for the best results possible.
-    background-color: rgba(0,0,0,0); // IE9
+    background-color: rgba(0, 0, 0, 0); // IE9
   }
+
   .ai1ec-active {
     margin: 0;
-    width:  12px;
+    width: 12px;
     height: 12px;
     background-color: @carousel-indicator-active-bg;
   }
@@ -194,6 +205,7 @@
   color: @carousel-caption-color;
   text-align: center;
   text-shadow: @carousel-text-shadow;
+
   & .ai1ec-btn {
     text-shadow: none; // No shadow for button elements in carousel-caption
   }

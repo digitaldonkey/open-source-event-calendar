@@ -8,14 +8,14 @@
 		</th>
 		<td>
 
-			<img src='{{ image_src }}' {{ image_style }} alt='' id='ai1ec_category_imag_preview' />
-			<input type="hidden" name="ai1ec_category_image_url" id="ai1ec_category_image_url" value="">
-			<input class="button at-upload_image_button" type="button" id='ai1ec_category_image_uploader' value="{{ label }}">
+			<img src='{{ image_src }}' {{ image_style }} alt='' id='osec_category_imag_preview' />
+			<input type="hidden" name="osec_category_image_url" id="osec_category_image_url" value="">
+			<input class="button at-upload_image_button" type="button" id='osec_category_image_uploader' value="{{ label }}">
 
 			{% if image_src %}
 			<p>
-				<input type="checkbox" style="width:auto;" name="ai1ec_category_image_url_remove" id="ai1ec_category_image_url_remove" value="1" />
-				<label for="ai1ec_category_image_url_remove">{{ remove_label }}</label>
+				<input type="checkbox" style="width:auto;" name="osec_category_image_url_remove" id="osec_category_image_url_remove" value="1" />
+				<label for="osec_category_image_url_remove">{{ remove_label }}</label>
 			</p>
 			{% endif %}
 
@@ -29,13 +29,13 @@
 
 {% else %}
 	<div class="form-field">
-		<label for="ai1ec_image_field_id">
+		<label for="osec_category_image_uploader">
 			{{ section_name | raw }}
 		</label>
 
-		<img src='{{ image_src }}' {{ image_style }} alt='' id='ai1ec_category_imag_preview' />
-		<input type="hidden" name="ai1ec_category_image_url" id="ai1ec_category_image_url" value="">
-		<input class="button at-upload_image_button" type="button" id='ai1ec_category_image_uploader' value="{{ label }}">
+		<img src='{{ image_src }}' {{ image_style }} alt='' id='osec_category_imag_preview' />
+		<input type="hidden" name="osec_category_image_url" id="osec_category_image_url" value="">
+		<input class="button at-upload_image_button" type="button" id='osec_category_image_uploader' value="{{ label }}">
 
 		<div class="desc-field">
 			<p class="description">

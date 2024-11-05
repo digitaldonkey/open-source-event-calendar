@@ -1,7 +1,7 @@
 <?php if( ! validate_current_theme() ) : ?>
 	<div id="message1" class="updated">
 		<p>
-			<?php _e( 'The active theme is broken.  Reverting to the default theme.', AI1EC_PLUGIN_NAME ); ?>
+			<?php _e( 'The active theme is broken.  Reverting to the default theme.', OSEC_TXT_DOM ); ?>
 		</p>
 	</div>
 <?php elseif( isset( $_GET['activated'] ) ) :
@@ -10,8 +10,8 @@
          current_user_can('edit_theme_options') ) { ?>
 			<div id="message2" class="updated">
 				<p>
-					<?php printf( __( 'New theme activated. This theme supports widgets, please visit the <a href="%s">widgets settings</a> screen to configure them.', AI1EC_PLUGIN_NAME ),
-						ai1ec_admin_url( 'widgets.php' ) ); ?>
+					<?php printf( __( 'New theme activated. This theme supports widgets, please visit the <a href="%s">widgets settings</a> screen to configure them.', OSEC_TXT_DOM ),
+						admin_url( 'widgets.php' ) ); ?>
 				</p>
 			</div>
 	<?php } else { ?>
@@ -23,20 +23,19 @@
 	<?php } elseif( isset( $_GET['deleted'] ) ) : ?>
 			<div id="message3" class="updated">
 				<p>
-					<?php _e( 'Theme deleted.', AI1EC_PLUGIN_NAME ) ?>
+					<?php _e( 'Theme deleted.', OSEC_TXT_DOM ) ?>
 				</p>
 			</div>
 	<?php endif; ?>
 
 	<div class="wrap">
 		<?php
-		screen_icon();
 		if( ! is_multisite() && current_user_can( 'install_themes' ) ) : ?>
 			<h2 class="nav-tab-wrapper">
-				<a href="<?php echo ai1ec_admin_url( AI1EC_THEME_SELECTION_BASE_URL ) ?>" class="nav-tab nav-tab-active">
+				<a href="<?php echo admin_url( OSEC_THEME_SELECTION_BASE_URL ) ?>" class="nav-tab nav-tab-active">
 					<?php echo esc_html( __( 'Manage Themes' ) ); ?>
 				</a>
-				<a href="<?php echo ai1ec_admin_url( AI1EC_THEME_SELECTION_BASE_URL . '-install' ) ?>" class="nav-tab">
+				<a href="<?php echo admin_url( OSEC_THEME_SELECTION_BASE_URL . '-install' ) ?>" class="nav-tab">
 					<?php echo esc_html_x( 'Install Themes', 'theme' ); ?>
 				</a>
 			</h2>

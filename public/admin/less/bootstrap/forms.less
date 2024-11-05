@@ -127,7 +127,7 @@ output {
   background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.ai1ec-com/necolas/normalize.ai1ec-css/issues/214
   border: 1px solid @input-border;
   border-radius: @input-border-radius;
-  .ai1ec-box-shadow(inset 0 1px 1px rgba(0,0,0,.075));
+  .ai1ec-box-shadow(inset 0 1px 1px rgba(0, 0, 0, .075));
   .ai1ec-transition(~"border-color ease-in-out .15s, box-shadow ease-in-out .15s");
 
   // Customize the `:focus` state to imitate native WebKit styles.
@@ -179,6 +179,7 @@ output {
   margin-bottom: 10px;
   padding-left: 20px;
   vertical-align: middle;
+
   label {
     display: inline;
     margin-bottom: 0;
@@ -186,6 +187,7 @@ output {
     cursor: pointer;
   }
 }
+
 .ai1ec-radio input[type="radio"],
 .ai1ec-radio-inline input[type="radio"],
 .ai1ec-checkbox input[type="checkbox"],
@@ -193,6 +195,7 @@ output {
   float: left;
   margin-left: -20px;
 }
+
 .ai1ec-radio + .ai1ec-radio,
 .ai1ec-checkbox + .ai1ec-checkbox {
   margin-top: -5px; // Move up sibling radios or checkboxes for tighter spacing
@@ -208,6 +211,7 @@ output {
   font-weight: normal;
   cursor: pointer;
 }
+
 .ai1ec-radio-inline + .ai1ec-radio-inline,
 .ai1ec-checkbox-inline + .ai1ec-checkbox-inline {
   margin-top: 0;
@@ -247,10 +251,12 @@ input[type="checkbox"],
 .ai1ec-has-warning {
   .ai1ec-form-control-validation(@state-warning-text; @state-warning-text; @state-warning-bg);
 }
+
 // Error
 .ai1ec-has-error {
   .ai1ec-form-control-validation(@state-danger-text; @state-danger-text; @state-danger-bg);
 }
+
 // Success
 .ai1ec-has-success {
   .ai1ec-form-control-validation(@state-success-text; @state-success-text; @state-success-bg);
@@ -280,7 +286,6 @@ input[type="checkbox"],
 }
 
 
-
 // Inline forms
 //
 // Make forms appear inline(-block) by adding the `.ai1ec-form-inline` class. Inline
@@ -297,7 +302,7 @@ input[type="checkbox"],
   // Kick in the inline
   @media (min-width: @screen-sm) {
     // Inline-block all the things for "inline"
-    .ai1ec-form-group  {
+    .ai1ec-form-group {
       display: inline-block;
       margin-bottom: 0;
       vertical-align: middle;
@@ -323,6 +328,7 @@ input[type="checkbox"],
       margin-bottom: 0;
       padding-left: 0;
     }
+
     .ai1ec-radio input[type="radio"],
     .ai1ec-checkbox input[type="checkbox"] {
       float: none;
@@ -349,6 +355,7 @@ input[type="checkbox"],
     margin-bottom: 0;
     padding-top: (@padding-base-vertical + 1); // Default padding plus a border
   }
+
   // Account for padding we're adding to ensure the alignment and of help text
   // and other content below items
   .ai1ec-radio,

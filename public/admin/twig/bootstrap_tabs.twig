@@ -16,7 +16,7 @@
 				<ul class="ai1ec-dropdown-menu">
 					{% for drop_id, drop_name in data.items %}
 						<li>
-							<a href="#ai1ec-{{ drop_id }}" data-toggle="ai1ec-tab">
+							<a href="#osec-{{ drop_id }}" data-toggle="ai1ec-tab">
 								{{ drop_name }}
 							</a>
 						</li>
@@ -25,7 +25,7 @@
 			</li>
 		{% else %}
 			<li>
-				<a href="#ai1ec-{{ id }}" data-toggle="ai1ec-tab">{{ data.name }}</a>
+				<a href="#osec-{{ id }}" data-toggle="ai1ec-tab">{{ data.name }}</a>
 			</li>
 		{% endif %}
 	{% endfor %}
@@ -37,7 +37,7 @@
 <div class="ai1ec-tab-content {{ content_class }}">
 	{{ pre_tabs_markup | raw}}
 	{% for id, data in tabs %}
-		<div class="ai1ec-tab-pane" id="ai1ec-{{ id }}">
+		<div class="ai1ec-tab-pane" id="osec-{{ id }}">
 			{% for element in data.elements %}
 				{{ element.html | raw }}
 			{% endfor %}

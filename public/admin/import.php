@@ -3,7 +3,7 @@
 		<tbody>
 			<tr valign="top">
 				<th scope="row">
-					<?php _e( 'Successfully imported events:', AI1EC_PLUGIN_NAME ) ?>
+					<?php _e( 'Successfully imported events:', OSEC_TXT_DOM ) ?>
 				</th>
 				<td>
 					<?php echo $imported_events ?>

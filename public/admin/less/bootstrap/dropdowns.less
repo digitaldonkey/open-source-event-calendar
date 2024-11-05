@@ -10,9 +10,9 @@
   height: 0;
   margin-left: 2px;
   vertical-align: middle;
-  border-top:   @caret-width-base solid;
+  border-top: @caret-width-base solid;
   border-right: @caret-width-base solid transparent;
-  border-left:  @caret-width-base solid transparent;
+  border-left: @caret-width-base solid transparent;
 }
 
 // The dropdown wrapper (div)
@@ -42,7 +42,7 @@
   border: 1px solid @dropdown-fallback-border; // IE8 fallback
   border: 1px solid @dropdown-border;
   border-radius: @border-radius-base;
-  .ai1ec-box-shadow(0 6px 12px rgba(0,0,0,.175));
+  .ai1ec-box-shadow(0 6px 12px rgba(0, 0, 0, .175));
   background-clip: padding-box;
 
   // Aligns the dropdown menu to right
@@ -101,6 +101,7 @@
     color: @dropdown-link-disabled-color;
   }
 }
+
 // Nuke hover/focus effects
 .ai1ec-dropdown-menu > .ai1ec-disabled > a {
   &:hover,
@@ -164,6 +165,7 @@
     border-bottom: @caret-width-base solid;
     content: "";
   }
+
   // Different positioning for bottom up menu
   .ai1ec-dropdown-menu {
     top: auto;
