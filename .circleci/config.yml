@@ -36,10 +36,10 @@ references:
     attach_workspace:
       at: *workspace_root
 
-#  copy_vendor: &copy_vendor
-#    run:
-#      name: Copy vendor directory
-#      command: cp -R /tmp/vendor .
+  copy_vendor: &copy_vendor
+    run:
+      name: Copy vendor directory
+      command: cp -R /tmp/vendor .
 
   install_subversion: &install_subversion
     run:
@@ -76,7 +76,7 @@ jobs:
     steps:
       - checkout
       - *attach_workspace
-#      - *copy_vendor
+      - *copy_vendor
       - run:
           name: Run code quality tests
           command: ./vendor/bin/grumphp run
