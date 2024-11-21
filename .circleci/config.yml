@@ -80,7 +80,7 @@ jobs:
 #      - *copy_vendor
       - run:
           name: Run code quality tests
-          command: ./vendor/bin/grumphp run
+          command: ~/vendor/bin/grumphp run
 
 
 #  say-hello:
