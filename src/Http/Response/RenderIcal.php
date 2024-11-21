@@ -12,13 +12,11 @@ namespace Osec\Http\Response;
  */
 class RenderIcal extends RenderStrategyAbstract
 {
-
     public function render(array $params)
     {
         $this->_dump_buffers();
         header('Content-type: text/calendar; charset=utf-8');
-        echo $params[ 'data' ];
+        echo $params['data'];
         ResponseHelper::stop();
     }
-
 }

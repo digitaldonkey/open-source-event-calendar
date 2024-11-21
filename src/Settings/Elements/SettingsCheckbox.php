@@ -14,16 +14,15 @@ use Osec\Theme\ThemeLoader;
  */
 class SettingsCheckbox extends SettingsAbstract
 {
-
-    public function render($html = '', $wrap = true) : string
+    public function render($html = '', $wrap = true): string
     {
         $attributes = ['class' => 'checkbox'];
-        if (true === $this->_args[ 'value' ]) {
-            $attributes[ 'checked' ] = 'checked';
+        if (true === $this->args['value']) {
+            $attributes['checked'] = 'checked';
         }
-        $args = $this->_args;
-        $args[ 'attributes' ] = $attributes;
-        $file = ThemeLoader::factory($this->app)->get_file(
+        $args               = $this->args;
+        $args['attributes'] = $attributes;
+        $file               = ThemeLoader::factory($this->app)->get_file(
             'setting/checkbox.twig',
             $args,
             true
@@ -31,5 +30,4 @@ class SettingsCheckbox extends SettingsAbstract
 
         return $this->warp_in_form_group($file->get_content());
     }
-
 }

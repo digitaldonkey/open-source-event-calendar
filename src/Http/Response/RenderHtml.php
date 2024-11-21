@@ -14,21 +14,20 @@ use Osec\App\Controller\AppendContentController;
  */
 class RenderHtml extends RenderStrategyAbstract
 {
-
     /**
      * Twig page content placeholder.
      */
-    const CALENDAR_PLACEHOLDER = '<!-- OSEC_PAGE_CONTENT_PLACEHOLDER -->';
+    public const CALENDAR_PLACEHOLDER = '<!-- OSEC_PAGE_CONTENT_PLACEHOLDER -->';
 
     /**
      * @var string the event html.
      */
-    protected $_html;
+    protected string $html;
 
     /**
      * @var string The html for the footer of the event.
      */
-    protected $_html_footer = '';
+    protected string $footerHtml = '';
 
     /**
      * Caller identifier. Just for paranoid check in append_content method.
@@ -36,7 +35,7 @@ class RenderHtml extends RenderStrategyAbstract
      *
      * @var string
      */
-    protected $_caller = '';
+    protected string $caller = '';
 
     /**
      * Registers proper filters for content modifications.
@@ -47,14 +46,14 @@ class RenderHtml extends RenderStrategyAbstract
      */
     public function render(array $params)
     {
-        $this->_html = $params[ 'data' ];
-        if (isset($params[ 'caller' ])) {
-            $this->_caller = $params[ 'caller' ];
+        $this->html = $params['data'];
+        if (isset($params['caller'])) {
+            $this->caller = $params['caller'];
         }
-        if (isset($params[ 'footer' ])) {
-            $this->_html_footer = $params[ 'footer' ];
+        if (isset($params['footer'])) {
+            $this->footerHtml = $params['footer'];
         }
-        if (isset($params[ 'is_event' ])) {
+        if (isset($params['is_event'])) {
             // Filter event post content, in single- and multi-post views
             add_filter('the_content', [$this, 'event_content'], PHP_INT_MAX - 1);
 
@@ -79,9 +78,9 @@ class RenderHtml extends RenderStrategyAbstract
         if ( ! AppendContentController::factory($this->app)->append_content()) {
             $content = '';
         }
-        $to_return = $this->_html.$content;
-        if (isset($this->_html_footer)) {
-            $to_return .= $this->_html_footer;
+        $to_return = $this->html . $content;
+        if (isset($this->footerHtml)) {
+            $to_return .= $this->footerHtml;
         }
 
         /**
@@ -108,9 +107,10 @@ class RenderHtml extends RenderStrategyAbstract
      */
     public function append_content($content)
     {
-
-        if ('calendar' === $this->_caller && ! AppendContentController::factory($this->app)
-                                                                      ->append_content()) {
+        if (
+            'calendar' === $this->caller && ! AppendContentController::factory($this->app)
+                                                                     ->append_content()
+        ) {
             return $content;
         }
 
@@ -120,12 +120,11 @@ class RenderHtml extends RenderStrategyAbstract
             $content = str_replace(
                 self::CALENDAR_PLACEHOLDER,
                 $content,
-                $this->_html
+                $this->html
             );
-            $content .= $this->_html_footer;
+            $content .= $this->footerHtml;
         }
 
         return $content;
     }
-
 }

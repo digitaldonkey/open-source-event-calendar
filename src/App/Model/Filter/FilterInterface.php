@@ -14,13 +14,11 @@ use Osec\Bootstrap\App;
  */
 interface FilterInterface
 {
-
     /**
      * Store user-input locally.
      *
      * @param  App  $app  Injected registry.
      * @param  array  $filter_values  User provided input.
-     *
      */
     public function __construct(
         App $app,
@@ -32,7 +30,7 @@ interface FilterInterface
      *
      * @return string Valid SQL snippet for `FROM` part.
      */
-    public function get_join() : string;
+    public function get_join(): string;
 
     /**
      * Return SQL snippet for `WHERE` part.
@@ -42,6 +40,5 @@ interface FilterInterface
      *
      * @return string Valid SQL snippet.
      */
-    public function get_where() : string;
-
+    public function get_where(): string;
 }

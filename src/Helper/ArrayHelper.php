@@ -11,7 +11,6 @@ namespace Osec\Helper;
  */
 class ArrayHelper
 {
-
     /**
      * Optionally explode given value.
      *
@@ -22,7 +21,7 @@ class ArrayHelper
      *
      * @return array List of values.
      */
-    static public function opt_explode(string $separator, $input)
+    public static function opt_explode(string $separator, $input)
     {
         if ( ! is_array($input)) {
             $input = explode($separator, $input);
@@ -43,24 +42,24 @@ class ArrayHelper
      *
      * @return array Merge product
      */
-    static public function deep_merge(array $arr1, array $arr2)
+    public static function deep_merge(array $arr1, array $arr2)
     {
         $result = [];
         foreach ($arr1 as $key => $value) {
             self::_merge_value($result, $key, $value);
-            if (isset($arr2[ $key ])) {
-                if (is_array($result[ $key ]) || is_array($arr2[ $key ])) {
-                    $result[ $key ] = (array) $result[ $key ];
-                    $arr2[ $key ] = (array) $arr2[ $key ];
-                    $result[ $key ] = self::deep_merge(
-                        $result[ $key ],
-                        $arr2[ $key ]
+            if (isset($arr2[$key])) {
+                if (is_array($result[$key]) || is_array($arr2[$key])) {
+                    $result[$key] = (array)$result[$key];
+                    $arr2[$key]   = (array)$arr2[$key];
+                    $result[$key] = self::deep_merge(
+                        $result[$key],
+                        $arr2[$key]
                     );
                 } else {
-                    self::_merge_value($result, $key, $arr2[ $key ]);
+                    self::_merge_value($result, $key, $arr2[$key]);
                 }
             }
-            unset($arr2[ $key ]);
+            unset($arr2[$key]);
         }
         foreach ($arr2 as $key => $value) {
             self::_merge_value($result, $key, $value);
@@ -81,16 +80,15 @@ class ArrayHelper
      *
      * @return bool Success If it is not true - something wrong happened
      */
-    static protected function _merge_value(array &$result, $key, mixed $value)
+    protected static function _merge_value(array &$result, $key, mixed $value)
     {
         if (is_int($key) || ctype_digit($key)) {
             $result[] = $value;
 
             return true;
         }
-        $result[ $key ] = $value;
+        $result[$key] = $value;
 
         return true;
     }
-
 }

@@ -20,26 +20,25 @@ use Osec\Settings\HtmlFactory;
  */
 class EventTaxonomyView extends OsecBaseClass
 {
-
     /**
      * @var TaxonomyAdapter|null EventTaxonomyView abstraction layer.
      */
-    protected ?TaxonomyAdapter $_taxonomy_model;
+    protected ?TaxonomyAdapter $taxonomyModel;
 
     /**
      * @var array Caches the color evaluated for each event.
      */
-    protected $_event_color_map = [];
+    protected array $colorMap = [];
 
     /**
      * @var array Caches the color squares HTML evaluated for each event.
      */
-    protected $_event_color_squares_map = [];
+    protected array $colorSquaresMap = [];
 
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->_taxonomy_model = TaxonomyAdapter::factory($app);
+        $this->taxonomyModel = TaxonomyAdapter::factory($app);
     }
 
     /**
@@ -56,8 +55,8 @@ class EventTaxonomyView extends OsecBaseClass
         // Convert to style attribute.
         if ($color) {
             $color = $event->is_allday() || $event->is_multiday()
-                ? 'background-color: '.$color.';'
-                : 'color: '.$color.' !important;';
+                ? 'background-color: ' . $color . ';'
+                : 'color: ' . $color . ' !important;';
         } else {
             $color = '';
         }
@@ -77,8 +76,7 @@ class EventTaxonomyView extends OsecBaseClass
         $post_id = $event->get('post_id');
 
         // If color for this event is uncached, populate cache.
-        if ( ! isset($this->_event_color_map[ $post_id ])) {
-
+        if ( ! isset($this->colorMap[$post_id])) {
             /**
              * Add additional color
              *
@@ -87,16 +85,15 @@ class EventTaxonomyView extends OsecBaseClass
              * @since 1.0
              *
              * @param  string  $color  Return a color string.
-             *
              */
             $color = apply_filters('osec_event_color', '', $event);
 
             // If none provided, fall back to event categories.
             if (empty($color)) {
-                $categories = $this->_taxonomy_model->get_post_categories($post_id);
+                $categories = $this->taxonomyModel->get_post_categories($post_id);
                 // Find the first category of this post that defines a color.
                 foreach ($categories as $category) {
-                    $color = $this->_taxonomy_model->get_category_color(
+                    $color = $this->taxonomyModel->get_category_color(
                         $category->term_id
                     );
                     if ($color) {
@@ -104,10 +101,10 @@ class EventTaxonomyView extends OsecBaseClass
                     }
                 }
             }
-            $this->_event_color_map[ $post_id ] = $color;
+            $this->colorMap[$post_id] = $color;
         }
 
-        return $this->_event_color_map[ $post_id ];
+        return $this->colorMap[$post_id];
     }
 
     /**
@@ -121,9 +118,9 @@ class EventTaxonomyView extends OsecBaseClass
     {
         $post_id = $event->get('post_id');
 
-        if ( ! isset($this->_event_color_squares_map[ $post_id ])) {
-            $squares = '';
-            $categories = $this->_taxonomy_model->get_post_categories($post_id);
+        if ( ! isset($this->colorSquaresMap[$post_id])) {
+            $squares    = '';
+            $categories = $this->taxonomyModel->get_post_categories($post_id);
 
             if (false !== $categories) {
                 $squares = $this->get_event_category_colors($categories);
@@ -138,11 +135,11 @@ class EventTaxonomyView extends OsecBaseClass
              *
              * @param  string  $squares  Avatar image fallback
              */
-            $squares = apply_filters('osec_event_color_squares', $squares, $event);
-            $this->_event_color_squares_map[ $post_id ] = $squares;
+            $squares                         = apply_filters('osec_event_color_squares', $squares, $event);
+            $this->colorSquaresMap[$post_id] = $squares;
         }
 
-        return $this->_event_color_squares_map[ $post_id ];
+        return $this->colorSquaresMap[$post_id];
     }
 
     /**
@@ -174,15 +171,15 @@ class EventTaxonomyView extends OsecBaseClass
      */
     public function get_category_color_square($term_id)
     {
-        $color = $this->_taxonomy_model->get_category_color($term_id);
+        $color          = $this->taxonomyModel->get_category_color($term_id);
         $event_taxonomy = EventTaxonomy::factory($this->app);
         if (null !== $color) {
             $taxonomy = $event_taxonomy->get_taxonomy_for_term_id($term_id);
-            $cat = get_term($term_id, $taxonomy->taxonomy);
+            $cat      = get_term($term_id, $taxonomy->taxonomy);
 
-            return '<span class="ai1ec-color-swatch ai1ec-tooltip-trigger" '.
-                   'style="background:'.$color.'" title="'.
-                   esc_attr($cat->name).'"></span>';
+            return '<span class="ai1ec-color-swatch ai1ec-tooltip-trigger" ' .
+                   'style="background:' . $color . '" title="' .
+                   esc_attr($cat->name) . '"></span>';
         }
 
         return '';
@@ -197,10 +194,10 @@ class EventTaxonomyView extends OsecBaseClass
      */
     public function get_category_image_square($term_id)
     {
-        $image = $this->_taxonomy_model->get_category_image($term_id);
+        $image = $this->taxonomyModel->get_category_image($term_id);
         if (null !== $image) {
-            return '<img src="'.$image.'" alt="'.
-                   I18n::__('Category image').
+            return '<img src="' . $image . '" alt="' .
+                   I18n::__('Category image') .
                    '" class="osec_category_small_image_preview" />';
         }
 
@@ -220,7 +217,7 @@ class EventTaxonomyView extends OsecBaseClass
 
         // Convert to HTML attribute.
         if ($color) {
-            $color = 'style="background-color: '.$color.';"';
+            $color = 'style="background-color: ' . $color . ';"';
         } else {
             $color = '';
         }
@@ -241,7 +238,7 @@ class EventTaxonomyView extends OsecBaseClass
 
         // Convert to HTML attribute.
         if ($color) {
-            $color = 'style="border-color: '.$color.' transparent transparent transparent;"';
+            $color = 'style="border-color: ' . $color . ' transparent transparent transparent;"';
         } else {
             $color = '';
         }
@@ -262,7 +259,7 @@ class EventTaxonomyView extends OsecBaseClass
 
         // Convert to HTML attribute.
         if ($color) {
-            $color = 'style="color: '.$color.';"';
+            $color = 'style="color: ' . $color . ';"';
         } else {
             $color = '';
         }
@@ -282,48 +279,48 @@ class EventTaxonomyView extends OsecBaseClass
         Event $event,
         $format = 'blocks'
     ) {
-        $categories = $this->_taxonomy_model->get_post_categories(
+        $categories = $this->taxonomyModel->get_post_categories(
             $event->get('post_id')
         );
         foreach ($categories as &$category) {
-            $href = HtmlFactory::factory($this->app)
-                               ->create_href_helper_instance(['cat_ids' => $category->term_id])
-                               ->generate_href();
+            $href  = HtmlFactory::factory($this->app)
+                                ->create_href_helper_instance(['cat_ids' => $category->term_id])
+                                ->generate_href();
             $class = $data_type = $title = '';
             if ($category->description) {
-                $title = 'title="'.
-                         esc_attr($category->description).'" ';
+                $title = 'title="' .
+                         esc_attr($category->description) . '" ';
             }
 
-            $html = '';
-            $class .= ' ai1ec-category';
+            $html        = '';
+            $class       .= ' ai1ec-category';
             $color_style = '';
             if ($format === 'inline') {
-                $taxonomy = TaxonomyAdapter::factory($this->app);
+                $taxonomy    = TaxonomyAdapter::factory($this->app);
                 $color_style = $taxonomy->get_category_color(
                     $category->term_id
                 );
                 if ($color_style !== '') {
-                    $color_style = 'style="color: '.$color_style.';" ';
+                    $color_style = 'style="color: ' . $color_style . ';" ';
                 }
                 $class .= '-inline';
             }
 
-            $html .= '<a '.$data_type.' class="'.$class.
-                     ' ai1ec-term-id-'.$category->term_id.' p-category" '.
-                     $title.$color_style.'href="'.$href.'">';
+            $html .= '<a ' . $data_type . ' class="' . $class .
+                     ' ai1ec-term-id-' . $category->term_id . ' p-category" ' .
+                     $title . $color_style . 'href="' . $href . '">';
 
             if ($format === 'blocks') {
                 $html .= $this->get_category_color_square(
-                        $category->term_id
-                    ).' ';
+                    $category->term_id
+                ) . ' ';
             } else {
                 $html .=
-                    '<i '.$color_style.
+                    '<i ' . $color_style .
                     'class="ai1ec-fa ai1ec-fa-folder-open"></i>';
             }
 
-            $html .= esc_html($category->name).'</a>';
+            $html     .= esc_html($category->name) . '</a>';
             $category = $html;
         }
 
@@ -335,7 +332,7 @@ class EventTaxonomyView extends OsecBaseClass
      */
     public function get_tags_html(Event $event)
     {
-        $tags = $this->_taxonomy_model->get_post_tags(
+        $tags = $this->taxonomyModel->get_post_tags(
             $event->get('post_id')
         );
         if ( ! $tags) {
@@ -346,20 +343,19 @@ class EventTaxonomyView extends OsecBaseClass
                                ->create_href_helper_instance(['tag_ids' => $tag->term_id])
                                ->generate_href();
 
-            $class = '';
+            $class     = '';
             $data_type = '';
-            $title = '';
+            $title     = '';
             if ($tag->description) {
-                $title = 'title="'.esc_attr($tag->description).'" ';
+                $title = 'title="' . esc_attr($tag->description) . '" ';
             }
-            $tag = '<a '.$data_type.' class="ai1ec-tag '.$class.
-                   ' ai1ec-term-id-'.$tag->term_id.'" '.$title.
-                   'href="'.$href.'">'.
-                   '<i class="ai1ec-fa ai1ec-fa-tag"></i>'.
-                   esc_html($tag->name).'</a>';
+            $tag = '<a ' . $data_type . ' class="ai1ec-tag ' . $class .
+                   ' ai1ec-term-id-' . $tag->term_id . '" ' . $title .
+                   'href="' . $href . '">' .
+                   '<i class="ai1ec-fa ai1ec-fa-tag"></i>' .
+                   esc_html($tag->name) . '</a>';
         }
 
         return implode(' ', $tags);
     }
-
 }

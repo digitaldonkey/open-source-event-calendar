@@ -3,6 +3,8 @@
     "type": "wordpress-plugin",
     "description": "Open Source Event Calendar WordPress Plugin",
     "require": {
+        "php": "^8.2",
+        "ext-json": "*",
         "ext-curl": "*",
         "twig/twig": "^3.10",
         "mrclay/minify": "^4.0",
@@ -27,18 +29,24 @@
             "email": "tho@donkeymedia.eu"
         }
     ],
+    "scripts": {
+        "phpcs": "phpcs --standard=phpcs.xml"
+    },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
         "cweagans/composer-patches": "~1.0",
         "phpunit/phpunit": "^9.6",
         "yoast/phpunit-polyfills": "^2.0",
         "symfony/debug-bundle": "^7.1",
-        "phpro/grumphp": "^2.9"
+        "phpro/grumphp": "^2.9",
+        "wp-coding-standards/wpcs": "^3.0",
+        "phpcompatibility/phpcompatibility-wp": "*"
     },
     "config": {
         "allow-plugins": {
             "cweagans/composer-patches": true,
-            "phpro/grumphp": true
+            "phpro/grumphp": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
         }
     },
     "extra": {

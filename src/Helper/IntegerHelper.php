@@ -11,7 +11,6 @@ namespace Osec\Helper;
  */
 final class IntegerHelper
 {
-
     /**
      * Cast input as non-negative integer.
      *
@@ -21,7 +20,7 @@ final class IntegerHelper
      */
     public static function positive($input)
     {
-        $input = (int) $input;
+        $input = (int)$input;
         if ($input < 1) {
             return 0;
         }
@@ -39,7 +38,7 @@ final class IntegerHelper
      *
      * @return array List of positive integers
      */
-    static public function convert_to_int_list($separator, $input)
+    public static function convert_to_int_list($separator, $input)
     {
         return self::map_to_integer(
             ArrayHelper::opt_explode($separator, $input)
@@ -55,11 +54,11 @@ final class IntegerHelper
      *
      * @return array List of positive integers
      */
-    static public function map_to_integer(array $input)
+    public static function map_to_integer(array $input)
     {
         $output = [];
         foreach ($input as $value) {
-            $value = (int) $value;
+            $value = (int)$value;
             if ($value > 0) {
                 $output[] = $value;
             }
@@ -77,9 +76,9 @@ final class IntegerHelper
      *
      * @return int Value to use as MySQL boolean value
      */
-    static public function db_bool($value)
+    public static function db_bool($value)
     {
-        return (int) (bool) intval($value);
+        return (int)(bool)intval($value);
     }
 
     /**
@@ -93,14 +92,13 @@ final class IntegerHelper
      *
      * @return int Valid value
      */
-    static public function index($value, $limit = 0, $default = null)
+    public static function index($value, $limit = 0, $default = null)
     {
-        $value = (int) $value;
+        $value = (int)$value;
         if ($value < $limit) {
             return $default;
         }
 
         return $value;
     }
-
 }

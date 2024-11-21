@@ -59,7 +59,8 @@ jobs:
       - run: node --version
       - run:
           name: Install dependencies
-          command: composer install -n -o
+          command: composer install ---no-interaction --optimize-autoloader
+          # --no-dev Option required for production build
       - run:
           name: Install WordPress
           command: bash .circleci/install-wp.sh
@@ -71,6 +72,16 @@ jobs:
           root: *workspace_root
           paths:
             - wordpress
+  code_quality:
+    <<: *container_config
+    steps:
+      - checkout
+      - *attach_workspace
+      - *copy_vendor
+      - run:
+          name: Run code quality tests
+          command: vendor/bin/grumphp run --testsuite=code_quality
+
 
 #  say-hello:
 #    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.

@@ -23,20 +23,20 @@ use Osec\Helper\JsonHelper;
  */
 class Event extends OsecBaseClass
 {
-
     /**
      * @var EventEntity Data store object reference.
      */
-    protected $_entity = null;
+    protected ?EventEntity $entity;
 
     /**
-     * @var array Map of fields that require special care during set/get
-     *            operations. Values have following meanings:
-     *            [0]  - both way care required;
-     *            [1]  - only `set` operations require care;
-     *            [-1] - only `get` (for storage) operations require care.
+     * @var array $mutatorMethods
+     *  Map of fields that require special care during set/get
+     *    operations. Values have following meanings:
+     *      [0]  - both way care required;
+     *      [1]  - only `set` operations require care;
+     *      [-1] - only `get` (for storage) operations require care.
      */
-    protected $_swizzable = [
+    protected array $mutatorMethods = [
         'cost'             => 0,
         'start'            => 0,
         'end'              => 0,
@@ -44,17 +44,21 @@ class Event extends OsecBaseClass
         'recurrence_dates' => 1,
         'exception_dates'  => 1,
         'instant_event'    => -1,
+        'tags'             => 1,
+        'categories'       => 1,
+        'latitude'         => -1,
+        'longitude'        => -1,
     ];
 
     /**
      * @var array Runtime properties
      */
-    protected $_runtime_props = [];
+    protected array $runtimeProps = [];
 
     /**
      * @var bool|null Boolean cache-definition indicating if event is multiday.
      */
-    protected $_is_multiday = null;
+    protected ?bool $isMultiday = null;
 
     /**
      * Create new event object, using provided data for initialization.
@@ -72,36 +76,34 @@ class Event extends OsecBaseClass
      * @throws InvalidArgumentException
      *   When $data is not one of int|array|null.
      */
-    function __construct(App $app, $data = null, $instance = false)
+    public function __construct(App $app, $data = null, $instance = false)
     {
         parent::__construct($app);
-        $this->_entity = new EventEntity($app);
+        $this->entity = new EventEntity($app);
         if ($instance) {
-            $this->_entity->set('instance_id', $instance);
+            $this->entity->set('instance_id', $instance);
         }
         if (null === $data) {
             return; // empty object
+        }
+
+        if (is_array($data)) {
+            $this->initialize_from_array($data, $instance);
+        } elseif (is_numeric($data)) {
+            $this->initialize_from_id($data, $instance);
         } else {
-            if (is_array($data)) {
-                $this->initialize_from_array($data, $instance);
-            } else {
-                if (is_numeric($data)) {
-                    $this->initialize_from_id($data, $instance);
-                } else {
-                    throw new InvalidArgumentException(
-                        'Argument to constructor must be integer, array or NULL'.
-                        ', not '.var_export($data, true)
-                    );
-                }
-            }
+            throw new InvalidArgumentException(
+                'Argument to constructor must be integer, array or NULL' .
+                ', not ' . var_export($data, true)
+            );
         }
 
         if ($this->is_allday()) {
             try {
                 $timezone = Timezones::factory($this->app)->get($this->get('timezone_name'));
-                $this->_entity->set_preferred_timezone($timezone);
+                $this->entity->set_preferred_timezone($timezone);
             } catch (Exception) {
-                //  ignore
+                // ignore
             }
         }
     }
@@ -119,13 +121,13 @@ class Event extends OsecBaseClass
     public function set($property, mixed $value)
     {
         if (
-            isset($this->_swizzable[ $property ]) &&
-            $this->_swizzable[ $property ] >= 0
+            isset($this->mutatorMethods[$property]) &&
+            $this->mutatorMethods[$property] >= 0
         ) {
-            $method = '_handle_property_construct_'.$property;
-            $value = $this->{$method}($value);
+            $method = '_handle_property_construct_' . $property;
+            $value  = $this->{$method}($value);
         }
-        $this->_entity->set($property, $value);
+        $this->entity->set($property, $value);
 
         return $this;
     }
@@ -139,23 +141,22 @@ class Event extends OsecBaseClass
      */
     public function initialize_from_array(array $data)
     {
-
         // =======================================================
         // = Assign each event field the value from the database =
         // =======================================================
-        foreach ($this->_entity->list_properties() as $property) {
-            if ('post' !== $property && isset($data[ $property ])) {
-                $this->set($property, $data[ $property ]);
-                unset($data[ $property ]);
+        foreach ($this->entity->list_properties() as $property) {
+            if ('post' !== $property && isset($data[$property])) {
+                $this->set($property, $data[$property]);
+                unset($data[$property]);
             }
         }
-        if (isset($data[ 'post' ])) {
-            $this->set('post', (object) $data[ 'post' ]);
+        if (isset($data['post'])) {
+            $this->set('post', (object)$data['post']);
         } else {
             // ========================================
             // = Remaining fields are the post fields =
             // ========================================
-            $this->set('post', (object) $data);
+            $this->set('post', (object)$data);
         }
 
         return $this;
@@ -177,16 +178,16 @@ class Event extends OsecBaseClass
     public function initialize_from_id($post_id, $instance = false)
     {
         $post = get_post($post_id);
-        if ( ! $post || $post->post_status == 'auto-draft') {
+        if (! $post || $post->post_status == 'auto-draft') {
             throw new EventNotFoundException(
-                'Post with ID \''.$post_id.
+                'Post with ID \'' . $post_id .
                 '\' could not be retrieved from the database.'
             );
         }
-        $post_id = (int) $post_id;
-        $dbi = $this->app->db;
+        $post_id = (int)$post_id;
+        $dbi     = $this->app->db;
 
-        $left_join = '';
+        $left_join  = '';
         $select_sql = '
 			e.post_id,
 			e.timezone_name,
@@ -226,55 +227,55 @@ class Event extends OsecBaseClass
             is_numeric($instance) &&
             $instance > 0
         ) {
-            $select_sql .= ', IF( aei.start IS NOT NULL, aei.start, e.start ) as start,'.
+            $select_sql .= ', IF( aei.start IS NOT NULL, aei.start, e.start ) as start,' .
                            '  IF( aei.start IS NOT NULL, aei.end,   e.end )   as end ';
 
-            $instance = (int) $instance;
+            $instance = (int)$instance;
             $this->set('instance_id', $instance);
-            $left_join = 'LEFT JOIN '.$dbi->get_table_name(OSEC_DB__INSTANCES).
-                         ' aei ON aei.id = '.$instance.' AND e.post_id = aei.post_id ';
+            $left_join = 'LEFT JOIN ' . $dbi->get_table_name(OSEC_DB__INSTANCES) .
+                         ' aei ON aei.id = ' . $instance . ' AND e.post_id = aei.post_id ';
         } else {
             $select_sql .= ', e.start as start, e.end as end, e.allday ';
-            if (-1 === (int) $instance) {
+            if (-1 === (int)$instance) {
                 $select_sql .= ', aei.id as instance_id ';
-                $left_join = 'LEFT JOIN '.
-                             $dbi->get_table_name(OSEC_DB__INSTANCES).
-                             ' aei ON e.post_id = aei.post_id '.
-                             'AND e.start = aei.start AND e.end = aei.end ';
+                $left_join  = 'LEFT JOIN ' .
+                              $dbi->get_table_name(OSEC_DB__INSTANCES) .
+                              ' aei ON e.post_id = aei.post_id ' .
+                              'AND e.start = aei.start AND e.end = aei.end ';
             }
         }
 
         // =============================
         // = Fetch event from database =
         // =============================
-        $query = 'SELECT '.$select_sql.'
-			FROM '.$dbi->get_table_name(OSEC_DB__EVENTS).' e
-				LEFT JOIN '.
-                 $dbi->get_table_name('term_relationships').' tr
+        $query = 'SELECT ' . $select_sql . '
+			FROM ' . $dbi->get_table_name(OSEC_DB__EVENTS) . ' e
+				LEFT JOIN ' .
+                 $dbi->get_table_name('term_relationships') . ' tr
 					ON ( e.post_id = tr.object_id )
-				LEFT JOIN '.$dbi->get_table_name('term_taxonomy').' ttc
+				LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttc
 					ON (
 						tr.term_taxonomy_id = ttc.term_taxonomy_id AND
 						ttc.taxonomy = \'events_categories\'
 					)
-				LEFT JOIN '.$dbi->get_table_name('term_taxonomy').' ttt
+				LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttt
 					ON (
 						tr.term_taxonomy_id = ttt.term_taxonomy_id AND
 						ttt.taxonomy = \'events_tags\'
 					)
-				'.$left_join.'
-			WHERE e.post_id = '.$post_id.'
+				' . $left_join . '
+			WHERE e.post_id = ' . $post_id . '
 			GROUP BY e.post_id';
 
         $event = $dbi->get_row($query, ARRAY_A);
-        if (null === $event || null === $event[ 'post_id' ]) {
+        if (null === $event || null === $event['post_id']) {
             throw new EventNotFoundException(
-                'Event with ID \''.$post_id.
+                'Event with ID \'' . $post_id .
                 '\' could not be retrieved from the database.'
             );
         }
 
-        $event[ 'post' ] = $post;
+        $event['post'] = $post;
 
         return $this->initialize_from_array($event);
     }
@@ -286,7 +287,7 @@ class Event extends OsecBaseClass
      */
     public function is_allday()
     {
-        return (bool) $this->get('allday');
+        return (bool)$this->get('allday');
     }
 
     /**
@@ -299,7 +300,7 @@ class Event extends OsecBaseClass
      */
     public function get($property, mixed $default = null)
     {
-        return $this->_entity->get($property, $default);
+        return $this->entity->get($property, $default);
     }
 
     /**
@@ -354,17 +355,19 @@ class Event extends OsecBaseClass
      */
     public function has_geoinformation()
     {
-        $latitude = floatval($this->get('latitude'));
-        $longitude = floatval($this->get('longitude'));
-
         return (
+            self::is_geo_value($this->get('latitude'))
+            && self::is_geo_value($this->get('longitude'))
+        );
+    }
+
+    public static function is_geo_value(mixed $value): bool
+    {
+        return (
+            is_float($value) &&
             (
-                $latitude >= 0.000000000000001 ||
-                $latitude <= -0.000000000000001
-            ) &&
-            (
-                $longitude >= 0.000000000000001 ||
-                $longitude <= -0.000000000000001
+                (float) $value >= 0.000000000000001
+                || (float)$value <= -0.000000000000001
             )
         );
     }
@@ -382,15 +385,15 @@ class Event extends OsecBaseClass
     public function get_uid()
     {
         $ical_uid = $this->get('ical_uid');
-        if ( ! empty($ical_uid)) {
+        if (! empty($ical_uid)) {
             return $ical_uid;
         }
         static $format = null;
         if (null === $format) {
-            $site_url = parse_url((string) get_site_url());
-            $format = 'ai1ec-%d@'.$site_url[ 'host' ];
-            if (isset($site_url[ 'path' ])) {
-                $format .= $site_url[ 'path' ];
+            $site_url = parse_url((string)get_site_url());
+            $format   = 'OSEC-%d@' . $site_url['host'];
+            if (isset($site_url['path'])) {
+                $format .= $site_url['path'];
             }
         }
 
@@ -404,7 +407,7 @@ class Event extends OsecBaseClass
      */
     public function is_free()
     {
-        return (bool) $this->get('is_free');
+        return (bool)$this->get('is_free');
     }
 
     /**
@@ -414,28 +417,28 @@ class Event extends OsecBaseClass
      */
     public function is_instant()
     {
-        return (bool) $this->get('instant_event');
+        return (bool)$this->get('instant_event');
     }
 
     /**
      * Check if event is taking multiple days.
      *
-     * Uses object-wide variable {@see self::$_is_multiday} to store
+     * Uses object-wide variable {@see self::$isMultiday} to store
      * calculated value after first call.
      *
      * @return bool True for multiday events.
      */
     public function is_multiday()
     {
-        if (null === $this->_is_multiday) {
-            $start = $this->get('start');
-            $end = $this->get('end');
-            $diff = $end->diff_sec($start);
-            $this->_is_multiday = $diff > 86400 &&
-                                  $start->format('Y-m-d') !== $end->format('Y-m-d');
+        if (null === $this->isMultiday) {
+            $start            = $this->get('start');
+            $end              = $this->get('end');
+            $diff             = $end->diff_sec($start);
+            $this->isMultiday = $diff > 86400 &&
+                                $start->format('Y-m-d') !== $end->format('Y-m-d');
         }
 
-        return $this->_is_multiday;
+        return $this->isMultiday;
     }
 
     /**
@@ -447,7 +450,7 @@ class Event extends OsecBaseClass
     {
         $duration = $this->get_runtime('duration', null);
         if (null === $duration) {
-            $duration = (int) ($this->get('end')->format() - $this->get('start')->format());
+            $duration = (int)($this->get('end')->format() - $this->get('start')->format());
             $this->set_runtime('duration', $duration);
         }
 
@@ -463,7 +466,7 @@ class Event extends OsecBaseClass
      */
     public function get_runtime($property, $default = '')
     {
-        return $this->_runtime_props[ $property ] ?? $default;
+        return $this->runtimeProps[$property] ?? $default;
     }
 
     /**
@@ -474,7 +477,7 @@ class Event extends OsecBaseClass
      */
     public function set_runtime($property, $value)
     {
-        $this->_runtime_props[ $property ] = $value;
+        $this->runtimeProps[$property] = $value;
     }
 
     /**
@@ -487,24 +490,23 @@ class Event extends OsecBaseClass
      * creates a new post AND record in the osec_events table for this event.
      *
      * @param  bool  $update  Whether to update an existing event or create a
-     *                        new one
+     *                       new one
      *
      * @return int            The post_id of the new or existing event.
      */
-    function save($update = false)
+    public function save($update = false)
     {
         /**
-         * Do something befor save Event data.
+         * Do something befor  save Event data.
          *
          * @since 1.0
          *
          * @param  Event  $event
          * @param  bool  $update  Update or new.
-         *
          */
         do_action('osec_pre_save_event', $this, $update);
 
-        if ( ! $update) {
+        if (! $update) {
             /**
              * Change new Event before save
              *
@@ -515,23 +517,23 @@ class Event extends OsecBaseClass
             $response = apply_filters('osec_event_save_new', $this);
             if (is_wp_error($response)) {
                 throw new EventCreateException(
-                    'Failed to create event: '.$response->get_error_message()
+                    'Failed to create event: ' . $response->get_error_message()
                 );
             }
         }
 
-        $dbi = $this->app->db;
-        $columns = $this->prepare_store_entity();
-        $format = $this->prepare_store_format($columns);
+        $dbi        = $this->app->db;
+        $columns    = $this->prepare_store_entity();
+        $format     = $this->prepare_store_format($columns);
         $table_name = $dbi->get_table_name(OSEC_DB__EVENTS);
-        $post_id = $columns[ 'post_id' ];
+        $post_id    = $columns['post_id'];
 
-        if ($this->get('end')->is_empty()) {
+        if ($this->get('end')->isEmpty()) {
             $this->set_no_end_time();
         }
         if ($post_id) {
             $success = false;
-            if ( ! $update) {
+            if (! $update) {
                 $success = $dbi->insert(
                     $table_name,
                     $columns,
@@ -541,7 +543,7 @@ class Event extends OsecBaseClass
                 $success = $dbi->update(
                     $table_name,
                     $columns,
-                    ['post_id' => $columns[ 'post_id' ]],
+                    ['post_id' => $columns['post_id']],
                     $format,
                     ['%d']
                 );
@@ -551,7 +553,6 @@ class Event extends OsecBaseClass
                 // return false;
                 throw new Exception('Error saving Post Data');
             }
-
         } else {
             // ===================
             // = Insert new post =
@@ -561,7 +562,7 @@ class Event extends OsecBaseClass
                 return false;
             }
             $this->set('post_id', $post_id);
-            $columns[ 'post_id' ] = $post_id;
+            $columns['post_id'] = $post_id;
 
             // Insert new event data
             if (false === $dbi->insert($table_name, $columns, $format)) {
@@ -570,7 +571,7 @@ class Event extends OsecBaseClass
         }
 
         $taxonomy = new EventTaxonomy($this->app, $post_id);
-        $cats = $this->get('categories');
+        $cats     = $this->get('categories');
         if (
             is_array($cats) &&
             ! empty($cats)
@@ -585,19 +586,16 @@ class Event extends OsecBaseClass
             $taxonomy->set_tags($tags);
         }
 
-        if (
-            $feed = ( $this->get( 'feed' ) &&
-                      isset( $feed->feed_id ) )
-        ) {
+        $feed = $this->get('feed');
+        if ($feed && isset($feed->feed_id)) {
             $taxonomy->set_feed($feed);
         }
 
-
         /**
-         * Do something befor save Event data.
+         * Do something before save Event data.
          *
          * Give other plugins / extensions the ability to do things
-         * when saving, like fetching authors which i removed as it's not core.
+         * when saving.
          *
          * @since 1.0
          *
@@ -622,7 +620,7 @@ class Event extends OsecBaseClass
     }
 
     /**
-     * Prepare event entity {@see self::$_entity} for persistent storage.
+     * Prepare event entity {@see self::$entity} for persistent storage.
      *
      * Creates an array of database fields and corresponding values.
      *
@@ -658,8 +656,8 @@ class Event extends OsecBaseClass
             'ical_source_url'  => $this->storage_format('ical_source_url'),
             'ical_uid'         => $this->storage_format('ical_uid'),
             'show_coordinates' => $this->storage_format('show_coordinates'),
-            'latitude'         => $this->storage_format('latitude', ''),
-            'longitude'        => $this->storage_format('longitude', ''),
+            'latitude'         => $this->storage_format('latitude'),
+            'longitude'        => $this->storage_format('longitude'),
         ];
 
         return $entity;
@@ -675,12 +673,12 @@ class Event extends OsecBaseClass
      */
     public function storage_format($field, mixed $default = null)
     {
-        $value = $this->_entity->get($field, $default);
+        $value = $this->entity->get($field, $default);
         if (
-            isset($this->_swizzable[ $field ]) &&
-            $this->_swizzable[ $field ] <= 0
+            isset($this->mutatorMethods[$field]) &&
+            $this->mutatorMethods[$field] <= 0
         ) {
-            $value = $this->{'_handle_property_destruct_'.$field}($value);
+            $value = $this->{'_handle_property_destruct_' . $field}($value);
         }
 
         return $value;
@@ -701,11 +699,11 @@ class Event extends OsecBaseClass
         // ====== Sample implementation to follow method signature: ======
         // ===============================================================
         // static $format = array(
-        // 	'post_id'       => '%d',
-        // 	'start'         => '%d',
-        // 	'end'           => '%d',
-        // 	'timezone_name' => '%s',
-        // 	// other keys to follow...
+        // 'post_id'       => '%d',
+        // 'start'         => '%d',
+        // 'end'           => '%d',
+        // 'timezone_name' => '%s',
+        // other keys to follow...
         // );
         // return array_values( array_intersect_key( $format, $entity ) );
         // ===============================================================
@@ -779,7 +777,7 @@ class Event extends OsecBaseClass
     {
         $this->set('instant_event', true);
         $start = $this->get('start');
-        $end = new DT($start);
+        $end   = new DT($start);
         $end->set_time(
             $start->format('H'),
             $start->format('i') + 30,
@@ -795,13 +793,13 @@ class Event extends OsecBaseClass
      */
     public function __clone()
     {
-        $this->_entity = clone $this->_entity;
+        $this->entity = clone $this->entity;
     }
 
     protected function _handle_property_construct_recurrence_dates($value)
     {
         if ($value) {
-            $this->_entity->set('recurrence_rules', 'RDATE='.$value);
+            $this->entity->set('recurrence_rules', 'RDATE=' . $value);
         }
 
         return $value;
@@ -810,7 +808,7 @@ class Event extends OsecBaseClass
     protected function _handle_property_construct_exception_dates($value)
     {
         if ($value) {
-            $this->_entity->set('exception_rules', 'EXDATE='.$value);
+            $this->entity->set('exception_rules', 'EXDATE=' . $value);
         }
 
         return $value;
@@ -818,11 +816,57 @@ class Event extends OsecBaseClass
 
     protected function _handle_property_destruct_instant_event($value)
     {
+        return $this->destructBoolean($value);
+    }
+
+    /**
+     * Format datetime to UNIX timestamp for storage.
+     *
+     * @param  DT  $end  Datetime object to compact.
+     *
+     * @return string UNIX timestamp.
+     */
+    protected function destructBoolean(mixed $value)
+    {
         if (is_null($value)) {
             return 0;
         }
 
         return $value;
+    }
+
+    protected function _handle_property_destruct_latitude($value)
+    {
+        return $this->destructCoordinates($value);
+    }
+
+    protected function destructCoordinates(mixed $value)
+    {
+        if (self::is_geo_value($value)) {
+            return $value;
+        }
+        return 'NULL';
+    }
+
+    protected function _handle_property_destruct_longitude($value)
+    {
+        return $this->destructCoordinates($value);
+    }
+
+
+    protected function _handle_property_destruct_allday($value)
+    {
+        return $this->destructBoolean($value);
+    }
+
+    protected function _handle_property_destruct_show_map($value)
+    {
+        return $this->destructBoolean($value);
+    }
+
+    protected function _handle_property_destruct_show_coordinates($value)
+    {
+        return $this->destructBoolean($value);
     }
 
     /**
@@ -857,18 +901,44 @@ class Event extends OsecBaseClass
      *
      * @return string UNIX timestamp.
      */
-    protected function _handle_property_destruct_start(DT $start)
+    protected function _handle_property_destruct_start(DT $start): string
     {
-        return $start->format_to_gmt();
+        return $this->destructDate($start);
+    }
+
+    private function destructDate(DT $date): string
+    {
+        return $date->format_to_gmt();
     }
 
     protected function _handle_property_construct_start($value)
     {
-        if ($value instanceof DT) {
-            return $value;
+        return $this->constructDate($value);
+    }
+
+    /**
+     * @param  int|string|DT  $date
+     *
+     * @return string
+     * @throws BootstrapException
+     * @throws TimezoneException
+     */
+    private function constructDate(mixed $date): DT
+    {
+        if ($date instanceof DT) {
+            return $date;
         }
 
-        return new DT($value);
+        return new DT($date);
+    }
+
+    protected function _handle_property_construct_timezone_name($value)
+    {
+        if (is_null($value)) {
+            return 'sys.default';
+        }
+
+        return $value;
     }
 
     /**
@@ -880,50 +950,46 @@ class Event extends OsecBaseClass
      */
     protected function _handle_property_destruct_end(DT $end)
     {
-        return $end->format_to_gmt();
+        return $this->destructDate($end);
     }
 
     /**
      * @throws TimezoneException
      * @throws BootstrapException
      */
-    protected function _handle_property_construct_end($value) : DT
+    protected function _handle_property_construct_end($value): DT
     {
-        if ($value instanceof DT) {
-            return $value;
-        }
-
-        return new DT($value);
+        return $this->constructDate($value);
     }
 
-	/**
-	 * Handle `cost` value reading from permanent storage.
-	 *
-	 * @param  string  $value  Value stored in permanent storage
-	 *
-	 * @return string Success: true, always
-	 */
-	protected function _handle_property_construct_cost(string $value)
-	{
-		$cost = '';
-		$is_free = true;
+    /**
+     * Handle `cost` value reading from permanent storage.
+     *
+     * @param  string  $value  Value stored in permanent storage
+     *
+     * @return string Success: true, always
+     */
+    protected function _handle_property_construct_cost(string $value)
+    {
+        $cost    = '';
+        $is_free = true;
 
-		// Aggregated value from DB.
-		if (JsonHelper::isValidJson($value)) {
-			$data  = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
-			$is_free = (bool) $data['is_free'];
-			$cost = $data['cost'];
-		}
-		else {
-			// Plain value submitted.
-			$cost = sanitize_text_field( $value );
-			if ($cost) {
-				$is_free = false;
-			}
-		}
-		$this->_entity->set('is_free', $is_free);
-		return $cost;
-	}
+        // Aggregated value from DB.
+        if (JsonHelper::isValidJson($value)) {
+            $data    = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+            $is_free = (bool)$data['is_free'];
+            $cost    = $data['cost'];
+        } else {
+            // Plain value submitted.
+            $cost = sanitize_text_field($value);
+            if ($cost) {
+                $is_free = false;
+            }
+        }
+        $this->entity->set('is_free', $is_free);
+
+        return $cost;
+    }
 
     /**
      * Handle `cost` writing to permanent storage.
@@ -934,10 +1000,36 @@ class Event extends OsecBaseClass
      */
     protected function _handle_property_destruct_cost($cost)
     {
-        $data = ['cost' => $cost, 'is_free' => true];
+        $data = [
+            'cost'    => $cost,
+            'is_free' => true,
+        ];
         if ($cost) {
-	        $data[ 'is_free' ] = false;
+            $data['is_free'] = false;
         }
+
         return json_encode($data);
+    }
+
+    protected function _handle_property_construct_tags(mixed $tags)
+    {
+        return $this->construct_taxonomies($tags);
+    }
+
+    private function construct_taxonomies(
+        mixed $taxonomies,
+    ) {
+        if (is_array($taxonomies)) {
+            return implode(',', $taxonomies);
+        }
+        if (is_string($taxonomies)) {
+            return $taxonomies;
+        }
+        throw new Exception('Illegal value');
+    }
+
+    protected function _handle_property_construct_categories(mixed $tags)
+    {
+        return $this->construct_taxonomies($tags);
     }
 }

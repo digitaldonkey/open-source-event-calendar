@@ -12,26 +12,25 @@ namespace Osec\App\Model\Date;
  */
 class I18nParser
 {
-
     /**
      * @var string Character separating tokens.
      */
-    protected $_token_separator;
+    protected string $tokenSeparator;
 
     /**
      * @var string Character specifying need for localization.
      */
-    protected $_localize_indicator;
+    protected string $localizeIndicator;
 
     /**
      * @var array Map of input and parsed formats.
      */
-    protected $_parsed = [];
+    protected array $formats = [];
 
     /**
      * @var array Map of I18n-able format specifiers.
      */
-    protected $_i18nable_formats = [
+    protected array $i18nableFormats = [
         'D' => ['w', null],
         'F' => ['m', 'get_month'],
         'l' => ['w', 'get_weekday'],
@@ -47,8 +46,8 @@ class I18nParser
      */
     public function __construct()
     {
-        $this->_token_separator = chr(12); // "\n"
-        $this->_localize_indicator = chr(11); // \t
+        $this->tokenSeparator    = chr(12); // "\n"
+        $this->localizeIndicator = chr(11); // \t
     }
 
     /**
@@ -62,11 +61,11 @@ class I18nParser
      */
     public function get_format($format)
     {
-        if ( ! isset($this->_parsed[ $format ])) {
-            $this->_parsed[ $format ] = $this->parse($format);
+        if ( ! isset($this->formats[$format])) {
+            $this->formats[$format] = $this->parse($format);
         }
 
-        return $this->_parsed[ $format ];
+        return $this->formats[$format];
     }
 
     /**
@@ -79,9 +78,9 @@ class I18nParser
     public function parse($format)
     {
         $parsed = '';
-        $case = 0;
+        $case   = 0;
         for ($idx = 0, $len = strlen($format); $idx < $len; $idx++) {
-            $char = $format[ $idx ];
+            $char = $format[$idx];
             if (1 !== $case) {
                 if ('\\' === $char) {
                     $case = 2;
@@ -95,7 +94,7 @@ class I18nParser
             }
         }
 
-        return trim($parsed, $this->_token_separator);
+        return trim($parsed, $this->tokenSeparator);
     }
 
     /**
@@ -107,12 +106,12 @@ class I18nParser
      */
     public function get_i18n_name($format)
     {
-        if (isset($this->_i18nable_formats[ $format ])) {
-            return $this->_token_separator.
-                   $this->_localize_indicator. // speed parsing token
-                   '\\'.$format. // backslashed value for recovery
-                   $this->_i18nable_formats[ $format ][ 0 ]. // formattable token
-                   $this->_token_separator;
+        if (isset($this->i18nableFormats[$format])) {
+            return $this->tokenSeparator .
+                   $this->localizeIndicator . // speed parsing token
+                   '\\' . $format . // backslashed value for recovery
+                   $this->i18nableFormats[$format][0] . // formattable token
+                   $this->tokenSeparator;
         }
 
         return $format;
@@ -128,7 +127,7 @@ class I18nParser
     public function squeeze(string $formatted)
     {
         $output = '';
-        $tokens = explode($this->_token_separator, $formatted);
+        $tokens = explode($this->tokenSeparator, $formatted);
         foreach ($tokens as $token) {
             $output .= $this->get_i18n_value($token);
         }
@@ -148,10 +147,10 @@ class I18nParser
      */
     public function get_i18n_value($token)
     {
-        if (isset($token[ 0 ]) && $this->_localize_indicator === $token[ 0 ]) {
-            $format = $token[ 1 ];
-            $value = substr($token, 2);
-            $token = $this->localize($format, $value);
+        if (isset($token[0]) && $this->localizeIndicator === $token[0]) {
+            $format = $token[1];
+            $value  = substr($token, 2);
+            $token  = $this->localize($format, $value);
         }
 
         return $token;
@@ -169,10 +168,10 @@ class I18nParser
     {
         global $wp_locale;
         if (
-            isset($this->_i18nable_formats[ $format ]) &&
-            isset($this->_i18nable_formats[ $format ][ 1 ])
+            isset($this->i18nableFormats[$format]) &&
+            isset($this->i18nableFormats[$format][1])
         ) {
-            return $wp_locale->{$this->_i18nable_formats[ $format ][ 1 ]}($value);
+            return $wp_locale->{$this->i18nableFormats[$format][1]}($value);
         }
 
         return match ($format) {
@@ -185,5 +184,4 @@ class I18nParser
             default => $value,
         }; // fail-safe
     }
-
 }

@@ -15,7 +15,6 @@ use WP_Post;
  */
 class ContentNotEmptyCheck extends OsecBaseClass
 {
-
     /**
      * Checks if post has content for default calendar page and if not sets one.
      *
@@ -23,7 +22,7 @@ class ContentNotEmptyCheck extends OsecBaseClass
      *
      * @return void Method does not return.
      */
-    public function check_content($post) : void
+    public function check_content($post): void
     {
         if (
             null === $post ||

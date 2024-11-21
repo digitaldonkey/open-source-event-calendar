@@ -15,13 +15,12 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageManageThemes extends AdminPageAbstract
 {
-
-    public function display_page() : void
+    public function display_page(): void
     {
         global $ct;
         // defaults
-        $activated = isset($_GET[ 'activated' ]) ? true : false;
-        $deleted = false;
+        $activated = isset($_GET['activated']) ? true : false;
+        $deleted   = false;
 
         $_list_table = new AdminThemeList($this->app);
         $_list_table->prepare_items();
@@ -43,7 +42,7 @@ class AdminPageManageThemes extends AdminPageAbstract
                    ->render();
     }
 
-    public function add_page() : void
+    public function add_page(): void
     {
         add_submenu_page(
             OSEC_ADMIN_BASE_URL,
@@ -55,12 +54,11 @@ class AdminPageManageThemes extends AdminPageAbstract
         );
     }
 
-    public function add_meta_box() : void
+    public function add_meta_box(): void
     {
     }
 
     public function handle_post()
     {
     }
-
 }

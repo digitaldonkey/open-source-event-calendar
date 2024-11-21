@@ -12,10 +12,8 @@ namespace Osec\App\Model\Filter;
  */
 class FilterPostIds extends FilterInt
 {
-
     public function get_field()
     {
         return 'e.post_id';
     }
-
 }

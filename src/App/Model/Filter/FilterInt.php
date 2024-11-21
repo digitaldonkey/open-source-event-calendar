@@ -15,7 +15,6 @@ use Osec\Helper\IntegerHelper;
  */
 abstract class FilterInt implements FilterInterface
 {
-
     /**
      * @var App Injected object registry.
      */
@@ -24,7 +23,7 @@ abstract class FilterInt implements FilterInterface
     /**
      * @var array Sanitized input values with only positive integers kept.
      */
-    protected $_values = [];
+    protected array $values = [];
 
     /**
      * Sanitize input values upon construction.
@@ -38,8 +37,8 @@ abstract class FilterInt implements FilterInterface
         App $app,
         array $filter_values = []
     ) {
-        $this->app = $app;
-        $this->_values = array_filter(
+        $this->app     = $app;
+        $this->values = array_filter(
             array_map(
                 [IntegerHelper::class, 'positive'],
                 $filter_values
@@ -52,7 +51,7 @@ abstract class FilterInt implements FilterInterface
      *
      * @return string Empty string is returned.
      */
-    public function get_join() : string
+    public function get_join(): string
     {
         return '';
     }
@@ -64,13 +63,13 @@ abstract class FilterInt implements FilterInterface
      *
      * @return string Conditional snippet for query.
      */
-    public function get_where($inner_operator = null) : string
+    public function get_where($inner_operator = null): string
     {
-        if (empty($this->_values)) {
+        if (empty($this->values)) {
             return '';
         }
 
-        return $this->get_field().' IN ( '.join(',', $this->_values).' )';
+        return $this->get_field() . ' IN ( ' . implode(',', $this->values) . ' )';
     }
 
     /**
@@ -79,5 +78,4 @@ abstract class FilterInt implements FilterInterface
      * @return string Column alias to use in condition.
      */
     abstract public function get_field();
-
 }

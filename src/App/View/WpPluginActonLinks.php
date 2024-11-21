@@ -14,7 +14,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class WpPluginActonLinks extends OsecBaseClass
 {
-
     /**
      * Adds a link to Settings page in plugin list page.
      *
@@ -22,9 +21,8 @@ class WpPluginActonLinks extends OsecBaseClass
      *
      * @return array Modified links list.
      */
-    public function plugin_action_links(array $links) {
-
-
+    public function plugin_action_links(array $links)
+    {
         $settings_link = sprintf(
             I18n::__('<a href="%s">Settings</a>'),
             admin_url(OSEC_SETTINGS_BASE_URL)
@@ -32,17 +30,16 @@ class WpPluginActonLinks extends OsecBaseClass
         array_unshift($links, $settings_link);
 
         // TODO
-        //   Maybe enable after renaming/setup.
+        // Maybe enable after renaming/setup.
         //
-        //    if (current_user_can('update_plugins')) {
-        //        $updates_link = sprintf(
-        //            I18n::__('<a href="%s">Check for updates</a>'),
-        //            admin_url(OSEC_FORCE_UPDATES_URL)
-        //        );
-        //        array_push($links, $updates_link);
-        //    }
+        // if (current_user_can('update_plugins')) {
+        // $updates_link = sprintf(
+        // I18n::__('<a href="%s">Check for updates</a>'),
+        // admin_url(OSEC_FORCE_UPDATES_URL)
+        // );
+        // array_push($links, $updates_link);
+        // }
 
         return $links;
     }
-
 }

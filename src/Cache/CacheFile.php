@@ -15,7 +15,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class CacheFile extends OsecBaseClass implements CacheInterface
 {
-
     /**
      * @car OSEC_FILE_CACHE_UNAVAILABLE
      *
@@ -46,13 +45,13 @@ class CacheFile extends OsecBaseClass implements CacheInterface
     {
         parent::__construct($app);
         $this->_cache_path = $path;
-        $this->_cache_url = $url;
-        $this->_cache_id = $cache_id ? $cache_id : 'default';
+        $this->_cache_url  = $url;
+        $this->_cache_id   = $cache_id ? $cache_id : 'default';
     }
 
-    public static function is_available() : bool
+    public static function is_available(): bool
     {
-        return (bool) (new CachePath())->getCachePath();
+        return (bool)(new CachePath())->getCachePath();
     }
 
     /**
@@ -60,7 +59,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
      *
      * @return string
      */
-    public function getCachePath() : string
+    public function getCachePath(): string
     {
         return $this->_cache_path;
     }
@@ -74,7 +73,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
      * @return CacheFile|null
      * @throws Exception
      */
-    public static function createFileCacheInstance(App $app, ?string $cache_id = null) : ?CacheFile
+    public static function createFileCacheInstance(App $app, ?string $cache_id = null): ?CacheFile
     {
         if ($cache_id && str_starts_with($cache_id, '/')) {
             throw new Exception('a cache identifier must be provided. It will define a directory in cachePath');
@@ -86,7 +85,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
             return null;
         }
 
-        return new self($app, $cacheData[ 'path' ], $cacheData[ 'url' ], $cache_id);
+        return new self($app, $cacheData['path'], $cacheData['url'], $cache_id);
     }
 
     /**
@@ -97,7 +96,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
      *
      * @return void
      */
-    private static function setUnavailable(App $app, ?string $cache_id) : void
+    private static function setUnavailable(App $app, ?string $cache_id): void
     {
         $cache_id = ! empty($cache_id) ? $cache_id : 'default_cache';
         $app->options->set(
@@ -108,7 +107,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         // TODO : Maybe add Admin message?
     }
 
-    public function set(string $key, mixed $value) : bool
+    public function set(string $key, mixed $value): bool
     {
         return is_array($this->setWithFileInfo($key, $value));
     }
@@ -118,35 +117,35 @@ class CacheFile extends OsecBaseClass implements CacheInterface
      *
      * @inheritDoc
      */
-    public function setWithFileInfo(string $key, mixed $value) : array
+    public function setWithFileInfo(string $key, mixed $value): array
     {
         $fileName = $this->_safe_file_name($key);
 
-        $value = maybe_serialize($value);
+        $value  = maybe_serialize($value);
         $result = $this->put_contents(
-            $this->_cache_path.$fileName,
+            $this->_cache_path . $fileName,
             $value
         );
 
         $oldFile = $this->get_file_name($key);
         if ($result !== false) {
             // Delete old file if on update.
-            if ($oldFile && file_exists($this->_cache_path.$oldFile)) {
-                unlink($this->_cache_path.$oldFile);
+            if ($oldFile && file_exists($this->_cache_path . $oldFile)) {
+                unlink($this->_cache_path . $oldFile);
             } else {
                 // Update
                 $this->setOption($key, $fileName);
             }
         } else {
-            $message = 'An error occured while saving data to \''.
-                       $this->_cache_path.$fileName.'\'';
+            $message = 'An error occured while saving data to \'' .
+                       $this->_cache_path . $fileName . '\'';
             throw new CacheWriteException($message);
         }
 
         return [
             'key'  => $key,
-            'path' => $this->_cache_path.$fileName,
-            'url'  => $this->_cache_url.$fileName,
+            'path' => $this->_cache_path . $fileName,
+            'url'  => $this->_cache_url . $fileName,
             'file' => $fileName,
         ];
     }
@@ -170,12 +169,12 @@ class CacheFile extends OsecBaseClass implements CacheInterface
             $prefix = substr(md5(site_url()), 0, 8);
         }
         // Make sure Prefix is onöly added if not yet set.
-        if (0 !== strncmp($file, (string) $prefix, 8)) {
-            $key = $prefix.$file;
+        if (0 !== strncmp($file, (string)$prefix, 8)) {
+            $key = $prefix . $file;
         }
 
 
-        return is_string($prefix) ? $prefix.'_'.$file : $file;
+        return is_string($prefix) ? $prefix . '_' . $file : $file;
     }
 
     /**
@@ -188,7 +187,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
     {
         global $wp_filesystem;
         // @see https://wordpress.stackexchange.com/a/372407/15081
-        require_once ABSPATH.'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/file.php';
         WP_Filesystem();
 
         return $wp_filesystem->put_contents(
@@ -201,9 +200,10 @@ class CacheFile extends OsecBaseClass implements CacheInterface
      * Tries to get the stored filename
      *
      * @param  string  $key
+     *
      * @return string|null
-*/
-    public function get_file_name(string $key) : ?string
+     */
+    public function get_file_name(string $key): ?string
     {
         $fileName = $this->getOption($key);
         if ($fileName) {
@@ -213,7 +213,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         return false;
     }
 
-    private function getOption($key) : mixed
+    private function getOption($key): mixed
     {
         return $this->app->options->get(
             $this->optionKey($key)
@@ -225,7 +225,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
      * @param  string  $key
      * @param  mixed|null  $default  *
      */
-    public function get($key, mixed $default = null) : mixed
+    public function get($key, mixed $default = null): mixed
     {
         $filename = $this->get_file_name($key);
         if ( ! $key || ! file_exists($filename)) {
@@ -233,7 +233,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
                 return $default;
             }
             throw new CacheNotSetException(
-                'File \''.$key.'\' does not exist'
+                'File \'' . $key . '\' does not exist'
             );
         }
 
@@ -242,13 +242,13 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         );
     }
 
-    public static function optionKey($key, $revert = false) : string
+    public static function optionKey($key, $revert = false): string
     {
         if ($revert) {
             return substr($key, strlen(self::OPTION_PREFIX));
         }
 
-        return self::OPTION_PREFIX.$key;
+        return self::OPTION_PREFIX . $key;
     }
 
     /**
@@ -256,14 +256,15 @@ class CacheFile extends OsecBaseClass implements CacheInterface
      *
      * @param $key
      * @param $filename
+     *
      * @return bool True on success.
      * @see https://developer.wordpress.org/reference/functions/update_option/
-*/
-    private function setOption($key, $filename) : bool
+     */
+    private function setOption($key, $filename): bool
     {
         return $this->app->options->set(
             $this->optionKey($key),
-            $this->_cache_path.$filename,
+            $this->_cache_path . $filename,
             true
         );
     }
@@ -271,7 +272,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
     /**
      * @inheritDoc
      */
-    public function delete_matching(string $pattern) : int
+    public function delete_matching(string $pattern): int
     {
         $dirhandle = opendir($this->_cache_path);
         if (false === $dirhandle) {
@@ -279,8 +280,8 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         }
         $count = 0;
         while (false !== ($entry = readdir($dirhandle))) {
-            if ('.' !== $entry[ 0 ] && str_contains($entry, $pattern)) {
-                if (unlink($this->_cache_path.$entry)) {
+            if ('.' !== $entry[0] && str_contains($entry, $pattern)) {
+                if (unlink($this->_cache_path . $entry)) {
                     ++$count;
                 }
             }
@@ -290,13 +291,13 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         return $count;
     }
 
-    public function clear_cache() : bool
+    public function clear_cache(): bool
     {
         $cache = (new CachePath())->getCacheData($this->_cache_id);
 
-        if ($cache && CachePath::clean_and_check_dir($cache[ 'path' ])) {
-            $this->_cache_path = $cache[ 'path' ];
-            $this->_cache_url = $cache[ 'url' ];
+        if ($cache && CachePath::clean_and_check_dir($cache['path'])) {
+            $this->_cache_path = $cache['path'];
+            $this->_cache_url  = $cache['url'];
 
             return true;
         }
@@ -305,7 +306,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         return false;
     }
 
-    public function empty_all_caches() : bool
+    public function empty_all_caches(): bool
     {
         foreach ($this->get_all_cache_files() as $f) {
             if ( ! $this->delete($this->optionKey($f->name, true))) {
@@ -317,15 +318,15 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         return CachePath::clean_and_check_dir($cacheBasepath);
     }
 
-    public function get_all_cache_files() : array
+    public function get_all_cache_files(): array
     {
-        $db = $this->app->db;
+        $db        = $this->app->db;
         $sql_query = $db->prepare(
-            'SELECT option_name as name, option_value as filename FROM '.$db->get_table_name('options').
+            'SELECT option_name as name, option_value as filename FROM ' . $db->get_table_name('options') .
             ' WHERE option_name LIKE %s',
-            '%%'.(string) self::OPTION_PREFIX.'%%'
+            '%%' . (string)self::OPTION_PREFIX . '%%'
         );
-        $files = [];
+        $files     = [];
         foreach ($db->get_results($sql_query) as $result) {
             $files[] = $result;
         }
@@ -336,7 +337,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
     /**
      * @inheritDoc
      */
-    public function delete(string $key) : bool
+    public function delete(string $key): bool
     {
         $filename = $this->get_file_name($key);
         if ($filename) {
@@ -345,10 +346,11 @@ class CacheFile extends OsecBaseClass implements CacheInterface
                 return unlink($filename);
             }
         }
+
         return true;
     }
 
-    public function add($key, mixed $value) : bool
+    public function add($key, mixed $value): bool
     {
         if ($this->key_exists($key)) {
             return false;
@@ -357,13 +359,12 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         }
     }
 
-    private function key_exists($key) : bool
+    private function key_exists($key): bool
     {
         try {
-            return (bool) $this->get_file_name($key);
+            return (bool)$this->get_file_name($key);
         } catch (CacheNotSetException) {
             return false;
         }
     }
-
 }

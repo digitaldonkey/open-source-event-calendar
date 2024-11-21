@@ -17,11 +17,10 @@ use Osec\Exception\BootstrapException;
  */
 class Options extends OsecBaseClass
 {
-
     /**
      * @var CacheMemory In-memory cache storage engine for fast access.
      */
-    protected ?CacheMemory $_cache = null;
+    protected ?CacheMemory $cache;
 
     /**
      * Add cache instance to object scope.
@@ -33,7 +32,7 @@ class Options extends OsecBaseClass
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->_cache = CacheMemory::factory($app);
+        $this->cache = CacheMemory::factory($app);
     }
 
     /**
@@ -51,7 +50,7 @@ class Options extends OsecBaseClass
         if ( ! add_option($name, $value, '', $autoload)) {
             return false;
         }
-        $this->_cache->set($name, $value);
+        $this->cache->set($name, $value);
 
         return true;
     }
@@ -86,7 +85,7 @@ class Options extends OsecBaseClass
         if ( ! update_option($name, $value)) {
             return false;
         }
-        $this->_cache->set($name, $value);
+        $this->cache->set($name, $value);
 
         return true;
     }
@@ -101,10 +100,10 @@ class Options extends OsecBaseClass
      */
     public function get($name, mixed $default = null)
     {
-        $value = $this->_cache->get($name, $default);
+        $value = $this->cache->get($name, $default);
         if ($default === $value) {
             $value = get_option($name, $default);
-            $this->_cache->set($name, $value);
+            $this->cache->set($name, $value);
         }
 
         return $value;
@@ -121,12 +120,11 @@ class Options extends OsecBaseClass
      */
     public function delete($name)
     {
-        $this->_cache->delete($name);
+        $this->cache->delete($name);
         if ('deleted_option' === current_filter()) {
             return true; // avoid loops
         }
 
         return delete_option($name);
     }
-
 }

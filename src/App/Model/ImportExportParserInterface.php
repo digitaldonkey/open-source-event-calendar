@@ -14,7 +14,6 @@ use Osec\Exception\ImportExportParseException;
  */
 interface ImportExportParserInterface
 {
-
     /**
      * This methods allow for importing of events.
      *
@@ -23,7 +22,7 @@ interface ImportExportParserInterface
      * @return array The number of imported events.
      * @throws ImportExportParseException When the data passed is not parsable
      */
-    public function import(array $arguments) : array;
+    public function import(array $arguments): array;
 
     /**
      * This methods allow exporting events.
@@ -33,5 +32,5 @@ interface ImportExportParserInterface
      *
      * @return string It doesn't return anything.
      */
-    public function export(array $arguments, array $params = []) : string;
+    public function export(array $arguments, array $params = []): string;
 }

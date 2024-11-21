@@ -17,24 +17,21 @@ use Stringable;
  */
 abstract class SettingsAbstract extends OsecBaseClass implements SettingsInterface, Stringable
 {
-
-
     /**
      * @var array Map of arbitrary arguments passed to an element.
      */
-    protected array $_args = [];
+    protected array $args = [];
 
     /**
      * Constructor accepts system as injectable and requests HTML helper.
      *
      * @param  App  $app
      * @param  array  $args
-     *
      */
     public function __construct(App $app, array $args)
     {
         parent::__construct($app);
-        $this->_args = $args;
+        $this->args = $args;
     }
 
     /**
@@ -47,16 +44,16 @@ abstract class SettingsAbstract extends OsecBaseClass implements SettingsInterfa
      *
      * @return self Instance of self.
      */
-    public function set($attribute, $value) : self
+    public function set($attribute, $value): self
     {
-        $this->{'_'.$attribute} = $value;
+        $this->{'_' . $attribute} = $value;
 
         return $this;
     }
 
-    public function warp_in_form_group(string $html) : string
+    public function warp_in_form_group(string $html): string
     {
-        return '<div class="ai1ec-form-group">'.$html.'</div>';
+        return '<div class="ai1ec-form-group">' . $html . '</div>';
     }
 
     /**
@@ -64,7 +61,7 @@ abstract class SettingsAbstract extends OsecBaseClass implements SettingsInterfa
      *
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return $this->render();
     }
@@ -77,14 +74,14 @@ abstract class SettingsAbstract extends OsecBaseClass implements SettingsInterfa
      *
      * @return string Finalized HTML snippet.
      */
-    abstract function render($html = '', $wrap = true) : string;
+    abstract public function render($html = '', $wrap = true): string;
 
     /**
      * Override to include any initialization logics.
      *
      * @return void Method output is ignored.
      */
-    protected function _initialize() : void
+    protected function _initialize(): void
     {
     }
 }

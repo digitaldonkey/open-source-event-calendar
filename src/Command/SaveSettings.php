@@ -2,7 +2,6 @@
 
 namespace Osec\Command;
 
-
 use Osec\App\View\Admin\AdminPageAbstract;
 use Osec\Exception\Exception;
 
@@ -16,16 +15,15 @@ use Osec\Exception\Exception;
  */
 class SaveSettings extends SaveAbstract
 {
-
     public function do_execute()
     {
-        $options = $this->app->settings->get_options();
-        $_POST[ 'default_tags_categories' ] = (
-            isset($_POST[ 'default_tags_categories_default_categories' ]) ||
-            isset($_POST[ 'default_tags_categories_default_tags' ])
+        $options                          = $this->app->settings->get_options();
+        $_POST['default_tags_categories'] = (
+            isset($_POST['default_tags_categories_default_categories']) ||
+            isset($_POST['default_tags_categories_default_tags'])
         );
         // set some a variable to true to trigger the saving.
-        $_POST[ 'enabled_views' ] = true;
+        $_POST['enabled_views'] = true;
 
         /**
          * Alter Settings before validation.
@@ -42,34 +40,33 @@ class SaveSettings extends SaveAbstract
             $value = null;
 
             // Sanity check.
-            if ( ! isset($data[ 'renderer' ][ 'validator' ]) && ! isset($data[ 'type' ])) {
-                throw new Exception('No validation defined for '.$name);
+            if ( ! isset($data['renderer']['validator']) && ! isset($data['type'])) {
+                throw new Exception('No validation defined for ' . $name);
             }
 
-            if ( ! isset($_POST[ $name ]) && isset($data[ 'type' ]) && 'bool' === $data[ 'type' ]) {
+            if ( ! isset($_POST[$name]) && isset($data['type']) && 'bool' === $data['type']) {
                 // False booleans are not send by browser.
                 $value = false;
             }
 
-            if (isset($_POST[ $name ])) {
-
-                if (isset($data[ 'renderer' ][ 'validator' ])) {
+            if (isset($_POST[$name])) {
+                if (isset($data['renderer']['validator'])) {
                     throw new \Exception('Renderer->validattor is not supported anymore..');
                 } else {
-                    switch ($data[ 'type' ]) {
+                    switch ($data['type']) {
                         case 'bool':
                             $value = true;
                             break;
                         case 'int':
-                            $value = (int) $_POST[ $name ];
+                            $value = (int)$_POST[$name];
                             break;
                         case 'string':
-                            $value = (string) $_POST[ $name ];
+                            $value = (string)$_POST[$name];
                             break;
                         case 'array':
                         case 'mixed':
-                            $method = '_handle_saving_'.$name;
-                            $value = null;
+                            $method = '_handle_saving_' . $name;
+                            $value  = null;
                             if (method_exists($this, $method)) {
                                 $value = $this->$method();
                             }
@@ -84,15 +81,15 @@ class SaveSettings extends SaveAbstract
                              * @param  array  $value  Value returned by $method or null.
                              * @param  array  $_REQUEST  Request.
                              */
-                            $value = apply_filters('osec'.$method, $value, $_REQUEST);
+                            $value = apply_filters('osec' . $method, $value, $_REQUEST);
                             break;
                         case 'wp_option':
                             // Save the corresponding WP option
-                            $this->app->options->set($name, $_POST[ $name ], true);
-                            $value = (string) $_POST[ $name ];
+                            $this->app->options->set($name, $_POST[$name], true);
+                            $value = (string)$_POST[$name];
                             break;
                         default:
-                            throw new Exception('No validation defined datatype '.$data[ 'type' ]);
+                            throw new Exception('No validation defined datatype ' . $data['type']);
                     }
                 }
             }
@@ -135,7 +132,7 @@ class SaveSettings extends SaveAbstract
             'url'        => admin_url(
                 OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings'
             ),
-            'query_args' => ['updated' => 1]
+            'query_args' => ['updated' => 1],
         ];
     }
 
@@ -148,15 +145,15 @@ class SaveSettings extends SaveAbstract
     {
         $enabled_views = $this->app->settings->get('enabled_views');
         foreach ($enabled_views as $view => &$options) {
-            $options[ 'enabled' ] = isset($_POST[ 'view_'.$view.'_enabled' ]);
-            $options[ 'default' ] = isset($_POST[ 'default_calendar_view' ])
-                ? $_POST[ 'default_calendar_view' ] === $view
+            $options['enabled']        = isset($_POST['view_' . $view . '_enabled']);
+            $options['default']        = isset($_POST['default_calendar_view'])
+                ? $_POST['default_calendar_view'] === $view
                 : false;
-            $options[ 'enabled_mobile' ] =
-                isset($_POST[ 'view_'.$view.'_enabled_mobile' ]);
-            $options[ 'default_mobile' ] =
-                isset($_POST[ 'default_calendar_view_mobile' ]) &&
-                $_POST[ 'default_calendar_view_mobile' ] === $view;
+            $options['enabled_mobile'] =
+                isset($_POST['view_' . $view . '_enabled_mobile']);
+            $options['default_mobile'] =
+                isset($_POST['default_calendar_view_mobile']) &&
+                $_POST['default_calendar_view_mobile'] === $view;
         }
 
         return $enabled_views;
@@ -170,8 +167,8 @@ class SaveSettings extends SaveAbstract
     protected function _handle_saving_default_tags_categories()
     {
         return [
-            'tags'       => $_POST[ 'default_tags_categories_default_tags' ] ?? [],
-            'categories' => $_POST[ 'default_tags_categories_default_categories' ] ?? [],
+            'tags'       => $_POST['default_tags_categories_default_tags'] ?? [],
+            'categories' => $_POST['default_tags_categories_default_categories'] ?? [],
         ];
     }
 
@@ -182,21 +179,21 @@ class SaveSettings extends SaveAbstract
      */
     protected function _handle_saving_calendar_page_id()
     {
-        $calendar_page = isset($_POST[ 'calendar_page_id' ]) ? $_POST[ 'calendar_page_id' ] : null;
+        $calendar_page = isset($_POST['calendar_page_id']) ? $_POST['calendar_page_id'] : null;
         if (
             ! is_numeric($calendar_page) &&
             preg_match('#^__auto_page:(.*?)$#', $calendar_page, $matches)
         ) {
             return wp_insert_post(
                 [
-                    'post_title'     => $matches[ 1 ],
+                    'post_title'     => $matches[1],
                     'post_type'      => 'page',
                     'post_status'    => 'publish',
                     'comment_status' => 'closed',
                 ]
             );
         } else {
-            return (int) $calendar_page;
+            return (int)$calendar_page;
         }
     }
 }

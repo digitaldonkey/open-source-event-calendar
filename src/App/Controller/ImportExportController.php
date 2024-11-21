@@ -17,11 +17,10 @@ use Osec\Exception\ImportExportParseException;
  */
 class ImportExportController
 {
-
     /**
      * @var array The registered engines.
      */
-    protected array $_engines = [];
+    protected array $engines = [];
 
 
     /**
@@ -32,7 +31,7 @@ class ImportExportController
     /**
      * @var array Import / export params.
      */
-    protected $_params;
+    protected array $params;
 
     /**
      * This controller is instanciated only if we need to import/export something.
@@ -43,12 +42,12 @@ class ImportExportController
      */
     public function __construct(App $app, ?array $engines = null, array $params = [])
     {
-        $this->app = $app;
-        $this->_params = $params;
+        $this->app    = $app;
+        $this->params = $params;
 
         if ($engines) {
             // We expect a NEW format. E.g:
-            //   'ics' => 'Osec\App\Model\IcsImportExportParser'
+            // 'ics' => 'Osec\App\Model\IcsImportExportParser'
             // Alertnatively It could be: id, classname or an array containing one of them.
             $engines = $this->check_engine($engines);
         }
@@ -72,37 +71,38 @@ class ImportExportController
      *
      * @return array|null @see Defaults in get_engines().
      */
-    protected function check_engine(mixed $engines) : ?array
+    protected function check_engine(mixed $engines): ?array
     {
         $knownEngines = $this->get_engines();
 
         if (is_string($engines)) {
-            if (isset($knownEngines[ $engines ])) {
-                return [$knownEngines[ $engines ]];
+            if (isset($knownEngines[$engines])) {
+                return [$knownEngines[$engines]];
             } elseif (class_exists($engines)) {
                 foreach ($knownEngines as $id => $className) {
                     if ($className === $engines) {
-                        return [$knownEngines[ $id ]];
+                        return [$knownEngines[$id]];
                     }
                 }
             }
         }
         if (is_array($engines) && count($engines) === 2) {
-            if (isset($knownEngines[ $engines[ 0 ] ])
-                && $knownEngines[ $engines[ 0 ] ] === (string) $engines[ 1 ]
+            if (
+                isset($knownEngines[$engines[0]])
+                && $knownEngines[$engines[0]] === (string)$engines[1]
             ) {
-                return [$knownEngines[ $engines[ 0 ] ]];
+                return [$knownEngines[$engines[0]]];
             } else {
                 foreach ($engines as $int_or_name => $classPath) {
                     // Defined ID and ClassPath.
-                    if ($knownEngines[ $int_or_name ] && is_string($classPath) && class_exists($classPath)) {
+                    if ($knownEngines[$int_or_name] && is_string($classPath) && class_exists($classPath)) {
                         continue;
-                    } elseif ($knownEngines[ $int_or_name ]) {
+                    } elseif ($knownEngines[$int_or_name]) {
                         // Only Key is set.
-                        $engines[ $int_or_name ] = $knownEngines[ $int_or_name ];
+                        $engines[$int_or_name] = $knownEngines[$int_or_name];
                     } else {
                         // Let's remove it and maybe crash later.
-                        unset($engines[ $int_or_name ]);
+                        unset($engines[$int_or_name]);
                     }
 
                     return $engines;
@@ -113,7 +113,7 @@ class ImportExportController
         return null;
     }
 
-    protected function get_engines() : array
+    protected function get_engines(): array
     {
         $engines = [
             'ics' => 'Osec\App\Model\IcsImportExportParser',
@@ -139,7 +139,7 @@ class ImportExportController
      */
     public function register(string $id, string $engineClassPath)
     {
-        $this->_engines[ $id ] = $engineClassPath;
+        $this->engines[$id] = $engineClassPath;
     }
 
     /**
@@ -152,16 +152,15 @@ class ImportExportController
      * @throws ImportExportParseException If an error happens during parse.
      * @throws EngineNotSetException If the engine is not set.
      */
-    public function import_events(string $engineName, array $args) : array
+    public function import_events(string $engineName, array $args): array
     {
-
-        if ( ! isset($this->_engines[ $engineName ])) {
+        if ( ! isset($this->engines[$engineName])) {
             throw new EngineNotSetException(
-                'The engine '.$engineName.'is not registered.'
+                'The engine ' . $engineName . 'is not registered.'
             );
         } else {
-            $engineClass = $this->_engines[ $engineName ];
-            $engine = $engineClass::factory($this->app);
+            $engineClass = $this->engines[$engineName];
+            $engine      = $engineClass::factory($this->app);
         }
 
         // external engines must register themselves into the registry.
@@ -184,15 +183,14 @@ class ImportExportController
      */
     public function export_events(string $engine, array $args)
     {
-        if ( ! isset($this->_engines[ $engine ])) {
+        if ( ! isset($this->engines[$engine])) {
             throw new EngineNotSetException(
-                'The engine '.$engine.'is not registered.'
+                'The engine ' . $engine . 'is not registered.'
             );
         }
-        $className = $this->_engines[ $engine ];
-        $engine = $className::factory($this->app);
+        $className = $this->engines[$engine];
+        $engine    = $className::factory($this->app);
 
-        return $engine->export($args, $this->_params);
+        return $engine->export($args, $this->params);
     }
-
 }

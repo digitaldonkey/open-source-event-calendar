@@ -9,10 +9,11 @@ use Twig\Extension\AbstractExtension;
 use Twig\Template;
 use Twig\TemplateWrapper;
 use Twig\TwigFunction;
+
 use function extension_loaded;
 use function ini_get;
-use const PHP_SAPI;
 
+use const PHP_SAPI;
 
 /**
  * Twig Debugging:
@@ -28,14 +29,15 @@ use const PHP_SAPI;
  */
 class TwigDebugExtension extends AbstractExtension
 {
-
     public static function no_dump()
     {
         global $osec_app;
         $notification = NotificationAdmin::factory($osec_app);
 
         $notification->store(
-            I18n::__('You need to enable xdebug or run `composer install` to use Twig debug() in twig files. <br /><br />'),
+            I18n::__(
+                'You need to enable xdebug or run `composer install` to use Twig debug() in twig files. <br /><br />'
+            ),
             'error',
             2,
             [NotificationAdmin::RCPT_ADMIN],
@@ -60,7 +62,7 @@ class TwigDebugExtension extends AbstractExtension
             $vars = [];
             foreach ($context as $key => $value) {
                 if ( ! $value instanceof Template && ! $value instanceof TemplateWrapper) {
-                    $vars[ $key ] = $value;
+                    $vars[$key] = $value;
                 }
             }
 
@@ -87,14 +89,19 @@ class TwigDebugExtension extends AbstractExtension
                                 && (false === ini_get('html_errors') || ini_get('html_errors'))
                                 || 'cli' === PHP_SAPI;
 
-
         if ($isDumpOutputHtmlSafe) {
             // If xdebug is enables we can dump fast here.
             return [
-                new TwigFunction('dump', [self::class, 'dump'], [
-                    'is_safe'           => $isDumpOutputHtmlSafe ? ['html'] : [], 'needs_context' => true,
-                    'needs_environment' => true, 'is_variadic' => true
-                ]),
+                new TwigFunction(
+                    'dump',
+                    [self::class, 'dump'],
+                    [
+                        'is_safe'           => $isDumpOutputHtmlSafe ? ['html'] : [],
+                        'needs_context'     => true,
+                        'needs_environment' => true,
+                        'is_variadic'       => true,
+                    ]
+                ),
             ];
         }
 
@@ -102,14 +109,13 @@ class TwigDebugExtension extends AbstractExtension
             // Alternatively we will use symfoy varDumper.
             // requires composer install (includes --dev packages
             return [
-                new  TwigFunction('dump', array('Symfony\Component\VarDumper\VarDumper', 'dump')),
+                new TwigFunction('dump', ['Symfony\Component\VarDumper\VarDumper', 'dump']),
             ];
         }
 
         // Todo maybe we need an alternative?
         return [
-            new TwigFunction('dump', [self::class, 'no_dump'])
+            new TwigFunction('dump', [self::class, 'no_dump']),
         ];
-
     }
 }

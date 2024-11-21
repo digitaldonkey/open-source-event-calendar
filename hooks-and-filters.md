@@ -1081,7 +1081,7 @@ add_filter('osec_notification_label', $label);
 ### osec_pre_save_event <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
-Do something befor save Event data.
+Do something befor  save Event data.
 
 ```php
 do_action('osec_pre_save_event', $event $update);
@@ -1099,7 +1099,7 @@ do_action('osec_pre_save_event', $event $update);
 
 ```php
 /**
- * Do something befor save Event data.
+ * Do something befor  save Event data.
  *
  * @since 1.0
  *
@@ -1152,7 +1152,7 @@ add_filter('osec_event_save_new', $event);
 ### osec_save_event <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
-Do something befor save Event data.
+Do something befor  save Event data.
 
 ```php
 do_action('osec_save_event', $event);
@@ -1174,7 +1174,7 @@ Give other plugins / extensions the ability to do things when saving, like fetch
 
 ```php
 /**
- * Do something befor save Event data.
+ * Do something befor  save Event data.
  *
  * Give other plugins / extensions the ability to do things
  * when saving, like fetching authors which i removed as it's not core.
@@ -3248,7 +3248,7 @@ add_filter('osec_timespan_time_html_before_start_html', $separator);
 #### Description
 
 
-Added befor dtay start date at Ui Timespan displays if they are not all-day. E.g. Event pages, ManageEvents table.
+Added befor  dtay start date at Ui Timespan displays if they are not all-day. E.g. Event pages, ManageEvents table.
 
 #### Parameters
 
@@ -3263,7 +3263,7 @@ Added befor dtay start date at Ui Timespan displays if they are not all-day. E.g
 /**
  * Timespan pefix string/html
  *
- * Added befor dtay start date at Ui Timespan displays
+ * Added befor  dtay start date at Ui Timespan displays
  * if they are not all-day.
  * E.g. Event pages, ManageEvents table.
  *
@@ -5384,7 +5384,7 @@ add_filter('osec_notification_label', $label);
 ### osec_pre_save_event <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
-Do something befor save Event data.
+Do something befor  save Event data.
 
 ```php
 do_action('osec_pre_save_event', $event $update);
@@ -5402,7 +5402,7 @@ do_action('osec_pre_save_event', $event $update);
 
 ```php
 /**
- * Do something befor save Event data.
+ * Do something befor  save Event data.
  *
  * @since 1.0
  *
@@ -5455,7 +5455,7 @@ add_filter('osec_event_save_new', $event);
 ### osec_save_event <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
-Do something befor save Event data.
+Do something befor  save Event data.
 
 ```php
 do_action('osec_save_event', $event);
@@ -5477,7 +5477,7 @@ Give other plugins / extensions the ability to do things when saving, like fetch
 
 ```php
 /**
- * Do something befor save Event data.
+ * Do something befor  save Event data.
  *
  * Give other plugins / extensions the ability to do things
  * when saving, like fetching authors which i removed as it's not core.
@@ -7551,7 +7551,7 @@ add_filter('osec_timespan_time_html_before_start_html', $separator);
 #### Description
 
 
-Added befor dtay start date at Ui Timespan displays if they are not all-day. E.g. Event pages, ManageEvents table.
+Added befor  dtay start date at Ui Timespan displays if they are not all-day. E.g. Event pages, ManageEvents table.
 
 #### Parameters
 
@@ -7566,7 +7566,7 @@ Added befor dtay start date at Ui Timespan displays if they are not all-day. E.g
 /**
  * Timespan pefix string/html
  *
- * Added befor dtay start date at Ui Timespan displays
+ * Added befor  dtay start date at Ui Timespan displays
  * if they are not all-day.
  * E.g. Event pages, ManageEvents table.
  *

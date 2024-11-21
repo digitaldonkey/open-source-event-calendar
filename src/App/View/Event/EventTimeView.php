@@ -19,7 +19,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class EventTimeView extends OsecBaseClass
 {
-
     /**
      * Returns timespan expression for the event.
      *
@@ -33,7 +32,7 @@ class EventTimeView extends OsecBaseClass
      *
      * @param  Event  $event  Rendered event.
      * @param  string  $start_date_display  Can be one of 'hidden', 'short',
-     *                                        or 'long'.
+     *                                       or 'long'.
      *
      * @return string Formatted timespan HTML element.
      */
@@ -46,7 +45,7 @@ class EventTimeView extends OsecBaseClass
 
         // Localize time.
         $start = new DT($event->get('start'));
-        $end = new DT($event->get('end'));
+        $end   = new DT($event->get('end'));
 
         // All-day events need to have their end time shifted by 1 second less
         // to land on the correct day.
@@ -63,12 +62,12 @@ class EventTimeView extends OsecBaseClass
         $start_ts = (new DT($start))
             ->set_time(0, 0, 0)
             ->format();
-        $end_ts = (new DT($end))
+        $end_ts   = (new DT($end))
             ->set_time(0, 0, 0)
             ->format();
 
         $break_years = $start->format('Y') !== $end->format('Y');
-        $output = '';
+        $output      = '';
 
         // Display start date, depending on $start_date_display.
         switch ($start_date_display) {
@@ -77,7 +76,7 @@ class EventTimeView extends OsecBaseClass
             case 'short':
             case 'long':
                 $function = 'format_' . $start_date_display . '_date';
-                $output .= $this->{$function}($start, $break_years);
+                $output   .= $this->{$function}($start, $break_years);
                 break;
             default:
                 $start_date_display = 'long';
@@ -86,11 +85,10 @@ class EventTimeView extends OsecBaseClass
         // Output start time for non-all-day events.
         if ( ! $event->is_allday()) {
             if ('hidden' !== $start_date_display) {
-
                 /**
                  * Timespan pefix string/html
                  *
-                 * Added befor dtay start date at Ui Timespan displays
+                 * Added befor  dtay start date at Ui Timespan displays
                  * if they are not all-day.
                  * E.g. Event pages, ManageEvents table.
                  *
@@ -98,7 +96,10 @@ class EventTimeView extends OsecBaseClass
                  *
                  * @param  string  $separator  Translated separator inclusing spaces.
                  */
-                $output .= apply_filters('osec_timespan_time_html_before_start_html', I18n::_x(' @ ', 'Event time separator'));
+                $output .= apply_filters(
+                    'osec_timespan_time_html_before_start_html',
+                    I18n::_x(' @ ', 'Event time separator')
+                );
             }
             $output .= $this->format_time($start);
         }
@@ -123,7 +124,6 @@ class EventTimeView extends OsecBaseClass
              */
             $output .= apply_filters('osec_timespan_time_separator_html', I18n::_x(' - ', 'Event time separator'));
 
-
             // If event ends on a different day, output end date.
             if ($start_ts !== $end_ts) {
                 // for short date, use short display type
@@ -140,8 +140,10 @@ class EventTimeView extends OsecBaseClass
                     /**
                      * Filter doc: See above.
                      */
-                    $output .= apply_filters('osec_timespan_time_separator_html_starttime',
-                        I18n::_x(' ', 'Event time separator'));
+                    $output .= apply_filters(
+                        'osec_timespan_time_separator_html_starttime',
+                        I18n::_x(' ', 'Event time separator')
+                    );
                 }
                 $output .= $this->format_time($end);
             }
@@ -151,12 +153,13 @@ class EventTimeView extends OsecBaseClass
 
         // Add all-day label.
         if ($event->is_allday()) {
-            $allday_html = ' <span class="ai1ec-allday-badge">'.I18n::__('all-day').'</span>';
+            $allday_html = ' <span class="ai1ec-allday-badge">' . I18n::__('all-day') . '</span>';
 
             /**
              * Alter all-day badge html.
              *
              * Displayed if Event duration is all-day.
+             *
              * @since 1.0
              *
              * @param  string  $allday_html  Translated html string.
@@ -207,17 +210,18 @@ class EventTimeView extends OsecBaseClass
     public static function format_short_date(DT $time, $add_year = false)
     {
         $formatCfg = $add_year ? DateFormatsFrontend::FORMAT_SHORT : DateFormatsFrontend::FORMAT_NO_YEAR;
-        $format = get_option($formatCfg);
+        $format    = get_option($formatCfg);
 
         /**
          * Alter frontend date format "short".
          *
          * Note: Date formats are defined/changed in WordPress settings-general page.
          *
-         * @param string $formatter See input_date_format at Settings class.
-         * @param bool $add_year True if year should be provided.
+         * @param  string  $formatter  See input_date_format at Settings class.
+         * @param  bool  $add_year  True if year should be provided.
          */
         $format = apply_filters('osec_ui_date_format_short', $format, $add_year);
+
         return $time->format_i18n($format);
     }
 
@@ -243,6 +247,7 @@ class EventTimeView extends OsecBaseClass
          * @param  string  $date_format
          */
         $format = apply_filters('osec_ui_date_format_long', $date_format);
+
         return $time->format_i18n($format);
     }
 
@@ -254,21 +259,20 @@ class EventTimeView extends OsecBaseClass
      *
      * @return string
      */
-    public function get_exclude_html(Event $event, RepeatRuleToText $rrule) : string
+    public function get_exclude_html(Event $event, RepeatRuleToText $rrule): string
     {
-        $excludes = [];
+        $excludes        = [];
         $exception_rules = $event->get('exception_rules');
         $exception_dates = $event->get('exception_dates');
         if ($exception_rules) {
             $excludes[] =
                 $rrule->rrule_to_text($exception_rules);
         }
-        if ($exception_dates && ! str_starts_with((string) $exception_rules, 'EXDATE')) {
+        if ($exception_dates && ! str_starts_with((string)$exception_rules, 'EXDATE')) {
             $excludes[] =
                 $rrule->exdate_to_text($exception_dates);
         }
 
         return implode(I18n::__(', and '), $excludes);
     }
-
 }

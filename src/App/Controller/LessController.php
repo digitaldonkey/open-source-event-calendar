@@ -22,8 +22,7 @@ use Osec\Theme\ThemeLoader;
  */
 class LessController extends OsecBaseClass
 {
-
-    public const DB_KEY_FOR_LESS_VARIABLES = "osec_less_variables";
+    public const DB_KEY_FOR_LESS_VARIABLES = 'osec_less_variables';
 
     private Less_Parser $lessc;
 
@@ -47,18 +46,20 @@ class LessController extends OsecBaseClass
         parent::__construct($app);
 
         // @see https://lesscss.org/usage/#less-options-lint;
-        $this->lessc = new Less_Parser([
-            'compress'     => ! OSEC_DEBUG,
-            'sourceMap'    => OSEC_DEBUG,
-            'relativeUrls' => true,
-            'math'         => 'always',
-            //      'sourceMapBasepath'   =>'/var/www/html',
-        ]);
+        $this->lessc = new Less_Parser(
+            [
+                'compress'     => ! OSEC_DEBUG,
+                'sourceMap'    => OSEC_DEBUG,
+                'relativeUrls' => true,
+                'math'         => 'always',
+                // 'sourceMapBasepath'   =>'/var/www/html',
+            ]
+        );
 
         $this->default_theme_url = $this->sanitize_default_theme_url($default_theme_url);
-        $this->parsed_css = '';
-        $this->variables = [];
-        $this->files = ['style.less', 'event.less', 'calendar.less'];
+        $this->parsed_css        = '';
+        $this->variables         = [];
+        $this->files             = ['style.less', 'event.less', 'calendar.less'];
     }
 
     /**
@@ -70,16 +71,14 @@ class LessController extends OsecBaseClass
      */
     public function sanitize_default_theme_url($url)
     {
-        $pos_http = strrpos($url, 'http://');
+        $pos_http  = strrpos($url, 'http://');
         $pos_https = strrpos($url, 'https://');
         // if there are two http
         if (0 !== $pos_http) {
             // cut of the first one
             $url = substr($url, $pos_http);
-        } else {
-            if (0 !== $pos_https) {
-                $url = substr($url, $pos_https);
-            }
+        } elseif (0 !== $pos_https) {
+            $url = substr($url, $pos_https);
         }
 
         return $url;
@@ -89,13 +88,13 @@ class LessController extends OsecBaseClass
      * Parse all the Less files resolving the dependencies.
      *
      * @param  bool  $compile_core  If set to true, it forces compilation of core
-     *   CSS only, suitable for shipping.
+     *  CSS only, suitable for shipping.
      *
      * @return string
      * @throws Exception
      * @throws FileNotFoundException|Exception
      */
-    public function parse_less_files(array $variables = null, $compile_core = true) : string
+    public function parse_less_files(array $variables = null, $compile_core = true): string
     {
         // If no variables are passed, initialize from DB, config file, and
         // extension injections in one call.
@@ -113,7 +112,6 @@ class LessController extends OsecBaseClass
          * @since 1.0
          *
          * @param  array  $variables  Array of Less variables
-         *
          */
         $variables = apply_filters('osec_less_constants', $variables);
 
@@ -136,32 +134,35 @@ class LessController extends OsecBaseClass
          *
          * @return array
          */
-        $this->files = apply_filters('osec_less_files', $this->files);
+        $this->files   = apply_filters('osec_less_files', $this->files);
         $this->files[] = 'override.less';
 
         // Find out the active theme URL.
         $theme = $this->app->options->get('osec_current_theme');
 
         // IMPORT DIRS
-        $this->lessc->SetImportDirs([
-            /**
-             * Callback - Trying to map dependencies.
-             */
-            function ($path) use ($theme) {
-                if (substr($path, 0, 10) === 'bootstrap/') {
-                    return [$theme[ 'theme_root' ].'/vortex/less/'.$path, null];
-                }
-                if (file_exists($theme[ 'theme_dir' ].'/less/'.$path)) {
-                    return [$theme[ 'theme_dir' ].'/less/'.$path, null];
-                } else {
-                    if (file_exists($theme[ 'theme_root' ].'/vortex/less/'.$path)) {
-                        return [$theme[ 'theme_root' ].'/vortex/less/'.$path, null];
+        $this->lessc->SetImportDirs(
+            [
+                /**
+                 * Callback - Trying to map dependencies.
+                 */
+                function ($path) use ($theme) {
+                    if (substr($path, 0, 10) === 'bootstrap/') {
+                        return [$theme['theme_root'] . '/vortex/less/' . $path, null];
                     }
-                }
 
-                return [$theme[ 'theme_dir' ].'/less/'.$path, null];
-            },
-        ]);
+                    if (file_exists($theme['theme_dir'] . '/less/' . $path)) {
+                        return [$theme['theme_dir'] . '/less/' . $path, null];
+                    }
+
+                    if (file_exists($theme['theme_root'] . '/vortex/less/' . $path)) {
+                        return [$theme['theme_root'] . '/vortex/less/' . $path, null];
+                    }
+
+                    return [$theme['theme_dir'] . '/less/' . $path, null];
+                },
+            ]
+        );
         $import_dirs = [];
         foreach ($this->files as $file) {
             $file_to_parse = null;
@@ -184,15 +185,15 @@ class LessController extends OsecBaseClass
             $this->lessc->parseFile($file_to_parse->get_name(), $this->abs_path_to_url($file_to_parse->get_name()));
         }
 
-        $variables[ 'fontdir' ] = '~"'.ResponseHelper::remove_protocols($theme[ 'theme_url' ]).'/font"';
-        $variables[ 'fontdir_default' ] = '~"'.ResponseHelper::remove_protocols($this->default_theme_url).'font"';
-        $variables[ 'imgdir' ] = '~"'.ResponseHelper::remove_protocols($theme[ 'theme_url' ]).'/img"';
-        $variables[ 'imgdir_default' ] = '~"'.ResponseHelper::remove_protocols($this->default_theme_url).'img"';
+        $variables['fontdir']         = '~"' . ResponseHelper::remove_protocols($theme['theme_url']) . '/font"';
+        $variables['fontdir_default'] = '~"' . ResponseHelper::remove_protocols($this->default_theme_url) . 'font"';
+        $variables['imgdir']          = '~"' . ResponseHelper::remove_protocols($theme['theme_url']) . '/img"';
+        $variables['imgdir_default']  = '~"' . ResponseHelper::remove_protocols($this->default_theme_url) . 'img"';
         if (true === $compile_core) {
-            $variables[ 'fontdir' ] = '~"../font"';
-            $variables[ 'fontdir_default' ] = '~"../font"';
-            $variables[ 'imgdir' ] = '~"../img"';
-            $variables[ 'imgdir_default' ] = '~"../img"';
+            $variables['fontdir']         = '~"../font"';
+            $variables['fontdir_default'] = '~"../font"';
+            $variables['imgdir']          = '~"../img"';
+            $variables['imgdir_default']  = '~"../img"';
         }
         try {
             $this->lessc->ModifyVars($variables);
@@ -221,7 +222,7 @@ class LessController extends OsecBaseClass
      *
      * @return array
      */
-    public function get_saved_variables($with_description = true) : array
+    public function get_saved_variables($with_description = true): array
     {
         // We don't store description in options table, so find it in current config
         // file. Variables from extensions are already injected during this call.
@@ -241,22 +242,22 @@ class LessController extends OsecBaseClass
         foreach ($variables as $name => $attrs) {
             // Also filter out any legacy variables that are no longer found in
             // current config file (exceptions thrown if this is not handled here).
-            if ( ! isset($variables_from_config[ $name ])) {
-                unset($variables[ $name ]);
-            }
-            else {
+            if ( ! isset($variables_from_config[$name])) {
+                unset($variables[$name]);
+            } else {
                 // If description is requested and is available in config file, use it.
                 if (
                     $with_description &&
-                    isset($variables_from_config[ $name ][ 'description' ])
+                    isset($variables_from_config[$name]['description'])
                 ) {
-                    $variables[ $name ][ 'description' ] =
-                        $variables_from_config[ $name ][ 'description' ];
+                    $variables[$name]['description'] =
+                        $variables_from_config[$name]['description'];
                 } else {
-                    unset($variables[ $name ][ 'description' ]);
+                    unset($variables[$name]['description']);
                 }
             }
         }
+
         return $variables;
     }
 
@@ -266,7 +267,7 @@ class LessController extends OsecBaseClass
      *
      * @return array
      */
-    public function get_less_variable_data_from_config_file() : array
+    public function get_less_variable_data_from_config_file(): array
     {
         // Load the file to parse using the theme loader to select the right file.
         $file = ThemeLoader::factory($this->app)
@@ -297,10 +298,9 @@ class LessController extends OsecBaseClass
      */
     private function convert_less_variables_for_parsing(array $variables)
     {
-
         $converted_variables = [];
         foreach ($variables as $variable_name => $variable_params) {
-            $converted_variables[ $variable_name ] = $variable_params[ 'value' ];
+            $converted_variables[$variable_name] = $variable_params['value'];
         }
 
         return $converted_variables;
@@ -312,11 +312,10 @@ class LessController extends OsecBaseClass
      */
     private function load_static_theme_variables()
     {
-        return ThemeLoader::factory($this->app)
-                          ->get_file('variables.less', [], false);
+        return ThemeLoader::factory($this->app)->get_file('variables.less', [], false);
     }
 
-    function abs_path_to_url($path = '')
+    private function abs_path_to_url($path = '')
     {
         $url = str_replace(
             wp_normalize_path(untrailingslashit(ABSPATH)),
@@ -331,7 +330,7 @@ class LessController extends OsecBaseClass
      * Check LESS variables are stored in the options table; if not, initialize
      * with defaults from config file and extensions.
      */
-    public function initialize_less_variables_if_not_set() : void
+    public function initialize_less_variables_if_not_set(): void
     {
         $variables = $this->app->options->get(
             self::DB_KEY_FOR_LESS_VARIABLES,
@@ -365,8 +364,8 @@ class LessController extends OsecBaseClass
         $new_variables = $this->get_less_variable_data_from_config_file();
         foreach ($new_variables as $name => $attributes) {
             // If the variable already exists, keep the old value.
-            if (isset($saved_variables[ $name ])) {
-                $new_variables[ $name ][ 'value' ] = $saved_variables[ $name ][ 'value' ];
+            if (isset($saved_variables[$name])) {
+                $new_variables[$name]['value'] = $saved_variables[$name]['value'];
             }
         }
         // Save the new variables to the DB.
@@ -385,14 +384,17 @@ class LessController extends OsecBaseClass
     {
         foreach ($this->variables as $key => $value) {
             if (str_starts_with($key, 'fontdir_')) {
-                unset($this->variables[ $key ]);
+                unset($this->variables[$key]);
             }
         }
-        $hashmap = ThemeHashMap::factory($this->app)->build_current_theme_hashmap();
+        $hashmap   = ThemeHashMap::factory($this->app)->build_current_theme_hashmap();
         $variables = $this->variables;
         ksort($variables);
 
-        return ['variables' => $variables, 'files' => $hashmap];
+        return [
+            'variables' => $variables,
+            'files'     => $hashmap,
+        ];
     }
 
     /**
@@ -406,7 +408,6 @@ class LessController extends OsecBaseClass
      */
     public function is_compilation_needed(?array $variables = [])
     {
-
         // TODO Fix or not?
         // return true;
 
@@ -420,10 +421,11 @@ class LessController extends OsecBaseClass
          * @since 1.0
          *
          * @param  array  $variables  Array of less variables.
-         *
          */
         $shouldRecompile = apply_filters('osec_should_recompile_less', false);
-        if ($shouldRecompile || (defined('OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST') && OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST)
+        if ($shouldRecompile
+            || (defined('OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST')
+                && OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST)
         ) {
             return true;
         }
@@ -447,18 +449,17 @@ class LessController extends OsecBaseClass
          * @since 1.0
          *
          * @param  array  $variables  Array of less variables
-         *
          */
         $variables = apply_filters('osec_less_constants_pre_hashmap', $variables);
         if (
             null === $cur_hashmap ||
-            $variables !== $cur_hashmap[ 'variables' ]
+            $variables !== $cur_hashmap['variables']
         ) {
             return true;
         }
         $file_hashmap = $hashMap->build_current_theme_hashmap();
 
-        return ! $hashMap->compare_hashmaps($file_hashmap, $cur_hashmap[ 'files' ]);
+        return ! $hashMap->compare_hashmaps($file_hashmap, $cur_hashmap['files']);
     }
 
     /**
@@ -472,7 +473,7 @@ class LessController extends OsecBaseClass
     {
         foreach ($variables as $key => $value) {
             if (str_starts_with($key, 'fontdir_')) {
-                unset($variables[ $key ]);
+                unset($variables[$key]);
             }
         }
 
@@ -497,17 +498,19 @@ class LessController extends OsecBaseClass
          * @since 1.0
          *
          * @param  array  $variables  Array of Less variables
-         *
          */
-        $dirs = apply_filters('osec_font_dirs', [
-            'AI1EC' => [
-                $theme[ 'theme_dir' ].DIRECTORY_SEPARATOR.'font',
-                OSEC_DEFAULT_THEME_PATH.DIRECTORY_SEPARATOR.'font',
-            ],
-        ]);
-        $directories = $dirs[ $matches[ 1 ] ];
+        $dirs        = apply_filters(
+            'osec_font_dirs',
+            [
+                'AI1EC' => [
+                    $theme['theme_dir'] . DIRECTORY_SEPARATOR . 'font',
+                    OSEC_DEFAULT_THEME_PATH . DIRECTORY_SEPARATOR . 'font',
+                ],
+            ]
+        );
+        $directories = $dirs[$matches[1]];
         foreach ($directories as $dir) {
-            $font_file = $dir.DIRECTORY_SEPARATOR.$matches[ 2 ];
+            $font_file = $dir . DIRECTORY_SEPARATOR . $matches[2];
             if (file_exists($font_file)) {
                 return base64_encode(file_get_contents($font_file));
             }
@@ -515,5 +518,4 @@ class LessController extends OsecBaseClass
 
         return '';
     }
-
 }

@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Event;
 
-
 use Osec\App\I18n;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\PostTypeEvent\Event;
@@ -21,14 +20,14 @@ use Osec\Theme\ThemeLoader;
  */
 class EventSingleView extends OsecBaseClass
 {
-
     /**
      * @return The html of the footer
      */
     public function get_footer(Event $event)
     {
         $text_calendar_feed = I18n::__(
-            'This post was replicated from another site\'s <a href="%s" title="iCalendar feed"><i class="ai1ec-fa ai1ec-fa-calendar"></i> calendar feed</a>.'
+            'This post was replicated from another site\'s <a href="%s" title="iCalendar feed">'
+                    . '<i class="ai1ec-fa ai1ec-fa-calendar"></i> calendar feed</a>.'
         );
         $text_calendar_feed = sprintf(
             $text_calendar_feed,
@@ -36,7 +35,7 @@ class EventSingleView extends OsecBaseClass
                 str_replace('http://', 'webcal://', $event->get('ical_feed_url') ?: '')
             )
         );
-        $args = [
+        $args               = [
             'event'              => $event,
             'text_calendar_feed' => $text_calendar_feed,
             'text_view_post'     => I18n::__('View original'),
@@ -50,20 +49,19 @@ class EventSingleView extends OsecBaseClass
     /**
      * Renders the html of the page and returns it.
      *
-     *
      * @return string the html of the page
      */
     public function get_content(Event $event)
     {
-        $settings = $this->app->settings;
-        $rrule = RepeatRuleToText::factory($this->app);
+        $settings     = $this->app->settings;
+        $rrule        = RepeatRuleToText::factory($this->app);
         $taxonomyView = EventTaxonomyView::factory($this->app);
-        $location = EventLocationView::factory($this->app);
-        $ticketView = EventTicketView::factory($this->app);
-        $contentView = EventContentView::factory($this->app);
-        $timeView = EventTimeView::factory($this->app);
+        $location     = EventLocationView::factory($this->app);
+        $ticketView   = EventTicketView::factory($this->app);
+        $contentView  = EventContentView::factory($this->app);
+        $timeView     = EventTimeView::factory($this->app);
 
-        $subscribe_url = OSEC_EXPORT_URL.'&osec_post_ids='.
+        $subscribe_url = OSEC_EXPORT_URL . '&osec_post_ids=' .
                          $event->get('post_id');
 
         $event->set_runtime(
@@ -95,8 +93,9 @@ class EventSingleView extends OsecBaseClass
          *
          * @param  array  $html  Event location.
          */
-        $venues_html = apply_filters('osec_rendering_single_event_venues',
-            nl2br((string) $location->get_location($event)),
+        $venues_html   = apply_filters(
+            'osec_rendering_single_event_venues',
+            nl2br((string)$location->get_location($event)),
             $event
         );
         $timezone_info = [
@@ -104,7 +103,7 @@ class EventSingleView extends OsecBaseClass
             'text_timezone_title' => null,
             'event_timezone'      => null,
         ];
-        $default_tz = Timezones::factory($this->app)->get_default_timezone();
+        $default_tz    = Timezones::factory($this->app)->get_default_timezone();
         /**
          * Only display the timezone information if:
          *     -) local timezone is not enforced -- because if it is enforced
@@ -123,7 +122,7 @@ class EventSingleView extends OsecBaseClass
                 'show_timezone'       => true,
                 'event_timezone'      => $event->get('timezone_name'),
                 'text_timezone_title' => sprintf(
-                    I18n:: __('Event was created in the %s time zone'),
+                    I18n::__('Event was created in the %s time zone'),
                     $event->get('start')->get_gmt_offset_as_text()
                 ),
             ];
@@ -131,6 +130,7 @@ class EventSingleView extends OsecBaseClass
 
         /**
          * Alter Event before rendering on a single Event page.
+         *
          * @since 1.0
          *
          * @param  Event  $event  passed by reference. So can be modified.
@@ -146,13 +146,15 @@ class EventSingleView extends OsecBaseClass
             'location'               => $venues_html,
             'map'                    => $location->get_map_view($event),
             'contact'                => $ticketView->get_contact_html($event),
-            'back_to_calendar'       => $contentView->get_back_to_calendar_button_html($event->get('start')
-                                                                                             ->format()),
+            'back_to_calendar'       => $contentView->get_back_to_calendar_button_html(
+                $event->get('start')
+                      ->format()
+            ),
             'subscribe_url'          => $subscribe_url,
-            'subscribe_url_no_html'  => $subscribe_url.'&no_html=true',
+            'subscribe_url_no_html'  => $subscribe_url . '&no_html=true',
             'edit_instance_url'      => null,
             'edit_instance_text'     => null,
-            'google_url'             => 'http://www.google.com/calendar/render?cid='.urlencode($subscribe_url),
+            'google_url'             => 'http://www.google.com/calendar/render?cid=' . urlencode($subscribe_url),
             'show_subscribe_buttons' => ! $settings->get('turn_off_subscription_buttons'),
             'hide_featured_image'    => $settings->get('hide_featured_image'),
             'extra_buttons'          => $extra_buttons,
@@ -181,15 +183,15 @@ class EventSingleView extends OsecBaseClass
         ];
 
         if (
-            ! empty($args[ 'recurrence' ]) &&
+            ! empty($args['recurrence']) &&
             $event->get('instance_id') &&
             current_user_can('edit_osec_events')
         ) {
-            $args[ 'edit_instance_url' ] = admin_url(
-                'post.php?post='.$event->get('post_id').
-                '&action=edit&instance='.$event->get('instance_id')
+            $args['edit_instance_url']  = admin_url(
+                'post.php?post=' . $event->get('post_id') .
+                '&action=edit&instance=' . $event->get('instance_id')
             );
-            $args[ 'edit_instance_text' ] = sprintf(
+            $args['edit_instance_text'] = sprintf(
                 I18n::__('Edit this occurrence (%s)'),
                 $event->get('start')->format_i18n('M j')
             );
@@ -207,7 +209,6 @@ class EventSingleView extends OsecBaseClass
      */
     public function get_full_article(Event $event, $footer = '')
     {
-
         /**
          * Alter Event content
          *
@@ -221,10 +222,11 @@ class EventSingleView extends OsecBaseClass
          *
          * @param  array  $html  Event location.
          */
-        $theContent = apply_filters('osec_the_content',
+        $theContent = apply_filters(
+            'osec_the_content',
             wpautop(apply_filters('the_content', $event->get('post')->post_content))
         );
-        $args = [
+        $args       = [
             'title'         => apply_filters('the_title', $event->get('post')->post_title, $event->get('post_id')),
             'event_details' => $this->get_content($event),
             'content'       => $theContent,
@@ -235,5 +237,4 @@ class EventSingleView extends OsecBaseClass
                           ->get_file('event-single-full.twig', $args, false)
                           ->get_content();
     }
-
 }

@@ -16,18 +16,17 @@ use Stringable;
  */
 abstract class FileAbstract extends OsecBaseClass implements Stringable
 {
-
     /**
      * @var array The paths where to look for the file.
      */
-    protected $_paths;
+    protected array $paths;
 
     /**
      * @var mixed The content of the file.
      * Usually it's a string but for some edge cases it might be a PHP type like an array
      * The only case now is user_variables.php for Less
      */
-    protected $_content;
+    protected $content;
 
     /**
      * Standard constructor for basic files.
@@ -42,13 +41,13 @@ abstract class FileAbstract extends OsecBaseClass implements Stringable
         array $paths
     ) {
         parent::__construct($app);
-        $this->_paths = $paths;
+        $this->paths = $paths;
     }
 
     /**
-     * Locates the file and parses its content. Populates $this->_content.
+     * Locates the file and parses its content. Populates $this->content.
      *
-     * @return boolean Returns true if the file is found, false otheriwse.
+     * @return bool Returns true if the file is found, false otheriwse.
      */
     abstract public function process_file();
 
@@ -57,7 +56,7 @@ abstract class FileAbstract extends OsecBaseClass implements Stringable
      */
     public function render()
     {
-        echo $this->_content;
+        echo $this->content;
     }
 
 
@@ -72,14 +71,14 @@ abstract class FileAbstract extends OsecBaseClass implements Stringable
             return '';
         }
 
-        return $this->_content;
+        return $this->content;
     }
 
     /**
      * Just in case you want to echo the object.
      */
-    public function __toString() : string
+    public function __toString(): string
     {
-        return (string) $this->_content;
+        return (string)$this->content;
     }
 }

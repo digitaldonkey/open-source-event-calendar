@@ -15,7 +15,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class CalendarSubscribeButtonView extends OsecBaseClass
 {
-
     /**
      * Get a list of texts for subscribtion buttons.
      *
@@ -32,7 +31,9 @@ class CalendarSubscribeButtonView extends OsecBaseClass
                 'plaintext' => I18n::__('Add to other calendar'),
             ],
             'title' => [
-                'timely'    => I18n::__('Copy this URL for your own Timely calendar or click to add to your rich-text calendar'),
+                'timely'    => I18n::__(
+                    'Copy this URL for your own Timely calendar or click to add to your rich-text calendar'
+                ),
                 'google'    => I18n::__('Subscribe to this calendar in your Google Calendar'),
                 'outlook'   => I18n::__('Subscribe to this calendar in MS Outlook'),
                 'apple'     => I18n::__('Subscribe to this calendar in Apple Calendar/iCal'),
@@ -40,5 +41,4 @@ class CalendarSubscribeButtonView extends OsecBaseClass
             ],
         ];
     }
-
 }

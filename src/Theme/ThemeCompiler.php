@@ -18,12 +18,10 @@ use Twig\Environment;
  */
 class ThemeCompiler extends OsecBaseClass
 {
-
     /**
      * Register filters early on.
      *
      * @param  App  $app  Instance to use.
-     *
      */
     public function __construct(App $app)
     {
@@ -47,11 +45,11 @@ class ThemeCompiler extends OsecBaseClass
             );
         }
         foreach ([true, false] as $for_admin) {
-            $twig = ThemeLoader::factory($this->app)->get_twig_instance($for_admin, true);
+            $twig  = ThemeLoader::factory($this->app)->get_twig_instance($for_admin, true);
             $files = $this->get_files($twig);
             $this->compile($twig, $files);
         }
-        echo 'Re-compiled in '.(microtime(true) - $start)."\n";
+        echo 'Re-compiled in ' . (microtime(true) - $start) . "\n";
         exit(0);
     }
 
@@ -68,10 +66,9 @@ class ThemeCompiler extends OsecBaseClass
         try {
             $paths = $twig->getLoader()->getPaths();
             foreach ($paths as $path) {
-                $files += $this->read_files($path, strlen((string) $path) + 1);
+                $files += $this->read_files($path, strlen((string)$path) + 1);
             }
         } catch (Exception) {
-
         }
 
         return $files;
@@ -88,22 +85,22 @@ class ThemeCompiler extends OsecBaseClass
     public function read_files($path, $trim_length)
     {
         $handle = opendir($path);
-        $files = [];
+        $files  = [];
         if (false === $handle) {
             return $files;
         }
         while (false !== ($file = readdir($handle))) {
-            if ('.' === $file[ 0 ]) {
+            if ('.' === $file[0]) {
                 continue;
             }
-            $new_path = $path.DIRECTORY_SEPARATOR.$file;
+            $new_path = $path . DIRECTORY_SEPARATOR . $file;
             if (is_dir($new_path)) {
                 $files += $this->read_files($new_path, $trim_length);
             } elseif (
                 is_file($new_path) &&
                 '.twig' === strrchr($new_path, '.')
             ) {
-                $files[ $new_path ] = substr($new_path, $trim_length);
+                $files[$new_path] = substr($new_path, $trim_length);
             }
         }
         closedir($handle);
@@ -126,6 +123,4 @@ class ThemeCompiler extends OsecBaseClass
             echo 'Compiled: ', $template, ' (', $file, ')', "\n";
         }
     }
-
 }
-

@@ -1,53 +1,55 @@
-<?php if( $activated ) : ?>
-	<div id="message2" class="updated">
-		<p>
-			<?php printf( __( 'New theme activated. <a href="%s">Visit site</a>' ), home_url( '/' ) ); ?>
-		</p>
-	</div>
-<?php elseif( $deleted ) : ?>
-	<div id="message3" class="updated">
-		<p>
-			<?php _e( 'Theme deleted.', OSEC_TXT_DOM ) ?>
-		</p>
-	</div>
+<?php if ($activated) : ?>
+    <div id="message2" class="updated">
+        <p>
+            <?php printf(__('New theme activated. <a href="%s">Visit site</a>'), home_url('/')); ?>
+        </p>
+    </div>
+<?php elseif ($deleted) : ?>
+    <div id="message3" class="updated">
+        <p>
+            <?php _e('Theme deleted.', OSEC_TXT_DOM) ?>
+        </p>
+    </div>
 <?php endif; ?>
 
 <div class="wrap">
 
-	<h2><?php echo esc_html( $page_title ); ?></h2>
-	<h3><?php _e( 'Current Calendar Theme', OSEC_TXT_DOM ); ?></h3>
-	<div id="current-theme"<?php echo ( $ct->screenshot ) ? ' class="has-screenshot"' : '' ?>>
-	<?php if ( $ct->screenshot ) : ?>
-	<img src="<?php echo $ct->theme_root_uri . '/' . $ct->stylesheet . '/' . $ct->screenshot; ?>" alt="<?php esc_attr_e('Current theme preview', OSEC_TXT_DOM); ?>" />
-	<?php endif; ?>
-	<h4><?php
-		/* translators: 1: theme title, 2: theme version, 3: theme author */
-		printf(__('%1$s %2$s by %3$s', OSEC_TXT_DOM ), $ct->title, $ct->version, $ct->author) ; ?></h4>
-	<p class="theme-description"><?php echo $ct->description; ?></p>
-	<div class="theme-options">
-		<?php if ( $ct->tags ) : ?>
-		<p><?php _e( 'Tags:', OSEC_TXT_DOM ); ?> <?php echo join(', ', $ct->tags); ?></p>
-		<?php endif; ?>
-	</div>
-	<?php theme_update_available($ct); ?>
+    <h2><?php echo esc_html($page_title); ?></h2>
+    <h3><?php _e('Current Calendar Theme', OSEC_TXT_DOM); ?></h3>
+    <div id="current-theme"<?php echo ($ct->screenshot) ? ' class="has-screenshot"' : '' ?>>
+        <?php if ($ct->screenshot) : ?>
+            <img src="<?php echo $ct->theme_root_uri . '/' . $ct->stylesheet . '/' . $ct->screenshot; ?>"
+                 alt="<?php esc_attr_e('Current theme preview', OSEC_TXT_DOM); ?>"/>
+        <?php endif; ?>
+        <h4><?php
+            /* translators: 1: theme title, 2: theme version, 3: theme author */
+            printf(__('%1$s %2$s by %3$s', OSEC_TXT_DOM), $ct->title, $ct->version, $ct->author); ?></h4>
+        <p class="theme-description"><?php echo $ct->description; ?></p>
+        <div class="theme-options">
+            <?php if ($ct->tags) : ?>
+                <p><?php _e('Tags:', OSEC_TXT_DOM); ?><?php echo implode(', ', $ct->tags); ?></p>
+            <?php endif; ?>
+        </div>
+        <?php theme_update_available($ct); ?>
 
-	</div>
+    </div>
 
-	<br class="clear" />
-	<?php
-	if (
-		! current_user_can( 'switch_themes' ) &&
-		! current_user_can( 'switch_osec_themes' )
-	) {
-		echo '</div>';
-		return false;
-	}
-	?>
+    <br class="clear"/>
+    <?php
+    if (
+        ! current_user_can('switch_themes') &&
+        ! current_user_can('switch_osec_themes')
+    ) {
+        echo '</div>';
 
-	<h3><?php _e( 'Available Calendar Themes', OSEC_TXT_DOM ); ?></h3>
+        return false;
+    }
+    ?>
 
-	<?php $wp_list_table->display(); ?>
+    <h3><?php _e('Available Calendar Themes', OSEC_TXT_DOM); ?></h3>
 
-	<br class="clear" />
+    <?php $wp_list_table->display(); ?>
 
-	</div>
+    <br class="clear"/>
+
+</div>

@@ -14,7 +14,6 @@ use Osec\Exception\BootstrapException;
  */
 class CacheFactory extends OsecBaseClass
 {
-
     /**
      * create_cache_strategy_instance method
      *
@@ -26,9 +25,8 @@ class CacheFactory extends OsecBaseClass
      * @return Cache Instance of CacheType
      * @throws BootstrapException
      */
-    public function createCache($cache_id, $override = null) : Cache
+    public function createCache($cache_id, $override = null): Cache
     {
-
         // TODO ADD SOME CONFIGURABILITY.
 
         if (OSEC_ENABLE_CACHE_ACPU && CacheApcu::is_available() && ! $override) {
@@ -46,5 +44,4 @@ class CacheFactory extends OsecBaseClass
 
         return new Cache($cache_id, $engine);
     }
-
 }

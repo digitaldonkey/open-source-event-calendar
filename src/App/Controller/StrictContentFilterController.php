@@ -16,31 +16,31 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class StrictContentFilterController extends OsecBaseClass
 {
-
     /**
      * Content filters lib.
+     *
      * @var ContentFilterBypassHelper
      */
-    protected ContentFilterBypassHelper $_content_filter;
+    protected ContentFilterBypassHelper $contentFilter;
 
     /**
      * Setting _use_strict_filter.
+     *
      * @var bool
      */
-    protected bool $_use_strict_filter;
+    protected bool $useStrictFilter;
 
     /**
      * Constructor.
      *
      * @param  App  $app
-     *
      */
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->_content_filter = ContentFilterBypassHelper::factory($app);
+        $this->contentFilter = ContentFilterBypassHelper::factory($app);
 
-        $this->_use_strict_filter =
+        $this->useStrictFilter =
             $app->settings->get('strict_compatibility_content_filtering');
     }
 
@@ -51,8 +51,8 @@ class StrictContentFilterController extends OsecBaseClass
      */
     public function clear_the_content_filters()
     {
-        if ($this->_use_strict_filter) {
-            $this->_content_filter->clear_the_content_filters();
+        if ($this->useStrictFilter) {
+            $this->contentFilter->clear_the_content_filters();
         }
     }
 
@@ -63,8 +63,8 @@ class StrictContentFilterController extends OsecBaseClass
      */
     public function restore_the_content_filters()
     {
-        if ($this->_use_strict_filter) {
-            $this->_content_filter->restore_the_content_filters();
+        if ($this->useStrictFilter) {
+            $this->contentFilter->restore_the_content_filters();
         }
     }
 }

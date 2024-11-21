@@ -14,13 +14,13 @@ use Osec\Bootstrap\OsecBaseClass;
  * @replaces Ai1ec_Http_Request
  * @author     Timely Network Inc
  */
-class  Request extends OsecBaseClass
+class Request extends OsecBaseClass
 {
-
     /**
      * Changes debug to false for AJAX req.
      *
      * Callback for debug-checking filters.
+     *
      * @wp_hook osec_dbi_debug
      *
      * @param  bool  $do_debug  Current debug value.
@@ -47,23 +47,23 @@ class  Request extends OsecBaseClass
             return true;
         }
         if (
-            isset($_SERVER[ 'HTTP_X_REQUESTED_WITH' ]) &&
-            'XMLHttpRequest' === $_SERVER[ 'HTTP_X_REQUESTED_WITH' ]
+            isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            'XMLHttpRequest' === $_SERVER['HTTP_X_REQUESTED_WITH']
         ) {
             return true;
         }
         if (
-            isset($_GET[ 'ai1ec_doing_ajax' ]) &&
-            'true' === $_GET[ 'ai1ec_doing_ajax' ]
+            isset($_GET['ai1ec_doing_ajax']) &&
+            'true' === $_GET['ai1ec_doing_ajax']
         ) {
             return true;
         }
-        if (isset($_GET[ 'osec_legacy_widget' ])) {
+        if (isset($_GET['osec_legacy_widget'])) {
             return true;
         }
         if (
-            isset($_GET[ ScriptsFrontendController::LOAD_JS_PARAMETER ]) ||
-            isset($_GET[ FrontendCssController::REQUEST_CSS_PARAM ])
+            isset($_GET[ScriptsFrontendController::LOAD_JS_PARAMETER]) ||
+            isset($_GET[FrontendCssController::REQUEST_CSS_PARAM])
         ) {
             return true;
         }
@@ -116,10 +116,9 @@ class  Request extends OsecBaseClass
      */
     public function is_json_required($request_format, $type)
     {
-        return
-            'json' === $request_format &&
-            $this->app->settings->get('osec_use_frontend_rendering') &&
-            $this->is_ajax();
+        return 'json' === $request_format &&
+               $this->app->settings->get('osec_use_frontend_rendering') &&
+               $this->is_ajax();
     }
 
     /**
@@ -129,11 +128,11 @@ class  Request extends OsecBaseClass
      */
     public function get_current_action()
     {
-        if (isset($_REQUEST[ 'action' ]) && -1 != $_REQUEST[ 'action' ]) {
-            return $_REQUEST[ 'action' ];
+        if (isset($_REQUEST['action']) && -1 != $_REQUEST['action']) {
+            return $_REQUEST['action'];
         }
-        if (isset($_REQUEST[ 'action2' ]) && -1 != $_REQUEST[ 'action2' ]) {
-            return $_REQUEST[ 'action2' ];
+        if (isset($_REQUEST['action2']) && -1 != $_REQUEST['action2']) {
+            return $_REQUEST['action2'];
         }
 
         return null;

@@ -15,34 +15,35 @@ use Osec\Theme\ThemeLoader;
  */
 class SettingsCatsTagsFilter extends SettingsAbstract
 {
-
-    public function render($html = '', $wrap = true) : string
+    public function render($html = '', $wrap = true): string
     {
-        $tags = [];
+        $tags       = [];
         $categories = [];
         foreach (['tags', 'categories'] as $type) {
-            ${$type} = get_categories([
-                'taxonomy'     => 'events_'.$type,
-                'hierarchical' => true
-            ]);
+            ${$type} = get_categories(
+                [
+                    'taxonomy'     => 'events_' . $type,
+                    'hierarchical' => true,
+                ]
+            );
         }
-        if (empty ($tags) && empty ($categories)) {
+        if (empty($tags) && empty($categories)) {
             return '';
         }
         $args = [
-            'label' => $this->_args[ 'renderer' ][ 'label' ],
-            'help'  => $this->_args[ 'renderer' ][ 'help' ],
+            'label' => $this->args['renderer']['label'],
+            'help'  => $this->args['renderer']['help'],
         ];
-        if ( ! empty ($tags)) {
-            $args[ 'tags' ] = $this->_get_select_for_terms(
+        if ( ! empty($tags)) {
+            $args['tags'] = $this->_get_select_for_terms(
                 'tags',
                 I18n::__('Tags'),
                 $tags
             );
         }
         $categories_html = '';
-        if ( ! empty ($categories)) {
-            $args[ 'categories' ] = $this->_get_select_for_terms(
+        if ( ! empty($categories)) {
+            $args['categories'] = $this->_get_select_for_terms(
                 'categories',
                 I18n::__('Categories'),
                 $categories
@@ -66,17 +67,20 @@ class SettingsCatsTagsFilter extends SettingsAbstract
     {
         $options = [];
         foreach ($terms as $term) {
-            $option = ['value' => $term->term_id, 'text' => $term->name];
-            if (isset($this->_args[ 'value' ][ $type ])) {
-                if (in_array($term->term_id, $this->_args[ 'value' ][ $type ])) {
-                    $option[ 'args' ] = ['selected' => 'selected'];
+            $option = [
+                'value' => $term->term_id,
+                'text'  => $term->name,
+            ];
+            if (isset($this->args['value'][$type])) {
+                if (in_array($term->term_id, $this->args['value'][$type])) {
+                    $option['args'] = ['selected' => 'selected'];
                 }
             }
             $options[] = $option;
         }
         $args = [
-            'id'         => $this->_args[ 'id' ].'_default_'.$type,
-            'name'       => $this->_args[ 'id' ].'_default_'.$type.'[]',
+            'id'         => $this->args['id'] . '_default_' . $type,
+            'name'       => $this->args['id'] . '_default_' . $type . '[]',
             'label'      => $label,
             'options'    => $options,
             'stacked'    => true,
@@ -92,5 +96,4 @@ class SettingsCatsTagsFilter extends SettingsAbstract
                           ->get_file('setting/select.twig', $args, true)
                           ->get_content();
     }
-
 }

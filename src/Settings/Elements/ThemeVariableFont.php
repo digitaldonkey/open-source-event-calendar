@@ -15,7 +15,6 @@ use Osec\Theme\ThemeLoader;
  */
 class ThemeVariableFont extends SettingsAbstract
 {
-
     /**
      * @var string Value saved when a custom font is used
      */
@@ -77,44 +76,43 @@ class ThemeVariableFont extends SettingsAbstract
          * @since 1.0
          *
          * @param  array  $default_fonts
-         *
          */
         $this->fonts = apply_filters('osec_default_font_options_alter', $this->fonts);
 
         // Add Option for "Custom" to fontList
-        $this->fonts[ __("Custom...", OSEC_TXT_DOM) ] = self::CUSTOM_FONT;
+        $this->fonts[__('Custom...', OSEC_TXT_DOM)] = self::CUSTOM_FONT;
 
-        if ( ! in_array($args[ 'value' ], $this->fonts)) {
+        if ( ! in_array($args['value'], $this->fonts)) {
             $this->use_custom_value = true;
-            $this->custom_value = $args[ 'value' ];
-            $this->_args[ 'value' ] = self::CUSTOM_FONT;
+            $this->custom_value     = $args['value'];
+            $this->args['value']   = self::CUSTOM_FONT;
         }
     }
 
-    public function render($html = '', $wrap = true) : string
+    public function render($html = '', $wrap = true): string
     {
         $args = [
-            'label'  => $this->_args[ 'description' ],
-            'id'     => $this->_args[ 'id' ],
+            'label'  => $this->args['description'],
+            'id'     => $this->args['id'],
             'input'  => [
-                'id'    => $this->_args[ 'id' ].self::CUSTOM_FONT_ID_SUFFIX,
+                'id'    => $this->args['id'] . self::CUSTOM_FONT_ID_SUFFIX,
                 'value' => '',
                 'args'  => [
-                    'placeholder' => __("Enter custom font(s)", OSEC_TXT_DOM),
+                    'placeholder' => __('Enter custom font(s)', OSEC_TXT_DOM),
                     'class'       => 'ai1ec-custom-font',
                 ],
             ],
             'select' => [
-                'id'      => $this->_args[ 'id' ],
+                'id'      => $this->args['id'],
                 'args'    => ['class' => 'ai1ec_font'],
                 'options' => $this->_get_options(),
             ],
         ];
 
         if ( ! $this->use_custom_value) {
-            $args[ 'input' ][ 'args' ][ 'class' ] = 'ai1ec-custom-font ai1ec-hide';
+            $args['input']['args']['class'] = 'ai1ec-custom-font ai1ec-hide';
         } else {
-            $args[ 'input' ][ 'value' ] = $this->custom_value;
+            $args['input']['value'] = $this->custom_value;
         }
 
         return ThemeLoader::factory($this->app)
@@ -126,16 +124,19 @@ class ThemeVariableFont extends SettingsAbstract
     {
         $options = [];
         foreach ($this->fonts as $text => $key) {
-            $option = ['text' => $text, 'value' => $key];
-            if ($key === $this->_args[ 'value' ]
+            $option = [
+                'text'  => $text,
+                'value' => $key,
+            ];
+            if (
+                $key === $this->args['value']
                 || ($key === self::CUSTOM_FONT && $this->use_custom_value)
             ) {
-                $option[ 'args' ] = ['selected' => 'selected'];
+                $option['args'] = ['selected' => 'selected'];
             }
             $options[] = $option;
         }
 
         return $options;
     }
-
 }

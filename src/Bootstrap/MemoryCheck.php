@@ -12,7 +12,6 @@ namespace Osec\Bootstrap;
  */
 class MemoryCheck extends OsecBaseClass
 {
-
     /**
      * Checks if there is enough available free memory.
      *
@@ -26,8 +25,8 @@ class MemoryCheck extends OsecBaseClass
             return true;
         }
         $required = self::_string_to_bytes($required_limit);
-        $limit = self::_string_to_bytes(ini_get('memory_limit'));
-        $used = self::get_usage();
+        $limit    = self::_string_to_bytes(ini_get('memory_limit'));
+        $used     = self::get_usage();
 
         return ($limit - $used) >= $required;
     }
@@ -41,15 +40,21 @@ class MemoryCheck extends OsecBaseClass
      */
     protected static function _string_to_bytes($v)
     {
-        $letter = substr($v, -1);
-        $value = (int) substr($v, 0, -1);
-        $powers = ['K' => 10, 'M' => 20, 'G' => 30, 'T' => 40, 'P' => 50];
+        $letter     = substr($v, -1);
+        $value      = (int)substr($v, 0, -1);
+        $powers     = [
+            'K' => 10,
+            'M' => 20,
+            'G' => 30,
+            'T' => 40,
+            'P' => 50,
+        ];
         $multiplier = 1;
-        if (isset($powers[ $letter ])) {
-            $multiplier = 2 ** $powers[ $letter ];
+        if (isset($powers[$letter])) {
+            $multiplier = 2 ** $powers[$letter];
         }
         if (1 === $multiplier) {
-            return (int) $v;
+            return (int)$v;
         }
 
         return $value * $multiplier;

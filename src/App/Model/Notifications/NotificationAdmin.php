@@ -16,7 +16,6 @@ use Osec\Theme\ThemeLoader;
  */
 class NotificationAdmin extends NotificationAbstract
 {
-
     /**
      * @var string Option key for messages storage.
      */
@@ -40,7 +39,7 @@ class NotificationAdmin extends NotificationAbstract
     /**
      * @var array Map of messages to be rendered.
      */
-    protected $_message_list = [];
+    protected ?array $messages = [];
 
     /**
      * Add message to store.
@@ -48,10 +47,10 @@ class NotificationAdmin extends NotificationAbstract
      * @param  string  $message  Actual message.
      * @param  string  $class  Message box class.
      * @param  int  $importance  Optional importance parameter for the message.
-     * Levels of importance are as following:
-     *     - 0 - messages limited to Ai1EC pages;
-     *     - 1 - messages limited to [0] and Plugins/Updates pages;
-     *     - 2 - messages limited to [1] and Dashboard.
+     *   Levels of importance are as following:
+     *       - 0 - messages limited to Ai1EC pages;
+     *       - 1 - messages limited to [0] and Plugins/Updates pages;
+     *       - 2 - messages limited to [1] and Dashboard.
      * @param  array  $recipients  List of message recipients.
      * @param  bool  $persistent  If set to true, messages needs to be dismissed by user.
      *
@@ -66,18 +65,18 @@ class NotificationAdmin extends NotificationAbstract
     ) {
         $this->retrieve();
 
-        $entity = compact('message', 'class', 'importance', 'persistent');
-        $msg_key = sha1(json_encode($entity));
-        $entity[ 'msg_key' ] = $msg_key;
-        if (isset($this->_message_list[ '_messages' ][ $msg_key ])) {
+        $entity            = compact('message', 'class', 'importance', 'persistent');
+        $msg_key           = sha1(json_encode($entity));
+        $entity['msg_key'] = $msg_key;
+        if (isset($this->messages['_messages'][$msg_key])) {
             return true;
         }
-        $this->_message_list[ '_messages' ][ $msg_key ] = $entity;
+        $this->messages['_messages'][$msg_key] = $entity;
         foreach ($recipients as $rcpt) {
-            if ( ! isset($this->_message_list[ $rcpt ])) {
+            if ( ! isset($this->messages[$rcpt])) {
                 continue;
             }
-            $this->_message_list[ $rcpt ][ $msg_key ] = $msg_key;
+            $this->messages[$rcpt][$msg_key] = $msg_key;
         }
 
         return $this->write();
@@ -90,15 +89,20 @@ class NotificationAdmin extends NotificationAbstract
      */
     public function retrieve()
     {
-        static $default = ['_messages' => [], self::RCPT_ALL => [], self::RCPT_NETWORK => [], self::RCPT_ADMIN => []];
-        $this->_message_list = $this->app->options
+        static $default = [
+            '_messages'        => [],
+            self::RCPT_ALL     => [],
+            self::RCPT_NETWORK => [],
+            self::RCPT_ADMIN   => [],
+        ];
+        $this->messages = $this->app->options
             ->get(self::OPTION_KEY, null);
-        if (null === $this->_message_list) {
-            $this->_message_list = $default;
+        if (null === $this->messages) {
+            $this->messages = $default;
         } else {
-            $this->_message_list = array_merge(
+            $this->messages = array_merge(
                 $default,
-                $this->_message_list
+                $this->messages
             );
         }
 
@@ -113,7 +117,7 @@ class NotificationAdmin extends NotificationAbstract
     public function write()
     {
         return $this->app->options
-            ->set(self::OPTION_KEY, $this->_message_list);
+            ->set(self::OPTION_KEY, $this->messages);
     }
 
     /**
@@ -124,27 +128,27 @@ class NotificationAdmin extends NotificationAbstract
      *
      * @return bool Update status.
      */
-    public function send() : bool
+    public function send(): bool
     {
         $this->retrieve();
 
         $destinations = [self::RCPT_ALL, current_filter()];
-        $modified = false;
+        $modified     = false;
         foreach ($destinations as $dst) {
-            if ( ! empty($this->_message_list[ $dst ])) {
-                foreach ($this->_message_list[ $dst ] as $key) {
+            if ( ! empty($this->messages[$dst])) {
+                foreach ($this->messages[$dst] as $key) {
                     if (
-                        isset($this->_message_list[ '_messages' ][ $key ])
+                        isset($this->messages['_messages'][$key])
                     ) {
                         $this->_render_message(
-                            $this->_message_list[ '_messages' ][ $key ]
+                            $this->messages['_messages'][$key]
                         );
                         if (
-                            ! isset($this->_message_list[ '_messages' ][ $key ][ 'persistent' ]) ||
-                            false === $this->_message_list[ '_messages' ][ $key ][ 'persistent' ]
+                            ! isset($this->messages['_messages'][$key]['persistent']) ||
+                            false === $this->messages['_messages'][$key]['persistent']
                         ) {
-                            unset($this->_message_list[ '_messages' ][ $key ]);
-                            unset($this->_message_list[ $dst ][ $key ]);
+                            unset($this->messages['_messages'][$key]);
+                            unset($this->messages[$dst][$key]);
                         }
                     }
                 }
@@ -161,8 +165,8 @@ class NotificationAdmin extends NotificationAbstract
     protected function _render_message(array $entity)
     {
         $importance = 0;
-        if (isset($entity[ 'importance' ])) {
-            $importance = ((int) $entity[ 'importance' ]) % 3;
+        if (isset($entity['importance'])) {
+            $importance = ((int)$entity['importance']) % 3;
         }
         if ($this->are_notices_available($importance)) {
             static $theme = null;
@@ -176,12 +180,12 @@ class NotificationAdmin extends NotificationAbstract
              *
              * @param  string  $label  Translated text.
              */
-            $entity[ 'text_label' ] = apply_filters(
+            $entity['text_label']          = apply_filters(
                 'osec_notification_label',
                 I18n::__('Open Source Event Calendar')
             );
-            $entity[ 'text_dismiss_button' ] = I18n::__('Got it – dismiss this');
-            $file = $theme->get_file(
+            $entity['text_dismiss_button'] = I18n::__('Got it – dismiss this');
+            $file                          = $theme->get_file(
                 'notification/admin.twig',
                 $entity,
                 true
@@ -239,17 +243,15 @@ class NotificationAdmin extends NotificationAbstract
 
     /**
      * Delete a notice from ajax call.
-     *
      */
-    public function dismiss_notice() : void
+    public function dismiss_notice(): void
     {
-        $key = $_POST[ 'key' ];
-        foreach ($this->_message_list as $dest) {
-            if (isset($this->_message_list[ $dest ][ $key ])) {
-                unset($this->_message_list[ $dest ][ $key ]);
+        $key = $_POST['key'];
+        foreach ($this->messages as $dest) {
+            if (isset($this->messages[$dest][$key])) {
+                unset($this->messages[$dest][$key]);
             }
         }
         $this->write();
     }
-
 }

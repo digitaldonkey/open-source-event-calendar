@@ -26,7 +26,6 @@ use Twig\TwigTest;
  */
 class TwigExtension extends AbstractExtension
 {
-
     /**
      * @var App
      */
@@ -41,11 +40,11 @@ class TwigExtension extends AbstractExtension
      *
      * @param  Event  $event  The event to get the avatar for
      * @param  array|null  $fallback_order  Order of fallback in searching for
-     *                                      images, or null to use default
+     *                                     images, or null to use default
      * @param  string  $classes  A space-separated list of CSS classes
-     *                                      to apply to the outer <div> element.
-     * @param  boolean  $wrap_permalink  Whether to wrap the element in a link
-     *                                      to the event details page.
+     *                                         to apply to the outer <div> element.
+     * @param  bool  $wrap_permalink  Whether to wrap the element in a link
+     *                                        to the event details page.
      *
      * @return  string                   String of HTML if image is found
      */
@@ -63,7 +62,8 @@ class TwigExtension extends AbstractExtension
         );
     }
 
-    /* (non-PHPdoc)
+    /*
+    (non-PHPdoc)
      * @see Twig_Extension::getFunctions()
      */
 
@@ -74,7 +74,7 @@ class TwigExtension extends AbstractExtension
      *
      * @param  Event  $event  The event to get the avatar for.
      * @param  array|null  $fallback_order  Order of fallback in searching for
-     *                                      images, or null to use default.
+     *                                     images, or null to use default.
      *
      * @return  string                   URL if image is found.
      */
@@ -91,7 +91,7 @@ class TwigExtension extends AbstractExtension
      *
      * @param  mixed  $var  Suspected string
      *
-     * @return boolean True if it is a string, false otherwise.
+     * @return bool True if it is a string, false otherwise.
      */
     public static function is_string(mixed $var)
     {
@@ -107,7 +107,7 @@ class TwigExtension extends AbstractExtension
      */
     public static function hour_to_datetime($hour)
     {
-        $ret = new DT ('now', 'sys.default');
+        $ret = new DT('now', 'sys.default');
 
         return $ret->set_time($hour, 0, 0);
     }
@@ -190,7 +190,7 @@ class TwigExtension extends AbstractExtension
      * @param  number  $length  Length to truncate string to.
      * @param  string  $read_more  What string to append if truncated.
      * @param  string  $html_entities  Whether to treat input string as HTML with
-     *                              possible &asdf; entities
+     *                             possible &asdf; entities
      *
      * @return string
      */
@@ -203,14 +203,15 @@ class TwigExtension extends AbstractExtension
         // Truncate multibyte encodings differently, if supported.
         // First decode entities if requested.
         if ($html_entities) {
-            $string = html_entity_decode((string) $string, ENT_QUOTES, 'UTF-8');
+            $string = html_entity_decode((string)$string, ENT_QUOTES, 'UTF-8');
         }
         // Truncate string.
-        $string = mb_strimwidth((string) $string, 0, $length, $read_more, 'UTF-8');
+        $string = mb_strimwidth((string)$string, 0, $length, $read_more, 'UTF-8');
         // Reencode entities if requested.
         if ($html_entities) {
             $string = htmlentities($string, ENT_QUOTES, 'UTF-8');
         }
+
         return $string;
     }
 
@@ -233,7 +234,7 @@ class TwigExtension extends AbstractExtension
      *
      * @param  App  $app
      */
-    public function set_registry(App $app) : void
+    public function set_registry(App $app): void
     {
         $this->app = $app;
     }
@@ -244,10 +245,13 @@ class TwigExtension extends AbstractExtension
             'wp_nonce_field'               => new TwigFunction('wp_nonce_field', [$this, 'wp_nonce_field']),
             'do_meta_boxes'                => new TwigFunction('do_meta_boxes', [$this, 'do_meta_boxes']),
             'fb'                           => new TwigFunction('fb', [$this, 'fb']),
-            'ai1ec_disable_content_output' => new TwigFunction('ai1ec_disable_content_output', [
-                $this,
-                'ai1ec_disable_content_output'
-            ]),
+            'ai1ec_disable_content_output' => new TwigFunction(
+                'ai1ec_disable_content_output',
+                [
+                    $this,
+                    'ai1ec_disable_content_output',
+                ]
+            ),
         ];
     }
 
@@ -256,7 +260,7 @@ class TwigExtension extends AbstractExtension
      *
      * @return array
      */
-    public function getFilters() : array
+    public function getFilters(): array
     {
         return [
             new TwigFilter('truncate', $this->truncate(...)),
@@ -286,7 +290,7 @@ class TwigExtension extends AbstractExtension
     /**
      * Debug function to be used in twig templates with Firebug/FirePHP
      */
-    public function fb(mixed $object) : void
+    public function fb(mixed $object): void
     {
         if (function_exists('fb')) {
             /** @noinspection PhpUndefinedFunctionInspection */
@@ -319,8 +323,8 @@ class TwigExtension extends AbstractExtension
      * @param  mixed  $object  gets passed to the box callback function as first parameter
      *
      * @return void number of meta_boxes
-*/
-    public function do_meta_boxes($screen, $context, mixed $object) : void
+     */
+    public function do_meta_boxes($screen, $context, mixed $object): void
     {
         do_meta_boxes($screen, $context, $object);
     }
@@ -354,12 +358,13 @@ class TwigExtension extends AbstractExtension
      * @return string Nonce field.
      * @package WordPress
      */
-    public function wp_nonce_field($action = -1, $name = "_wpnonce", $referer = true, $echo = false)
+    public function wp_nonce_field($action = -1, $name = '_wpnonce', $referer = true, $echo = false)
     {
         return wp_nonce_field($action, $name, $referer, false);
     }
 
-    /* (non-PHPdoc)
+    /*
+    (non-PHPdoc)
      * @see Twig_ExtensionInterface::getName()
      */
     public function getName()

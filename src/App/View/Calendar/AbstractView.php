@@ -28,23 +28,21 @@ use Osec\Theme\ThemeLoader;
  */
 abstract class AbstractView extends OsecBaseClass
 {
-
     /**
      * @var RequestParser The request object
      */
-    protected RequestParser $_request;
+    protected RequestParser $request;
 
     /**
      * Public constructor
      *
      * @param  App  $app
      * @param  RequestParser  $request
-     *
      */
     public function __construct(App $app, RequestParser $request)
     {
         parent::__construct($app);
-        $this->_request = $request;
+        $this->request = $request;
     }
 
     /**
@@ -56,10 +54,10 @@ abstract class AbstractView extends OsecBaseClass
      */
     public function get_extra_arguments(array $view_args, $exact_date)
     {
-        $offset = $this->get_name().'_offset';
-        $view_args[ $offset ] = $this->_request->get($offset);
+        $offset             = $this->get_name() . '_offset';
+        $view_args[$offset] = $this->request->get($offset);
         if (false !== $exact_date) {
-            $view_args[ 'exact_date' ] = $exact_date;
+            $view_args['exact_date'] = $exact_date;
         }
 
         return $view_args;
@@ -75,12 +73,10 @@ abstract class AbstractView extends OsecBaseClass
     /**
      * Get extra arguments specific for the view's template
      *
-     *
      * @return array The template arguments with the extra parameters added.
      */
     public function get_extra_template_arguments(array $args)
     {
-
         /**
          * Change the Twig arguments
          *
@@ -91,7 +87,6 @@ abstract class AbstractView extends OsecBaseClass
          * @since 1.0
          *
          * @param  array  $args  Event location.
-         *
          */
         return apply_filters('osec_calendar_view_template_alter', $args);
     }
@@ -103,10 +98,12 @@ abstract class AbstractView extends OsecBaseClass
     protected function _create_link_for_day_view($exact_date)
     {
         $href = HtmlFactory::factory($this->app)
-                           ->create_href_helper_instance([
-                               'action'     => 'oneday',
-                               'exact_date' => $exact_date
-                           ]);
+                           ->create_href_helper_instance(
+                               [
+                                   'action'     => 'oneday',
+                                   'exact_date' => $exact_date,
+                               ]
+                           );
 
         return $href->generate_href();
     }
@@ -120,7 +117,7 @@ abstract class AbstractView extends OsecBaseClass
     {
         $view = $this->get_name();
         $file = ThemeLoader::factory($this->app)
-                           ->get_file($view.'.twig', $view_args, false);
+                           ->get_file($view . '.twig', $view_args, false);
 
         /**
          * Alter View Html output
@@ -131,12 +128,11 @@ abstract class AbstractView extends OsecBaseClass
          *
          * @param  string  $view  Calendar View Name
          */
-        return apply_filters('osec_get_'.$view.'_view_content_alter', $file->get_content(), $view_args);
+        return apply_filters('osec_get_' . $view . '_view_content_alter', $file->get_content(), $view_args);
     }
 
     /**
      * Render the view and return the content
-     *
      *
      * @return string the html of the view
      */
@@ -145,12 +141,12 @@ abstract class AbstractView extends OsecBaseClass
     /**
      * Applies filters to view args for front end rendering
      */
-    protected function _apply_filters_to_args(array $args) : array
+    protected function _apply_filters_to_args(array $args): array
     {
         $view = $this->get_name();
 
         return ThemeLoader::factory($this->app)
-                          ->apply_filters_to_args($args, $view.'.twig', false);
+                          ->apply_filters_to_args($args, $view . '.twig', false);
     }
 
     /**
@@ -166,12 +162,11 @@ abstract class AbstractView extends OsecBaseClass
             // reset to be day-contained with respect to current timezone
             $event_start = (new DT($event->get('start'), 'sys.default'))
                 ->set_time(0, 0, 0)->format();
-            $event_end = (new DT($event->get('end'), 'sys.default'))
+            $event_end   = (new DT($event->get('end'), 'sys.default'))
                 ->set_time(0, 0, 0)->format();
-        }
-        else {
+        } else {
             $event_start = $event->get('start')->format();
-            $event_end = $event->get('end')->format();
+            $event_end   = $event->get('end')->format();
         }
 
         return [$event_start, $event_end];
@@ -190,7 +185,7 @@ abstract class AbstractView extends OsecBaseClass
     {
         $post_ids = [];
         foreach ($events as $event) {
-            $post_ids[] = (int) $event->get('post_id');
+            $post_ids[] = (int)$event->get('post_id');
         }
         update_meta_cache('post', $post_ids);
         TaxonomyAdapter::factory($this->app)->update_meta($post_ids);
@@ -200,13 +195,12 @@ abstract class AbstractView extends OsecBaseClass
      * Gets the navigation bar HTML.
      *
      * @param  array  $nav_args  Args for the navigation bar template, including
-     *                        'no_navigation' which determines whether to show it
+     *                       'no_navigation' which determines whether to show it
      *
      * @return string
      */
     protected function _get_navigation(array $nav_args)
     {
-
         /**
          * Add Html at calendar navigarion header.
          *
@@ -218,8 +212,8 @@ abstract class AbstractView extends OsecBaseClass
          *
          * @param  array  $html  Event location.
          */
-        $nav_args[ 'contribution_buttons' ] = apply_filters('osec_contribution_buttons', '', 'html', 'render-command');
-        if ($nav_args[ 'no_navigation' ]) {
+        $nav_args['contribution_buttons'] = apply_filters('osec_contribution_buttons', '', 'html', 'render-command');
+        if ($nav_args['no_navigation']) {
             return '';
         }
 
@@ -237,13 +231,13 @@ abstract class AbstractView extends OsecBaseClass
      *
      * @return string
      */
-    protected function _get_pagination(array $args, $title)
+    protected function _get_pagination(array $args, $title, $title_short = '')
     {
-
-        $method = 'get_'.$this->get_name().'_pagination_links';
-        $args = [
-            'links'     => $this->$method($args, $title),
-            'data_type' => $args[ 'data_type' ],
+        /* @uses OnedayView:get_oneday_pagination_links() */
+        $method = 'get_' . $this->get_name() . '_pagination_links';
+        $args   = [
+            'links'     => $this->$method($args, $title, $title_short),
+            'data_type' => $args['data_type'],
         ];
 
         return ThemeLoader::factory($this->app)
@@ -257,8 +251,8 @@ abstract class AbstractView extends OsecBaseClass
     protected function _add_runtime_properties(Event $event)
     {
         global $post;
-        $original_post = $post;
-        $post = $event->get('post');
+        $original_post      = $post;
+        $post               = $event->get('post');
         $instance_permalink = get_permalink(
             $event->get('post_id')
         );
@@ -282,7 +276,8 @@ abstract class AbstractView extends OsecBaseClass
         $appendController->set_append_content(false);
         $event->set_runtime(
             'filtered_content',
-            apply_filters('osec_the_content',
+            apply_filters(
+                'osec_the_content',
                 apply_filters(
                     'the_content',
                     $event->get('post')->post_content
@@ -292,16 +287,19 @@ abstract class AbstractView extends OsecBaseClass
         $appendController->set_append_content(true);
 
         $taxonomyView = EventTaxonomyView::factory($this->app);
-        $ticketView = EventTicketView::factory($this->app);
+        $ticketView   = EventTicketView::factory($this->app);
 
         $event->set_runtime('color_style', $taxonomyView->get_color_style($event));
         $event->set_runtime('category_colors', $taxonomyView->get_category_colors($event));
         $event->set_runtime('ticket_url_label', $ticketView->get_tickets_url_label($event, false));
         $event->set_runtime('edit_post_link', get_edit_post_link($event->get('post_id')));
-        $event->set_runtime('edit_post_instance_link', admin_url(
-            'post.php?post='.$event->get('post_id').
-            '&action=edit&instance='.$event->get('instance_id', 1)
-        ));
+        $event->set_runtime(
+            'edit_post_instance_link',
+            admin_url(
+                'post.php?post=' . $event->get('post_id') .
+                '&action=edit&instance=' . $event->get('instance_id', 1)
+            )
+        );
         $event->set_runtime('post_excerpt', EventPostView::factory($this->app)->trim_excerpt($event));
         $color = EventColorView::factory($this->app);
         $event->set_runtime('faded_color', $color->get_faded_color($event));
@@ -319,10 +317,9 @@ abstract class AbstractView extends OsecBaseClass
      */
     protected function _add_view_specific_runtime_properties(Event $event)
     {
-
     }
 
-    protected function getFilterDefaults($view_args) : array
+    protected function getFilterDefaults($view_args): array
     {
         /**
          * Do something mysterious to prepare the filter.
@@ -336,16 +333,16 @@ abstract class AbstractView extends OsecBaseClass
          * @param  bool  $show_unique_only  If only unique events should be shown
          * @param  string  $callingFrom  Class name of the view requesting default filtsers.
          */
-        return apply_filters('osec_events_relative_to_filter_defaults',
+        return apply_filters(
+            'osec_events_relative_to_filter_defaults',
             [
-                'post_ids'     => $view_args[ 'post_ids' ],
-                'auth_ids'     => $view_args[ 'auth_ids' ],
-                'cat_ids'      => $view_args[ 'cat_ids' ],
-                'tag_ids'      => $view_args[ 'tag_ids' ],
-                'instance_ids' => $view_args[ 'instance_ids' ],
+                'post_ids'     => $view_args['post_ids'],
+                'auth_ids'     => $view_args['auth_ids'],
+                'cat_ids'      => $view_args['cat_ids'],
+                'tag_ids'      => $view_args['tag_ids'],
+                'instance_ids' => $view_args['instance_ids'],
             ],
             $view_args,
-
             /**
              * Show only unique events
              *
@@ -360,7 +357,7 @@ abstract class AbstractView extends OsecBaseClass
         );
     }
 
-    protected function getBelowToolbarHtml(string $type, array $view_args) : string
+    protected function getBelowToolbarHtml(string $type, array $view_args): string
     {
         /**
          * Add Html below the toolbar on calendar views.
@@ -376,5 +373,4 @@ abstract class AbstractView extends OsecBaseClass
             $view_args
         );
     }
-
 }

@@ -2,7 +2,6 @@
 
 namespace Osec\App\Model\Notifications;
 
-
 use Osec\Bootstrap\OsecBaseClass;
 
 /**
@@ -15,16 +14,15 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 abstract class NotificationAbstract extends OsecBaseClass
 {
-
     /**
      * @var string The message to send.
      */
-    protected $_message;
+    protected $message;
 
     /**
      * @var array A list of recipients.
      */
-    protected $_recipients = [];
+    protected array $recipients = [];
 
     /**
      * This function performs the actual sending of the message.
@@ -34,5 +32,4 @@ abstract class NotificationAbstract extends OsecBaseClass
      * @return bool Success.
      */
     abstract public function send();
-
 }

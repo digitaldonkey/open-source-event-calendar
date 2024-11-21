@@ -30,7 +30,8 @@ timely.define([
             },
             o = {
                 init: function (o) {
-                    var u = jQueryTimely.extend({}, s, o), startDateInput = jQueryTimely(u.start_date_input), f = jQueryTimely(u.start_time), l = startDateInput, whatIsC = startDateInput;
+                    var u = jQueryTimely.extend({}, s, o), startDateInput = jQueryTimely(u.start_date_input),
+                        f = jQueryTimely(u.start_time), l = startDateInput, whatIsC = startDateInput;
 
 
                     return whatIsC.bind("focus.timespan", r), l.calendricalDate({

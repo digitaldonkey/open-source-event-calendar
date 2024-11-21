@@ -15,7 +15,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class EventTicketView extends OsecBaseClass
 {
-
     /**
      * Create readable content for buy tickets/register link
      *
@@ -38,7 +37,6 @@ class EventTicketView extends OsecBaseClass
              * @since 1.0
              *
              * @param  string  $html  Html do display a ticket icon.
-             *
              */
             $output = apply_filters('osec_buy_tickets_url_icon', '<i class="ai1ec-fa ai1ec-fa-shopping-cart"></i>');
             if ( ! empty($output)) {
@@ -57,40 +55,40 @@ class EventTicketView extends OsecBaseClass
      */
     public function get_contact_html(Event $event)
     {
-        $contact = '<div class="h-card">';
+        $contact      = '<div class="h-card">';
         $has_contents = false;
         if ($event->get('contact_name')) {
-            $contact .=
-                '<div class="ai1ec-contact-name p-name">'.
-                '<i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-user"></i> '.
-                esc_html($event->get('contact_name')).
+            $contact      .=
+                '<div class="ai1ec-contact-name p-name">' .
+                '<i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-user"></i> ' .
+                esc_html($event->get('contact_name')) .
                 '</div> ';
             $has_contents = true;
         }
         if ($event->get('contact_phone')) {
-            $contact .=
-                '<div class="ai1ec-contact-phone p-tel">'.
-                '<i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-phone"></i> '.
-                esc_html($event->get('contact_phone')).
+            $contact      .=
+                '<div class="ai1ec-contact-phone p-tel">' .
+                '<i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-phone"></i> ' .
+                esc_html($event->get('contact_phone')) .
                 '</div> ';
             $has_contents = true;
         }
         if ($event->get('contact_email')) {
-            $contact .=
-                '<div class="ai1ec-contact-email">'.
-                '<a class="u-email" href="mailto:'.
-                esc_attr($event->get('contact_email')).'">'.
-                '<i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-envelope-o"></i> '.
-                __('Email', OSEC_TXT_DOM).'</a></div> ';
+            $contact      .=
+                '<div class="ai1ec-contact-email">' .
+                '<a class="u-email" href="mailto:' .
+                esc_attr($event->get('contact_email')) . '">' .
+                '<i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-envelope-o"></i> ' .
+                __('Email', OSEC_TXT_DOM) . '</a></div> ';
             $has_contents = true;
         }
         $contact_url = $event->get('contact_url');
         if ($contact_url) {
-            $contact .=
-                '<div class="ai1ec-contact-url">'.
-                '<a class="u-url" target="_blank" href="'.
-                esc_attr($contact_url).
-                '"><i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-link"></i> '.
+            $contact      .=
+                '<div class="ai1ec-contact-url">' .
+                '<a class="u-url" target="_blank" href="' .
+                esc_attr($contact_url) .
+                '"><i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-link"></i> ' .
 
                 /**
                  * Alter contact_url label
@@ -105,7 +103,7 @@ class EventTicketView extends OsecBaseClass
                  * @param  string  $event_website_link  Multilingual label for the link.
                  */
                 apply_filters('osec_contact_url_link', __('Event website', OSEC_TXT_DOM), $contact_url)
-                .' <i class="ai1ec-fa ai1ec-fa-external-link"></i></a></div>';
+                . ' <i class="ai1ec-fa ai1ec-fa-external-link"></i></a></div>';
             $has_contents = true;
         }
         $contact .= '</div>';

@@ -13,7 +13,6 @@ namespace Osec\App\Model;
  */
 class MetaAdapterUser extends MetaAdapterAbstract
 {
-
     /**
      * Get meta value for current user.
      *
@@ -26,8 +25,8 @@ class MetaAdapterUser extends MetaAdapterAbstract
     {
         $user_id = 0;
         if (is_callable('wp_get_current_user')) {
-            $user = wp_get_current_user();
-            $user_id = (int) $user->ID;
+            $user    = wp_get_current_user();
+            $user_id = (int)$user->ID;
             unset($user);
         }
         if ($user_id <= 0) {
@@ -57,8 +56,8 @@ class MetaAdapterUser extends MetaAdapterAbstract
         $new_value = null,
         $force_update = false
     ) {
-        $meta_key = 'ai1ec_timezone';
-        $user_id = (int) $user_id;
+        $meta_key  = 'osec_timezone';
+        $user_id   = (int)$user_id;
         $old_value = $this->get(
             $user_id,
             $meta_key,
@@ -97,5 +96,4 @@ class MetaAdapterUser extends MetaAdapterAbstract
 
         return $old_value;
     }
-
 }

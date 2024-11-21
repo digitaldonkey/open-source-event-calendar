@@ -16,7 +16,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class EventColorView extends OsecBaseClass
 {
-
     public function get_faded_color(Event $event)
     {
         return $this->_get_color($event, 'faded');
@@ -31,7 +30,7 @@ class EventColorView extends OsecBaseClass
             'rgba'  => [],
             'faded' => [],
         ];
-        $methods = [
+        $methods    = [
             'rgba'  => 'get_event_category_rgba_color',
             'faded' => 'get_event_category_faded_color',
         ];
@@ -39,12 +38,12 @@ class EventColorView extends OsecBaseClass
                                      ->get_post_categories($event->get('post_id'));
 
         if ( ! empty($categories)) {
-            if ( ! isset($categories_cache[ $type ][ $categories[ 0 ]->term_id ])) {
-                $method = $methods[ $type ];
-                $categories_cache[ $type ][ $categories[ 0 ]->term_id ] = $this->$method($categories[ 0 ]->term_id);
+            if ( ! isset($categories_cache[$type][$categories[0]->term_id])) {
+                $method                                           = $methods[$type];
+                $categories_cache[$type][$categories[0]->term_id] = $this->$method($categories[0]->term_id);
             }
 
-            return $categories_cache[ $type ][ $categories[ 0 ]->term_id ];
+            return $categories_cache[$type][$categories[0]->term_id];
         }
 
         return '';
@@ -70,10 +69,9 @@ class EventColorView extends OsecBaseClass
     public function get_event_category_faded_color($term_id)
     {
         $taxonomy = TaxonomyAdapter::factory($this->app);
-        $color = $taxonomy->get_category_color($term_id);
+        $color    = $taxonomy->get_category_color($term_id);
         if ( ! is_null($color) && ! empty($color)) {
-
-            $color1 = substr((string) $color, 1);
+            $color1 = substr((string)$color, 1);
             $color2 = 'ffffff';
 
             $c1_p1 = hexdec(substr($color1, 0, 2));
@@ -88,7 +86,7 @@ class EventColorView extends OsecBaseClass
             $m_p2 = dechex(round($c1_p2 * 0.5 + $c2_p2 * 0.5));
             $m_p3 = dechex(round($c1_p3 * 0.5 + $c2_p3 * 0.5));
 
-            return '#'.$m_p1.$m_p2.$m_p3;
+            return '#' . $m_p1 . $m_p2 . $m_p3;
         }
 
         return '';
@@ -105,16 +103,15 @@ class EventColorView extends OsecBaseClass
     public function get_event_category_rgba_color($term_id)
     {
         $taxonomy = TaxonomyAdapter::factory($this->app);
-        $color = $taxonomy->get_category_color($term_id);
+        $color    = $taxonomy->get_category_color($term_id);
         if ( ! is_null($color) && ! empty($color)) {
-            $p1 = hexdec(substr((string) $color, 1, 2));
-            $p2 = hexdec(substr((string) $color, 3, 2));
-            $p3 = hexdec(substr((string) $color, 5, 2));
+            $p1 = hexdec(substr((string)$color, 1, 2));
+            $p2 = hexdec(substr((string)$color, 3, 2));
+            $p3 = hexdec(substr((string)$color, 5, 2));
 
             return "rgba($p1, $p2, $p3, %s)";
         }
 
         return '';
     }
-
 }

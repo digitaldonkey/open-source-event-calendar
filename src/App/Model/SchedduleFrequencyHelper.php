@@ -13,11 +13,10 @@ use Osec\App\Model\PostTypeEvent\InvalidArgumentException;
  */
 class SchedduleFrequencyHelper
 {
-
     /**
      * @var array Map of default multipliers
      */
-    protected $_multipliers = [
+    protected $multipliers = [
         's' => 1,
         // take care, to always have an identifier with unit of `1`
         'm' => 60,
@@ -29,30 +28,30 @@ class SchedduleFrequencyHelper
     /**
      * @var array Map of WordPress native multipliers
      */
-    protected $_wp_names = [
+    protected array $wpNames = [
         'hourly'     => [
             'item'    => ['h' => 1],
-            'seconds' => 3600
+            'seconds' => 3600,
         ],
         'twicedaily' => [
             'item'    => ['d' => 0.5],
-            'seconds' => 43200
+            'seconds' => 43200,
         ],
         'daily'      => [
             'item'    => ['d' => 1],
-            'seconds' => 86400
+            'seconds' => 86400,
         ],
     ];
 
     /**
      * @var string One letter code for lowest available quantifier
      */
-    protected $_lowest_quantifier = 's';
+    protected string $lowestQuantifier = 's';
 
     /**
      * @var array Parsed representation - quantifiers and their amounts
      */
-    protected $_parsed = [];
+    protected array $parsed = [];
 
     /**
      * Inject different multiplier
@@ -67,17 +66,17 @@ class SchedduleFrequencyHelper
      * @throws InvalidArgumentException
      *   If first argument is not an ASCII letter.
      */
-    public function add_multiplier($letter, $quant) : self
+    public function add_multiplier($letter, $quant): self
     {
-        $letter = substr((string) $letter, 0, 1);
-        $quant = (int) $quant;
+        $letter = substr((string)$letter, 0, 1);
+        $quant  = (int)$quant;
         if ($quant < 0 || ! preg_match('/^[a-z]$/i', $letter)) {
             throw new InvalidArgumentException(
-                'First argument to add_multiplier must be ASCII letter'.
+                'First argument to add_multiplier must be ASCII letter' .
                 '(a-zA-Z), and second - an integer'
             );
         }
-        $this->_multipliers[ $letter ] = $quant;
+        $this->multipliers[$letter] = $quant;
 
         return $this;
     }
@@ -91,17 +90,17 @@ class SchedduleFrequencyHelper
      *
      * @return bool Success
      */
-    public function parse($input) : bool
+    public function parse($input): bool
     {
         $input = strtolower(
-            (string) preg_replace(
+            (string)preg_replace(
                 '|(\d*\.?\d+)\s+([a-z])|',
                 '$1$2',
                 trim($input)
             )
         );
-        if (isset($this->_wp_names[ $input ])) {
-            $this->_parsed = $this->_wp_names[ $input ][ 'item' ];
+        if (isset($this->wpNames[$input])) {
+            $this->parsed = $this->wpNames[$input]['item'];
 
             return true;
         }
@@ -109,7 +108,7 @@ class SchedduleFrequencyHelper
         if ( ! $match) {
             return false;
         }
-        $this->_parsed = $match;
+        $this->parsed = $match;
 
         return true;
     }
@@ -125,24 +124,24 @@ class SchedduleFrequencyHelper
      *
      * @return array|NULL Extracted time identifiers
      */
-    protected function _match($input) : ?array
+    protected function _match($input): ?array
     {
-        $regexp = '/(\d*\.?\d+)(['.
-                  implode('|', array_keys($this->_multipliers)).
-                  '])?/';
+        $regexp  = '/(\d*\.?\d+)([' .
+                   implode('|', array_keys($this->multipliers)) .
+                   '])?/';
         $matches = null;
         if ( ! preg_match_all($regexp, $input, $matches)) {
             return null;
         }
         $output = [];
-        foreach ($matches[ 0 ] as $key => $value) {
-            $quantifier = ( ! empty($matches[ 2 ][ $key ]))
-                ? $matches[ 2 ][ $key ]
-                : $this->_lowest_quantifier;
-            if ( ! isset($output[ $quantifier ])) {
-                $output[ $quantifier ] = 0;
+        foreach ($matches[0] as $key => $value) {
+            $quantifier = ( ! empty($matches[2][$key]))
+                ? $matches[2][$key]
+                : $this->lowestQuantifier;
+            if ( ! isset($output[$quantifier])) {
+                $output[$quantifier] = 0;
             }
-            $output[ $quantifier ] += $matches[ 1 ][ $key ];
+            $output[$quantifier] += $matches[1][$key];
         }
 
         return $output;
@@ -153,23 +152,23 @@ class SchedduleFrequencyHelper
      *
      * @return string Unified output format
      */
-    public function to_string() : string
+    public function to_string(): string
     {
         $seconds = $this->to_seconds();
         if ($wp_name = $this->match_wp_native_interval($seconds)) {
             return $wp_name;
         }
-        $reverse_quant = array_flip($this->_multipliers);
+        $reverse_quant = array_flip($this->multipliers);
         krsort($reverse_quant);
         $output = [];
         foreach ($reverse_quant as $duration => $quant) {
             if ($duration > $seconds) {
                 continue;
             }
-            $modded = (int) ($seconds / $duration);
+            $modded = (int)($seconds / $duration);
             if ($modded > 0) {
-                $output[] = $modded.$quant;
-                $seconds -= $modded * $duration;
+                $output[] = $modded . $quant;
+                $seconds  -= $modded * $duration;
                 if ($seconds <= 0) {
                     break;
                 }
@@ -184,13 +183,13 @@ class SchedduleFrequencyHelper
      *
      * @return int Number of seconds corresponding to user input
      */
-    public function to_seconds() : int
+    public function to_seconds(): int
     {
         $seconds = 0;
-        foreach ($this->_parsed as $quantifier => $number) {
-            $seconds += $number * $this->_multipliers[ $quantifier ];
+        foreach ($this->parsed as $quantifier => $number) {
+            $seconds += $number * $this->multipliers[$quantifier];
         }
-        $seconds = (int) $seconds; // discard any fractional part
+        $seconds = (int)$seconds; // discard any fractional part
 
         return $seconds;
     }
@@ -202,14 +201,14 @@ class SchedduleFrequencyHelper
      *
      * @return string|null False or name.
      */
-    public function match_wp_native_interval($seconds) : ?string
+    public function match_wp_native_interval($seconds): ?string
     {
-        if (empty($this->_parsed)) {
+        if (empty($this->parsed)) {
             return false;
         }
         $response = false;
-        foreach ($this->_wp_names as $name => $interval) {
-            if ($interval[ 'seconds' ] === $seconds) {
+        foreach ($this->wpNames as $name => $interval) {
+            if ($interval['seconds'] === $seconds) {
                 $response = $name;
                 break;
             }

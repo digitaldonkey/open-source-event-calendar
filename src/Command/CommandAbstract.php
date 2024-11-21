@@ -17,16 +17,15 @@ use Osec\Http\Response\RenderStrategyAbstract;
  */
 abstract class CommandAbstract extends OsecBaseClass
 {
-
     /**
      * @var RequestParser
      */
-    protected $_request;
+    protected ?RequestParser $request;
 
     /**
      * @var RenderStrategyAbstract
      */
-    protected $_render_strategy;
+    protected $renderStrategy;
 
     /**
      * Public constructor.
@@ -34,29 +33,30 @@ abstract class CommandAbstract extends OsecBaseClass
     public function __construct(App $app, RequestParser $request)
     {
         parent::__construct($app);
-        $this->_request = $request;
+        $this->request = $request;
     }
 
     /**
      * Gets parameters from the request object.
      *
-     * @return array|boolean
+     * @return array|bool
      */
     public function get_parameters()
     {
-        $plugin = $controller = $action = null;
-        $plugin = $this->_request->get_param('plugin', $plugin);
-        $controller = $this->_request->get_param('controller', $controller);
-        $action = $this->_request->get_param('action', $action);
+        $plugin     = $controller = $action = null;
+        $plugin     = $this->request->get_param('plugin', $plugin);
+        $controller = $this->request->get_param('controller', $controller);
+        $action     = $this->request->get_param('action', $action);
 
-        if (is_scalar($plugin)
-            && OSEC_PLUGIN_NAME === (string) $plugin
+        if (
+            is_scalar($plugin)
+            && OSEC_PLUGIN_NAME === (string)$plugin
             && $controller !== null
             && $action !== null
         ) {
             return [
                 'controller' => $controller,
-                'action'     => $action
+                'action'     => $action,
             ];
         }
 
@@ -71,11 +71,11 @@ abstract class CommandAbstract extends OsecBaseClass
     public function execute()
     {
         // Set the render strategy
-        $this->set_render_strategy($this->_request);
+        $this->setRenderStrategy($this->request);
         // get the data from the concrete implementation
         $data = $this->do_execute();
         // render it.
-        $this->_render_strategy->render($data);
+        $this->renderStrategy->render($data);
     }
 
     /**
@@ -83,7 +83,7 @@ abstract class CommandAbstract extends OsecBaseClass
      *
      * @param  RequestParser  $request
      */
-    abstract public function set_render_strategy(RequestParser $request);
+    abstract public function setRenderStrategy(RequestParser $request): void;
 
     /**
      * The abstract method concrete command must implement.
@@ -112,7 +112,7 @@ abstract class CommandAbstract extends OsecBaseClass
      * logic into the resolver ( oAuth or ics export for instance )
      * and this seems to me to be the most logical way to do this.
      *
-     * @return boolean
+     * @return bool
      */
     abstract public function is_this_to_execute();
 }

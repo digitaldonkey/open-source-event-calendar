@@ -12,10 +12,8 @@ namespace Osec\App\Model\Filter;
  */
 class FilterInstanceIds extends FilterInt
 {
-
     public function get_field()
     {
         return 'i.id';
     }
-
 }

@@ -16,7 +16,6 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageManageFeeds extends AdminPageAbstract
 {
-
     /**
      * Adds page to the menu.
      *
@@ -24,7 +23,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
      *
      * @return void
      */
-    public function add_page() : void
+    public function add_page(): void
     {
         // =======================
         // = Calendar Feeds Page =
@@ -48,7 +47,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
      *
      * @return void
      */
-    public function add_meta_box() : void
+    public function add_meta_box(): void
     {
         // Add the 'ICS Import Settings' meta box.
         add_meta_box(
@@ -66,7 +65,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
      *
      * @return void
      */
-    public function display_page() : void
+    public function display_page(): void
     {
         $args = [
             'title'             => __('OSEC: Calendar Feeds', OSEC_TXT_DOM),
@@ -91,7 +90,6 @@ class AdminPageManageFeeds extends AdminPageAbstract
          * @since 1.0
          *
          * @param  FeedsController  $feed
-         *
          */
         $feed = apply_filters('osec_calendar_feeds', FeedsController::factory($this->app));
         $args = [
@@ -104,11 +102,10 @@ class AdminPageManageFeeds extends AdminPageAbstract
     }
 
 
-    public function handle_post() : void
+    public function handle_post(): void
     {
-        if (isset($_POST[ 'cron_freq' ])) {
-            $this->app->settings->set('ics_cron_freq', $_REQUEST[ 'cron_freq' ]);
+        if (isset($_POST['cron_freq'])) {
+            $this->app->settings->set('ics_cron_freq', $_REQUEST['cron_freq']);
         }
     }
-
 }

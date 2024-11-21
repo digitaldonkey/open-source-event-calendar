@@ -23,13 +23,13 @@ use Osec\Twig\TwigExtension;
  */
 class MonthView extends AbstractView
 {
-
-    /* (non-PHPdoc)
+    /*
+    (non-PHPdoc)
     */
     public function get_content(array $view_args)
     {
-        $settings = $this->app->settings;
-        $defaults = [
+        $settings   = $this->app->settings;
+        $defaults   = [
             'month_offset' => 0,
             'cat_ids'      => [],
             'auth_ids'     => [],
@@ -38,11 +38,11 @@ class MonthView extends AbstractView
             'instance_ids' => [],
             'exact_date'   => UIDateFormats::factory($this->app)->current_time(),
         ];
-        $args = wp_parse_args($view_args, $defaults);
-        $local_date = new DT($args[ 'exact_date' ], 'sys.default');
+        $args       = wp_parse_args($view_args, $defaults);
+        $local_date = new DT($args['exact_date'], 'sys.default');
         $local_date->set_date(
             $local_date->format('Y'),
-            $local_date->format('m') + $args[ 'month_offset' ],
+            $local_date->format('m') + $args['month_offset'],
             1
         )->set_time(0, 0, 0);
 
@@ -50,12 +50,12 @@ class MonthView extends AbstractView
             $local_date,
             $this->getFilterDefaults($view_args),
         );
-        $cell_array = $this->get_month_cell_array(
+        $cell_array  = $this->get_month_cell_array(
             $local_date,
             $days_events
         );
         // Create pagination links.
-        $title = $local_date->format_i18n('F Y');
+        $title            = $local_date->format_i18n('F Y');
         $pagination_links = $this->_get_pagination($args, $title);
 
         /**
@@ -74,27 +74,29 @@ class MonthView extends AbstractView
             'cell_array'               => $cell_array,
             'show_location_in_title'   => $settings->get('show_location_in_title'),
             'month_word_wrap'          => $settings->get('month_word_wrap'),
-            'post_ids'                 => implode(',', $args[ 'post_ids' ]),
-            'data_type'                => $args[ 'data_type' ],
+            'post_ids'                 => implode(',', $args['post_ids']),
+            'data_type'                => $args['data_type'],
             'is_ticket_button_enabled' => $is_ticket_button_enabled,
             'text_venue_separator'     => __('@ %s', OSEC_TXT_DOM),
             'pagination_links'         => $pagination_links,
         ];
 
         // Add navigation if requested.
-        $view_args[ 'navigation' ] = $this->_get_navigation(
+        $view_args['navigation'] = $this->_get_navigation(
             [
-                'no_navigation'    => $args[ 'no_navigation' ],
+                'no_navigation'    => $args['no_navigation'],
                 'pagination_links' => $pagination_links,
-                'views_dropdown'   => $args[ 'views_dropdown' ],
+                'views_dropdown'   => $args['views_dropdown'],
                 'below_toolbar'    => $this->getBelowToolbarHtml($this->get_name(), $view_args),
             ]
         );
 
         $view_args = $this->get_extra_template_arguments($view_args);
 
-        if (Request::factory($this->app)
-                   ->is_json_required($args[ 'request_format' ], 'month')) {
+        if (
+            Request::factory($this->app)
+                   ->is_json_required($args['request_format'], 'month')
+        ) {
             return $this->_apply_filters_to_args($view_args);
         }
 
@@ -110,14 +112,14 @@ class MonthView extends AbstractView
      *
      * @param  DT  $time  the UNIX timestamp of a date within the desired month
      * @param  array  $filter  Array of filters for the events returned:
-     *                          ['cat_ids']   => non-associatative array of
-     *   category IDs
-     *                          ['tag_ids']   => non-associatative array of tag
-     *   IDs
-     *                          ['post_ids']  => non-associatative array of post
-     *   IDs
-     *                          ['auth_ids']  => non-associatative array of
-     *   author IDs
+     *                         ['cat_ids']   => non-associatative array of
+     *  category IDs
+     *                         ['tag_ids']   => non-associatative array of tag
+     *  IDs
+     *                         ['post_ids']  => non-associatative array of post
+     *  IDs
+     *                         ['auth_ids']  => non-associatative array of
+     *  author IDs
      *
      * @return array            array of arrays as per function's description
      * @throws BootstrapException
@@ -148,20 +150,20 @@ class MonthView extends AbstractView
         $end_time = clone $start_time;
         $end_time->adjust_month(1);
 
-        $search = EventSearch::factory($this->app);
+        $search       = EventSearch::factory($this->app);
         $month_events = $search->get_events_between(
             $start_time,
             $end_time,
             $filter,
             true
         );
-        $start_time = $start_time->format();
-        $end_time = $end_time->format();
+        $start_time   = $start_time->format();
+        $end_time     = $end_time->format();
         $this->_update_meta($month_events);
         StrictContentFilterController::factory($this->app)->clear_the_content_filters();
         foreach ($month_events as $event) {
             $event_start = $event->get('start')->format();
-            $event_end = $event->get('end')->format();
+            $event_end   = $event->get('end')->format();
 
             /**
              * REASONING: we assume, that event spans multiple periods, one of
@@ -175,7 +177,7 @@ class MonthView extends AbstractView
              */
             $day = 1;
             if ($event_start > $start_time) {
-                $day = (int) $event->get('start')->format('j');
+                $day = (int)$event->get('start')->format('j');
             }
 
             // Set multiday properties. TODO: Should these be made event object
@@ -199,15 +201,15 @@ class MonthView extends AbstractView
             // TODO DATE SEEMS WRONG AT NEXT CALL
 
             $this->_add_runtime_properties($event);
-            $days_events[ $day ][ $priority ][] = $event;
+            $days_events[$day][$priority][] = $event;
         }
         StrictContentFilterController::factory($this->app)
                                      ->restore_the_content_filters();
         for ($day = 1; $day <= $last_day; $day++) {
-            $days_events[ $day ] = array_merge(
-                $days_events[ $day ][ 'multi' ],
-                $days_events[ $day ][ 'allday' ],
-                $days_events[ $day ][ 'other' ]
+            $days_events[$day] = array_merge(
+                $days_events[$day]['multi'],
+                $days_events[$day]['allday'],
+                $days_events[$day]['other']
             );
         }
 
@@ -232,9 +234,9 @@ class MonthView extends AbstractView
      * indicating whether that day is today.
      *
      * @param  DT  $timestamp  UNIX timestamp of the 1st day of the desired
-     *                            month to display
+     *                              month to display
      * @param  array  $days_events  list of events for each day of the month in
-     *                            the format returned by get_events_for_month()
+     *                           the format returned by get_events_for_month()
      *
      * @return array
      * @throws BootstrapException
@@ -243,15 +245,15 @@ class MonthView extends AbstractView
     protected function get_month_cell_array(DT $timestamp, $days_events)
     {
         $settings = $this->app->settings;
-        $today = new DT('now');// Used to flag today's cell
+        $today    = new DT('now');// Used to flag today's cell
 
         // Figure out index of first table cell
         $first_cell_index = $timestamp->format('w');
         // Modify weekday based on start of week setting
-        $first_cell_index = (7 + $first_cell_index - (int) $settings->get('week_start_day')) % 7;
+        $first_cell_index = (7 + $first_cell_index - (int)$settings->get('week_start_day')) % 7;
 
         // Get the last day of the month
-        $last_day = $timestamp->format('t');
+        $last_day       = $timestamp->format('t');
         $last_timestamp = new DT($timestamp);
         $last_timestamp->set_date(
             $timestamp->format('Y'),
@@ -263,18 +265,22 @@ class MonthView extends AbstractView
         // Modify weekday based on start of week setting
         $last_cell_index = (7 + $last_cell_index - $settings->get('week_start_day')) % 7;
 
-        $weeks = [];
-        $week = 0;
-        $weeks[ $week ] = [];
+        $weeks        = [];
+        $week         = 0;
+        $weeks[$week] = [];
 
         // Insert any needed blank cells into first week
         for ($i = 0; $i < $first_cell_index; $i++) {
-            $weeks[ $week ][] = ['date' => null, 'events' => [], 'date_link' => null];
+            $weeks[$week][] = [
+                'date'      => null,
+                'events'    => [],
+                'date_link' => null,
+            ];
         }
 
         // Insert each month's day and associated events
         for ($i = 1; $i <= $last_day; $i++) {
-            $day = (new DT('now'))
+            $day        = (new DT('now'))
                 ->set_date(
                     $timestamp->format('Y'),
                     $timestamp->format('m'),
@@ -286,8 +292,8 @@ class MonthView extends AbstractView
                 $day,
                 $settings->get('input_date_format')
             );
-            $events = [];
-            foreach ($days_events[ $i ] as $evt) {
+            $events     = [];
+            foreach ($days_events[$i] as $evt) {
                 $events[] = [
                     'filtered_title'   => $evt->get_runtime('filtered_title'),
                     'post_excerpt'     => $evt->get_runtime('post_excerpt'),
@@ -318,10 +324,11 @@ class MonthView extends AbstractView
                             'category_avatar',
                         ],
                         '',
-                        false),
+                        false
+                    ),
                 ];
             }
-            $weeks[ $week ][] = [
+            $weeks[$week][] = [
                 'date'      => $i,
                 'date_link' => $this->_create_link_for_day_view($exact_date),
                 'today'     =>
@@ -331,14 +338,17 @@ class MonthView extends AbstractView
                 'events'    => $events,
             ];
             // If reached the end of the week, increment week
-            if (count($weeks[ $week ]) == 7) {
-                $week++;
+            if (count($weeks[$week]) == 7) {
+                ++$week;
             }
         }
 
         // Insert any needed blank cells into last week
         for ($i = $last_cell_index + 1; $i < 7; $i++) {
-            $weeks[ $week ][] = ['date' => null, 'events' => []];
+            $weeks[$week][] = [
+                'date'   => null,
+                'events' => [],
+            ];
         }
 
         return $weeks;
@@ -389,32 +399,32 @@ class MonthView extends AbstractView
      *
      * @return array      Array of links
      */
-    function get_month_pagination_links($args, $title)
+    public function get_month_pagination_links($args, $title)
     {
         $links = [];
 
-        $local_date = new DT($args[ 'exact_date' ], 'sys.default');
-        $orig_date = new DT($local_date);
+        $local_date = new DT($args['exact_date'], 'sys.default');
+        $orig_date  = new DT($local_date);
         // =================
         // = Previous year =
         // =================
         // Align date to first of month, month offset applied, 1 year behind.
         $local_date
             ->set_date(
-                (int) $local_date->format('Y') - 1,
-                (int) $local_date->format('m') + $args[ 'month_offset' ],
+                (int)$local_date->format('Y') - 1,
+                (int)$local_date->format('m') + $args['month_offset'],
                 1
             )
             ->set_time(0, 0, 0);
 
-        $args[ 'exact_date' ] = $local_date->format();
-        $href = HtmlFactory::factory($this->app)
-                           ->create_href_helper_instance($args);
-        $links[] = [
+        $args['exact_date'] = $local_date->format();
+        $href               = HtmlFactory::factory($this->app)
+                                         ->create_href_helper_instance($args);
+        $links[]            = [
             'enabled' => true,
             'class'   => 'ai1ec-prev-year',
             'text'    =>
-                '<i class="ai1ec-fa ai1ec-fa-angle-double-left"></i> '.
+                '<i class="ai1ec-fa ai1ec-fa-angle-double-left"></i> ' .
                 $local_date->format_i18n('Y'),
             'href'    => $href->generate_href(),
         ];
@@ -429,13 +439,13 @@ class MonthView extends AbstractView
                 $local_date->format('m') - 1,
                 1
             );
-        $args[ 'exact_date' ] = $local_date->format();
-        $href = HtmlFactory::factory($this->app)
-                           ->create_href_helper_instance($args);
-        $links[] = [
+        $args['exact_date'] = $local_date->format();
+        $href               = HtmlFactory::factory($this->app)
+                                         ->create_href_helper_instance($args);
+        $links[]            = [
             'enabled' => true,
             'class'   => 'ai1ec-prev-month',
-            'text'    => '<i class="ai1ec-fa ai1ec-fa-angle-left"></i> '.
+            'text'    => '<i class="ai1ec-fa ai1ec-fa-angle-left"></i> ' .
                          $local_date->format_i18n('M'),
             'href'    => $href->generate_href(),
         ];
@@ -449,13 +459,13 @@ class MonthView extends AbstractView
             ->set_timezone('UTC')
             ->set_date(
                 $orig_date->format('Y'),
-                $orig_date->format('m') + $args[ 'month_offset' ],
+                $orig_date->format('m') + $args['month_offset'],
                 1
             );
-        $args[ 'exact_date' ] = $orig_date->format();
-        $links[] = HtmlFactory::factory($this->app)->create_datepicker_link(
+        $args['exact_date'] = $orig_date->format();
+        $links[]            = HtmlFactory::factory($this->app)->create_datepicker_link(
             $args,
-            $args[ 'exact_date' ],
+            $args['exact_date'],
             $title
         );
 
@@ -469,14 +479,14 @@ class MonthView extends AbstractView
                 $orig_date->format('m') + 1,
                 1
             );
-        $args[ 'exact_date' ] = $orig_date->format();
-        $href = HtmlFactory::factory($this->app)
-                           ->create_href_helper_instance($args);
-        $links[] = [
+        $args['exact_date'] = $orig_date->format();
+        $href               = HtmlFactory::factory($this->app)
+                                         ->create_href_helper_instance($args);
+        $links[]            = [
             'enabled' => true,
             'class'   => 'ai1ec-next-month',
             'text'    =>
-                $orig_date->format_i18n('M').
+                $orig_date->format_i18n('M') .
                 ' <i class="ai1ec-fa ai1ec-fa-angle-right"></i>',
             'href'    => $href->generate_href(),
         ];
@@ -491,14 +501,14 @@ class MonthView extends AbstractView
                 $orig_date->format('m') - 1,
                 1
             );
-        $args[ 'exact_date' ] = $orig_date->format();
-        $href = HtmlFactory::factory($this->app)
-                           ->create_href_helper_instance($args);
-        $links[] = [
+        $args['exact_date'] = $orig_date->format();
+        $href               = HtmlFactory::factory($this->app)
+                                         ->create_href_helper_instance($args);
+        $links[]            = [
             'enabled' => true,
             'class'   => 'ai1ec-next-year',
             'text'    =>
-                $orig_date->format_i18n('Y').
+                $orig_date->format_i18n('Y') .
                 ' <i class="ai1ec-fa ai1ec-fa-angle-double-right"></i>',
             'href'    => $href->generate_href(),
         ];
@@ -517,5 +527,4 @@ class MonthView extends AbstractView
             $event->get('start')->format('j')
         );
     }
-
 }

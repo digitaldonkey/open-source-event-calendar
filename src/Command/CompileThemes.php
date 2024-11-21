@@ -17,19 +17,18 @@ use Osec\Theme\ThemeCompiler;
  */
 class CompileThemes extends CommandAbstract
 {
-
     public function is_this_to_execute()
     {
         return (
             OSEC_DEBUG
-            && isset($_GET[ 'ai1ec_recompile_templates' ])
+            && isset($_GET['ai1ec_recompile_templates'])
             && current_user_can('switch_osec_themes')
         );
     }
 
-    public function set_render_strategy(RequestParser $request)
+    public function setRenderStrategy(RequestParser $request): void
     {
-        $this->_render_strategy = RenderVoid::factory($this->app);
+        $this->renderStrategy = RenderVoid::factory($this->app);
     }
 
     public function do_execute()
@@ -38,5 +37,4 @@ class CompileThemes extends CommandAbstract
         ThemeCompiler::factory($this->app)->generate();
         ResponseHelper::stop();
     }
-
 }

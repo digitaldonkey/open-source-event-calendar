@@ -13,13 +13,12 @@ use Osec\Bootstrap\App;
  */
 class FilePhp extends FileAbstract
 {
-
     /**
      * @var string filename with the variables
      */
     public const USER_VARIABLES_FILE = 'user_variables';
 
-    private array $_args;
+    private array $args;
 
     /**
      * Initialize class specific variables.
@@ -36,31 +35,31 @@ class FilePhp extends FileAbstract
         ?array $args
     ) {
         parent::__construct($app, $name, $paths);
-        $this->_args = is_array($args) ? $args : [];
+        $this->args = is_array($args) ? $args : [];
     }
 
     public function process_file()
     {
         // if the file was already processed just return.
-        if (isset($this->_content)) {
+        if (isset($this->content)) {
             return true;
         }
         $files_to_check = [];
-        foreach (array_values($this->_paths) as $path) {
-            $files_to_check[] = $path.$this->_name;
+        foreach (array_values($this->paths) as $path) {
+            $files_to_check[] = $path . $this->_name;
         }
         foreach ($files_to_check as $file) {
             if (is_file($file)) {
                 // Check if file is custom LESS variable definitions.
-                $user_variables_pattern = FileLess::THEME_LESS_FOLDER.'/'.self::USER_VARIABLES_FILE;
+                $user_variables_pattern = FileLess::THEME_LESS_FOLDER . '/' . self::USER_VARIABLES_FILE;
 
                 if (str_starts_with($this->_name, $user_variables_pattern)) {
-                    $this->_content = require $file;
+                    $this->content = require $file;
                 } else {
                     ob_start();
-                    extract($this->_args);
+                    extract($this->args);
                     require $file;
-                    $this->_content = ob_get_clean();
+                    $this->content = ob_get_clean();
                 }
 
                 return true;
@@ -69,5 +68,4 @@ class FilePhp extends FileAbstract
 
         return false;
     }
-
 }

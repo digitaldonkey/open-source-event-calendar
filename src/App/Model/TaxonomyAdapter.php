@@ -13,13 +13,12 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class TaxonomyAdapter extends OsecBaseClass
 {
-
     /**
      * @var array Map of taxonomy values.
      */
-    protected $_taxonomy_map = [
+    protected $taxonomyMap = [
         'events_categories' => [],
-        'events_tags'       => []
+        'events_tags'       => [],
     ];
 
     /**
@@ -32,19 +31,22 @@ class TaxonomyAdapter extends OsecBaseClass
      */
     public function prepare_meta_for_ics(array $post_ids)
     {
-        $taxonomies = get_object_taxonomies(OSEC_POST_TYPE);
-        $categories = [];
-        $excluded_categories = ['events_tags' => true, 'events_feeds' => true];
+        $taxonomies          = get_object_taxonomies(OSEC_POST_TYPE);
+        $categories          = [];
+        $excluded_categories = [
+            'events_tags'  => true,
+            'events_feeds' => true,
+        ];
         foreach ($taxonomies as $taxonomy) {
-            if (isset($excluded_categories[ $taxonomy ])) {
+            if (isset($excluded_categories[$taxonomy])) {
                 continue;
             }
             $categories[] = $taxonomy;
         }
         foreach ($post_ids as $post_id) {
-            $post_id = (int) $post_id;
-            $this->_taxonomy_map[ 'events_categories' ][ $post_id ] = [];
-            $this->_taxonomy_map[ 'events_tags' ][ $post_id ] = [];
+            $post_id                                          = (int)$post_id;
+            $this->taxonomyMap['events_categories'][$post_id] = [];
+            $this->taxonomyMap['events_tags'][$post_id]       = [];
         }
         $tags = wp_get_object_terms(
             $post_ids,
@@ -52,7 +54,7 @@ class TaxonomyAdapter extends OsecBaseClass
             ['fields' => 'all_with_object_id']
         );
         foreach ($tags as $term) {
-            $this->_taxonomy_map[ $term->taxonomy ][ $term->object_id ][] = $term;
+            $this->taxonomyMap[$term->taxonomy][$term->object_id][] = $term;
         }
         $category_terms = wp_get_object_terms(
             $post_ids,
@@ -60,7 +62,7 @@ class TaxonomyAdapter extends OsecBaseClass
             ['fields' => 'all_with_object_id']
         );
         foreach ($category_terms as $term) {
-            $this->_taxonomy_map[ 'events_categories' ][ $term->object_id ][] = $term;
+            $this->taxonomyMap['events_categories'][$term->object_id][] = $term;
         }
     }
 
@@ -74,9 +76,9 @@ class TaxonomyAdapter extends OsecBaseClass
     public function update_meta(array $post_ids)
     {
         foreach ($post_ids as $post_id) {
-            $post_id = (int) $post_id;
-            $this->_taxonomy_map[ 'events_categories' ][ $post_id ] = [];
-            $this->_taxonomy_map[ 'events_tags' ][ $post_id ] = [];
+            $post_id                                          = (int)$post_id;
+            $this->taxonomyMap['events_categories'][$post_id] = [];
+            $this->taxonomyMap['events_tags'][$post_id]       = [];
         }
         $terms = wp_get_object_terms(
             $post_ids,
@@ -84,7 +86,7 @@ class TaxonomyAdapter extends OsecBaseClass
             ['fields' => 'all_with_object_id']
         );
         foreach ($terms as $term) {
-            $this->_taxonomy_map[ $term->taxonomy ][ $term->object_id ][] = $term;
+            $this->taxonomyMap[$term->taxonomy][$term->object_id][] = $term;
         }
     }
 
@@ -110,16 +112,16 @@ class TaxonomyAdapter extends OsecBaseClass
      */
     public function get_post_taxonomy($post_id, $taxonomy)
     {
-        $post_id = (int) $post_id;
-        if ( ! isset($this->_taxonomy_map[ $taxonomy ][ $post_id ])) {
+        $post_id = (int)$post_id;
+        if ( ! isset($this->taxonomyMap[$taxonomy][$post_id])) {
             $definition = wp_get_post_terms($post_id, $taxonomy);
             if (empty($definition) || is_wp_error($definition)) {
                 $definition = [];
             }
-            $this->_taxonomy_map[ $taxonomy ][ $post_id ] = $definition;
+            $this->taxonomyMap[$taxonomy][$post_id] = $definition;
         }
 
-        return $this->_taxonomy_map[ $taxonomy ][ $post_id ];
+        return $this->taxonomyMap[$taxonomy][$post_id];
     }
 
     /**
@@ -160,12 +162,12 @@ class TaxonomyAdapter extends OsecBaseClass
         if (null === $category_meta) {
             $category_meta = $this->fetch_category_map();
         }
-        $term_id = (int) $term_id;
-        if ( ! isset($category_meta[ $term_id ])) {
+        $term_id = (int)$term_id;
+        if ( ! isset($category_meta[$term_id])) {
             return null;
         }
 
-        return $category_meta[ $term_id ][ $field ];
+        return $category_meta[$term_id][$field];
     }
 
     /**
@@ -176,7 +178,7 @@ class TaxonomyAdapter extends OsecBaseClass
     public function fetch_category_map()
     {
         $category_map = [];
-        $records = (array) $this->app->db->select(OSEC_DB__META, ['term_id', 'term_image', 'term_color']);
+        $records      = (array)$this->app->db->select(OSEC_DB__META, ['term_id', 'term_image', 'term_color']);
         foreach ($records as $row) {
             $image = $color = null;
             if ($row->term_image) {
@@ -185,7 +187,7 @@ class TaxonomyAdapter extends OsecBaseClass
             if ($row->term_color) {
                 $color = $row->term_color;
             }
-            $category_map[ (int) $row->term_id ] = compact('image', 'color');
+            $category_map[(int)$row->term_id] = compact('image', 'color');
         }
 
         return $category_map;
@@ -209,7 +211,7 @@ class TaxonomyAdapter extends OsecBaseClass
     public function uninstall(bool $purge = false)
     {
         if ($purge) {
-            foreach (array_keys($this->_taxonomy_map) as $taxonomy) {
+            foreach (array_keys($this->taxonomyMap) as $taxonomy) {
                 $terms = get_terms($taxonomy);
 
                 // delete all terms in $taxonomy
@@ -217,7 +219,7 @@ class TaxonomyAdapter extends OsecBaseClass
                     wp_delete_term($term->term_id, $taxonomy);
                 }
                 // deregister $taxonomy
-                unregister_taxonomy_for_object_type( $taxonomy, OSEC_POST_TYPE );
+                unregister_taxonomy_for_object_type($taxonomy, OSEC_POST_TYPE);
             }
         }
     }

@@ -21,20 +21,20 @@ class CacheFileTestBase extends TestBase
      * Create a directory and
      *  let it be deleted after testing is done
      */
-    protected function deleteAtTeardown(string $path) : void
+    protected function deleteAtTeardown(string $path): void
     {
         $this->precheckDirectory($path);
         $this->_deleteDirectories[] = $path;
     }
 
-    protected function precheckDirectory($path) : void
+    protected function precheckDirectory($path): void
     {
         if ( ! is_dir($path)) {
             throw new Exception('Only directories allowed. Got: ' . $path);
         }
         if ( ! (str_starts_with($path, OSEC_FILE_CACHE_DEFAULT_PATH)
                 || ($this->wp_upload_path && str_starts_with($path, $this->wp_upload_path)))) {
-            throw new Exception('Path not in whitelist. Got: '.$path);
+            throw new Exception('Path not in whitelist. Got: ' . $path);
         }
     }
 
@@ -42,7 +42,7 @@ class CacheFileTestBase extends TestBase
      * Make a dir Readonly
      *  e.g to test unavailability of cache.
      */
-    protected function makeDirReadonly(string $path) : bool
+    protected function makeDirReadonly(string $path): bool
     {
         $this->precheckDirectory($path);
         $this->_restorePermissions[] = [
@@ -57,26 +57,26 @@ class CacheFileTestBase extends TestBase
      * Let's try to ensure we don't delete or chmod anything bad.
      */
 
-    protected function setUp() : void
+    protected function setUp(): void
     {
         parent::setUp();
         $wp_upload = wp_upload_dir();
-        if ( ! $wp_upload[ 'error' ]) {
-            $this->wp_upload_path = trailingslashit($wp_upload[ 'basedir' ]);
+        if ( ! $wp_upload['error']) {
+            $this->wp_upload_path = trailingslashit($wp_upload['basedir']);
         }
     }
 
-    protected function tearDown() : void
+    protected function tearDown(): void
     {
         foreach ($this->_restorePermissions as $i => $restore) {
-            $this->precheckDirectory($restore[ 'path' ]);
-            chmod($restore[ 'path' ], $restore[ 'perms' ]);
-            unset($this->_restorePermissions[ $i ]);
+            $this->precheckDirectory($restore['path']);
+            chmod($restore['path'], $restore['perms']);
+            unset($this->_restorePermissions[$i]);
         }
         foreach ($this->_deleteDirectories as $i => $restore) {
             $this->precheckDirectory($restore);
             if (CachePath::clean_and_check_dir($restore) && rmdir($restore)) {
-                unset($this->_deleteDirectories[ $i ]);
+                unset($this->_deleteDirectories[$i]);
             }
         }
     }

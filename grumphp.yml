@@ -1,2 +1,20 @@
 grumphp:
-    tasks: { composer: null }
+    tasks:
+
+        # Doc: https://github.com/phpro/grumphp/blob/master/doc/tasks/composer.md
+        composer: { }
+
+        # Doc: https://github.com/phpro/grumphp/blob/master/doc/tasks/phpcs.md
+        phpcs:
+            standard: ['./phpcs.dist.xml']
+#        phpunit:
+#            config_file: ~
+#            testsuite: ~
+#            group: []
+#            exclude_group: []
+#            always_execute: false
+#            order: null
+#            coverage-clover: null
+#            coverage-html: null
+#            coverage-php: null
+#            coverage-xml: null

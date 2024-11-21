@@ -15,13 +15,11 @@ use Osec\Theme\ThemeLoader;
  */
 class SettingsInput extends SettingsAbstract
 {
-
-
-    public function render($html = '', $wrap = true) : string
+    public function render($html = '', $wrap = true): string
     {
-        $type = $this->_args[ 'renderer' ][ 'type' ];
-        $date = $append = false;
-        $class = '';
+        $type       = $this->args['renderer']['type'];
+        $date       = $append = false;
+        $class      = '';
         $input_type = 'text';
         switch ($type) {
             case 'date':
@@ -42,7 +40,7 @@ class SettingsInput extends SettingsAbstract
         }
 
         $input_args = ['class' => $class];
-        $settings = $this->app->settings;
+        $settings   = $this->app->settings;
         if (true === $date) {
             $input_args += [
                 'data-date-weekstart' => $settings->get('week_start_day'),
@@ -53,29 +51,28 @@ class SettingsInput extends SettingsAbstract
             ];
         }
         $args = [
-            'id'         => $this->_args[ 'id' ],
-            'label'      => $this->_args[ 'renderer' ][ 'label' ],
+            'id'         => $this->args['id'],
+            'label'      => $this->args['renderer']['label'],
             'input_args' => $input_args,
             'input_type' => $input_type,
-            'value'      => $this->_args[ 'value' ],
+            'value'      => $this->args['value'],
         ];
-        if (isset($this->_args[ 'renderer' ][ 'status' ])) {
-            $args[ 'licence_valid' ] = $settings->get($this->_args[ 'renderer' ][ 'status' ]) === 'valid';
+        if (isset($this->args['renderer']['status'])) {
+            $args['licence_valid'] = $settings->get($this->args['renderer']['status']) === 'valid';
         }
         if (true === $append) {
-            $args[ 'append' ] = $this->_args[ 'renderer' ][ 'append' ];
+            $args['append'] = $this->args['renderer']['append'];
         }
-        if (isset($this->_args[ 'renderer' ][ 'help' ])) {
-            $args[ 'help' ] = $this->_args[ 'renderer' ][ 'help' ];
+        if (isset($this->args['renderer']['help'])) {
+            $args['help'] = $this->args['renderer']['help'];
         }
-        if (isset($this->_args[ 'renderer' ][ 'group-class' ])) {
-            $args[ 'group_class' ] = $this->_args[ 'renderer' ][ 'group-class' ];
+        if (isset($this->args['renderer']['group-class'])) {
+            $args['group_class'] = $this->args['renderer']['group-class'];
         }
-        $html = ThemeLoader::factory($this->app)
+        $html .= ThemeLoader::factory($this->app)
                            ->get_file('setting/input.twig', $args, true)
                            ->get_content();
 
         return $this->warp_in_form_group($html);
     }
-
 }

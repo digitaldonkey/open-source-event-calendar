@@ -15,18 +15,12 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 abstract class AdminPageAbstract extends OsecBaseClass
 {
-
     public const ADMIN_PAGE_PREFIX = 'osec-admin-';
 
     /**
      * @var string
      */
-    protected $_page_id;
-
-    /**
-     * @var string
-     */
-    protected $_page_suffix;
+    protected $pageSuffix;
 
     /**
      * Standard constructor
@@ -36,8 +30,8 @@ abstract class AdminPageAbstract extends OsecBaseClass
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $exploded_class = explode('_', static::class);
-        $this->_page_suffix = strtolower(end($exploded_class));
+        $exploded_class   = explode('_', static::class);
+        $this->pageSuffix = strtolower(end($exploded_class));
     }
 
     /**
@@ -45,12 +39,12 @@ abstract class AdminPageAbstract extends OsecBaseClass
      *
      * @return string
      */
-    public function get_url() : string
+    public function get_url(): string
     {
         return add_query_arg(
             [
                 'post_type' => OSEC_POST_TYPE,
-                'page'      => OSEC_PLUGIN_NAME.'-'.$this->_page_suffix,
+                'page'      => OSEC_PLUGIN_NAME . '-' . $this->pageSuffix,
             ],
             admin_url('edit.php')
         );
@@ -59,21 +53,20 @@ abstract class AdminPageAbstract extends OsecBaseClass
     /**
      * Adds the page to the correct menu.
      */
-    abstract public function add_page() : void;
+    abstract public function add_page(): void;
 
     /**
      * Adds the page to the correct menu.
      */
-    abstract public function add_meta_box() : void;
+    abstract public function add_meta_box(): void;
 
     /**
      * Renders the page (using Twig renderer).
      */
-    abstract public function display_page() : void;
+    abstract public function display_page(): void;
 
     /**
      * Handle post, likely to be deprecated to use commands.
      */
     abstract public function handle_post();
-
 }

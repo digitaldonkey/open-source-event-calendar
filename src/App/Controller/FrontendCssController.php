@@ -26,7 +26,6 @@ use Osec\Http\Response\ResponseHelper;
  */
 class FrontendCssController extends OsecBaseClass
 {
-
     /**
      * If we request the "CSS file" from a non-File-cache,
      * this param will deliver CSS code.
@@ -49,14 +48,7 @@ class FrontendCssController extends OsecBaseClass
      * This option is set when... CSS needs recompile,
      */
     public const COMPILED_CSS_CACHE_KEY = 'osec_invalidate_css_cache';
-    /**
-     * Possible paths/url for file cache
-     *
-     * TODO ??
-     *
-     * @var array
-     */
-    protected $_cache_paths = [];
+
     /**
      * @var
      */
@@ -73,16 +65,16 @@ class FrontendCssController extends OsecBaseClass
         $this->cache = CacheFactory::factory($this->app)->createCache('css');
     }
 
-//    /**
-//     *
-//     * Get if file cache is enabled
-//     *
-//     * @return boolean
-//     */
-//    public function is_file_cache_enabled()
-//    {
-//        return $this->cache->is_file_cache();
-//    }
+    // **
+    // *
+    // * Get if file cache is enabled
+    // *
+    // * @return boolean
+    // */
+    // public function is_file_cache_enabled()
+    // {
+    // return $this->cache->is_file_cache();
+    // }
 
     /**
      * Renders the css for our frontend.
@@ -94,21 +86,21 @@ class FrontendCssController extends OsecBaseClass
         header('HTTP/1.1 200 OK');
         header('Content-Type: text/css', true, 200);
         // Aggressive caching to save future requests from the same client.
-        $etag = '"'.md5(__FILE__.$_GET[ self::REQUEST_CSS_PARAM ]).'"';
-        header('ETag: '.$etag);
+        $etag = '"' . md5(__FILE__ . $_GET[self::REQUEST_CSS_PARAM]) . '"';
+        header('ETag: ' . $etag);
         $max_age = 31536000;
         header(
-            'Expires: '.
+            'Expires: ' .
             gmdate(
                 'D, d M Y H:i:s',
                 UIDateFormats::factory($this->app)->current_time() + $max_age
-            ).
+            ) .
             ' GMT'
         );
-        header('Cache-Control: public, max-age='.$max_age);
+        header('Cache-Control: public, max-age=' . $max_age);
         if (
-            empty($_SERVER[ 'HTTP_IF_NONE_MATCH' ]) ||
-            $etag !== stripslashes((string) $_SERVER[ 'HTTP_IF_NONE_MATCH' ])
+            empty($_SERVER['HTTP_IF_NONE_MATCH']) ||
+            $etag !== stripslashes((string)$_SERVER['HTTP_IF_NONE_MATCH'])
         ) {
             echo $this->get_compiled_css();
         } else {
@@ -124,7 +116,6 @@ class FrontendCssController extends OsecBaseClass
      * If it's not there re-generate it and save it to cache
      * If we are in preview mode, recompile the css using the theme present in
      * the url.
-     *
      */
     public function get_compiled_css()
     {
@@ -149,8 +140,9 @@ class FrontendCssController extends OsecBaseClass
                     NotificationAdmin::factory($this->app)->store(
                         sprintf(
                             __(
-                                'Your CSS is being compiled on every request, which causes your calendar to perform slowly. The following error occurred: %s',
-	                            OSEC_TXT_DOM
+                                'Your CSS is being compiled on every request, '
+                                    . 'which causes your calendar to perform slowly. The following error occurred: %s',
+                                OSEC_TXT_DOM
                             ),
                             $e->getMessage()
                         ),
@@ -175,19 +167,18 @@ class FrontendCssController extends OsecBaseClass
      */
     public function update_persistence_layer($css)
     {
-
         // TODO THIS KEY SEEMS WRONG
         // Fix Tests First
 
         if ($this->cache->is_file_cache()) {
             $cacheData = $this->cache->engine->setWithFileInfo(self::COMPILED_CSS_KEY, $css);
-            $this->store_css_cache($cacheData[ 'url' ]);
+            $this->store_css_cache($cacheData['url']);
         } else {
             $this->cache->set(self::COMPILED_CSS_KEY, $css);
             // At any other cache the self::COMPILED_CSS_KEY
             // Value will be integer time.
             // VALUSE is_numeric
-           $this->store_css_cache(time());
+            $this->store_css_cache(time());
         }
     }
 
@@ -210,7 +201,7 @@ class FrontendCssController extends OsecBaseClass
     /**
      * Create the link that will be added to the frontend
      */
-    public function add_link_to_html_for_frontend() : void
+    public function add_link_to_html_for_frontend(): void
     {
         $url = $this->get_css_url();
         if ('' !== $url && ! is_admin()) {
@@ -230,7 +221,6 @@ class FrontendCssController extends OsecBaseClass
         $saved_par = $this->app->options->get(self::COMPILED_CSS_KEY);
         // $saved_par = Number value required to display css in Header,
 
-
         // if it's empty it's a new install probably. Return static css.
         if (null === $saved_par) {
             $theme = $this->app->options->get('osec_current_theme');
@@ -242,19 +232,18 @@ class FrontendCssController extends OsecBaseClass
              * @since 1.0
              *
              * @param  string  $parsed_css  Css file path
-             *
              */
-                apply_filters('osec_frontend_standard_css_url', $theme[ 'theme_url' ].'/css/ai1ec_parsed_css.css')
+                apply_filters('osec_frontend_standard_css_url', $theme['theme_url'] . '/css/ai1ec_parsed_css.css')
             );
         }
         // if it's numeric, just consider it a new install
         if (is_numeric($saved_par)) {
-            //    if (TRUE) {
+            // if (TRUE) {
 
             // "Link CSS in <head> section
-            //   when file cache is unavailable."
+            // when file cache is unavailable."
             if ($this->app->settings->get('render_css_as_link')) {
-                $time = (int) $saved_par;
+                $time = (int)$saved_par;
 
                 return ResponseHelper::remove_protocols(
                     add_query_arg(
@@ -268,7 +257,6 @@ class FrontendCssController extends OsecBaseClass
 
                 return '';
             }
-
         }
 
         // otherwise return the string
@@ -287,7 +275,7 @@ class FrontendCssController extends OsecBaseClass
     /**
      * Update the less variables on the DB and recompile the CSS
      *
-     * @param  boolean  $resetting  are we resetting or updating variables?
+     * @param  bool  $resetting  are we resetting or updating variables?
      */
     public function update_variables_and_compile_css(array $variables, $resetting)
     {
@@ -301,16 +289,16 @@ class FrontendCssController extends OsecBaseClass
 
             if (true === $resetting) {
                 $message = sprintf(
-                    '<p>'.I18n::__(
+                    '<p>' . I18n::__(
                         "Theme options were successfully reset to their default values. <a href='%s'>Visit site</a>"
-                    ).'</p>',
+                    ) . '</p>',
                     get_site_url()
                 );
             } else {
                 $message = sprintf(
-                    '<p>'.I18n::__(
+                    '<p>' . I18n::__(
                         "Theme options were updated successfully. <a href='%s'>Visit site</a>"
-                    ).'</p>',
+                    ) . '</p>',
                     get_site_url()
                 );
             }
@@ -323,12 +311,12 @@ class FrontendCssController extends OsecBaseClass
      * LESS files.
      *
      * @param  array|null  $variables  LESS variable array to use
-     * @param  boolean  $update_persistence  Whether the persist successful compile
+     * @param  bool  $update_persistence  Whether the persist successful compile
      *
-     * @return boolean                     Whether successful
+     * @return bool                     Whether successful
      * @throws BootstrapException
      */
-    public function  invalidate_cache(?array $variables = null, bool $update_persistence = true) : bool
+    public function invalidate_cache(?array $variables = null, bool $update_persistence = true): bool
     {
         $lessCtrl = LessController::factory($this->app);
         if ( ! $lessCtrl->is_compilation_needed($variables)) {
@@ -341,7 +329,9 @@ class FrontendCssController extends OsecBaseClass
         if ( ! MemoryCheck::check_available_memory(OSEC_LESS_MIN_AVAIL_MEMORY)) {
             $message = sprintf(
                 I18n::__(
-                    'CSS compilation failed because you don\'t have enough free memory (a minimum of %s is needed). Your calendar will not render or function properly without CSS. Increase your PHP memory limit.'
+                    'CSS compilation failed because you don\'t have enough free memory '
+                    . '(a minimum of %s is needed). Your calendar will not render or function properly without CSS. '
+                    . 'Increase your PHP memory limit.'
                 ),
                 OSEC_LESS_MIN_AVAIL_MEMORY
             );
@@ -370,14 +360,19 @@ class FrontendCssController extends OsecBaseClass
             }
         } catch (CacheWriteException) {
             // This means successful during parsing but problems persisting the CSS.
-            $message = '<p>'.I18n::__("The LESS file compiled correctly but there was an error while saving the generated CSS to persistence.").'</p>';
+            $message = '<p>' . I18n::__(
+                'The LESS file compiled correctly but there was an error while saving the generated CSS to persistence.'
+            ) . '</p>';
             $notification->store($message, 'error');
 
             return false;
         } catch (Exception $e) {
             // An error from lessphp.
             $message = sprintf(
-                I18n::__('<p><strong>There was an error while compiling CSS.</strong> The message returned was: <em>%s</em></p>'),
+                I18n::__(
+                    '<p><strong>There was an error while compiling CSS.</strong> '
+                        . 'The message returned was: <em>%s</em></p>'
+                ),
                 $e->getMessage()
             );
             $notification->store($message, 'error', 1);

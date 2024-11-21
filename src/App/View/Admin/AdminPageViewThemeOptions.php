@@ -15,7 +15,6 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageViewThemeOptions extends AdminPageAbstract
 {
-
     /**
      * @var string
      */
@@ -24,7 +23,7 @@ class AdminPageViewThemeOptions extends AdminPageAbstract
     /**
      * Adds the page to the correct menu.
      */
-    public function add_page() : void
+    public function add_page(): void
     {
         $theme_options_page = add_submenu_page(
             OSEC_ADMIN_BASE_URL,
@@ -39,10 +38,10 @@ class AdminPageViewThemeOptions extends AdminPageAbstract
     /**
      * Display the page html
      */
-    public function display_page() : void
+    public function display_page(): void
     {
         $settings = $this->app->settings->getOptionsList();
-        $args = [
+        $args     = [
             'all_options' => [
                 [
                     'title'   => 'ai1ec_settings (registry->settings))',
@@ -62,7 +61,7 @@ class AdminPageViewThemeOptions extends AdminPageAbstract
                     'options' => $this->app->options->get('osec_robots_txt'),
                 ],
 
-            ]
+            ],
         ];
 
         ThemeLoader::factory($this->app)
@@ -77,7 +76,7 @@ class AdminPageViewThemeOptions extends AdminPageAbstract
      *
      * @return void
      */
-    public function add_meta_box() : void
+    public function add_meta_box(): void
     {
     }
 
@@ -87,5 +86,4 @@ class AdminPageViewThemeOptions extends AdminPageAbstract
     public function handle_post()
     {
     }
-
 }

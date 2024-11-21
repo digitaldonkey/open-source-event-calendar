@@ -15,7 +15,6 @@ use Twig\Loader\FilesystemLoader;
  */
 class TwigLoader extends FilesystemLoader
 {
-
     /**
      * Gets the cache key to use for the cache for a given template name.
      *
@@ -25,18 +24,17 @@ class TwigLoader extends FilesystemLoader
      *
      * @throws LoaderError
      */
-    public function getCacheKey(string $name) : string
+    public function getCacheKey(string $name): string
     {
         // namespace style separators avoid OS colisions.
         $cache_key = str_replace('/', '\\', $this->findTemplate($name));
         // make path relative
         $cache_key = str_replace(
-            str_replace('/', '\\', WP_PLUGIN_DIR.'/'),
+            str_replace('/', '\\', WP_PLUGIN_DIR . '/'),
             '',
             $cache_key
         );
 
         return $cache_key;
     }
-
 }

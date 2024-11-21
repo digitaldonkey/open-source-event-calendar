@@ -4,13 +4,11 @@ namespace Osec\App\Model\PostTypeEvent;
 
 use Osec\App\Controller\DatabaseController;
 use Osec\App\Model\Date\DT;
-use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\Filter\FilterInterface;
 use Osec\App\WpmlHelper;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
-
 
 /**
  * Search Event.
@@ -22,13 +20,12 @@ use Osec\Exception\BootstrapException;
  */
 class EventSearch extends OsecBaseClass
 {
-
     /**
      * Caches the ids of the last 'between' query
      *
      * @var array
      */
-    protected $_ids_between_cache = [];
+    protected $idsCache = [];
     private ?DatabaseController $db;
 
     /**
@@ -43,14 +40,6 @@ class EventSearch extends OsecBaseClass
     }
 
     /**
-     * @return array
-     */
-    public function get_cached_between_ids()
-    {
-        return $this->_ids_between_cache;
-    }
-
-    /**
      * get_events_relative_to function
      *
      * Return all events starting after the given reference time, limiting the
@@ -62,17 +51,17 @@ class EventSearch extends OsecBaseClass
      * @param  int  $limit  return a maximum of this number of items
      * @param  int  $page_offset  offset the result set by $limit times this number
      * @param  array  $filter  Array of filters for the events returned.
-     *                            ['cat_ids']      => non-associatative array of category IDs
-     *                            ['tag_ids']      => non-associatative array of tag IDs
-     *                            ['post_ids']     => non-associatative array of post IDs
-     *                            ['auth_ids']     => non-associatative array of author IDs
-     *                            ['instance_ids'] => non-associatative array of author IDs
+     *                           ['cat_ids']      => non-associatative array of category IDs
+     *                           ['tag_ids']      => non-associatative array of tag IDs
+     *                           ['post_ids']     => non-associatative array of post IDs
+     *                           ['auth_ids']     => non-associatative array of author IDs
+     *                           ['instance_ids'] => non-associatative array of author IDs
      * @param  int  $last_day  Last day (time), that was displayed.
-     *                            NOTE FROM NICOLA: be careful, if you want a query with events
-     *                            that have a start date which is greater than today, pass 0 as
-     *                            this parameter. If you pass false ( or pass nothing ) you end up with a query
-     *                            with events that finish before today. I don't know the rationale
-     *                            behind this but that's how it works
+     *                             NOTE FROM NICOLA: be careful, if you want a query with events
+     *                             that have a start date which is greater than today, pass 0 as
+     *                             this parameter. If you pass false ( or pass nothing ) you end up with a query
+     *                             with events that finish before today. I don't know the rationale
+     *                             behind this but that's how it works
      * @param  bool  $unique  Whether display only unique events and don't
      *                            duplicate results with other instances or not.
      *
@@ -84,7 +73,7 @@ class EventSearch extends OsecBaseClass
      *                              ['date_last'] UNIX timestamp (date part) of last event
      */
     public function get_events_relative_to(
-        $time,
+        int $time,
         $limit = 0,
         $page_offset = 0,
         $filter = [],
@@ -92,8 +81,7 @@ class EventSearch extends OsecBaseClass
         $unique = false
     ) {
         $localization_helper = WpmlHelper::factory($this->app);
-        $settings = $this->app->settings;
-
+        $settings            = $this->app->settings;
 
         // Even if there ARE more than 5 times the limit results - we shall not
         // try to fetch and display these, as it would crash system
@@ -105,15 +93,9 @@ class EventSearch extends OsecBaseClass
             $upper_boundary *= 5;
         }
 
-        // Convert timestamp to GMT time TODO <---???
-        // TODO
-        //   I don't get the point of get_current_rounded_time vs current_time89 here.
-        //
-        //$time = UIDateFormats::factory($this->app)->get_current_rounded_time();
-        $time = UIDateFormats::factory($this->app)->current_time();
         // Get post status Where snippet and associated SQL arguments
-        $where_parameters = $this->_get_post_status_sql();
-        $post_status_where = $where_parameters[ 'post_status_where' ];
+        $where_parameters  = $this->_get_post_status_sql();
+        $post_status_where = $where_parameters['post_status_where'];
 
         // Get the Join (filter_join) and Where (filter_where) statements based
         // on $filter elements specified
@@ -121,14 +103,13 @@ class EventSearch extends OsecBaseClass
 
         // Query arguments
         $args = [$time];
-        $args = array_merge($args, $where_parameters[ 'args' ]);
+        $args = array_merge($args, $where_parameters['args']);
 
         if ($page_offset >= 0) {
             $first_record = $page_offset * $limit;
         } else {
             $first_record = (-$page_offset - 1) * $limit;
         }
-
 
         $wpml_join_particle = $localization_helper
             ->get_wpml_table_join('p.ID');
@@ -139,7 +120,7 @@ class EventSearch extends OsecBaseClass
         $filter_date_clause = ($page_offset >= 0)
             ? 'i.end >= %d '
             : 'i.start < %d ';
-        $order_direction = ($page_offset >= 0) ? 'ASC' : 'DESC';
+        $order_direction    = ($page_offset >= 0) ? 'ASC' : 'DESC';
         if (false !== $last_day) {
             if (0 == $last_day) {
                 $last_day = $time;
@@ -147,40 +128,42 @@ class EventSearch extends OsecBaseClass
             $filter_date_clause = ' i.end ';
             if ($page_offset < 0) {
                 $filter_date_clause .= '<';
-                $order_direction = 'DESC';
+                $order_direction    = 'DESC';
             } else {
                 $filter_date_clause .= '>';
-                $order_direction = 'ASC';
+                $order_direction    = 'ASC';
             }
             $filter_date_clause .= ' %d ';
-            $args[ 0 ] = $last_day;
-            $first_record = 0;
+            $args[0]            = $last_day;
+            $first_record       = 0;
         }
         $query = $this->db->prepare(
-            'SELECT DISTINCT p.*, e.post_id, i.id AS instance_id, '.
-            'i.start AS start, '.
-            'i.end AS end, '.
-            'e.allday AS event_allday, '.
-            'e.recurrence_rules, e.exception_rules, e.ticket_url, e.instant_event, e.recurrence_dates, e.exception_dates, '.
-            'e.venue, e.country, e.address, e.city, e.province, e.postal_code, '.
-            'e.show_map, e.contact_name, e.contact_phone, e.contact_email, e.cost, '.
-            'e.ical_feed_url, e.ical_source_url, e.ical_organizer, e.ical_contact, e.ical_uid, e.timezone_name, e.longitude, e.latitude '.
-            'FROM '.$this->db->get_table_name(OSEC_DB__EVENTS).' e '.
-            'INNER JOIN '.$this->db->get_table_name('posts').' p ON e.post_id = p.ID '.
-            $wpml_join_particle.
-            'INNER JOIN '.$this->db->get_table_name(OSEC_DB__INSTANCES).' i ON e.post_id = i.post_id '.
-            $filter[ 'filter_join' ].
-            "WHERE post_type = '".OSEC_POST_TYPE."' ".
-            'AND '.$filter_date_clause.
-            $wpml_where_particle.
-            $filter[ 'filter_where' ].
-            $post_status_where.
-            ($unique ? 'GROUP BY e.post_id ' : '').
+            'SELECT DISTINCT p.*, e.post_id, i.id AS instance_id, ' .
+            'i.start AS start, ' .
+            'i.end AS end, ' .
+            'e.allday AS event_allday, ' .
+            'e.recurrence_rules, e.exception_rules, e.ticket_url, e.instant_event, e.recurrence_dates, '
+                . 'e.exception_dates, ' .
+            'e.venue, e.country, e.address, e.city, e.province, e.postal_code, ' .
+            'e.show_map, e.contact_name, e.contact_phone, e.contact_email, e.cost, ' .
+            'e.ical_feed_url, e.ical_source_url, e.ical_organizer, e.ical_contact, e.ical_uid, e.timezone_name, '
+                . 'e.longitude, e.latitude ' .
+            'FROM ' . $this->db->get_table_name(OSEC_DB__EVENTS) . ' e ' .
+            'INNER JOIN ' . $this->db->get_table_name('posts') . ' p ON e.post_id = p.ID ' .
+            $wpml_join_particle .
+            'INNER JOIN ' . $this->db->get_table_name(OSEC_DB__INSTANCES) . ' i ON e.post_id = i.post_id ' .
+            $filter['filter_join'] .
+            "WHERE post_type = '" . OSEC_POST_TYPE . "' " .
+            'AND ' . $filter_date_clause .
+            $wpml_where_particle .
+            $filter['filter_where'] .
+            $post_status_where .
+            ($unique ? 'GROUP BY e.post_id ' : '') .
             // Reverse order when viewing negative pages, to get correct set of
             // records. Then reverse results later to order them properly.
-            'ORDER BY i.start '.$order_direction.
-            ', post_title '.$order_direction.
-            ' LIMIT '.$first_record.', '.$upper_boundary,
+            'ORDER BY i.start ' . $order_direction .
+            ', post_title ' . $order_direction .
+            ' LIMIT ' . $first_record . ', ' . $upper_boundary,
             $args
         );
 
@@ -201,15 +184,15 @@ class EventSearch extends OsecBaseClass
         $date_first = $date_last = null;
 
         foreach ($events as &$event) {
-            $event[ 'allday' ] = $this->_is_all_day($event);
-            $event = new Event($this->app, $event);
+            $event['allday'] = $this->_is_all_day($event);
+            $event           = new Event($this->app, $event);
             if (null === $date_first) {
                 $date_first = $event->get('start');
             }
             $date_last = $event->get('start');
         }
         $date_first = new DT($date_first);
-        $date_last = new DT($date_last);
+        $date_last  = new DT($date_last);
         // jus show next/prev links, in case no event found is shown.
         $next = true;
         $prev = true;
@@ -247,8 +230,8 @@ class EventSearch extends OsecBaseClass
         ) {
             // User has privilege of seeing all published and private
             $post_status_where = 'AND post_status IN ( %s, %s ) ';
-            $args[] = 'publish';
-            $args[] = 'private';
+            $args[]            = 'publish';
+            $args[]            = 'private';
         } elseif (is_user_logged_in()) {
             // User has privilege of seeing all published and only their own
             // private posts.
@@ -257,12 +240,12 @@ class EventSearch extends OsecBaseClass
             wp_get_current_user();
 
             // include post_status = published
-            //   OR
+            // OR
             // post_status = private AND post_author = userID
             $post_status_where =
-                'AND ( '.
-                'post_status = %s '.
-                'OR ( post_status = %s AND post_author = %d ) '.
+                'AND ( ' .
+                'post_status = %s ' .
+                'OR ( post_status = %s AND post_author = %d ) ' .
                 ') ';
 
             $args[] = 'publish';
@@ -271,10 +254,13 @@ class EventSearch extends OsecBaseClass
         } else {
             // User can only see published posts.
             $post_status_where = 'AND post_status = %s ';
-            $args[] = 'publish';
+            $args[]            = 'publish';
         }
 
-        return ['post_status_where' => $post_status_where, 'args' => $args];
+        return [
+            'post_status_where' => $post_status_where,
+            'args'              => $args,
+        ];
     }
 
     /**
@@ -284,11 +270,11 @@ class EventSearch extends OsecBaseClass
      * statements for running an SQL query limited to the specified options.
      *
      * @param  array  $filter  Array of filters for the events returned:
-     *                          ['cat_ids']      => list of category IDs
-     *                          ['tag_ids']      => list of tag IDs
-     *                          ['post_ids']     => list of event post IDs
-     *                          ['auth_ids']     => list of event author IDs
-     *                          ['instance_ids'] => list of event instance IDs
+     *                         ['cat_ids']      => list of category IDs
+     *                         ['tag_ids']      => list of tag IDs
+     *                         ['post_ids']     => list of event post IDs
+     *                         ['auth_ids']     => list of event author IDs
+     *                         ['instance_ids'] => list of event instance IDs
      *
      * @return array The modified filter array to having:
      *                   ['filter_join']  the Join statements for the SQL
@@ -300,37 +286,39 @@ class EventSearch extends OsecBaseClass
 
         foreach ($filter as $filter_type => $filter_ids) {
             $filter_object = null;
-            $filter_ids = empty($filter_ids) ? [] : $filter_ids;
+            $filter_ids    = empty($filter_ids) ? [] : $filter_ids;
             try {
                 // Derive classname by convention.
-                //  'auth_ids' => 'FilterAuthIds',
-                //  'cat_ids' => 'FilterCatIds',
-                //  'instance_ids' => 'FilterInstanceIds',
-                //  'int' => 'FilterInt',
-                //  'post_ids' => 'FilterPostIds',
-                //  'tag_ids' => 'FilterTagIds',
-                $className = 'Osec\App\Model\Filter\Filter'.join(array_map('ucfirst', explode('_', $filter_type)));
+                // 'auth_ids' => 'FilterAuthIds',
+                // 'cat_ids' => 'FilterCatIds',
+                // 'instance_ids' => 'FilterInstanceIds',
+                // 'int' => 'FilterInt',
+                // 'post_ids' => 'FilterPostIds',
+                // 'tag_ids' => 'FilterTagIds',
+                $className     = 'Osec\App\Model\Filter\Filter' . implode(
+                    array_map('ucfirst', explode('_', $filter_type))
+                );
                 $filter_object = new $className($this->app, $filter_ids);
                 if ( ! ($filter_object instanceof FilterInterface)) {
                     throw new BootstrapException(
-                        'Filter \''.$filter_object::class.
+                        'Filter \'' . $filter_object::class .
                         '\' is not instance of FilterInterface'
                     );
                 }
             } catch (BootstrapException) {
                 continue;
             }
-            $filter_join[] = $filter_object->get_join();
+            $filter_join[]  = $filter_object->get_join();
             $filter_where[] = $filter_object->get_where();
         }
 
-        $filter_join = array_filter($filter_join);
+        $filter_join  = array_filter($filter_join);
         $filter_where = array_filter($filter_where);
-        $filter_join = join(' ', $filter_join);
+        $filter_join  = implode(' ', $filter_join);
         if (count($filter_where) > 0) {
-            $operator = $this->get_distinct_types_operator();
-            $filter_where = $operator.'( '.
-                            implode(' ) '.$operator.' ( ', $filter_where).
+            $operator     = $this->get_distinct_types_operator();
+            $filter_where = $operator . '( ' .
+                            implode(' ) ' . $operator . ' ( ', $filter_where) .
                             ' ) ';
         } else {
             $filter_where = '';
@@ -346,7 +334,10 @@ class EventSearch extends OsecBaseClass
      */
     public function get_distinct_types_operator()
     {
-        static $operators = ['AND' => 1, 'OR' => 2];
+        static $operators = [
+            'AND' => 1,
+            'OR'  => 2,
+        ];
         $default = key($operators);
         /**
          * Mess around with some logic here
@@ -356,11 +347,10 @@ class EventSearch extends OsecBaseClass
          * @param  array  $default  Default distinct type logic.
          *
          * @see EventSearch->_get_filter_sql()
-         *
          */
         $distinct_types = apply_filters('osec_filter_distinct_types_logic', $default);
-        $where_operator = strtoupper(trim((string) $distinct_types));
-        if ( ! isset($operators[ $where_operator ])) {
+        $where_operator = strtoupper(trim((string)$distinct_types));
+        if ( ! isset($operators[$where_operator])) {
             $where_operator = $default;
         }
 
@@ -384,12 +374,12 @@ class EventSearch extends OsecBaseClass
         $limit,
         $last_day
     ) {
-        $limited_events = [];
+        $limited_events     = [];
         $start_day_previous = 0;
         foreach ($events as $event) {
             $start_day = date(
                 'Y-m-d',
-                $event[ 'start' ]
+                $event['start']
             );
             --$limit; // $limit = $limit - 1;
             if ($limit < 0) {
@@ -401,7 +391,7 @@ class EventSearch extends OsecBaseClass
                     break;
                 }
             }
-            $limited_events[] = $event;
+            $limited_events[]   = $event;
             $start_day_previous = $start_day;
         }
 
@@ -421,15 +411,15 @@ class EventSearch extends OsecBaseClass
      */
     protected function _is_all_day(array $event)
     {
-        if (isset($event[ 'event_allday' ]) && $event[ 'event_allday' ]) {
+        if (isset($event['event_allday']) && $event['event_allday']) {
             return true;
         }
 
-        if ( ! isset($event[ 'start' ]) || ! isset($event[ 'end' ])) {
+        if ( ! isset($event['start']) || ! isset($event['end'])) {
             return false;
         }
 
-        return (86400 === $event[ 'end' ] - $event[ 'start' ]);
+        return (86400 === $event['end'] - $event['start']);
     }
 
     /**
@@ -447,7 +437,7 @@ class EventSearch extends OsecBaseClass
     ) {
         $end_of_day = new DT($day);
         $end_of_day->set_time(23, 59, 59);
-        $start_of_day = new DT ($day);
+        $start_of_day = new DT($day);
         $start_of_day->set_time(0, 0, 0);
 
         return $this->get_events_between(
@@ -470,12 +460,12 @@ class EventSearch extends OsecBaseClass
      * @param  DT  $start  Limit to events starting after this.
      * @param  DT  $end  Limit to events starting before this.
      * @param  array  $filter  Array of filters for the events returned:
-     *                                   ['cat_ids']      => list of category IDs;
-     *                                   ['tag_ids']      => list of tag IDs;
-     *                                   ['post_ids']     => list of post IDs;
-     *                                   ['auth_ids']     => list of author IDs;
-     *                                   ['instance_ids'] => list of events
-     *                                                       instance ids;
+     *                                  ['cat_ids']      => list of category IDs;
+     *                                  ['tag_ids']      => list of tag IDs;
+     *                                  ['post_ids']     => list of post IDs;
+     *                                  ['auth_ids']     => list of author IDs;
+     *                                  ['instance_ids'] => list of events
+     *                                                      instance ids;
      * @param  bool  $spanning  Also include events that span this period.
      * @param  bool  $single_day  This parameter is added for oneday view.
      *                               Query should find events lasting in
@@ -498,13 +488,13 @@ class EventSearch extends OsecBaseClass
         // Query arguments
         $args = [
             $start->format_to_gmt(),
-            $end->format_to_gmt()
+            $end->format_to_gmt(),
         ];
 
         // Get post status Where snippet and associated SQL arguments
-        $where_parameters = $this->_get_post_status_sql();
-        $post_status_where = $where_parameters[ 'post_status_where' ];
-        $args = array_merge($args, $where_parameters[ 'args' ]);
+        $where_parameters  = $this->_get_post_status_sql();
+        $post_status_where = $where_parameters['post_status_where'];
+        $args              = array_merge($args, $where_parameters['args']);
 
         // Get the Join (filter_join) and Where (filter_where) statements based
         // on $filter elements specified
@@ -561,22 +551,22 @@ class EventSearch extends OsecBaseClass
 				`e`.`longitude`,
 				`e`.`latitude`
 			FROM
-				'.$this->db->get_table_name(OSEC_DB__EVENTS).' e
+				' . $this->db->get_table_name(OSEC_DB__EVENTS) . ' e
 				INNER JOIN
-					'.$this->db->get_table_name('posts').' p
+					' . $this->db->get_table_name('posts') . ' p
 						ON ( `p`.`ID` = `e`.`post_id` )
-				'.$wpml_join_particle.'
+				' . $wpml_join_particle . '
 				INNER JOIN
-					'.$this->db->get_table_name(OSEC_DB__INSTANCES).' i
+					' . $this->db->get_table_name(OSEC_DB__INSTANCES) . ' i
 					ON ( `e`.`post_id` = `i`.`post_id` )
-				'.$filter[ 'filter_join' ].'
+				' . $filter['filter_join'] . '
 			WHERE
-				post_type = \''.OSEC_POST_TYPE.'\'
-				'.$wpml_where_particle.'
+				post_type = \'' . OSEC_POST_TYPE . '\'
+				' . $wpml_where_particle . '
 			AND
-				'.$spanning_string.'
-				'.$filter[ 'filter_where' ].'
-				'.$post_status_where.'
+				' . $spanning_string . '
+				' . $filter['filter_where'] . '
+				' . $post_status_where . '
 			GROUP BY
 				`i`.`id`
 			ORDER BY
@@ -584,29 +574,29 @@ class EventSearch extends OsecBaseClass
 				`i` . `start`      ASC,
 				`p` . `post_title` ASC';
 
-        $query = $this->db->prepare($sql, $args);
+        $query  = $this->db->prepare($sql, $args);
         $events = $this->db->get_results($query, ARRAY_A);
 
-        $id_list = [];
+        $id_list          = [];
         $id_instance_list = [];
         foreach ($events as $event) {
-            $id_list[] = $event[ 'post_id' ];
+            $id_list[]          = $event['post_id'];
             $id_instance_list[] = [
-                'id'          => $event[ 'post_id' ],
-                'instance_id' => $event[ 'instance_id' ],
+                'id'          => $event['post_id'],
+                'instance_id' => $event['instance_id'],
             ];
         }
 
         if ( ! empty($id_list)) {
             update_meta_cache('post', $id_list);
-            $this->_ids_between_cache = $id_instance_list;
+            $this->idsCache = $id_instance_list;
         }
 
-		// TODO Inline type change?
+        // TODO Inline type change?
 
         foreach ($events as $i => &$event) {
-            $event[ 'allday' ] = $this->_is_all_day($event);
-            $events[$i] = new Event($this->app, $event);
+            $event['allday'] = $this->_is_all_day($event);
+            $events[$i]      = new Event($this->app, $event);
         }
 
         return $events;
@@ -635,21 +625,21 @@ class EventSearch extends OsecBaseClass
         $has_recurrence = false,
         $exclude_post_id = null
     ) {
-        $dbi = $this->app->db;
+        $dbi        = $this->app->db;
         $table_name = $dbi->get_table_name(OSEC_DB__EVENTS);
-        $query = 'SELECT `post_id` FROM '.$table_name.'
+        $query      = 'SELECT `post_id` FROM ' . $table_name . '
 			WHERE ical_feed_url   = %s
 				AND ical_uid        = %s
-				AND start           = %d '.
-                 ($has_recurrence ? 'AND NOT ' : 'AND ').
-                 ' ( recurrence_rules IS NULL OR recurrence_rules = \'\' )';
-        $args = [$feed, $uid];
+				AND start           = %d ' .
+                      ($has_recurrence ? 'AND NOT ' : 'AND ') .
+                      ' ( recurrence_rules IS NULL OR recurrence_rules = \'\' )';
+        $args       = [$feed, $uid];
 
         // Ensure a Int timestamp.
-        $args[] = $start instanceof \Osec\App\Model\Date\DT ? (int) $start->format() : (int) $start;
+        $args[] = $start instanceof DT ? (int)$start->format() : (int)$start;
 
         if (null !== $exclude_post_id) {
-            $query .= ' AND post_id <> %d';
+            $query  .= ' AND post_id <> %d';
             $args[] = $exclude_post_id;
         }
 
@@ -668,21 +658,21 @@ class EventSearch extends OsecBaseClass
      */
     public function get_matching_event_by_uid_and_url($uid, $url)
     {
-        if ( ! isset($uid[ 1 ])) {
+        if ( ! isset($uid[1])) {
             return null;
         }
-        $dbi = $this->app->db;
+        $dbi        = $this->app->db;
         $table_name = $dbi->get_table_name(OSEC_DB__EVENTS);
-        $argv = [$uid, $url];
+        $argv       = [$uid, $url];
         // fix issue where invalid feed URLs were assigned
-        $delete = 'SELECT `post_id` FROM `'.$table_name.
-                  '` WHERE `ical_uid` = %s AND `ical_feed_url` != %s';
+        $delete   = 'SELECT `post_id` FROM `' . $table_name .
+                    '` WHERE `ical_uid` = %s AND `ical_feed_url` != %s';
         $post_ids = $dbi->get_col($dbi->prepare($delete, $argv));
         foreach ($post_ids as $pid) {
             wp_delete_post($pid, true);
         }
         // retrieve actual feed ID if any
-        $select = 'SELECT `post_id` FROM `'.$table_name.
+        $select = 'SELECT `post_id` FROM `' . $table_name .
                   '` WHERE `ical_uid` = %s';
 
         return $dbi->get_var($dbi->prepare($select, $argv));
@@ -695,10 +685,10 @@ class EventSearch extends OsecBaseClass
      */
     public function get_event_ids_for_feed($feed_url)
     {
-        $dbi = $this->app->db;
+        $dbi        = $this->app->db;
         $table_name = $dbi->get_table_name(OSEC_DB__EVENTS);
-        $query = 'SELECT `post_id` FROM '.$table_name.
-                 ' WHERE ical_feed_url = %s';
+        $query      = 'SELECT `post_id` FROM ' . $table_name .
+                      ' WHERE ical_feed_url = %s';
 
         return $dbi->get_col($dbi->prepare($query, [$feed_url]));
     }
@@ -716,19 +706,19 @@ class EventSearch extends OsecBaseClass
         $where_events_ids = '';
         if ( ! empty($events_ids)) {
             $where_events_ids = 'i.post_id IN ('
-                                .implode(',', $events_ids).') AND ';
+                                . implode(',', $events_ids) . ') AND ';
         }
-        $query = 'SELECT i.id, i.post_id FROM '.
-                 $this->db->get_table_name(OSEC_DB__INSTANCES).
-                 ' i WHERE '.
-                 $where_events_ids.
-                 ' i.start > %d '.
+        $query = 'SELECT i.id, i.post_id FROM ' .
+                 $this->db->get_table_name(OSEC_DB__INSTANCES) .
+                 ' i WHERE ' .
+                 $where_events_ids .
+                 ' i.start > %d ' .
                  ' GROUP BY i.post_id';
-        $today = new DT ('now', 'sys.default');
+        $today = new DT('now', 'sys.default');
         $today->set_time(0, 0, 0);
-        $query = $this->db->prepare($query, $today->format('U'));
+        $query   = $this->db->prepare($query, $today->format('U'));
         $results = $this->db->get_results($query);
-        $events = [];
+        $events  = [];
         foreach ($results as $result) {
             $events[] = $this->get_event(
                 $result->post_id,
@@ -751,13 +741,12 @@ class EventSearch extends OsecBaseClass
      */
     public function get_event($post_id, $instance_id = false)
     {
-        $post_id = (int) $post_id;
-        $instance_id = (int) $instance_id;
+        $post_id     = (int)$post_id;
+        $instance_id = (int)$instance_id;
         if ($instance_id < 1) {
             $instance_id = false;
         }
 
         return new Event($this->app, $post_id, $instance_id);
     }
-
 }

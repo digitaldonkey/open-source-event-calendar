@@ -14,7 +14,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 abstract class RenderStrategyAbstract extends OsecBaseClass
 {
-
     /**
      * Render the output.
      */
@@ -35,5 +34,4 @@ abstract class RenderStrategyAbstract extends OsecBaseClass
 
         return $success;
     }
-
 }

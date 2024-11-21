@@ -17,7 +17,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class EventPostView extends OsecBaseClass
 {
-
     /**
      * Add event-specific messages to be used when one is modified in dashboard.
      *
@@ -31,7 +30,7 @@ class EventPostView extends OsecBaseClass
     {
         global $post, $post_ID;
 
-        $messages[ OSEC_POST_TYPE ] = [
+        $messages[OSEC_POST_TYPE] = [
             0  => '',
             // Unused. Messages start at index 1.
             1  => sprintf(
@@ -42,10 +41,10 @@ class EventPostView extends OsecBaseClass
             3  => I18n::__('Custom field deleted.'),
             4  => I18n::__('Event updated.'),
             /* translators: %s: date and time of the revision */
-            5  => isset($_GET[ 'revision' ])
+            5  => isset($_GET['revision'])
                 ? sprintf(
                     I18n::__('Event restored to revision from %s'),
-                    wp_post_revision_title((int) $_GET[ 'revision' ], false)
+                    wp_post_revision_title((int)$_GET['revision'], false)
                 )
                 : false,
             6  => sprintf(
@@ -58,7 +57,9 @@ class EventPostView extends OsecBaseClass
                 esc_url(add_query_arg('preview', 'true', get_permalink($post_ID)))
             ),
             9  => sprintf(
-                I18n::__('Event scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview event</a>'),
+                I18n::__(
+                    'Event scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview event</a>'
+                ),
                 // translators: Publish box date format, see http://php.net/date
                 (new DT($post->post_date))->format_i18n(I18n::__('M j, Y @ G:i')),
                 esc_url(get_permalink($post_ID))
@@ -84,13 +85,13 @@ class EventPostView extends OsecBaseClass
      *
      * @return string The excerpt.
      */
-    public function trim_excerpt(Event $event, $length = 35, $more = '[...]') : string
+    public function trim_excerpt(Event $event, $length = 35, $more = '[...]'): string
     {
         global $post;
         $original_post = $post;
-        $post = $event->get('post');
-        $raw_excerpt = $event->get('post')->post_content;
-        if ( ! isset($raw_excerpt[ 0 ])) {
+        $post          = $event->get('post');
+        $raw_excerpt   = $event->get('post')->post_content;
+        if ( ! isset($raw_excerpt[0])) {
             $raw_excerpt = '&nbsp;';
         }
 
@@ -107,8 +108,8 @@ class EventPostView extends OsecBaseClass
         $text = strip_tags($text);
 
         $excerpt_length = apply_filters('excerpt_length', $length);
-        $excerpt_more = apply_filters('excerpt_more', $more);
-        $words = preg_split(
+        $excerpt_more   = apply_filters('excerpt_more', $more);
+        $words          = preg_split(
             '/\s+/',
             $text,
             $excerpt_length + 1,
@@ -117,7 +118,7 @@ class EventPostView extends OsecBaseClass
         if (count($words) > $excerpt_length) {
             array_pop($words);
             $text = implode(' ', $words);
-            $text = $text.$excerpt_more;
+            $text = $text . $excerpt_more;
         } else {
             $text = implode(' ', $words);
         }
@@ -125,5 +126,4 @@ class EventPostView extends OsecBaseClass
 
         return apply_filters('wp_trim_excerpt', $text, $raw_excerpt);
     }
-
 }

@@ -15,7 +15,6 @@ namespace Osec\Settings;
  */
 interface SettingsInterface
 {
-
     /**
      * Set attribute for renderable element.
      *
@@ -35,6 +34,5 @@ interface SettingsInterface
      *
      * @return string HTML snippet.
      */
-    public function render($html = '') : string;
-
+    public function render($html = ''): string;
 }

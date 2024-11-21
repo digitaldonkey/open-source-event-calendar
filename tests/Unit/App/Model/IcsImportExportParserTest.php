@@ -5,19 +5,20 @@ namespace Osec\Tests\Unit\App\Model;
 use Osec\App\Model\IcsImportExportParser;
 use Osec\Tests\Utilities\TestBase;
 
+// phpcs:disable Generic.Files.LineLength.TooLong
+
 /**
  * @group ics
  * Sample test case.
  */
 class IcsImportExportParserTest extends TestBase
 {
-
     public function test_process_ical_source()
     {
         global $osec_app;
-        $DATA = array(
+        $DATA = [
             'events_in_db'   =>
-                array(
+                [
                     59  => 0,
                     60  => 1,
                     61  => 2,
@@ -63,9 +64,9 @@ class IcsImportExportParserTest extends TestBase
                     101 => 42,
                     102 => 43,
                     103 => 44,
-                ),
+                ],
             'feed'           =>
-                (object) array(
+                (object)[
                     'feed_id'              => '1',
                     'feed_url'             => 'https://ics.calendarlabs.com/641/64bc8358/FIFA_Womens_World_Cup.ics',
                     'feed_name'            => 'FIFA Womens World Cup',
@@ -76,7 +77,7 @@ class IcsImportExportParserTest extends TestBase
                     'keep_tags_categories' => '0',
                     'keep_old_events'      => '0',
                     'import_timezone'      => '0',
-                ),
+                ],
             'comment_status' => 'closed',
             'do_show_map'    => 0,
             'source'         => 'BEGIN:VCALENDAR
@@ -723,11 +724,11 @@ TRANSP:TRANSPARENT
 SEQUENCE:0
 END:VEVENT
 END:VCALENDAR',
-        );
-//    if (!defined('WP_SITEURL')) {
-//      define('WP_SITEURL', 'https://ddev-wordpress.ddev.site');
-//    }
+        ];
+        // if (!defined('WP_SITEURL')) {
+        // define('WP_SITEURL', 'https://ddev-wordpress.ddev.site');
+        // }
         $value = IcsImportExportParser::factory($osec_app)->import($DATA);
-        $this->assertEquals(53, $value[ 'count' ]);
+        $this->assertEquals(53, $value['count']);
     }
 }

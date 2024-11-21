@@ -14,13 +14,12 @@ use Osec\Theme\ThemeLoader;
  */
 class ThemeVariableSize extends SettingsAbstract
 {
-
-    public function render($html = '', $wrap = false) : string
+    public function render($html = '', $wrap = false): string
     {
         $args = [
-            'label' => $this->_args[ 'description' ],
-            'id'    => $this->_args[ 'id' ],
-            'value' => $this->_args[ 'value' ],
+            'label' => $this->args['description'],
+            'id'    => $this->args['id'],
+            'value' => $this->args['value'],
             'args'  => [
                 'class'       => 'input-mini ai1ec-less-variable-size',
                 'placeholder' => __('Length', OSEC_TXT_DOM),

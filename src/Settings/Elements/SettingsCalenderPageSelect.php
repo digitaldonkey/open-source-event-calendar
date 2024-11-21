@@ -15,7 +15,6 @@ use Osec\Theme\ThemeLoader;
  */
 class SettingsCalenderPageSelect extends SettingsAbstract
 {
-
     /**
      * @var string HTML id attribute for selector.
      */
@@ -24,13 +23,13 @@ class SettingsCalenderPageSelect extends SettingsAbstract
     /**
      * @var array Map of pages defined in system, use `get_pages()` WP call.
      */
-    protected $_pages = [];
+    protected $pages = [];
 
     /**
      * Set attributes for element.
      *
      * Currently recognized attributes:
-     *     - 'pages'    - {@see self::$_pages} for details;
+     *     - 'pages'    - {@see self::$pages} for details;
      *     - 'selected' - {@see self::$_selected} for details.
      *
      * @param  string  $attribute  Name of attribute to set.
@@ -38,7 +37,7 @@ class SettingsCalenderPageSelect extends SettingsAbstract
      *
      * @return self Instance of self.
      */
-    public function set($attribute, $value) : self
+    public function set($attribute, $value): self
     {
         // any validation may be provided here
         return parent::set($attribute, $value);
@@ -52,12 +51,12 @@ class SettingsCalenderPageSelect extends SettingsAbstract
      *
      * @return string HTML snippet for page selection.
      */
-    public function render($html = '', $wrap = true) : string
+    public function render($html = '', $wrap = true): string
     {
-        $output = '<label class="ai1ec-control-label ai1ec-col-sm-5" for="'.
-                  self::ELEMENT_ID.'">'.I18n::__('Calendar page').'</label>'
-                  .'<div class="ai1ec-col-sm-7">'.
-                  $this->_get_pages_selector().$this->_get_page_view_link().'</div>';
+        $output = '<label class="ai1ec-control-label ai1ec-col-sm-5" for="' .
+                  self::ELEMENT_ID . '">' . I18n::__('Calendar page') . '</label>'
+                  . '<div class="ai1ec-col-sm-7">' .
+                  $this->_get_pages_selector() . $this->_get_page_view_link() . '</div>';
 
         return $this->warp_in_form_group($output);
     }
@@ -69,15 +68,15 @@ class SettingsCalenderPageSelect extends SettingsAbstract
      */
     protected function _get_pages_selector()
     {
-        $html = '<select id="'.self::ELEMENT_ID.
-                '" class="ai1ec-form-control" name="'.self::ELEMENT_ID.'">';
+        $html = '<select id="' . self::ELEMENT_ID .
+                '" class="ai1ec-form-control" name="' . self::ELEMENT_ID . '">';
         $list = $this->_get_pages();
         foreach ($list as $key => $value) {
-            $html .= '<option value="'.esc_attr($key).'"';
-            if ($this->_args[ 'value' ] === $key) {
+            $html .= '<option value="' . esc_attr($key) . '"';
+            if ($this->args['value'] === $key) {
                 $html .= ' selected="selected"';
             }
-            $html .= '>'.esc_html($value).'</option>';
+            $html .= '>' . esc_html($value) . '</option>';
         }
         $html .= '</select>';
 
@@ -98,10 +97,10 @@ class SettingsCalenderPageSelect extends SettingsAbstract
         $output = [
             '__auto_page:Calendar' => I18n::__(
                 '- Auto-Create New Page -'
-            )
+            ),
         ];
         foreach ($pages as $key => $value) {
-            $output[ $value->ID ] = $value->post_title;
+            $output[$value->ID] = $value->post_title;
         }
 
         return $output;
@@ -114,10 +113,10 @@ class SettingsCalenderPageSelect extends SettingsAbstract
      */
     protected function _get_page_view_link()
     {
-        if (empty($this->_args[ 'value' ])) {
+        if (empty($this->args['value'])) {
             return '';
         }
-        $post = get_post($this->_args[ 'value' ]);
+        $post = get_post($this->args['value']);
         if (empty($post->ID)) {
             return '';
         }
@@ -135,5 +134,4 @@ class SettingsCalenderPageSelect extends SettingsAbstract
                           ->get_file('setting/calendar-page-selector.twig', $args, true)
                           ->get_content();
     }
-
 }

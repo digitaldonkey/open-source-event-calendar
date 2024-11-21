@@ -18,7 +18,6 @@ use Osec\Http\Request\RequestParser;
  */
 class CalendarShortcodeView extends OsecBaseClass
 {
-
     /**
      * Generate replacement content for [osec] shortcode.
      *
@@ -32,31 +31,31 @@ class CalendarShortcodeView extends OsecBaseClass
      */
     public function shortcode($atts, $content = '', $tag = OSEC_SHORTCODE)
     {
-        $settings_view = SettingsView::factory($this->app);
+        $settings_view   = SettingsView::factory($this->app);
         $view_names_list = array_keys($settings_view->get_all());
-        $default_view = $settings_view->get_default();
+        $default_view    = $settings_view->get_default();
 
         $view_names = [];
         foreach ($view_names_list as $view_name) {
-            $view_names[ $view_name ] = true;
+            $view_names[$view_name] = true;
         }
 
-        $view = $default_view;
+        $view               = $default_view;
         $_events_categories = $_events_tags = $post_ids = [];
 
-        if (isset($atts[ 'view' ])) {
+        if (isset($atts['view'])) {
             // TODO ???
-            if (str_ends_with((string) $atts[ 'view' ], 'ly')) {
-                $atts[ 'view' ] = substr((string) $atts[ 'view' ], 0, -2);
+            if (str_ends_with((string)$atts['view'], 'ly')) {
+                $atts['view'] = substr((string)$atts['view'], 0, -2);
             }
 
-            if ( ! isset($view_names[ $atts[ 'view' ] ])) {
+            if ( ! isset($view_names[$atts['view']])) {
                 return false;
             }
-            $view = $atts[ 'view' ];
+            $view = $atts['view'];
         }
 
-        $mappings = [
+        $mappings          = [
             'cat_name'     => 'events_categories',
             'cat_id'       => 'events_categories',
             'tag_name'     => 'events_tags',
@@ -64,42 +63,42 @@ class CalendarShortcodeView extends OsecBaseClass
             'post_id'      => 'post_ids',
             'events_limit' => 'events_limit',
         ];
-        $matches = [];
+        $matches           = [];
         $custom_taxonomies = [];
         if ( ! empty($atts)) {
             foreach ($atts as $att => $value) {
                 if (
                     ! preg_match('/([a-z0-9\_]+)_(id|name)/', $att, $matches) ||
-                    isset($mappings[ $matches[ 1 ].'_id' ])
+                    isset($mappings[$matches[1] . '_id'])
                 ) {
                     continue;
                 }
-                ${'_'.$matches[ 1 ].'_ids'} = [];
-                $custom_taxonomies[] = $matches[ 1 ];
+                ${'_' . $matches[1] . '_ids'} = [];
+                $custom_taxonomies[]          = $matches[1];
 
-                if ( ! isset($mappings[ $matches[ 1 ].'_id' ])) {
-                    $mappings[ $matches[ 1 ].'_id' ] = $matches[ 1 ];
+                if ( ! isset($mappings[$matches[1] . '_id'])) {
+                    $mappings[$matches[1] . '_id'] = $matches[1];
                 }
-                if ( ! isset($mappings[ $matches[ 1 ].'_name' ])) {
-                    $mappings[ $matches[ 1 ].'_name' ] = $matches[ 1 ];
+                if ( ! isset($mappings[$matches[1] . '_name'])) {
+                    $mappings[$matches[1] . '_name'] = $matches[1];
                 }
             }
         }
 
         foreach ($mappings as $att_name => $type) {
-            if ( ! isset($atts[ $att_name ])) {
+            if ( ! isset($atts[$att_name])) {
                 continue;
             }
-            $raw_values = explode(',', (string) $atts[ $att_name ]);
+            $raw_values = explode(',', (string)$atts[$att_name]);
             foreach ($raw_values as $argument) {
                 if ('post_id' === $att_name) {
-                    if (($argument = (int) $argument) > 0) {
+                    if (($argument = (int)$argument) > 0) {
                         $post_ids[] = $argument;
                     }
                 } else {
                     if ( ! is_numeric($argument)) {
                         $search_val = trim($argument);
-                        $argument = false;
+                        $argument   = false;
                         foreach (['name', 'slug'] as $field) {
                             $record = get_term_by(
                                 $field,
@@ -115,45 +114,43 @@ class CalendarShortcodeView extends OsecBaseClass
                         if (false === $argument) {
                             continue;
                         }
-                        $argument = (int) $argument->term_id;
-                    } else {
-                        if (($argument = (int) $argument) <= 0) {
-                            continue;
-                        }
+                        $argument = (int)$argument->term_id;
+                    } elseif (($argument = (int)$argument) <= 0) {
+                        continue;
                     }
-                    ${'_'.$type}[] = $argument;
+                    ${'_' . $type}[] = $argument;
                 }
             }
         }
         $request_type = $this->app->settings
             ->get('osec_use_frontend_rendering') ? 'json' : 'jsonp';
-        $query = [
+        $query        = [
 
-			// TODO How to transform into Osec_...?
+            // TODO How to transform into Osec_...?
 
-            'cat_ids'  => implode(',', $_events_categories),
-            'tag_ids'  => implode(',', $_events_tags),
-            'post_ids' => implode(',', $post_ids),
-            'action'         => $view,
-            'request_type'   => $request_type,
-            'events_limit'   => isset($atts[ 'events_limit' ])
+            'cat_ids'      => implode(',', $_events_categories),
+            'tag_ids'      => implode(',', $_events_tags),
+            'post_ids'     => implode(',', $post_ids),
+            'action'       => $view,
+            'request_type' => $request_type,
+            'events_limit' => isset($atts['events_limit'])
                 // definition above casts values as array, so we take first element,
                 // as there won't be others
-                ? (int) $atts[ 'events_limit' ] : null,
+                ? (int)$atts['events_limit'] : null,
         ];
-        if ( ! isset($atts[ 'display_filters' ])) {
-            $query[ 'display_filters' ] = 'true';
+        if ( ! isset($atts['display_filters'])) {
+            $query['display_filters'] = 'true';
         } else {
-            $query[ 'display_filters' ] = $atts[ 'display_filters' ];
+            $query['display_filters'] = $atts['display_filters'];
         }
 
         foreach ($custom_taxonomies as $taxonomy) {
-            $query[ 'osec_'.$taxonomy.'_ids' ] = implode(',', ${'_'.$taxonomy});
+            $query['osec_' . $taxonomy . '_ids'] = implode(',', ${'_' . $taxonomy});
         }
-        if (isset($atts[ 'exact_date' ])) {
-            $query[ 'exact_date' ] = $atts[ 'exact_date' ];
+        if (isset($atts['exact_date'])) {
+            $query['exact_date'] = $atts['exact_date'];
         }
-        //    $request = RequestParser::factory($this->app, [$query, $default_view]);
+        // $request = RequestParser::factory($this->app, [$query, $default_view]);
         $request = new RequestParser($this->app, $query, $view);
 
         $request->parse();
@@ -162,7 +159,6 @@ class CalendarShortcodeView extends OsecBaseClass
                              ->add_link_to_html_for_frontend();
         ScriptsFrontendController::factory($this->app)->load_frontend_js(true);
 
-        return $page_content[ 'html' ];
+        return $page_content['html'];
     }
-
 }
