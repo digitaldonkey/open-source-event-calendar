@@ -30,7 +30,7 @@ references:
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
     working_directory: ~/open-source-event-calendar
 
-  workspace_root: &workspace_root project
+  workspace_root: &workspace_root /tmp
 
   attach_workspace: &attach_workspace
     attach_workspace:
