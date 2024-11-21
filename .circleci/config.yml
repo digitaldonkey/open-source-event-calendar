@@ -77,7 +77,7 @@ jobs:
     steps:
       - checkout
       - *attach_workspace
-      - *copy_vendor
+#      - *copy_vendor
       - run:
           name: Run code quality tests
           command: vendor/bin/grumphp run
