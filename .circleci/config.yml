@@ -59,7 +59,7 @@ jobs:
       - run: node --version
       - run:
           name: Install dependencies
-          command: composer install ---no-interaction --optimize-autoloader
+          command: composer install --no-interaction --optimize-autoloader
           # --no-dev Option required for production build
       - run:
           name: Install WordPress
