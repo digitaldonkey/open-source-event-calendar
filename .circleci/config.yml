@@ -71,7 +71,7 @@ jobs:
       - persist_to_workspace:
           root: *workspace_root
           paths:
-            - /tmp/wordpress
+            - wordpress
   code_quality:
     <<: *container_config
     steps:
