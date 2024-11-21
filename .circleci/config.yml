@@ -107,4 +107,6 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - build
-      - code_quality
+      - code_quality:
+          requires:
+            - build
