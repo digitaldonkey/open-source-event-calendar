@@ -65,7 +65,7 @@ jobs:
           name: Install WordPress
           command: bash .circleci/install-wp.sh
       - persist_to_workspace:
-          root: *working_directory
+          root: .
           paths:
             - vendor
       - persist_to_workspace:
