@@ -67,11 +67,11 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - open-source-event-calendar/vendor
+            - vendor
       - persist_to_workspace:
           root: *workspace_root
           paths:
-            - wordpress
+            - /tmp/wordpress
   code_quality:
     <<: *container_config
     steps:
