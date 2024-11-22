@@ -116,6 +116,10 @@ jobs:
       - *copy_vendor
       - run:
           name: Update outdated apt key
+          command: (sudo cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
+
+      - run:
+          name: Update outdated apt key
           command: sudo mkdir -p /etc/apt/trusted.gpg.d/ && sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d/trusted.gpg
       - run:
           name: Install MySQL client and PHP extension
