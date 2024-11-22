@@ -69,7 +69,8 @@ jobs:
           # --no-dev Option required for production build
       - run:
           name: Install WordPress
-          command: bash ./bin/install-wp-tests.sh
+          command: bash ./bin/install-wp-tests.sh phpunit root root db:3306 6.6.1
+
       - persist_to_workspace:
           root: .
           paths:
