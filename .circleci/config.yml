@@ -48,45 +48,6 @@ references:
       command: sudo apt-get update && sudo apt-get install -y subversion && sudo rm -rf /var/lib/apt/lists/*
 
 
-  #
-  # Default configuration Database testing jobs
-  #
-  db_job: &db_job
-    <<: *container_config
-    docker:
-      - image: cimg/php:8.2-node
-      - image: circleci/mysql:8.0
-    steps:
-      - checkout
-      - run:
-          name: Add WordPress host to hosts file
-          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
-      - *attach_workspace
-      - *copy_vendor
-      - run:
-          name: Install MySQL client
-          command: sudo apt-get install mysql-client
-      - run:
-          name: Install MySQL PHP extension
-          command: sudo docker-php-ext-install mysqli
-  #      - run:
-#          name: Start PHP server
-#          command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
-#          background: True
-#      - run:
-#          name: Run Behat tests
-#          command: vendor/bin/behat --config .circleci/behat.yml --format progress --tags=$WP_TYPE
-
-      - run:
-          name: Run PHP unit tests
-          command: vendor/bin/phpunit
-
-  #        environment:
-  #          MYSQL_ROOT_PASSWORD: rootpw
-  #          MYSQL_DATABASE: osec
-  #          MYSQL_USER: osec
-  #          MYSQL_PASSWORD: osec
-
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
 jobs:
@@ -137,6 +98,45 @@ jobs:
 #      - run:
 #          name: Run PHP unit tests
 #          command: vendor/bin/phpunit
+
+  #
+  # Default configuration Database testing jobs
+  #
+  db_job: &db_job
+    <<: *container_config
+    docker:
+      - image: cimg/php:8.2-node
+      - image: circleci/mysql:8.0
+    steps:
+      - checkout
+      - run:
+          name: Add WordPress host to hosts file
+          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
+      - *attach_workspace
+      - *copy_vendor
+      - run:
+          name: Install MySQL client
+          command: sudo apt-get install mysql-client
+      - run:
+          name: Install MySQL PHP extension
+          command: sudo docker-php-ext-install mysqli
+      #      - run:
+      #          name: Start PHP server
+      #          command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
+      #          background: True
+      #      - run:
+      #          name: Run Behat tests
+      #          command: vendor/bin/behat --config .circleci/behat.yml --format progress --tags=$WP_TYPE
+
+      - run:
+          name: Run PHP unit tests
+          command: vendor/bin/phpunit
+
+  #        environment:
+  #          MYSQL_ROOT_PASSWORD: rootpw
+  #          MYSQL_DATABASE: osec
+  #          MYSQL_USER: osec
+  #          MYSQL_PASSWORD: osec
 
 #  say-hello:
 #    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
