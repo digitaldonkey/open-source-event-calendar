@@ -115,9 +115,11 @@ jobs:
       - *attach_workspace
       - *copy_vendor
       - run:
+          name: Update outdated apt key
+          command: sudo mkdir -p /etc/apt/trusted.gpg.d/ && sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d/trusted.gpg
+      - run:
           name: Install MySQL client and PHP extension
-          command: sudo mkdir -p /etc/apt/trusted.gpg.d/ && sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d/trusted.gpg \                     
-                    && sudo apt-get update
+          command: sudo apt-get update \
                     && sudo apt-get install -y mysql-client \
                     && sudo rm -rf /var/lib/apt/lists/* \
                     && sudo docker-php-ext-install mysqli \
