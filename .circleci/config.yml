@@ -115,11 +115,16 @@ jobs:
       - *attach_workspace
       - *copy_vendor
       - run:
-          name: Install MySQL client
-          command: sudo apt-get install mysql-client
+          name: Install MySQL client and PHP extension
+          command: sudo apt-get update \ 
+                    && sudo apt-get install -y mysql-client \
+                    && sudo rm -rf /var/lib/apt/lists/*
+                    && sudo docker-php-ext-install mysqli
+                    && sudo docker-php-ext-install opcache
+                    && sudo docker-php-ext-install acpu
       - run:
           name: Install MySQL PHP extension
-          command: sudo docker-php-ext-install mysqli
+          command:
       #      - run:
       #          name: Start PHP server
       #          command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
