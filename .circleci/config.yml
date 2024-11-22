@@ -70,8 +70,9 @@ references:
           command: sudo docker-php-ext-install mysqli
       - run:
           name: Install WordPress
-          command: bash ./bin/install-wp-tests.sh phpunit root root db:3306 latest
-#      - run:
+          command: bash ./bin/install-wp-tests.sh phpunit root root db:3306 6.6.1 true
+
+  #      - run:
 #          name: Start PHP server
 #          command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
 #          background: True
