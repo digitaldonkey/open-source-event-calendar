@@ -127,7 +127,7 @@ jobs:
                     && sudo apt-get install -y mysql-client 
                     && sudo rm -rf /var/lib/apt/lists/* 
                     && sudo docker-php-ext-install mysqli 
-                    && sudo docker-php-ext-install acpu
+                    && sudo docker-php-ext-install apcu
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
