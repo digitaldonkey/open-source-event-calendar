@@ -159,6 +159,6 @@ workflows:
       - code_quality:
           requires:
             - build
-      - phpunit:
+      - phpunit_job:
           requires:
             - build
