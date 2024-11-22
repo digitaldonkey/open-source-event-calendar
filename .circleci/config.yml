@@ -101,9 +101,10 @@ jobs:
           root: .
           paths:
             - vendor
+      - *install_subversion
       - run:
           name: Install WordPress
-          command: bash ./bin/install-wp-tests.sh phpunit root root db:3306 6.6.1 true
+          command: bash ./bin/install-wp-tests.sh phpunit root root db:3306 6.6.2 true
       - persist_to_workspace:
           root: *workspace_root
           paths:
