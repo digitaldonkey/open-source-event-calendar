@@ -44,7 +44,7 @@ You might require a `composer install` to load dev dependencies.
 composer run-script phpcs
 ddev phpunit
 
-# A few phpunit tests @see phpunit.dist.xml 
+# A few phpunit tests @see phpunit.xml 
 vendor/bin/phpunit
 ddev phpunit
 

@@ -4,40 +4,34 @@ version: 2.1
 orbs:
   php: circleci/php@1.1.0
 
-# References section as descrribed in
+
+# References section
 #   @see https://carlalexander.ca/continuous-deployment-wordpress-directory-circleci/
+#
 references:
   # Environment variables
   #
   WP_CORE_DIR: &WP_CORE_DIR
-               /tmp/wordpress
+                /tmp/wordpress
   WP_HOST: &WP_HOST
-             open-source-event-calendar.test
+              open-source-event-calendar.test
   WP_ORG_PLUGIN_NAME: &WP_ORG_PLUGIN_NAME
-                        open-source-event-calendar
+              open-source-event-calendar
   WP_ORG_USERNAME: &WP_ORG_USERNAME
-                     digitaldonkey
+               digitaldonkey
+  workspace_root: &workspace_root /tmp
 
   # Default container configuration
   #
   container_config: &container_config
     docker:
       - image: cimg/php:8.2-node
-        environment:
-          MYSQL_ROOT_PASSWORD: rootpw
-          MYSQL_DATABASE: osec
-          MYSQL_USER: osec
-          MYSQL_PASSWORD: osec
-
     environment:
       - WP_CORE_DIR: *WP_CORE_DIR
       - WP_HOST: *WP_HOST
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
     working_directory: ~/open-source-event-calendar
-
-
-  workspace_root: &workspace_root /tmp
 
   attach_workspace: &attach_workspace
     attach_workspace:
@@ -53,6 +47,44 @@ references:
       name: Install subversion
       command: sudo apt-get install subversion
 
+  #
+  # Default configuration Database testing jobs
+  #
+  db_job: &db_job
+    <<: *container_config
+    docker:
+      - image: cimg/php:8.2-node
+      - image: circleci/mysql:8.0
+    steps:
+      - checkout
+      - run:
+          name: Add WordPress host to hosts file
+          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
+      - *attach_workspace
+      - *copy_vendor
+      - run:
+          name: Install MySQL client
+          command: sudo apt-get install mysql-client
+      - run:
+          name: Install MySQL PHP extension
+          command: sudo docker-php-ext-install mysqli
+      - run:
+          name: Install WordPress
+          command: bash ./bin/install-wp-tests.sh phpunit root root db:3306 latest
+#      - run:
+#          name: Start PHP server
+#          command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
+#          background: True
+#      - run:
+#          name: Run Behat tests
+#          command: vendor/bin/behat --config .circleci/behat.yml --format progress --tags=$WP_TYPE
+
+
+  #        environment:
+  #          MYSQL_ROOT_PASSWORD: rootpw
+  #          MYSQL_DATABASE: osec
+  #          MYSQL_USER: osec
+  #          MYSQL_PASSWORD: osec
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
@@ -67,9 +99,6 @@ jobs:
           name: Install dependencies
           command: composer install --no-interaction --optimize-autoloader
           # --no-dev Option required for production build
-      - run:
-          name: Install WordPress
-          command: bash ./bin/install-wp-tests.sh phpunit root root db:3306 6.6.1
 
       - persist_to_workspace:
           root: .
@@ -87,8 +116,16 @@ jobs:
       - *copy_vendor
       - run:
           name: Run code quality tests
-          command: vendor/bin/grumphp run
-
+          command: vendor/bin/grumphp run --testsuite=code_quality
+  phpunit_job: &phpunit_job
+    <<: *container_config
+    steps:
+      - checkout
+      - *attach_workspace
+      - *copy_vendor
+      - run:
+          name: Run PHP unit tests
+          command: vendor/bin/phpunit
 
 #  say-hello:
 #    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
@@ -107,6 +144,11 @@ jobs:
 #          name: "Say hello"
 #          command: "echo Hello, World!"
 
+#  -      - run:
+#  -          name: Install WordPress
+#  -          command: bash ./bin/install-wp-tests.sh phpunit root root db:3306 6.6.1
+
+
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
 workflows:
@@ -115,5 +157,8 @@ workflows:
     jobs:
       - build
       - code_quality:
+          requires:
+            - build
+      - phpunit:
           requires:
             - build
