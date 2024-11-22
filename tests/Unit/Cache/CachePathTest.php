@@ -19,7 +19,7 @@ class CachePathTest extends CacheFileTestBase
         $cache_path = (new CachePath())->getCachePath();
 
         $this->assertEquals(
-            '/var/www/html/wp-content/plugins/' . OSEC_PLUGIN_NAME . '/cache/',
+            $_SERVER['DOCUMENT_ROOT'] . '/wp-content/plugins/' . OSEC_PLUGIN_NAME . '/cache/',
             $cache_path
         );
     }
@@ -29,7 +29,7 @@ class CachePathTest extends CacheFileTestBase
         $cachePath = (new CachePath())->getCachePath('the_new_directory');
         $this->deleteAtTeardown($cachePath);
         $this->assertEquals(
-            '/var/www/html/wp-content/plugins/' . OSEC_PLUGIN_NAME . '/cache/the_new_directory/',
+            $_SERVER['DOCUMENT_ROOT'] . '/wp-content/plugins/' . OSEC_PLUGIN_NAME . '/cache/the_new_directory/',
             $cachePath
         );
     }
@@ -39,7 +39,7 @@ class CachePathTest extends CacheFileTestBase
         $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
         $cache_path = (new CachePath())->getCachePath();
         $this->assertEquals(
-            '/var/www/html/phpunit_wp_cache/wordpress/wp-content/uploads/open_source_event_calendar_cache/',
+            sys_get_temp_dir() . '/wordpress/wp-content/uploads/open_source_event_calendar_cache/',
             $cache_path
         );
         $this->deleteAtTeardown($cache_path);
@@ -59,7 +59,7 @@ class CachePathTest extends CacheFileTestBase
         $this->deleteAtTeardown($cacheData['path']);
 
         $this->assertEquals(
-            '/var/www/html/wp-content/plugins/' . OSEC_PLUGIN_NAME . '/cache/another_directory/',
+            $_SERVER['DOCUMENT_ROOT'] . '/wp-content/plugins/' . OSEC_PLUGIN_NAME . '/cache/another_directory/',
             $cacheData['path']
         );
         $this->assertEquals(

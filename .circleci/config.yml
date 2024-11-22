@@ -23,6 +23,12 @@ references:
   container_config: &container_config
     docker:
       - image: cimg/php:8.2-node
+        environment:
+          MYSQL_ROOT_PASSWORD: rootpw
+          MYSQL_DATABASE: osec
+          MYSQL_USER: osec
+          MYSQL_PASSWORD: osec
+
     environment:
       - WP_CORE_DIR: *WP_CORE_DIR
       - WP_HOST: *WP_HOST
@@ -63,7 +69,7 @@ jobs:
           # --no-dev Option required for production build
       - run:
           name: Install WordPress
-          command: bash .circleci/install-wp.sh
+          command: bash ./bin/install-wp-tests.sh
       - persist_to_workspace:
           root: .
           paths:

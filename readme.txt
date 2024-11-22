@@ -90,7 +90,7 @@ If you love truly open source software and don't mind to get your hands dirty yo
 
 **Please do not ask for support at Time.ly for this Plugin**.
 
-Source and developer support you can find at https://github.com/digitaldonkey/all-in-one-event-calendar
+Source and developer support you can find at https://github.com/digitaldonkey/open-source-event-calendar
 
 == Other notes ==
 

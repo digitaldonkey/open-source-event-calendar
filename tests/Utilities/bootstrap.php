@@ -8,7 +8,7 @@
 
 $_tests_dir = getenv('WP_TESTS_DIR');
 
-if ( ! $_tests_dir) {
+if (! $_tests_dir) {
     $_tests_dir = rtrim(sys_get_temp_dir(), '/\\') . '/wordpress-tests-lib';
 }
 
@@ -18,7 +18,7 @@ if (false !== $_phpunit_polyfills_path) {
     define('WP_TESTS_PHPUNIT_POLYFILLS_PATH', $_phpunit_polyfills_path);
 }
 
-if ( ! file_exists("{$_tests_dir}/includes/functions.php")) {
+if (! file_exists("{$_tests_dir}/includes/functions.php")) {
     // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     echo "Could not find {$_tests_dir}/includes/functions.php, have you run bin/install-wp-tests.sh ?" . PHP_EOL;
     exit(1);
@@ -35,12 +35,14 @@ function _manually_load_plugin()
     // Let's set a timezone in WP-settings. We need it at least for the Week start calculation.
     update_option('timezone_string', ini_get('date.timezone'));
 
-    // ABSPATH is defined as /var/www/html/phpunit_wp_cache/wordpress/
-    // but Plugin is in ....
-    // I assume this is intended.
-    $_SERVER['DOCUMENT_ROOT'] = '/var/www/html';
-    $wp_root                  = substr(__FILE__, 0, strpos(__FILE__, 'wp-content/'));
-    $plugin_dir               = $wp_root . 'wp-content/plugins/';
+    $wp_root = substr(__FILE__, 0, strpos(__FILE__, 'wp-content/'));
+
+    // Emmulate DOCUMENT_ROOT.
+    // ABSPATH is defined as sys_get_temp_dir()./wordpress/
+    // $_SERVER['DOCUMENT_ROOT'] = '/var/www/html'; // <-- in ddev.
+    $_SERVER['DOCUMENT_ROOT'] = untrailingslashit($wp_root);
+
+    $plugin_dir = $wp_root . 'wp-content/plugins/';
     require_once $plugin_dir . 'open-source-event-calendar/open-source-event-calendar.php';
     osec_plugin_activate();
     // Now constants like OSEC_PLUGIN_NAME, OSEC_XYZ are available.

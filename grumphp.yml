@@ -1,4 +1,9 @@
 grumphp:
+    git_hook_variables:
+        # Using grunp inside ddev.
+        # @see https://www.patrickvanefferen.nl/blog/configuring-grumphp-ddev
+        # requires Reinit ddev exec grumphp git:init
+        EXEC_GRUMPHP_COMMAND: ddev exec php
     tasks:
 
         # Doc: https://github.com/phpro/grumphp/blob/master/doc/tasks/composer.md
@@ -7,14 +12,14 @@ grumphp:
         # Doc: https://github.com/phpro/grumphp/blob/master/doc/tasks/phpcs.md
         phpcs:
             standard: ['./phpcs.dist.xml']
-#        phpunit:
-#            config_file: ~
-#            testsuite: ~
-#            group: []
-#            exclude_group: []
-#            always_execute: false
-#            order: null
-#            coverage-clover: null
-#            coverage-html: null
-#            coverage-php: null
-#            coverage-xml: null
+        phpunit:
+            config_file: ~
+            testsuite: ~
+            group: []
+            exclude_group: []
+            always_execute: false
+            order: null
+            coverage-clover: null
+            coverage-html: null
+            coverage-php: null
+            coverage-xml: null

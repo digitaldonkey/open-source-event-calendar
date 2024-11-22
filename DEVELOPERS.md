@@ -33,17 +33,22 @@ SELECT id, post_id, `start`, DATE_FORMAT(FROM_UNIXTIME(`start`), '%Y-%m-%d %H:%i
 
 ## Ensure coding standards before commit. 
 
+We have a PHP (require_dev) based toolset.
+Project has been set up using ddev. All scripts should be running stable in ddev using provided config.
+
+You might require a `composer install` to load dev dependencies.
+
+
 ```
 # Codesniffer 
 composer run-script phpcs
 ddev phpunit
 
-
-# A few Tests only. 
+# A few phpunit tests @see phpunit.dist.xml 
 vendor/bin/phpunit
 ddev phpunit
 
-# Before commit
+# Altogether @see grumphp.yml
 vendor/bin/grumphp run
 ```
 
@@ -71,6 +76,8 @@ composer require --dev yoast/phpunit-polyfills:"^2.0"
 
 Ensure you have subversion available 
 
+WordPress Test scripts require subversion access. 
+
 ```
  @file .ddev/config.yaml
  webimage_extra_packages: [subversion]
@@ -79,19 +86,13 @@ Ensure you have subversion available
 Alternatively... 
 
 ```
-ddev ssh 
-sudo su
-apt update
-apt install subversion
-exit 
+apt update && install subversion 
 ```
 
 **initialize once **
 
 ```
-cd /var/www/html/wp-content/plugins/all-in-one-event-calendar
-mkdir -p /var/www/phpunit_wp_cache \
-&& export TMPDIR="/var/www/phpunit_wp_cache" \
+PHP_TMP=$($(command -v php) -r 'echo  sys_get_temp_dir();')
 && cd /var/www/html/wp-content/plugins/open-source-event-calendar \
 && bin/install-wp-tests.sh phpunit root root db:3306 6.6.1
 ```

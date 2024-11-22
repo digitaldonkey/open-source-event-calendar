@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Maybe TODO
+# svn/Subversion is a removable dependency here.
+# which could be replaced with git e.g.
+# https://github.com/WordPress/wordpress-develop/tree/trunk/tests/phpunit/includes
+
 if [ $# -lt 3 ]; then
 	echo "usage: $0 <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation]"
 	exit 1
@@ -12,7 +17,7 @@ DB_HOST=${4-localhost}
 WP_VERSION=${5-latest}
 SKIP_DB_CREATE=${6-false}
 
-TMPDIR=${TMPDIR-/tmp}
+TMPDIR=${TMPDIR-$($(command -v php) -r 'echo  sys_get_temp_dir();')}
 TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
 WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress}

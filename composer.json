@@ -30,7 +30,8 @@
         }
     ],
     "scripts": {
-        "phpcs": "phpcs --standard=phpcs.xml"
+        "phpcs": "phpcs --standard=phpcs.xml",
+        "grumphp": "grumphp"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
@@ -40,7 +41,8 @@
         "symfony/debug-bundle": "^7.1",
         "phpro/grumphp": "^2.9",
         "wp-coding-standards/wpcs": "^3.0",
-        "phpcompatibility/phpcompatibility-wp": "*"
+        "phpcompatibility/phpcompatibility-wp": "*",
+        "wp-cli/wp-cli-bundle": "^2.11"
     },
     "config": {
         "allow-plugins": {

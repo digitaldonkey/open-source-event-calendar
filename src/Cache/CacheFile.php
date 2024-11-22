@@ -79,7 +79,10 @@ class CacheFile extends OsecBaseClass implements CacheInterface
             throw new Exception('a cache identifier must be provided. It will define a directory in cachePath');
         }
         $cacheData = (new CachePath())->getCacheData($cache_id);
-        if ( ! is_array($cacheData)) {
+        if ( ! is_array($cacheData)
+            || ! isset($cacheData['path'])
+            || ! isset($cacheData['url'])
+        ) {
             self::setUnavailable($app, $cache_id);
 
             return null;
