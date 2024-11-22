@@ -77,6 +77,9 @@ references:
 #          name: Run Behat tests
 #          command: vendor/bin/behat --config .circleci/behat.yml --format progress --tags=$WP_TYPE
 
+      - run:
+          name: Run PHP unit tests
+          command: vendor/bin/phpunit
 
   #        environment:
   #          MYSQL_ROOT_PASSWORD: rootpw
@@ -87,17 +90,18 @@ references:
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
 jobs:
+
+  # BUILD
   build:
     <<: *container_config
     steps:
       - checkout
-      - run: php --version
-      - run: node --version
+#      - run: php --version
+#      - run: node --version
       - run:
           name: Install dependencies
           command: composer install --no-interaction --optimize-autoloader
           # --no-dev Option required for production build
-
       - persist_to_workspace:
           root: .
           paths:
@@ -111,27 +115,28 @@ jobs:
           paths:
             - wordpress
             - wordpress-tests-lib
-  code_quality:
+
+  # STATIC CODE ANALYSE
+  code_quality_job:
     <<: *container_config
     steps:
       - checkout
       - *attach_workspace
       - *copy_vendor
-#      - run:
-#          name: Install WordPress
-#          command: bash ./bin/install-wp-tests.sh phpunit root root db:3306 6.6.2 true
       - run:
           name: Run code quality tests
           command: vendor/bin/grumphp run --testsuite=code_quality
-  phpunit_job: &phpunit_job
-    <<: *container_config
-    steps:
-      - checkout
-      - *attach_workspace
-      - *copy_vendor
-      - run:
-          name: Run PHP unit tests
-          command: vendor/bin/phpunit
+
+#  # DB / PHPUNIT
+#  phpunit_job: &phpunit_job
+#    <<: *container_config
+#    steps:
+#      - checkout
+#      - *attach_workspace
+#      - *copy_vendor
+#      - run:
+#          name: Run PHP unit tests
+#          command: vendor/bin/phpunit
 
 #  say-hello:
 #    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
@@ -162,9 +167,9 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - build
-      - code_quality:
+      - code_quality_job:
           requires:
             - build
-      - phpunit_job:
+      - db_job:
           requires:
             - build
