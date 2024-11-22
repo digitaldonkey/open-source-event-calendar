@@ -126,7 +126,6 @@ jobs:
           command: sudo apt-get update
                     && sudo apt-get install -y mysql-client 
                     && sudo rm -rf /var/lib/apt/lists/* 
-                    && sudo docker-php-ext-install mysqli 
                     && sudo docker-php-ext-install apcu
       - run:
           name: Start PHP server
