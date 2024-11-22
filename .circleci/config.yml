@@ -127,7 +127,6 @@ jobs:
                     && sudo apt-get install -y mysql-client 
                     && sudo rm -rf /var/lib/apt/lists/* 
                     && sudo docker-php-ext-install mysqli 
-                    && sudo docker-php-ext-install opcache 
                     && sudo docker-php-ext-install acpu
       - run:
           name: Start PHP server
