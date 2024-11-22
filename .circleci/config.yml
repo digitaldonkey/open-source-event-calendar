@@ -45,7 +45,8 @@ references:
   install_subversion: &install_subversion
     run:
       name: Install subversion
-      command: sudo apt-get install subversion
+      command: apt-get update && apt-get install -y subversion && rm -rf /var/lib/apt/lists/*
+
 
   #
   # Default configuration Database testing jobs
