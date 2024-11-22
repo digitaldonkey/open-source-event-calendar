@@ -106,7 +106,7 @@ jobs:
     <<: *container_config
     docker:
       - image: cimg/php:8.2-node
-      - image: circleci/mysql:8.0
+      - image: cimg/mysql:8.0
     steps:
       - checkout
       - run:
