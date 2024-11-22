@@ -69,8 +69,10 @@ install_wp() {
 	if [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
 		mkdir -p $TMPDIR/wordpress-trunk
 		rm -rf $TMPDIR/wordpress-trunk/*
-		svn export --quiet https://core.svn.wordpress.org/trunk $TMPDIR/wordpress-trunk/wordpress
-		mv $TMPDIR/wordpress-trunk/wordpress/* $WP_CORE_DIR
+    mkdir -p /tmp/wordpress-nightly
+    download https://wordpress.org/nightly-builds/wordpress-latest.zip  $TMPDIR/wordpress-nightly/wordpress-nightly.zip
+    unzip -q $TMPDIR/wordpress-nightly/wordpress-nightly.zip -d $TMPDIR/wordpress-nightly/
+    mv /tmp/wordpress-nightly/wordpress/* $WP_CORE_DIR
 	else
 		if [ $WP_VERSION == 'latest' ]; then
 			local ARCHIVE_NAME='latest'
@@ -113,6 +115,14 @@ install_test_suite() {
 		# set up testing suite
 		mkdir -p $WP_TESTS_DIR
 		rm -rf $WP_TESTS_DIR/{includes,data}
+		#
+		#  git checkout-index -a -f --prefix=/destination/path/
+		#  git checkout-index -a -f --prefix=$WP_TESTS_DIR/includes
+
+		# Via https://minhaskamal.github.io/DownGit/#/home Which is considered comprimized.
+		# https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/WordPress/wordpress-develop/tree/trunk/tests/phpunit/includes
+		# https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/WordPress/wordpress-develop/tree/trunk/tests/phpunit/data
+
 		svn export --quiet --ignore-externals https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/includes/ $WP_TESTS_DIR/includes
 		svn export --quiet --ignore-externals https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/data/ $WP_TESTS_DIR/data
 	fi

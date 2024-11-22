@@ -45,7 +45,7 @@ references:
   install_subversion: &install_subversion
     run:
       name: Install subversion
-      command: apt-get update && apt-get install -y subversion && rm -rf /var/lib/apt/lists/*
+      command: sudo apt-get update && sudo apt-get install -y subversion && sudo rm -rf /var/lib/apt/lists/*
 
 
   #
