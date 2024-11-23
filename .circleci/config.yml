@@ -131,7 +131,7 @@ jobs:
           name: Install apcu
           command: sudo mkdir -p /tmp/pear/temp
                     && sudo pecl channel-update pecl.php.net
-                    && sudo pecl install apcu-5.1.12 
+                    && sudo pecl install apcu 
                     && sudo docker-php-ext-enable apcu
       - run:
           name: Start PHP server
