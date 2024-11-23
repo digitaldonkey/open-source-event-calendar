@@ -126,8 +126,7 @@ jobs:
           name: Install MySQL client and PHP extension
           command: sudo apt-get update
                     && sudo apt-get install -y mysql-client 
-                    && sudo rm -rf /var/lib/apt/lists/* 
-                    && sudo docker-php-ext-install apcu
+                    && sudo rm -rf /var/lib/apt/lists/*
 
 #          echo "apc.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini
 
