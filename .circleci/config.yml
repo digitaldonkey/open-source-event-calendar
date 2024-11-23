@@ -106,7 +106,11 @@ jobs:
     <<: *container_config
     docker:
       - image: cimg/php:8.2-node
+        environment:
+          TZ:"Europe/Berlin"
       - image: cimg/mysql:8.0
+        environment:
+          TZ:"Europe/Berlin"
     steps:
       - checkout
       - run:
@@ -121,7 +125,7 @@ jobs:
       - run:
           name: Update outdated apt key
           command: sudo mkdir -p /etc/apt/trusted.gpg.d/ && sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d/trusted.gpg
-      - run: sudo pecl install apcu-5.1.24 && sudo docker-php-ext-enable apcu
+      - run: sudo pecl install apcu-5.1.12 && sudo docker-php-ext-enable apcu
       - run:
           name: Install MySQL client and PHP extension
           command: sudo apt-get update
