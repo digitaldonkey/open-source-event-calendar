@@ -132,7 +132,8 @@ jobs:
                     && sudo rm -rf /var/lib/apt/lists/*
       - run:
           name: Install apcu
-          command: sudo pecl install apcu-5.1.12 && sudo docker-php-ext-enable apcu \
+          command: pecl channel-update pecl.php.net \
+                    && sudo pecl install apcu-5.1.12 && sudo docker-php-ext-enable apcu \
                     && echo "apc.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini
 
       - run:
