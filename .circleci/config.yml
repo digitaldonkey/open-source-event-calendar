@@ -124,7 +124,8 @@ jobs:
 
       - run:
           name: Update outdated apt key
-          command: sudo mkdir -p /etc/apt/trusted.gpg.d/ && sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d/trusted.gpg
+          command: sudo mkdir -p /etc/apt/trusted.gpg.d/ 
+                      && sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d/trusted.gpg
       - run:
           name: Install MySQL client and PHP extension
           command: sudo apt-get update
@@ -132,9 +133,9 @@ jobs:
                     && sudo rm -rf /var/lib/apt/lists/*
       - run:
           name: Install apcu
-          command: sudo pecl channel-update pecl.php.net \
-                    && sudo pecl install apcu-5.1.12 && sudo docker-php-ext-enable apcu \
-                    && echo "apc.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini
+          command: sudo pecl channel-update pecl.php.net
+                     && sudo pecl install apcu-5.1.12 && sudo docker-php-ext-enable apcu
+                     && echo "apc.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
@@ -147,6 +148,7 @@ jobs:
 #          name: Run PHP unit tests
 #          command: vendor/bin/phpunit
       - run:
+          name: Run PHP unit tests
           command: |
             mkdir -p ~/phpunit
             vendor/bin/phpunit --log-junit ~/phpunit/junit.xml tests
