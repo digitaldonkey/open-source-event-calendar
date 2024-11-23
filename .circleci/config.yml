@@ -121,12 +121,16 @@ jobs:
       - run:
           name: Update outdated apt key
           command: sudo mkdir -p /etc/apt/trusted.gpg.d/ && sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d/trusted.gpg
+      - run: sudo pecl install apcu-5.1.24 && sudo docker-php-ext-enable apcu
       - run:
           name: Install MySQL client and PHP extension
           command: sudo apt-get update
                     && sudo apt-get install -y mysql-client 
                     && sudo rm -rf /var/lib/apt/lists/* 
                     && sudo docker-php-ext-install apcu
+
+#          echo "apc.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini
+
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
