@@ -106,11 +106,7 @@ jobs:
     <<: *container_config
     docker:
       - image: cimg/php:8.2-node
-        environment:
-          TZ:"Europe/Berlin"
       - image: cimg/mysql:8.0
-        environment:
-          TZ:"Europe/Berlin"
     steps:
       - checkout
       - run:
