@@ -129,9 +129,10 @@ jobs:
                     && sudo rm -rf /var/lib/apt/lists/*
       - run:
           name: Install apcu
-          command: sudo pecl channel-update pecl.php.net
-                     && sudo pecl install apcu-5.1.12 && sudo docker-php-ext-enable apcu
-                     && echo "apc.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini
+          command: sudo mkdir -p /tmp/pear/temp
+                    && sudo pecl channel-update pecl.php.net
+                    && sudo pecl install apcu-5.1.12 
+                    && sudo docker-php-ext-enable apcu
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
