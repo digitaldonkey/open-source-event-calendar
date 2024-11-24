@@ -70,7 +70,7 @@ jobs:
       - *install_subversion
       - run:
           name: Install WordPress
-          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci localhost:3306 6.6.2 true
+          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST 6.6.2 true
       - persist_to_workspace:
           root: *workspace_root
           paths:
