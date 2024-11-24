@@ -70,7 +70,7 @@ jobs:
       - *install_subversion
       - run:
           name: Install WordPress
-          command: bash ./bin/install-wp-tests.sh phpunit root root db:3306 6.6.2 true
+          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci localhost:3306 6.6.2 true
       - persist_to_workspace:
           root: *workspace_root
           paths:
@@ -107,6 +107,10 @@ jobs:
     docker:
       - image: cimg/php:8.2-node
       - image: cimg/mysql:8.0
+        environment:
+          MYSQL_USER: wp_ci
+          MYSQL_DATABASE: wp_ci
+          MYSQL_ROOT_PASSWORD: wp_ci
     steps:
       - checkout
       - run:
@@ -176,7 +180,7 @@ jobs:
 
 #  -      - run:
 #  -          name: Install WordPress
-#  -          command: bash ./bin/install-wp-tests.sh phpunit root root db:3306 6.6.1
+#  -          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci localhost:3306 6.6.1
 
 
 # Orchestrate jobs using workflows
