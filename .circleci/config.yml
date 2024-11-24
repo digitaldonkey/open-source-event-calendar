@@ -108,9 +108,10 @@ jobs:
       - image: cimg/php:8.2-node
       - image: cimg/mysql:8.0
         environment:
+          MYSQL_ROOT_PASSWORD: wp_ci_root
           MYSQL_USER: wp_ci
           MYSQL_DATABASE: wp_ci
-          MYSQL_ROOT_PASSWORD: wp_ci
+          MYSQL_PASSWORD: wp_ci
     steps:
       - checkout
       - run:
