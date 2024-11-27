@@ -590,6 +590,10 @@ class DatabaseSchema extends OsecBaseClass
                 $type_req = strtolower(
                     preg_replace('#\s+#', '', $type_req)
                 );
+                // Mysql:5.x and mariadb return type(int)
+                // Mysql: 8.x does return the plain type.
+                // @see https://stackoverflow.com/a/60892835/308533.
+                $type_db = preg_replace('/^bigint(:?\([\d]+\))?(unsigned)?$/', 'bigint$2', $type_db);
                 if (0 !== strcmp($type_db, $type_req)) {
                     throw new DatabaseErrorException(
                         'Field `' . $table . '`.`' . $column->Field .
