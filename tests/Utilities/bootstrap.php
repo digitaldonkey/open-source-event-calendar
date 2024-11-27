@@ -42,11 +42,13 @@ function _manually_load_plugin()
     // $_SERVER['DOCUMENT_ROOT'] = '/var/www/html'; // <-- in ddev.
     $_SERVER['DOCUMENT_ROOT'] = untrailingslashit($wp_root);
 
-    $plugin_file = $wp_root . 'wp-content/plugins/open-source-event-calendar/open-source-event-calendar.php';
+    // Gow Two dir levels up, so that it works
+    $plugin_file = dirname(__DIR__, 2) . '/open-source-event-calendar.php';
 
-    if (!file_exists($plugin_file )) {
+    if (!file_exists($plugin_file)) {
         throw new Exception("Plugin \"{$plugin_file}\" not found.");
     }
+
     require_once $plugin_file;
     osec_plugin_activate();
     // Now constants like OSEC_PLUGIN_NAME, OSEC_XYZ are available.
