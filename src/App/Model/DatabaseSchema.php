@@ -87,9 +87,9 @@ class DatabaseSchema extends OsecBaseClass
         // =======================
         $table_name = $dbi->get_table_name(OSEC_DB__EVENTS);
         $sql        = "CREATE TABLE $table_name (
-				post_id bigint(20) NOT NULL,
-				start int(10) UNSIGNED NOT NULL,
-				end int(10) UNSIGNED,
+				post_id bigint NOT NULL,
+				start bigint UNSIGNED NOT NULL,
+				end bigint UNSIGNED,
 				timezone_name varchar(50),
 				allday tinyint(1) NOT NULL,
 				instant_event tinyint(1) NOT NULL DEFAULT 0,
@@ -127,10 +127,10 @@ class DatabaseSchema extends OsecBaseClass
         // ==========================
         $table_name = $dbi->get_table_name(OSEC_DB__INSTANCES);
         $sql        .= "CREATE TABLE $table_name (
-				id bigint(20) NOT NULL AUTO_INCREMENT,
-				post_id bigint(20) NOT NULL,
-				start int(10) unsigned NOT NULL,
-				end int(10) unsigned NOT NULL,
+				id bigint NOT NULL AUTO_INCREMENT,
+				post_id bigint NOT NULL,
+				start bigint unsigned NOT NULL,
+				end bigint unsigned NOT NULL,
 				PRIMARY KEY  (id),
 				UNIQUE KEY evt_instance (post_id,start)
 				) CHARACTER SET utf8;";
@@ -152,7 +152,7 @@ class DatabaseSchema extends OsecBaseClass
         // ================================
         $table_name = $dbi->get_table_name(OSEC_DB__META);
         $sql        .= "CREATE TABLE $table_name (
-			term_id bigint(20) NOT NULL,
+			term_id bigint NOT NULL,
 			term_color varchar(255) NOT NULL,
 			term_image varchar(254) NULL DEFAULT NULL,
 			PRIMARY KEY  (term_id)
@@ -160,7 +160,7 @@ class DatabaseSchema extends OsecBaseClass
 
         $table_name = $dbi->get_table_name(OSEC_DB__FEEDS);
         $sql        .= "CREATE TABLE $table_name (
-					feed_id bigint(20) NOT NULL AUTO_INCREMENT,
+					feed_id bigint NOT NULL AUTO_INCREMENT,
 					feed_url varchar(255) NOT NULL,
 					feed_name varchar(255) NOT NULL,
 					feed_category varchar(255) NOT NULL,
