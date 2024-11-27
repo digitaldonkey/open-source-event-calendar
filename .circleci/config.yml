@@ -153,7 +153,6 @@ jobs:
           command: |            
             mkdir -p ~/phpunit
             set -o nounset
-            set -o errexit
             set -o pipefail
             vendor/bin/phpunit --log-junit ~/phpunit/junit.xml tests
           when: always
