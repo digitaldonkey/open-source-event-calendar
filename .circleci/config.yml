@@ -152,7 +152,9 @@ jobs:
           name: Run PHP unit tests
           command: |            
             mkdir -p ~/phpunit
-            set -e            
+            set -o nounset
+            set -o errexit
+            set -o pipefail
             vendor/bin/phpunit --log-junit ~/phpunit/junit.xml tests
           when: always
       - store_test_results:
