@@ -308,7 +308,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // Do set to "FALSE" on production sites!
     //
     if ( ! defined('OSEC_DEBUG')) {
-        define('OSEC_DEBUG', true);
+        define('OSEC_DEBUG', false);
     }
 
     // ================

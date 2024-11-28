@@ -88,12 +88,6 @@ class ShutdownController extends OsecBaseClass
         foreach ($this->restorables as $name => $object) {
             unset($object, $this->restorables[$name]);
         }
-        if (OSEC_DEBUG) {
-            // __destruct is called twice if facebook extension is installed
-            // still can't find the reason, this fixes it but prevent other plugins
-            // __destruct() so let's just use it in dev until we fix this.
-            exit(0);
-        }
     }
 
     /**
