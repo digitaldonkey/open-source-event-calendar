@@ -135,8 +135,9 @@ jobs:
       - run:
           name: Install apcu
           command: sudo mkdir -p /tmp/pear/temp
-                    && sudo pecl channel-update pecl.php.net
+                    && sudo pec.circleci/config.ymll channel-update pecl.php.net
                     && echo no '' |  sudo pecl install apcu
+                    && sudo docker-php-ext-enable apcu
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
