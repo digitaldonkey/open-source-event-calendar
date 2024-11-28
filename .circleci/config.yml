@@ -151,7 +151,7 @@ jobs:
       - run:
           name: Run PHP unit tests
           command: |
-            set -euxo pipefail
+            set -Eeuxo pipefail
             mkdir -p ~/phpunit          
             vendor/bin/phpunit --log-junit ~/phpunit/junit.xml tests
           when: always
