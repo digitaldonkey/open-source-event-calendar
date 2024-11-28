@@ -137,7 +137,6 @@ jobs:
           command: sudo mkdir -p /tmp/pear/temp
                     && sudo pecl channel-update pecl.php.net
                     && echo no '' |  sudo pecl install apcu
-                    && docker-php-ext-enable apcu --ini-name docker-php-ext-10-apcu.ini
       - run:
           name: Test apcu in PHP.ini
           command: php -i | grep apcu
