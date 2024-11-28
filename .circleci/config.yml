@@ -122,7 +122,7 @@ jobs:
       - run:
           name: Update outdated apt key
           command: (cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
-
+#
 #      - run:
 #          name: Update outdated apt key
 #          command: sudo mkdir -p /etc/apt/trusted.gpg.d/
@@ -135,7 +135,7 @@ jobs:
       - run:
           name: Install apcu
           command: sudo mkdir -p /tmp/pear/temp
-                    && sudo pec.circleci/config.ymll channel-update pecl.php.net
+                    && sudo pecl channel-update pecl.php.net
                     && echo no '' |  sudo pecl install apcu
                     && sudo docker-php-ext-enable apcu
       - run:
