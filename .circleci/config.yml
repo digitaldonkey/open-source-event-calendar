@@ -150,10 +150,9 @@ jobs:
 #          command: vendor/bin/phpunit
       - run:
           name: Run PHP unit tests
-          command: |            
-            mkdir -p ~/phpunit
-            set -o nounset
-            set -o pipefail
+          command: |
+            set -euxo pipefail
+            mkdir -p ~/phpunit          
             vendor/bin/phpunit --log-junit ~/phpunit/junit.xml tests
           when: always
       - store_test_results:
