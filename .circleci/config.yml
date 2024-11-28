@@ -137,9 +137,10 @@ jobs:
           command: sudo mkdir -p /tmp/pear/temp
                     && sudo pecl channel-update pecl.php.net
                     && echo no '' |  sudo pecl install apcu
+                    && sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
       - run:
           name: Test apcu in PHP.ini
-          command: php -i | grep apcu
+          command: php -i | grep -i apcu
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
@@ -147,10 +148,6 @@ jobs:
       #      - run:
       #          name: Run Behat tests
       #          command: vendor/bin/behat --config .circleci/behat.yml --format progress --tags=$WP_TYPE
-
-#      - run:
-#          name: Run PHP unit tests
-#          command: vendor/bin/phpunit
       - run:
           name: Run PHP unit tests
           command: |
