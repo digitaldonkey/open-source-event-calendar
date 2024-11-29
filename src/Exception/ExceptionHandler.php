@@ -374,8 +374,9 @@ JAVASCRIPT;
             // What kind of Exception handling we have here?
 
             // all plugins should implement an exception based on this convention
-            // which is the same convention we use for constants, only with just first letter uppercase
-            $exc = str_replace('aioec', 'Ai1ec', $exc) . '_Exception';
+            // which is the same convention we use for constants,
+            // only with just first letter uppercase
+            $exc = str_replace('aioec', 'Osec', $exc) . '_Exception';
             if (class_exists($exc)) {
                 $message = sprintf(
                     'Osec: %s @ %s:%d #%d',

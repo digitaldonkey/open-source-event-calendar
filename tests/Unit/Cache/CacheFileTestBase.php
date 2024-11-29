@@ -7,7 +7,17 @@ use Osec\Cache\CachePath;
 use Osec\Tests\Utilities\TestBase;
 
 /**
- * Sample test case.
+ * This class allows to make file paths readonly for a test
+ * and restore original permissions later at tearDown().
+ *
+ * In case tests crashed without tearDown() being called
+ * you may end up with unwritable folders.
+ *
+ * E.g.
+ *  chmod 777 /var/www/html/wp-content/plugins/open-source-event-calendar/cache/
+ *  chmod 777 /var/www/html/phpunit_wp_cache/wordpress/wp-content/uploads/open_source_event_calendar_cache
+ *   or delete folder `open_source_event_calendar_cache` in wp-uploads dir.
+ * We check/clear the dirs at test start in tests/Utilities/bootstrap.php.
  */
 class CacheFileTestBase extends TestBase
 {
@@ -27,6 +37,16 @@ class CacheFileTestBase extends TestBase
         $this->_deleteDirectories[] = $path;
     }
 
+    /**
+     * Precaution:
+     * Limit File Actions to Plugin and wp-upload dirs.
+     * You will never know how many this saved your life ;)
+     *
+     * @param $path
+     *
+     * @return void
+     * @throws Exception
+     */
     protected function precheckDirectory($path): void
     {
         if ( ! is_dir($path)) {

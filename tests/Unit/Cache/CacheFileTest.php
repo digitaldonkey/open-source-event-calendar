@@ -15,6 +15,14 @@ class CacheFileTest extends CacheFileTestBase
     public function test_file_cache_basic()
     {
         global $osec_app;
+
+        // Force to use wp-uploads based cache,
+        // as plugin might not be in $_SERVER['DOCUMENT_ROOT'],
+        // but wp-uploads will be as defined in tests/Utilities/bootstrap.php.
+        // Depending on DOCUMENT_ROOT for Uri generation at getCacheData().
+        // OSEC_FILE_CACHE_DEFAULT_PATH might be out of document root when testing.
+        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
+
         $fileCache = CacheFile::createFileCacheInstance($osec_app);
         $this->assertInstanceOf('\Osec\Cache\CacheFile', $fileCache);
     }
@@ -24,7 +32,7 @@ class CacheFileTest extends CacheFileTestBase
         global $osec_app;
 
         $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
-        $this->makeDirReadonly($this->wp_upload_path);
+        $this->makeDirReadonly($this->wp_upload_path . OSEC_FILE_CACHE_WP_UPLOAD_DIR);
 
         $fileCache = CacheFile::createFileCacheInstance($osec_app);
         $this->assertNull($fileCache);
@@ -35,6 +43,8 @@ class CacheFileTest extends CacheFileTestBase
 
     public function test_file_cache_write_and_read()
     {
+        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
+
         global $osec_app;
         $value     = 'Curabitur blandit tempus porttitor.';
         $fileCache = CacheFile::createFileCacheInstance($osec_app, 'testing_rw');
@@ -48,6 +58,8 @@ class CacheFileTest extends CacheFileTestBase
 
     public function test_file_cache_write_and_delete()
     {
+        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
+
         global $osec_app;
         $value     = 'Curabitur blandit tempus porttitor.';
         $fileCache = CacheFile::createFileCacheInstance($osec_app, 'another_context');
@@ -60,6 +72,8 @@ class CacheFileTest extends CacheFileTestBase
 
     public function test_file_cache_empty_all_caches()
     {
+        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
+
         global $osec_app;
         $fileCache = CacheFile::createFileCacheInstance($osec_app);
         $this->assertTrue($fileCache->empty_all_caches());
@@ -70,8 +84,9 @@ class CacheFileTest extends CacheFileTestBase
 
     public function test_file_cache_get_all_caches()
     {
-        global $osec_app;
+        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
 
+        global $osec_app;
         $fileCache = CacheFile::createFileCacheInstance($osec_app);
         $fileCache->add('file.abc', 'Value1');
         $this->deleteAtTeardown($fileCache->getCachePath());

@@ -46,7 +46,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         parent::__construct($app);
         $this->_cache_path = $path;
         $this->_cache_url  = $url;
-        $this->_cache_id   = $cache_id ? $cache_id : 'default';
+        $this->_cache_id   = $cache_id ?? 'default';
     }
 
     public static function is_available(): bool

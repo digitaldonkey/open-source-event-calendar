@@ -16,6 +16,9 @@ use RecursiveIteratorIterator;
  */
 class CachePath
 {
+
+    public const CLEAN_DIR_DEFAULT_PERMISSIONS = 0754;
+
     public function __construct()
     {
         include_once ABSPATH . 'wp-admin/includes/file.php';
@@ -39,7 +42,7 @@ class CachePath
         try {
             self::delete_directory_content($dir);
 
-            return chmod($dir, 0754);
+            return chmod($dir, self::CLEAN_DIR_DEFAULT_PERMISSIONS);
         } catch (\Exception) {
             return false;
         }
@@ -122,7 +125,7 @@ class CachePath
         if ($wp_upload['error']) {
             return null;
             // TODO
-            //  Here we must admit, that we can mot use Filecache.
+            //  Here we must admit, that we can not use Filecache.
         }
 
         $cachePath = trailingslashit($wp_upload['basedir'])

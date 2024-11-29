@@ -146,6 +146,7 @@ class CachePerformanceTest extends CacheFileTestBase
     public function test_filecache_with_timer()
     {
         global $osec_app;
+        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH); // Required as path be out of docroot in testing.
         $key  = 'test_filecache';
         $DATA = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyz', 100)), 0, 100);
 
