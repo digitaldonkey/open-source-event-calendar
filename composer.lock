@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "28513f5781f56f74649960d882ddfcb5",
+    "content-hash": "1c01f2fe1a3bd417eb681487688d5844",
     "packages": [
         {
             "name": "intervention/httpauth",
@@ -12118,7 +12118,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.1",
+        "php": "^8.0",
         "ext-json": "*",
         "ext-curl": "*"
     },

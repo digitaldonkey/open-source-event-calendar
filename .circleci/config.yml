@@ -169,6 +169,13 @@ jobs:
       - image: cimg/mysql:8.0
         <<: *database_config
 
+  db_job_php_8_0:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.0
+      - image: cimg/mysql:8.0
+        <<: *database_config
+
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
 #   & https://circleci.com/docs/configuration-reference/#workflows
@@ -192,6 +199,10 @@ workflows:
               - build
 #              - db_job
       - db_job_php_8_1:
+          requires:
+            - build
+#              - db_job
+      - db_job_php_8_0:
           requires:
             - build
 #              - db_job
