@@ -25,7 +25,7 @@ references:
   #
   container_config: &container_config
     docker:
-      - image: cimg/php:8.2-node
+      - image: cimg/php:8.2
     environment:
       - WP_CORE_DIR: *WP_CORE_DIR
       - WP_HOST: *WP_HOST
@@ -104,7 +104,7 @@ jobs:
   db_job: &db_job
     <<: *container_config
     docker:
-      - image: cimg/php:8.2-node
+      - image: cimg/php:8.2
       - image: cimg/mysql:8.0
         <<: *database_config
     steps:
@@ -148,6 +148,13 @@ jobs:
       - store_test_results:
           path: ~/phpunit
 
+  db_job_maria: &db_job
+    <<: *container_config
+    docker:
+      - image: cimg/php:8.2
+      - image: cimg/mysql:10.5
+        <<: *database_config
+
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
 #   & https://circleci.com/docs/configuration-reference/#workflows
@@ -160,5 +167,8 @@ workflows:
           requires:
             - build
       - db_job:
+          requires:
+            - build
+      - db_job_maria:
           requires:
             - build
