@@ -33,6 +33,16 @@ references:
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
     working_directory: ~/open-source-event-calendar
 
+  # Default DB configuration
+  #
+  database_config: &database_config
+      environment:
+        MYSQL_ROOT_PASSWORD: wp_ci_root
+        MYSQL_USER: wp_ci
+        MYSQL_DATABASE: wp_ci
+        MYSQL_PASSWORD: wp_ci
+
+
   attach_workspace: &attach_workspace
     attach_workspace:
       at: *workspace_root
@@ -88,17 +98,6 @@ jobs:
           name: Run code quality tests
           command: vendor/bin/grumphp run --testsuite=code_quality
 
-#  # DB / PHPUNIT
-#  phpunit_job: &phpunit_job
-#    <<: *container_config
-#    steps:
-#      - checkout
-#      - *attach_workspace
-#      - *copy_vendor
-#      - run:
-#          name: Run PHP unit tests
-#          command: vendor/bin/phpunit
-
   #
   # Default configuration Database testing jobs
   #
@@ -107,11 +106,7 @@ jobs:
     docker:
       - image: cimg/php:8.2-node
       - image: cimg/mysql:8.0
-        environment:
-          MYSQL_ROOT_PASSWORD: wp_ci_root
-          MYSQL_USER: wp_ci
-          MYSQL_DATABASE: wp_ci
-          MYSQL_PASSWORD: wp_ci
+        <<: *database_config
     steps:
       - checkout
       - run:
@@ -122,11 +117,6 @@ jobs:
       - run:
           name: Update outdated apt key
           command: (cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
-#
-#      - run:
-#          name: Update outdated apt key
-#          command: sudo mkdir -p /etc/apt/trusted.gpg.d/
-#                      && sudo cp /etc/apt/trusted.gpg /etc/apt/trusted.gpg.d/trusted.gpg
       - run:
           name: Install MySQL client and PHP extension
           command: sudo apt-get update
@@ -157,36 +147,10 @@ jobs:
           when: always
       - store_test_results:
           path: ~/phpunit
-  #        environment:
-  #          MYSQL_ROOT_PASSWORD: rootpw
-  #          MYSQL_DATABASE: osec
-  #          MYSQL_USER: osec
-  #          MYSQL_PASSWORD: osec
-
-#  say-hello:
-#    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
-#    # See: https://circleci.com/docs/executor-intro/ & https://circleci.com/docs/configuration-reference/#executor-job
-#    docker:
-#      # Specify the version you desire here
-#      # See: https://circleci.com/developer/images/image/cimg/base
-#      - image: cimg/base:current
-#
-#    # Add steps to the job
-#    # See: https://circleci.com/docs/jobs-steps/#steps-overview & https://circleci.com/docs/configuration-reference/#steps
-#    steps:
-#      # Checkout the code as the first step.
-#      - checkout
-#      - run:
-#          name: "Say hello"
-#          command: "echo Hello, World!"
-
-#  -      - run:
-#  -          name: Install WordPress
-#  -          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci localhost:3306 6.6.1
-
 
 # Orchestrate jobs using workflows
-# See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
+# See: https://circleci.com/docs/workflows/
+#   & https://circleci.com/docs/configuration-reference/#workflows
 workflows:
   build_test_deploy: # This is the name of the workflow, feel free to change it to better match your workflow.
     # Inside the workflow, you define the jobs you want to run.
