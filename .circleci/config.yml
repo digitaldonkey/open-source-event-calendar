@@ -148,8 +148,8 @@ jobs:
       - store_test_results:
           path: ~/phpunit
 
-  db_job_maria: &db_job
-    <<: *container_config
+  db_job_maria:
+    <<: *db_job
     docker:
       - image: cimg/php:8.2
       - image: cimg/mysql:10.5
