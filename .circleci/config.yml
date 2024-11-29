@@ -172,7 +172,7 @@ jobs:
   db_job_php_8_0:
     <<: *db_job
     docker:
-      - image: cimg/php:8.1
+      - image: cimg/php:8.0.28
       - image: cimg/mysql:8.0
         <<: *database_config
 
