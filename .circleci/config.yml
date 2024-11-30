@@ -202,11 +202,19 @@ jobs:
     steps:
       - *install_subversion
       - checkout
-      #      - run: php --version
-      #      - run: node --version
       - run:
           name: Install dependencies (no dev)
           command: composer install --no-interaction --optimize-autoloader --no-dev
+      - run:
+          name: Creat Release package
+          command: tar -czf "/tmp/$WP_ORG_PLUGIN_NAME.tar.gz" language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
+      - store_artifacts:
+          path: /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
+#      - persist_to_workspace:
+#          root: .
+#          paths:
+#            - /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
+
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
