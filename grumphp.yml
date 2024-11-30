@@ -6,7 +6,7 @@ grumphp:
         # Using grunp inside ddev.
         # @see https://www.patrickvanefferen.nl/blog/configuring-grumphp-ddev
         # requires Reinit ddev exec grumphp git:init
-        EXEC_GRUMPHP_COMMAND: ddev exec php
+        EXEC_GRUMPHP_COMMAND: ddev exec -d  "/var/www/html/wp-content/plugins/open-source-event-calendar" ./vendor/bin/grumphp
 parameters:
     process_timeout: 120
     tasks:

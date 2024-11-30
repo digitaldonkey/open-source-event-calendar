@@ -17,10 +17,9 @@ The [Open Source Event Calendar]() is based on the Timely All-in-one-event-calen
 [Timely](http://time.ly/). The calendar system combines clean visual design with a basic set of
 features to create share and aggregate Events in WordPress. Ical import is possible.
 
-This Plugin is open source software in a very traditional sense.
-I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features.
+This Plugin is open source software in traditional sense. I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features.
 
-Osec calendar is most likely not compatible with any previous All-in-one-event-calendar release, but with spme effort you might get it working.
+Osec calendar is most likely not compatible with any previous All-in-one-event-calendar release, but with some effort you might get it working.
 
 = Import and Export Events =
 
@@ -56,6 +55,10 @@ any other system that accepts iCalendar (.ics) feeds.
 * Each event links to the original calendar.
 * Your calendar can be embedded into a WordPress page without needing
 to create template files or modify the theme.
+
+= Requirements =
+
+* PHP >= 8.2 is currently required (maybe 8.1 will work too, untested) excessing default WordPress requirements.
 
 = Languages =
 

@@ -66,6 +66,7 @@ jobs:
   build:
     <<: *container_config
     steps:
+      - *install_subversion
       - checkout
 #      - run: php --version
 #      - run: node --version
@@ -77,7 +78,6 @@ jobs:
           root: .
           paths:
             - vendor
-      - *install_subversion
       - run:
           name: Install WordPress
           command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST 6.6.2 true
@@ -169,12 +169,35 @@ jobs:
       - image: cimg/mysql:8.0
         <<: *database_config
 
-  db_job_php_8_0:
-    <<: *db_job
-    docker:
-      - image: cimg/php:8.0.28
-      - image: cimg/mysql:8.0
-        <<: *database_config
+  create_release:
+    <<: *container_config
+    steps:
+      - *install_subversion
+      - checkout
+      - *attach_workspace
+      - *copy_vendor
+      - run:
+          name: Install dependencies (no dev)
+          command: composer install --no-interaction --optimize-autoloader --no-dev
+      - run:
+          name: Creat Release package
+          command: |
+            tar -czf /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz" language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
+      - persist_to_workspace:
+          root: .
+          paths:
+            - /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
+      - store_artifacts:
+          path: /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
+
+#  db_job_php_8_0:
+#    <<: *db_job
+#    docker:
+#      - image: cimg/php:8.0.28
+#      - image: cimg/mysql:8.0
+#        <<: *database_config
+# mclay/minify && Grumphp and others require PHP > 8.1.
+
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
@@ -193,16 +216,17 @@ workflows:
       - db_job_maria_10_5:
           requires:
             - build
-#            - db_job
+            - db_job
       - db_job_maria_11:
-            requires:
-              - build
-#              - db_job
+          requires:
+            - build
+            - db_job
       - db_job_php_8_1:
           requires:
             - build
-#              - db_job
-      - db_job_php_8_0:
+            - db_job
+      - create_release:
           requires:
-            - build
-#              - db_job
+            - db_job_php_8_1
+            - db_job_maria_11
+            - db_job_maria_10_5
