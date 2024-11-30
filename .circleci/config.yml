@@ -169,6 +169,14 @@ jobs:
       - image: cimg/mysql:8.0
         <<: *database_config
 
+  #  db_job_php_8_0:
+  #    <<: *db_job
+  #    docker:
+  #      - image: cimg/php:8.0.28
+  #      - image: cimg/mysql:8.0
+  #        <<: *database_config
+  # mclay/minify && Grumphp and others require PHP > 8.1.
+
   create_release:
     <<: *container_config
     steps:
@@ -190,13 +198,7 @@ jobs:
       - store_artifacts:
           path: /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
 
-#  db_job_php_8_0:
-#    <<: *db_job
-#    docker:
-#      - image: cimg/php:8.0.28
-#      - image: cimg/mysql:8.0
-#        <<: *database_config
-# mclay/minify && Grumphp and others require PHP > 8.1.
+
 
 
 # Orchestrate jobs using workflows
@@ -215,16 +217,16 @@ workflows:
             - build
       - db_job_maria_10_5:
           requires:
-            - build
             - db_job
+            - code_quality_job
       - db_job_maria_11:
           requires:
-            - build
             - db_job
+            - code_quality_job
       - db_job_php_8_1:
           requires:
-            - build
             - db_job
+            - code_quality_job
       - create_release:
           requires:
             - db_job_php_8_1
