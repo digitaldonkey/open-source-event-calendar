@@ -209,11 +209,11 @@ jobs:
           name: Creat Release package
           command: tar -czf "/tmp/$WP_ORG_PLUGIN_NAME.tar.gz" language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
       - store_artifacts:
-          path: /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
-#      - persist_to_workspace:
-#          root: .
-#          paths:
-#            - /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
+          path: /tmp/$WP_ORG_PLUGIN_NAME.tar.gz
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - /tmp/$WP_ORG_PLUGIN_NAME.tar.gz
 
 
 # Orchestrate jobs using workflows
@@ -244,6 +244,8 @@ workflows:
             - code_quality_job
       - create_release:
           requires:
-            - db_job_php_8_1
-            - db_job_maria_11
-            - db_job_maria_10_5
+#            - db_job_php_8_1
+#            - db_job_maria_11
+#            - db_job_maria_10_5
+            - db_job
+            - code_quality_job
