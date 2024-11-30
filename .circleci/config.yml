@@ -207,13 +207,13 @@ jobs:
           command: composer install --no-interaction --optimize-autoloader --no-dev
       - run:
           name: Creat Release package
-          command: tar -czf "/tmp/$WP_ORG_PLUGIN_NAME.tar.gz" language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
+          command: tar -czf /tmp/open-source-event-calendar.tar.gz language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
       - store_artifacts:
-          path: /tmp/$WP_ORG_PLUGIN_NAME.tar.gz
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - /tmp/$WP_ORG_PLUGIN_NAME.tar.gz
+          path: /tmp/open-source-event-calendar.tar.gz
+#      - persist_to_workspace:
+#          root: *workspace_root
+#          paths:
+#            - /tmp/$WP_ORG_PLUGIN_NAME.tar.gz
 
 
 # Orchestrate jobs using workflows
