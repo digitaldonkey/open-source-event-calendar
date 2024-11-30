@@ -177,29 +177,36 @@ jobs:
   #        <<: *database_config
   # mclay/minify && Grumphp and others require PHP > 8.1.
 
+#  create_release:
+#    <<: *container_config
+#    steps:
+#      - *install_subversion
+#      - checkout
+#      - *attach_workspace
+#      - *copy_vendor
+#      - run:
+#          name: Install dependencies (no dev)
+#          command: composer install --no-interaction --optimize-autoloader --no-dev
+#      - run:
+#          name: Creat Release package
+#          command: |
+#            tar -czf /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz" language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
+#      - persist_to_workspace:
+#          root: .
+#          paths:
+#            - /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
+#      - store_artifacts:
+#          path: /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
   create_release:
     <<: *container_config
     steps:
       - *install_subversion
       - checkout
-      - *attach_workspace
-      - *copy_vendor
+      #      - run: php --version
+      #      - run: node --version
       - run:
           name: Install dependencies (no dev)
           command: composer install --no-interaction --optimize-autoloader --no-dev
-      - run:
-          name: Creat Release package
-          command: |
-            tar -czf /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz" language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
-      - persist_to_workspace:
-          root: .
-          paths:
-            - /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
-      - store_artifacts:
-          path: /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
-
-
-
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
