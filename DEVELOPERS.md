@@ -52,6 +52,17 @@ ddev phpunit
 vendor/bin/grumphp run
 ```
 
+#### Using grumphp inside ddev.
+
+Edit local `grumphp.yml`
+
+```
+EXEC_GRUMPHP_COMMAND: ddev exec -d  "/var/www/html/wp-content/plugins/open-source-event-calendar"
+```
+Requires reinit `ddev exec grumphp git:init` which will reconfigure the git pre-commit hook.
+
+@see [configuring-grumphp-ddev](https://www.patrickvanefferen.nl/blog/configuring-grumphp-ddev)
+
 ## Testing 
 
 @see [wordpress.org/.../plugin-unit-tests](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/)
