@@ -197,8 +197,9 @@ jobs:
   create_release:
     <<: *container_config
     steps:
-      - *install_subversion
+#      - *install_subversion
       - checkout
+#      - *attach_workspace
       - run:
           name: Install dependencies (no dev)
           command: composer install --no-interaction --optimize-autoloader --no-dev
