@@ -210,7 +210,7 @@ jobs:
       - persist_to_workspace:
           root: *workspace_root
           paths:
-            - /tmp/open-source-event-calendar.tar.gz"
+            - /tmp/open-source-event-calendar.tar.gz
 
   release_test:
     <<: *db_job
