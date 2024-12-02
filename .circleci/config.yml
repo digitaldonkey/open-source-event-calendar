@@ -208,7 +208,7 @@ jobs:
       - store_artifacts:
           path: /tmp/open-source-event-calendar.tar.gz
       - persist_to_workspace:
-          root: .
+          root: *workspace_root
           paths:
             - /tmp/open-source-event-calendar.tar.gz"
 
@@ -271,18 +271,18 @@ workflows:
       - db_job:
           requires:
             - build
-      - db_job_maria_10_5:
-          requires:
-            - db_job
-            - code_quality_job
-      - db_job_maria_11:
-          requires:
-            - db_job
-            - code_quality_job
-      - db_job_php_8_1:
-          requires:
-            - db_job
-            - code_quality_job
+#      - db_job_maria_10_5:
+#          requires:
+#            - db_job
+#            - code_quality_job
+#      - db_job_maria_11:
+#          requires:
+#            - db_job
+#            - code_quality_job
+#      - db_job_php_8_1:
+#          requires:
+#            - db_job
+#            - code_quality_job
       - create_release:
           requires:
 #            - db_job_php_8_1
