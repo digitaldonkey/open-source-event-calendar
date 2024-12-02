@@ -1,4 +1,4 @@
-const {webdriver, Builder, Browser, By, Select} = require('selenium-webdriver');
+const {webdriver, Builder, Browser, By, Select, until} = require('selenium-webdriver');
 const { writeFile } = require('node:fs/promises');
 
 class BasePage {
@@ -18,15 +18,30 @@ class BasePage {
         if (!findBy instanceof By) {
             throw new Error('enterText requires instance of By as first param')
         }
-        await this.driver.findElement(findBy).sendKeys(searchText);
+        return this.driver.findElement(findBy).sendKeys(searchText);
     }
 
     async selectByValue(findBy, value){
         if (!findBy instanceof By) {
             throw new Error('enterText requires instance of By as first param')
         }
-        const select = new Select(this.driver.findElement(findBy));
-        await select.selectByValue(value);
+        const select = await this.driver.findElement(findBy);
+        const selectApi = new Select(select);
+        return selectApi.selectByValue(value);
+    }
+
+    async getSelectSingleValue(findBy, textValue = false){
+        if (!findBy instanceof By) {
+            throw new Error('enterText requires instance of By as first param')
+        }
+        const element = await this.driver.findElement(findBy);
+        await this.driver.wait(until.elementIsVisible(element), 6000);
+        const select = new Select(element);
+        const option = await select.getFirstSelectedOption();
+        if (textValue) {
+            return option.getText()
+        }
+        return option.getAttribute('value')
     }
 
     /**
@@ -48,7 +63,7 @@ class BasePage {
 
         // screenshotsDir
         const filename = this.settings.screenshotsDir + '/' + title.replace( /[^\w-]+/g, '_' ).trim() + '.png'
-        await writeFile(filename, image, 'base64')
+        return writeFile(filename, image, 'base64')
     }
 
 

@@ -39,40 +39,41 @@ describe('Plugin install', function(){
         const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
         await pageObject.go_to_url(url);
         await pageObject.doLogin();
-        let selectElement = await pageObject.driver.findElement(By.id('calendar_page_id'));
-        await pageObject.driver.wait(until.elementIsVisible(selectElement));
+
+        const calendarPageSelectID = By.id('calendar_page_id');
+        let calendarPageSelect = await pageObject.driver.findElement(calendarPageSelectID);
+        await pageObject.driver.wait(until.elementIsVisible(calendarPageSelect));
 
         // Set day
-        await pageObject.setWeekDayTo();
+        await pageObject.setWeekDay();
+
+        // Set timezon to Europe/Berlin
+        await pageObject.setTimezone();
 
         // Submit/Save
         await pageObject.driver.findElement(By.id('osec_save_settings')).click();
-        // Reqired second call.
-        selectElement = await pageObject.driver.findElement(By.id('calendar_page_id'));
 
-        await pageObject.driver.wait(until.elementIsVisible(selectElement), 6000);
-
-
-        // Check settings pages calender page id is saved
-        // By default Select is "Create new page" after saving it sould be "Calendar" and a Link is visible.
-        const calendarPageSelect =  await pageObject.driver.findElement(By.id('calendar_page_id'));
+        // Required to call again.
+        calendarPageSelect = await pageObject.driver.findElement(calendarPageSelectID);
         await pageObject.driver.wait(until.elementIsVisible(calendarPageSelect), 6000);
-        const calendarPageSelectItem = new Select(calendarPageSelect);
-        const calendarPageSelectItemOption = await calendarPageSelectItem.getFirstSelectedOption();
-        const calenderPageSelected = await calendarPageSelectItemOption.getText();
 
-        // If Calendar page was created, the will be a new Link
-        //  below select#calendar_page_id.
+        // Check settings pages calendar page id is saved
+        // By default Select is "Create new page" after saving it sould be "Calendar" and a Link is visible.
+        // calenderPage value would be int WP Page ID.
+        const calenderPageSelectedText = await pageObject.getSelectSingleValue(calendarPageSelectID, true);
+
+        // Check timezone saved.
+        const timeZoneSelectedValue = await pageObject.getSelectSingleValue(By.id('timezone_string'));
+
+        // New view-link below select#calendar_page_id
         const calendarLink = await pageObject.driver.findElement(By.css('#calendar_page_id~p>a'));
         const calendarPageLinkText = await calendarLink.getText();
 
         await pageObject.takeScreenshot(this.test.fullTitle());
         pageObject.assert.ok(
-            calenderPageSelected === 'Calendar'
+            calenderPageSelectedText === 'Calendar'
             && calendarPageLinkText === 'View "Calendar"'
+            && timeZoneSelectedValue === pageObject.settings.AdminPageSettings.timeZone
         )
-        /* @var int/string selectedValue WP Page ID */
-        // const selectedValue = await calendarPageSelectItemOption.getAttribute('value');
-        // console.log({selectedValue })
     });
 })

@@ -12,6 +12,7 @@ module.exports = {
         // }
     },
     AdminPageSettings: {
-        weekDay: 1 // Monday.
+        weekDay: "1", // Monday.
+        timeZone: 'Europe/Berlin'
     }
 };

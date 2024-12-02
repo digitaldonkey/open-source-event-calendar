@@ -1,5 +1,5 @@
-const  AdminPageSettings = require('../page_objects/AdminPageSettings');
-const pageObject = new AdminPageSettings();
+const  WpLogin = require('../page_objects/WpLogin');
+const pageObject = new WpLogin();
 const {
     Select,
     until,
