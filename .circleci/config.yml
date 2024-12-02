@@ -135,9 +135,6 @@ jobs:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
           background: True
-      #      - run:
-      #          name: Run Behat tests
-      #          command: vendor/bin/behat --config .circleci/behat.yml --format progress --tags=$WP_TYPE
       - run:
           name: Run PHP unit tests
           command: |
@@ -206,14 +203,58 @@ jobs:
           name: Install dependencies (no dev)
           command: composer install --no-interaction --optimize-autoloader --no-dev
       - run:
-          name: Creat Release package
+          name: Create Release package
           command: tar -czf /tmp/open-source-event-calendar.tar.gz language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
       - store_artifacts:
           path: /tmp/open-source-event-calendar.tar.gz
-#      - persist_to_workspace:
-#          root: *workspace_root
-#          paths:
-#            - /tmp/$WP_ORG_PLUGIN_NAME.tar.gz
+      - persist_to_workspace:
+          root: .
+          paths:
+            - /tmp/open-source-event-calendar.tar.gz"
+
+  release_test:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.2-node-browsers
+      - image: cimg/mysql:8.0
+        <<: *database_config
+    steps:
+      - run:
+          name: Add WordPress host to hosts file
+          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
+      - *attach_workspace
+      - run:
+          name: Update outdated apt key
+          command: (cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
+      - run:
+          name: Install MySQL client and PHP extension
+          command: sudo apt-get update
+            && sudo apt-get install -y mysql-client
+            && sudo rm -rf /var/lib/apt/lists/*
+      - run:
+          name: Install apcu
+          command: sudo mkdir -p /tmp/pear/temp
+            && sudo pecl channel-update pecl.php.net
+            && echo no '' |  sudo pecl install apcu
+            && sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
+      - run:
+          name: Test apcu in PHP.ini
+          command: php -i | grep -i apcu
+      - run:
+          name: Start PHP server
+          command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
+          background: True
+      - run:
+          name: Release integratiion test
+          command: |
+            set -Eeuxo pipefail
+            mkdir -p ~/integration_test_results
+            (cd integration_tests/ && nvm use && npm i && npm run test)
+          when: always
+      - store_test_results:
+          path: ~/integration_test_results
+
+
 
 
 # Orchestrate jobs using workflows
@@ -249,3 +290,6 @@ workflows:
 #            - db_job_maria_10_5
             - db_job
             - code_quality_job
+      - release_test:
+          requires:
+            - create_release
