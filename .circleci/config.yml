@@ -208,10 +208,10 @@ jobs:
           command: tar -czf /tmp/open-source-event-calendar.tar.gz language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
       - store_artifacts:
           path: /tmp/open-source-event-calendar.tar.gz
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - /tmp/open-source-event-calendar.tar.gz
+#      - persist_to_workspace:
+#          root: *workspace_root
+#          paths:
+#            - /tmp/open-source-event-calendar.tar.gz
 
   release_test:
     <<: *db_job
