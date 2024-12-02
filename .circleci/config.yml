@@ -3,6 +3,7 @@
 version: 2.1
 orbs:
   php: circleci/php@1.1.0
+  browser-tools: circleci/browser-tools@1.4.9
 
 
 # References section
@@ -216,7 +217,7 @@ jobs:
   release_test:
     <<: *db_job
     docker:
-      - image: cimg/php:8.2-node-browsers
+      - image: cimg/php:8.2-browsers
       - image: cimg/mysql:8.0
         <<: *database_config
     steps:
@@ -224,6 +225,15 @@ jobs:
           name: Add WordPress host to hosts file
           command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
       - *attach_workspace
+
+      - browser-tools/install-browser-tools
+      - checkout
+      - run: |
+          php --version
+          node --version
+          java --version
+          google-chrome --version
+
       - run:
           name: Update outdated apt key
           command: (cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
