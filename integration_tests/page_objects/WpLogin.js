@@ -9,14 +9,14 @@ class WpLogin extends BasePage {
 
     async doLogin(auth){
         if (!auth) {
-            auth = settings.wpLogin.admin;
+            auth = this.settings.wpLogin.admin;
         }
         await this.enterText(this.inputUser, auth.user);
         await this.enterText(this.inputPass, auth.pass);
         await this.enterText(this.inputUser, Key.RETURN);
 
-        const revealed = await driver.findElement(By.css("body.wp-admin"));
-        return await driver.wait(until.elementIsVisible(revealed));
+        const revealed = await this.driver.findElement(By.css("body.wp-admin"));
+        return await this.driver.wait(until.elementIsVisible(revealed));
     }
 
 }

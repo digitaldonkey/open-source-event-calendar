@@ -1,5 +1,6 @@
 module.exports = {
     domain: 'https://ddev-wordpress.ddev.site',
+    screenshotsDir: 'screen_shots', // No trailing slash
     wpLogin: {
         admin: {
             user: 'admin',
