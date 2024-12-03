@@ -146,32 +146,44 @@ jobs:
       - store_test_results:
           path: ~/phpunit
 
-  db_job_maria_10_5:
-    <<: *db_job
-    docker:
-      - image: cimg/php:8.2
-      - image: cimg/mariadb:10.5
-        <<: *database_config
-
-  db_job_maria_11:
-    <<: *db_job
-    docker:
-      - image: cimg/php:8.2
-      - image: cimg/mariadb:11.0
-        <<: *database_config
-
-  db_job_php_8_1:
-    <<: *db_job
-    docker:
-      - image: cimg/php:8.1
-      - image: cimg/mysql:8.0
-        <<: *database_config
+#  db_job_maria_10_5:
+#    <<: *db_job
+#    docker:
+#      - image: cimg/php:8.2
+#      - image: cimg/mariadb:10.5
+#        <<: *database_config
+#
+#  db_job_maria_11:
+#    <<: *db_job
+#    docker:
+#      - image: cimg/php:8.2
+#      - image: cimg/mariadb:11.4
+#        <<: *database_config
+#
+#  db_job_php_8_1:
+#    <<: *db_job
+#    docker:
+#      - image: cimg/php:8.1
+#      - image: cimg/mariadb:11.4
+#        <<: *database_config
+#
+#  db_job_php_8_3:
+#    docker:
+#      - image: cimg/php:8.3
+#      - image: cimg/mysql:8.0
+#        <<: *database_config
+#
+#  db_job_mysql_8:
+#    docker:
+#      - image: cimg/php:8.2
+#      - image: cimg/mysql:8.0
+#        <<: *database_config
 
   #  db_job_php_8_0:
   #    <<: *db_job
   #    docker:
   #      - image: cimg/php:8.0.28
-  #      - image: cimg/mysql:8.0
+  #      - image: cimg/cimg/mariadb:11.4
   #        <<: *database_config
   # mclay/minify && Grumphp and others require PHP > 8.1.
 
@@ -218,7 +230,7 @@ jobs:
     <<: *db_job
     docker:
       - image: cimg/php:8.2-browsers
-      - image: cimg/mysql:8.0
+      - image: cimg/mariadb:11.4
         <<: *database_config
     steps:
       - checkout
@@ -266,7 +278,7 @@ jobs:
           command: |
             set -Eeuxo pipefail
             mkdir -p ~/integration_test_results
-            (cd integration_tests/ && nvm use && npm i && npm run test)
+            (cd integration_tests/ && npm run test)
           when: always
       - store_test_results:
           path: ~/integration_test_results
@@ -297,6 +309,10 @@ workflows:
 #            - db_job
 #            - code_quality_job
 #      - db_job_php_8_1:
+#          requires:
+#            - db_job
+#            - code_quality_job
+#      - db_job_mysql_8:
 #          requires:
 #            - db_job
 #            - code_quality_job
