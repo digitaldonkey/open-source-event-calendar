@@ -5,16 +5,21 @@ const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
 const assert = require("node:assert");
 
+// Check for local settings file, overriding defaults.
+let settings
+if (fs.existsSync(__dirname +  '/../settings.local.js')) {
+    settings = require('../settings.local.js');
+}
+else {
+    settings = require('../settings.js');
+}
+
 class BasePage {
     constructor(){
-        // Check for local settings file, overriding defaults.
-        if (fs.existsSync(__dirname +  '/../settings.local.js')) {
-            this.settings = require('../settings.local.js');
-        }
-        else {
-            this.settings = require('../settings.js');
-        }
+        this.settings = settings;
         this.driver = this.setupWebDriver(this.settings.headless);
+        this.driver.manage().window().maximize();
+        this.driver.manage().setTimeouts({implicit: (10000)});
         this.assert = assert;
     }
 
@@ -74,7 +79,6 @@ class BasePage {
         return writeFile(filename, image, 'base64')
     }
 
-
     setupWebDriver (isHeadless = true) {
         let driver = null;
         if (isHeadless) {
@@ -82,20 +86,14 @@ class BasePage {
                 width: 1280,
                 height: 1280
             };
-            driver = new Builder()
+            return new Builder()
                 .forBrowser(Browser.CHROME)
                 .setChromeOptions(new chrome.Options().addArguments('--headless').windowSize(screen))
                 .setFirefoxOptions(new firefox.Options().addArguments('--headless').windowSize(screen))
                 .build();
         }
-        else {
-            driver = new Builder().forBrowser(Browser.CHROME).build();
-        }
-        driver.manage().window().maximize();
-        driver.manage().setTimeouts({implicit: (10000)});
-        return driver;
+        return new Builder().forBrowser(Browser.CHROME).build();
     }
-
-
 }
+
 module.exports = BasePage;
