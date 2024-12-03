@@ -84,7 +84,7 @@ jobs:
             - vendor
       - run:
           name: Install WordPress (Test scripts)
-          command: WP_CORE_DIR=~/docroot bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_VERSION true false
+          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_VERSION true false
       - persist_to_workspace:
           root: *workspace_root
           paths:
@@ -256,7 +256,7 @@ jobs:
           command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
       - run:
           name: Install WordPress (DB, no unit test scripts)
-          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_VERSION false true
+          command: bash WP_CORE_DIR=~/docroot ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_VERSION false true
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
