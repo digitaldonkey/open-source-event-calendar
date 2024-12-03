@@ -229,12 +229,15 @@ jobs:
       # @see https://circleci.com/developer/orbs/orb/circleci/browser-tools
       - browser-tools/install-chrome
 
-      - checkout
+
       - run: |
           php --version
           node --version
           java --version
           google-chrome --version
+
+      - install-packages:
+          app-dir: integration_tests/
 
       - run:
           name: Update outdated apt key
