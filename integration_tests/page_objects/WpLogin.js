@@ -1,5 +1,4 @@
 const BasePage = require ('./BasePage');
-const settings = require("../settings");
 const {Key, By, until} = require('selenium-webdriver');
 
 class WpLogin extends BasePage {
@@ -15,7 +14,7 @@ class WpLogin extends BasePage {
         await this.enterText(this.inputPass, auth.pass);
         await this.enterText(this.inputUser, Key.RETURN);
 
-        const revealed = await this.driver.findElement(By.css("body.wp-admin"));
+        const revealed = await this.driver.findElement(By.css("body.wp-admin"), 6000);
         return await this.driver.wait(until.elementIsVisible(revealed));
     }
 

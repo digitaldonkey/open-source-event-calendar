@@ -111,7 +111,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Add WordPress host to hosts file
+          name: Add WordPress domain to hosts file
           command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
       - *attach_workspace
       - *copy_vendor
@@ -187,26 +187,6 @@ jobs:
   #        <<: *database_config
   # mclay/minify && Grumphp and others require PHP > 8.1.
 
-#  create_release:
-#    <<: *container_config
-#    steps:
-#      - *install_subversion
-#      - checkout
-#      - *attach_workspace
-#      - *copy_vendor
-#      - run:
-#          name: Install dependencies (no dev)
-#          command: composer install --no-interaction --optimize-autoloader --no-dev
-#      - run:
-#          name: Creat Release package
-#          command: |
-#            tar -czf /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz" language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
-#      - persist_to_workspace:
-#          root: .
-#          paths:
-#            - /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
-#      - store_artifacts:
-#          path: /tmp/"$WP_ORG_PLUGIN_NAME.tar.gz"
   create_release:
     <<: *container_config
     steps:
@@ -238,20 +218,8 @@ jobs:
           name: Add WordPress host to hosts file
           command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
       - *attach_workspace
-
       # @see https://circleci.com/developer/orbs/orb/circleci/browser-tools
       - browser-tools/install-chrome
-
-
-      - run: |
-          php --version
-          node --version
-          java --version
-          google-chrome --version
-
-      - node/install-packages:
-          app-dir: integration_tests/
-
       - run:
           name: Update outdated apt key
           command: (cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
@@ -266,25 +234,32 @@ jobs:
             && sudo pecl channel-update pecl.php.net
             && echo no '' |  sudo pecl install apcu
             && sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
-      - run:
-          name: Test apcu in PHP.ini
-          command: php -i | grep -i apcu
+      - run: |
+          php --version
+          php -i | grep -i apcu
+          node --version
+          java --version
+          google-chrome --version
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
           background: True
+      - node/install-packages:
+          app-dir: integration_tests/
       - run:
           name: Release integratiion test
           command: |
             set -Eeuxo pipefail
-            mkdir -p ~/integration_test_results
-            (cd integration_tests/ && npm run test)
+            mkdir -p /tmp/integration_test_results/screenshots
+            (
+              cd integration_tests/ && 
+              MOCHA_FILE=/tmp/integration_test_results/mocha-junit.xml \
+              MOCHA_SCREENSHOT_DIR=/tmp/integration_test_results/screenshots \
+              npm run test
+            )
           when: always
       - store_test_results:
-          path: ~/integration_test_results
-
-
-
+          path: /tmp/integration_test_results
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/

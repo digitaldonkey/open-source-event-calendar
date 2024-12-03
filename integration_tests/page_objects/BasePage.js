@@ -1,13 +1,21 @@
-const {webdriver, Builder, Browser, By, Select, until} = require('selenium-webdriver');
+const {Builder, Browser, By, Select, until} = require('selenium-webdriver');
 const { writeFile } = require('node:fs/promises');
+const fs = require('fs');
+const chrome = require('selenium-webdriver/chrome');
+const firefox = require('selenium-webdriver/firefox');
+const assert = require("node:assert");
 
 class BasePage {
     constructor(){
-        this.driver = new Builder().forBrowser(Browser.CHROME).build();
-        this.driver.manage().setTimeouts({implicit: (10000)});
-        this.driver.manage().window().maximize();
-        this.assert = require("node:assert");
-        this.settings = require('../settings')
+        // Check for local settings file, overriding defaults.
+        if (fs.existsSync(__dirname +  '/../settings.local.js')) {
+            this.settings = require('../settings.local.js');
+        }
+        else {
+            this.settings = require('../settings.js');
+        }
+        this.driver = this.setupWebDriver(this.settings.headless);
+        this.assert = assert;
     }
 
     async go_to_url(url){
@@ -60,10 +68,32 @@ class BasePage {
 
     async takeScreenshot(title){
         let image = await this.driver.takeScreenshot()
-
+        const screenshotsDir = process.env.MOCHA_SCREENSHOT_DIR ?? this.settings.screenshotsDir;
         // screenshotsDir
-        const filename = this.settings.screenshotsDir + '/' + title.replace( /[^\w-]+/g, '_' ).trim() + '.png'
+        const filename = screenshotsDir + '/' + title.replace( /[^\w-]+/g, '_' ).trim() + '.png'
         return writeFile(filename, image, 'base64')
+    }
+
+
+    setupWebDriver (isHeadless = true) {
+        let driver = null;
+        if (isHeadless) {
+            const screen = {
+                width: 1280,
+                height: 1280
+            };
+            driver = new Builder()
+                .forBrowser(Browser.CHROME)
+                .setChromeOptions(new chrome.Options().addArguments('--headless').windowSize(screen))
+                .setFirefoxOptions(new firefox.Options().addArguments('--headless').windowSize(screen))
+                .build();
+        }
+        else {
+            driver = new Builder().forBrowser(Browser.CHROME).build();
+        }
+        driver.manage().window().maximize();
+        driver.manage().setTimeouts({implicit: (10000)});
+        return driver;
     }
 
 

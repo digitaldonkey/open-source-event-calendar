@@ -9,9 +9,15 @@
     "dependencies": {
         "assert": "2.1.0",
         "mocha": "11.0.1",
+        "mocha-junit-reporter": "^2.2.1",
+        "mocha-multi": "^1.1.7",
         "selenium-webdriver": "4.27.0"
     },
     "devDependencies": {
         "flow-bin": "^0.255.0"
+    },
+    "mocha": {
+        "reporter": "mocha-multi",
+        "reporterOptions": "spec=-,mocha-junit-reporter=-"
     }
 }

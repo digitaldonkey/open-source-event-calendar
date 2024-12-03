@@ -1,15 +1,12 @@
 module.exports = {
-    domain: 'https://ddev-wordpress.ddev.site',
-    screenshotsDir: 'screen_shots', // No trailing slash
+    domain: 'open-source-event-calendar.test',
+    screenshotsDir: '/tmp/integration_test_results', // No trailing slash
+    headless: true,
     wpLogin: {
         admin: {
             user: 'admin',
             pass: 'password',
         }
-        // admin: {
-        //     user: 'tho',
-        //     pass: 'resox232',
-        // }
     },
     AdminPageSettings: {
         weekDay: "1", // Monday.
