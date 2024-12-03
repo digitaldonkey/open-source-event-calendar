@@ -236,7 +236,7 @@ jobs:
           java --version
           google-chrome --version
 
-      - install-packages:
+      - node/install-packages:
           app-dir: integration_tests/
 
       - run:
