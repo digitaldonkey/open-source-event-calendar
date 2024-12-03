@@ -221,6 +221,7 @@ jobs:
       - image: cimg/mysql:8.0
         <<: *database_config
     steps:
+      - checkout
       - run:
           name: Add WordPress host to hosts file
           command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
