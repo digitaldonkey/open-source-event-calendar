@@ -92,7 +92,7 @@ jobs:
             - wordpress-tests-lib
 
   # STATIC CODE ANALYSE
-  code_quality_job:
+  static_job:
     <<: *container_config
     steps:
       - checkout
@@ -221,7 +221,7 @@ jobs:
       - image: cimg/mariadb:11.4
         <<: *database_config
     environment:
-      - WP_CORE_DIR: ~/docroot
+      - WP_CORE_DIR: /tmp/docroot
       - WP_HOST: *WP_HOST
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
@@ -251,12 +251,17 @@ jobs:
           node --version
           java --version
           google-chrome --version
+          echo "WP_CORE_DIR: $WP_CORE_DIR"
+          echo "WP_HOST: $WP_HOST"
+          echo "WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
+          echo "WP_ORG_USERNAME: $WP_ORG_USERNAME"
+          echo "WP_VERSION: $WP_VERSION"
       - run:
           name: Add WordPress host to hosts file
           command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
       - run:
           name: Install WordPress (DB, no unit test scripts)
-          command: bash WP_CORE_DIR=~/docroot ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_VERSION false true
+          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_VERSION false true
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
@@ -286,7 +291,7 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - build
-      - code_quality_job:
+      - static_job:
           requires:
             - build
       - db_job:
@@ -295,26 +300,26 @@ workflows:
 #      - db_job_maria_10_5:
 #          requires:
 #            - db_job
-#            - code_quality_job
+#            - static_job
 #      - db_job_maria_11:
 #          requires:
 #            - db_job
-#            - code_quality_job
+#            - static_job
 #      - db_job_php_8_1:
 #          requires:
 #            - db_job
-#            - code_quality_job
+#            - static_job
 #      - db_job_mysql_8:
 #          requires:
 #            - db_job
-#            - code_quality_job
+#            - static_job
       - create_release:
           requires:
 #            - db_job_php_8_1
 #            - db_job_maria_11
 #            - db_job_maria_10_5
             - db_job
-            - code_quality_job
+            - static_job
       - release_test:
           requires:
             - create_release
