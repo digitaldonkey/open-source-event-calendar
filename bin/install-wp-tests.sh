@@ -16,6 +16,8 @@ DB_PASS=$3
 DB_HOST=${4-localhost}
 WP_VERSION=${5-latest}
 SKIP_DB_CREATE=${6-false}
+SKIP_TESTSUITE_CREATE=${7-false}
+
 
 TMPDIR=${TMPDIR-$($(command -v php) -r 'echo  sys_get_temp_dir();')}
 TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
@@ -103,6 +105,11 @@ install_wp() {
 }
 
 install_test_suite() {
+
+  if [ ${SKIP_TESTSUITE_CREATE} = "true" ]; then
+  		return 0
+  fi
+
 	# portable in-place argument for both GNU sed and Mac OSX sed
 	if [[ $(uname -s) == 'Darwin' ]]; then
 		local ioption='-i.bak'

@@ -20,6 +20,8 @@ references:
               open-source-event-calendar
   WP_ORG_USERNAME: &WP_ORG_USERNAME
                digitaldonkey
+  WP_DEFAULT_VERSION: &WP_DEFAULT_VERSION
+               latest # e.g.
   workspace_root: &workspace_root /tmp
 
   # Default container configuration
@@ -80,8 +82,8 @@ jobs:
           paths:
             - vendor
       - run:
-          name: Install WordPress
-          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST 6.6.2 true
+          name: Install WordPress (Test scripts)
+          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_DEFAULT_VERSION true false
       - persist_to_workspace:
           root: *workspace_root
           paths:
@@ -240,6 +242,9 @@ jobs:
           node --version
           java --version
           google-chrome --version
+      - run:
+          name: Install WordPress (DB, no unit test scripts)
+          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_DEFAULT_VERSION false true
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
