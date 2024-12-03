@@ -4,7 +4,7 @@ version: 2.1
 orbs:
   php: circleci/php@1.1.0
   browser-tools: circleci/browser-tools@1.4.9
-
+  node: circleci/node@6.3.0
 
 # References section
 #   @see https://carlalexander.ca/continuous-deployment-wordpress-directory-circleci/
@@ -226,7 +226,9 @@ jobs:
           command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
       - *attach_workspace
 
-      - browser-tools/install-browser-tools
+      # @see https://circleci.com/developer/orbs/orb/circleci/browser-tools
+      - browser-tools/install-chrome
+
       - checkout
       - run: |
           php --version
