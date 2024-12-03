@@ -20,8 +20,8 @@ references:
               open-source-event-calendar
   WP_ORG_USERNAME: &WP_ORG_USERNAME
                digitaldonkey
-  WP_DEFAULT_VERSION: &WP_DEFAULT_VERSION
-               latest # e.g.
+  WP_VERSION: &WP_VERSION
+               latest
   workspace_root: &workspace_root /tmp
 
   # Default container configuration
@@ -34,6 +34,7 @@ references:
       - WP_HOST: *WP_HOST
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
+      - WP_VERSION: *WP_VERSION
     working_directory: ~/open-source-event-calendar
 
   # Default DB configuration
@@ -83,7 +84,7 @@ jobs:
             - vendor
       - run:
           name: Install WordPress (Test scripts)
-          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_DEFAULT_VERSION true false
+          command: WP_CORE_DIR=~/docroot bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_DEFAULT_VERSION true false
       - persist_to_workspace:
           root: *workspace_root
           paths:
@@ -192,7 +193,7 @@ jobs:
   create_release:
     <<: *container_config
     steps:
-#      - *install_subversion
+      - *install_subversion
       - checkout
       - *attach_workspace
       - run:
@@ -203,25 +204,33 @@ jobs:
           command: tar -czf /tmp/open-source-event-calendar.tar.gz language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
       - store_artifacts:
           path: /tmp/open-source-event-calendar.tar.gz
-#      - persist_to_workspace:
-#          root: *workspace_root
-#          paths:
-#            - /tmp/open-source-event-calendar.tar.gz
-
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - open-source-event-calendar.tar.gz
+    environment:
+      - WP_CORE_DIR: *WP_CORE_DIR
+      - WP_HOST: *WP_HOST
+      - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
+      - WP_ORG_USERNAME: *WP_ORG_USERNAME
+      - WP_VERSION: *WP_VERSION
   release_test:
     <<: *db_job
     docker:
       - image: cimg/php:8.2-browsers
       - image: cimg/mariadb:11.4
         <<: *database_config
+    environment:
+      - WP_CORE_DIR: ~/docroot
+      - WP_HOST: *WP_HOST
+      - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
+      - WP_ORG_USERNAME: *WP_ORG_USERNAME
+      - WP_VERSION: *WP_VERSION
     steps:
       - checkout
-      - run:
-          name: Add WordPress host to hosts file
-          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
+      - browser-tools/install-chrome
       - *attach_workspace
       # @see https://circleci.com/developer/orbs/orb/circleci/browser-tools
-      - browser-tools/install-chrome
       - run:
           name: Update outdated apt key
           command: (cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
@@ -242,6 +251,9 @@ jobs:
           node --version
           java --version
           google-chrome --version
+      - run:
+          name: Add WordPress host to hosts file
+          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
       - run:
           name: Install WordPress (DB, no unit test scripts)
           command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_DEFAULT_VERSION false true

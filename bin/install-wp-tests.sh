@@ -18,7 +18,6 @@ WP_VERSION=${5-latest}
 SKIP_DB_CREATE=${6-false}
 SKIP_TESTSUITE_CREATE=${7-false}
 
-
 TMPDIR=${TMPDIR-$($(command -v php) -r 'echo  sys_get_temp_dir();')}
 TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
 WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
