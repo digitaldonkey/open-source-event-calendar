@@ -13,15 +13,19 @@ references:
   # Environment variables
   #
   WP_CORE_DIR: &WP_CORE_DIR
-                /tmp/wordpress
+      /tmp/wordpress
   WP_HOST: &WP_HOST
-              open-source-event-calendar.test
+      open-source-event-calendar.test
   WP_ORG_PLUGIN_NAME: &WP_ORG_PLUGIN_NAME
-              open-source-event-calendar
+      open-source-event-calendar
   WP_ORG_USERNAME: &WP_ORG_USERNAME
-               digitaldonkey
+      digitaldonkey
   WP_VERSION: &WP_VERSION
-               latest
+      latest
+  OSEC_RELEASE_FILE: &OSEC_RELEASE_FILE
+      /tmp/open-source-event-calendar.tar.gz
+  OSEC_RELEASE_WHITE_LIST: &OSEC_RELEASE_WHITE_LIST
+      "language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt"
   workspace_root: &workspace_root /tmp
 
   # Default container configuration
@@ -35,8 +39,8 @@ references:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - WP_VERSION: *WP_VERSION
-      - OSEC_RELEASE_FILE: /tmp/open-source-event-calendar.tar.gz
-      - OSEC_RELEASE_WHITE_LIST: "language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt"
+      - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
+      - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
     working_directory: ~/open-source-event-calendar
 
   # Default DB configuration
@@ -195,7 +199,7 @@ jobs:
   create_release:
     <<: *container_config
     steps:
-      - *install_subversion
+#      - *install_subversion
       - checkout
       - *attach_workspace
       - run:
