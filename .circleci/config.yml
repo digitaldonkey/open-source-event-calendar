@@ -201,7 +201,7 @@ jobs:
           command: composer install --no-interaction --optimize-autoloader --no-dev
       - run:
           name: Create Release package
-          command: tar -czf /tmp/open-source-event-calendar.tar.gz language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
+          command: tar -czf /tmp/open-source-event-calendar.tar.gz --transform "s,^,$WP_ORG_PLUGIN_NAME," language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
       - store_artifacts:
           path: /tmp/open-source-event-calendar.tar.gz
       - persist_to_workspace:
@@ -227,6 +227,7 @@ jobs:
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - WP_VERSION: *WP_VERSION
       - WP_CLI: /tmp/vendor/bin/wp
+      - OSEC_RELEASE_FILE: /tmp/open-source-event-calendar.tar.gz
     steps:
       - checkout
       - browser-tools/install-chrome
@@ -268,6 +269,10 @@ jobs:
             echo yes '' | bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_VERSION false false
             $WP_CLI config create --dbname=wp_ci --dbuser=wp_ci --dbpass=wp_ci --path=$WP_CORE_DIR --dbhost=127.0.0.1
             $WP_CLI core install --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@about.test.com"
+      - run:
+          name: Install Open source event calendar plugin (release)
+          command: |
+            tar -xf OSEC_RELEASE_FILE -C $WP_CORE_DIR/wp-content/plugins
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
