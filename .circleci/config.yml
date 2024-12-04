@@ -25,14 +25,29 @@ references:
   OSEC_RELEASE_FILE: &OSEC_RELEASE_FILE
       /tmp/open-source-event-calendar.tar.gz
   OSEC_RELEASE_WHITE_LIST: &OSEC_RELEASE_WHITE_LIST
-      "language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt"
+      (                 
+        src/
+        vendor/
+        public/
+        language/                             
+        open-source-event-calendar.php
+        constants.php
+        global-functions.php
+        constants-local.php.example                    
+        composer.json
+        composer.lock
+        readme.txt
+        DEVELOPERS.md
+        LICENSE
+        hooks-and-filters.md
+      )
   workspace_root: &workspace_root /tmp
 
   # Default container configuration
-  #
   container_config: &container_config
     docker:
       - image: cimg/php:8.2
+    working_directory: ~/open-source-event-calendar
     environment:
       - WP_CORE_DIR: *WP_CORE_DIR
       - WP_HOST: *WP_HOST
@@ -41,16 +56,15 @@ references:
       - WP_VERSION: *WP_VERSION
       - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
       - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
-    working_directory: ~/open-source-event-calendar
 
   # Default DB configuration
   #
   database_config: &database_config
-      environment:
-        MYSQL_ROOT_PASSWORD: wp_ci_root
-        MYSQL_USER: wp_ci
-        MYSQL_DATABASE: wp_ci
-        MYSQL_PASSWORD: wp_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: wp_ci_root
+      MYSQL_USER: wp_ci
+      MYSQL_DATABASE: wp_ci
+      MYSQL_PASSWORD: wp_ci
 
 
   attach_workspace: &attach_workspace
@@ -66,7 +80,6 @@ references:
     run:
       name: Install subversion
       command: sudo apt-get update && sudo apt-get install -y subversion && sudo rm -rf /var/lib/apt/lists/*
-
 
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
@@ -209,7 +222,7 @@ jobs:
           name: Create Release package
           command: |
             mkdir -p /tmp/release/$WP_ORG_PLUGIN_NAME
-            (cd ~/$WP_ORG_PLUGIN_NAME && cp -R $OSEC_RELEASE_WHITE_LIST /tmp/release/$WP_ORG_PLUGIN_NAME)            
+            (cd ~/$WP_ORG_PLUGIN_NAME && cp -R "${OSEC_RELEASE_WHITE_LIST[@]}"  /tmp/release/$WP_ORG_PLUGIN_NAME)            
             tar -czf $OSEC_RELEASE_FILE -C /tmp/release/ $WP_ORG_PLUGIN_NAME
       - store_artifacts:
           path: /tmp/open-source-event-calendar.tar.gz
@@ -217,12 +230,6 @@ jobs:
           root: *workspace_root
           paths:
             - open-source-event-calendar.tar.gz
-    environment:
-      - WP_CORE_DIR: *WP_CORE_DIR
-      - WP_HOST: *WP_HOST
-      - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
-      - WP_ORG_USERNAME: *WP_ORG_USERNAME
-      - WP_VERSION: *WP_VERSION
   release_test:
     <<: *db_job
     docker:
@@ -230,6 +237,8 @@ jobs:
       - image: cimg/mariadb:11.4
         <<: *database_config
     environment:
+      # Rewrite environment
+      # Standard WP at docroot. Osec release tar goes into wp-plugins.
       - WP_CORE_DIR: /tmp/docroot
       - WP_HOST: *WP_HOST
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
@@ -237,6 +246,8 @@ jobs:
       - WP_VERSION: *WP_VERSION
       - WP_CLI: /tmp/vendor/bin/wp
       - OSEC_RELEASE_FILE: /tmp/open-source-event-calendar.tar.gz
+      - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
+
     steps:
       - checkout
       - browser-tools/install-chrome
