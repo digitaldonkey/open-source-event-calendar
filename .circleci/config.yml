@@ -25,7 +25,6 @@ references:
   OSEC_RELEASE_FILE: &OSEC_RELEASE_FILE
       /tmp/open-source-event-calendar.tar.gz
   OSEC_RELEASE_WHITE_LIST: &OSEC_RELEASE_WHITE_LIST
-      (                 
         src/
         vendor/
         public/
@@ -40,7 +39,6 @@ references:
         DEVELOPERS.md
         LICENSE
         hooks-and-filters.md
-      )
   workspace_root: &workspace_root /tmp
 
   # Default container configuration
@@ -209,7 +207,7 @@ jobs:
   #        <<: *database_config
   # mclay/minify && Grumphp and others require PHP > 8.1.
 
-  create_release:
+  create_release_job:
     <<: *container_config
     steps:
 #      - *install_subversion
@@ -230,7 +228,7 @@ jobs:
           root: *workspace_root
           paths:
             - open-source-event-calendar.tar.gz
-  release_test:
+  release_test_job:
     <<: *db_job
     docker:
       - image: cimg/php:8.2-browsers
@@ -344,13 +342,13 @@ workflows:
 #          requires:
 #            - db_job
 #            - static_job
-      - create_release:
+      - create_release_job:
           requires:
 #            - db_job_php_8_1
 #            - db_job_maria_11
 #            - db_job_maria_10_5
             - db_job
             - static_job
-      - release_test:
+      - release_test_job:
           requires:
-            - create_release
+            - create_release_job
