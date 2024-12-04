@@ -97,6 +97,7 @@ class EnvironmentCheck extends OsecBaseClass
             ! $rewrite
             || ! is_object($wp_rewrite)
             || ! isset($wp_rewrite->rules)
+            || empty($wp_rewrite->rules)
             || 0 === count($wp_rewrite->rules)
         ) {
             return;

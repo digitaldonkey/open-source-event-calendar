@@ -36,8 +36,8 @@ references:
         composer.json
         composer.lock
         readme.txt
-        DEVELOPERS.md
         LICENSE
+        DEVELOPERS.md                             
         hooks-and-filters.md
   workspace_root: &workspace_root /tmp
 
@@ -265,19 +265,26 @@ jobs:
             && sudo pecl channel-update pecl.php.net
             && echo no '' |  sudo pecl install apcu
             && sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
-      - run: |
-          php --version
-          php -i | grep -i apcu
-          node --version
-          java --version
-          google-chrome --version
-          echo "WP_CORE_DIR: $WP_CORE_DIR"
-          echo "WP_HOST: $WP_HOST"
-          echo "WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-          echo "WP_ORG_USERNAME: $WP_ORG_USERNAME"
-          echo "WP_VERSION: $WP_VERSION"
-          echo "WP_CLI: $WP_CLI"
-          $WP_CLI --version
+      - run:
+          name: Releas test variables
+          command: |
+            echo "PHP VERSION:"
+            php --version
+            echo "APCu:"
+            php -i | grep -i "APCu Support"
+            echo "NODE VERSION:"
+            node --version
+            echo "GOOGLE CHROME VERSION:"
+            google-chrome --version
+            echo "CONSTANTS:"
+            echo "WP_CORE_DIR: $WP_CORE_DIR"
+            echo "WP_HOST: $WP_HOST"
+            echo "WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
+            echo "WP_VERSION: $WP_VERSION"
+            echo "WP_ORG_USERNAME: $WP_ORG_USERNAME"
+            echo "WP_CLI: $WP_CLI"
+            echo "WP_CLI VERSION:"          
+            $WP_CLI --version
       - run:
           name: Add WordPress host to hosts file
           command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
