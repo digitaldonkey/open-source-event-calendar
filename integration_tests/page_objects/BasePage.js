@@ -51,8 +51,16 @@ class BasePage {
             };
             return new Builder()
                 .forBrowser(Browser.CHROME)
-                .setChromeOptions(new chrome.Options().addArguments('--headless').windowSize(screen))
-                .setFirefoxOptions(new firefox.Options().addArguments('--headless').windowSize(screen))
+                .setChromeOptions(
+                    new chrome.Options()
+                    .addArguments('--headless').windowSize(screen)
+                    .addArguments('ignore-certificate-errors')
+                )
+                .setFirefoxOptions(
+                    new firefox.Options()
+                        .addArguments('--headless')
+                        .windowSize(screen))
+                        .setCapability('acceptInsecureCerts', true)
                 .build();
         }
         return new Builder().forBrowser(Browser.CHROME).build();
