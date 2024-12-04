@@ -272,7 +272,7 @@ jobs:
       - run:
           name: Install Open source event calendar plugin (release)
           command: |
-            tar -xf OSEC_RELEASE_FILE -C $WP_CORE_DIR/wp-content/plugins
+            tar -xf $OSEC_RELEASE_FILE -C $WP_CORE_DIR/wp-content/plugins
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
