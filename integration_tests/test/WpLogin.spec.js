@@ -1,15 +1,19 @@
 const  WpLogin = require('../page_objects/WpLogin');
-const pageObject = new WpLogin();
 const {
     Select,
     until,
     By
 } = require('selenium-webdriver');
+const WpPlugin = require("../page_objects/ActivatePluginAndSettings");
+let pageObject = null;
 
-// @see https://www.selenium.dev/selenium/docs/api/javascript/
 
 describe('WordPress Login', function(){
     this.timeout(50000);
+    before (async function() {
+        pageObject = await WpPlugin.build();
+    })
+
     beforeEach(async function(){
         //Enter actions performed before test
     });
@@ -17,7 +21,6 @@ describe('WordPress Login', function(){
     afterEach(async function(){
         //Enter actions to be performed after test
         pageObject.driver.manage().deleteAllCookies();
-
     });
 
     after(async () => {

@@ -1,24 +1,26 @@
 //wp-admin/plugins.php
 const WpPlugin = require('../page_objects/ActivatePluginAndSettings');
-const pageObject = new WpPlugin();
-
 const {
-    Select,
     until,
     By
 } = require('selenium-webdriver');
+let pageObject = null;
 
-// @see https://www.selenium.dev/selenium/docs/api/javascript/
+
 
 describe('Plugin install', function(){
     this.timeout(50000);
+    before (async function() {
+        pageObject = await WpPlugin.build();
+    })
+
     beforeEach(async function(){
         //Enter actions performed before test
     });
 
     afterEach(async function(){
         //Enter actions to be performed after test
-        pageObject.driver.manage().deleteAllCookies();
+        await pageObject.driver.manage().deleteAllCookies();
     });
 
     after(async () => {

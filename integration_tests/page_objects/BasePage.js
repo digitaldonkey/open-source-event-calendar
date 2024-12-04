@@ -5,22 +5,57 @@ const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
 const assert = require("node:assert");
 
-// Check for local settings file, overriding defaults.
-let settings
-if (fs.existsSync(__dirname +  '/../settings.local.js')) {
-    settings = require('../settings.local.js');
-}
-else {
-    settings = require('../settings.js');
-}
+
+// API
+// @see https://www.selenium.dev/selenium/docs/api/javascript/
 
 class BasePage {
-    constructor(){
+    constructor(settings, driver){
+        if (typeof driver === 'undefined') {
+            throw new Error('Cannot be called directly');
+        }
+        this.assert = assert;
         this.settings = settings;
-        this.driver = this.setupWebDriver(this.settings.headless);
+        this.driver = driver;
         this.driver.manage().window().maximize();
         this.driver.manage().setTimeouts({implicit: (10000)});
-        this.assert = assert;
+    }
+
+    static async build () {
+        // Check for local settings file, overriding defaults.
+        let settings
+        if (fs.existsSync(__dirname +  '/../settings.local.js')) {
+            settings = require('../settings.local.js');
+        }
+        else {
+            settings = require('../settings.js');
+        }
+        const theClass = this;
+        return this.setupWebDriver(settings.headless)
+            .then(function(driver){
+                return new theClass(settings, driver);
+            });
+    }
+
+    /**
+     * Set up selenium webdriver.
+     *
+     * @param isHeadless
+     * @returns {!ThenableWebDriver}
+     */
+    static setupWebDriver (isHeadless = true) {
+        if (isHeadless) {
+            const screen = {
+                width: 1280,
+                height: 1280
+            };
+            return new Builder()
+                .forBrowser(Browser.CHROME)
+                .setChromeOptions(new chrome.Options().addArguments('--headless').windowSize(screen))
+                .setFirefoxOptions(new firefox.Options().addArguments('--headless').windowSize(screen))
+                .build();
+        }
+        return new Builder().forBrowser(Browser.CHROME).build();
     }
 
     async go_to_url(url){
@@ -70,29 +105,12 @@ class BasePage {
         return Promise.resolve();
     }
 
-
     async takeScreenshot(title){
         let image = await this.driver.takeScreenshot()
         const screenshotsDir = process.env.MOCHA_SCREENSHOT_DIR ?? this.settings.screenshotsDir;
         // screenshotsDir
         const filename = screenshotsDir + '/' + title.replace( /[^\w-]+/g, '_' ).trim() + '.png'
         return writeFile(filename, image, 'base64')
-    }
-
-    setupWebDriver (isHeadless = true) {
-        let driver = null;
-        if (isHeadless) {
-            const screen = {
-                width: 1280,
-                height: 1280
-            };
-            return new Builder()
-                .forBrowser(Browser.CHROME)
-                .setChromeOptions(new chrome.Options().addArguments('--headless').windowSize(screen))
-                .setFirefoxOptions(new firefox.Options().addArguments('--headless').windowSize(screen))
-                .build();
-        }
-        return new Builder().forBrowser(Browser.CHROME).build();
     }
 }
 
