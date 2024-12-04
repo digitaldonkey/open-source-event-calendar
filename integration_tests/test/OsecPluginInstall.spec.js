@@ -29,9 +29,9 @@ describe('Plugin install', function(){
     });
 
 
-    it('WordPress admin login', async function () {
+    it('WordPress activate Osec plugin', async function () {
         await pageObject.go_to_url(pageObject.settings.domain + '/wp-admin/plugins.php');
-        const adminPluginPageLoaded = await pageObject.doLogin();
+        await pageObject.doLogin();
         const sucess = await pageObject.activateOsecPlugin();
         pageObject.assert.ok(sucess);
         await pageObject.takeScreenshot(this.test.fullTitle());

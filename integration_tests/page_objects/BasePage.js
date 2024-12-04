@@ -59,7 +59,8 @@ class BasePage {
     }
 
     async go_to_url(url){
-        await this.driver.get(url);
+        console.log('      get: ' + url);
+        this.driver.get(url);
     }
 
     async enterText(findBy, searchText){
