@@ -226,7 +226,7 @@ jobs:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - WP_VERSION: *WP_VERSION
-      - WP_CLI: /vendor/bin/wp
+      - WP_CLI: /tmp/vendor/bin/wp
     steps:
       - checkout
       - browser-tools/install-chrome
