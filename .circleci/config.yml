@@ -257,6 +257,8 @@ jobs:
           echo "WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
           echo "WP_ORG_USERNAME: $WP_ORG_USERNAME"
           echo "WP_VERSION: $WP_VERSION"
+          echo "WP_CLI: $WP_CLI"
+          $WP_CLI --version
       - run:
           name: Add WordPress host to hosts file
           command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
