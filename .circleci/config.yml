@@ -35,6 +35,8 @@ references:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - WP_VERSION: *WP_VERSION
+      - OSEC_RELEASE_FILE: /tmp/open-source-event-calendar.tar.gz
+      - OSEC_RELEASE_WHITE_LIST: language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
     working_directory: ~/open-source-event-calendar
 
   # Default DB configuration
@@ -201,7 +203,10 @@ jobs:
           command: composer install --no-interaction --optimize-autoloader --no-dev
       - run:
           name: Create Release package
-          command: tar -czf /tmp/open-source-event-calendar.tar.gz --transform "s,^,$WP_ORG_PLUGIN_NAME," language/ public/ src/ vendor/ composer.* *.php *.md constants-local.php.example LICENSE readme.txt
+          command: |
+            mkdir -p /tmp/release/$WP_ORG_PLUGIN_NAME
+            cp -R $OSEC_RELEASE_WHITE_LIST /tmp/release/$WP_ORG_PLUGIN_NAME            
+            tar -czf $OSEC_RELEASE_FILE -C /tmp/release/ $WP_ORG_PLUGIN_NAME
       - store_artifacts:
           path: /tmp/open-source-event-calendar.tar.gz
       - persist_to_workspace:
