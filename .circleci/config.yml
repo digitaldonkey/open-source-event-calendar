@@ -258,7 +258,7 @@ jobs:
       - run:
           name: Install Apache, MySQL client and PHP extension
           command: sudo apt-get update
-            && sudo apt-get install -y mysql-client apache2
+            && sudo apt-get install -y mysql-client apache2 apache2-utils
             && sudo rm -rf /var/lib/apt/lists/*
       - run:
           name: Add WordPress domain to hosts file
