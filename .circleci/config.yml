@@ -263,12 +263,8 @@ jobs:
       - run:
           name: Setup apache
           command: |
-            # override config
             sudo cp ~/.circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
-#            sudo sed -i "s/#ServerName www.example.com/ServerName $WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
-#            sudo sed -i 's/\${APACHE_LOG_DIR\}\/error\.log/\/dev\/stdout/g' /etc/apache2/sites-enabled/000-default.conf
-#            sudo sed -i 's/\${APACHE_LOG_DIR\}\/access\.log/\/dev\/stdout/g' /etc/apache2/sites-enabled/000-default.conf
             sudo a2enmod rewrite
             sudo service apace2 restart
       - run:
