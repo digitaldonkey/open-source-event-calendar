@@ -316,6 +316,8 @@ jobs:
           background: True
       - node/install-packages:
           app-dir: integration_tests/
+          override-ci-command: npm install
+
       - run:
           name: Release integratiion test
           command: |
