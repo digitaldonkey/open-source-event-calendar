@@ -210,7 +210,7 @@ jobs:
   create_release_job:
     <<: *container_config
     steps:
-#      - *install_subversion
+      #      - *install_subversion
       - checkout
       - *attach_workspace
       - run:
@@ -248,8 +248,8 @@ jobs:
       - OSEC_RELEASE_FILE: /tmp/open-source-event-calendar.tar.gz
       - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
     steps:
-      - checkout
       - browser-tools/install-chrome
+      - checkout
       - *attach_workspace
       # @see https://circleci.com/developer/orbs/orb/circleci/browser-tools
       - run:
@@ -264,9 +264,9 @@ jobs:
           name: Add WordPress domain to hosts file
           command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
       - run:
-          name: Setup apache
+          name: Setup webserver
           command: |
-            sudo cp ~/.circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf
+            sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "s/WP_HOST/${WP_HOST}/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
             sudo a2enmod rewrite
@@ -310,9 +310,9 @@ jobs:
           name: Install Open source event calendar plugin (release)
           command: |
             tar -xf $OSEC_RELEASE_FILE -C $WP_CORE_DIR/wp-content/plugins
-      - run:
-          name: Start PHP server
-          command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
+#      - run:
+#          name: Start PHP server
+#          command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
           background: True
       - node/install-packages:
           app-dir: integration_tests/
@@ -325,7 +325,7 @@ jobs:
               cd integration_tests/ && 
               MOCHA_FILE=/tmp/integration_test_results/mocha-junit.xml \
               MOCHA_SCREENSHOT_DIR=/tmp/integration_test_results/screenshots \
-              npm run test
+              npx mocha test/**/*.spec.js --timeout 60000
             )
           when: always
       - store_test_results:
