@@ -15,7 +15,7 @@ references:
   WP_CORE_DIR: &WP_CORE_DIR
       /tmp/wordpress
   WP_HOST: &WP_HOST
-      host.docker.internal
+    open-source-event-calendar.test
   WP_ORG_PLUGIN_NAME: &WP_ORG_PLUGIN_NAME
       open-source-event-calendar
   WP_ORG_USERNAME: &WP_ORG_USERNAME
@@ -130,9 +130,9 @@ jobs:
         <<: *database_config
     steps:
       - checkout
-#      - run:
-#          name: Add WordPress domain to hosts file
-#          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
+      - run:
+          name: Add WordPress domain to hosts file
+          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
       - *attach_workspace
       - *copy_vendor
       - run:
@@ -261,9 +261,13 @@ jobs:
             && sudo apt-get install -y mysql-client apache2
             && sudo rm -rf /var/lib/apt/lists/*
       - run:
+          name: Add WordPress domain to hosts file
+          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
+      - run:
           name: Setup apache
           command: |
             sudo cp ~/.circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf
+            sudo sed -i "s/WP_HOST/${WP_HOST}/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
             sudo a2enmod rewrite
             sudo service apace2 restart
