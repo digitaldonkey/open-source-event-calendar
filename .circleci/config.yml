@@ -15,7 +15,7 @@ references:
   WP_CORE_DIR: &WP_CORE_DIR
       /tmp/wordpress
   WP_HOST: &WP_HOST
-      open-source-event-calendar.test
+      host.docker.internal
   WP_ORG_PLUGIN_NAME: &WP_ORG_PLUGIN_NAME
       open-source-event-calendar
   WP_ORG_USERNAME: &WP_ORG_USERNAME
@@ -130,9 +130,9 @@ jobs:
         <<: *database_config
     steps:
       - checkout
-      - run:
-          name: Add WordPress domain to hosts file
-          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
+#      - run:
+#          name: Add WordPress domain to hosts file
+#          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
       - *attach_workspace
       - *copy_vendor
       - run:
@@ -232,12 +232,14 @@ jobs:
     <<: *db_job
     docker:
       - image: cimg/php:8.2-browsers
+        # php:8.2-apache
+        # webdevops/php-apache:8.2
       - image: cimg/mariadb:11.4
         <<: *database_config
     environment:
       # Rewrite environment
       # Standard WP at docroot. Osec release tar goes into wp-plugins.
-      - WP_CORE_DIR: /tmp/docroot
+      - WP_CORE_DIR: /var/www/html # /tmp/docroot
       - WP_HOST: *WP_HOST
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
@@ -245,7 +247,6 @@ jobs:
       - WP_CLI: /tmp/vendor/bin/wp
       - OSEC_RELEASE_FILE: /tmp/open-source-event-calendar.tar.gz
       - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
-
     steps:
       - checkout
       - browser-tools/install-chrome
@@ -255,10 +256,21 @@ jobs:
           name: Update outdated apt key
           command: (cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
       - run:
-          name: Install MySQL client and PHP extension
+          name: Install Apache, MySQL client and PHP extension
           command: sudo apt-get update
-            && sudo apt-get install -y mysql-client
+            && sudo apt-get install -y mysql-client apache2
             && sudo rm -rf /var/lib/apt/lists/*
+      - run:
+          name: Setup apache
+          command: |
+            # override config
+            sudo cp ~/.circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf
+            sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
+#            sudo sed -i "s/#ServerName www.example.com/ServerName $WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
+#            sudo sed -i 's/\${APACHE_LOG_DIR\}\/error\.log/\/dev\/stdout/g' /etc/apache2/sites-enabled/000-default.conf
+#            sudo sed -i 's/\${APACHE_LOG_DIR\}\/access\.log/\/dev\/stdout/g' /etc/apache2/sites-enabled/000-default.conf
+            sudo a2enmod rewrite
+            sudo service apace2 restart
       - run:
           name: Install apcu
           command: sudo mkdir -p /tmp/pear/temp
@@ -266,7 +278,7 @@ jobs:
             && echo no '' |  sudo pecl install apcu
             && sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
       - run:
-          name: Releas test variables
+          name: Release test variables
           command: |
             echo "PHP VERSION:"
             php --version
