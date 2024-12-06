@@ -638,9 +638,10 @@ class BootstrapController
      */
     public function verifyCache()
     {
-        if ($this->app->options->get(
-                FrontendCssController::COMPILED_CSS_CACHE_KEY
-            ) || FrontendCssController::PARSE_LESS_FILES_AT_EVERY_REQUEST) {
+        if (
+            $this->app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY)
+            || FrontendCssController::PARSE_LESS_FILES_AT_EVERY_REQUEST
+        ) {
             FrontendCssController::factory($this->app)
                                  ->invalidate_cache(null, true);
             $this->app->options->delete(FrontendCssController::COMPILED_CSS_CACHE_KEY);
