@@ -215,7 +215,7 @@ jobs:
       - *attach_workspace
       - run:
           name: Install dependencies (no dev)
-          command: composer install --no-interaction --optimize-autoloader --no-dev
+          command: composer install --no-dev --no-interaction --optimize-autoloader
       - run:
           name: Create Release package
           command: |
@@ -314,7 +314,14 @@ jobs:
           name: Install Open source event calendar plugin (release)
           command: |
             tar -xf $OSEC_RELEASE_FILE -C $WP_CORE_DIR/wp-content/plugins
-#      - run:
+      - run:
+          name: Debug
+          command: |
+            sudo apt-get update && sudo apt-get install -y lynx && sudo rm -rf /var/lib/apt/lists/*
+            # ADD WP_DEBUG statement
+            'WP_DEBUG', false
+            sudo sed -i "s/'WP_DEBUG', false/'WP_DEBUG', true/g" /var/www/html/wp-config.php
+      #      - run:
 #          name: Start PHP server
 #          command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
 #          background: True
@@ -337,11 +344,7 @@ jobs:
           path: /tmp/integration_test_results/mocha-junit.xml
       - store_artifacts:
           path: /integration_test_results/screenshots
-      - run:
-          name: Debug
-          command: |
-            sudo apt-get update && sudo apt-get install -y lynx && sudo rm -rf /var/lib/apt/lists/*
-            # ADD WP_DEBUG statement
+
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
