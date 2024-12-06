@@ -285,8 +285,7 @@ jobs:
             sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
             sudo a2enmod rewrite
-            sudo apache2 -X -d $WP_CORE_DIR -f /etc/apache2/apache2.conf
-
+            sudo apachectl -DFOREGROUND
           #            sudo service apache2 restart
           background: True
       - run:
