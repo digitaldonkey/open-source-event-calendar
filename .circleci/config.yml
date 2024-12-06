@@ -273,7 +273,7 @@ jobs:
           command: |
             sudo apt-get update
             sudo add-apt-repository ppa:ondrej/php -y                   
-            sudo apt-get install -y mysql-client apache2 apache2-utils libapache2-mod-php8.2 php8.2-mysql
+            sudo apt-get install -y mysql-client apache2 libapache2-mod-php8.2 php8.2-mysql
             sudo rm -rf /var/lib/apt/lists/*
       - run:
           name: Add WordPress domain to hosts file
@@ -285,7 +285,8 @@ jobs:
             sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
             sudo a2enmod rewrite
-            apachectl -D FOREGROUND
+            sudo apache2 -X -d $WP_CORE_DIR -f /etc/apache2/apache2.conf
+
           #            sudo service apache2 restart
           background: True
       - run:
