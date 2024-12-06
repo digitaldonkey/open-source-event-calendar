@@ -190,35 +190,27 @@ class BootstrapController
     protected function _initialize_actions_and_filters()
     {
         $app = $this->app;
-
-        // TEST TEST TEST
-        // add_action( 'osec_admin_ics_feeds_options_header_html', function ($feed_id) use ( $app ) {
-        // echo 'HELLO 1';
-        // }, 10, 1 );
-        // add_action( 'osec_admin_ics_feeds_options_after_settings_html', function ($feed_id) use ( $app ) {
-        // echo 'osec_admin_ics_feeds_options_after_settings_html';
-        // }, 10, 1 );
-
         //
-        // TODO BLOCK TESTING
+        // TODO BLOCK TESTING - calendar_block not comitted yet.
         //
-        add_action(
-            'init',
-            function () {
-                // Point to each folder that corresponds to each block within build
-                $XXX = register_block_type(OSEC_PATH . 'calendar_block/build');
-                // $YYY = register_block_type( 'all-in-one-event-calendar/cal2' );
-            }
-        );
+        //add_action(
+        //    'init',
+        //    function () {
+        //        // Point to each folder that corresponds to each block within build
+        //        $XXX = register_block_type(OSEC_PATH . 'calendar_block/build');
+        //        // $YYY = register_block_type( 'all-in-one-event-calendar/cal2' );
+        //    }
+        //);
 
+        /**
+         * Add date formats on Serrings-general.php
+         */
         add_action(
             'admin_init',
             function () use ($app) {
                 DateFormatsFrontend::factory($app)->initialize();
             }
         );
-
-        // <<<< END TESTING
 
         add_action(
             'init',
@@ -594,7 +586,7 @@ class BootstrapController
                 require_once $osec_base_dir . '/' . $file;
             }
         }
-        if ( ! function_exists('osec_initiate_constants')) {
+        if (! function_exists('osec_initiate_constants')) {
             throw new Exception(
                 'No constant file was found.'
             );
@@ -647,8 +639,8 @@ class BootstrapController
     public function verifyCache()
     {
         if ($this->app->options->get(
-            FrontendCssController::COMPILED_CSS_CACHE_KEY
-        ) || FrontendCssController::PARSE_LESS_FILES_AT_EVERY_REQUEST) {
+                FrontendCssController::COMPILED_CSS_CACHE_KEY
+            ) || FrontendCssController::PARSE_LESS_FILES_AT_EVERY_REQUEST) {
             FrontendCssController::factory($this->app)
                                  ->invalidate_cache(null, true);
             $this->app->options->delete(FrontendCssController::COMPILED_CSS_CACHE_KEY);
@@ -715,7 +707,7 @@ class BootstrapController
         // get the command
         $commands = $resolver->get_commands();
         // if we have a command
-        if ( ! empty($commands)) {
+        if (! empty($commands)) {
             foreach ($commands as $command) {
                 $result = $command->execute();
                 if ($command->stop_execution()) {
@@ -809,7 +801,7 @@ class BootstrapController
         $settings = $this->app->settings;
         $cal_page = $settings->get('calendar_page_id');
 
-        if ( ! $cal_page || $cal_page < 1) { // Routing may not be affected in any way if no calendar page exists.
+        if (! $cal_page || $cal_page < 1) { // Routing may not be affected in any way if no calendar page exists.
             return null;
         }
 
@@ -828,7 +820,7 @@ class BootstrapController
                 $cal_page = $trans[$clang];
             }
         }
-        if ( ! get_post($cal_page)) {
+        if (! get_post($cal_page)) {
             return null;
         }
 
