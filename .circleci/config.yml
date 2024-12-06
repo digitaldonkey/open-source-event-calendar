@@ -28,7 +28,9 @@ references:
         src/
         vendor/
         public/
-        language/                             
+        language/
+        composer.json
+        composer.lock
         open-source-event-calendar.php
         constants.php
         global-functions.php
