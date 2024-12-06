@@ -33,8 +33,6 @@ references:
         constants.php
         global-functions.php
         constants-local.php.example                    
-        composer.json
-        composer.lock
         readme.txt
         LICENSE
         DEVELOPERS.md                             
