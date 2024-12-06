@@ -29,19 +29,21 @@ class CacheFactory extends OsecBaseClass
     {
         // TODO ADD SOME CONFIGURABILITY.
 
-        if (OSEC_ENABLE_CACHE_ACPU && CacheApcu::is_available() && ! $override) {
-            $engine = new CacheApcu($this->app);
-        } else {
-            if (
-                true === OSEC_ENABLE_CACHE_FILE &&
-                null !== CacheFile::is_available()
-            ) {
-                $engine = CacheFile::createFileCacheInstance($this->app, $cache_id);
-            } else {
-                $engine = CacheDb::factory($this->app);
-            }
+        if (OSEC_ENABLE_CACHE_APCU && CacheApcu::is_available() && ! $override) {
+            return new Cache(
+                $cache_id,
+                new CacheApcu($this->app)
+            );
         }
-
-        return new Cache($cache_id, $engine);
+        if (true === OSEC_ENABLE_CACHE_FILE && CacheFile::is_available()) {
+            return new Cache(
+                $cache_id,
+                CacheFile::createFileCacheInstance($this->app, $cache_id)
+            );
+        }
+        return new Cache(
+            $cache_id,
+            CacheDb::factory($this->app)
+        );
     }
 }

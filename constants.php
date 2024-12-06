@@ -351,7 +351,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // Enabling/Disabling any cache will require to recompile
     // the theme by reenabling it or updating theme color options.
     //
-    // File cahce by default will use
+    // File cache by default will use
     // plugindir/cache cache/css/f9d016b4_osec_compiled.css.
     //
     if ( ! defined('OSEC_ENABLE_CACHE_FILE')) {
@@ -365,8 +365,8 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // ACPU and DB cache will deliver CSS on a different url than file cache.
     // E.g: yourdomain.tld/?osec-css-cache=1728977613
     //
-    if ( ! defined('OSEC_ENABLE_CACHE_ACPU')) {
-        define('OSEC_ENABLE_CACHE_ACPU', true);
+    if ( ! defined('OSEC_ENABLE_CACHE_APCU')) {
+        define('OSEC_ENABLE_CACHE_APCU', true);
     }
 
     // Defines amount of needed free memory to compile LESS files.

@@ -45,7 +45,7 @@ class SettingsCache extends SettingsAbstract
                 'is_curren_cache' => $this->niceBoolean($current_cache === 'CacheApcu'),
                 'notes'           => '@see: <a target="_blank" href="https://www.php.net/manual/en/book.apcu.php">'
                                      . 'php.net/manual/en/book.apcu.php</a>',
-                'constant'        => 'OSEC_ENABLE_CACHE_ACPU',
+                'constant'        => 'OSEC_ENABLE_CACHE_APCU',
             ],
             'CacheFile' => [
                 'name'            => 'CacheFile',

@@ -27,7 +27,7 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      */
     public static function is_available(): bool
     {
-        if ( ! OSEC_ENABLE_CACHE_ACPU) {
+        if ( ! OSEC_ENABLE_CACHE_APCU) {
             return false;
         }
         ini_set('apc.enable_cli', true);
