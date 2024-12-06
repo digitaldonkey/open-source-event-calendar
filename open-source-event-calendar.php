@@ -30,7 +30,9 @@ use Osec\Theme\ThemeLoader;
 $osec_base_dir = __DIR__;
 
 // PHP Composer @see package.json.
-if (is_readable($osec_base_dir . '/vendor/autoload.php')) {
+if (
+    // Try fixing a bug where
+    ! class_exists("\Osec\App\Controller\BootstrapController")) {
     require_once $osec_base_dir . '/vendor/autoload.php';
 }
 
