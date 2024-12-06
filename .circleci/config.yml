@@ -303,7 +303,7 @@ jobs:
       - run:
           name: Install WordPress (DB, no unit test scripts)
           command: |
-            echo yes '' | bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_VERSION false false
+            echo yes '' | bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_VERSION true true
             $WP_CLI config create --dbname=wp_ci --dbuser=wp_ci --dbpass=wp_ci --path=$WP_CORE_DIR --dbhost=127.0.0.1
             $WP_CLI core install --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@about.test.com"
       - run:
