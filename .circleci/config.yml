@@ -318,8 +318,6 @@ jobs:
           name: Debug
           command: |
             sudo apt-get update && sudo apt-get install -y lynx && sudo rm -rf /var/lib/apt/lists/*
-            # ADD WP_DEBUG statement
-            'WP_DEBUG', false
             sudo sed -i "s/'WP_DEBUG', false/'WP_DEBUG', true/g" /var/www/html/wp-config.php
       #      - run:
 #          name: Start PHP server
