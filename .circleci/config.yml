@@ -41,10 +41,27 @@ references:
         hooks-and-filters.md
   workspace_root: &workspace_root /tmp
 
+  # Default DB Docker image environement
+  ENV_DB_IMAGE: &ENV_DB_IMAGE
+    environment:
+      MYSQL_ROOT_PASSWORD: wp_ci_root
+      MYSQL_DATABASE: wp_ci
+      MYSQL_USER: wp_ci
+      MYSQL_PASSWORD: wp_ci
+
+  # Default DB Docker image environement
+  ENV_PHP_IMAGE: &ENV_PHP_IMAGE
+    environment:
+      TZ: "Europe/Berlin"
+      MYSQL_DATABASE: wp_ci
+      MYSQL_USER: wp_ci
+      MYSQL_PASSWORD: wp_ci
+
   # Default container configuration
   container_config: &container_config
     docker:
       - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
     working_directory: ~/open-source-event-calendar
     environment:
       - WP_CORE_DIR: *WP_CORE_DIR
@@ -54,16 +71,6 @@ references:
       - WP_VERSION: *WP_VERSION
       - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
       - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
-
-  # Default DB configuration
-  #
-  database_config: &database_config
-    environment:
-      MYSQL_ROOT_PASSWORD: wp_ci_root
-      MYSQL_USER: wp_ci
-      MYSQL_DATABASE: wp_ci
-      MYSQL_PASSWORD: wp_ci
-
 
   attach_workspace: &attach_workspace
     attach_workspace:
@@ -101,7 +108,7 @@ jobs:
             - vendor
       - run:
           name: Install WordPress (Test scripts)
-          command: bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_VERSION true false
+          command: bash ./bin/install-wp-tests.sh $MYSQL_DATABASE $MYSQL_USER $MYSQL_PASSWORD $WP_HOST $WP_VERSION true false
       - persist_to_workspace:
           root: *workspace_root
           paths:
@@ -126,8 +133,9 @@ jobs:
     <<: *container_config
     docker:
       - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
       - image: cimg/mariadb:11.4
-        <<: *database_config
+        <<: *ENV_DB_IMAGE
     steps:
       - checkout
       - run:
@@ -170,41 +178,47 @@ jobs:
 #    <<: *db_job
 #    docker:
 #      - image: cimg/php:8.2
+#        <<: *ENV_PHP_IMAGE
 #      - image: cimg/mariadb:10.5
-#        <<: *database_config
+#        <<: *ENV_DB_IMAGE
 #
 #  db_job_maria_11:
 #    <<: *db_job
 #    docker:
 #      - image: cimg/php:8.2
+#        <<: *ENV_PHP_IMAGE
 #      - image: cimg/mariadb:11.4
-#        <<: *database_config
+#        <<: *ENV_DB_IMAGE
 #
 #  db_job_php_8_1:
 #    <<: *db_job
 #    docker:
 #      - image: cimg/php:8.1
+#        <<: *ENV_PHP_IMAGE
 #      - image: cimg/mariadb:11.4
-#        <<: *database_config
+#        <<: *ENV_DB_IMAGE
 #
 #  db_job_php_8_3:
 #    docker:
 #      - image: cimg/php:8.3
+#        <<: *ENV_PHP_IMAGE
 #      - image: cimg/mariadb:11.4
-#        <<: *database_config
+#        <<: *ENV_DB_IMAGE
 #
 #  db_job_mysql_8:
 #    docker:
 #      - image: cimg/php:8.2
+#        <<: *ENV_PHP_IMAGE
 #      - image: cimg/mysql:8.0
-#        <<: *database_config
+#        <<: *ENV_DB_IMAGE
 
   #  db_job_php_8_0:
   #    <<: *db_job
   #    docker:
   #      - image: cimg/php:8.0.28
+  #        <<: *ENV_PHP_IMAGE
   #      - image: cimg/cimg/mariadb:11.4
-  #        <<: *database_config
+  #        <<: *ENV_DB_IMAGE
   # mclay/minify && Grumphp and others require PHP > 8.1.
 
   create_release_job:
@@ -232,10 +246,9 @@ jobs:
     <<: *db_job
     docker:
       - image: cimg/php:8.2-browsers
-        # php:8.2-apache
-        # webdevops/php-apache:8.2
+        <<: *ENV_PHP_IMAGE
       - image: cimg/mariadb:11.4
-        <<: *database_config
+        <<: *ENV_DB_IMAGE
     environment:
       # Rewrite environment
       # Standard WP at docroot. Osec release tar goes into wp-plugins.
@@ -272,7 +285,8 @@ jobs:
             sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
             sudo a2enmod rewrite
-            sudo service apache2 restart
+            apachectl -D FOREGROUND
+          #            sudo service apache2 restart
           background: True
       - run:
           name: Install apcu
@@ -307,9 +321,9 @@ jobs:
           name: Install WordPress (DB, no unit test scripts)
           command: |
             sudo chown root:circleci $WP_CORE_DIR/.. && sudo chmod g+w $WP_CORE_DIR/.. && sudo rm -rf $WP_CORE_DIR 
-            bash ./bin/install-wp-tests.sh wp_ci wp_ci wp_ci $WP_HOST $WP_VERSION true true
-            $WP_CLI config create --dbname=wp_ci --dbuser=wp_ci --dbpass=wp_ci --path=$WP_CORE_DIR --dbhost=127.0.0.1
-            $WP_CLI core install --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@about.test.com"
+            bash ./bin/install-wp-tests.sh $MYSQL_DATABASE $MYSQL_USER $MYSQL_PASSWORD $WP_HOST $WP_VERSION true true
+            $WP_CLI config create --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
+            $WP_CLI core install --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com"
       - run:
           name: Install Open source event calendar plugin (release)
           command: |
