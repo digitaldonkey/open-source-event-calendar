@@ -266,8 +266,8 @@ jobs:
       - run:
           name: Setup webserver
           command: |
-            sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf
-            sudo sed -i "s/WP_HOST/${WP_HOST}/g" /etc/apache2/sites-enabled/000-default.conf
+            sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf            
+            sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
             sudo a2enmod rewrite
             sudo service apache2 restart
@@ -334,7 +334,12 @@ jobs:
       - store_test_results:
           path: /tmp/integration_test_results/mocha-junit.xml
       - store_artifacts:
-          path: /tmp/integration_test_results
+          path: /integration_test_results/screenshots
+      - run:
+          name: Debug
+          command: |
+            sudo apt-get update && sudo apt-get install -y lynx && sudo rm -rf /var/lib/apt/lists/*
+            # ADD WP_DEBUG statement
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
