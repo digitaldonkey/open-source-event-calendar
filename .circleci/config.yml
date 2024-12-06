@@ -332,6 +332,8 @@ jobs:
             )
           when: always
       - store_test_results:
+          path: /tmp/integration_test_results/mocha-junit.xml
+      - store_artifacts:
           path: /tmp/integration_test_results
 
 # Orchestrate jobs using workflows
