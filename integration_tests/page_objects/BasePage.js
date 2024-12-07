@@ -33,7 +33,7 @@ class BasePage {
             settings = require('../settings.js');
         }
         const theClass = this;
-        return this.setupWebDriver(settings.headless)
+        return this.setupWebDriver(settings)
             .then(function(driver){
                 return new theClass(settings, driver);
             });
@@ -45,17 +45,13 @@ class BasePage {
      * @param isHeadless
      * @returns {!ThenableWebDriver}
      */
-    static setupWebDriver (isHeadless = true) {
-        if (isHeadless) {
-            // const screen = {
-            //     width: 1280,
-            //     height: 1280
-            // };
+    static setupWebDriver (settings) {
+        if (settings.isHeadless) {
             return new Builder()
                 .forBrowser(Browser.CHROME)
                 .setChromeOptions(
                     new chrome.Options()
-                    .addArguments('--headless').windowSize(this.settings.screen)
+                    .addArguments('--headless').windowSize(settings.screen)
                     .addArguments('--disable-gpu')
                     .addArguments('ignore-certificate-errors')
                 )
