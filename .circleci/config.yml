@@ -239,7 +239,7 @@ jobs:
             (cd ~/$WP_ORG_PLUGIN_NAME && cp -R $OSEC_RELEASE_WHITE_LIST /tmp/release/$WP_ORG_PLUGIN_NAME)
             (cd /tmp/release/ && zip -r $OSEC_RELEASE_FILE $WP_ORG_PLUGIN_NAME)
       - store_artifacts:
-          path: /tmp/$OSEC_RELEASE_FILE
+          path: $OSEC_RELEASE_FILE
       - persist_to_workspace:
           root: *workspace_root
           paths:
