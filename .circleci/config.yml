@@ -156,9 +156,6 @@ jobs:
           command: sudo mkdir -p /tmp/pear/temp
                     && sudo pecl channel-update pecl.php.net
                     && echo no '' |  sudo pecl install apcu
-                    && sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
-                    && sudo bash -c "echo 'log_errors = On'  >>  /etc/php.d/circleci.ini"
-                    && sudo bash -c "echo 'error_log = /var/log/php_error.log'  >>  /etc/php.d/circleci.ini"
       - run:
           name: Test apcu in PHP.ini
           command: php -i | grep -i apcu
@@ -286,11 +283,17 @@ jobs:
             && sudo pecl channel-update pecl.php.net
             && echo no '' |  sudo pecl install apcu
             && sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
+            && sudo bash -c "echo 'memory_limit = 192M'  >>  /etc/php.d/circleci.ini"
+            && sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
+            && sudo bash -c "echo 'log_errors = On'  >>  /etc/php.d/circleci.ini"
+            && sudo bash -c "echo 'error_log = /var/log/php_error.log'  >>  /etc/php.d/circleci.ini"
       - run:
           name: Release test VARIABLES
           command: |
             php --version
             php -i | grep -i "APCu Support"
+            php -i | grep -i memory_limit
+            php -i | grep -i error_log
             echo""
             echo "NODE $( node --version)"
             echo "NVM $( nvm --version)"             
@@ -302,7 +305,7 @@ jobs:
             echo " WP_HOST: $WP_HOST"
             echo " WP_CORE_DIR: $WP_CORE_DIR"
             echo " WP_VERSION: $WP_VERSION"
-            echo "$($WP_CLI --version) $WP_CLI"
+            echo " $($WP_CLI --version) $WP_CLI"
       - run:
           name: Install WordPress (DB, no unit test scripts)
           command: |
