@@ -237,7 +237,7 @@ jobs:
           command: |
             mkdir -p /tmp/release/$WP_ORG_PLUGIN_NAME
             (cd ~/$WP_ORG_PLUGIN_NAME && cp -R $OSEC_RELEASE_WHITE_LIST /tmp/release/$WP_ORG_PLUGIN_NAME)            
-            tar -czf $OSEC_RELEASE_FILE -C /tmp/release/ $WP_ORG_PLUGIN_NAME
+            zip -r $OSEC_RELEASE_FILE -C /tmp/release/ $WP_ORG_PLUGIN_NAME
       - store_artifacts:
           path: /tmp/open-source-event-calendar.tar.gz
       - persist_to_workspace:
@@ -260,7 +260,7 @@ jobs:
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - WP_VERSION: *WP_VERSION
       - WP_CLI: /tmp/vendor/bin/wp
-      - OSEC_RELEASE_FILE: /tmp/open-source-event-calendar.tar.gz
+      - OSEC_RELEASE_FILE: /tmp/open-source-event-calendar.zip
       - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
     steps:
       - browser-tools/install-chrome
@@ -313,7 +313,7 @@ jobs:
       - run:
           name: Install Open source event calendar plugin (release)
           command: |
-            tar -xf $OSEC_RELEASE_FILE -C $WP_CORE_DIR/wp-content/plugins
+            unzip $OSEC_RELEASE_FILE -d $WP_CORE_DIR/wp-content/plugins
       - run:
           name: Apache2 webserver
           command: |
