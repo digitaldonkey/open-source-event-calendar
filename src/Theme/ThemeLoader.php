@@ -382,7 +382,7 @@ class ThemeLoader extends OsecBaseClass
              */
             $environment = apply_filters('osec_twig_environment_settings_alter', $environment);
 
-            $twig_environment      = new Environment(
+            $twig_environment = new Environment(
                 $twigLoader,
                 $environment
             );
@@ -432,7 +432,7 @@ class ThemeLoader extends OsecBaseClass
 
             $this->app->settings->set('twig_cache', CacheFile::OSEC_FILE_CACHE_UNAVAILABLE);
 
-            return CacheFile::OSEC_FILE_CACHE_UNAVAILABLE;
+            return false;
         }
         $this->app->settings->set('twig_cache', $this->fileCache->getCachePath());
 
