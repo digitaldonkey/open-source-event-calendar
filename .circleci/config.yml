@@ -350,6 +350,10 @@ jobs:
           path: /tmp/integration_test_results/mocha-junit.xml
       - store_artifacts:
           path: /integration_test_results/screenshots
+          when: always
+      - store_artifacts:
+          path: /var/log/php_error.log
+          when: always
 
 
 # Orchestrate jobs using workflows
