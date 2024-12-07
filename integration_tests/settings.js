@@ -2,6 +2,10 @@ module.exports = {
     domain: 'open-source-event-calendar.test',
     screenshotsDir: '/tmp/integration_test_results', // No trailing slash
     headless: true,
+    screen: {
+        width: 1024,
+        height: 768
+    },
     wpLogin: {
         admin: {
             user: 'admin',

@@ -286,7 +286,7 @@ jobs:
             && sudo bash -c "echo 'memory_limit = 192M'  >>  /etc/php.d/circleci.ini"
             && sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
             && sudo bash -c "echo 'log_errors = On'  >>  /etc/php.d/circleci.ini"
-            && echo "STARTING..."> /var/log/php_error.log
+            && sudo echo "STARTING..." > /var/log/php_error.log
             && sudo bash -c "echo 'error_log = /var/log/php_error.log'  >>  /etc/php.d/circleci.ini"
       - run:
           name: Release test VARIABLES
@@ -351,8 +351,10 @@ jobs:
           path: /tmp/integration_test_results/mocha-junit.xml
       - store_artifacts:
           path: /tmp/integration_test_results/screenshots
+          when: always
       - store_artifacts:
           path: /var/log/php_error.log
+          when: always
 
 
 # Orchestrate jobs using workflows
