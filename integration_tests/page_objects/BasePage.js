@@ -54,6 +54,7 @@ class BasePage {
                 .setChromeOptions(
                     new chrome.Options()
                     .addArguments('--headless').windowSize(screen)
+                    .addArguments('--disable-gpu')
                     .addArguments('ignore-certificate-errors')
                 )
                 .setFirefoxOptions(

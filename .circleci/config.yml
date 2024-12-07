@@ -157,6 +157,8 @@ jobs:
                     && sudo pecl channel-update pecl.php.net
                     && echo no '' |  sudo pecl install apcu
                     && sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
+                    && sudo bash -c "echo 'log_errors = On'  >>  /etc/php.d/circleci.ini"
+                    && sudo bash -c "echo 'error_log = /var/log/php_error.log'  >>  /etc/php.d/circleci.ini"
       - run:
           name: Test apcu in PHP.ini
           command: php -i | grep -i apcu
@@ -302,19 +304,6 @@ jobs:
             echo " WP_VERSION: $WP_VERSION"
             echo "$($WP_CLI --version) $WP_CLI"
       - run:
-          name: Add WordPress host to hosts file
-          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
-      - run:
-          name: Apache2 webserver
-          command: |
-            sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf            
-            sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
-            sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
-            sudo a2enmod rewrite
-            sudo apachectl -DFOREGROUND
-          #            sudo service apache2 restart
-          background: True
-      - run:
           name: Install WordPress (DB, no unit test scripts)
           command: |
             sudo chown root:circleci $WP_CORE_DIR/.. && sudo chmod g+w $WP_CORE_DIR/.. && sudo rm -rf $WP_CORE_DIR 
@@ -325,6 +314,15 @@ jobs:
           name: Install Open source event calendar plugin (release)
           command: |
             tar -xf $OSEC_RELEASE_FILE -C $WP_CORE_DIR/wp-content/plugins
+      - run:
+          name: Apache2 webserver
+          command: |
+            sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf            
+            sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
+            sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
+            sudo a2enmod rewrite 
+            sudo apachectl -DFOREGROUND
+          background: True
       - node/install-packages:
           app-dir: integration_tests/
           override-ci-command: npm ci --include=dev

@@ -38,26 +38,17 @@ class MemoryCheck extends OsecBaseClass
      *
      * @return int Number.
      */
-    protected static function _string_to_bytes($v)
+    protected static function _string_to_bytes($value)
     {
-        $letter     = substr($v, -1);
-        $value      = (int)substr($v, 0, -1);
-        $powers     = [
-            'K' => 10,
-            'M' => 20,
-            'G' => 30,
-            'T' => 40,
-            'P' => 50,
-        ];
-        $multiplier = 1;
-        if (isset($powers[$letter])) {
-            $multiplier = 2 ** $powers[$letter];
-        }
-        if (1 === $multiplier) {
-            return (int)$v;
-        }
-
-        return $value * $multiplier;
+        return preg_replace_callback('/^\s*(\d+)\s*(?:([kmgt]?)b?)?\s*$/i', function ($m) {
+            switch (strtolower($m[2])) {
+                case 't': $m[1] *= 1024;
+                case 'g': $m[1] *= 1024;
+                case 'm': $m[1] *= 1024;
+                case 'k': $m[1] *= 1024;
+            }
+            return $m[1];
+        }, $value);
     }
 
     /**
