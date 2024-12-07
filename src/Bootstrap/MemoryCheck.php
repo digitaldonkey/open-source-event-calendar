@@ -42,10 +42,18 @@ class MemoryCheck extends OsecBaseClass
     {
         return preg_replace_callback('/^\s*(\d+)\s*(?:([kmgt]?)b?)?\s*$/i', function ($m) {
             switch (strtolower($m[2])) {
-                case 't': $m[1] *= 1024;
-                case 'g': $m[1] *= 1024;
-                case 'm': $m[1] *= 1024;
-                case 'k': $m[1] *= 1024;
+                case 't':
+                    $m[1] *= 1024;
+                    break;
+                case 'g':
+                    $m[1] *= 1024;
+                    break;
+                case 'm':
+                    $m[1] *= 1024;
+                    break;
+                case 'k':
+                    $m[1] *= 1024;
+                    break;
             }
             return $m[1];
         }, $value);
