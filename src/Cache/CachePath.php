@@ -123,11 +123,9 @@ class CachePath
 
         $wp_upload = wp_upload_dir();
         if ($wp_upload['error']) {
+            //  Admit, that we can not use Filecache.
             return null;
-            // TODO
-            //  Here we must admit, that we can not use Filecache.
         }
-
         $cachePath = trailingslashit($wp_upload['basedir'])
                      . trailingslashit(OSEC_FILE_CACHE_WP_UPLOAD_DIR)
                      . $subDirectory;

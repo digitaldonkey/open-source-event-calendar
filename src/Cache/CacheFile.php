@@ -41,7 +41,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
 
     private $_cacheData;
 
-    private function __construct(App $app, string $path, string $url, ?string $cache_id)
+    private function __construct(App $app, string $path, ?string $url, ?string $cache_id)
     {
         parent::__construct($app);
         $this->_cache_path = $path;
@@ -79,9 +79,12 @@ class CacheFile extends OsecBaseClass implements CacheInterface
             throw new Exception('a cache identifier must be provided. It will define a directory in cachePath');
         }
         $cacheData = (new CachePath())->getCacheData($cache_id);
+
+        // $cacheData['url'] is optional.
+        // the creator needs to deal with not
+        // having a public url for the cache.
         if ( ! is_array($cacheData)
             || ! isset($cacheData['path'])
-            || ! isset($cacheData['url'])
         ) {
             self::setUnavailable($app, $cache_id);
 
@@ -148,7 +151,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         return [
             'key'  => $key,
             'path' => $this->_cache_path . $fileName,
-            'url'  => $this->_cache_url . $fileName,
+            'url'  => $this->_cache_url ?? $this->_cache_url . $fileName,
             'file' => $fileName,
         ];
     }

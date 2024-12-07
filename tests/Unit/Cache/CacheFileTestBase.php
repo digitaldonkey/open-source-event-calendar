@@ -49,12 +49,18 @@ class CacheFileTestBase extends TestBase
      */
     protected function precheckDirectory($path): void
     {
-        if ( ! is_dir($path)) {
-            throw new Exception('Only directories allowed. Got: ' . $path);
-        }
         if ( ! (str_starts_with($path, OSEC_FILE_CACHE_DEFAULT_PATH)
                 || ($this->wp_upload_path && str_starts_with($path, $this->wp_upload_path)))) {
             throw new Exception('Path not in whitelist. Got: ' . $path);
+        }
+        if (
+            $path === $this->wp_upload_path . OSEC_FILE_CACHE_WP_UPLOAD_DIR
+            && !is_dir($path)
+        ) {
+            wp_mkdir_p($path);
+        }
+        if ( ! is_dir($path)) {
+            throw new Exception('Only directories allowed. Got: ' . $path);
         }
     }
 

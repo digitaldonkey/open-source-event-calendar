@@ -34,6 +34,9 @@ class CacheFileTest extends CacheFileTestBase
         $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
         $this->makeDirReadonly($this->wp_upload_path . OSEC_FILE_CACHE_WP_UPLOAD_DIR);
 
+        $cacheFileIsAvailabe = CacheFile::is_available();
+        $this->assertFalse($cacheFileIsAvailabe);
+
         $fileCache = CacheFile::createFileCacheInstance($osec_app);
         $this->assertNull($fileCache);
 
