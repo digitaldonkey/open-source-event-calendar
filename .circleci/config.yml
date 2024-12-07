@@ -23,7 +23,7 @@ references:
   WP_VERSION: &WP_VERSION
       latest
   OSEC_RELEASE_FILE: &OSEC_RELEASE_FILE
-      /tmp/open-source-event-calendar.tar.gz
+      /tmp/open-source-event-calendar.zip
   OSEC_RELEASE_WHITE_LIST: &OSEC_RELEASE_WHITE_LIST
         src/
         vendor/
