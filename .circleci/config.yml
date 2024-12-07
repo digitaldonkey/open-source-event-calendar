@@ -328,7 +328,6 @@ jobs:
             sudo apachectl -DFOREGROUND
           background: True
       - node/install-packages:
-          name: Install integration tests npm packages
           app-dir: integration_tests/
           override-ci-command: npm ci --include=dev
       - run:
