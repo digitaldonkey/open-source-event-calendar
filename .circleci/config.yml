@@ -239,11 +239,11 @@ jobs:
             (cd ~/$WP_ORG_PLUGIN_NAME && cp -R $OSEC_RELEASE_WHITE_LIST /tmp/release/$WP_ORG_PLUGIN_NAME)
             (cd /tmp/release/ && zip -r $OSEC_RELEASE_FILE $WP_ORG_PLUGIN_NAME)
       - store_artifacts:
-          path: /tmp/open-source-event-calendar.tar.gz
+          path: /tmp/$OSEC_RELEASE_FILE
       - persist_to_workspace:
           root: *workspace_root
           paths:
-            - open-source-event-calendar.tar.gz
+            - $OSEC_RELEASE_FILE
   release_test_job:
     <<: *db_job
     docker:
