@@ -349,7 +349,7 @@ jobs:
       - store_test_results:
           path: /tmp/integration_test_results/mocha-junit.xml
       - store_artifacts:
-          path: /integration_test_results/screenshots
+          path: /tmp/integration_test_results/screenshots
           destination: screenshots
       - store_artifacts:
           path: /var/log/php_error.log
