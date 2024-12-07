@@ -296,7 +296,7 @@ jobs:
             php -i | grep -i error_log
             echo""
             echo "NODE $( node --version)"
-            echo "NVM $( nvm --version)"             
+            echo "NPM $( npm --version)"             
             google-chrome --version
             echo""
             echo "CONSTANTS:"
