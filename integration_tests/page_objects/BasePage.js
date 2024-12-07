@@ -47,22 +47,22 @@ class BasePage {
      */
     static setupWebDriver (isHeadless = true) {
         if (isHeadless) {
-            const screen = {
-                width: 1280,
-                height: 1280
-            };
+            // const screen = {
+            //     width: 1280,
+            //     height: 1280
+            // };
             return new Builder()
                 .forBrowser(Browser.CHROME)
                 .setChromeOptions(
                     new chrome.Options()
-                    .addArguments('--headless').windowSize(screen)
+                    .addArguments('--headless').windowSize(this.settings.screen)
                     .addArguments('--disable-gpu')
                     .addArguments('ignore-certificate-errors')
                 )
                 .setFirefoxOptions(
                     new firefox.Options()
                         .addArguments('--headless')
-                        .windowSize(screen))
+                        .windowSize(this.settings.screen))
                         .setCapability('acceptInsecureCerts', true)
                 .build();
         }
@@ -71,7 +71,7 @@ class BasePage {
 
     async go_to_url(url){
         console.log('      get: ' + url);
-        this.driver.get(url);
+        return this.driver.get(url);
     }
 
     async enterText(findBy, searchText){

@@ -31,10 +31,9 @@ describe('WordPress Login', function(){
 
     it('Admin login to WordPress', async function () {
         await pageObject.go_to_url(pageObject.settings.domain + '/wp-login.php');
-        let adminPageLoaded = pageObject.doLogin();
-
         await pageObject.takeScreenshot(this);
-
+        let adminPageLoaded = await pageObject.doLogin();
+        await pageObject.takeScreenshot(this);
         pageObject.assert.ok(adminPageLoaded);
     });
 
