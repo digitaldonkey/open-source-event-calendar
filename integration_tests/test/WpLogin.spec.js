@@ -33,6 +33,8 @@ describe('WordPress Login', function(){
         await pageObject.go_to_url(pageObject.settings.domain + '/wp-login.php');
         let adminPageLoaded = pageObject.doLogin();
 
+        await pageObject.takeScreenshot(this);
+
         pageObject.assert.ok(adminPageLoaded);
     });
 

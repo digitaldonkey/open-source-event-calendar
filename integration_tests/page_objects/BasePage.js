@@ -10,6 +10,7 @@ const assert = require("node:assert");
 // @see https://www.selenium.dev/selenium/docs/api/javascript/
 
 class BasePage {
+
     constructor(settings, driver){
         if (typeof driver === 'undefined') {
             throw new Error('Cannot be called directly');
@@ -19,6 +20,7 @@ class BasePage {
         this.driver = driver;
         this.driver.manage().window().maximize();
         this.driver.manage().setTimeouts({implicit: (10000)});
+        this.screenshotCount = 1;
     }
 
     static async build () {
@@ -115,7 +117,12 @@ class BasePage {
         return Promise.resolve();
     }
 
-    async takeScreenshot(title){
+    async takeScreenshot(mocha){
+        const number = this.screenshotCount.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})
+        this.screenshotCount ++;
+
+        const title = mocha.test.parent.title + '__' + mocha.test.title + '_' + number;
+
         let image = await this.driver.takeScreenshot()
         const screenshotsDir = process.env.MOCHA_SCREENSHOT_DIR ?? this.settings.screenshotsDir;
         // screenshotsDir

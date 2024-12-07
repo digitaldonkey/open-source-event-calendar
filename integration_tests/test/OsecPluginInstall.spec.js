@@ -31,13 +31,13 @@ describe('Plugin install', function(){
 
     it('WordPress activate Osec plugin', async function () {
         await pageObject.go_to_url(pageObject.settings.domain + '/wp-admin/plugins.php');
-        await pageObject.takeScreenshot('01_' . this.test.fullTitle());
+        await pageObject.takeScreenshot(this);
         await pageObject.doLogin();
-        await pageObject.takeScreenshot('02_' . this.test.fullTitle());
+        await pageObject.takeScreenshot(this);
         const sucess = await pageObject.activateOsecPlugin();
-        await pageObject.takeScreenshot('03_' . this.test.fullTitle());
+        await pageObject.takeScreenshot(this);
         pageObject.assert.ok(sucess);
-        await pageObject.takeScreenshot('04_' . this.test.fullTitle());
+        await pageObject.takeScreenshot(this);
     });
 
     it('Update osec settings', async function () {
@@ -74,7 +74,7 @@ describe('Plugin install', function(){
         const calendarLink = await pageObject.driver.findElement(By.css('#calendar_page_id~p>a'));
         const calendarPageLinkText = await calendarLink.getText();
 
-        await pageObject.takeScreenshot(this.test.fullTitle());
+        await pageObject.takeScreenshot(this);
         pageObject.assert.ok(
             calenderPageSelectedText === 'Calendar'
             && calendarPageLinkText === 'View "Calendar"'
