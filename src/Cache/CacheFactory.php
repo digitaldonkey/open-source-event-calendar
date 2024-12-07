@@ -45,7 +45,7 @@ class CacheFactory extends OsecBaseClass
                 $cacheFile
             );
         }
-        $cacheDb = CacheDb::factory($this->app)
+        $cacheDb = CacheDb::factory($this->app);
         if (!$cacheDb) throw new BootstrapException('Constructing CacheDb returned null');
         return new Cache(
             $cache_id,
