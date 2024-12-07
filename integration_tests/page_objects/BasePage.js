@@ -119,11 +119,11 @@ class BasePage {
 
         const title = mocha.test.parent.title + '__' + mocha.test.title + '_' + number;
 
-        let image = await this.driver.takeScreenshot()
-        const screenshotsDir = process.env.MOCHA_SCREENSHOT_DIR ?? this.settings.screenshotsDir;
-        // screenshotsDir
-        const filename = screenshotsDir + '/' + title.replace( /[^\w-]+/g, '_' ).trim() + '.png'
-        return writeFile(filename, image, 'base64')
+        // let image = await this.driver.takeScreenshot()
+        // const screenshotsDir = process.env.MOCHA_SCREENSHOT_DIR ?? this.settings.screenshotsDir;
+        // // screenshotsDir
+        // const filename = screenshotsDir + '/' + title.replace( /[^\w-]+/g, '_' ).trim() + '.png'
+        // return writeFile(filename, image, 'base64')
     }
 }
 
