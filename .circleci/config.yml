@@ -329,6 +329,8 @@ jobs:
             mkdir -p $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache            
             sudo chown circleci:www-data $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
             sudo chmod 775 $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
+            la -al $WP_CORE_DIR/wp-content/uploads
+            la -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
       - run:
           name: Apache2 webserver
           command: |
@@ -337,6 +339,7 @@ jobs:
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
             sudo a2enmod rewrite 
             sudo apachectl -DFOREGROUND
+            ls -al
           background: True
       - node/install-packages:
           app-dir: integration_tests/
