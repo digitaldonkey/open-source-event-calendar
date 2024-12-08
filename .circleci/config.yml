@@ -322,7 +322,7 @@ jobs:
           command: |
             unzip /tmp/$OSEC_RELEASE_FILE -d $WP_CORE_DIR/wp-content/plugins
             mkdir $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
-            sudo chown circleci:www-date $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
+            sudo chown circleci:www-data $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
             sudo chmod 775 $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
       - run:
           name: Apache2 webserver
