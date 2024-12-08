@@ -329,8 +329,8 @@ jobs:
             mkdir -p $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache            
             sudo chown circleci:www-data $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
             sudo chmod 775 $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
-            ls -al $WP_CORE_DIR/wp-content/uploads
-            ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
+            echo "ls -al $WP_CORE_DIR/wp-content/uploads" && ls -al $WP_CORE_DIR/wp-content/uploads
+            echo "ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache" && ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
       - run:
           name: Apache2 webserver
           command: |
