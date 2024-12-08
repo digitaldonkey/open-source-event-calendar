@@ -320,8 +320,13 @@ jobs:
       - run:
           name: Install Open source event calendar plugin (release)
           command: |
-            unzip /tmp/$OSEC_RELEASE_FILE -d $WP_CORE_DIR/wp-content/plugins
-            mkdir $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
+            unzip /tmp/$OSEC_RELEASE_FILE -d $WP_CORE_DIR/wp-content/plugins            
+            # Upload dir
+            mkdir -p $WP_CORE_DIR/wp-content/uploads
+            sudo chown circleci:www-data $WP_CORE_DIR/wp-content/uploads
+            sudo chmod 775 $WP_CORE_DIR/wp-content/uploads
+            # Plugin cache dir
+            mkdir -p $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache            
             sudo chown circleci:www-data $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
             sudo chmod 775 $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
       - run:
