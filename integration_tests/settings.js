@@ -3,8 +3,8 @@ module.exports = {
     screenshotsDir: '/tmp/integration_test_results', // No trailing slash
     headless: true,
     screen: {
-        width: 1024,
-        height: 768
+        width: 1280,
+        height: 1280
     },
     wpLogin: {
         admin: {
