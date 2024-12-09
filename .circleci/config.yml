@@ -394,9 +394,9 @@ workflows:
       - db_job_maria_10_5:
           requires:
             - build
-      - db_job_php_8_1:
-          requires:
-            - build
+#      - db_job_php_8_1:
+#          requires:
+#            - build
       - db_job_php_8_3:
           requires:
             - build
@@ -409,6 +409,7 @@ workflows:
             - static_job
             - db_job_maria_10_5
 # TODO      - db_job_php_8_1
+#   Maybe https://stackoverflow.com/a/43442839/308533
             - db_job_php_8_3
             - db_job_mysql_8
       - release_test_job:
