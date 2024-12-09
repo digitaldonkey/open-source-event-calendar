@@ -282,7 +282,7 @@ jobs:
             sudo pecl channel-update pecl.php.net
             echo no '' |  sudo pecl install apcu            
             sudo bash -c "echo 'memory_limit = 192M'  >>  /etc/php.d/circleci.ini"
-            sudo bash -c "echo 'apc.enable = 1'  >>  /etc/php.d/circleci.ini"
+            sudo bash -c "echo 'apc.enabled = 1'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'error_reporting = E_ALL'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'ignore_repeated_errors = On'  >>  /etc/php.d/circleci.ini"
@@ -333,9 +333,9 @@ jobs:
           command: |
             sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf            
             sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
-            sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
+            sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf            
+            sudo ln -s /etc/php.d/circleci.ini /etc/php/8.2/apache2/conf.d/30-circleci.ini
             sudo a2enmod rewrite
-            sudo cp /etc/php.d/circleci.ini /etc/php/8.2/apache2/conf.d/30-circleci.ini
             sudo apachectl -DFOREGROUND
           background: True
       - node/install-packages:
