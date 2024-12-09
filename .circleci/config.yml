@@ -286,7 +286,7 @@ jobs:
             sudo bash -c "echo 'error_reporting = E_ALL'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'ignore_repeated_errors = On'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'log_errors = On'  >>  /etc/php.d/circleci.ini"
-            echo 'php -r "var_dump(function_exists(\'apcu_enabled\') && apcu_enabled());"' 
+            echo 'php -r "var_dump(function_exists(\"apcu_enabled\") && apcu_enabled());"' 
             php -r "var_dump(function_exists('apcu_enabled') && apcu_enabled());"
       - run:
           name: Release test VARIABLES
