@@ -24,8 +24,7 @@ function osec_output_buffering_start()
  */
 function osec_output_buffering_finalize()
 {
-    if (ob_get_level()) {
-        echo ob_get_clean();
-        ob_end_clean();
+    if (ob_get_length()) {
+        ob_get_clean();
     }
 }

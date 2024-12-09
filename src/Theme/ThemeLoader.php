@@ -181,7 +181,7 @@ class ThemeLoader extends OsecBaseClass
 
     public function clear_cache(): bool
     {
-        return (bool)$this->fileCache->clear_cache();
+        return ! $this->fileCache || (bool)$this->fileCache->clear_cache();
     }
 
     /**
@@ -359,8 +359,9 @@ class ThemeLoader extends OsecBaseClass
             $twigLoader = new TwigLoader($loader_path);
             unset($loader_path);
 
+            $cache = $this->get_cache_dir();
             $environment = [
-                'cache'         => $this->get_cache_dir(),
+                'cache' => is_string($cache) ? $cache : false,
                 'optimizations' => -1,
                 // (default to -1 -- all optimizations are enabled; set it to 0 to disable).
                 // all
@@ -420,10 +421,10 @@ class ThemeLoader extends OsecBaseClass
         }
         if (false === $rescan) {
             if (CacheFile::OSEC_FILE_CACHE_UNAVAILABLE === $twig_cache) {
-                return false;
+                return null;
             }
             // Seems we need that. In ci we had a strange string here.
-            return is_writable($twig_cache) ? $twig_cache : false;
+            return is_writable($twig_cache) ? $twig_cache : null;
         }
         $this->fileCache = CacheFile::createFileCacheInstance($this->app, 'twig');
         if ( ! $this->fileCache) {
@@ -432,7 +433,7 @@ class ThemeLoader extends OsecBaseClass
 
             $this->app->settings->set('twig_cache', CacheFile::OSEC_FILE_CACHE_UNAVAILABLE);
 
-            return false;
+            return null;
         }
         $this->app->settings->set('twig_cache', $this->fileCache->getCachePath());
 
