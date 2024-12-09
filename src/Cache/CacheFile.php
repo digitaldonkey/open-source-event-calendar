@@ -196,7 +196,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         global $wp_filesystem;
         // @see https://wordpress.stackexchange.com/a/372407/15081
         require_once ABSPATH . 'wp-admin/includes/file.php';
-        if (WP_Filesystem()) {
+        if (WP_Filesystem([], dirname($file))) {
             try {
                 return $wp_filesystem->put_contents(
                     $file,
