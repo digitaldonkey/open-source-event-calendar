@@ -96,12 +96,10 @@ jobs:
     steps:
       - *install_subversion
       - checkout
-#      - run: php --version
-#      - run: node --version
       - run:
           name: Install dependencies
           command: composer install --no-interaction --optimize-autoloader
-          # --no-dev Option required for production build
+          # --no-dev option will be used production build below.
       - persist_to_workspace:
           root: .
           paths:
@@ -126,9 +124,7 @@ jobs:
           name: Run code quality tests
           command: vendor/bin/grumphp run --testsuite=code_quality
 
-  #
   # Default configuration Database testing jobs
-  #
   db_job: &db_job
     <<: *container_config
     docker:
@@ -153,13 +149,11 @@ jobs:
                     && sudo rm -rf /var/lib/apt/lists/*
       - run:
           name: Install apcu
-          command: sudo mkdir -p /tmp/pear/temp
-                    && sudo pecl channel-update pecl.php.net
-                    && echo no '' |  sudo pecl install apcu
-                    && sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
-
-          #                    && sudo bash -c "echo 'apc.enabled = 1'  >>  /etc/php.d/circleci.ini"
-
+          command: |
+            sudo mkdir -p /tmp/pear/temp
+            sudo pecl channel-update pecl.php.net
+            echo no '' |  sudo pecl install apcu
+            sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
       - run:
           name: Test apcu in PHP.ini
           command: php -i | grep -i apc
@@ -292,9 +286,8 @@ jobs:
             sudo bash -c "echo 'error_reporting = E_ALL'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'ignore_repeated_errors = On'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'log_errors = On'  >>  /etc/php.d/circleci.ini"
-
-##            sudo bash -c "echo 'apc.enabled = 1'  >>  /etc/php.d/circleci.ini"
-
+            echo 'php -r "var_dump(function_exists(\'apcu_enabled\') && apcu_enabled());"' 
+            php -r "var_dump(function_exists('apcu_enabled') && apcu_enabled());"
       - run:
           name: Release test VARIABLES
           command: |
@@ -341,6 +334,7 @@ jobs:
             sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
             sudo a2enmod rewrite
+            sudo cp /etc/php.d/circleci.ini /etc/php/8.2/apache2/conf.d/30-circleci.ini
             sudo apachectl -DFOREGROUND
           background: True
       - node/install-packages:
