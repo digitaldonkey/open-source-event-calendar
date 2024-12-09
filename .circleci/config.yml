@@ -331,7 +331,7 @@ jobs:
       - run:
           name: Apache2 webserver
           command: |
-            mkdir -p /var/run/apache2
+            sudo mkdir -p /var/run/apache2
             sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf            
             sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
