@@ -197,6 +197,7 @@ jobs:
         <<: *ENV_DB_IMAGE
 
   db_job_php_8_3:
+    <<: *db_job
     docker:
       - image: cimg/php:8.3
         <<: *ENV_PHP_IMAGE
@@ -204,6 +205,7 @@ jobs:
         <<: *ENV_DB_IMAGE
 
   db_job_mysql_8:
+    <<: *db_job
     docker:
       - image: cimg/php:8.2
         <<: *ENV_PHP_IMAGE
