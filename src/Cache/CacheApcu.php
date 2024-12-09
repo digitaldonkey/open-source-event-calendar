@@ -16,7 +16,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class CacheApcu extends OsecBaseClass implements CacheInterface
 {
-
     /**
      * is_available method
      *
@@ -26,14 +25,12 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      *
      * @return bool Availability
      */
-    public static function is_available() : bool
+    public static function is_available(): bool
     {
-        if ( ! OSEC_ENABLE_CACHE_ACPU) {
+        if ( ! OSEC_ENABLE_CACHE_APCU) {
             return false;
         }
-        ini_set('apc.enable_cli', true);
         $apcuAvailabe = function_exists('apcu_enabled') && apcu_enabled();
-
         return $apcuAvailabe;
     }
 
@@ -41,7 +38,7 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      * Cache a variable in the data store.
      * Overwrite if key exists.
      */
-    public function set($key, mixed $value) : bool
+    public function set($key, mixed $value): bool
     {
         $dist_key = $this->_key($key);
 
@@ -62,10 +59,10 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
     {
         static $prefix = null;
         if (null === $prefix) {
-            $prefix = substr(md5((string) get_site_url()), 0, 8).'_';
+            $prefix = substr(md5((string)get_site_url()), 0, 8) . '_';
         }
-        if (0 !== strncmp($key, (string) $prefix, 8)) {
-            $key = $prefix.$key;
+        if (0 !== strncmp($key, (string)$prefix, 8)) {
+            $key = $prefix . $key;
         }
 
         return $key;
@@ -75,7 +72,7 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      * apcu_add — Cache a new variable in the data store.
      * @return False if Key does not exist.
      */
-    public function add($key, mixed $value) : bool
+    public function add($key, mixed $value): bool
     {
         $dist_key = $this->_key($key);
 
@@ -85,10 +82,10 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
     /**
      * @inheritDoc
      */
-    public function get($key, mixed $default = null) : mixed
+    public function get($key, mixed $default = null): mixed
     {
         $dist_key = $this->_key($key);
-        $data = apcu_fetch($dist_key);
+        $data     = apcu_fetch($dist_key);
         if (false === $data && $default) {
             return $default;
         }
@@ -99,27 +96,28 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
         return $data;
     }
 
-    public function clear_cache() : bool
+    public function clear_cache(): bool
     {
         return apcu_clear_cache();
     }
 
-    public function delete_matching(string $pattern) :int
+    public function delete_matching(string $pattern): int
     {
         $i = 0;
         foreach (new APCUIterator('/$pattern/') as $counter) {
-            $this->delete($counter[ 'key' ]);
-            if (apc_dec($counter[ 'key' ], $counter[ 'value' ])) {
+            $this->delete($counter['key']);
+            if (apc_dec($counter['key'], $counter['value'])) {
                 $i++;
             }
         }
+
         return $i;
     }
 
     /**
      * @inheritDoc
      */
-    public function delete($key) : bool
+    public function delete($key): bool
     {
         return apcu_delete($this->_key($key));
     }

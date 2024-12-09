@@ -4,7 +4,6 @@ namespace Osec\App;
 
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
-use SitePress;
 
 /**
  * Localization manager for wpml.
@@ -15,14 +14,13 @@ use SitePress;
  */
 class WpmlHelper extends OsecBaseClass
 {
-
     // TODO Maybe remove this as it seems to be a proprietary plugin
-    //  and most likely outdated here.
+    // and most likely outdated here.
 
     /**
      * @var NULL|string Currently asset language
      **/
-    protected $_language = null;
+    protected ?string $language;
 
     /**
      * Constructor
@@ -31,7 +29,7 @@ class WpmlHelper extends OsecBaseClass
      **/
     public function __construct(App $app)
     {
-		parent::__construct($app);
+        parent::__construct($app);
         add_filter(
             'qtranslate_language',
             $this->callback_current_language(...)
@@ -47,16 +45,16 @@ class WpmlHelper extends OsecBaseClass
      * @return string
      * @replaces Ai1ec_Wp_Uri_Helper::get_pagebase_for_links()
      */
-    static public function remove_language_from_url(string $uri, string $lang)
+    public static function remove_language_from_url(string $uri, string $lang)
     {
         if (empty($lang)) {
             return $uri;
         }
         if (str_contains($uri, '&amp;lang=')) {
-            return str_replace('&amp;lang='.$lang, '', $uri);
+            return str_replace('&amp;lang=' . $lang, '', $uri);
         }
         if (str_contains($uri, '?lang=')) {
-            return str_replace('?lang='.$lang, '', $uri);
+            return str_replace('?lang=' . $lang, '', $uri);
         }
 
         return $uri;
@@ -76,7 +74,7 @@ class WpmlHelper extends OsecBaseClass
     public function get_translations_of_page($page_id)
     {
         $matches = [];
-        $page_id = (int) $page_id;
+        $page_id = (int)$page_id;
         if ($this->is_wpml_active()) {
             $matches += $this->get_wpml_translations_of_page($page_id);
         }
@@ -91,14 +89,11 @@ class WpmlHelper extends OsecBaseClass
      *
      * @return bool Activity
      **/
-    public function is_wpml_active() : bool
+    public function is_wpml_active(): bool
     {
         global $sitepress;
-        if (isset($sitepress) && $sitepress instanceof SitePress) {
-            return true;
-        }
 
-        return false;
+        return isset($sitepress) && $sitepress instanceof SitePress;
     }
 
     /**
@@ -116,16 +111,16 @@ class WpmlHelper extends OsecBaseClass
     public function get_wpml_translations_of_page($page_id, $language = false)
     {
         global $sitepress, $wpdb;
-        $page_id = (int) $page_id;
-        $translations = (array) $sitepress->get_element_translations($page_id);
+        $page_id      = (int)$page_id;
+        $translations = (array)$sitepress->get_element_translations($page_id);
         if (empty($translations)) {
             $parent_id = $wpdb->get_var(
-                'SELECT trid FROM '.$wpdb->prefix.'icl_translations '.
-                'WHERE element_type = \'post_page\' '.
-                'AND   element_id   = '.$page_id
+                'SELECT trid FROM ' . $wpdb->prefix . 'icl_translations ' .
+                'WHERE element_type = \'post_page\' ' .
+                'AND   element_id   = ' . $page_id
             );
             if ($parent_id) {
-                $translations += (array) $sitepress->get_element_translations(
+                $translations += (array)$sitepress->get_element_translations(
                     $parent_id
                 );
             }
@@ -136,7 +131,7 @@ class WpmlHelper extends OsecBaseClass
             if ($language) {
                 $key = $lang;
             }
-            $output[ $lang ] = $entry->element_id;
+            $output[$lang] = $entry->element_id;
         }
 
         return $output;
@@ -152,8 +147,8 @@ class WpmlHelper extends OsecBaseClass
     public function get_region()
     {
         $locale = explode('_', get_locale());
-        $region = (isset($locale[ 1 ]) && $locale[ 1 ] != '')
-            ? strtolower($locale[ 1 ])
+        $region = (isset($locale[1]) && $locale[1] != '')
+            ? strtolower($locale[1])
             : '';
 
         // Primary ccTLD for "United Kingdom" is uk.
@@ -165,7 +160,6 @@ class WpmlHelper extends OsecBaseClass
      *
      * @return string Comma-separated list of localized week day names.
      * @see Ai1ec_Locale::get_localized_week_names()
-     *
      */
     public function get_localized_week_names()
     {
@@ -179,7 +173,7 @@ class WpmlHelper extends OsecBaseClass
      *
      * @return string Comma-separated list of localized month names.
      */
-    public function get_localized_month_names() : string
+    public function get_localized_month_names(): string
     {
         global $wp_locale;
 
@@ -197,17 +191,17 @@ class WpmlHelper extends OsecBaseClass
     public function get_translatable_id()
     {
         if (
-            isset($_GET[ 'trid' ]) &&
-            isset($_GET[ 'source_lang' ]) &&
+            isset($_GET['trid']) &&
+            isset($_GET['source_lang']) &&
             $this->is_wpml_active()
         ) {
             global $sitepress;
             $details = $sitepress->get_element_translations(
-                $_GET[ 'trid' ],
-                'post_'.OSEC_POST_TYPE
+                $_GET['trid'],
+                'post_' . OSEC_POST_TYPE
             );
-            if (isset($details[ $_GET[ 'source_lang' ] ])) {
-                return $details[ $_GET[ 'source_lang' ] ]->element_id;
+            if (isset($details[$_GET['source_lang']])) {
+                return $details[$_GET['source_lang']]->element_id;
             }
         }
 
@@ -243,11 +237,11 @@ class WpmlHelper extends OsecBaseClass
         if ( ! $this->is_wpml_active()) {
             return '';
         }
-        $query = ' LEFT JOIN '.
-                 $wpdb->prefix.'icl_translations AS translation'.
-                 ' ON ('.
-                 ' translation.element_type = \'post_'.OSEC_POST_TYPE.'\''.
-                 ' AND translation.element_id = '.$local_id.
+        $query = ' LEFT JOIN ' .
+                 $wpdb->prefix . 'icl_translations AS translation' .
+                 ' ON (' .
+                 ' translation.element_type = \'post_' . OSEC_POST_TYPE . '\'' .
+                 ' AND translation.element_id = ' . $local_id .
                  ' ) ';
 
         return $query;
@@ -268,10 +262,10 @@ class WpmlHelper extends OsecBaseClass
         if ( ! $this->is_wpml_active()) {
             return '';
         }
-        $query = ' AND ( '.
-                 $table_alias.'.translation_id IS NULL OR '.
-                 $table_alias.'.language_code = \''.
-                 $this->get_language().
+        $query = ' AND ( ' .
+                 $table_alias . '.translation_id IS NULL OR ' .
+                 $table_alias . '.language_code = \'' .
+                 $this->get_language() .
                  '\' ) ';
 
         return $query;
@@ -300,15 +294,15 @@ class WpmlHelper extends OsecBaseClass
      **/
     public function set_language($language)
     {
-        $language = (string) $language;
+        $language = (string)$language;
         if (
-            ! isset($language[ 1 ]) ||
-            isset($language[ 3 ]) ||
+            ! isset($language[1]) ||
+            isset($language[3]) ||
             false === ctype_alnum($language)
         ) {
             return false;
         }
-        $this->_language = $language;
+        $this->language = $language;
         $this->call_set_language();
         add_action(
             'plugins_loaded',
@@ -324,7 +318,7 @@ class WpmlHelper extends OsecBaseClass
      *
      * @return string|null Currently configured language, or default.
      */
-    public function get_current_language() : ?string
+    public function get_current_language(): ?string
     {
         global $sitepress;
         if (
@@ -344,7 +338,7 @@ class WpmlHelper extends OsecBaseClass
      *
      * @return string|null Default language or NULL if none detected
      */
-    public function get_default_language() : ?string
+    public function get_default_language(): ?string
     {
         global $sitepress, $q_config;
         $language = null;
@@ -356,14 +350,14 @@ class WpmlHelper extends OsecBaseClass
             defined('QTRANS_INIT') &&
             isset($q_config) &&
             is_array($q_config) &&
-            isset($q_config[ 'default_language' ])
+            isset($q_config['default_language'])
         ) {
-            $language = $q_config[ 'default_language' ];
+            $language = $q_config['default_language'];
         }
         if (
             null !== $language && (
-                ! isset($language[ 1 ]) ||
-                isset($language[ 3 ])
+                ! isset($language[1]) ||
+                isset($language[3])
             )
         ) {
             $language = null;
@@ -385,14 +379,14 @@ class WpmlHelper extends OsecBaseClass
     {
         global $sitepress, $q_config;
         if (isset($sitepress) && $sitepress instanceof SitePress) {
-            $sitepress->switch_lang($this->_language);
+            $sitepress->switch_lang($this->language);
         }
         if (
             defined('QTRANS_INIT') &&
             isset($q_config) &&
             is_array($q_config)
         ) {
-            $q_config[ 'language' ] = $this->_language;
+            $q_config['language'] = $this->language;
         }
     }
 
@@ -408,7 +402,7 @@ class WpmlHelper extends OsecBaseClass
     {
         $locale = explode('_', get_locale());
 
-        return (isset($locale[ 0 ]) && $locale[ 0 ] != '') ? $locale[ 0 ] : 'en';
+        return (isset($locale[0]) && $locale[0] != '') ? $locale[0] : 'en';
     }
 
     /**
@@ -423,8 +417,8 @@ class WpmlHelper extends OsecBaseClass
      **/
     public function callback_current_language(mixed $old_language)
     {
-        if (null !== $this->_language) {
-            return $this->_language;
+        if (null !== $this->language) {
+            return $this->language;
         }
 
         return $old_language;

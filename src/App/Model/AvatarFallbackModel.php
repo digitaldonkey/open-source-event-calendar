@@ -14,13 +14,16 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class AvatarFallbackModel extends OsecBaseClass
 {
-
     /**
      * Default avatar fallbacks.
      *
      * @var array
      */
-    protected $_fallbacks = ['post_thumbnail', 'content_img', 'category_avatar'];
+    protected array $fallbacks = [
+        'post_thumbnail',
+        'content_img',
+        'category_avatar'
+    ];
 
     /**
      * Get registered fallbacks.
@@ -35,9 +38,8 @@ class AvatarFallbackModel extends OsecBaseClass
          * @since 1.0
          *
          * @param  array  $fallbacks  Avatar image fallback
-         *
          */
-        return apply_filters('osec_avatar_fallbacks', $this->_fallbacks);
+        return apply_filters('osec_avatar_fallbacks', $this->fallbacks);
     }
 
     /**
@@ -49,7 +51,6 @@ class AvatarFallbackModel extends OsecBaseClass
      */
     public function set(array $fallbacks)
     {
-        $this->_fallbacks = $fallbacks;
+        $this->fallbacks = $fallbacks;
     }
-
 }

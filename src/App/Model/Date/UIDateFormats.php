@@ -19,19 +19,17 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class UIDateFormats extends OsecBaseClass
 {
-
-    private DateTime $_current_time;
+    private DateTime $currentTime;
 
     /**
      * Initiate current time list.
      *
      * @param  App  $app
-     *
      */
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->_current_time = new DateTime("@$_SERVER[REQUEST_TIME]");
+        $this->currentTime = new DateTime("@$_SERVER[REQUEST_TIME]");
     }
 
     /**
@@ -43,7 +41,20 @@ class UIDateFormats extends OsecBaseClass
      */
     public function current_time()
     {
-        return $this->_current_time->format('U');
+        return $this->currentTime->format('U');
+    }
+
+    /**
+     * Timstamp of this day start.
+     *
+     * @return int Timestamp
+     */
+    public function currentDay(): int
+    {
+        $date = clone $this->currentTime;
+        $date->setTime(0, 0, 0);
+
+        return (int)$date->format('U');
     }
 
     /**
@@ -55,12 +66,11 @@ class UIDateFormats extends OsecBaseClass
      *
      * @param  int  $timestamp  UNIX timestamp representing a date.
      * @param  string  $pattern  Key of date pattern (@see
-     *                          self::get_date_format_patter()) to
-     *                          format date with
+     *                         self::get_date_format_patter()) to
+     *                         format date with
      *
      * @return string Formatted date string.
      * @see UIDateFormats::get_date_patterns() for supported date formats.
-     *
      */
     public function format_date_for_url($timestamp, $pattern = 'def')
     {
@@ -75,12 +85,11 @@ class UIDateFormats extends OsecBaseClass
      *
      * @param  int  $timestamp  UNIX timestamp representing a date (in GMT)
      * @param  string  $pattern  Key of date pattern (@see
-     *                           self::get_date_format_patter()) to
-     *                           format date with
+     *                          self::get_date_format_patter()) to
+     *                          format date with
      *
      * @return string            Formatted date string
      * @see  self::get_date_patterns() for supported date formats.
-     *
      */
     public function format_date($timestamp, $pattern = 'def')
     {
@@ -113,11 +122,11 @@ class UIDateFormats extends OsecBaseClass
     public function get_date_pattern_by_key($key = 'def')
     {
         $patterns = $this->get_date_patterns();
-        if ( ! isset($patterns[ $key ])) {
-            return (string) current($patterns);
+        if ( ! isset($patterns[$key])) {
+            return (string)current($patterns);
         }
 
-        return $patterns[ $key ];
+        return $patterns[$key];
     }
 
     /**
@@ -154,7 +163,7 @@ class UIDateFormats extends OsecBaseClass
      *
      * @return string Formatted datetime string.
      */
-    public function format_datetime_for_url(DT $datetime, string $pattern = 'def') : string
+    public function format_datetime_for_url(DT $datetime, string $pattern = 'def'): string
     {
         $date = $datetime->format($this->get_date_format_patter($pattern));
 
@@ -171,7 +180,7 @@ class UIDateFormats extends OsecBaseClass
     public function get_gmt_offset_expr($timezone_name = null)
     {
         $timezone = $this->get_gmt_offset($timezone_name);
-        $offset_h = (int) ($timezone / 60);
+        $offset_h = (int)($timezone / 60);
         $offset_m = absint($timezone - $offset_h * 60);
         $timezone = sprintf(
             I18n::__('GMT%+d:%02d'),
@@ -198,25 +207,4 @@ class UIDateFormats extends OsecBaseClass
 
         return $current->get_gmt_offset();
     }
-
-    /**
-     * Returns current rounded time as unix integer.
-     *
-     * TODO
-     *   Disabled usage. Couldn't see any sense in the only call of this function.
-     *   Maybe remove entirely?
-     *
-     * @param  int  $shift  Shift value.
-     *
-     * @return int Unix timestamp.
-     */
-    public function get_current_rounded_time($shift = 11) : int
-    {
-        return strtotime(
-            date('d.m.Y H:00:00', $this->_current_time->format('U'))
-        );
-        // I don't really understand the rounding jitter implemented before:
-        // return $this->current_time() >> $shift << $shift;
-    }
-
 }

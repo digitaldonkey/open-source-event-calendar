@@ -6,7 +6,6 @@ use Osec\App\I18n;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Theme\ThemeLoader;
 
-
 /**
  * The page to manage taxonomies.
  *
@@ -17,18 +16,17 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageManageTaxonomies extends OsecBaseClass
 {
-
     /**
      * @var array The taxonomies for events
      */
-    protected $_taxonomies = [];
+    protected array $taxonomies = [];
 
     /**
      * Register actions to draw the headers
      */
     public function add_taxonomy_actions()
     {
-        $taxonomies = get_object_taxonomies(OSEC_POST_TYPE, 'object');
+        $taxonomies        = get_object_taxonomies(OSEC_POST_TYPE, 'object');
         $taxonomy_metadata = [
             'events_categories' => ['icon' => 'ai1ec-fa ai1ec-fa-folder-open'],
             'events_tags'       => ['icon' => 'ai1ec-fa ai1ec-fa-tags'],
@@ -52,36 +50,45 @@ class AdminPageManageTaxonomies extends OsecBaseClass
         foreach ($taxonomies as $taxonomy => $data) {
             if (true === $data->public) {
                 $active_taxonomy =
-                    isset($_GET[ 'taxonomy' ]) &&
-                    $taxonomy === $_GET[ 'taxonomy' ];
-                $edit_url = $edit_label = '';
-                if (isset($taxonomy_metadata[ $taxonomy ][ 'url' ])) {
-                    $edit_url = $taxonomy_metadata[ $taxonomy ][ 'url' ];
-                    $edit_label = $taxonomy_metadata[ $taxonomy ][ 'edit_label' ];
+                    isset($_GET['taxonomy']) &&
+                    $taxonomy === $_GET['taxonomy'];
+                $edit_url        = $edit_label = '';
+                if (isset($taxonomy_metadata[$taxonomy]['url'])) {
+                    $edit_url   = $taxonomy_metadata[$taxonomy]['url'];
+                    $edit_label = $taxonomy_metadata[$taxonomy]['edit_label'];
                 }
-                $this->_taxonomies[] = [
+                $this->taxonomies[] = [
                     'taxonomy_name' => $taxonomy,
                     'url'           => add_query_arg(
-                        ['post_type' => OSEC_POST_TYPE, 'taxonomy' => $taxonomy],
+                        [
+                            'post_type' => OSEC_POST_TYPE,
+                            'taxonomy'  => $taxonomy,
+                        ],
                         admin_url('edit-tags.php')
                     ),
                     'name'          => $data->labels->name,
                     'active'        => $active_taxonomy,
-                    'icon'          => isset($taxonomy_metadata[ $taxonomy ]) ?
-                        $taxonomy_metadata[ $taxonomy ][ 'icon' ] :
+                    'icon'          => isset($taxonomy_metadata[$taxonomy]) ?
+                        $taxonomy_metadata[$taxonomy]['icon'] :
                         '',
                     'edit_url'      => $edit_url,
                     'edit_label'    => $edit_label,
                 ];
 
                 if ($active_taxonomy) {
-                    $view = AdminPageManageTaxonomies::factory($this->app);
-                    add_action($taxonomy.'_pre_add_form', function () use ($view) {
-                        $view->render_header();
-                    });
-                    add_action($taxonomy.'_pre_edit_form', function () use ($view) {
-                        $view->render_header();
-                    });
+                    $view = self::factory($this->app);
+                    add_action(
+                        $taxonomy . '_pre_add_form',
+                        function () use ($view) {
+                            $view->render_header();
+                        }
+                    );
+                    add_action(
+                        $taxonomy . '_pre_edit_form',
+                        function () use ($view) {
+                            $view->render_header();
+                        }
+                    );
                 }
             }
         }
@@ -112,7 +119,7 @@ class AdminPageManageTaxonomies extends OsecBaseClass
              *
              * @param  array  $taxonomies  Array of current taxonomies.
              */
-            'taxonomies' => apply_filters('osec_custom_taxonomies', $this->_taxonomies),
+            'taxonomies' => apply_filters('osec_custom_taxonomies', $this->taxonomies),
             'text_title' => I18n::__('Organize Events'),
         ];
 
@@ -120,5 +127,4 @@ class AdminPageManageTaxonomies extends OsecBaseClass
                           ->get_file('organize/header.twig', $args, true)
                           ->get_content();
     }
-
 }

@@ -13,7 +13,6 @@ use Osec\Tests\Unit\Cache\CacheFileTestBase;
  */
 class CachePerformanceTest extends CacheFileTestBase
 {
-
     public const REPEAT_COUNT = 1000;
 
     public function test_apcu_with_timer()
@@ -23,12 +22,12 @@ class CachePerformanceTest extends CacheFileTestBase
             $this->markTestSkipped('APCU not available');
         }
 
-        $key = 'ABCDEF';
-        $DATA = substr(str_shuffle(str_repeat("0123456789abcdefghijklmnopqrstuvwxyz", 100)), 0, 100);
+        $key  = 'ABCDEF';
+        $DATA = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyz', 100)), 0, 100);
 
         $repeats = [];
         for ($i = 0; $i < self::REPEAT_COUNT; $i++) {
-            $repeats[ $key.$i ] = $DATA;
+            $repeats[$key . $i] = $DATA;
         }
 
         $start = $this->performance_report_start();
@@ -44,15 +43,16 @@ class CachePerformanceTest extends CacheFileTestBase
             microtime(true) - $start,
             4
         );
-        $this->assertEquals($repeats[ $key.'0' ], $engine->get($key.'0'));
+        $this->assertEquals($repeats[$key . '0'], $engine->get($key . '0'));
         $this->performance_report_print($start);
     }
 
     /**
      * Helps to
+     *
      * @return float
      */
-    private function performance_report_start() : float
+    private function performance_report_start(): float
     {
         return microtime(true);
     }
@@ -64,15 +64,14 @@ class CachePerformanceTest extends CacheFileTestBase
      *
      * @return void
      * @see performance_report_start()
-     *
      */
-    private function performance_report_print(float $start) : void
+    private function performance_report_print(float $start): void
     {
         $time_elapsed_secs = round(
             microtime(true) - $start,
             4
         );
-        echo "   TIME: ".$time_elapsed_secs."s (Repeats: ".self::REPEAT_COUNT.")\n";
+        echo '   TIME: ' . $time_elapsed_secs . 's (Repeats: ' . self::REPEAT_COUNT . ")\n";
     }
 
     public function test_cache_db_with_timer()
@@ -82,12 +81,12 @@ class CachePerformanceTest extends CacheFileTestBase
         // DB uses WP Options autoload.Always available ;).
         $this->assertTrue(CacheDb::is_available());
 
-        $key = 'ABCDEF';
-        $DATA = substr(str_shuffle(str_repeat("0123456789abcdefghijklmnopqrstuvwxyz", 100)), 0, 100);
+        $key  = 'ABCDEF';
+        $DATA = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyz', 100)), 0, 100);
 
         $repeats = [];
         for ($i = 0; $i < self::REPEAT_COUNT; $i++) {
-            $repeats[ $key.$i ] = $DATA;
+            $repeats[$key . $i] = $DATA;
         }
 
         $start = $this->performance_report_start();
@@ -103,7 +102,7 @@ class CachePerformanceTest extends CacheFileTestBase
             microtime(true) - $start,
             4
         );
-        $this->assertEquals($repeats[ $key.'0' ], $engine->get($key.'0'));
+        $this->assertEquals($repeats[$key . '0'], $engine->get($key . '0'));
         $this->performance_report_print($start);
     }
 
@@ -114,12 +113,12 @@ class CachePerformanceTest extends CacheFileTestBase
         // DB uses WP Options autoload.Always available ;).
         $this->assertTrue(CacheMemory::is_available());
 
-        $key = 'ABCDEF';
-        $DATA = substr(str_shuffle(str_repeat("0123456789abcdefghijklmnopqrstuvwxyz", 100)), 0, 100);
+        $key  = 'ABCDEF';
+        $DATA = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyz', 100)), 0, 100);
 
         $repeats = [];
         for ($i = 0; $i < self::REPEAT_COUNT; $i++) {
-            $repeats[ $key.$i ] = $DATA;
+            $repeats[$key . $i] = $DATA;
         }
 
         $start = $this->performance_report_start();
@@ -140,19 +139,20 @@ class CachePerformanceTest extends CacheFileTestBase
             microtime(true) - $start,
             4
         );
-        $this->assertEquals($repeats[ $key.'0' ], $engine->get($key.'0'));
+        $this->assertEquals($repeats[$key . '0'], $engine->get($key . '0'));
         $this->performance_report_print($start);
     }
 
     public function test_filecache_with_timer()
     {
         global $osec_app;
-        $key = 'test_filecache';
-        $DATA = substr(str_shuffle(str_repeat("0123456789abcdefghijklmnopqrstuvwxyz", 100)), 0, 100);
+        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH); // Required as path be out of docroot in testing.
+        $key  = 'test_filecache';
+        $DATA = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyz', 100)), 0, 100);
 
         $repeats = [];
         for ($i = 0; $i < self::REPEAT_COUNT; $i++) {
-            $repeats[ $key.$i ] = $DATA;
+            $repeats[$key . $i] = $DATA;
         }
 
         $start = $this->performance_report_start();
@@ -167,8 +167,8 @@ class CachePerformanceTest extends CacheFileTestBase
             $a = $fileCache->get($k);
         }
 
-        $this->assertEquals($repeats[ $key.'0' ], $fileCache->get($key.'0'));
+        $this->assertEquals($repeats[$key . '0'], $fileCache->get($key . '0'));
         $this->performance_report_print($start);
-//    echo "   TIME: " . $time_elapsed_secs ."s (Repeats: " . self::REPEAT_COUNT ."\n";
+        // echo "   TIME: " . $time_elapsed_secs ."s (Repeats: " . self::REPEAT_COUNT ."\n";
     }
 }

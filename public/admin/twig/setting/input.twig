@@ -10,7 +10,6 @@ group_class : 'ai1ec-col-lg-3 ai1ec-col-md-4 ai1ec-col-sm-5' }}">
             {% endif %}
 
             {% from 'form-elements/input.twig' import input %}
-            {% apply spaceless %}
             {{ input( id, id, value, input_type, input_args ) }}
 
 
@@ -29,7 +28,6 @@ group_class : 'ai1ec-col-lg-3 ai1ec-col-md-4 ai1ec-col-sm-5' }}">
 			</span>
     </div>
     {% endif %}
-    {% endapply %}
 </div>
 
 {% if help is defined %}

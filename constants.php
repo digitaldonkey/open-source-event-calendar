@@ -16,7 +16,6 @@ use Osec\Command\ExportEvents;
  */
 function osec_initiate_constants($osec_base_dir, $osec_base_url)
 {
-
     // ===============
     // = Plugin Path =
     // ===============
@@ -31,19 +30,19 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         define('OSEC_PLUGIN_NAME', 'open-source-event-calendar');
     }
 
-	// ===============
-	// = Plugin Textdomain =
-	// ===============
-	if ( ! defined('OSEC_TXT_DOM')) {
-		define('OSEC_TXT_DOM', OSEC_PLUGIN_NAME);
-	}
+    // ===============
+    // = Plugin Textdomain =
+    // ===============
+    if ( ! defined('OSEC_TXT_DOM')) {
+        define('OSEC_TXT_DOM', OSEC_PLUGIN_NAME);
+    }
 
     // ===============
     // = Plugin Short Name =
     // ===============
-//    if ( ! defined('OSEC_PLUGIN_SHORT_NAME')) {
-//        define('OSEC_PLUGIN_SHORT_NAME', 'osec');
-//    }
+    // if ( ! defined('OSEC_PLUGIN_SHORT_NAME')) {
+    // define('OSEC_PLUGIN_SHORT_NAME', 'osec');
+    // }
 
     // ==================
     // = Plugin Version =
@@ -72,7 +71,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if ( ! defined('OSEC_ADMIN_PATH')) {
         define(
             'OSEC_ADMIN_PATH',
-            OSEC_PATH.'public/admin/'
+            OSEC_PATH . 'public/admin/'
         );
     }
 
@@ -82,7 +81,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if ( ! defined('OSEC_ADMIN_URL')) {
         define(
             'OSEC_ADMIN_URL',
-            OSEC_URL.'/public/admin/'
+            OSEC_URL . '/public/admin/'
         );
     }
 
@@ -106,8 +105,8 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if ( ! defined('OSEC_DEFAULT_THEME_ROOT')) {
         define(
             'OSEC_DEFAULT_THEME_ROOT',
-            OSEC_PATH.'public'.
-            DIRECTORY_SEPARATOR.OSEC_THEME_FOLDER
+            OSEC_PATH . 'public' .
+            DIRECTORY_SEPARATOR . OSEC_THEME_FOLDER
         );
     }
 
@@ -117,7 +116,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if ( ! defined('OSEC_DEFAULT_THEME_PATH')) {
         define(
             'OSEC_DEFAULT_THEME_PATH',
-            OSEC_DEFAULT_THEME_ROOT.'/'.OSEC_DEFAULT_THEME_NAME
+            OSEC_DEFAULT_THEME_ROOT . '/' . OSEC_DEFAULT_THEME_NAME
         );
     }
 
@@ -127,10 +126,9 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if ( ! defined('OSEC_THEMES_URL')) {
         define(
             'OSEC_THEMES_URL',
-            OSEC_URL.'/public/'.OSEC_THEME_FOLDER
+            OSEC_URL . '/public/' . OSEC_THEME_FOLDER
         );
     }
-
 
     // =====================
     // = Core themes =
@@ -143,28 +141,28 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = Theme URL =
     // ===================
     if ( ! defined('OSEC_THEMES_URL')) {
-        define('OSEC_THEMES_URL', OSEC_URL.'/public/'.OSEC_THEME_FOLDER.'/');
+        define('OSEC_THEMES_URL', OSEC_URL . '/public/' . OSEC_THEME_FOLDER . '/');
     }
 
     // =================
     // = Admin CSS URL =
     // =================
     if ( ! defined('OSEC_ADMIN_THEME_CSS_URL')) {
-        define('OSEC_ADMIN_THEME_CSS_URL', OSEC_URL.'/public/admin/css/');
+        define('OSEC_ADMIN_THEME_CSS_URL', OSEC_URL . '/public/admin/css/');
     }
 
     // =================
     // = Admin Font URL =
     // =================
     if ( ! defined('OSEC_ADMIN_THEME_FONT_URL')) {
-        define('OSEC_ADMIN_THEME_FONT_URL', OSEC_URL.'/public/admin/font/');
+        define('OSEC_ADMIN_THEME_FONT_URL', OSEC_URL . '/public/admin/font/');
     }
 
     // =================
     // = Admin Js  URL =
     // =================
     if ( ! defined('OSEC_ADMIN_THEME_JS_URL')) {
-        define('OSEC_ADMIN_THEME_JS_URL', OSEC_URL.'/public/js/');
+        define('OSEC_ADMIN_THEME_JS_URL', OSEC_URL . '/public/js/');
     }
 
     // =============
@@ -180,7 +178,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if ( ! defined('OSEC_SCRIPT_URL')) {
         define(
             'OSEC_SCRIPT_URL',
-            get_option('home').'/?plugin='.OSEC_PLUGIN_NAME
+            get_option('home') . '/?plugin=' . OSEC_PLUGIN_NAME
         );
     }
 
@@ -191,12 +189,14 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         define('OSEC_ADMIN_BASE_URL', 'edit.php?post_type=' . OSEC_POST_TYPE);
     }
 
-
     // =====================================================
     // = THEME OPTIONS PAGE BASE URL (wrap in admin_url()) =
     // =====================================================
     if ( ! defined('OSEC_THEME_OPTIONS_BASE_URL')) {
-        define('OSEC_THEME_OPTIONS_BASE_URL', OSEC_ADMIN_BASE_URL.'&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'edit-css');
+        define(
+            'OSEC_THEME_OPTIONS_BASE_URL',
+            OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'edit-css'
+        );
     }
 
     // =======================================================
@@ -205,16 +205,18 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if ( ! defined('OSEC_THEME_SELECTION_BASE_URL')) {
         define(
             'OSEC_THEME_SELECTION_BASE_URL',
-            OSEC_ADMIN_BASE_URL.'&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'themes'
+            OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'themes'
         );
     }
-
 
     // =====================================================
     // = FEED SETTINGS PAGE BASE URL (wrap in admin_url()) =
     // =====================================================
     if ( ! defined('OSEC_FEED_SETTINGS_BASE_URL')) {
-        define('OSEC_FEED_SETTINGS_BASE_URL', OSEC_ADMIN_BASE_URL.'&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'feeds');
+        define(
+            'OSEC_FEED_SETTINGS_BASE_URL',
+            OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'feeds'
+        );
     }
 
     // ================================================
@@ -223,7 +225,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if ( ! defined('OSEC_SETTINGS_BASE_URL')) {
         define(
             'OSEC_SETTINGS_BASE_URL',
-            OSEC_ADMIN_BASE_URL.'&page='. AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings'
+            OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings'
         );
     }
 
@@ -258,7 +260,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = Default theme url =
     // =====================
     if ( ! defined('OSEC_DEFAULT_THEME_URL')) {
-        define('OSEC_DEFAULT_THEME_URL', OSEC_THEMES_URL.'/'.OSEC_DEFAULT_THEME_NAME.'/');
+        define('OSEC_DEFAULT_THEME_URL', OSEC_THEMES_URL . '/' . OSEC_DEFAULT_THEME_NAME . '/');
     }
 
     // ===================
@@ -286,14 +288,14 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = Admin theme JS path =
     // =======================
     if ( ! defined('OSEC_ADMIN_THEME_JS_PATH')) {
-        define('OSEC_ADMIN_THEME_JS_PATH', OSEC_PATH.'public/'.OSEC_JS_FOLDER.'/');
+        define('OSEC_ADMIN_THEME_JS_PATH', OSEC_PATH . 'public/' . OSEC_JS_FOLDER . '/');
     }
 
     // =================
     // = Admin IMG URL =
     // =================
     if ( ! defined('OSEC_ADMIN_THEME_IMG_URL')) {
-        define('OSEC_ADMIN_THEME_IMG_URL', OSEC_URL.'/public/admin/'.OSEC_IMG_FOLDER);
+        define('OSEC_ADMIN_THEME_IMG_URL', OSEC_URL . '/public/admin/' . OSEC_IMG_FOLDER);
     }
 
     // ===============
@@ -301,12 +303,12 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // ===============
     //
     // Enable debug mode,
-	// which means, that extra output may appear at places.
-	//
+    // which means, that extra output may appear at places.
+    //
     // Do set to "FALSE" on production sites!
     //
     if ( ! defined('OSEC_DEBUG')) {
-        define('OSEC_DEBUG', TRUE);
+        define('OSEC_DEBUG', false);
     }
 
     // ================
@@ -327,7 +329,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if ( ! defined('OSEC_FILE_CACHE_DEFAULT_PATH')) {
         define(
             'OSEC_FILE_CACHE_DEFAULT_PATH',
-            OSEC_PATH.'cache/'
+            OSEC_PATH . 'cache/'
         );
     }
 
@@ -339,9 +341,8 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // we try to use wp-content/uploads/OSEC_FILE_CACHE_WP_UPLOAD_DIR
     //
     if ( ! defined('OSEC_FILE_CACHE_WP_UPLOAD_DIR')) {
-        define('OSEC_FILE_CACHE_WP_UPLOAD_DIR', str_replace('-', '_', OSEC_PLUGIN_NAME.'_cache/'));
+        define('OSEC_FILE_CACHE_WP_UPLOAD_DIR', str_replace('-', '_', OSEC_PLUGIN_NAME . '_cache/'));
     }
-
 
     // =======================
     // = ENABLE FILE CACHE  ==
@@ -350,8 +351,8 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // Enabling/Disabling any cache will require to recompile
     // the theme by reenabling it or updating theme color options.
     //
-    // File cahce by default will use
-    //   plugindir/cache cache/css/f9d016b4_osec_compiled.css.
+    // File cache by default will use
+    // plugindir/cache cache/css/f9d016b4_osec_compiled.css.
     //
     if ( ! defined('OSEC_ENABLE_CACHE_FILE')) {
         define('OSEC_ENABLE_CACHE_FILE', true);
@@ -362,12 +363,11 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // =======================
     //
     // ACPU and DB cache will deliver CSS on a different url than file cache.
-    //   E.g: yourdomain.tld/?osec-css-cache=1728977613
+    // E.g: yourdomain.tld/?osec-css-cache=1728977613
     //
-    if ( ! defined('OSEC_ENABLE_CACHE_ACPU')) {
-        define('OSEC_ENABLE_CACHE_ACPU', true);
+    if ( ! defined('OSEC_ENABLE_CACHE_APCU')) {
+        define('OSEC_ENABLE_CACHE_APCU', true);
     }
-
 
     // Defines amount of needed free memory to compile LESS files.
     if ( ! defined('OSEC_LESS_MIN_AVAIL_MEMORY')) {
@@ -385,7 +385,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if ( ! defined('OSEC_FORCE_UPDATES_URL')) {
         define(
             'OSEC_FORCE_UPDATES_URL',
-            OSEC_ADMIN_BASE_URL.'&osec_force_updates=true'
+            OSEC_ADMIN_BASE_URL . '&osec_force_updates=true'
         );
     }
 
@@ -394,49 +394,62 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
      */
     if ( ! defined('OSEC_URI_DIRECTION_SEPARATOR')) {
         define(
-            'OSEC_URI_DIRECTION_SEPARATOR', '~');
+            'OSEC_URI_DIRECTION_SEPARATOR',
+            '~'
+        );
     }
 
     // ================================================
-    //  Uninstall Plugin Data, purge on Uninstall (Purge)
+    // Uninstall Plugin Data, purge on Uninstall (Purge)
     //
-    //   Set to clean up DB and caches on plugin uninstall.
-    //   Some things might be left if you did SWITCH caches.
+    // Set to clean up DB and caches on plugin uninstall.
+    // Some things might be left if you did SWITCH caches.
     // ================================================
     if ( ! defined('OSEC_UNINSTALL_PLUGIN_DATA')) {
         define(
-            'OSEC_UNINSTALL_PLUGIN_DATA', true);
+            'OSEC_UNINSTALL_PLUGIN_DATA',
+            true
+        );
     }
 
-	/**
-	 * Shortcode.
-	 */
-	if ( ! defined('OSEC_SHORTCODE')) {
-		define(
-			'OSEC_SHORTCODE', 'osec');
-	}
-
+    /**
+     * Shortcode.
+     */
+    if ( ! defined('OSEC_SHORTCODE')) {
+        define(
+            'OSEC_SHORTCODE',
+            'osec'
+        );
+    }
 
     // Lets globalize Table names for now.
     if ( ! defined('OSEC_DB__EVENTS')) {
         define(
-            'OSEC_DB__EVENTS', 'osec_events');
+            'OSEC_DB__EVENTS',
+            'osec_events'
+        );
     }
     if ( ! defined('OSEC_DB__FEEDS')) {
         define(
-            'OSEC_DB__FEEDS', 'osec_event_feeds');
+            'OSEC_DB__FEEDS',
+            'osec_event_feeds'
+        );
     }
     if ( ! defined('OSEC_DB__INSTANCES')) {
         define(
-            'OSEC_DB__INSTANCES', 'osec_event_instances');
+            'OSEC_DB__INSTANCES',
+            'osec_event_instances'
+        );
     }
     if ( ! defined('OSEC_DB__META')) {
         define(
-            'OSEC_DB__META', 'osec_event_category_meta');
+            'OSEC_DB__META',
+            'osec_event_category_meta'
+        );
     }
 
     // Defines if backward (<= 2.1.5) theme compatibility is enabled or not.
     if (defined('AI1EC_THEME_COMPATIBILITY_FER')) {
-        throw new \Exception('Backward compatibility to ali1ec (<= 2.1.5) is not supported.');
+        throw new Exception('Backward compatibility to ali1ec (<= 2.1.5) is not supported.');
     }
 }

@@ -15,21 +15,20 @@ use WP_Rewrite;
  */
 class QueryPermalinkController
 {
-
     /**
      * @var WP_Query Instance of WP_Query object
      */
-    protected $_query = null;
+    protected ?WP_Query $query;
 
     /**
      * @var WP_Rewrite Instance of WP_Rewrite object
      */
-    protected $_rewrite = null;
+    protected ?WP_Rewrite $rewrite;
 
     /**
      * @var array List of parsed query variables
      */
-    protected $_query_vars = [];
+    protected array $queryVars = [];
 
     /**
      * Initiate object entities
@@ -47,19 +46,17 @@ class QueryPermalinkController
             global $wp_query;
             $query_object = $wp_query;
         }
-        $this->_query = $query_object;
+        $this->query = $query_object;
         if (null === $rewrite_object) {
             global $wp_rewrite;
             $rewrite_object = $wp_rewrite;
         }
-        $this->_rewrite = $rewrite_object;
+        $this->rewrite = $rewrite_object;
         $this->init_vars();
     }
 
     /**
      * Initiate (populate) query variables list. Two different url structures are supported.
-     *
-     *
      */
     public function init_vars($query = null)
     {
@@ -67,18 +64,19 @@ class QueryPermalinkController
             $this->variable($key, $value);
         }
         if (null === $query) {
-            $query = $_SERVER[ 'REQUEST_URI' ];
+            $query = $_SERVER['REQUEST_URI'];
         }
 
-        $particles = explode('/', trim((string) $query, '/'));
-        $imported = 0;
+        $particles = explode('/', trim((string)$query, '/'));
+        $imported  = 0;
         foreach ($particles as $element) {
             if ($this->_add_serialized_var($element)) {
                 ++$imported;
             }
         }
-        if (isset($_REQUEST[ 'ai1ec' ])) {
-            $particles = explode('|', trim((string) $_REQUEST[ 'ai1ec' ], '|'));
+        if (isset($_REQUEST['ai1ec'])) {
+            // TODO Why there is a ai1ec sneaking left?
+            $particles = explode('|', trim((string)$_REQUEST['ai1ec'], '|'));
             foreach ($particles as $element) {
                 if ($this->_add_serialized_var($element)) {
                     ++$imported;
@@ -100,15 +98,15 @@ class QueryPermalinkController
     public function variable($name, mixed $value = null)
     {
         if (null !== $value) {
-            $this->_query_vars[ $name ] = $value;
+            $this->queryVars[$name] = $value;
 
             return true;
         }
-        if ( ! isset($this->_query_vars[ $name ])) {
+        if ( ! isset($this->queryVars[$name])) {
             return null;
         }
 
-        return $this->_query_vars[ $name ];
+        return $this->queryVars[$name];
     }
 
     /**
@@ -116,10 +114,10 @@ class QueryPermalinkController
      */
     protected function _add_serialized_var($element)
     {
-        if ( ! str_contains((string) $element, OSEC_URI_DIRECTION_SEPARATOR)) {
+        if ( ! str_contains((string)$element, OSEC_URI_DIRECTION_SEPARATOR)) {
             return false;
         }
-        [$key, $value] = explode(OSEC_URI_DIRECTION_SEPARATOR, (string) $element, 2);
+        [$key, $value] = explode(OSEC_URI_DIRECTION_SEPARATOR, (string)$element, 2);
         $this->variable($key, $value);
 
         return true;
@@ -130,7 +128,7 @@ class QueryPermalinkController
      */
     public function rewrite_enabled()
     {
-        return $this->_rewrite->using_mod_rewrite_permalinks();
+        return $this->rewrite->using_mod_rewrite_permalinks();
     }
 
     /**
@@ -150,15 +148,15 @@ class QueryPermalinkController
             $priority = 1;
         }
         $priority = ($priority > 0) ? 'top' : 'bottom';
-        $regexp = $this->_inject_route_groups($regexp);
-        $existing = $this->_rewrite->wp_rewrite_rules();
-        if ( ! isset($existing[ $regexp ])) {
-            $this->_rewrite->add_rule(
+        $regexp   = $this->_inject_route_groups($regexp);
+        $existing = $this->rewrite->wp_rewrite_rules();
+        if ( ! isset($existing[$regexp])) {
+            $this->rewrite->add_rule(
                 $regexp,
                 $landing,
                 $priority
             );
-            $this->_rewrite->flush_rules();
+            $this->rewrite->flush_rules();
         }
 
         return $regexp;
@@ -171,19 +169,18 @@ class QueryPermalinkController
     {
         $elements = preg_split(
             '/\$(\d+)/',
-            (string) $query,
+            (string)$query,
             -1,
             PREG_SPLIT_DELIM_CAPTURE
         );
-        $result = '';
+        $result   = '';
         foreach ($elements as $key => $value) {
             if ($key % 2 == 1) {
-                $value = $this->_rewrite->preg_index($value);
+                $value = $this->rewrite->preg_index($value);
             }
             $result .= $value;
         }
 
         return $result;
     }
-
 }

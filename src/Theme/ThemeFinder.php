@@ -15,11 +15,10 @@ use WP_Theme;
  */
 class ThemeFinder extends OsecBaseClass
 {
-
     /**
      * @var array Holds global variables which need to be restored.
      */
-    protected array $_restore = [];
+    protected array $restoreGlobals = [];
 
     /**
      * Sets the correct uri for our core themes.
@@ -37,7 +36,7 @@ class ThemeFinder extends OsecBaseClass
     ) {
         $core_themes = explode(',', OSEC_CORE_THEMES);
         if (in_array($stylesheet_or_template, $core_themes)) {
-            return OSEC_URL.'/public/'.OSEC_THEME_FOLDER;
+            return OSEC_URL . '/public/' . OSEC_THEME_FOLDER;
         }
 
         return $theme_root_uri;
@@ -50,7 +49,7 @@ class ThemeFinder extends OsecBaseClass
      *
      * @return array
      */
-    public function filter_themes(array $terms = [], array $features = [], bool $broken = false) : array
+    public function filter_themes(array $terms = [], array $features = [], bool $broken = false): array
     {
         static $theme_list = null;
         if (null === $theme_list) {
@@ -62,7 +61,7 @@ class ThemeFinder extends OsecBaseClass
                 ( ! $broken && false !== $theme->errors()) ||
                 ! $this->theme_matches($theme, $terms, $features)
             ) {
-                unset($theme_list[ $key ]);
+                unset($theme_list[$key]);
                 continue;
             }
         }
@@ -75,12 +74,12 @@ class ThemeFinder extends OsecBaseClass
      *
      * @return array The currently available themes
      */
-    public function get_themes() : array
+    public function get_themes(): array
     {
         $this->_pre_search($this->get_theme_dirs());
 
-        $options = [
-            'errors' => null,
+        $options   = [
+            'errors'  => null,
             // null -> all
             'allowed' => null,
         ];
@@ -104,10 +103,13 @@ class ThemeFinder extends OsecBaseClass
     /**
      * Set some globals to allow theme searching.
      */
-    protected function _pre_search(array $directories) : void
+    protected function _pre_search(array $directories): void
     {
-        $this->_restore = $this->_replace_search_globals(
-            ['wp_theme_directories' => $directories, 'wp_broken_themes' => []]
+        $this->restoreGlobals = $this->_replace_search_globals(
+            [
+                'wp_theme_directories' => $directories,
+                'wp_broken_themes'     => [],
+            ]
         );
         add_filter(
             'wp_cache_themes_persistently',
@@ -119,15 +121,14 @@ class ThemeFinder extends OsecBaseClass
     /**
      * Replacecs global variables.
      *
-     *
      * @return array
      */
-    protected function _replace_search_globals(array $variables_map) : array
+    protected function _replace_search_globals(array $variables_map): array
     {
         foreach ($variables_map as $key => $current_value) {
             global ${$key};
-            $variables_map[ $key ] = ${$key};
-            ${$key} = $current_value;
+            $variables_map[$key] = ${$key};
+            ${$key}              = $current_value;
         }
         search_theme_directories(true);
 
@@ -139,10 +140,10 @@ class ThemeFinder extends OsecBaseClass
      *
      * @return array The folder to scan for themes
      */
-    public function get_theme_dirs() : array
+    public function get_theme_dirs(): array
     {
         $theme_dirs = [
-            WP_CONTENT_DIR.DIRECTORY_SEPARATOR.OSEC_THEME_FOLDER,
+            WP_CONTENT_DIR . DIRECTORY_SEPARATOR . OSEC_THEME_FOLDER,
             OSEC_DEFAULT_THEME_ROOT,
         ];
 
@@ -154,7 +155,7 @@ class ThemeFinder extends OsecBaseClass
          * @param  array  $theme_dirs  Css file path
          */
         $theme_dirs = apply_filters('osec_register_theme', $theme_dirs);
-        $selected = [];
+        $selected   = [];
         foreach ($theme_dirs as $directory) {
             if (is_dir($directory)) {
                 $selected[] = $directory;
@@ -167,14 +168,14 @@ class ThemeFinder extends OsecBaseClass
     /**
      * Reset globals and filters post scan.
      */
-    protected function _post_search() : void
+    protected function _post_search(): void
     {
         remove_filter(
             'wp_cache_themes_persistently',
             '__return_false',
             1
         );
-        $this->_replace_search_globals($this->_restore);
+        $this->_replace_search_globals($this->restoreGlobals);
     }
 
     /**
@@ -182,9 +183,9 @@ class ThemeFinder extends OsecBaseClass
      *
      * @param  WP_Theme  $theme
      *
-     * @return boolean
+     * @return bool
      */
-    public function theme_matches(WP_Theme $theme, array $search, array $features) : bool
+    public function theme_matches(WP_Theme $theme, array $search, array $features): bool
     {
         static $fields = [
             'Name',
@@ -197,13 +198,12 @@ class ThemeFinder extends OsecBaseClass
 
         $tags = array_map(
             'sanitize_title_with_dashes',
-            $theme[ 'Tags' ]
+            $theme['Tags']
         );
 
         // Match all phrases
         if (count($search) > 0) {
             foreach ($search as $word) {
-
                 // In a tag?
                 if ( ! in_array($word, $tags)) {
                     return false;
@@ -211,11 +211,10 @@ class ThemeFinder extends OsecBaseClass
 
                 // In one of the fields?
                 foreach ($fields as $field) {
-                    if (false === stripos((string) $theme->get($field), (string) $word)) {
+                    if (false === stripos((string)$theme->get($field), (string)$word)) {
                         return false;
                     }
                 }
-
             }
         }
 
@@ -232,5 +231,4 @@ class ThemeFinder extends OsecBaseClass
         // Only get here if each word exists in the tags or one of the fields
         return true;
     }
-
 }

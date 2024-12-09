@@ -15,7 +15,6 @@ use HTTP_Encoder;
  */
 class HttpEncoder extends HTTP_Encoder
 {
-
     /**
      * Overrides parent function and removed Content-Length header to avoid
      * some problems if our JavaScript is somehow prepended by 3rd party code.
@@ -24,7 +23,7 @@ class HttpEncoder extends HTTP_Encoder
      */
     public function sendHeaders()
     {
-        unset($this->_headers[ 'Content-Length' ]);
+        unset($this->_headers['Content-Length']);
         parent::sendHeaders();
     }
 }

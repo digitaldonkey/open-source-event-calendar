@@ -25,23 +25,22 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminDateRepeatBox extends OsecBaseClass
 {
-
     /**
      * get_repeat_box function
      */
-    public function get_repeat_box() : void
+    public function get_repeat_box(): void
     {
-        $repeat = (int) $_REQUEST[ "repeat" ];
-        $repeat = $repeat == 1 ? 1 : 0;
-        $post_id = (int) $_REQUEST[ "post_id" ];
-        $count = 100;
-        $end = 0;
-        $until = UIDateFormats::factory($this->app)->current_time();
+        $repeat  = (int)$_REQUEST['repeat'];
+        $repeat  = $repeat == 1 ? 1 : 0;
+        $post_id = (int)$_REQUEST['post_id'];
+        $count   = 100;
+        $end     = 0;
+        $until   = UIDateFormats::factory($this->app)->current_time();
 
         // try getting the event
         try {
             $event = new Event($this->app, $post_id);
-            $rule = '';
+            $rule  = '';
 
             if ($repeat) {
                 $rule = $event->get('recurrence_rules') ?: '';
@@ -52,24 +51,24 @@ class AdminDateRepeatBox extends OsecBaseClass
             $rule = RepeatRuleToText::factory($this->app)->filter_rule($rule);
 
             $rc = new SG_iCal_Recurrence(
-                new SG_iCal_Line('RRULE:'.$rule)
+                new SG_iCal_Line('RRULE:' . $rule)
             );
 
             if ($until = $rc->getUntil()) {
-                $until = (is_numeric($until)) ? $until : strtotime((string) $until);
-                $end = 2;
+                $until = (is_numeric($until)) ? $until : strtotime((string)$until);
+                $end   = 2;
             } elseif ($count = $rc->getCount()) {
                 $count = (is_numeric($count)) ? $count : 100;
-                $end = 1;
+                $end   = 1;
             }
         } catch (EventNotFoundException) {
             $rule = '';
-            $rc = new SG_iCal_Recurrence(
+            $rc   = new SG_iCal_Recurrence(
                 new SG_iCal_Line('RRULE:')
             );
         }
 
-        $args = [
+        $args   = [
             'row_daily'    => $this->row_daily(
                 false,
                 $rc->getInterval() ?: 1
@@ -96,14 +95,14 @@ class AdminDateRepeatBox extends OsecBaseClass
                 $this->get_date_array_from_rule($rule)
             ),
             'count'        => $this->create_count_input(
-                    'osec_count',
-                    $count
-                ).I18n::__('times'),
+                'osec_count',
+                $count
+            ) . I18n::__('times'),
             'end'          => $this->create_end_dropdown($end),
             'until'        => $until,
             'repeat'       => $repeat,
             'ending_type'  => $end,
-            'selected_tab' => $rc->getFreq() ? strtolower((string) $rc->getFreq()) : 'custom',
+            'selected_tab' => $rc->getFreq() ? strtolower((string)$rc->getFreq()) : 'custom',
         ];
         $output = [
             'error'   => false,
@@ -119,17 +118,16 @@ class AdminDateRepeatBox extends OsecBaseClass
      * row_daily function
      *
      * Returns daily selector
-     *
      **/
-    protected function row_daily($visible = false, $selected = 1) : string
+    protected function row_daily($visible = false, $selected = 1): string
     {
         $args = [
             'visible' => $visible,
             'count'   => $this->create_count_input(
-                    'osec_daily_count',
-                    $selected,
-                    365
-                ).I18n::__('day(s)'),
+                'osec_daily_count',
+                $selected,
+                365
+            ) . I18n::__('day(s)'),
         ];
 
         return ThemeLoader::factory($this->app)->get_file('row_daily.php', $args, true)
@@ -143,7 +141,7 @@ class AdminDateRepeatBox extends OsecBaseClass
      *
      * @return String Repeat dropdown
      */
-    protected function create_count_input($name, $count = 100, $max = 365) : string
+    protected function create_count_input($name, $count = 100, $max = 365): string
     {
         ob_start();
 
@@ -151,10 +149,14 @@ class AdminDateRepeatBox extends OsecBaseClass
             $count = 100;
         }
         ?>
-        <input type="range" name="<?php echo $name ?>" id="<?php echo $name ?>"
-               min="1" max="<?php echo $max ?>"
-            <?php if ($count)
-                echo 'value="'.$count.'"' ?> />
+        <input type="range" name="<?php echo $name; ?>" id="<?php echo $name; ?>"
+               min="1" max="<?php echo $max; ?>"
+            <?php
+            if ($count) {
+                echo 'value="' . $count . '"';
+            }
+            ?>
+        />
         <?php
         return ob_get_clean();
     }
@@ -163,9 +165,8 @@ class AdminDateRepeatBox extends OsecBaseClass
      * row_weekly function
      *
      * Returns weekly selector
-     *
      **/
-    protected function row_weekly($visible = false, $count = 1, array $selected = []) : string
+    protected function row_weekly($visible = false, $count = 1, array $selected = []): string
     {
         global $wp_locale;
         $start_of_week = $this->app->options
@@ -174,25 +175,25 @@ class AdminDateRepeatBox extends OsecBaseClass
         $options = [];
         // get days from start_of_week until the last day
         for ($i = $start_of_week; $i <= 6; ++$i) {
-            $options[ $this->get_weekday_by_id($i) ] = $wp_locale
-                ->weekday_initial[ $wp_locale->weekday[ $i ] ];
+            $options[$this->get_weekday_by_id($i)] = $wp_locale
+                ->weekday_initial[$wp_locale->weekday[$i]];
         }
 
         // get days from 0 until start_of_week
         if ($start_of_week > 0) {
             for ($i = 0; $i < $start_of_week; $i++) {
-                $options[ $this->get_weekday_by_id($i) ] = $wp_locale
-                    ->weekday_initial[ $wp_locale->weekday[ $i ] ];
+                $options[$this->get_weekday_by_id($i)] = $wp_locale
+                    ->weekday_initial[$wp_locale->weekday[$i]];
             }
         }
 
         $args = [
             'visible'   => $visible,
             'count'     => $this->create_count_input(
-                    'osec_weekly_count',
-                    $count,
-                    52
-                ).I18n::__('week(s)'),
+                'osec_weekly_count',
+                $count,
+                52
+            ) . I18n::__('week(s)'),
             'week_days' => $this->create_list_element(
                 'osec_weekly_date_select',
                 $options,
@@ -238,7 +239,7 @@ class AdminDateRepeatBox extends OsecBaseClass
             return false;
         }
 
-        return $week_days[ $day_id ];
+        return $week_days[$day_id];
     }
 
     /**
@@ -246,7 +247,7 @@ class AdminDateRepeatBox extends OsecBaseClass
      *
      * @return string
      */
-    protected function create_list_element($name, array $options = [], array $selected = []) : string
+    protected function create_list_element($name, array $options = [], array $selected = []): string
     {
         ob_start();
         ?>
@@ -254,16 +255,16 @@ class AdminDateRepeatBox extends OsecBaseClass
             <?php foreach ($options as $key => $val) : ?>
                 <div class="ai1ec-pull-left">
                     <a class="ai1ec-btn ai1ec-btn-default ai1ec-btn-block
-				<?php echo in_array($key, $selected) ? 'ai1ec-active' : ''; ?>">
+                <?php echo in_array($key, $selected) ? 'ai1ec-active' : ''; ?>">
                         <?php echo $val; ?>
                     </a>
-                    <input type="hidden" name="<?php echo $name.'_'.$key; ?>"
+                    <input type="hidden" name="<?php echo $name . '_' . $key; ?>"
                            value="<?php echo $key; ?>">
                 </div class="ai1ec-pull-left">
             <?php endforeach; ?>
         </div>
         <input type="hidden" name="<?php echo $name; ?>"
-               value="<?php echo implode(',', $selected) ?>">
+               value="<?php echo implode(',', $selected); ?>">
         <?php
         return ob_get_clean();
     }
@@ -272,9 +273,8 @@ class AdminDateRepeatBox extends OsecBaseClass
      * row_monthly function
      *
      * Returns monthly selector
-     *
      **/
-    protected function row_monthly($visible = false, $count = 1, $bymonthday = true, $month = [], $day = []) : string
+    protected function row_monthly($visible = false, $count = 1, $bymonthday = true, $month = [], $day = []): string
     {
         global $wp_locale;
         $start_of_week = $this->app->options->get('start_of_week', 1);
@@ -282,38 +282,44 @@ class AdminDateRepeatBox extends OsecBaseClass
         $options_wd = [];
         // get days from start_of_week until the last day
         for ($i = $start_of_week; $i <= 6; ++$i) {
-            $options_wd[ $this->get_weekday_by_id($i) ] = $wp_locale
-                ->weekday[ $i ];
+            $options_wd[$this->get_weekday_by_id($i)] = $wp_locale
+                ->weekday[$i];
         }
 
         // get days from 0 until start_of_week
         if ($start_of_week > 0) {
             for ($i = 0; $i < $start_of_week; $i++) {
-                $options_wd[ $this->get_weekday_by_id($i) ] = $wp_locale
-                    ->weekday[ $i ];
+                $options_wd[$this->get_weekday_by_id($i)] = $wp_locale
+                    ->weekday[$i];
             }
         }
 
         // get options like 1st/2nd/3rd for "day number"
-        $options_dn = [1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5];
+        $options_dn = [
+            1 => 1,
+            2 => 2,
+            3 => 3,
+            4 => 4,
+            5 => 5,
+        ];
         foreach ($options_dn as $_dn) {
-            $options_dn[ $_dn ] = (new DT(strtotime($_dn.'-01-1998 12:00:00')))
+            $options_dn[$_dn] = (new DT(strtotime($_dn . '-01-1998 12:00:00')))
                 ->format_i18n('jS');
         }
-        $options_dn[ '-1' ] = I18n::__('last');
+        $options_dn['-1'] = I18n::__('last');
 
-        $byday_checked = $bymonthday ? '' : 'checked';
-        $byday_expanded = $bymonthday ? 'ai1ec-collapse' : 'ai1ec-in';
-        $bymonthday_checked = $bymonthday ? 'checked' : '';
+        $byday_checked       = $bymonthday ? '' : 'checked';
+        $byday_expanded      = $bymonthday ? 'ai1ec-collapse' : 'ai1ec-in';
+        $bymonthday_checked  = $bymonthday ? 'checked' : '';
         $bymonthday_expanded = $bymonthday ? 'ai1ec-in' : 'ai1ec-collapse';
 
         $args = [
             'visible'             => $visible,
             'count'               => $this->create_count_input(
-                    'osec_monthly_count',
-                    $count,
-                    12
-                ).I18n::__('month(s)'),
+                'osec_monthly_count',
+                $count,
+                12
+            ) . I18n::__('month(s)'),
             'month'               => $this->create_monthly_date_select(
                 $month
             ),
@@ -346,7 +352,7 @@ class AdminDateRepeatBox extends OsecBaseClass
     {
         $options = [];
         for ($i = 1; $i <= 31; ++$i) {
-            $options[ $i ] = $i;
+            $options[$i] = $i;
         }
 
         return $this->create_list_element(
@@ -376,12 +382,12 @@ class AdminDateRepeatBox extends OsecBaseClass
     ) {
         ob_start();
         ?>
-        <select name="<?php echo $name ?>" id="<?php echo $name ?>">
-            <?php foreach ($options as $key => $val): ?>
-                <option value="<?php echo $key ?>"
-                    <?php echo $key === $selected ? 'selected="selected"' : '' ?>
-                    <?php echo in_array($key, $disabled_keys) ? 'disabled' : '' ?>>
-                    <?php echo $val ?>
+        <select name="<?php echo $name; ?>" id="<?php echo $name; ?>">
+            <?php foreach ($options as $key => $val) : ?>
+                <option value="<?php echo $key; ?>"
+                    <?php echo $key === $selected ? 'selected="selected"' : ''; ?>
+                    <?php echo in_array($key, $disabled_keys) ? 'disabled' : ''; ?>>
+                    <?php echo $val; ?>
                 </option>
             <?php endforeach ?>
         </select>
@@ -392,12 +398,11 @@ class AdminDateRepeatBox extends OsecBaseClass
     /**
      * Returns day number from by day array.
      *
-     *
      * @return bool|int Day of false if empty array.
      */
     protected function _get_day_number_from_byday(array $day)
     {
-        return isset($day[ 0 ]) ? (int) $day[ 0 ] : false;
+        return isset($day[0]) ? (int)$day[0] : false;
     }
 
     /**
@@ -413,9 +418,9 @@ class AdminDateRepeatBox extends OsecBaseClass
         if (empty($day)) {
             return false;
         }
-        $value = $day[ 0 ];
-        if (preg_match('/[-]?\d([A-Z]+)/', (string) $value, $matches)) {
-            return $matches[ 1 ];
+        $value = $day[0];
+        if (preg_match('/[-]?\d([A-Z]+)/', (string)$value, $matches)) {
+            return $matches[1];
         }
 
         return false;
@@ -437,17 +442,16 @@ class AdminDateRepeatBox extends OsecBaseClass
      * row_yearly function
      *
      * Returns yearly selector
-     *
      **/
-    protected function row_yearly($visible = false, $count = 1, $year = [], $first = false, $second = false) : string
+    protected function row_yearly($visible = false, $count = 1, $year = [], $first = false, $second = false): string
     {
         $args = [
             'visible'       => $visible,
             'count'         => $this->create_count_input(
-                    'osec_yearly_count',
-                    $count,
-                    10
-                ).I18n::__('year(s)'),
+                'osec_yearly_count',
+                $count,
+                10
+            ) . I18n::__('year(s)'),
             'year'          => $this->create_yearly_date_select($year),
             'on_the_select' => $this->create_on_the_select(
                 $first,
@@ -463,8 +467,6 @@ class AdminDateRepeatBox extends OsecBaseClass
     /**
      * create_yearly_date_select function
      *
-     *
-     *
      * @return string
      **/
     protected function create_yearly_date_select($selected = [])
@@ -472,7 +474,7 @@ class AdminDateRepeatBox extends OsecBaseClass
         global $wp_locale;
         $options = [];
         for ($i = 1; $i <= 12; ++$i) {
-            $options[ $i ] = $wp_locale->month_abbrev[ $wp_locale->month[ sprintf('%02d', $i) ] ];
+            $options[$i] = $wp_locale->month_abbrev[$wp_locale->month[sprintf('%02d', $i)]];
         }
 
         return $this->create_list_element(
@@ -484,8 +486,6 @@ class AdminDateRepeatBox extends OsecBaseClass
 
     /**
      * create_on_the_select function
-     *
-     *
      *
      * @return string
      **/
@@ -503,7 +503,7 @@ class AdminDateRepeatBox extends OsecBaseClass
             '4' => '------',
             '5' => I18n::__('last'),
         ];
-        $ret = $this->create_select_element(
+        $ret           = $this->create_select_element(
             'osec_monthly_each_select',
             $first_options,
             $f_selected,
@@ -524,12 +524,12 @@ class AdminDateRepeatBox extends OsecBaseClass
             '10' => I18n::__('weekend day'),
         ];
 
-        return $ret.$this->create_select_element(
-                'osec_monthly_on_the_select',
-                $second_options,
-                $s_selected,
-                [7]
-            );
+        return $ret . $this->create_select_element(
+            'osec_monthly_on_the_select',
+            $second_options,
+            $s_selected,
+            [7]
+        );
     }
 
     /**
@@ -537,9 +537,12 @@ class AdminDateRepeatBox extends OsecBaseClass
      *
      * Returns custom dates selector
      **/
-    protected function row_custom($visible = false, $dates = []) : string
+    protected function row_custom($visible = false, $dates = []): string
     {
-        $args = ['visible' => $visible, 'selected_dates' => implode(',', $dates)];
+        $args = [
+            'visible'        => $visible,
+            'selected_dates' => implode(',', $dates),
+        ];
 
         return ThemeLoader::factory($this->app)->get_file('row_custom.php', $args, true)->get_content();
     }
@@ -560,12 +563,12 @@ class AdminDateRepeatBox extends OsecBaseClass
         ) {
             return [];
         }
-        $line = new SG_iCal_Line('RRULE:'.$rule);
-        $dates = $line->getDataAsArray();
+        $line             = new SG_iCal_Line('RRULE:' . $rule);
+        $dates            = $line->getDataAsArray();
         $dates_as_strings = [];
         foreach ($dates as $date) {
-            $date = str_replace(['RDATE=', 'EXDATE='], '', $date);
-            $date = new DT($date);
+            $date               = str_replace(['RDATE=', 'EXDATE='], '', $date);
+            $date               = new DT($date);
             $dates_as_strings[] = $date->format('m/d/Y');
         }
 
@@ -579,7 +582,7 @@ class AdminDateRepeatBox extends OsecBaseClass
      *
      * @param  int  $selected  The index of the selected option, if any
      **/
-    protected function create_end_dropdown($selected = null) : string
+    protected function create_end_dropdown($selected = null): string
     {
         ob_start();
 
@@ -591,11 +594,15 @@ class AdminDateRepeatBox extends OsecBaseClass
 
         ?>
         <select name="osec_table_coordinates" id="osec_table_coordinates">
-            <?php foreach ($options as $key => $val): ?>
-                <option value="<?php echo $key ?>"
-                    <?php if ($key === $selected)
-                        echo 'selected="selected"' ?>>
-                    <?php echo $val ?>
+            <?php foreach ($options as $key => $val) : ?>
+                <option value="<?php echo $key; ?>"
+                    <?php
+                    if ($key === $selected) {
+                        echo 'selected="selected"';
+                    }
+                    ?>
+                >
+                    <?php echo $val; ?>
                 </option>
             <?php endforeach ?>
         </select>
@@ -616,34 +623,35 @@ class AdminDateRepeatBox extends OsecBaseClass
      **/
     public function convert_rrule_to_text()
     {
-        $error = false;
+        $error   = false;
         $message = '';
         // check to see if RRULE is set
-        if (isset($_REQUEST[ 'rrule' ])) {
+        if (isset($_REQUEST['rrule'])) {
             // check to see if rrule is empty
-            if (empty($_REQUEST[ 'rrule' ])) {
-                $error = true;
+            if (empty($_REQUEST['rrule'])) {
+                $error   = true;
                 $message = I18n::__(
                     'Recurrence rule cannot be empty.'
                 );
             } else {
                 $message = ucfirst(
-                    (string) RepeatRuleToText::factory($this->app)->rrule_to_text($_REQUEST[ 'rrule' ])
+                    (string)RepeatRuleToText::factory($this->app)->rrule_to_text($_REQUEST['rrule'])
                 );
-                //}
+                // }
             }
         } else {
-            $error = true;
+            $error   = true;
             $message = I18n::__(
                 'Recurrence rule was not provided.'
             );
         }
-        RenderJson::factory($this->app)->render([
-            'data' => [
-                'error'   => $error,
-                'message' => $message,
-            ],
-        ]);
+        RenderJson::factory($this->app)->render(
+            [
+                'data' => [
+                    'error'   => $error,
+                    'message' => $message,
+                ],
+            ]
+        );
     }
-
 }

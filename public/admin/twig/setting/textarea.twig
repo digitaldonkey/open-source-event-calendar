@@ -7,14 +7,12 @@
         {% endif %}
 
         {% from 'form-elements/textarea.twig' import textarea %}
-        {% apply spaceless %}
         {{ textarea( id, id, value, input_args ) }}
 
         {% if append is defined %}
         <span class="ai1ec-input-group-addon">{{ append }}</span>
     </div>
     {% endif %}
-    {% endapply %}
 </div>
 
 {% if help is defined %}

@@ -15,11 +15,10 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class ShutdownController extends OsecBaseClass
 {
-
     /**
      * @var array Map of object names and class names they represent to preserve
      */
-    protected $_preserve = [
+    protected array $preserveMap = [
         'wpdb'            => 'wpdb',
         'wp_object_cache' => 'WP_Object_Cache',
     ];
@@ -27,12 +26,12 @@ class ShutdownController extends OsecBaseClass
     /**
      * @var array Map of object names and their representation from global scope
      */
-    protected $_restorables = [];
+    protected array $restorables = [];
 
     /**
      * @var array List of callbacks to be executed during shutdown sequence
      */
-    protected $_callbacks = [];
+    protected array $callbacks = [];
 
     /**
      * Constructor
@@ -44,8 +43,8 @@ class ShutdownController extends OsecBaseClass
     public function __construct(App $app)
     {
         parent::__construct($app);
-        foreach ($this->_preserve as $name => $class) {
-            $this->_restorables[ $name ] = $GLOBALS[ $name ];
+        foreach ($this->preserveMap as $name => $class) {
+            $this->restorables[$name] = $GLOBALS[$name];
         }
     }
 
@@ -61,39 +60,33 @@ class ShutdownController extends OsecBaseClass
     {
         // replace globals from our internal store
         $restore = [];
-        foreach ($this->_preserve as $name => $class) {
+        foreach ($this->preserveMap as $name => $class) {
             if (
-                ! isset($GLOBALS[ $name ]) ||
-                ! ($GLOBALS[ $name ] instanceof $class)
+                ! isset($GLOBALS[$name]) ||
+                ! ($GLOBALS[$name] instanceof $class)
             ) {
-                $restore[ $name ] = null;
-                if (isset($GLOBALS[ $name ])) {
-                    $restore[ $name ] = $GLOBALS[ $name ];
+                $restore[$name] = null;
+                if (isset($GLOBALS[$name])) {
+                    $restore[$name] = $GLOBALS[$name];
                 }
-                $GLOBALS[ $name ] = $this->_restorables[ $name ];
+                $GLOBALS[$name] = $this->restorables[$name];
             }
         }
         // execute callbacks
-        foreach ($this->_callbacks as $callback) {
+        foreach ($this->callbacks as $callback) {
             call_user_func($callback);
         }
         // restore globals to previous state
         foreach ($restore as $name => $object) {
             if (null === $object) {
-                unset($GLOBALS[ $name ]);
+                unset($GLOBALS[$name]);
             } else {
-                $GLOBALS[ $name ] = $object;
+                $GLOBALS[$name] = $object;
             }
         }
         // destroy local references
-        foreach ($this->_restorables as $name => $object) {
-            unset($object, $this->_restorables[ $name ]);
-        }
-        if (OSEC_DEBUG) {
-            // __destruct is called twice if facebook extension is installed
-            // still can't find the reason, this fixes it but prevent other plugins
-            // __destruct() so let's just use it in dev until we fix this.
-            exit(0);
+        foreach ($this->restorables as $name => $object) {
+            unset($object, $this->restorables[$name]);
         }
     }
 
@@ -106,9 +99,8 @@ class ShutdownController extends OsecBaseClass
      */
     public function register($callback)
     {
-        $this->_callbacks[] = $callback;
+        $this->callbacks[] = $callback;
 
         return $this;
     }
-
 }

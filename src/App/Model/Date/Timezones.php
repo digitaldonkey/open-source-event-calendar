@@ -20,20 +20,18 @@ use Osec\Exception\TimezoneException;
  * @author     Time.ly Network, Inc.
  * @package Date
  * @replaces Ai1ec_Date_Timezone
- *
  */
 class Timezones extends OsecBaseClass
 {
-
     /**
      * @var CacheInterface In-memory storage for timezone objects.
      */
-    protected ?CacheInterface $_cache = null;
+    protected ?CacheInterface $cache = null;
 
     /**
      * @var array Map of timezone names and their Olson TZ counterparts.
      */
-    protected $_zones = [
+    protected $timeZones = [
         '+00:00'                          => 'UTC',
         'Z'                               => 'UTC',
         'AUS Central Standard Time'       => 'Australia/Darwin',
@@ -321,24 +319,25 @@ class Timezones extends OsecBaseClass
     /**
      * @var array Map of timezones acceptable by DateTimeZone but not strtotime.
      */
-    protected $_invalid_legacy = ['US/Eastern' => true];
+    protected $invalidLegacyZones = [
+        'US/Eastern' => true,
+    ];
 
     /**
      * @var array|bool List of system identifiers or false if none available.
      */
-    protected $_identifiers = false;
+    protected $identifiers = false;
 
     /**
      * Initialize local cache and identifiers.
      *
      * @param  App  $app  App to use.
-     *
      */
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->_cache = CacheMemory::factory($app);
-        $this->_init_identifiers();
+        $this->cache = CacheMemory::factory($app);
+        $this->initIdentifiers();
     }
 
     /**
@@ -346,20 +345,20 @@ class Timezones extends OsecBaseClass
      *
      * @return bool Success
      */
-    protected function _init_identifiers()
+    protected function initIdentifiers()
     {
         $identifiers = DateTimeZone::listIdentifiers();
-        if ( ! $identifiers) {
+        if (! $identifiers) {
             return false;
         }
         $mapped = [];
         foreach ($identifiers as $zone) {
-            $zone = (string) $zone;
-            $mapped[ $zone ] = true;
-            $this->_zones[ $zone ] = $zone;
+            $zone                   = (string)$zone;
+            $mapped[$zone]          = true;
+            $this->timeZones[$zone] = $zone;
         }
         unset($identifiers, $zone);
-        $this->_identifiers = $mapped;
+        $this->identifiers = $mapped;
 
         return true;
     }
@@ -369,18 +368,17 @@ class Timezones extends OsecBaseClass
      *
      * @return array
      */
-    public static function get_timezones($only_zones = false)
+    public static function get_timezones($only_zones = false): array
     {
         $zones = DateTimeZone::listIdentifiers();
-        if (
-            empty($zones)
-        ) {
+        if (empty($zones)) {
             return [];
         }
-        if ( ! $only_zones) {
-            $manual = __('Manual Offset', OSEC_TXT_DOM);
-            $options = [];
-            $options[ $manual ][] = [
+        $options = [];
+
+        if (! $only_zones) {
+            $manual             = __('Manual Offset', OSEC_TXT_DOM);
+            $options[$manual][] = [
                 'text'  => __('Choose your timezone', OSEC_TXT_DOM),
                 'value' => '',
                 'args'  => ['selected' => 'selected'],
@@ -388,13 +386,13 @@ class Timezones extends OsecBaseClass
         }
         foreach ($zones as $zone) {
             $exploded_zone = explode('/', $zone);
-            if ( ! isset($exploded_zone[ 1 ]) && ! $only_zones) {
-                $exploded_zone[ 1 ] = $exploded_zone[ 0 ];
-                $exploded_zone[ 0 ] = $manual;
+            if (! isset($exploded_zone[1]) && ! $only_zones) {
+                $exploded_zone[1] = $exploded_zone[0];
+                $exploded_zone[0] = $manual;
             }
-            $optgroup = $exploded_zone[ 0 ];
-            unset($exploded_zone[ 0 ]);
-            $options[ $optgroup ][] = [
+            $optgroup = $exploded_zone[0];
+            unset($exploded_zone[0]);
+            $options[$optgroup][] = [
                 'text'  => implode('/', $exploded_zone),
                 'value' => $zone,
             ];
@@ -417,14 +415,14 @@ class Timezones extends OsecBaseClass
     {
         static $default_timezone = null;
         if (null === $default_timezone) {
-            $candidates = [];
-            $candidates[] = (string) MetaAdapterUser::factory($this->app)
-                                                    ->get_current('ai1ec_timezone');
-            $candidates[] = (string) $this->app->options
+            $candidates   = [];
+            $candidates[] = (string)MetaAdapterUser::factory($this->app)
+                                                   ->get_current('osec_timezone');
+            $candidates[] = (string)$this->app->options
                 ->get('timezone_string');
-            $candidates[] = (string) $this->app->options
+            $candidates[] = (string)$this->app->options
                 ->get('gmt_offset');
-            $candidates = array_filter($candidates, 'strlen');
+            $candidates   = array_filter($candidates, 'strlen');
             foreach ($candidates as $timezone) {
                 $timezone = $this->get_name($timezone);
                 if (false !== $timezone) {
@@ -439,8 +437,8 @@ class Timezones extends OsecBaseClass
                         I18n::__(
                             'Please select site timezone in %s <em>Timezone</em> dropdown menu.'
                         ),
-                        '<a href="'.admin_url('options-general.php').
-                        '">'.I18n::__('Settings').'</a>'
+                        '<a href="' . admin_url('options-general.php') .
+                        '">' . I18n::__('Settings') . '</a>'
                     ),
                     'error'
                 );
@@ -465,10 +463,10 @@ class Timezones extends OsecBaseClass
             $timezone = $this->get_default_timezone();
         }
         $name = $this->get_name($timezone);
-        if ( ! $name) {
+        if (! $name) {
             $name = $this->get_name($this->get_default_timezone());
         }
-        $zone = $this->_cache->get($name, null);
+        $zone = $this->cache->get($name, null);
         if (null === $zone) {
             $exception = null;
             try {
@@ -479,7 +477,7 @@ class Timezones extends OsecBaseClass
             if (null !== $exception) {
                 throw new TimezoneException($exception->getMessage());
             }
-            $this->_cache->set($name, $zone);
+            $this->cache->set($name, $zone);
         }
 
         return $zone;
@@ -494,12 +492,11 @@ class Timezones extends OsecBaseClass
      */
     public function get_name($zone)
     {
-
-        if (false === $this->_identifiers) {
+        if (false === $this->identifiers) {
             return $zone; // anything should do, as zones are not supported
         }
 
-        if (isset($this->_identifiers[ $zone ])) {
+        if (isset($this->identifiers[$zone])) {
             return $zone;
         }
 
@@ -515,18 +512,20 @@ class Timezones extends OsecBaseClass
                 return $zone;
             } else {
                 // Add warning
-                NotificationAdmin::factory($this->app)->store(sprintf(
-                    I18n::__('Selected timezone "UTC%+d" will be treated as %s.'),
-                    $zone,
-                    $decoded_zone
-                ));
+                NotificationAdmin::factory($this->app)->store(
+                    sprintf(
+                        I18n::__('Selected timezone "UTC%+d" will be treated as %s.'),
+                        $zone,
+                        $decoded_zone
+                    )
+                );
 
                 return $decoded_zone;
             }
         }
 
         // Try to guess non standard TZ names.
-        $zone = $this->_olson_lookup($zone);
+        $zone         = $this->_olson_lookup($zone);
         $valid_legacy = false;
         try {
             new DateTimeZone($zone); // throw away instantly
@@ -534,10 +533,10 @@ class Timezones extends OsecBaseClass
         } catch (Exception) {
             // ignore.
         }
-        if ( ! $valid_legacy || isset($this->_invalid_legacy[ $zone ])) {
+        if (! $valid_legacy || isset($this->invalidLegacyZones[$zone])) {
             return $this->guess_zone($zone);
         }
-        $this->_identifiers[ $zone ] = $zone;
+        $this->identifiers[$zone] = $zone;
         unset($valid_legacy);
 
         return $zone;
@@ -558,7 +557,7 @@ class Timezones extends OsecBaseClass
         }
         $auto_zone = timezone_name_from_abbr(
             null,
-            ((int) $zone) * 3600,
+            ((int)$zone) * 3600,
             true
         );
         if (false !== $auto_zone) {
@@ -567,10 +566,11 @@ class Timezones extends OsecBaseClass
         NotificationAdmin::factory($this->app)->store(
             sprintf(
                 I18n::__(
-                    'Timezone "UTC%+d" is not recognized. Please %suse valid%s timezone name, until then events will be created in UTC timezone.'
+                    'Timezone "UTC%+d" is not recognized. Please %suse valid%s timezone name, '
+                    . 'until then events will be created in UTC timezone.'
                 ),
                 $zone,
-                '<a href="'.admin_url('options-general.php').'">',
+                '<a href="' . admin_url('options-general.php') . '">',
                 '</a>'
             ),
             'error'
@@ -588,7 +588,7 @@ class Timezones extends OsecBaseClass
      */
     protected function _olson_lookup($zone)
     {
-        return $this->_zones[ $zone ] ?? $zone;
+        return $this->timeZones[$zone] ?? $zone;
     }
 
     /**
@@ -600,10 +600,10 @@ class Timezones extends OsecBaseClass
      */
     public function guess_zone(string $meta_name)
     {
-        if (isset($this->_zones[ $meta_name ])) {
-            return $this->_zones[ $meta_name ];
+        if (isset($this->timeZones[$meta_name])) {
+            return $this->timeZones[$meta_name];
         }
-        if ( ! is_string($meta_name)) {
+        if (! is_string($meta_name)) {
             return false;
         }
         $name_variants = [
@@ -616,16 +616,16 @@ class Timezones extends OsecBaseClass
             }
         }
         foreach ($name_variants as $name) {
-            if (isset($this->_zones[ $name ])) {
+            if (isset($this->timeZones[$name])) {
                 // cache to avoid future lookups and return
-                $this->_zones[ $meta_name ] = $this->_zones[ $name ];
+                $this->timeZones[$meta_name] = $this->timeZones[$name];
 
-                return $this->_zones[ $name ];
+                return $this->timeZones[$name];
             }
         }
         if (
-            isset($meta_name[ 0 ]) &&
-            '(' === $meta_name[ 0 ] &&
+            isset($meta_name[0]) &&
+            '(' === $meta_name[0] &&
             $closing_pos = strpos($meta_name, ')')
         ) {
             $meta_name = trim(substr($meta_name, $closing_pos + 1));
@@ -636,8 +636,8 @@ class Timezones extends OsecBaseClass
             ! str_contains($meta_name, ' Standard ') &&
             false !== ($time_pos = strpos($meta_name, ' Time'))
         ) {
-            $meta_name = substr($meta_name, 0, $time_pos).
-                         ' Standard'.substr($meta_name, $time_pos);
+            $meta_name = substr($meta_name, 0, $time_pos) .
+                         ' Standard' . substr($meta_name, $time_pos);
 
             return $this->guess_zone($meta_name);
         }
@@ -647,7 +647,6 @@ class Timezones extends OsecBaseClass
 
     /**
      * Check if timezone is set in wp_option
-     *
      */
     public function is_timezone_not_set()
     {
@@ -656,5 +655,4 @@ class Timezones extends OsecBaseClass
 
         return empty($timezone);
     }
-
 }

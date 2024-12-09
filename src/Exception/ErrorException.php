@@ -12,5 +12,4 @@ namespace Osec\Exception;
  */
 class ErrorException extends \ErrorException
 {
-
 }

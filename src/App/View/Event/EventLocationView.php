@@ -18,7 +18,6 @@ use Osec\Theme\ThemeLoader;
  */
 class EventLocationView extends OsecBaseClass
 {
-
     /**
      * Return location details in brief format, separated by | characters.
      *
@@ -44,13 +43,13 @@ class EventLocationView extends OsecBaseClass
     public function get_location(Event $event)
     {
         $location = '';
-        $venue = $event->get('venue');
+        $venue    = $event->get('venue');
         if ($venue) {
-            $location .= $venue."\n";
+            $location .= $venue . "\n";
         }
         $address = $event->get('address');
         if ($address) {
-            $bits = explode(',', (string) $address);
+            $bits = explode(',', (string)$address);
             $bits = array_map('trim', $bits);
 
             // If more than three comma-separated values, treat first value as
@@ -58,7 +57,7 @@ class EventLocationView extends OsecBaseClass
             // in the middle as the city, state, etc.
             if (count($bits) >= 3) {
                 // Append the street address
-                $street_address = array_shift($bits)."\n";
+                $street_address = array_shift($bits) . "\n";
                 if ($street_address) {
                     $location .= $street_address;
                 }
@@ -67,16 +66,16 @@ class EventLocationView extends OsecBaseClass
                 // Append the middle bit(s) (filtering out any zero-length strings)
                 $bits = array_filter($bits, 'strval');
                 if ($bits) {
-                    $location .= join(', ', $bits)."\n";
+                    $location .= implode(', ', $bits) . "\n";
                 }
                 if ($country) {
-                    $location .= $country."\n";
+                    $location .= $country . "\n";
                 }
             } else {
                 // There are two or less comma-separated values, so just append
                 // them each on their own line (filtering out any zero-length strings)
-                $bits = array_filter($bits, 'strval');
-                $location .= join("\n", $bits);
+                $bits     = array_filter($bits, 'strval');
+                $location .= implode("\n", $bits);
             }
         }
 
@@ -91,7 +90,7 @@ class EventLocationView extends OsecBaseClass
      *
      * @return string
      **/
-    function get_map_view(Event $event) : string
+    public function get_map_view(Event $event): string
     {
         $settings = $this->app->settings;
         if ( ! $event->get('show_map')) {
@@ -131,8 +130,8 @@ class EventLocationView extends OsecBaseClass
         // If the coordinates are set by hand use them.
         if ($event->get('show_coordinates')) {
             $longitude = floatval($event->get('longitude'));
-            $latitude = floatval($event->get('latitude'));
-            $location = $latitude.','.$longitude;
+            $latitude  = floatval($event->get('latitude'));
+            $location  = $latitude . ',' . $longitude;
         }
 
         return $location;
@@ -149,14 +148,13 @@ class EventLocationView extends OsecBaseClass
      */
     public function get_gmap_url(Event $event)
     {
-        $lang = WpmlHelper::factory($this->app)->get_language();
+        $lang     = WpmlHelper::factory($this->app)->get_language();
         $location = $this->get_latlng($event);
         if ( ! $location) {
             $location = $event->get('address');
         }
 
-        return 'https://www.google.com/maps?f=q&hl='.urlencode((string) $lang).
-               '&source=embed&q='.urlencode((string) $location);
+        return 'https://www.google.com/maps?f=q&hl=' . urlencode((string)$lang) .
+               '&source=embed&q=' . urlencode((string)$location);
     }
-
 }

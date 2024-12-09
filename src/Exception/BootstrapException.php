@@ -12,11 +12,9 @@ namespace Osec\Exception;
  */
 class BootstrapException extends Exception
 {
-
     public function get_html_message()
     {
-        return '<p>Failure in Open Source Event Calendar core:<br />'.
-               $this->getMessage().'</p>';
+        return '<p>Failure in Open Source Event Calendar core:<br />' .
+               $this->getMessage() . '</p>';
     }
-
 }

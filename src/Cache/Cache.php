@@ -2,7 +2,6 @@
 
 namespace Osec\Cache;
 
-
 /**
  * The context class which handles the caching strategy.
  *
@@ -12,7 +11,6 @@ namespace Osec\Cache;
  */
 class Cache implements CacheInterface
 {
-
     public readonly CacheInterface $engine;
     private ?string $key_for_persistance;
 
@@ -24,18 +22,18 @@ class Cache implements CacheInterface
     public function __construct(string $key_for_persistance, CacheInterface $engine)
     {
         $this->key_for_persistance = $key_for_persistance;
-        $this->engine = $engine;
+        $this->engine              = $engine;
     }
 
-    public static function is_available() : bool
+    public static function is_available(): bool
     {
-        return TRUE;
+        return true;
     }
 
     /**
      * Are we using file cache?
      *
-     * @return boolean
+     * @return bool
      */
     public function is_file_cache()
     {
@@ -49,7 +47,7 @@ class Cache implements CacheInterface
      *
      * @return int Count of entries deleted
      */
-    public function delete_matching_entries_from_persistence(string $pattern) : int
+    public function delete_matching_entries_from_persistence(string $pattern): int
     {
         return $this->engine->delete_matching($pattern);
     }
@@ -57,7 +55,15 @@ class Cache implements CacheInterface
     /**
      * @inheritDoc
      */
-    public function add(string $key, mixed $value) : bool
+    public function delete_matching(string $pattern): int
+    {
+        return $this->engine->delete_matching($pattern);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function add(string $key, mixed $value): bool
     {
         if ( ! $this->get($key)) {
             return $this->set($key, $value);
@@ -73,7 +79,7 @@ class Cache implements CacheInterface
      * @return mixed
      * @throws CacheNotSetException
      */
-    public function get(string $key, mixed $default = null) : mixed
+    public function get(string $key, mixed $default = null): mixed
     {
         try {
             $data = $this->engine->get($key);
@@ -95,7 +101,7 @@ class Cache implements CacheInterface
      *
      * @return bool
      */
-    public function set(string $key, mixed $value) : bool
+    public function set(string $key, mixed $value): bool
     {
         try {
             return $this->engine->set($key, $value);
@@ -107,7 +113,7 @@ class Cache implements CacheInterface
     /**
      * @inheritDoc
      */
-    public function delete(string $key = null) : bool
+    public function delete(string $key = null): bool
     {
         if ( ! $key) {
             $key = $this->key_for_persistance;
@@ -119,7 +125,7 @@ class Cache implements CacheInterface
     /**
      * @inheritDoc
      */
-    public function clear_cache() : bool
+    public function clear_cache(): bool
     {
         return $this->engine->clear_cache();
     }
@@ -129,13 +135,5 @@ class Cache implements CacheInterface
         $path = explode('\\', get_class($this->engine));
 
         return array_pop($path);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function delete_matching(string $pattern) : int
-    {
-        return $this->engine->delete_matching($pattern);
     }
 }

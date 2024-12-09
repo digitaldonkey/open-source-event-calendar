@@ -20,9 +20,7 @@ use Osec\Theme\ThemeLoader;
  */
 class SettingsCache extends SettingsAbstract
 {
-
-
-    public function render($html = '', $wrap = true) : string
+    public function render($html = '', $wrap = true): string
     {
         $args = $this->get_twig_cache_args();
         $file = ThemeLoader::factory($this->app)
@@ -38,22 +36,25 @@ class SettingsCache extends SettingsAbstract
      */
     public function get_twig_cache_args()
     {
-        $cachePath = (new CachePath())->getCacheData();
-        $current_cache = CacheFactory::factory($this->app)->createCache('test')->get_active_cache();
+        $cachePath        = (new CachePath())->getCacheData();
+        $current_cache    = CacheFactory::factory($this->app)->createCache('test')->get_active_cache();
         $available_caches = [
             'CacheApcu' => [
                 'name'            => 'CacheApcu',
                 'is_available'    => $this->niceBoolean(CacheApcu::is_available()),
                 'is_curren_cache' => $this->niceBoolean($current_cache === 'CacheApcu'),
-                'notes'           => '@see: <a target="_blank" href="https://www.php.net/manual/en/book.apcu.php">php.net/manual/en/book.apcu.php</a>',
-                'constant'        => 'OSEC_ENABLE_CACHE_ACPU'
+                'notes'           => '@see: <a target="_blank" href="https://www.php.net/manual/en/book.apcu.php">'
+                                     . 'php.net/manual/en/book.apcu.php</a>',
+                'constant'        => 'OSEC_ENABLE_CACHE_APCU',
             ],
             'CacheFile' => [
                 'name'            => 'CacheFile',
                 'is_available'    => $this->niceBoolean(CacheFile::is_available()),
                 'is_curren_cache' => $this->niceBoolean($current_cache === 'CacheFile'),
-                'notes'           => $cachePath ? '<div style="max-width: 100%; overflow-x: scroll;">'.$cachePath[ 'path' ].'<br />'.$cachePath[ 'url' ].'</div>' : __('Not Available'),
-                'constant'        => 'OSEC_ENABLE_CACHE_FILE'
+                'notes'           => $cachePath ? '<div style="max-width: 100%; overflow-x: scroll;">'
+                                      . $cachePath['path'] . '<br />'
+                                      . $cachePath['url'] . '</div>' : __('Not Available'),
+                'constant'        => 'OSEC_ENABLE_CACHE_FILE',
             ],
             'CacheDb'   => [
                 'name'            => 'CacheDb',
@@ -64,18 +65,16 @@ class SettingsCache extends SettingsAbstract
             ],
         ];
 
-        $XXX = $this->_args;
-
         $args = [
             'current_cache'        => $current_cache,
             'available_caches'     => $available_caches,
             'twig_cache_available' => (
-                CacheFile::OSEC_FILE_CACHE_UNAVAILABLE !== $this->_args[ 'value' ]
-                && !empty($this->_args[ 'value' ])
+                CacheFile::OSEC_FILE_CACHE_UNAVAILABLE !== $this->args['value']
+                && ! empty($this->args['value'])
             ),
-            'twig_path'            => $this->_args[ 'value' ],
-            'id'                   => $this->_args[ 'id' ],
-            'label'                => $this->_args[ 'renderer' ][ 'label' ],
+            'twig_path'            => $this->args['value'],
+            'id'                   => $this->args['id'],
+            'label'                => $this->args['renderer']['label'],
             'text'                 => [
                 'refresh' => I18n::__('Check again'),
                 'nocache' => I18n::__('Templates cache is not writable'),
@@ -84,12 +83,11 @@ class SettingsCache extends SettingsAbstract
                 'title'   => I18n::__('Performance Report'),
             ],
         ];
-
         return $args;
     }
 
-    function niceBoolean($bool) : string
+    protected function niceBoolean($bool): string
     {
-        return (bool) $bool;
+        return (string)(bool)$bool;
     }
 }

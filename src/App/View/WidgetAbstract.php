@@ -17,18 +17,17 @@ use WP_Widget;
  */
 abstract class WidgetAbstract extends WP_Widget
 {
-
     /**
      * @var App
      */
     protected App $app;
 
-    protected ?WidgetController $_widgetController;
+    protected ?WidgetController $widgetController;
 
     /**
-     * @var boolean
+     * @var bool
      */
-    protected $_css_loaded = false;
+    protected bool $cssIsLoaded = false;
 
     /**
      * @param $_id
@@ -41,21 +40,22 @@ abstract class WidgetAbstract extends WP_Widget
     public function __construct(protected $_id, $name, $widget_options = [], $control_options = [])
     {
         global $osec_app;
-        $this->app = $osec_app;
-        $this->_widgetController = WidgetController::factory($this->app);
+        $this->app              = $osec_app;
+        $this->widgetController = WidgetController::factory($this->app);
 
         // Return if it is allready there
-        if ($this->_widgetController->getIfRegistered($_id)) {
-	        // This is weird.
-	        // TODO Let's remove this widget soon and replace it with a block.
-	        //
+        if ($this->widgetController->getIfRegistered($_id)) {
+            // This is weird.
+            // TODO Let's remove this widget soon and replace it with a block.
+            //
             return;
         }
 
         parent::__construct($this->_id, $name, $widget_options, $control_options);
         add_shortcode($this->_id, $this->shortcode(...));
         /* Filter doc @see \Osec\App\Model\PostTypeEvent\EventEditing->strip_shortcode_tag() */
-        add_filter('osec_content_remove_shortcode_'.$this->_id,
+        add_filter(
+            'osec_content_remove_shortcode_' . $this->_id,
             $this->is_this_to_remove_from_event(...)
         );
 
@@ -118,7 +118,7 @@ abstract class WidgetAbstract extends WP_Widget
      */
     public function add_js_translations(array $translations)
     {
-        $translations[ 'javascript_widgets' ][ $this->_id ] = $this->get_js_widget_configurable_defaults();
+        $translations['javascript_widgets'][$this->_id] = $this->get_js_widget_configurable_defaults();
 
         return $translations;
     }
@@ -146,10 +146,10 @@ abstract class WidgetAbstract extends WP_Widget
         $defaults = $this->get_defaults();
         $instance = wp_parse_args($instance, $defaults);
         $this->add_js();
-        $args[ 'widget_html' ] = $this->get_content($instance);
-        if ( ! empty($args[ 'widget_html' ])) {
-            $args[ 'title' ] = $instance[ 'title' ];
-            $args = $this->_filter_widget_args($args);
+        $args['widget_html'] = $this->get_content($instance);
+        if ( ! empty($args['widget_html'])) {
+            $args['title'] = $instance['title'];
+            $args          = $this->_filter_widget_args($args);
             FrontendCssController::factory($this->app)
                                  ->add_link_to_html_for_frontend();
             // Display theme
@@ -157,7 +157,6 @@ abstract class WidgetAbstract extends WP_Widget
                        ->get_file('widget.twig', $args)
                        ->render();
         }
-
     }
 
     /**
@@ -177,7 +176,7 @@ abstract class WidgetAbstract extends WP_Widget
      * Create the html for the widget. Shared by all versions.
      *
      * @param  bool  $remote_request  whether the request is for a remote site or
-     *   not (useful to inline CSS)
+     *  not (useful to inline CSS)
      */
     abstract public function get_content(array $args_for_widget, $remote = false);
 
@@ -204,7 +203,7 @@ abstract class WidgetAbstract extends WP_Widget
     public function shortcode($atts, $content = null)
     {
         $defaults = $this->get_defaults();
-        $atts = shortcode_atts($defaults, $atts);
+        $atts     = shortcode_atts($defaults, $atts);
         $this->add_js();
 
         return $this->get_content($atts);
@@ -218,7 +217,7 @@ abstract class WidgetAbstract extends WP_Widget
     public function javascript_widget($args)
     {
         $defaults = $this->get_defaults();
-        $args = wp_parse_args($args, $defaults);
+        $args     = wp_parse_args($args, $defaults);
 
         return $this->get_content($args, true);
     }
@@ -232,5 +231,4 @@ abstract class WidgetAbstract extends WP_Widget
     {
         return true;
     }
-
 }

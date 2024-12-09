@@ -17,7 +17,6 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageThemeOptions extends AdminPageAbstract
 {
-
     /**
      * @var string The nonce action
      */
@@ -51,7 +50,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
     /**
      * Adds the page to the correct menu.
      */
-    public function add_page() : void
+    public function add_page(): void
     {
         $theme_options_page = add_submenu_page(
             OSEC_ADMIN_BASE_URL,
@@ -63,7 +62,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
         );
         if (false !== $this->app->settings->get('less_variables_page')) {
             // Make copy of Theme Options page at its old location.
-            $submenu[ 'themes.php' ][] = [
+            $submenu['themes.php'][] = [
                 I18n::__('Calendar Theme Options'),
                 'manage_osec_options',
                 OSEC_THEME_OPTIONS_BASE_URL,
@@ -79,7 +78,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
      *
      * @return void
      */
-    public function add_meta_box() : void
+    public function add_meta_box(): void
     {
         // Add the 'General Settings' meta box.
         add_meta_box(
@@ -96,9 +95,8 @@ class AdminPageThemeOptions extends AdminPageAbstract
     /**
      * Display the page html
      */
-    public function display_page() : void
+    public function display_page(): void
     {
-
         $settings = $this->app->settings;
 
         $args = [
@@ -116,7 +114,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
                 'object' => null,
             ],
             'action'  =>
-                '?controller=front&action=ai1ec_save_theme_options&plugin='.OSEC_PLUGIN_NAME,
+                '?controller=front&action=ai1ec_save_theme_options&plugin=' . OSEC_PLUGIN_NAME,
         ];
 
         // TODO SEEMS TO BE UNUSED LEFTOVER. Remove it.
@@ -130,30 +128,29 @@ class AdminPageThemeOptions extends AdminPageAbstract
     /**
      * Displays the meta box for the settings page.
      */
-    public function display_meta_box(mixed $object, mixed $box) : void
+    public function display_meta_box(mixed $object, mixed $box): void
     {
-
         $tabs = [
             'general'  => [
-                'name' => I18n::__('General')
+                'name' => I18n::__('General'),
             ],
             'table'    => [
-                'name' => I18n::__('Tables')
+                'name' => I18n::__('Tables'),
             ],
             'buttons'  => [
-                'name' => I18n::__('Buttons')
+                'name' => I18n::__('Buttons'),
             ],
             'forms'    => [
-                'name' => I18n::__('Forms')
+                'name' => I18n::__('Forms'),
             ],
             'calendar' => [
-                'name' => I18n::__('Calendar general')
+                'name' => I18n::__('Calendar general'),
             ],
             'month'    => [
-                'name' => I18n::__('Month/week/day view')
+                'name' => I18n::__('Month/week/day view'),
             ],
             'agenda'   => [
-                'name' => I18n::__('Agenda view')
+                'name' => I18n::__('Agenda view'),
             ],
         ];
 
@@ -164,9 +161,9 @@ class AdminPageThemeOptions extends AdminPageAbstract
          *
          * @param  array  $tabs  Currently available tabs.
          */
-        $tabs = apply_filters('osec_admin_theme_options_tabs_alter', $tabs);
+        $tabs           = apply_filters('osec_admin_theme_options_tabs_alter', $tabs);
         $less_variables = LessController::factory($this->app)->get_saved_variables();
-        $tabs = $this->_get_tabs_to_show($less_variables, $tabs);
+        $tabs           = $this->_get_tabs_to_show($less_variables, $tabs);
 
         $args = [
             'stacked'       => true,
@@ -174,13 +171,13 @@ class AdminPageThemeOptions extends AdminPageAbstract
             'tabs'          => $tabs,
             'submit'        => [
                 'id'    => self::SUBMIT_ID,
-                'value' => '<i class="ai1ec-fa ai1ec-fa-save ai1ec-fa-fw"></i> '.
+                'value' => '<i class="ai1ec-fa ai1ec-fa-save ai1ec-fa-fw"></i> ' .
                            I18n::__('Save Options'),
                 'args'  => ['class' => 'ai1ec-btn ai1ec-btn-primary ai1ec-btn-lg'],
             ],
             'reset'         => [
                 'id'    => self::RESET_ID,
-                'value' => '<i class="ai1ec-fa ai1ec-fa-undo ai1ec-fa-fw"></i> '.
+                'value' => '<i class="ai1ec-fa ai1ec-fa-undo ai1ec-fa-fw"></i> ' .
                            I18n::__('Reset to Defaults'),
                 'args'  => ['class' => 'ai1ec-btn ai1ec-btn-danger ai1ec-btn-lg'],
             ],
@@ -199,22 +196,23 @@ class AdminPageThemeOptions extends AdminPageAbstract
      */
     protected function _get_tabs_to_show(array $less_variables, array $tabs)
     {
-
         // Inizialize the array of tabs that will be added to the layout
         $bootstrap_tabs_to_add = [];
 
         foreach ($tabs as $id => $tab) {
-            $tab[ 'elements' ] = [];
-            $bootstrap_tabs_to_add[ $id ] = $tab;
+            $tab['elements']            = [];
+            $bootstrap_tabs_to_add[$id] = $tab;
         }
 
         $uiElementFactory = ThemeVariablesFactory::factory($this->app);
 
         foreach ($less_variables as $variable_id => $variable_attributes) {
-            $variable_attributes[ 'id' ] = $variable_id;
-            $renderable = $uiElementFactory->createRenderer($variable_attributes);
-            $bootstrap_tabs_to_add[ $variable_attributes[ 'tab' ] ][ 'elements' ][] = [
-                'html' => $renderable->render()
+            $variable_attributes['id']                                        = $variable_id;
+            $renderable                                                       = $uiElementFactory->createRenderer(
+                $variable_attributes
+            );
+            $bootstrap_tabs_to_add[$variable_attributes['tab']]['elements'][] = [
+                'html' => $renderable->render(),
             ];
         }
 
@@ -226,6 +224,5 @@ class AdminPageThemeOptions extends AdminPageAbstract
      */
     public function handle_post()
     {
-
     }
 }

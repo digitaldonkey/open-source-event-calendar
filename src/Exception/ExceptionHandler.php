@@ -16,7 +16,6 @@ use Throwable;
  */
 class ExceptionHandler
 {
-
     /**
      * @var string The option for the messgae in the db
      */
@@ -30,23 +29,23 @@ class ExceptionHandler
     /**
      * @var callable|null Previously set exception handler if any
      */
-    protected $_prev_ex_handler;
+    protected $prevExceptionHandler;
 
     /**
      * @var callable|null Previously set error handler if any
      */
-    protected $_prev_er_handler;
+    protected $prevErrorHandler;
 
     /**
      * @var string The message to display in the admin notice
      */
-    protected $_message;
+    protected string $message;
 
     /**
      * @var array Mapped list of errors that are non-fatal, to be ignored
      *            in production.
      */
-    protected $_nonfatal_errors = null;
+    protected ?array $ignoreAbleErrors = null;
 
     /**
      * Constructor accepts names of classes to be handled
@@ -58,7 +57,7 @@ class ExceptionHandler
      */
     public function __construct(protected $_exception_class, protected $_error_exception_class)
     {
-        $this->_nonfatal_errors = [
+        $this->ignoreAbleErrors = [
             E_USER_WARNING => true,
             E_WARNING      => true,
             E_USER_NOTICE  => true,
@@ -68,8 +67,8 @@ class ExceptionHandler
         if (version_compare(PHP_VERSION, '5.3.0') >= 0) {
             // wrapper `constant( 'XXX' )` is used to avoid compile notices
             // on earlier PHP versions.
-            $this->_nonfatal_errors[ constant('E_DEPRECATED') ] = true;
-            $this->_nonfatal_errors[ constant('E_USER_DEPRECATED') ] = true;
+            $this->ignoreAbleErrors[constant('E_DEPRECATED')]      = true;
+            $this->ignoreAbleErrors[constant('E_USER_DEPRECATED')] = true;
         }
     }
 
@@ -80,20 +79,21 @@ class ExceptionHandler
      *
      * @return void Method does not return
      */
-    public function set_prev_ex_handler($handler)
+    public function setPrevExceptionHandler($handler)
     {
-        $this->_prev_ex_handler = $handler;
+        $this->prevExceptionHandler = $handler;
     }
 
     /**
      * Store error handler that was previously set
      *
      * @param $handler
+     *
      * @return void Method does not return
-*/
-    public function set_prev_er_handler($handler)
+     */
+    public function setPrevErrorHandler($handler)
     {
-        $this->_prev_er_handler = $handler;
+        $this->prevErrorHandler = $handler;
     }
 
     /**
@@ -103,10 +103,10 @@ class ExceptionHandler
      *
      * @return void Exception handler is not expected to return
      */
-    public function handle_exception(Throwable $exception)
+    public function handleException(Throwable $exception)
     {
         if (defined('OSEC_DEBUG') && true === OSEC_DEBUG) {
-            die ('<pre>'.print_r($exception, true).'</pre>');
+            die('<pre>' . print_r($exception, true) . '</pre>');
         }
         // if it's something we handle, handle it
         throw $exception;
@@ -114,20 +114,20 @@ class ExceptionHandler
         if ($exception instanceof $this->_exception_class) {
             // check if it's a plugin instead of core
             $disable_addon = $this->is_caused_by_addon($exception);
-            $message = method_exists($exception, 'get_html_message')
+            $message       = method_exists($exception, 'get_html_message')
                 ? $exception->get_html_message()
                 : $exception->getMessage();
-            $message = '<p>'.$message.'</p>';
+            $message       = '<p>' . $message . '</p>';
             if ($exception->display_backtrace()) {
                 $message .= $backtrace;
             }
             if (null !== $disable_addon) {
-                include_once ABSPATH.'wp-admin/includes/plugin.php';
+                include_once ABSPATH . 'wp-admin/includes/plugin.php';
                 // deactivate the plugin. Fire handlers to hide options.
                 deactivate_plugins($disable_addon);
                 global $osec_app;
                 NotificationAdmin::factory($osec_app)->store(
-                    $this->get_disabled_line($disable_addon).$message,
+                    $this->get_disabled_line($disable_addon) . $message,
                     'error',
                     2,
                     [NotificationAdmin::RCPT_ADMIN],
@@ -138,38 +138,34 @@ class ExceptionHandler
                 // check if it has a methof for deatiled html
                 $this->soft_deactivate_plugin($message);
             }
-
-        } // if it's a PHP error in our plugin files, deactivate and redirect
-        else {
-            if ($exception instanceof $this->_error_exception_class) {
-                $this->soft_deactivate_plugin(
-                    $exception->getMessage().$backtrace
-                );
-            }
+        } elseif ($exception instanceof $this->_error_exception_class) {
+            // If it's a PHP error in our plugin files, deactivate and redirect.
+            $this->soft_deactivate_plugin(
+                $exception->getMessage() . $backtrace
+            );
         }
-        // if another handler was set, let it handle the exception
-        if (is_callable($this->_prev_ex_handler)) {
-            call_user_func($this->_prev_ex_handler, $exception);
+
+        if (is_callable($this->prevExceptionHandler)) {
+            // If another handler was set, let it handle the exception.
+            call_user_func($this->prevExceptionHandler, $exception);
         }
     }
 
     /**
      * Get HTML code with backtrace information for given exception.
      *
-     *
      * @return string HTML code.
      */
     protected function _get_backtrace(Exception $exception)
     {
-
         $backtrace = '';
-        $trace = nl2br($exception->getTraceAsString());
-        $ident = sha1($trace);
+        $trace     = nl2br($exception->getTraceAsString());
+        $ident     = sha1($trace);
         if ( ! empty($trace)) {
-            $request_uri = $_SERVER[ 'REQUEST_URI' ];
+            $request_uri  = $_SERVER['REQUEST_URI'];
             $button_label = __('Toggle error details', OSEC_TXT_DOM);
-            $title = __('Error Details:', OSEC_TXT_DOM);
-            $backtrace = <<<JAVASCRIPT
+            $title        = __('Error Details:', OSEC_TXT_DOM);
+            $backtrace    = <<<JAVASCRIPT
 			<script type="text/javascript">
 			jQuery( function($) {
 				$( "a[data-rel='$ident']" ).click( function() {
@@ -210,8 +206,8 @@ JAVASCRIPT;
             }
         }
         if (null === $addon) {
-            $position = strlen(dirname(OSEC_PATH));
-            $length = strlen(OSEC_PLUGIN_NAME);
+            $position   = strlen(dirname(OSEC_PATH));
+            $length     = strlen(OSEC_PLUGIN_NAME);
             $trace_list = $exception->getTrace();
             array_unshift(
                 $trace_list,
@@ -219,24 +215,24 @@ JAVASCRIPT;
             );
             foreach ($trace_list as $trace) {
                 if (
-                    ! isset($trace[ 'file' ]) ||
-                    ! isset($trace[ 'file' ][ $position ])
+                    ! isset($trace['file']) ||
+                    ! isset($trace['file'][$position])
                 ) {
                     continue;
                 }
                 $file = substr(
-                    $trace[ 'file' ],
+                    $trace['file'],
                     $position,
-                    strpos($trace[ 'file' ], '/', $position) - $position
+                    strpos($trace['file'], '/', $position) - $position
                 );
                 if (0 === strncmp(OSEC_PLUGIN_NAME, $file, $length)) {
                     if (OSEC_PLUGIN_NAME !== $file) {
-                        $addon = $file.'/'.$file.'.php';
+                        $addon = $file . '/' . $file . '.php';
                     }
                 }
             }
         }
-        if ('core' === strtolower((string) $addon)) {
+        if ('core' === strtolower((string)$addon)) {
             return null;
         }
 
@@ -254,7 +250,7 @@ JAVASCRIPT;
      */
     public function get_disabled_line($addon)
     {
-        $file = dirname(OSEC_PATH).$addon;
+        $file = dirname(OSEC_PATH) . $addon;
         $line = '';
         if (
             is_file($file) &&
@@ -264,11 +260,11 @@ JAVASCRIPT;
                 $matches
             )
         ) {
-            $line = '<p><strong>'.
+            $line = '<p><strong>' .
                     sprintf(
                         __('The add-on "%s" has been disabled due to an error:'),
-                        __(trim($matches[ 1 ]), dirname($addon))
-                    ).
+                        __(trim($matches[1]), dirname($addon))
+                    ) .
                     '</strong></p>';
         }
 
@@ -311,10 +307,9 @@ JAVASCRIPT;
      * @param  string  $errline  Line in which error was raised
      * @param  array  $errcontext  Error context symbols table copy
      *
-     * @return boolean|void Nothing when error is ours, false when no
+     * @return bool|void Nothing when error is ours, false when no
      *                      other handler exists
      * @throws ErrorException If error originates from within Ai1EC
-     *
      */
     public function handle_error(
         $errno,
@@ -324,11 +319,11 @@ JAVASCRIPT;
         $errcontext = []
     ) {
         // if the error is not in our plugin, let PHP handle things.
-        $position = strpos($errfile, (string) OSEC_PLUGIN_NAME);
+        $position = strpos($errfile, (string)OSEC_PLUGIN_NAME);
         if (false === $position) {
-            if (is_callable($this->_prev_er_handler)) {
+            if (is_callable($this->prevErrorHandler)) {
                 return call_user_func_array(
-                    $this->_prev_er_handler,
+                    $this->prevErrorHandler,
                     func_get_args()
                 );
             }
@@ -338,11 +333,16 @@ JAVASCRIPT;
         // do not disable plugin in production if the error is rather low
         $isVendor = 'vendor' === substr($errfile, strlen(OSEC_PATH), 6);
         if (
-            isset($this->_nonfatal_errors[ $errno ])
+            isset($this->ignoreAbleErrors[$errno])
             && (
                 // Non fatal /vendor errors should not become fatal here.
-                ( ! defined('OSEC_DEBUG') || false === OSEC_DEBUG)
-                || $isVendor && defined('OSEC_DEBUG') && OSEC_DEBUG && defined('OSEC_DEBUG_VENDOR') && OSEC_DEBUG_VENDOR === false
+                (!defined('OSEC_DEBUG') || false === OSEC_DEBUG )
+                || (
+                    $isVendor
+                    && defined('OSEC_DEBUG')
+                    && OSEC_DEBUG && defined('OSEC_DEBUG_VENDOR')
+                    && OSEC_DEBUG_VENDOR === false
+                )
             )
         ) {
             $message = sprintf(
@@ -356,25 +356,27 @@ JAVASCRIPT;
             return error_log($message, 0);
         }
         // let's get the plugin folder
-        $tail = substr($errfile, $position);
-        $exploded = explode(DIRECTORY_SEPARATOR, $tail);
-        $plugin_dir = $exploded[ 0 ];
+        $tail       = substr($errfile, $position);
+        $exploded   = explode(DIRECTORY_SEPARATOR, $tail);
+        $plugin_dir = $exploded[0];
         // if the error doesn't belong to core, throw the plugin exception to trigger disabling
         // of the plugin in the exception handler
         if (OSEC_PLUGIN_NAME !== $plugin_dir) {
             $exc = implode(
-                '', array_map(
+                '',
+                array_map(
                     $this->return_first_char(...),
                     explode('-', $plugin_dir)
                 )
             );
 
             // TODO
-            //  What kind of Exception handling we have here?
+            // What kind of Exception handling we have here?
 
             // all plugins should implement an exception based on this convention
-            // which is the same convention we use for constants, only with just first letter uppercase
-            $exc = str_replace('aioec', 'Ai1ec', $exc).'_Exception';
+            // which is the same convention we use for constants,
+            // only with just first letter uppercase
+            $exc = str_replace('aioec', 'Osec', $exc) . '_Exception';
             if (class_exists($exc)) {
                 $message = sprintf(
                     'Osec: %s @ %s:%d #%d',
@@ -397,13 +399,13 @@ JAVASCRIPT;
 
     public function return_first_char($name)
     {
-        return $name[ 0 ];
+        return $name[0];
     }
 
     /**
      * Perform what's needed to reactivate the plugin
      *
-     * @return boolean Success
+     * @return bool Success
      */
     public function reactivate_plugin()
     {
@@ -413,7 +415,7 @@ JAVASCRIPT;
     /**
      * Get message to be displayed to admin if any
      *
-     * @return string|boolean Error message or false if plugin is not disabled
+     * @return string|bool Error message or false if plugin is not disabled
      */
     public function get_disabled_message()
     {
@@ -441,152 +443,9 @@ JAVASCRIPT;
     public function show_notices($message)
     {
         // save the message to use it later
-        $this->_message = $message;
+        $this->message = $message;
         add_action('admin_notices', $this->render_admin_notice(...));
     }
-
-//  /**
-//   * Had to add it as var_dump was locking my browser.
-//   *
-//   * Taken from
-//   * http://www.leaseweblabs.com/2013/10/smart-alternative-phps-var_dump-function/
-//   *
-//   * @param int $strlen
-//   * @param int $width
-//   * @param int $depth
-//   * @param int $i
-//   * @param array $objects
-//   *
-//   * @return string
-//   */
-//  public function var_debug(
-//    mixed $variable,
-//          $strlen = 400,
-//          $width = 25,
-//          $depth = 10,
-//          $i = 0,
-//          &$objects = []
-//  ) {
-//    $search = ["\0", "\a", "\b", "\f", "\n", "\r", "\t", "\v"];
-//    $replace = ['\0', '\a', '\b', '\f', '\n', '\r', '\t', '\v'];
-//    $string = '';
-//
-//    switch (gettype($variable)) {
-//      case 'boolean' :
-//        $string .= $variable ? 'true' : 'false';
-//        break;
-//      case 'integer' :
-//        $string .= $variable;
-//        break;
-//      case 'double' :
-//        $string .= $variable;
-//        break;
-//      case 'resource' :
-//        $string .= '[resource]';
-//        break;
-//      case 'NULL' :
-//        $string .= "NULL";
-//        break;
-//      case 'unknown type' :
-//        $string .= '???';
-//        break;
-//      case 'string' :
-//        $len = strlen($variable);
-//        $variable = str_replace(
-//          $search,
-//          $replace,
-//          substr($variable, 0, $strlen),
-//          $count);
-//        $variable = substr($variable, 0, $strlen);
-//        if ($len < $strlen) {
-//          $string .= '"' . $variable . '"';
-//        }
-//        else {
-//          $string .= 'string(' . $len . '): "' . $variable . '"...';
-//        }
-//        break;
-//      case 'array' :
-//        $len = count($variable);
-//        if ($i == $depth) {
-//          $string .= 'array(' . $len . ') {...}';
-//        }
-//        elseif (!$len) {
-//          $string .= 'array(0) {}';
-//        }
-//        else {
-//          $keys = array_keys($variable);
-//          $spaces = str_repeat(' ', $i * 2);
-//          $string .= "array($len)\n" . $spaces . '{';
-//          $count = 0;
-//          foreach ($keys as $key) {
-//            if ($count == $width) {
-//              $string .= "\n" . $spaces . "  ...";
-//              break;
-//            }
-//            $string .= "\n" . $spaces . "  [$key] => ";
-//            $string .= $this->var_debug(
-//              $variable[$key],
-//              $strlen,
-//              $width,
-//              $depth,
-//              $i + 1,
-//              $objects
-//            );
-//            $count++;
-//          }
-//          $string .= "\n" . $spaces . '}';
-//        }
-//        break;
-//      case 'object':
-//        $id = array_search($variable, $objects, TRUE);
-//        if ($id !== FALSE) {
-//          $string .= $variable::class . '#' . ($id + 1) . ' {...}';
-//        }
-//        else {
-//          if ($i == $depth) {
-//            $string .= $variable::class . ' {...}';
-//          }
-//          else {
-//            $id = array_push($objects, $variable);
-//            $array = ( array ) $variable;
-//            $spaces = str_repeat(' ', $i * 2);
-//            $string .= $variable::class . "#$id\n" . $spaces . '{';
-//            $properties = array_keys($array);
-//            foreach ($properties as $property) {
-//              $name = str_replace("\0", ':', trim($property));
-//              $string .= "\n" . $spaces . "  [$name] => ";
-//              $string .= $this->var_debug(
-//                $array[$property],
-//                $strlen,
-//                $width,
-//                $depth,
-//                $i + 1,
-//                $objects
-//              );
-//            }
-//            $string .= "\n" . $spaces . '}';
-//          }
-//        }
-//        break;
-//    }
-//
-//    if ($i > 0) {
-//      return $string;
-//    }
-//
-//    $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-//    do {
-//      $caller = array_shift($backtrace);
-//    } while (
-//      $caller &&
-//      !isset($caller['file'])
-//    );
-//    if ($caller) {
-//      $string = $caller['file'] . ':' . $caller['line'] . "\n" . $string;
-//    }
-//
-//    echo nl2br(str_replace(' ', '&nbsp;', htmlentities($string)));
-//  }
 
     /**
      * Render HTML snipped to be displayd as a notice to admin
@@ -602,17 +461,18 @@ JAVASCRIPT;
             'true',
             get_admin_url()
         );
-        $label = __(
-            'Open Source Event Calendar has been disabled due to an error:', OSEC_TXT_DOM);
-        $message = '<div class="message error">';
-        $message .= '<p><strong>'.$label.'</strong></p>';
-        $message .= $this->_message;
-        $message .= ' <a href="'.$redirect_url.
-                    '" class="button button-primary ai1ec-dismissable">'.
-                    __( 'Try reactivating plugin', OSEC_TXT_DOM );
-        $message .= '</a>';
-        $message .= '<p></p></div>';
+        $label        = __(
+            'Open Source Event Calendar has been disabled due to an error:',
+            OSEC_TXT_DOM
+        );
+        $message      = '<div class="message error">';
+        $message      .= '<p><strong>' . $label . '</strong></p>';
+        $message      .= $this->message;
+        $message      .= ' <a href="' . $redirect_url .
+                         '" class="button button-primary ai1ec-dismissable">' .
+                         __('Try reactivating plugin', OSEC_TXT_DOM);
+        $message      .= '</a>';
+        $message      .= '<p></p></div>';
         echo $message;
     }
-
 }

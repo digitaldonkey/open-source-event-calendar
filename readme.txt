@@ -4,7 +4,8 @@ Tags: calendar, events, ics, ics feed, wordpress ical importer, google, block
 calendar, ical, iCalendar, all-in-one, events sync, events widget,
 calendar widget, Osec, Open source Event Calendar
 Requires WordPress at least: 6.6
-Tested up to: 6.6.2
+Tested up to: 6.7.1
+Requires PHP: 8.2
 Stable tag: 1.0.0
 License: GNU General Public License, version 3 (GPL-3.0)
 
@@ -13,14 +14,11 @@ categories, recurrence, and import/export of .ics feeds.
 
 == Description ==
 
-The [Open Source Event Calendar]() is based on the Timely All-in-one-event-calendar version v2.3.4. by
-[Timely](http://time.ly/). The calendar system combines clean visual design with a basic set of
-features to create share and aggregate Events in WordPress. Ical import is possible.
+The [Open Source Event Calendar]() is based on the Timely All-in-one-event-calendar version v2.3.4. by [Timely](http://time.ly/). The calendar system combines clean visual design with a basic set of features to create share and aggregate Events in WordPress. Ical import is possible.
 
-This Plugin is open source software in a very traditional sense.
-I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features.
+This Plugin is open source software in traditional sense. I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features.
 
-Osec calendar is most likely not compatible with any previous All-in-one-event-calendar release, but with spme effort you might get it working.
+Osec calendar is most likely not compatible with any previous All-in-one-event-calendar release, but with some effort you might get it working.
 
 = Import and Export Events =
 
@@ -34,9 +32,6 @@ calendar. You can even send events from a specific category or tag (or
 combination of categories and tags).
 
 = Features =
-
-This plugin has many features we hope will prove useful to users,
-including:
 
 * Import and Export (!) of Ical feeds without additional addons.
 ** Import other calendars automatically to display in your calendar.
@@ -56,6 +51,10 @@ any other system that accepts iCalendar (.ics) feeds.
 * Each event links to the original calendar.
 * Your calendar can be embedded into a WordPress page without needing
 to create template files or modify the theme.
+
+= Requirements =
+
+* PHP >= 8.2 is currently required at least for development. PHP 8.1 may work too with release version (using `composer install --no-dev`).
 
 = Languages =
 
@@ -90,7 +89,7 @@ If you love truly open source software and don't mind to get your hands dirty yo
 
 **Please do not ask for support at Time.ly for this Plugin**.
 
-Source and developer support you can find at https://github.com/digitaldonkey/all-in-one-event-calendar
+Source and developer support you can find at https://github.com/digitaldonkey/open-source-event-calendar
 
 == Other notes ==
 
@@ -100,7 +99,6 @@ Plan is to provide a simple shortcode-based Block before releasing 1.0.
 For now it might be better to use "Shortcodes".
 
 You may use the Widget with help of [X3P0 - Legacy Widget](https://wordpress.org/support/plugin/x3p0-legacy-widget/), but it is considered deprecated and will be removed in favor of "Shortcode-Block".
-
 
 = Shortcodes =
 

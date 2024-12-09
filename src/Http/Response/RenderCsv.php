@@ -12,7 +12,6 @@ namespace Osec\Http\Response;
  */
 class RenderCsv extends RenderStrategyAbstract
 {
-
     /*
      * @see RenderStrategyAbstract::render()
      */
@@ -20,12 +19,12 @@ class RenderCsv extends RenderStrategyAbstract
     {
         $this->_dump_buffers();
 
-        $now = gmdate('D, d M Y H:i:s');
-        $filename = $params[ 'filename' ];
+        $now      = gmdate('D, d M Y H:i:s');
+        $filename = $params['filename'];
 
         header('Expires: Tue, 03 Jul 2001 06:00:00 GMT');
         header('Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate');
-        header('Last-Modified: '.$now.' GMT');
+        header('Last-Modified: ' . $now . ' GMT');
 
         // force download
         header('Content-Type: application/force-download');
@@ -33,31 +32,34 @@ class RenderCsv extends RenderStrategyAbstract
         header('Content-Type: application/download');
 
         // disposition / encoding on response body
-        header('Content-Disposition: attachment;filename="'.addcslashes(
-                (string) $filename, '"').'"');
+        header(
+            'Content-Disposition: attachment;filename="' . addcslashes(
+                (string)$filename,
+                '"'
+            ) . '"'
+        );
         header('Content-Transfer-Encoding: binary');
 
-        $columns = $params[ 'columns' ];
-        for ($i = 0, $iMax = count( $columns ); $i < $iMax; $i++) {
+        $columns = $params['columns'];
+        for ($i = 0, $iMax = count($columns); $i < $iMax; $i++) {
             if ($i > 0) {
                 echo(',');
             }
-            echo($columns[ $i ]);
+            echo($columns[$i]);
         }
         echo("\n");
 
-        $data = $params[ 'data' ];
-        for ($i = 0, $iMax = count( $data ); $i < $iMax; $i++) {
-            $row = $data[ $i ];
-	        foreach ( $row as $j => $jValue ) {
-	            if ($j > 0) {
-	                echo(',');
-	            }
-	            echo( $jValue );
-	        }
-	        echo("\n");
+        $data = $params['data'];
+        for ($i = 0, $iMax = count($data); $i < $iMax; $i++) {
+            $row = $data[$i];
+            foreach ($row as $j => $jValue) {
+                if ($j > 0) {
+                    echo(',');
+                }
+                echo($jValue);
+            }
+            echo("\n");
         }
         ResponseHelper::stop();
     }
-
 }

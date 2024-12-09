@@ -15,7 +15,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class ExecutionLimitController extends OsecBaseClass
 {
-
     /**
      * Return time of last acquisition.
      *
@@ -29,37 +28,37 @@ class ExecutionLimitController extends OsecBaseClass
      */
     public function acquire($name, $timeout = 86400)
     {
-        $name = $this->safe_name($name);
-        $dbi = $this->app->db;
+        $name  = $this->safe_name($name);
+        $dbi   = $this->app->db;
         $entry = [
             'time' => time(),
-            'pid'  => getmypid()
+            'pid'  => getmypid(),
         ];
         $table = $dbi->get_table_name('options');
         $dbi->query('START TRANSACTION');
         $query = $dbi->prepare(
-            'SELECT option_value FROM '.$table.
+            'SELECT option_value FROM ' . $table .
             ' WHERE option_name = %s',
             $name
         );
-        $prev = $dbi->get_var($query);
+        $prev  = $dbi->get_var($query);
         if ( ! empty($prev)) {
-            $prev = json_decode((string) $prev, true);
+            $prev = json_decode((string)$prev, true);
         }
         if (
             ! empty($prev) &&
-            ((int) $prev[ 'time' ] + (int) $timeout) >= $entry[ 'time' ]
+            ((int)$prev['time'] + (int)$timeout) >= $entry['time']
         ) {
             $dbi->query('ROLLBACK');
 
             return false;
         }
         $query = ! $prev ? 'INSERT INTO' : 'UPDATE';
-        $query .= ' `'.$table.'` SET `option_name` = %s, `option_value` = %s, `autoload` = 0';
+        $query .= ' `' . $table . '` SET `option_name` = %s, `option_value` = %s, `autoload` = 0';
         if ( ! empty($prev)) {
             $query .= ' WHERE `option_name` = %s';
         }
-        $query = $dbi->prepare($query, $name, json_encode($entry), $name);
+        $query   = $dbi->prepare($query, $name, json_encode($entry), $name);
         $success = $dbi->query($query);
         if ( ! $success) {
             $dbi->query('ROLLBACK');
@@ -81,8 +80,8 @@ class ExecutionLimitController extends OsecBaseClass
     protected function safe_name($name)
     {
         $name = preg_replace('/[^A-Za-z_0-9\-]/', '_', $name);
-        $name = trim((string) preg_replace('/_+/', '_', $name), '_');
-        $name = 'osec_xlock_'.$name;
+        $name = trim((string)preg_replace('/_+/', '_', $name), '_');
+        $name = 'osec_xlock_' . $name;
 
         return substr($name, 0, 50);
     }
@@ -97,10 +96,9 @@ class ExecutionLimitController extends OsecBaseClass
     public function release($name)
     {
         return false !== $this->app->db->delete(
-                'options',
-                ['option_name' => $this->safe_name($name)],
-                ['%s']
-            );
+            'options',
+            ['option_name' => $this->safe_name($name)],
+            ['%s']
+        );
     }
-
 }

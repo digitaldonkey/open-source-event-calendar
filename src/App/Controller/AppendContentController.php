@@ -14,14 +14,13 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class AppendContentController extends OsecBaseClass
 {
-
     /**
      * Whether Html render strategy should append content in the_content
      * filter hook.
      *
      * @var bool
      */
-    private $_append_content = true;
+    private bool $shouldAppend = true;
 
     /**
      * Returns whether html render strategy should append content in the_content
@@ -31,7 +30,7 @@ class AppendContentController extends OsecBaseClass
      */
     public function append_content()
     {
-        return $this->_append_content;
+        return $this->shouldAppend;
     }
 
     /**
@@ -42,6 +41,6 @@ class AppendContentController extends OsecBaseClass
      */
     public function set_append_content($status)
     {
-        $this->_append_content = $status;
+        $this->shouldAppend = $status;
     }
 }

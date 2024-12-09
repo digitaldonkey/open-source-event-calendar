@@ -12,10 +12,8 @@ namespace Osec\App\Model\Filter;
  */
 class FilterAuthIds extends FilterInt
 {
-
     public function get_field()
     {
         return 'p.post_author';
     }
-
 }

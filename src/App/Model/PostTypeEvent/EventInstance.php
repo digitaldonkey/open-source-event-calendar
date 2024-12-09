@@ -13,7 +13,6 @@ use Osec\Bootstrap\OsecBaseClass;
 /**
  * Event instance management model.
  *
- *
  * @since        2.0
  * @author       Time.ly Network, Inc.
  * @package PostTypeEvent
@@ -21,12 +20,11 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class EventInstance extends OsecBaseClass
 {
-
     /**
      * Store locally instance of \Ai1ec_Dbi.
      *
      * @param  App  $app  Injected object
-     *   registry.
+     *  registry.
      */
     public function __construct(App $app)
     {
@@ -43,11 +41,11 @@ class EventInstance extends OsecBaseClass
      */
     public function clean($post_id, $instance_id = null)
     {
-        $where = ['post_id' => $post_id];
+        $where  = ['post_id' => $post_id];
         $format = ['%d'];
         if (null !== $instance_id) {
-            $where[ 'id' ] = $instance_id;
-            $format[] = '%d';
+            $where['id'] = $instance_id;
+            $format[]    = '%d';
         }
 
         return $this->app->db->delete(OSEC_DB__INSTANCES, $where, $format);
@@ -60,18 +58,18 @@ class EventInstance extends OsecBaseClass
      *
      * @return void Success.
      */
-    public function recreate(Event $event) : void
+    public function recreate(Event $event): void
     {
         $old_instances = $this->_load_instances($event->get('post_id'));
-        $instances = $this->_create_instances_collection($event);
-        $insert = [];
+        $instances     = $this->_create_instances_collection($event);
+        $insert        = [];
 
         foreach ($instances as $instance) {
-            if ( ! isset($old_instances[ $instance[ 'start' ].':'.$instance[ 'end' ] ])) {
+            if ( ! isset($old_instances[$instance['start'] . ':' . $instance['end']])) {
                 $insert[] = $instance;
                 continue;
             }
-            unset($old_instances[ $instance[ 'start' ].':'.$instance[ 'end' ] ]);
+            unset($old_instances[$instance['start'] . ':' . $instance['end']]);
         }
         $this->_remove_instances_by_ids(array_values($old_instances));
         $this->_add_instances($insert);
@@ -80,22 +78,22 @@ class EventInstance extends OsecBaseClass
     /**
      * Returns current instances map.
      *
-     * @param  int $post_id Post ID.
+     * @param  int  $post_id  Post ID.
      *
      * @return array Array of data.
      */
     protected function _load_instances($post_id)
     {
-        $query = $this->app->db->prepare(
-            'SELECT `id`, `start`, `end` FROM '.
-            $this->app->db->get_table_name(OSEC_DB__INSTANCES).
+        $query     = $this->app->db->prepare(
+            'SELECT `id`, `start`, `end` FROM ' .
+            $this->app->db->get_table_name(OSEC_DB__INSTANCES) .
             ' WHERE post_id = %d',
             $post_id
         );
-        $results = $this->app->db->get_results($query);
+        $results   = $this->app->db->get_results($query);
         $instances = [];
         foreach ($results as $result) {
-            $instances[ (int) $result->start.':'.(int) $result->end ] = (int) $result->id;
+            $instances[(int)$result->start . ':' . (int)$result->end] = (int)$result->id;
         }
 
         return $instances;
@@ -110,19 +108,19 @@ class EventInstance extends OsecBaseClass
      */
     protected function _create_instances_collection(Event $event)
     {
-        $events = [];
+        $events     = [];
         $event_item = [
             'post_id' => $event->get('post_id'),
             'start'   => $event->get('start')->format_to_gmt(),
             'end'     => $event->get('end')->format_to_gmt(),
         ];
-        $duration = $event->get('end')->diff_sec($event->get('start'));
+        $duration   = $event->get('end')->diff_sec($event->get('start'));
 
         $_start = $event->get('start')->format_to_gmt();
-        $_end = $event->get('end')->format_to_gmt();
+        $_end   = $event->get('end')->format_to_gmt();
 
         // Always cache initial instance
-        $events[ $_start ] = $event_item;
+        $events[$_start] = $event_item;
 
         if ($event->get('recurrence_rules') || $event->get('recurrence_dates')) {
             /**
@@ -137,7 +135,7 @@ class EventInstance extends OsecBaseClass
             $start_timezone = Timezones::factory($this->app)->get_name(
                 $start_datetime->get_timezone()
             );
-            $events += $this->create_instances_by_recurrence(
+            $events         += $this->create_instances_by_recurrence(
                 $event,
                 $event_item,
                 $_start,
@@ -152,7 +150,7 @@ class EventInstance extends OsecBaseClass
             // overriding 'RECURRENCE-ID' of the same iCalendar feed (by comparing the
             // UID, start date, recurrence). If so, then do not create duplicate
             // instance of event.
-//            $start = $event_item[ 'start' ];
+            // $start = $event_item[ 'start' ];
             $matching_event_id = null;
             if ($event->get('ical_uid')) {
                 $matching_event_id = $search_helper->get_matching_event_id(
@@ -195,21 +193,18 @@ class EventInstance extends OsecBaseClass
         $events = [];
 
         // TODO
-        //  There are more bugs in here. We need to test all options.
-        //  We need TESTS for all rrule options you can select in Frontend.
-
+        // There are more bugs in here. We need to test all options.
+        // We need TESTS for all rrule options you can select in Frontend.
 
         $origEventTime = new DT($_start, $timezone);
-        $wdate = $origEventTime->getObject();
-
+        $wdate         = $origEventTime->getObject();
 
         $recurrenceEndDate = clone $origEventTime->getObject();
         //
         // TODO Seems we repeat for max 3 Years.
-        //   Shouldn't this be a transparent by having a setting in App?
+        // Shouldn't this be a transparent by having a setting in App?
         //
         $recurrenceEndDate->modify('+ 3 years');
-
 
         $recurrence_dates = [];
         if ($event->get('recurrence_dates')) {
@@ -253,11 +248,11 @@ class EventInstance extends OsecBaseClass
 
         // Add the instances
         foreach (array_keys($recurrence_dates) as $timestamp) {
-            if ( ! isset($exclude_dates[ $timestamp ])) {
-                $events[ $timestamp ] = [
-                    'post_id' => $event_instance[ 'post_id' ],
+            if ( ! isset($exclude_dates[$timestamp])) {
+                $events[$timestamp] = [
+                    'post_id' => $event_instance['post_id'],
                     'start'   => $timestamp,
-                    'end'     => (int) $timestamp + $duration,
+                    'end'     => (int)$timestamp + $duration,
                 ];
             }
         }
@@ -265,39 +260,39 @@ class EventInstance extends OsecBaseClass
         return $events;
     }
 
-    //  /**
-    //   * Check if given date match dates in EXDATES rule.
-    //   *
-    //   * @param string $date Date to check.
-    //   * @param string $ics_rule ICS EXDATES rule.
-    //   * @param string $timezone Timezone to evaluate value in.
-    //   *
-    //   * @return bool True if given date is in rule.
-    //   */
-    //  public function date_match_exdates($date, $ics_rule, $timezone) {
-    //    $ranges = $this->_get_date_ranges($ics_rule, $timezone);
-    //    foreach ($ranges as $interval) {
-    //      if ($date >= $interval[0] && $date <= $interval[1]) {
-    //        return TRUE;
-    //      }
-    //      if ($date <= $interval[0]) {
-    //        break;
-    //      }
-    //    }
-    //    return FALSE;
-    //  }
+    // **
+    // * Check if given date match dates in EXDATES rule.
+    // *
+    // * @param string $date Date to check.
+    // * @param string $ics_rule ICS EXDATES rule.
+    // * @param string $timezone Timezone to evaluate value in.
+    // *
+    // * @return bool True if given date is in rule.
+    // */
+    // public function date_match_exdates($date, $ics_rule, $timezone) {
+    // $ranges = $this->_get_date_ranges($ics_rule, $timezone);
+    // foreach ($ranges as $interval) {
+    // if ($date >= $interval[0] && $date <= $interval[1]) {
+    // return true;
+    // }
+    // if ($date <= $interval[0]) {
+    // break;
+    // }
+    // }
+    // return false;
+    // }
 
-    protected function _populate_recurring_dates(array &$dates, string $rule, DT $start, $timezone) : void
+    protected function _populate_recurring_dates(array &$dates, string $rule, DT $start, $timezone): void
     {
-        foreach (explode(',', (string) $rule) as $date) {
+        foreach (explode(',', (string)$rule) as $date) {
             $i_date = clone $start;
-            $spec = sscanf($date, '%04d%02d%02d');
+            $spec   = sscanf($date, '%04d%02d%02d');
             $i_date->set_date(
-                $spec[ 0 ],
-                $spec[ 1 ],
-                $spec[ 2 ]
+                $spec[0],
+                $spec[1],
+                $spec[2]
             );
-            $dates[ $i_date->format_to_gmt() ] = true;
+            $dates[$i_date->format_to_gmt()] = true;
         }
     }
 
@@ -319,14 +314,18 @@ class EventInstance extends OsecBaseClass
         string $timezone
     ) {
         $unprocessedData = [];
-        $ignoreKeys = [
+        $ignoreKeys      = [
             'EXDATE',
             'RDATE',
         ];
 
-        $rulesArray = array_filter(RecurFactory::parseRexrule($rrule), function ($k) use ($ignoreKeys) {
-            return ! in_array($k, $ignoreKeys);
-        }, ARRAY_FILTER_USE_KEY);
+        $rulesArray = array_filter(
+            RecurFactory::parseRexrule($rrule),
+            function ($k) use ($ignoreKeys) {
+                return ! in_array($k, $ignoreKeys);
+            },
+            ARRAY_FILTER_USE_KEY
+        );
 
         if ( ! empty($rulesArray)) {
             date_default_timezone_set($timezone);
@@ -342,10 +341,10 @@ class EventInstance extends OsecBaseClass
             foreach ($unprocessedData as $dateStamp => $bool) {
                 $instanceDate = new DateTime($dateStamp);
                 $instanceDate->setTime(
-                    (int) $wdate->format('H'),
-                    (int) $wdate->format('i'),
+                    (int)$wdate->format('H'),
+                    (int)$wdate->format('i'),
                 );
-                $data[ $instanceDate->getTimestamp() ] = $bool;
+                $data[$instanceDate->getTimestamp()] = $bool;
             }
         }
     }
@@ -362,11 +361,11 @@ class EventInstance extends OsecBaseClass
         if (empty($ids)) {
             return false;
         }
-        $query = 'DELETE FROM '.$this->app->db->get_table_name(
-                OSEC_DB__INSTANCES
-            ).' WHERE id IN (';
-        $ids = array_filter(array_map('intval', $ids));
-        $query .= implode(',', $ids).')';
+        $query = 'DELETE FROM ' . $this->app->db->get_table_name(
+            OSEC_DB__INSTANCES
+        ) . ' WHERE id IN (';
+        $ids   = array_filter(array_map('intval', $ids));
+        $query .= implode(',', $ids) . ')';
         $this->app->db->query($query);
 
         return true;
@@ -383,7 +382,9 @@ class EventInstance extends OsecBaseClass
     {
         $chunks = array_chunk($instances, 50);
         foreach ($chunks as $chunk) {
-            $query = 'INSERT INTO '.$this->app->db->get_table_name(OSEC_DB__INSTANCES) . '(`post_id`, `start`, `end`) VALUES';
+            $query = 'INSERT INTO ' . $this->app->db->get_table_name(
+                OSEC_DB__INSTANCES
+            ) . '(`post_id`, `start`, `end`) VALUES';
             $chunk = array_map(
                 $this->app->db->array_value_to_sql_value(...),
                 $chunk
@@ -397,7 +398,7 @@ class EventInstance extends OsecBaseClass
      * Generate and store instance entries in database for given event.
      *
      * @param  Event  $event  Instance of event to
-     *   build_recurrence_rules_array entries for.
+     *  build_recurrence_rules_array entries for.
      *
      * @return bool Success.
      */
@@ -423,22 +424,21 @@ class EventInstance extends OsecBaseClass
     protected function _get_date_ranges($date_list, $timezone)
     {
         static $ranges = [];
-        if ( ! isset($ranges[ $date_list ])) {
-            $ranges[ $date_list ] = [];
-            $exploded = explode(',', $date_list);
+        if ( ! isset($ranges[$date_list])) {
+            $ranges[$date_list] = [];
+            $exploded           = explode(',', $date_list);
             sort($exploded);
             foreach ($exploded as $date) {
                 // COMMENT on `rtrim( $date, 'Z' )`:
                 // user selects exclusion date in event timezone thus it
                 // must be parsed as such as opposed to UTC which happen
                 // when 'Z' is preserved.
-                $date = new DT(rtrim($date, 'Z'), $timezone);
-                $date = (int) $date->format_to_gmt();
-                $ranges[ $date_list ][] = [$date, $date + (24 * 60 * 60) - 1];
+                $date                 = new DT(rtrim($date, 'Z'), $timezone);
+                $date                 = (int)$date->format_to_gmt();
+                $ranges[$date_list][] = [$date, $date + (24 * 60 * 60) - 1];
             }
         }
 
-        return $ranges[ $date_list ];
+        return $ranges[$date_list];
     }
-
 }

@@ -16,7 +16,6 @@ use Osec\App\View\Admin\AdminPageAbstract;
  */
 class EnvironmentCheck extends OsecBaseClass
 {
-
     /**
      * Runs checks for necessary config options.
      *
@@ -26,7 +25,7 @@ class EnvironmentCheck extends OsecBaseClass
     {
         global $plugin_page, $wp_rewrite;
 
-        $role = get_role('administrator');
+        $role         = get_role('administrator');
         $current_user = get_userdata(get_current_user_id());
         if (
             ! is_object($role) ||
@@ -46,21 +45,25 @@ class EnvironmentCheck extends OsecBaseClass
         do_action('osec_env_check');
 
         $notificationApi = NotificationAdmin::factory($this->app);
-        $notifications = [];
+        $notifications   = [];
 
         // check if is set calendar page
         if ( ! $this->app->settings->get('calendar_page_id')) {
-            $msg = I18n::__(
+            $msg             = I18n::__(
                 'Select an option in the <strong>Calendar page</strong> dropdown list.'
             );
             $notifications[] = $msg;
         }
-        if ($plugin_page !== AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings'
+        if (
+            $plugin_page !== AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings'
             && ! empty($notifications)
         ) {
             if ($current_user->has_cap('manage_osec_options')) {
                 $msg = sprintf(
-                    I18n::__('The plugin is installed, but has not been configured. <a href="%s">Click here to set it up now &raquo;</a>'),
+                    I18n::__(
+                        'The plugin is installed, but has not been configured. '
+                        . '<a href="%s">Click here to set it up now &raquo;</a>'
+                    ),
                     admin_url(OSEC_SETTINGS_BASE_URL)
                 );
                 $notificationApi->store(
@@ -71,7 +74,8 @@ class EnvironmentCheck extends OsecBaseClass
                 );
             } else {
                 $msg = I18n::__(
-                    'The plugin is installed, but has not been configured. Please log in as an Administrator to set it up.'
+                    'The plugin is installed, but has not been configured. '
+                    . 'Please log in as an Administrator to set it up.'
                 );
                 $notificationApi->store(
                     $msg,
@@ -87,17 +91,18 @@ class EnvironmentCheck extends OsecBaseClass
             $notificationApi->store($msg, 'updated', 2, [NotificationAdmin::RCPT_ADMIN]);
         }
 
-        $option = $this->app->options;
+        $option  = $this->app->options;
         $rewrite = $option->get('osec_force_flush_rewrite_rules');
-        if ( ! $rewrite
-             || ! is_object($wp_rewrite)
-             || ! isset($wp_rewrite->rules)
-             || 0 === count($wp_rewrite->rules)
+        if (
+            ! $rewrite
+            || ! is_object($wp_rewrite)
+            || ! isset($wp_rewrite->rules)
+            || empty($wp_rewrite->rules)
+            || 0 === count($wp_rewrite->rules)
         ) {
             return;
         }
         flush_rewrite_rules(true);
         $option->set('osec_force_flush_rewrite_rules', false);
     }
-
 }

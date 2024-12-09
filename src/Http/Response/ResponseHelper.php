@@ -14,7 +14,6 @@ use Exception;
  */
 class ResponseHelper
 {
-
     /**
      * Perform redirect to desired location and stop script execution after that
      *
@@ -28,11 +27,10 @@ class ResponseHelper
      * @return void Method does call {@see self::stop()} to halt further
      *                  script execution unless mocked
      * @uses wp_redirect To create actual headers.
-     *
      */
-    public static function redirect($location, $code = 302) : void
+    public static function redirect($location, $code = 302): void
     {
-        header('Location: '.$location, true, $code);
+        header('Location: ' . $location, true, $code);
         self::stop();
     }
 
@@ -43,7 +41,7 @@ class ResponseHelper
      *
      * @return never Method does not return
      */
-    public static function stop($code = 0) : never
+    public static function stop($code = 0): never
     {
         exit($code);
     }
@@ -80,7 +78,7 @@ class ResponseHelper
             );
         }
         if ( ! is_array($input)) {
-            $input = (array) $input;
+            $input = (array)$input;
         }
 
         return array_map([self::class, 'utf8'], $input);

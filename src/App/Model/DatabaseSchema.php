@@ -8,10 +8,10 @@ use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\DatabaseErrorException;
 
 // TODO
-//  There was a very complicated Schema management.
-//  Not really disabled but deactivated the $this->_check_delta() --> sucess ...
-//  So far tested only against blank/new DB, so enabling works.
-//  Needs review,
+// There was a very complicated Schema management.
+// Not really disabled but deactivated the $this->_check_delta() --> sucess ...
+// So far tested only against blank/new DB, so enabling works.
+// Needs review,
 
 /**
  * Event manage form backend view layer.
@@ -25,16 +25,14 @@ use Osec\Exception\DatabaseErrorException;
  */
 class DatabaseSchema extends OsecBaseClass
 {
+    protected ?array $schemaDelta;
 
-
-    protected $_schema_delta;
-
-    protected array $_prefixes;
+    protected array $prefixes;
 
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->_prefixes = [
+        $this->prefixes = [
             $this->app->db->get_table_name('osec_'),
             $this->app->db->get_table_name(),
             '',
@@ -52,7 +50,7 @@ class DatabaseSchema extends OsecBaseClass
     public function verifySqlSchema()
     {
         $schema_sql = $this->get_current_db_schema();
-        $version = sha1($schema_sql);
+        $version    = sha1($schema_sql);
 
         if ($this->app->options->get('osec_db_version') != $version) {
             if (
@@ -65,7 +63,6 @@ class DatabaseSchema extends OsecBaseClass
                  * @since 1.0
                  *
                  * @param $do_schema_update
-                 *
                  */
                 apply_filters('osec_perform_scheme_update', $do_schema_update = true)
                 && $this->apply_delta($schema_sql)
@@ -89,10 +86,10 @@ class DatabaseSchema extends OsecBaseClass
         // = Create table events =
         // =======================
         $table_name = $dbi->get_table_name(OSEC_DB__EVENTS);
-        $sql = "CREATE TABLE $table_name (
-				post_id bigint(20) NOT NULL,
-				start int(10) UNSIGNED NOT NULL,
-				end int(10) UNSIGNED,
+        $sql        = "CREATE TABLE $table_name (
+				post_id bigint NOT NULL,
+				start bigint UNSIGNED NOT NULL,
+				end bigint UNSIGNED,
 				timezone_name varchar(50),
 				allday tinyint(1) NOT NULL,
 				instant_event tinyint(1) NOT NULL DEFAULT 0,
@@ -121,7 +118,6 @@ class DatabaseSchema extends OsecBaseClass
 				show_coordinates tinyint(1),
 				latitude decimal(20,15),
 				longitude decimal(20,15),
-				force_regenerate tinyint(1) NOT NULL DEFAULT 0,
 				PRIMARY KEY  (post_id),
 				KEY feed_source (ical_feed_url)
 				) CHARACTER SET utf8;";
@@ -130,18 +126,18 @@ class DatabaseSchema extends OsecBaseClass
         // = Create table instances =
         // ==========================
         $table_name = $dbi->get_table_name(OSEC_DB__INSTANCES);
-        $sql .= "CREATE TABLE $table_name (
-				id bigint(20) NOT NULL AUTO_INCREMENT,
-				post_id bigint(20) NOT NULL,
-				start int(10) unsigned NOT NULL,
-				end int(10) unsigned NOT NULL,
+        $sql        .= "CREATE TABLE $table_name (
+				id bigint NOT NULL AUTO_INCREMENT,
+				post_id bigint NOT NULL,
+				start bigint unsigned NOT NULL,
+				end bigint unsigned NOT NULL,
 				PRIMARY KEY  (id),
 				UNIQUE KEY evt_instance (post_id,start)
 				) CHARACTER SET utf8;";
 
         if (OSEC_DEBUG) {
-            $debug_view_name = $table_name.'_readable_date';
-            $sql .= " CREATE VIEW `$debug_view_name` AS SELECT
+            $debug_view_name = $table_name . '_readable_date';
+            $sql             .= " CREATE VIEW `$debug_view_name` AS SELECT
          id,
          post_id,
          `start`, 
@@ -151,22 +147,20 @@ class DatabaseSchema extends OsecBaseClass
         FROM $table_name; ";
         }
 
-
         // ================================
         // = Create table category colors =
         // ================================
         $table_name = $dbi->get_table_name(OSEC_DB__META);
-        $sql .= "CREATE TABLE $table_name (
-			term_id bigint(20) NOT NULL,
+        $sql        .= "CREATE TABLE $table_name (
+			term_id bigint NOT NULL,
 			term_color varchar(255) NOT NULL,
 			term_image varchar(254) NULL DEFAULT NULL,
 			PRIMARY KEY  (term_id)
 			) CHARACTER SET utf8;";
 
-
         $table_name = $dbi->get_table_name(OSEC_DB__FEEDS);
-        $sql .= "CREATE TABLE $table_name (
-					feed_id bigint(20) NOT NULL AUTO_INCREMENT,
+        $sql        .= "CREATE TABLE $table_name (
+					feed_id bigint NOT NULL AUTO_INCREMENT,
 					feed_url varchar(255) NOT NULL,
 					feed_name varchar(255) NOT NULL,
 					feed_category varchar(255) NOT NULL,
@@ -199,25 +193,26 @@ class DatabaseSchema extends OsecBaseClass
      *
      * @throws DatabaseErrorException In case of any error
      */
-    public function apply_delta($query) : bool {
+    public function apply_delta($query): bool
+    {
         if ( ! function_exists('dbDelta')) {
-            require_once ABSPATH.'wp-admin/includes/upgrade.php';
+            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         }
-// WAS
-//        $success = false;
-//        $this->_schema_delta = array();
-//        $queries = $this->_prepare_delta( $query );
-//        $result  = dbDelta( $queries );
-//        $success = $this->_check_delta();
-//        return $success;
+        // WAS
+        // $success = false;
+        // $this->schemaDelta = [];
+        // $queries = $this->_prepare_delta( $query );
+        // $result  = dbDelta( $queries );
+        // $success = $this->_check_delta();
+        // return $success;
 
-        $success = false;
-        $this->_schema_delta = [];
-        $queries = $this->_prepare_delta($query);
-        $result = dbDelta($queries);
-        $success = $this->_check_delta();
+        $success           = false;
+        $this->schemaDelta = [];
+        $queries           = $this->_prepare_delta($query);
+        $result              = dbDelta($queries);
+        $success             = $this->_check_delta();
         // TODO
-        //   THIS IS A REAL MESS
+        // THIS IS A REAL MESS
 
         return $success;
     }
@@ -248,33 +243,33 @@ class DatabaseSchema extends OsecBaseClass
 			([^()]*)
 			#six';
         foreach ($queries as $query) {
-            if (preg_match($ctable_regexp, (string) $query, $matches)) {
-                $this->_schema_delta[ $matches[ 1 ] ] = [
-                    'tblname' => $matches[ 1 ],
+            if (preg_match($ctable_regexp, (string)$query, $matches)) {
+                $this->schemaDelta[$matches[1]] = [
+                    'tblname' => $matches[1],
                     'cryptic' => null,
                     'creator' => '',
                     'columns' => [],
                     'indexes' => [],
-                    'content' => preg_replace('#`#', '', $matches[ 2 ]),
-                    'clauses' => $matches[ 3 ]
+                    'content' => preg_replace('#`#', '', $matches[2]),
+                    'clauses' => $matches[3],
                 ];
             }
         }
         $this->_parse_delta();
         $sane_queries = [];
-        foreach ($this->_schema_delta as $table => $definition) {
-            $create = 'CREATE TABLE '.$table." (\n";
-            foreach ($definition[ 'columns' ] as $column) {
-                $create .= '    '.$column[ 'create' ].",\n";
+        foreach ($this->schemaDelta as $table => $definition) {
+            $create = 'CREATE TABLE ' . $table . " (\n";
+            foreach ($definition['columns'] as $column) {
+                $create .= '    ' . $column['create'] . ",\n";
             }
-            foreach ($definition[ 'indexes' ] as $index) {
-                $create .= '    '.$index[ 'create' ].",\n";
+            foreach ($definition['indexes'] as $index) {
+                $create .= '    ' . $index['create'] . ",\n";
             }
-            $create = substr($create, 0, -2)."\n";
-            $create .= ')'.$definition[ 'clauses' ];
-            $this->_schema_delta[ $table ][ 'creator' ] = $create;
-            $this->_schema_delta[ $table ][ 'cryptic' ] = md5($create);
-            $sane_queries[] = $create;
+            $create                               = substr($create, 0, -2) . "\n";
+            $create                               .= ')' . $definition['clauses'];
+            $this->schemaDelta[$table]['creator'] = $create;
+            $this->schemaDelta[$table]['cryptic'] = md5($create);
+            $sane_queries[]                       = $create;
         }
 
         return $sane_queries;
@@ -292,40 +287,42 @@ class DatabaseSchema extends OsecBaseClass
      */
     protected function _parse_delta()
     {
-        foreach ($this->_schema_delta as $table => $definitions) {
-            $listing = explode("\n", (string) $definitions[ 'content' ]);
+        foreach ($this->schemaDelta as $table => $definitions) {
+            $listing = explode("\n", (string)$definitions['content']);
             $listing = array_filter($listing, $this->_is_not_empty_line(...));
-            $lines = count($listing);
-            $lineno = 0;
+            $lines   = count($listing);
+            $lineno  = 0;
             foreach ($listing as $line) {
                 ++$lineno;
-                $line = trim((string) preg_replace('#\s+#', ' ', $line));
+                $line     = trim((string)preg_replace('#\s+#', ' ', $line));
                 $line_new = rtrim($line, ',');
                 if (
                     $lineno < $lines && $line === $line_new ||
                     $lineno == $lines && $line !== $line_new
                 ) {
                     throw new DatabaseErrorException(
-                        'Missing comma in line \''.$line.'\''
+                        'Missing comma in line \'' . $line . '\''
                     );
                 }
                 $line = $line_new;
                 unset($line_new);
                 $type = 'indexes';
                 if (false === ($record = $this->_parse_index($line))) {
-                    $type = 'columns';
+                    $type   = 'columns';
                     $record = $this->_parse_column($line);
                 }
-                if (isset(
-                    $this->_schema_delta[ $table ][ $type ][ $record[ 'name' ] ]
-                )) {
-                    throw new ErrorException (
-                        'For table `'.$table.'` entry '.$type.
-                        ' named `'.$record[ 'name' ].'` was declared twice'.
-                        ' in '.$definitions
+                if (
+                    isset(
+                        $this->schemaDelta[$table][$type][$record['name']]
+                    )
+                ) {
+                    throw new ErrorException(
+                        'For table `' . $table . '` entry ' . $type .
+                        ' named `' . $record['name'] . '` was declared twice' .
+                        ' in ' . $definitions
                     );
                 }
-                $this->_schema_delta[ $table ][ $type ][ $record[ 'name' ] ] = $record;
+                $this->schemaDelta[$table][$type][$record['name']] = $record;
             }
         }
     }
@@ -350,47 +347,51 @@ class DatabaseSchema extends OsecBaseClass
             '',
             $description
         );
-        $details = explode(' ', (string) $description);
-        $index = ['name' => null, 'content' => [], 'create' => ''];
-        $details[ 0 ] = strtoupper($details[ 0 ]);
-        switch ($details[ 0 ]) {
+        $details     = explode(' ', (string)$description);
+        $index       = [
+            'name'    => null,
+            'content' => [],
+            'create'  => '',
+        ];
+        $details[0]  = strtoupper($details[0]);
+        switch ($details[0]) {
             case 'PRIMARY':
-                $index[ 'name' ] = 'PRIMARY';
-                $index[ 'create' ] = 'PRIMARY KEY ';
+                $index['name']   = 'PRIMARY';
+                $index['create'] = 'PRIMARY KEY ';
                 break;
 
             case 'UNIQUE':
-                $name = $details[ 1 ];
+                $name = $details[1];
                 if (
                     0 === strcasecmp('KEY', $name) ||
                     0 === strcasecmp('INDEX', $name)
                 ) {
-                    $name = $details[ 2 ];
+                    $name = $details[2];
                 }
-                $index[ 'name' ] = $name;
-                $index[ 'create' ] = 'UNIQUE KEY '.$name;
+                $index['name']   = $name;
+                $index['create'] = 'UNIQUE KEY ' . $name;
                 break;
 
             case 'KEY':
             case 'INDEX':
-                $index[ 'name' ] = $details[ 1 ];
-                $index[ 'create' ] = 'KEY '.$index[ 'name' ];
+                $index['name']   = $details[1];
+                $index['create'] = 'KEY ' . $index['name'];
                 break;
 
             default:
                 return false;
         }
-        $index[ 'content' ] = $this->_parse_index_content($description);
-        $index[ 'create' ] .= ' (';
-        foreach ($index[ 'content' ] as $column => $length) {
-            $index[ 'create' ] .= $column;
+        $index['content'] = $this->_parse_index_content($description);
+        $index['create']  .= ' (';
+        foreach ($index['content'] as $column => $length) {
+            $index['create'] .= $column;
             if (null !== $length) {
-                $index[ 'create' ] .= '('.$length.')';
+                $index['create'] .= '(' . $length . ')';
             }
-            $index[ 'create' ] .= ',';
+            $index['create'] .= ',';
         }
-        $index[ 'create' ] = substr($index[ 'create' ], 0, -1);
-        $index[ 'create' ] .= ')';
+        $index['create'] = substr($index['create'], 0, -1);
+        $index['create'] .= ')';
 
         return $index;
     }
@@ -409,30 +410,30 @@ class DatabaseSchema extends OsecBaseClass
      */
     protected function _parse_index_content($description)
     {
-        if ( ! preg_match('#^[^(]+\((.+)\)$#', (string) $description, $matches)) {
+        if ( ! preg_match('#^[^(]+\((.+)\)$#', (string)$description, $matches)) {
             throw new DatabaseErrorException(
-                'Invalid index description '.$description
+                'Invalid index description ' . $description
             );
         }
-        $columns = [];
-        $textual = explode(',', $matches[ 1 ]);
+        $columns       = [];
+        $textual       = explode(',', $matches[1]);
         $column_regexp = '#\s*([^(]+)(?:\s*\(\s*(\d+)\s*\))?\s*#sx';
         foreach ($textual as $column) {
             if (
                 ! preg_match($column_regexp, $column, $matches) || (
-                    isset($matches[ 2 ]) &&
-                    (string) $matches[ 2 ] !== (string) intval($matches[ 2 ])
+                    isset($matches[2]) &&
+                    (string)$matches[2] !== (string)intval($matches[2])
                 )
             ) {
                 throw new DatabaseErrorException(
-                    'Invalid index (columns) description '.$description.
-                    ' as per \''.$column.'\''
+                    'Invalid index (columns) description ' . $description .
+                    ' as per \'' . $column . '\''
                 );
             }
-            $matches[ 1 ] = trim($matches[ 1 ]);
-            $columns[ $matches[ 1 ] ] = null;
-            if (isset($matches[ 2 ])) {
-                $columns[ $matches[ 1 ] ] = (int) $matches[ 2 ];
+            $matches[1]           = trim($matches[1]);
+            $columns[$matches[1]] = null;
+            if (isset($matches[2])) {
+                $columns[$matches[1]] = (int)$matches[2];
             }
         }
 
@@ -480,56 +481,40 @@ class DatabaseSchema extends OsecBaseClass
 		$#six';
         if ( ! preg_match($column_regexp, $description, $matches)) {
             throw new DatabaseErrorException(
-                'Invalid column description '.$description
+                'Invalid column description ' . $description
             );
         }
         $column = [
-            'name'    => $matches[ 1 ],
+            'name' => $matches[1],
             'content' => [],
         ];
-        if (0 === strcasecmp('boolean', $matches[ 2 ])) {
-            $matches[ 2 ] = 'tinyint(1)';
+        if (0 === strcasecmp('boolean', $matches[2])) {
+            $matches[2] = 'tinyint(1)';
         }
-        $column[ 'content' ][ 'type' ] = $matches[ 2 ];
-        $column[ 'content' ][ 'NULL' ] = (
-            ! isset($matches[ 3 ]) ||
-            0 !== strcasecmp('NOT NULL', trim($matches[ 3 ]))
+        $column['content']['type'] = $matches[2];
+        $column['content']['NULL'] = (
+            ! isset($matches[3]) ||
+            0 !== strcasecmp('NOT NULL', trim($matches[3]))
         );
-        $column[ 'create' ] = $column[ 'name' ].' '.$column[ 'content' ][ 'type' ];
-        if (isset($matches[ 3 ])) {
-            $column[ 'create' ] .= ' '.
-                                   implode(
-                                       ' ',
-                                       array_map(
-                                           'trim',
-                                           array_slice($matches, 3)
-                                       )
-                                   );
+        $column['create']          = $column['name'] . ' ' . $column['content']['type'];
+        if (isset($matches[3])) {
+            $column['create'] .= ' ' .
+                                 implode(
+                                     ' ',
+                                     array_map(
+                                         'trim',
+                                         array_slice($matches, 3)
+                                     )
+                                 );
         }
 
         return $column;
     }
 
-    public function uninstall(bool $purge = false)
-    {
-        if ($purge) {
-            $dbi = $this->app->db;
-            // Tables
-            $events = $dbi->get_table_name(OSEC_DB__EVENTS);
-            $event_instances = $dbi->get_table_name(OSEC_DB__INSTANCES);
-            $event_feeds = $dbi->get_table_name(OSEC_DB__FEEDS);
-            $event_category_meta = $dbi->get_table_name(OSEC_DB__META);
-            $dbi->query("DROP TABLE IF EXISTS $events, $event_instances, $event_feeds, $event_category_meta;");
-            // View
-            $debug_view_name = $event_instances.'_readable_date';
-            $dbi->query("DROP VIEW IF EXISTS $debug_view_name;");
-        }
-    }
-
     /**
      * _check_delta method
      *
-     * Given parsed schema definitions (in {@see self::$_schema_delta} map) this
+     * Given parsed schema definitions (in {@see self::$schemaDelta} map) this
      * method performs checks, to ensure that table exists, columns are of
      * expected type, and indexes match their definition in original query.
      *
@@ -539,54 +524,55 @@ class DatabaseSchema extends OsecBaseClass
      */
     protected function _check_delta()
     {
-        if (empty($this->_schema_delta)) {
+        if (empty($this->schemaDelta)) {
             return true;
         }
-        foreach ($this->_schema_delta as $table => $description) {
-
-            $currentTableColumns = $this->app->db->get_results('SHOW FULL COLUMNS FROM '.$table);
+        foreach ($this->schemaDelta as $table => $description) {
+            $currentTableColumns = $this->app->db->get_results('SHOW FULL COLUMNS FROM ' . $table);
 
             if (empty($currentTableColumns)) {
                 throw new DatabaseErrorException(
-                    'Required table `'.$table.'` was not created'
+                    'Required table `' . $table . '` was not created'
                 );
             }
             $db_column_names = [];
             foreach ($currentTableColumns as $column) {
-                if ( ! isset($description[ 'columns' ][ $column->Field ])) {
-                    if ($this->app->db->query(
-                        'ALTER TABLE `' .$table.
-                        '` DROP COLUMN `'.$column->Field.'`'
-                    )) {
+                if ( ! isset($description['columns'][$column->Field])) {
+                    if (
+                        $this->app->db->query(
+                            'ALTER TABLE `' . $table .
+                            '` DROP COLUMN `' . $column->Field . '`'
+                        )
+                    ) {
                         continue;
                     }
                     continue; // ignore so far
-                    //throw new DatabaseErrorException(
-                    //	'Unknown column `' . $column->Field .
-                    //	'` is present in table `' . $table . '`'
-                    //);
+                    // throw new DatabaseErrorException(
+                    // 'Unknown column `' . $column->Field .
+                    // '` is present in table `' . $table . '`'
+                    // );
                 }
-                $db_column_names[ $column->Field ] = $column->Field;
-                $type_db = $column->Type;
-                $collation = '';
+                $db_column_names[$column->Field] = $column->Field;
+                $type_db                         = $column->Type;
+                $collation                       = '';
                 if ($column->Collation) {
-                    $collation = ' CHARACTER SET '.
+                    $collation = ' CHARACTER SET ' .
                                  substr(
                                      $column->Collation,
                                      0,
                                      strpos($column->Collation, '_')
-                                 ).' COLLATE '.$column->Collation;
+                                 ) . ' COLLATE ' . $column->Collation;
                 }
-                $type_req = $description[ 'columns' ][ $column->Field ]
-                [ 'content' ][ 'type' ];
+                $type_req = $description['columns'][$column->Field]
+                ['content']['type'];
                 if (
                     false !== stripos(
-                        (string) $type_req,
+                        (string)$type_req,
                         ' COLLATE '
                     )
                 ) {
                     // suspend collation checking
-                    //$type_db .= $collation;
+                    // $type_db .= $collation;
                     $type_req = preg_replace(
                         '#^
 							(.+)
@@ -598,40 +584,44 @@ class DatabaseSchema extends OsecBaseClass
                         $type_req
                     );
                 }
-                $type_db = strtolower(
+                $type_db  = strtolower(
                     preg_replace('#\s+#', '', $type_db)
                 );
                 $type_req = strtolower(
                     preg_replace('#\s+#', '', $type_req)
                 );
+                // Mysql:5.x and mariadb return type(int)
+                // Mysql: 8.x does return the plain type.
+                // @see https://stackoverflow.com/a/60892835/308533.
+                $type_db = preg_replace('/^bigint(:?\([\d]+\))?(unsigned)?$/', 'bigint$2', $type_db);
                 if (0 !== strcmp($type_db, $type_req)) {
                     throw new DatabaseErrorException(
-                        'Field `'.$table.'`.`'.$column->Field.
+                        'Field `' . $table . '`.`' . $column->Field .
                         '` is of incompatible type'
                     );
                 }
                 if (
                     'YES' === $column->Null &&
-                    false === $description[ 'columns' ][ $column->Field ]
-                    [ 'content' ][ 'NULL' ] ||
+                    false === $description['columns'][$column->Field]
+                    ['content']['NULL'] ||
                     'NO' === $column->Null &&
-                    true === $description[ 'columns' ][ $column->Field ]
-                    [ 'content' ][ 'NULL' ]
+                    true === $description['columns'][$column->Field]
+                    ['content']['NULL']
                 ) {
                     throw new DatabaseErrorException(
-                        'Field `'.$table.'`.`'.$column->Field.
+                        'Field `' . $table . '`.`' . $column->Field .
                         '` NULLability is flipped'
                     );
                 }
             }
             if (
                 $missing = array_diff(
-                    array_keys($description[ 'columns' ]),
+                    array_keys($description['columns']),
                     $db_column_names
                 )
             ) {
                 throw new DatabaseErrorException(
-                    'In table `'.$table.'` fields are missing: '.
+                    'In table `' . $table . '` fields are missing: ' .
                     implode(', ', $missing)
                 );
             }
@@ -639,43 +629,42 @@ class DatabaseSchema extends OsecBaseClass
             $indexes = $this->get_indices($table);
 
             foreach ($indexes as $name => $definition) {
-                if ( ! isset($description[ 'indexes' ][ $name ])) {
+                if ( ! isset($description['indexes'][$name])) {
                     continue; // ignore so far
-                    //throw new DatabaseErrorException(
-                    //	'Unknown index `' . $name .
-                    //	'` is defined for table `' . $table . '`'
-                    //);
+                    // throw new DatabaseErrorException(
+                    // 'Unknown index `' . $name .
+                    // '` is defined for table `' . $table . '`'
+                    // );
                 }
 
-                $XXX = $description[ 'indexes' ][ $name ][ 'content' ];
-                $YYY = $definition[ 'columns' ];
+                $XXX = $description['indexes'][$name]['content'];
+                $YYY = $definition['columns'];
 
                 if (
                     $missed = array_diff_assoc(
-                        $description[ 'indexes' ][ $name ][ 'content' ],
-                        $definition[ 'columns' ]
+                        $description['indexes'][$name]['content'],
+                        $definition['columns']
                     )
                 ) {
                     throw new DatabaseErrorException(
-                        'Index `'.$name.
-                        '` definition for table `'.$table.'` has invalid '.
-                        ' fields: '.implode(', ', array_keys($missed))
+                        'Index `' . $name .
+                        '` definition for table `' . $table . '` has invalid ' .
+                        ' fields: ' . implode(', ', array_keys($missed))
                     );
                 }
             }
 
             if (
                 $missing = array_diff(
-                    array_keys($description[ 'indexes' ]),
+                    array_keys($description['indexes']),
                     array_keys($indexes)
                 )
             ) {
                 throw new DatabaseErrorException(
-                    'In table `'.$table.'` indexes are missing: '.
+                    'In table `' . $table . '` indexes are missing: ' .
                     implode(', ', $missing)
                 );
             }
-
         }
 
         return true;
@@ -692,30 +681,47 @@ class DatabaseSchema extends OsecBaseClass
      */
     public function get_indices($table)
     {
-//        if ( ! $this->_is_table($table)) {
-//            return [];
-//        }
-//        $list = $this->app->db->get_results('SHOW INDEX FROM `'.$table.'`');
-//        $currentTableIndexColumns = [];
-//        foreach ($list as $column) {
-//            $currentTableIndexColumns[ strtolower($column->Key_name) ] = $column->Key_name;
-//        }
-//
-//        return $currentTableIndexColumns;
-        $result    = $this->app->db->get_results('SHOW INDEX FROM `'.$table.'`');
-        $indices   = array();
-        foreach ( $result as $index ) {
+        // if ( ! $this->_is_table($table)) {
+        // return [];
+        // }
+        // $list = $this->app->db->get_results('SHOW INDEX FROM `'.$table.'`');
+        // $currentTableIndexColumns = [];
+        // foreach ($list as $column) {
+        // $currentTableIndexColumns[ strtolower($column->Key_name) ] = $column->Key_name;
+        // }
+        //
+        // return $currentTableIndexColumns;
+        $result  = $this->app->db->get_results('SHOW INDEX FROM `' . $table . '`');
+        $indices = [];
+        foreach ($result as $index) {
             $name = $index->Key_name;
-            if ( ! isset( $indices[$name] ) ) {
-                $indices[$name] = array(
+            if ( ! isset($indices[$name])) {
+                $indices[$name] = [
                     'name'    => $name,
-                    'columns' => array(),
-                    'unique'  => ! (bool)intval( $index->Non_unique ),
-                );
+                    'columns' => [],
+                    'unique'  => ! (bool)intval($index->Non_unique),
+                ];
             }
             $indices[$name]['columns'][$index->Column_name] = $index->Sub_part;
         }
+
         return $indices;
+    }
+
+    public function uninstall(bool $purge = false)
+    {
+        if ($purge) {
+            $dbi = $this->app->db;
+            // Tables
+            $events              = $dbi->get_table_name(OSEC_DB__EVENTS);
+            $event_instances     = $dbi->get_table_name(OSEC_DB__INSTANCES);
+            $event_feeds         = $dbi->get_table_name(OSEC_DB__FEEDS);
+            $event_category_meta = $dbi->get_table_name(OSEC_DB__META);
+            $dbi->query("DROP TABLE IF EXISTS $events, $event_instances, $event_feeds, $event_category_meta;");
+            // View
+            $debug_view_name = $event_instances . '_readable_date';
+            $dbi->query("DROP VIEW IF EXISTS $debug_view_name;");
+        }
     }
 
     /**
@@ -731,7 +737,7 @@ class DatabaseSchema extends OsecBaseClass
             $this->app->db->prepare('SHOW TABLES LIKE %s', $table)
         );
 
-        return ((string) $table === (string) $name);
+        return ((string)$table === (string)$name);
     }
 
     /**

@@ -11,11 +11,10 @@ namespace Osec\Theme;
  */
 class FileImage extends FileAbstract
 {
-
     /**
      * @var string The url of the image file.
      */
-    protected $_url;
+    protected $url;
 
     /**
      * Get the URL to the image file.
@@ -24,21 +23,21 @@ class FileImage extends FileAbstract
      */
     public function get_url()
     {
-        return $this->_url;
+        return $this->url;
     }
 
     public function process_file()
     {
         $files_to_check = [];
-        foreach (array_keys($this->_paths) as $path) {
-            $files_to_check[ $path ] =
-                $path.'img'.DIRECTORY_SEPARATOR.$this->_name;
+        foreach (array_keys($this->paths) as $path) {
+            $files_to_check[$path] =
+                $path . 'img' . DIRECTORY_SEPARATOR . $this->_name;
         }
         foreach ($files_to_check as $path => $file) {
             if (file_exists($file)) {
-                // Construct URL based on base URL available in $this->_paths array.
-                $this->_url = $this->_paths[ $path ].'/img/'.$this->_name;
-                $this->_content = $file;
+                // Construct URL based on base URL available in $this->paths array.
+                $this->url     = $this->paths[$path] . '/img/' . $this->_name;
+                $this->content = $file;
 
                 return true;
             }

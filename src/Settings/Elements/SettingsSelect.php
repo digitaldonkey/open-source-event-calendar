@@ -16,15 +16,13 @@ use Osec\Theme\ThemeLoader;
  */
 class SettingsSelect extends SettingsAbstract
 {
-
-
-    public function render($html = '', $wrap = true) : string
+    public function render($html = '', $wrap = true): string
     {
-        $options = $this->_args[ 'renderer' ][ 'options' ];
+        $options = $this->args['renderer']['options'];
 
         if ( ! is_array($options)) {
-            $callback = explode(':', (string) $options);
-            if (str_starts_with($callback[ 0 ], 'Osec')) {
+            $callback = explode(':', (string)$options);
+            if (str_starts_with($callback[0], 'Osec')) {
                 if (strpos($options, '::') !== false) {
                     $options = $options();
                 } else {
@@ -46,7 +44,7 @@ class SettingsSelect extends SettingsAbstract
          *
          * @param  array  $options  Select options
          */
-        $options = apply_filters('osec_settings_select_options', $options, $this->_args[ 'id' ]);
+        $options   = apply_filters('osec_settings_select_options', $options, $this->args['id']);
         $fieldsets = [];
         foreach ($options as $key => &$option) {
             // if the key is a string, it's an optgroup
@@ -56,28 +54,28 @@ class SettingsSelect extends SettingsAbstract
                 }
             } else {
                 $option = $this->_set_selected_value($option);
-                if (isset($option[ 'settings' ])) {
+                if (isset($option['settings'])) {
                     throw new Exception('This case must not exists anymore.');
-                    //  $fieldsets[] = $this->_render_fieldset(
-                    //    $option['settings'],
-                    //    $option['value'],
-                    //    $this->_args['id'],
-                    //    isset($option['args']['selected'])
-                    //  );
+                    // $fieldsets[] = $this->_render_fieldset(
+                    // $option['settings'],
+                    // $option['value'],
+                    // $this->args['id'],
+                    // isset($option['args']['selected'])
+                    // );
                 }
             }
         }
         $select_args = [];
-        $args = [
-            'id'         => $this->_args[ 'id' ],
-            'label'      => $this->_args[ 'renderer' ][ 'label' ],
+        $args        = [
+            'id'         => $this->args['id'],
+            'label'      => $this->args['renderer']['label'],
             'attributes' => $select_args,
             'options'    => $options,
             'fieldsets'  => $fieldsets,
         ];
-        $html = ThemeLoader::factory($this->app)
-                           ->get_file('setting/select.twig', $args, true)
-                           ->get_content();
+        $html .= ThemeLoader::factory($this->app)
+                                  ->get_file('setting/select.twig', $args, true)
+                                  ->get_content();
 
         return $this->warp_in_form_group($html);
     }
@@ -91,8 +89,8 @@ class SettingsSelect extends SettingsAbstract
      */
     protected function _set_selected_value(array $option)
     {
-        if ($option[ 'value' ] === $this->_args[ 'value' ]) {
-            $option[ 'args' ] = ['selected' => 'selected'];
+        if ($option['value'] === $this->args['value']) {
+            $option['args'] = ['selected' => 'selected'];
         }
 
         return $option;
@@ -103,11 +101,11 @@ class SettingsSelect extends SettingsAbstract
      *
      * @return array
      */
-    protected function get_weekdays_settings() : array
+    protected function get_weekdays_settings(): array
     {
         $options = [];
         for ($day_index = 0; $day_index <= 6; $day_index++) {
-            $option = [
+            $option    = [
                 'text'  => WpmlHelper::factory($this->app)
                                      ->get_weekday($day_index),
                 'value' => $day_index,
@@ -117,5 +115,4 @@ class SettingsSelect extends SettingsAbstract
 
         return $options;
     }
-
 }

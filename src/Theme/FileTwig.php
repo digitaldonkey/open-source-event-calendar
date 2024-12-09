@@ -14,13 +14,12 @@ use Twig\Environment;
  */
 class FileTwig extends FileAbstract
 {
-
     /**
      * @var array
      */
-    protected $_args;
+    protected array $args;
 
-    protected ?Environment $_twig;
+    protected ?Environment $twigEnv;
 
     /**
      * @param  App  $app
@@ -31,9 +30,9 @@ class FileTwig extends FileAbstract
     public function __construct(App $app, string $name, array $args, Environment $twig)
     {
         parent::__construct($app, $name, $args);
-        $this->_args = $args;
+        $this->args  = $args;
         $this->_name = $name;
-        $this->_twig = $twig;
+        $this->twigEnv = $twig;
     }
 
     /**
@@ -43,7 +42,7 @@ class FileTwig extends FileAbstract
      */
     public function appendPath($search_path)
     {
-        $loader = $this->_twig->getLoader();
+        $loader = $this->twigEnv->getLoader();
         $loader->addPath($search_path);
     }
 
@@ -54,24 +53,23 @@ class FileTwig extends FileAbstract
      */
     public function prepend_path($search_path)
     {
-        $loader = $this->_twig->getLoader();
+        $loader = $this->twigEnv->getLoader();
         $loader->prependPath($search_path);
     }
 
-    /* (non-PHPdoc)
+    /*
+    (non-PHPdoc)
      * @see Ai1ec_File::locate_file()
      */
     public function process_file()
     {
-        $loader = $this->_twig->getLoader();
+        $loader = $this->twigEnv->getLoader();
         if ($loader->exists($this->_name)) {
-
-            $this->_content = $this->_twig->render($this->_name, $this->_args);
+            $this->content = $this->twigEnv->render($this->_name, $this->args);
 
             return true;
         }
 
         return false;
     }
-
 }

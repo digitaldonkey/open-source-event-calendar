@@ -2,27 +2,27 @@
 
 Open Source Event calendar is based on All-in-One Event Calendar 2.3.4. 
 
-Replace Classnames With Regex 
-https://regex101.com/r/COkvCD/3
+All 236 classes where rewritten using PHP Namespaces and composer for dependency management. 
 
-SEARCH 
-/<\?php\n(?<header>\s*)(?<comment>\/\*[\s\S]+?(?=\*\/)\*\/\s)(?<className>[\s\S]+?(?=extends))extends\sAi1ec_Base/gms
+Repository with all available sources are at [github.com/digitaldonkey/open-source-event-calendar](https://github.com/digitaldonkey/open-source-event-calendar).
 
-REPLACE
-<\?php\n ${header}use Osec\\Bootstrap\\RegistryBase;\n\n${comment}${className}extends RegistryBase
+### Composer
 
+Plugin will be lelivered without dev dependencies (--no-dev). 
 
+To use developer tools you need to do ´composer install´. 
 
-downloadable font: Glyph bbox was incorrect (glyph ids 47 69 76 77 95 96 97 98 101 102 103 104 126 133 134 137 153 173 176 178 180 192 198 199 231 232 286 287 288 289 293 295 298 304 305 306 323 324 333 335 337 340 343 344 345 346 347 348 353 361 365 366 367 368 371 372 380 381 384 385) (font-family: "Timely_FontAwesome" style:normal weight:400 stretch:100 src index:1) source: data:application/x-font-woff;charset=utf-8;base64,d09GRgABAAAAAK2QAA4AAAABOwwAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABGRlRNAAABRAAAABwAAA … QXiW5H8cQv7lAbOTI/rsxvDwyrZph9ylYc3185qjPs2MODJd80HZ5jrz/BTnV6n2iS1zE928smmDIZVpUjVTqlF3NTetmhnVzKpmTjWb/wsmC9pGAAAAAAFSd7nXAAA=
-https://github.com/FortAwesome/Font-Awesome/issues/19925
+## Events, EventEntity and EventInstances
 
-Global Search for 
-@instantiator
-Will tell you how to instanciate the class. 
+Events are posts (post type `osec_event`) with a (ID) related to `wp_osec_events` table.
+Repeatables are based on [RFC-5545 Recurrence concept](https://devguide.calconnect.org/iCalendar-Topics/Recurrences/) 
+and will show up in `wp_osec_event_instances` table as event insatnces which only contain start and end date/time and ID. 
 
+(See also [3.8.5.3. Recurrence Rule](https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html))
 
-## Helper to debug EventInstances
-I'm using a view 
+They may turn into child-events when "Edit this instance" (link is on Single page) is used: this will create a derivate Post/Event set to stay on its own.  
+
+To debug event-instances I recommend a SQL view like the following
 
 ```sql
 CREATE VIEW wp_osec_event_instances_readable_date AS
@@ -31,3 +31,90 @@ SELECT id, post_id, `start`, DATE_FORMAT(FROM_UNIXTIME(`start`), '%Y-%m-%d %H:%i
 ```
 
 
+## Ensure coding standards before commit. 
+
+We have a PHP (require_dev) based toolset.
+Project has been set up using ddev. All scripts should be running stable in ddev using provided config.
+
+You might require a `composer install` to load dev dependencies.
+
+
+```
+# Codesniffer 
+composer run-script phpcs
+ddev phpunit
+
+# A few phpunit tests @see phpunit.xml 
+vendor/bin/phpunit
+ddev phpunit
+
+# Altogether @see grumphp.yml
+vendor/bin/grumphp run
+```
+
+#### Using grumphp inside ddev.
+
+Edit local `grumphp.yml`
+
+```
+EXEC_GRUMPHP_COMMAND: ddev exec -d  "/var/www/html/wp-content/plugins/open-source-event-calendar"
+```
+Requires reinit `ddev exec grumphp git:init` which will reconfigure the git pre-commit hook.
+
+@see [configuring-grumphp-ddev](https://www.patrickvanefferen.nl/blog/configuring-grumphp-ddev)
+
+## Testing 
+
+@see [wordpress.org/.../plugin-unit-tests](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/)
+
+### PHPunit 
+
+According to [supported-version-chart](https://make.wordpress.org/core/handbook/references/phpunit-compatibility-and-wordpress-versions/#supported-version-chart)
+
+and https://packagist.org/packages/phpunit/phpunit#9.6.20 
+we will need 
+
+```
+wp scaffold plugin-tests open-source-event-calendar
+
+composer require --dev "phpunit/phpunit:^9.6"
+composer require --dev yoast/phpunit-polyfills:"^2.0"
+
+```
+
+
+### Install Test scripts in ddev 
+
+Ensure you have subversion available 
+
+WordPress Test scripts require subversion access. 
+
+```
+ @file .ddev/config.yaml
+ webimage_extra_packages: [subversion]
+```
+
+Alternatively... 
+
+```
+apt update && install subversion 
+```
+
+**initialize once **
+
+```
+PHP_TMP=$($(command -v php) -r 'echo  sys_get_temp_dir();')
+&& cd /var/www/html/wp-content/plugins/open-source-event-calendar \
+&& bin/install-wp-tests.sh phpunit root root db:3306 6.6.1
+```
+
+
+So Finally testing: 
+
+```
+ddev ssh 
+cd /var/www/html/wp-content/plugins/open-source-event-calendar
+ ./vendor/bin/phpunit phpcs --standard=phpcs.xml
+ or 
+ composer run phpcs
+```

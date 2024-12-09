@@ -12,26 +12,23 @@ namespace Osec\Http\Response;
  */
 class RenderJsonP extends RenderStrategyAbstract
 {
-
-    /* (non-PHPdoc)
+    /*
+    (non-PHPdoc)
      * @see RenderStrategyAbstract::render()
      */
-    public function render(array $params) : void
+    public function render(array $params): void
     {
         $this->_dump_buffers();
         header('HTTP/1.1 200 OK');
         header('Content-Type: application/json; charset=UTF-8');
-        $data = ResponseHelper::utf8($params[ 'data' ]);
+        $data   = ResponseHelper::utf8($params['data']);
         $output = json_encode($data);
-        if ( ! empty($params[ 'callback' ])) {
-            $output = $params[ 'callback' ].'('.$output.')';
-        } else {
-            if (isset($_GET[ 'callback' ])) {
-                $output = $_GET[ 'callback' ].'('.$output.')';
-            }
+        if ( ! empty($params['callback'])) {
+            $output = $params['callback'] . '(' . $output . ')';
+        } elseif (isset($_GET['callback'])) {
+            $output = $_GET['callback'] . '(' . $output . ')';
         }
         echo $output;
         ResponseHelper::stop();
     }
-
 }

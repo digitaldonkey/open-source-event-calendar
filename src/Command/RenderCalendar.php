@@ -9,14 +9,13 @@ use Osec\App\WpmlHelper;
 use Osec\Exception\BootstrapException;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\{RenderCsv,
-	RenderHtml,
-	RenderIcal,
-	RenderJson,
-	RenderJsonP,
-	RenderRedirect,
-	RenderVoid,
-	RenderXml,};
-
+    RenderHtml,
+    RenderIcal,
+    RenderJson,
+    RenderJsonP,
+    RenderRedirect,
+    RenderVoid,
+    RenderXml,};
 
 /**
  * The concrete command that renders the calendar.
@@ -28,15 +27,14 @@ use Osec\Http\Response\{RenderCsv,
  */
 class RenderCalendar extends CommandAbstract
 {
-
     /**
      * @var string
      */
-    protected $_request_type;
+    protected $requestType;
 
     public function is_this_to_execute()
     {
-        $settings = $this->app->settings;
+        $settings         = $this->app->settings;
         $calendar_page_id = $settings->get('calendar_page_id');
         if (empty($calendar_page_id)) {
             return false;
@@ -47,9 +45,8 @@ class RenderCalendar extends CommandAbstract
                                  $calendar_page_id
                              );
         foreach ($page_ids_to_match as $page_id) {
-
             if (is_page($page_id)) {
-                $this->_request->set_current_page($page_id);
+                $this->request->set_current_page($page_id);
                 if ( ! post_password_required($page_id)) {
                     return true;
                 }
@@ -59,40 +56,40 @@ class RenderCalendar extends CommandAbstract
         return false;
     }
 
-    public function set_render_strategy(RequestParser $request)
+    public function setRenderStrategy(RequestParser $request): void
     {
-        $this->_request_type = $request->get('request_type');
-        switch ($this->_request_type) {
+        $this->requestType = $request->get('request_type');
+        switch ($this->requestType) {
             case 'html':
                 FrontendCssController::factory($this->app)
                                      ->add_link_to_html_for_frontend();
                 ScriptsFrontendController::factory($this->app)
                                          ->load_frontend_js(true);
-                $this->_render_strategy = RenderHtml::factory($this->app);
+                $this->renderStrategy = RenderHtml::factory($this->app);
                 break;
             case 'json':
-                $this->_render_strategy = RenderJson::factory($this->app);
+                $this->renderStrategy = RenderJson::factory($this->app);
                 break;
             case 'jsonp':
-                $this->_render_strategy = RenderJsonP::factory($this->app);
+                $this->renderStrategy = RenderJsonP::factory($this->app);
                 break;
             case 'ical':
-                $this->_render_strategy = RenderIcal::factory($this->app);
+                $this->renderStrategy = RenderIcal::factory($this->app);
                 break;
             case 'csv':
-                $this->_render_strategy = RenderCsv::factory($this->app);
+                $this->renderStrategy = RenderCsv::factory($this->app);
                 break;
             case 'redirect':
-                $this->_render_strategy = RenderRedirect::factory($this->app);
+                $this->renderStrategy = RenderRedirect::factory($this->app);
                 break;
             case 'xml':
-                $this->_render_strategy = RenderXml::factory($this->app);
+                $this->renderStrategy = RenderXml::factory($this->app);
                 break;
             case 'void':
-                $this->_render_strategy = RenderVoid::factory($this->app);
+                $this->renderStrategy = RenderVoid::factory($this->app);
                 break;
             default:
-                throw new BootstrapException('Could not resolve render strategy: '.$this->_render_strategy);
+                throw new BootstrapException('Could not resolve render strategy: ' . $this->renderStrategy);
         }
     }
 
@@ -101,7 +98,7 @@ class RenderCalendar extends CommandAbstract
         // TODO Shouldn't this be only render Strategy == HTML??
 
         return [
-            'data'     => CalendarPageView::factory($this->app)->get_content($this->_request),
+            'data'     => CalendarPageView::factory($this->app)->get_content($this->request),
             'callback' => RequestParser::get_param(
                 'callback',
                 null
@@ -109,5 +106,4 @@ class RenderCalendar extends CommandAbstract
             'caller'   => 'calendar',
         ];
     }
-
 }

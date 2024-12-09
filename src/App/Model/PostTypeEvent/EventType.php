@@ -17,7 +17,6 @@ use WP_Role;
  */
 class EventType extends OsecBaseClass
 {
-
     /**
      * Registers the custom post type.
      *
@@ -46,7 +45,6 @@ class EventType extends OsecBaseClass
             'all_items'          => $this->get_all_items_name(),
         ];
 
-
         // ================================
         // = support for custom post type =
         // ================================
@@ -70,13 +68,13 @@ class EventType extends OsecBaseClass
             $page_base = get_page_uri($settings->get('calendar_page_id'));
         }
 
-        $rewrite = ['slug' => I18n::__('event')];
+        $rewrite     = ['slug' => I18n::__('event')];
         $has_archive = true;
         if (
             $settings->get('calendar_base_url_for_permalinks') &&
             $page_base
         ) {
-            $rewrite = ['slug' => $page_base];
+            $rewrite     = ['slug' => $page_base];
             $has_archive = OSEC_ALTERNATIVE_ARCHIVE_URL;
         }
         $args = [
@@ -268,7 +266,6 @@ class EventType extends OsecBaseClass
                 }
             }
         }
-
     }
 
     /**
@@ -297,7 +294,8 @@ class EventType extends OsecBaseClass
                 // append the pending events number to the menu
                 return sprintf(
                     I18n::__(
-                        'All Events <span class="update-plugins count-%d" title="%d Pending Events"><span class="update-count">%d</span></span>'
+                        'All Events <span class="update-plugins count-%d" title="%d Pending Events">'
+                        . '<span class="update-count">%d</span></span>'
                     ),
                     $query->post_count,
                     $query->post_count,
@@ -317,13 +315,15 @@ class EventType extends OsecBaseClass
     {
         if ($purge) {
             $postType = OSEC_POST_TYPE;
-            $this->app->db->query("DELETE a,b,c
+            $this->app->db->query(
+                "DELETE a,b,c
                 FROM wp_posts a
                 LEFT JOIN wp_term_relationships b
                     ON (a.ID = b.object_id)
                 LEFT JOIN wp_postmeta c
                     ON (a.ID = c.post_id)
-                WHERE a.post_type = '$postType';");
+                WHERE a.post_type = '$postType';"
+            );
 
             // Remove role
             remove_role('osec_event_assistant');

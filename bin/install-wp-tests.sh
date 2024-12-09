@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Maybe TODO
+# svn/Subversion is a removable dependency here.
+# which could be replaced with git e.g.
+# https://github.com/WordPress/wordpress-develop/tree/trunk/tests/phpunit/includes
+
 if [ $# -lt 3 ]; then
 	echo "usage: $0 <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation]"
 	exit 1
@@ -11,8 +16,9 @@ DB_PASS=$3
 DB_HOST=${4-localhost}
 WP_VERSION=${5-latest}
 SKIP_DB_CREATE=${6-false}
+SKIP_TESTSUITE_CREATE=${7-false}
 
-TMPDIR=${TMPDIR-/tmp}
+TMPDIR=${TMPDIR-$($(command -v php) -r 'echo  sys_get_temp_dir();')}
 TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
 WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress}
@@ -64,8 +70,10 @@ install_wp() {
 	if [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
 		mkdir -p $TMPDIR/wordpress-trunk
 		rm -rf $TMPDIR/wordpress-trunk/*
-		svn export --quiet https://core.svn.wordpress.org/trunk $TMPDIR/wordpress-trunk/wordpress
-		mv $TMPDIR/wordpress-trunk/wordpress/* $WP_CORE_DIR
+    mkdir -p /tmp/wordpress-nightly
+    download https://wordpress.org/nightly-builds/wordpress-latest.zip  $TMPDIR/wordpress-nightly/wordpress-nightly.zip
+    unzip -q $TMPDIR/wordpress-nightly/wordpress-nightly.zip -d $TMPDIR/wordpress-nightly/
+    mv /tmp/wordpress-nightly/wordpress/* $WP_CORE_DIR
 	else
 		if [ $WP_VERSION == 'latest' ]; then
 			local ARCHIVE_NAME='latest'
@@ -96,6 +104,11 @@ install_wp() {
 }
 
 install_test_suite() {
+
+  if [ ${SKIP_TESTSUITE_CREATE} = "true" ]; then
+  		return 0
+  fi
+
 	# portable in-place argument for both GNU sed and Mac OSX sed
 	if [[ $(uname -s) == 'Darwin' ]]; then
 		local ioption='-i.bak'
@@ -108,6 +121,14 @@ install_test_suite() {
 		# set up testing suite
 		mkdir -p $WP_TESTS_DIR
 		rm -rf $WP_TESTS_DIR/{includes,data}
+		#
+		#  git checkout-index -a -f --prefix=/destination/path/
+		#  git checkout-index -a -f --prefix=$WP_TESTS_DIR/includes
+
+		# Via https://minhaskamal.github.io/DownGit/#/home Which is considered comprimized.
+		# https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/WordPress/wordpress-develop/tree/trunk/tests/phpunit/includes
+		# https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/WordPress/wordpress-develop/tree/trunk/tests/phpunit/data
+
 		svn export --quiet --ignore-externals https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/includes/ $WP_TESTS_DIR/includes
 		svn export --quiet --ignore-externals https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/data/ $WP_TESTS_DIR/data
 	fi
