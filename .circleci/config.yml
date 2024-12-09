@@ -334,7 +334,9 @@ jobs:
             sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf            
             sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf            
-            sudo ln -s /etc/php.d/circleci.ini /etc/php/8.2/apache2/conf.d/30-circleci.ini
+            sudo chmod 666  /etc/php/8.2/apache2/php.ini 
+            sudo cat /etc/php.d/circleci.ini >> /etc/php/8.2/apache2/php.ini 
+            sudo chmod 644 /etc/php/8.2/apache2/php.ini
             sudo a2enmod rewrite
             sudo apachectl -DFOREGROUND
           background: True
@@ -346,6 +348,8 @@ jobs:
           command: |
             sudo apt-get update && sudo apt-get install -y lynx && sudo rm -rf /var/lib/apt/lists/*            
             sudo sed -i "s/'WP_DEBUG', false/'WP_DEBUG', true/g" /var/www/html/wp-config.php
+            echo "<?php echo 'Testing apcu on Apache config: '; var_dump(function_exists('apcu_enabled') && apcu_enabled()); " > $WP_CORE_DIR/osec_apcu_test.php
+            lynx -dump $WP_HOST/osec_apcu_test.php
       - run:
           name: Release integratiion test
           command: |
