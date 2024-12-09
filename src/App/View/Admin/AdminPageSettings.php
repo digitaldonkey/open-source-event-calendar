@@ -111,16 +111,9 @@ class AdminPageSettings extends AdminPageAbstract
         $tabs = [
             'viewing-events' => ['name' => I18n::__('Viewing Events')],
             'editing-events' => ['name' => I18n::__('Adding/Editing Events')],
-            'embedded-views' => ['name' => I18n::__('Shortcodes')],
-            'advanced'       => [
-                'name'  => I18n::__('Advanced'),
-                'items' => [
-                    'advanced' => I18n::__('Advanced Settings'),
-                    'email'    => I18n::__('Email Templates'),
-                    'apis'     => I18n::__('External Services'),
-                    'cache'    => I18n::__('Cache Report'),
-                ],
-            ],
+            'shortcodes' => ['name' => I18n::__('Shortcodes')],
+            'advanced' => ['name' => I18n::__('Advanced Settings')],
+            'cache' => ['name' => I18n::__('Cache Report')],
         ];
 
         /**

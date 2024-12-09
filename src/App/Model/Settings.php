@@ -341,7 +341,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCalenderPageSelect',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__('Calendar page'),
                 ],
                 'default'  => false,
@@ -364,7 +363,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsEnabledViews',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__('Available views'),
                 ],
                 'default'  => [
@@ -437,7 +435,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCatsTagsFilter',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__('Preselected calendar filters'),
                     'help'  => I18n::__(
                         'To clear, hold &#8984;/<abbr class="initialism">CTRL</abbr> and click selection.'
@@ -453,7 +450,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsInput',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__('Default calendar start date (optional)'),
                     'type'  => 'date',
                 ],
@@ -500,7 +496,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         '<strong>Word-wrap event stubs</strong> in Month view'
                     ),
@@ -515,7 +510,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         'In <span class="ai1ec-tooltip-toggle"
 						data-original-title="These include Agenda view,
@@ -531,7 +525,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         'Keep all events <strong>expanded</strong> in Agenda view (disables toggler).'
                     ),
@@ -543,7 +536,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         '<strong>Show year</strong> in calendar date labels'
                     ),
@@ -555,7 +547,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         '<strong>Show location in event titles</strong> in calendar views'
                     ),
@@ -567,7 +558,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         '<strong>Exclude</strong> events from search results'
                     ),
@@ -579,7 +569,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         'Hide <strong>Subscribe</strong>/<strong>Add to Calendar</strong> '
                         . 'buttons in calendar and single event views '
@@ -592,7 +581,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         ' Hide <strong>Google Maps</strong> until clicked'
                     ),
@@ -605,7 +593,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         ' <strong>Affix filter menu</strong> to top of window when it scrolls out of view'
                     ),
@@ -674,7 +661,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         'Strict compatibility content filtering'
                     ),
@@ -686,7 +672,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         ' <strong>Hide featured image</strong> from event details page'
                     ),
@@ -770,7 +755,7 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsShortcodesText',
                     'tab'   => 'advanced',
-                    'item'  => 'embedded-views',
+                    'item'  => 'shortcodes',
                 ],
                 'default'  => null,
             ],
@@ -779,7 +764,7 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsInput',
                     'tab'   => 'advanced',
-                    'item'  => 'advanced',
+//                    'item'  => 'advanced',
                     'label' => I18n::__('Move calendar into this DOM element'),
                     'type'  => 'normal',
                     'help'  => I18n::__(
@@ -800,7 +785,7 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'advanced',
-                    'item'  => 'advanced',
+//                    'item'  => 'advanced',
                     'label' => I18n::__(
                         '<strong>Skip <tt>in_the_loop()</tt> check </strong> '
                         . 'that protects against multiple calendar output'
@@ -818,7 +803,7 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'advanced',
-                    'item'  => 'advanced',
+//                    'item'  => 'advanced',
                     'label' => I18n::__(
                         'Use frontend rendering.'
                     ),
@@ -834,7 +819,7 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'advanced',
-                    'item'  => 'advanced',
+//                    'item'  => 'advanced',
                     'label' => I18n::__(
                         '<strong>Link CSS</strong> in <code>&lt;head&gt;</code> section when file cache is unavailable.'
                     ),
@@ -850,7 +835,7 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class'    => 'Osec\Settings\Elements\SettingsTextarea',
                     'tab'      => 'advanced',
-                    'item'     => 'advanced',
+//                    'item'     => 'advanced',
                     'label'    => I18n::__('Current <strong>robots.txt</strong> on this site'),
                     'type'     => 'normal',
                     'rows'     => 6,
@@ -873,8 +858,8 @@ class Settings extends OsecBaseInitialized
                 'type'     => 'string',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCache',
-                    'tab'   => 'advanced',
-                    'item'  => 'cache',
+                    'tab'   => 'cache',
+//                    'item'  => 'cache',
                     'label' => sprintf(
                         I18n::__(
                             'Templates cache improves site performance'
@@ -888,7 +873,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         'Display events in <strong>calendar time zone</strong>'
                     ),

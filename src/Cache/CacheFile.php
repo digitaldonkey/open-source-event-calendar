@@ -215,8 +215,8 @@ class CacheFile extends OsecBaseClass implements CacheInterface
                . "<br /><code>$file</code><br />"
                . I18n::__(
                 'You may set OSEC_ENABLE_CACHE_FILE false to use other cache methods like APCU or DB and ignore this message.'
-                .'<br /><br /><strong>BUT: If cant write anywhere Twig cache is disabled.</strong>'
-                .'<br /><br /><strong>Ensure that</strong><br /><code>wp-content/uploads/$OSEC_FILE_CACHE_WP_UPLOAD_DIR</code><br />or<br /><code>wp-content/plugins/open-source-event-calendar/cache</code><br /> are writable by php.',
+                .'<br /><br /><strong>BUT: If we can not write files Twig cache is disabled.</strong>'
+                .'<br /><br /><strong>Ensure that</strong><br /><code>'.ABSPATH.'wp-content/uploads/'.OSEC_FILE_CACHE_WP_UPLOAD_DIR.'</code><br />or<br /><code>'.OSEC_FILE_CACHE_DEFAULT_PATH.'</code><br /> are writable by php.',
             );
         NotificationAdmin::factory($this->app)->store(
             "<p>$msg</p>",

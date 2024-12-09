@@ -65,8 +65,6 @@ class SettingsCache extends SettingsAbstract
             ],
         ];
 
-        $XXX = $this->args;
-
         $args = [
             'current_cache'        => $current_cache,
             'available_caches'     => $available_caches,
@@ -85,7 +83,6 @@ class SettingsCache extends SettingsAbstract
                 'title'   => I18n::__('Performance Report'),
             ],
         ];
-
         return $args;
     }
 
