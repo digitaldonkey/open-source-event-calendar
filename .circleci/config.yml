@@ -393,20 +393,18 @@ workflows:
             - build
       - db_job_maria_10_5:
           requires:
-            - db_job
+#            - db_job
             - static_job
       - db_job_php_8_1:
           requires:
-            - db_job
+#            - db_job
             - static_job
       - db_job_mysql_8:
           requires:
-            - db_job
+#            - db_job
             - static_job
       - create_release_job:
           requires:
-            - static_job
-            - db_job
             - db_job_maria_10_5
             - db_job_php_8_1
             - db_job_mysql_8
