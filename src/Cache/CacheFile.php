@@ -3,6 +3,8 @@
 namespace Osec\Cache;
 
 use Exception;
+use Osec\App\I18n;
+use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 
@@ -194,12 +196,36 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         global $wp_filesystem;
         // @see https://wordpress.stackexchange.com/a/372407/15081
         require_once ABSPATH . 'wp-admin/includes/file.php';
-        WP_Filesystem();
+        if (WP_Filesystem()) {
+            try {
+                return $wp_filesystem->put_contents(
+                    $file,
+                    $content
+                );
+            } catch (Exception $e) {
+                // fall through.
+            }
+        }
+        // Throw a mean message.
 
-        return $wp_filesystem->put_contents(
-            $file,
-            $content
+        //  if ($notification->are_notices_available(2)) {}
+        $msg = I18n::__(
+                'Can not use WP_Filesystem() method to write to file: ',
+            )
+               . "<br /><code>$file</code><br />"
+               . I18n::__(
+                'You may set OSEC_ENABLE_CACHE_FILE false to use other cache methods like APCU or DB and ignore this message.'
+                .'<br /><br /><strong>BUT: If cant write anywhere Twig cache is disabled.</strong>'
+                .'<br /><br /><strong>Ensure that</strong><br /><code>wp-content/uploads/$OSEC_FILE_CACHE_WP_UPLOAD_DIR</code><br />or<br /><code>wp-content/plugins/open-source-event-calendar/cache</code><br /> are writable by php.',
+            );
+        NotificationAdmin::factory($this->app)->store(
+            "<p>$msg</p>",
+            'error',
+            1,
+            [NotificationAdmin::RCPT_ADMIN],
+            true
         );
+        throw new CacheWriteException($file);
     }
 
     /**
