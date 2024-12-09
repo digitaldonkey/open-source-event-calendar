@@ -296,7 +296,7 @@ jobs:
           name: Release test VARIABLES
           command: |
             php --version
-            php -i | grep -i "APCu Support"
+            php -i | grep -i "apcu"
             php -i | grep -i memory_limit
             php -i | grep -i error_log
             echo""
