@@ -179,13 +179,14 @@ jobs:
       - image: cimg/mariadb:10.5
         <<: *ENV_DB_IMAGE
 
-  db_job_maria_11:
-    <<: *db_job
-    docker:
-      - image: cimg/php:8.2
-        <<: *ENV_PHP_IMAGE
-      - image: cimg/mariadb:11.4
-        <<: *ENV_DB_IMAGE
+# This is default job: 'db_job'
+#  db_job_maria_11:
+#    <<: *db_job
+#    docker:
+#      - image: cimg/php:8.2
+#        <<: *ENV_PHP_IMAGE
+#      - image: cimg/mariadb:11.4
+#        <<: *ENV_DB_IMAGE
 
   db_job_php_8_1:
     <<: *db_job
@@ -342,11 +343,6 @@ jobs:
             sudo a2enmod proxy_fcgi setenvif rewrite
             sudo /etc/init.d/php8.2-fpm start
             sudo apachectl -DFOREGROUND
-
-# mkdir -p /var/run/apache2
-# sudo /etc/init.d/php8.2-fpm
-# sudo /etc/init.d/apache2 status
-
           background: True
       - node/install-packages:
           app-dir: integration_tests/
@@ -397,10 +393,6 @@ workflows:
           requires:
             - db_job
             - static_job
-      - db_job_maria_11:
-          requires:
-            - db_job
-            - static_job
       - db_job_php_8_1:
           requires:
             - db_job
@@ -411,11 +403,11 @@ workflows:
             - static_job
       - create_release_job:
           requires:
-            - db_job_php_8_1
-            - db_job_maria_11
-            - db_job_maria_10_5
-            - db_job
             - static_job
+            - db_job
+            - db_job_maria_10_5
+            - db_job_php_8_1
+            - db_job_mysql_8
       - release_test_job:
           requires:
             - create_release_job
