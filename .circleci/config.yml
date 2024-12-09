@@ -162,7 +162,7 @@ jobs:
 
       - run:
           name: Test apcu in PHP.ini
-          command: php -i | grep -i apcu
+          command: php -i | grep -i apc
       - run:
           name: Start PHP server
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
@@ -299,7 +299,7 @@ jobs:
           name: Release test VARIABLES
           command: |
             php --version
-            php -i | grep -i "apcu"
+            php -i | grep -i "apc"
             php -i | grep -i memory_limit
             echo""
             echo "NODE $( node --version)"
@@ -340,7 +340,8 @@ jobs:
             sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf            
             sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
-            sudo a2enmod rewrite 
+            sudo a2enmod rewrite
+            sudo /etc/init.d/apache2 reload
             sudo apachectl -DFOREGROUND
             ls -al
           background: True
