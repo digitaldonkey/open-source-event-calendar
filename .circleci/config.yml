@@ -406,7 +406,7 @@ workflows:
       - create_release_job:
           requires:
             - db_job_maria_10_5
-            - db_job_php_8_1
+# TODO      - db_job_php_8_1
             - db_job_mysql_8
       - release_test_job:
           requires:
