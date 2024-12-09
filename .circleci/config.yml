@@ -171,43 +171,43 @@ jobs:
       - store_test_results:
           path: ~/phpunit
 
-#  db_job_maria_10_5:
-#    <<: *db_job
-#    docker:
-#      - image: cimg/php:8.2
-#        <<: *ENV_PHP_IMAGE
-#      - image: cimg/mariadb:10.5
-#        <<: *ENV_DB_IMAGE
-#
-#  db_job_maria_11:
-#    <<: *db_job
-#    docker:
-#      - image: cimg/php:8.2
-#        <<: *ENV_PHP_IMAGE
-#      - image: cimg/mariadb:11.4
-#        <<: *ENV_DB_IMAGE
-#
-#  db_job_php_8_1:
-#    <<: *db_job
-#    docker:
-#      - image: cimg/php:8.1
-#        <<: *ENV_PHP_IMAGE
-#      - image: cimg/mariadb:11.4
-#        <<: *ENV_DB_IMAGE
-#
-#  db_job_php_8_3:
-#    docker:
-#      - image: cimg/php:8.3
-#        <<: *ENV_PHP_IMAGE
-#      - image: cimg/mariadb:11.4
-#        <<: *ENV_DB_IMAGE
-#
-#  db_job_mysql_8:
-#    docker:
-#      - image: cimg/php:8.2
-#        <<: *ENV_PHP_IMAGE
-#      - image: cimg/mysql:8.0
-#        <<: *ENV_DB_IMAGE
+  db_job_maria_10_5:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:10.5
+        <<: *ENV_DB_IMAGE
+
+  db_job_maria_11:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+
+  db_job_php_8_1:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.1
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+
+  db_job_php_8_3:
+    docker:
+      - image: cimg/php:8.3
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+
+  db_job_mysql_8:
+    docker:
+      - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mysql:8.0
+        <<: *ENV_DB_IMAGE
 
   #  db_job_php_8_0:
   #    <<: *db_job
