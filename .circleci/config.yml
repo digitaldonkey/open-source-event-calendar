@@ -356,6 +356,9 @@ jobs:
           command: |
             sudo apt-get update && sudo apt-get install -y lynx && sudo rm -rf /var/lib/apt/lists/*            
             sudo sed -i "s/'WP_DEBUG', false/'WP_DEBUG', true/g" /var/www/html/wp-config.php
+      - run:
+          name: Debug osec_apcu_test.php
+          command: |
             echo "<?php echo 'Testing apcu on Apache config: '; var_dump(function_exists('apcu_enabled') && apcu_enabled()); " > $WP_CORE_DIR/osec_apcu_test.php
             lynx -dump $WP_HOST/osec_apcu_test.php
       - run:
@@ -390,28 +393,28 @@ workflows:
       - db_job:
           requires:
             - build
-#      - db_job_maria_10_5:
-#          requires:
-#            - db_job
-#            - static_job
-#      - db_job_maria_11:
-#          requires:
-#            - db_job
-#            - static_job
-#      - db_job_php_8_1:
-#          requires:
-#            - db_job
-#            - static_job
-#      - db_job_mysql_8:
-#          requires:
-#            - db_job
-#            - static_job
+      - db_job_maria_10_5:
+          requires:
+            - db_job
+            - static_job
+      - db_job_maria_11:
+          requires:
+            - db_job
+            - static_job
+      - db_job_php_8_1:
+          requires:
+            - db_job
+            - static_job
+      - db_job_mysql_8:
+          requires:
+            - db_job
+            - static_job
       - create_release_job:
           requires:
-#            - db_job_php_8_1
-#            - db_job_maria_11
-#            - db_job_maria_10_5
-#            - db_job
+            - db_job_php_8_1
+            - db_job_maria_11
+            - db_job_maria_10_5
+            - db_job
             - static_job
       - release_test_job:
           requires:
