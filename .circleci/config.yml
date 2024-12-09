@@ -336,8 +336,8 @@ jobs:
             sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
             sudo bash -c "echo 'extension=apcu.so'  >>/etc/php/8.2/fpm/php.ini"
-            sudo bash -c "echo 'apc.enabled = 1'  >>/etc/php/8.2/fpm/php.ini"
-            sudo bash -c "echo 'apc.enable_cli = 1'  >>/etc/php/8.2/fpm/php.ini                     
+            sudo bash -c "echo 'apc.enabled = 1'    >>/etc/php/8.2/fpm/php.ini"
+            sudo bash -c "echo 'apc.enable_cli = 1' >>/etc/php/8.2/fpm/php.ini"                
             sudo a2enconf php8.2-fpm
             sudo a2enmod proxy_fcgi setenvif rewrite
             sudo /etc/init.d/php8.2-fpm start
