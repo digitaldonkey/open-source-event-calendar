@@ -282,6 +282,7 @@ jobs:
             sudo pecl channel-update pecl.php.net
             echo no '' |  sudo pecl install apcu            
             sudo bash -c "echo 'memory_limit = 192M'  >>  /etc/php.d/circleci.ini"
+            sudo bash -c "echo 'apc.enable = 1'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'error_reporting = E_ALL'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'ignore_repeated_errors = On'  >>  /etc/php.d/circleci.ini"
