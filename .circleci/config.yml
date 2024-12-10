@@ -408,30 +408,44 @@ workflows:
       - db_job_maria_10_5:
           requires:
             - build
-#      - db_job_php_8_1:
+          filters:
+            branches:
+              only: /master/
+      #      - db_job_php_8_1:
 #          requires:
 #            - build
+#          filters:
+#            branches:
+#              only: /master/
       - db_job_php_8_3:
           requires:
             - build
+          filters:
+            branches:
+              only: /master/
       - db_job_mysql_8:
           requires:
             - build
+          filters:
+            branches:
+              only: /master/            -
       - create_release_job:
           requires:
             - db_job
             - static_job
-            - db_job_maria_10_5
-# TODO      - db_job_php_8_1
-#   Maybe https://stackoverflow.com/a/43442839/308533
-            - db_job_php_8_3
-            - db_job_mysql_8
       - release_test_job:
           requires:
             - create_release_job
       - publish-github-release_job:
           requires:
             - release_test_job
+            - db_job
+            - static_job
+            - db_job_maria_10_5
+  # TODO      - db_job_php_8_1
+  #   Maybe https://stackoverflow.com/a/43442839/308533
+            - db_job_php_8_3
+            - db_job_mysql_8
           filters:
             branches:
               only: /master/
