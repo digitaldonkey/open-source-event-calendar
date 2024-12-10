@@ -434,7 +434,7 @@ workflows:
             - release_test_job
           filters:
             branches:
-              ignore: /.*/
+              only: /master/
             tags:
               only: /^\d+\.\d+\.\d+$/
 
