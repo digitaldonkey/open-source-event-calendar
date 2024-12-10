@@ -80,7 +80,7 @@ class ThemeVariableFont extends SettingsAbstract
         $this->fonts = apply_filters('osec_default_font_options_alter', $this->fonts);
 
         // Add Option for "Custom" to fontList
-        $this->fonts[__('Custom...', OSEC_TXT_DOM)] = self::CUSTOM_FONT;
+        $this->fonts[__('Custom...', 'open-source-event-calendar')] = self::CUSTOM_FONT;
 
         if ( ! in_array($args['value'], $this->fonts)) {
             $this->use_custom_value = true;
@@ -98,7 +98,7 @@ class ThemeVariableFont extends SettingsAbstract
                 'id'    => $this->args['id'] . self::CUSTOM_FONT_ID_SUFFIX,
                 'value' => '',
                 'args'  => [
-                    'placeholder' => __('Enter custom font(s)', OSEC_TXT_DOM),
+                    'placeholder' => __('Enter custom font(s)', 'open-source-event-calendar'),
                     'class'       => 'ai1ec-custom-font',
                 ],
             ],

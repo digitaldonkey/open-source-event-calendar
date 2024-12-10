@@ -68,7 +68,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
     public function display_page(): void
     {
         $args = [
-            'title'             => __('OSEC: Calendar Feeds', OSEC_TXT_DOM),
+            'title'             => __('OSEC: Calendar Feeds', 'open-source-event-calendar'),
             'settings_page'     => $this->app->settings->get('feeds_page'),
             'calendar_settings' => false,
         ];

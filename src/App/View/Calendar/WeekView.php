@@ -55,11 +55,11 @@ class WeekView extends AbstractView
 
         // Create pagination links. (Translators: '%s' = week's start date.)
         $title            = sprintf(
-            __('Week %s', OSEC_TXT_DOM),
+            __('Week %s', 'open-source-event-calendar'),
             $weekStart->format_i18n('W / F Y')
         );
         $title_short      = sprintf(
-            __('W%s', OSEC_TXT_DOM),
+            __('W%s', 'open-source-event-calendar'),
             $weekStart->format_i18n('W M/Y')
         );
         $pagination_links = $this->_get_pagination($args, $title, $title_short);
@@ -126,10 +126,10 @@ class WeekView extends AbstractView
             'data_type'                => $args['data_type'],
             'is_ticket_button_enabled' => $is_ticket_button_enabled,
             'show_reveal_button'       => $show_reveal_button,
-            'text_full_day'            => __('Reveal full day', OSEC_TXT_DOM),
-            'text_all_day'             => __('All-day', OSEC_TXT_DOM),
-            'text_now_label'           => __('Now:', OSEC_TXT_DOM),
-            'text_venue_separator'     => __('@ %s', OSEC_TXT_DOM),
+            'text_full_day'            => __('Reveal full day', 'open-source-event-calendar'),
+            'text_all_day'             => __('All-day', 'open-source-event-calendar'),
+            'text_now_label'           => __('Now:', 'open-source-event-calendar'),
+            'text_venue_separator'     => __('@ %s', 'open-source-event-calendar'),
             'hours'                    => $hours,
             'indent_multiplier'        => 8,
             'indent_offset'            => 0,

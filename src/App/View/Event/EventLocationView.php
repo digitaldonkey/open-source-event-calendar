@@ -106,8 +106,8 @@ class EventLocationView extends OsecBaseClass
             'address'                 => $location,
             'gmap_url_link'           => $this->get_gmap_url($event),
             'hide_maps_until_clicked' => $settings->get('hide_maps_until_clicked'),
-            'text_view_map'           => __('Click to view map', OSEC_TXT_DOM),
-            'text_full_map'           => __('View Full-Size Map', OSEC_TXT_DOM),
+            'text_view_map'           => __('Click to view map', 'open-source-event-calendar'),
+            'text_full_map'           => __('View Full-Size Map', 'open-source-event-calendar'),
         ];
 
         return ThemeLoader::factory($this->app)

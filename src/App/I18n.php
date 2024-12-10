@@ -20,7 +20,7 @@ class I18n
      */
     public static function __($term)
     {
-        return __($term, OSEC_TXT_DOM);
+        return __($term, 'open-source-event-calendar');
     }
 
     /**
@@ -33,6 +33,6 @@ class I18n
      */
     public static function _x($term, $ctxt)
     {
-        return _x($term, $ctxt, OSEC_TXT_DOM);
+        return _x($term, $ctxt, 'open-source-event-calendar');
     }
 }

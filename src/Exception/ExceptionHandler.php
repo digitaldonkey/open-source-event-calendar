@@ -163,8 +163,8 @@ class ExceptionHandler
         $ident     = sha1($trace);
         if ( ! empty($trace)) {
             $request_uri  = $_SERVER['REQUEST_URI'];
-            $button_label = __('Toggle error details', OSEC_TXT_DOM);
-            $title        = __('Error Details:', OSEC_TXT_DOM);
+            $button_label = __('Toggle error details', 'open-source-event-calendar');
+            $title        = __('Error Details:', 'open-source-event-calendar');
             $backtrace    = <<<JAVASCRIPT
 			<script type="text/javascript">
 			jQuery( function($) {
@@ -463,14 +463,14 @@ JAVASCRIPT;
         );
         $label        = __(
             'Open Source Event Calendar has been disabled due to an error:',
-            OSEC_TXT_DOM
+            'open-source-event-calendar'
         );
         $message      = '<div class="message error">';
         $message      .= '<p><strong>' . $label . '</strong></p>';
         $message      .= $this->message;
         $message      .= ' <a href="' . $redirect_url .
                          '" class="button button-primary ai1ec-dismissable">' .
-                         __('Try reactivating plugin', OSEC_TXT_DOM);
+                         __('Try reactivating plugin', 'open-source-event-calendar');
         $message      .= '</a>';
         $message      .= '<p></p></div>';
         echo $message;

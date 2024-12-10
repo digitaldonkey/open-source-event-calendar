@@ -131,8 +131,8 @@ class AgendaView extends AbstractView
             // Add extra buttons to Agenda view's nav bar if events were returned.
             if ($type === 'agenda' && $dates) {
                 $button_args                  = [
-                    'text_collapse_all' => __('Collapse All', OSEC_TXT_DOM),
-                    'text_expand_all'   => __('Expand All', OSEC_TXT_DOM),
+                    'text_collapse_all' => __('Collapse All', 'open-source-event-calendar'),
+                    'text_expand_all'   => __('Expand All', 'open-source-event-calendar'),
                     'no_toggle'         => $this->app->settings->get('agenda_events_expanded'),
                 ];
                 $nav_args['after_pagination'] = $loader
@@ -164,12 +164,12 @@ class AgendaView extends AbstractView
             'post_ids'                  => implode(',', $view_args['post_ids']),
             'data_type'                 => $view_args['data_type'],
             'is_ticket_button_enabled'  => $is_ticket_button_enabled,
-            'text_upcoming_events'      => __('There are no upcoming events to display at this time.', OSEC_TXT_DOM),
-            'text_edit'                 => __('Edit', OSEC_TXT_DOM),
-            'text_read_more'            => __('Read more', OSEC_TXT_DOM),
-            'text_categories'           => __('Categories:', OSEC_TXT_DOM),
-            'text_tags'                 => __('Tags:', OSEC_TXT_DOM),
-            'text_venue_separator'      => __('@ %s', OSEC_TXT_DOM),
+            'text_upcoming_events'      => __('There are no upcoming events to display at this time.', 'open-source-event-calendar'),
+            'text_edit'                 => __('Edit', 'open-source-event-calendar'),
+            'text_read_more'            => __('Read more', 'open-source-event-calendar'),
+            'text_categories'           => __('Categories:', 'open-source-event-calendar'),
+            'text_tags'                 => __('Tags:', 'open-source-event-calendar'),
+            'text_venue_separator'      => __('@ %s', 'open-source-event-calendar'),
         ];
 
         // Allow child views to modify arguments passed to template.

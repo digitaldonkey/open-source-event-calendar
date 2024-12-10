@@ -26,8 +26,8 @@ class EventTicketView extends OsecBaseClass
     {
         if ($event->is_free()) {
             return ($long)
-                ? __('Register Now', OSEC_TXT_DOM)
-                : __('Register', OSEC_TXT_DOM);
+                ? __('Register Now', 'open-source-event-calendar')
+                : __('Register', 'open-source-event-calendar');
         }
         $output = '';
         if ($long) {
@@ -44,8 +44,8 @@ class EventTicketView extends OsecBaseClass
             }
         }
         $output .= ($long)
-            ? __('Buy Tickets', OSEC_TXT_DOM)
-            : __('Tickets', OSEC_TXT_DOM);
+            ? __('Buy Tickets', 'open-source-event-calendar')
+            : __('Tickets', 'open-source-event-calendar');
 
         return $output;
     }
@@ -79,7 +79,7 @@ class EventTicketView extends OsecBaseClass
                 '<a class="u-email" href="mailto:' .
                 esc_attr($event->get('contact_email')) . '">' .
                 '<i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-envelope-o"></i> ' .
-                __('Email', OSEC_TXT_DOM) . '</a></div> ';
+                __('Email', 'open-source-event-calendar') . '</a></div> ';
             $has_contents = true;
         }
         $contact_url = $event->get('contact_url');
@@ -102,7 +102,7 @@ class EventTicketView extends OsecBaseClass
                  *
                  * @param  string  $event_website_link  Multilingual label for the link.
                  */
-                apply_filters('osec_contact_url_link', __('Event website', OSEC_TXT_DOM), $contact_url)
+                apply_filters('osec_contact_url_link', __('Event website', 'open-source-event-calendar'), $contact_url)
                 . ' <i class="ai1ec-fa ai1ec-fa-external-link"></i></a></div>';
             $has_contents = true;
         }

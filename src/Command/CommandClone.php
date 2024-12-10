@@ -110,7 +110,7 @@ class CommandClone extends CommandAbstract
         $message        = sprintf(
             __(
                 '<p>The event <strong>%1$s</strong> was cloned succesfully. <a href="%2$s">Edit cloned event</a></p>',
-                OSEC_TXT_DOM
+                'open-source-event-calendar'
             ),
             $post->post_title,
             $edit_event_url

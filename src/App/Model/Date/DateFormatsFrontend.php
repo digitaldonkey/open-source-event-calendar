@@ -59,18 +59,18 @@ class DateFormatsFrontend extends OsecBaseClass
 
         add_settings_section(
             self::SECTION_ID,
-            __('Osec Frontend Date Formats', OSEC_TXT_DOM),
+            __('Osec Frontend Date Formats', 'open-source-event-calendar'),
             function () {
                 echo '<p>'
                      . __(
                          'Osec calendar uses WordPress default "date_format" and "time_format" above and '
                          . 'provides additional <strong>frontend date formates</strong>.',
-                         OSEC_TXT_DOM
+                         'open-source-event-calendar'
                      )
                      . '<br />'
-                     . __('Above WordPress default "date_format" is considered as "long" format.', OSEC_TXT_DOM)
+                     . __('Above WordPress default "date_format" is considered as "long" format.', 'open-source-event-calendar')
                      . '<br />'
-                     . __('Backend Formats are in Osec Settings -> Adding/Editing Events.', OSEC_TXT_DOM)
+                     . __('Backend Formats are in Osec Settings -> Adding/Editing Events.', 'open-source-event-calendar')
                      . '</p>';
             },
             'general'
@@ -78,7 +78,7 @@ class DateFormatsFrontend extends OsecBaseClass
 
         add_settings_field(
             self::FORMAT_SHORT,
-            __('Date Format Short', OSEC_TXT_DOM),
+            __('Date Format Short', 'open-source-event-calendar'),
             [$this, 'renderShortDate'],
             'general',
             self::SECTION_ID,
@@ -86,7 +86,7 @@ class DateFormatsFrontend extends OsecBaseClass
 
         add_settings_field(
             self::FORMAT_NO_YEAR,
-            __('Date Format Short no year', OSEC_TXT_DOM),
+            __('Date Format Short no year', 'open-source-event-calendar'),
             [$this, 'renderShortNoYear'],
             'general',
             self::SECTION_ID,

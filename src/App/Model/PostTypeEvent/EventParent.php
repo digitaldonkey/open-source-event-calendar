@@ -303,14 +303,14 @@ class EventParent extends OsecBaseClass
                     '<a href="%s" title="%s">%s</a>',
                     wp_nonce_url($parent_link),
                     sprintf(
-                        __('Edit &#8220;%s&#8221;', OSEC_TXT_DOM),
+                        __('Edit &#8220;%s&#8221;', 'open-source-event-calendar'),
                         apply_filters(
                             'the_title',
                             $parent_post->post_title,
                             $parent_post->ID
                         )
                     ),
-                    __('Base Event', OSEC_TXT_DOM)
+                    __('Base Event', 'open-source-event-calendar')
                 );
             }
         }

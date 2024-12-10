@@ -27,10 +27,10 @@ class EditPostActions extends OsecBaseClass
             <script type="text/javascript">
                 jQuery(document).ready(function () {
                     jQuery('<option>').val('clone')
-                        .text('<?php _e('Clone', OSEC_TXT_DOM); ?>')
+                        .text('<?php _e('Clone', 'open-source-event-calendar'); ?>')
                         .appendTo("select[name='action']");
                     jQuery('<option>').val('clone')
-                        .text('<?php _e('Clone', OSEC_TXT_DOM); ?>')
+                        .text('<?php _e('Clone', 'open-source-event-calendar'); ?>')
                         .appendTo("select[name='action2']");
                 });
             </script>
@@ -51,13 +51,13 @@ class EditPostActions extends OsecBaseClass
                 'display',
                 false
             ) . '" title="'
-                                            . esc_attr(__('Make new copy of event', OSEC_TXT_DOM))
-                                            . '">' . __('Clone', OSEC_TXT_DOM) . '</a>';
+                                            . esc_attr(__('Make new copy of event', 'open-source-event-calendar'))
+                                            . '">' . __('Clone', 'open-source-event-calendar') . '</a>';
             $actions['edit_as_new_draft'] = '<a href="' . $this->duplicate_post_get_clone_post_link(
                 $post->ID
             ) . '" title="'
-                                            . esc_attr(__('Copy to a new draft', OSEC_TXT_DOM))
-                                            . '">' . __('Clone to Draft', OSEC_TXT_DOM) . '</a>';
+                                            . esc_attr(__('Copy to a new draft', 'open-source-event-calendar'))
+                                            . '">' . __('Clone to Draft', 'open-source-event-calendar') . '</a>';
         }
 
         return $actions;

@@ -22,7 +22,7 @@ class ThemeVariableSize extends SettingsAbstract
             'value' => $this->args['value'],
             'args'  => [
                 'class'       => 'input-mini ai1ec-less-variable-size',
-                'placeholder' => __('Length', OSEC_TXT_DOM),
+                'placeholder' => __('Length', 'open-source-event-calendar'),
             ],
         ];
 

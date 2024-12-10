@@ -3,7 +3,7 @@
        data-parent="#osec-add-new-event-accordion"
        href="#osec-time-and-date-box">
         <i class="ai1ec-fa ai1ec-fa-clock-o ai1ec-fa-fw"></i>
-        <?php _e('Event date and time', OSEC_TXT_DOM); ?>
+        <?php _e('Event date and time', 'open-source-event-calendar'); ?>
     </a>
 </div>
 <div id="osec-time-and-date-box"
@@ -23,7 +23,7 @@
                     <label for="osec_all_day_event">
                         <input type="checkbox" name="osec_all_day_event"
                                id="osec_all_day_event" value="1" <?php echo $all_day_event; ?>>
-                        <?php _e('All-day event', OSEC_TXT_DOM); ?>
+                        <?php _e('All-day event', 'open-source-event-calendar'); ?>
                     </label>
                 </td>
             </tr>
@@ -32,14 +32,14 @@
                     <label for="osec_instant_event">
                         <input type="checkbox" name="osec_instant_event"
                                id="osec_instant_event" value="1" <?php echo $instant_event; ?>>
-                        <?php _e('No end time', OSEC_TXT_DOM); ?>
+                        <?php _e('No end time', 'open-source-event-calendar'); ?>
                     </label>
                 </td>
             </tr>
             <tr>
                 <td class="ai1ec-first">
                     <label for="osec_start-date-input">
-                        <?php _e('Start date / time', OSEC_TXT_DOM); ?>:
+                        <?php _e('Start date / time', 'open-source-event-calendar'); ?>:
                     </label>
                 </td>
                 <td>
@@ -56,7 +56,7 @@
             <tr>
                 <td>
                     <label for="osec_end-date-input">
-                        <?php _e('End date / time', OSEC_TXT_DOM); ?>:
+                        <?php _e('End date / time', 'open-source-event-calendar'); ?>:
                     </label>
                 </td>
                 <td>
@@ -73,12 +73,12 @@
             <tr>
                 <td>
                     <label for="osec_end-date-input">
-                        <?php _e('Time zone', OSEC_TXT_DOM); ?>:
+                        <?php _e('Time zone', 'open-source-event-calendar'); ?>:
                     </label>
                 </td>
                 <td>
                     <select name="osec_timezone_name" id="timezone-select">
-                        <option value=""><?php _e('Choose your time zone', OSEC_TXT_DOM); ?></option>
+                        <option value=""><?php _e('Choose your time zone', 'open-source-event-calendar'); ?></option>
                         <?php foreach ($timezones_list as $group => $timezones) : ?>
                             <optgroup label="<?php echo $group; ?>">
                                 <?php
@@ -105,7 +105,7 @@
                     <input type="hidden" name="osec_rrule" id="osec_rrule"
                            value="<?php echo $rrule; ?>">
                     <label for="osec_repeat" id="osec_repeat_label">
-                        <?php _e('Repeat', OSEC_TXT_DOM);
+                        <?php _e('Repeat', 'open-source-event-calendar');
                         echo $repeating_event ? ':' : '...'; ?>
                     </label>
                 </td>
@@ -124,7 +124,7 @@
                     <input type="hidden" name="osec_exrule" id="osec_exrule"
                            value="<?php echo $exrule; ?>">
                     <label for="osec_exclude" id="osec_exclude_label">
-                        <?php _e('Exclude', OSEC_TXT_DOM);
+                        <?php _e('Exclude', 'open-source-event-calendar');
                         echo $exclude_event ? ':' : '...'; ?>
                     </label>
                 </td>
@@ -133,7 +133,7 @@
                         <a href="#osec_exclude_box"><?php echo $exrule_text; ?></a>
                     </div>
                     <span class="ai1ec-info-text">
-                            (<?php _e('Choose a rule for exclusion', OSEC_TXT_DOM); ?>)
+                            (<?php _e('Choose a rule for exclusion', 'open-source-event-calendar'); ?>)
                         </span>
                 </td>
             </tr>

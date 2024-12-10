@@ -427,10 +427,10 @@ JSC;
             ),
             'cookie_path'                    => COOKIEPATH,
             'disable_autocompletion'         => $settings->get('disable_autocompletion'),
-            'end_must_be_after_start'        => __('The end date can\'t be earlier than the start date.', OSEC_TXT_DOM),
+            'end_must_be_after_start'        => __('The end date can\'t be earlier than the start date.', 'open-source-event-calendar'),
             'show_at_least_six_hours'        => __(
                 'For week and day view, you must select an interval of at least 6 hours.',
-                OSEC_TXT_DOM
+                'open-source-event-calendar'
             ),
         ];
 

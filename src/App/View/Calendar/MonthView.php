@@ -77,7 +77,7 @@ class MonthView extends AbstractView
             'post_ids'                 => implode(',', $args['post_ids']),
             'data_type'                => $args['data_type'],
             'is_ticket_button_enabled' => $is_ticket_button_enabled,
-            'text_venue_separator'     => __('@ %s', OSEC_TXT_DOM),
+            'text_venue_separator'     => __('@ %s', 'open-source-event-calendar'),
             'pagination_links'         => $pagination_links,
         ];
 

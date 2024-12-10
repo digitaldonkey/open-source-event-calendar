@@ -41,7 +41,7 @@ class AdminPageWidgetCreator extends AdminPageAbstract
     {
         add_meta_box(
             'ai1ec-widget-creator',
-            _x('Widget Creator', 'meta box', OSEC_TXT_DOM),
+            _x('Widget Creator', 'meta box', 'open-source-event-calendar'),
             $this->display_meta_box(...),
             'ai1ec-super-widget',
             'left',
@@ -60,8 +60,8 @@ class AdminPageWidgetCreator extends AdminPageAbstract
     {
         add_submenu_page(
             OSEC_ADMIN_BASE_URL,
-            __('Widget Creator', OSEC_TXT_DOM),
-            __('Widget Creator', OSEC_TXT_DOM),
+            __('Widget Creator', 'open-source-event-calendar'),
+            __('Widget Creator', 'open-source-event-calendar'),
             'manage_osec_feeds',
             self::ADMIN_PAGE_PREFIX . 'widget-creator',
             $this->display_page(...)
@@ -84,7 +84,7 @@ class AdminPageWidgetCreator extends AdminPageAbstract
             [['style', 'widget.css']]
         );
         $args = [
-            'title'   => __('Widget Creator', OSEC_TXT_DOM),
+            'title'   => __('Widget Creator', 'open-source-event-calendar'),
             'metabox' => [
                 'screen' => 'ai1ec-super-widget',
                 'action' => 'left',

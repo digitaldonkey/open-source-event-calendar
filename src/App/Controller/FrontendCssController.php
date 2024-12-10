@@ -142,7 +142,7 @@ class FrontendCssController extends OsecBaseClass
                             __(
                                 'Your CSS is being compiled on every request, '
                                     . 'which causes your calendar to perform slowly. The following error occurred: %s',
-                                OSEC_TXT_DOM
+                                'open-source-event-calendar'
                             ),
                             $e->getMessage()
                         ),

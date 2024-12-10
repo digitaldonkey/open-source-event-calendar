@@ -220,7 +220,7 @@ JS;
     {
         $data['set_calendar_page'] = __(
             'You must choose the Calendar page before using the Super Widget',
-            OSEC_TXT_DOM
+            'open-source-event-calendar'
         );
 
         return $data;

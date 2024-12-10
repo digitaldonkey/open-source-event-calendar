@@ -14,7 +14,7 @@
                     <?php
                     // Show the submit button only in the settings page and not in the Feeds page.
                     if ($calendar_settings) {
-                        submit_button(esc_attr__('Update Settings', OSEC_TXT_DOM), 'primary', 'osec_save_settings');
+                        submit_button(esc_attr__('Update Settings', 'open-source-event-calendar'), 'primary', 'osec_save_settings');
                     }
                     ?>
                 </div>

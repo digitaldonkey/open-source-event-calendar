@@ -1,5 +1,5 @@
 <p>
-    <label for="<?php echo $title['id'] ?>"><?php _e('Title:', OSEC_TXT_DOM) ?></label>
+    <label for="<?php echo $title['id'] ?>"><?php _e('Title:', 'open-source-event-calendar') ?></label>
     <input class="widefat" id="<?php echo $title['id'] ?>" name="<?php echo $title['name'] ?>" type="text"
            value="<?php echo $title['value'] ?>"/>
 </p>
@@ -13,7 +13,7 @@
     ?> />
     <label for="<?php echo $events_seek_type['id']; ?>_events"><?php _e(
             'Number of events to show:',
-            OSEC_TXT_DOM
+            'open-source-event-calendar'
         ) ?></label>
     <input id="<?php echo $events_per_page['id'] ?>" name="<?php echo $events_per_page['name'] ?>" type="text" size="3"
            value="<?php echo $events_per_page['value'] ?>"/>
@@ -27,14 +27,14 @@
     ?> />
     <label for="<?php echo $events_seek_type['id']; ?>_days"><?php _e(
             'Number of days to show:',
-            OSEC_TXT_DOM
+            'open-source-event-calendar'
         ) ?></label>
     <input id="<?php echo $days_per_page['id'] ?>" name="<?php echo $days_per_page['name'] ?>" type="text" size="3"
            value="<?php echo $days_per_page['value'] ?>"/>
 </p>
 
 <p class="ai1ec-limit-by-container">
-    <?php _e('Limit to:', OSEC_TXT_DOM); ?>
+    <?php _e('Limit to:', 'open-source-event-calendar'); ?>
     <br/>
     <input id="<?php echo $limit_by_cat['id'] ?>" class="ai1ec-limit-by-cat ai1ec-toggle-fix"
            name="<?php echo $limit_by_cat['name'] ?>" type="checkbox" value="1" <?php if ($limit_by_cat['value']) {
@@ -44,7 +44,7 @@
     />
     <label for="<?php echo $limit_by_cat['id'] ?>"><?php _e(
             'Events with these <strong>Categories</strong>',
-            OSEC_TXT_DOM
+            'open-source-event-calendar'
         ) ?></label>
 </p>
 <p class="ai1ec-limit-by-options-container" <?php if ( ! $limit_by_cat['value']) {
@@ -61,7 +61,7 @@
             } ?>><?php echo $event_cat->name; ?></option>
         <?php endforeach ?>
         <?php if (count($cat_ids['options']) == 0) : ?>
-            <option disabled><?php _e('No categories found.', OSEC_TXT_DOM) ?></option>
+            <option disabled><?php _e('No categories found.', 'open-source-event-calendar') ?></option>
         <?php endif ?>
     </select>
 </p>
@@ -84,7 +84,7 @@
     "/>
     <label for="<?php echo $limit_by_tag['id'] ?>"><?php _e(
             '<strong>Or</strong> events with these <strong>Tags</strong>',
-            OSEC_TXT_DOM
+            'open-source-event-calendar'
         ) ?></label>
 </p>
 <p class="ai1ec-limit-by-options-container" <?php if ( ! $limit_by_tag['value']) {
@@ -101,7 +101,7 @@
             } ?>><?php echo $event_tag->name; ?></option>
         <?php endforeach ?>
         <?php if (count($tag_ids['options']) == 0) : ?>
-            <option disabled><?php _e('No tags found.', OSEC_TXT_DOM) ?></option>
+            <option disabled><?php _e('No tags found.', 'open-source-event-calendar') ?></option>
         <?php endif ?>
     </select>
 </p>
@@ -117,7 +117,7 @@
             onchange="this.parentElement.nextElementSibling.style.display = (this.parentElement.nextElementSibling.style.display === 'none') ? 'block' : 'none'; this.parentElement.nextElementSibling.children[0].value = '';"
     <label for="<?php echo $show_calendar_button['id'] ?>"><?php _e(
             'Show <strong>View Calendar</strong> button',
-            OSEC_TXT_DOM
+            'open-source-event-calendar'
         ) ?></label>
     <br/>
     <input id="<?php echo $show_subscribe_buttons['id'] ?>" name="<?php echo $show_subscribe_buttons['name'] ?>"
@@ -126,7 +126,7 @@
     } ?> />
     <label for="<?php echo $show_subscribe_buttons['id'] ?>"><?php _e(
             'Show <strong>Subscribe</strong> buttons',
-            OSEC_TXT_DOM
+            'open-source-event-calendar'
         ) ?></label>
     <br/>
     <input id="<?php echo $hide_on_calendar_page['id'] ?>" name="<?php echo $hide_on_calendar_page['name'] ?>"
@@ -135,6 +135,6 @@
     } ?> />
     <label for="<?php echo $hide_on_calendar_page['id'] ?>"><?php _e(
             'Hide this widget on calendar page',
-            OSEC_TXT_DOM
+            'open-source-event-calendar'
         ) ?></label>
 </p>

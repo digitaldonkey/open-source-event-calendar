@@ -71,10 +71,10 @@ class CalendarTaxonomyView extends OsecBaseClass
             'selected_' . $type_for_filter => $view_args[$type_for_filter],
             'data_type'                    => $view_args['data_type'],
             'clear_filter'                 => $href_for_clearing_filter,
-            'text_clear_category_filter'   => __('Clear category filter', OSEC_TXT_DOM),
-            'text_categories'              => __('Categories', OSEC_TXT_DOM),
-            'text_clear_tag_filter'        => __('Clear tag filter', OSEC_TXT_DOM),
-            'text_tags'                    => __('Tags', OSEC_TXT_DOM),
+            'text_clear_category_filter'   => __('Clear category filter', 'open-source-event-calendar'),
+            'text_categories'              => __('Categories', 'open-source-event-calendar'),
+            'text_clear_tag_filter'        => __('Clear tag filter', 'open-source-event-calendar'),
+            'text_tags'                    => __('Tags', 'open-source-event-calendar'),
         ];
 
         return ThemeLoader::factory($this->app)

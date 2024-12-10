@@ -33,11 +33,11 @@ class WidgetAgendaView extends WidgetAbstract
     {
         parent::__construct(
             $this->get_id(),
-            __('Upcoming Events', OSEC_TXT_DOM),
+            __('Upcoming Events', 'open-source-event-calendar'),
             [
                 'description'           => __(
                     'Open Source Event Calendar: Lists upcoming events in Agenda view',
-                    OSEC_TXT_DOM
+                    'open-source-event-calendar'
                 ),
                 'class'                 => __CLASS__,
                 'show_instance_in_rest' => true,
@@ -97,15 +97,15 @@ class WidgetAgendaView extends WidgetAbstract
                     'class'   => 'Osec\Settings\Elements\SettingsSelect',
                     'label'   => __(
                         'Choose how to limit the upcoming events',
-                        OSEC_TXT_DOM
+                        'open-source-event-calendar'
                     ),
                     'options' => [
                         [
-                            'text'  => __('Events', OSEC_TXT_DOM),
+                            'text'  => __('Events', 'open-source-event-calendar'),
                             'value' => 'events',
                         ],
                         [
-                            'text'  => __('Days', OSEC_TXT_DOM),
+                            'text'  => __('Days', 'open-source-event-calendar'),
                             'value' => 'days',
                         ],
                     ],
@@ -135,11 +135,11 @@ class WidgetAgendaView extends WidgetAbstract
                     'class' => 'Osec\Settings\Elements\SettingsCatsTagsFilter',
                     'label' => __(
                         'Show events filtered for the following tags/categories',
-                        OSEC_TXT_DOM
+                        'open-source-event-calendar'
                     ),
                     'help'  => __(
                         'To clear, hold &#8984;/<abbr class="initialism">CTRL</abbr> and click selection.',
-                        OSEC_TXT_DOM
+                        'open-source-event-calendar'
                     ),
                 ],
                 'value'    => [
@@ -175,7 +175,7 @@ class WidgetAgendaView extends WidgetAbstract
     public function get_defaults()
     {
         return [
-            'title'                  => __('Upcoming Events', OSEC_TXT_DOM),
+            'title'                  => __('Upcoming Events', 'open-source-event-calendar'),
             'events_seek_type'       => 'events',
             'events_per_page'        => 10,
             'days_per_page'          => 10,
@@ -475,16 +475,16 @@ class WidgetAgendaView extends WidgetAbstract
                                                                    ->generate_href();
         $args_for_widget['subscribe_url']             = OSEC_EXPORT_URL . $subscribe_filter;
         $args_for_widget['subscribe_url_no_html']     = OSEC_EXPORT_URL . '&no_html=true' . $subscribe_filter;
-        $args_for_widget['text_upcoming_events']      = __('There are no upcoming events.', OSEC_TXT_DOM);
-        $args_for_widget['text_all_day']              = __('all-day', OSEC_TXT_DOM);
-        $args_for_widget['text_view_calendar']        = __('View Calendar', OSEC_TXT_DOM);
+        $args_for_widget['text_upcoming_events']      = __('There are no upcoming events.', 'open-source-event-calendar');
+        $args_for_widget['text_all_day']              = __('all-day', 'open-source-event-calendar');
+        $args_for_widget['text_view_calendar']        = __('View Calendar', 'open-source-event-calendar');
 
         // TODO Just disabled that
 
         // $args_for_widget['calendar_url'] = get_page_uri($settings->get('calendar_page_id'));
-        $args_for_widget['text_edit']              = __('Edit', OSEC_TXT_DOM);
-        $args_for_widget['text_venue_separator']   = __('@ %s', OSEC_TXT_DOM);
-        $args_for_widget['text_subscribe_label']   = __('Add', OSEC_TXT_DOM);
+        $args_for_widget['text_edit']              = __('Edit', 'open-source-event-calendar');
+        $args_for_widget['text_venue_separator']   = __('@ %s', 'open-source-event-calendar');
+        $args_for_widget['text_subscribe_label']   = __('Add', 'open-source-event-calendar');
         $args_for_widget['subscribe_buttons_text'] = CalendarSubscribeButtonView::factory($this->app)->get_labels();
 
         // Display theme

@@ -20,10 +20,10 @@ class SettingsEnabledViews extends SettingsAbstract
         $args = [
             'views'        => $this->args['value'],
             'label'        => $this->args['renderer']['label'],
-            'text_enabled' => __('Enabled', OSEC_TXT_DOM),
-            'text_default' => __('Default', OSEC_TXT_DOM),
-            'text_desktop' => __('Desktop', OSEC_TXT_DOM),
-            'text_mobile'  => __('Mobile', OSEC_TXT_DOM),
+            'text_enabled' => __('Enabled', 'open-source-event-calendar'),
+            'text_default' => __('Default', 'open-source-event-calendar'),
+            'text_desktop' => __('Desktop', 'open-source-event-calendar'),
+            'text_mobile'  => __('Mobile', 'open-source-event-calendar'),
         ];
 
         return ThemeLoader::factory($this->app)

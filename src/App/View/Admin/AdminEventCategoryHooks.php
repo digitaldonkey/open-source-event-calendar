@@ -83,11 +83,11 @@ class AdminEventCategoryHooks extends OsecBaseClass
         $args = [
             'image_src'    => '',
             'image_style'  => 'style="display:none"',
-            'section_name' => __('Category Image', OSEC_TXT_DOM),
-            'label'        => __('Add Image', OSEC_TXT_DOM),
+            'section_name' => __('Category Image', 'open-source-event-calendar'),
+            'label'        => __('Add Image', 'open-source-event-calendar'),
             'description'  => __(
                 'Assign an optional image to the category. Recommended size: square, minimum 400&times;400 pixels.',
-                OSEC_TXT_DOM
+                'open-source-event-calendar'
             ),
             'edit'         => false,
         ];
@@ -151,12 +151,12 @@ class AdminEventCategoryHooks extends OsecBaseClass
         $args = [
             'image_src'    => $image,
             'image_style'  => $style,
-            'section_name' => __('Category Image', OSEC_TXT_DOM),
-            'label'        => __('Add Image', OSEC_TXT_DOM),
-            'remove_label' => __('Remove Image', OSEC_TXT_DOM),
+            'section_name' => __('Category Image', 'open-source-event-calendar'),
+            'label'        => __('Add Image', 'open-source-event-calendar'),
+            'remove_label' => __('Remove Image', 'open-source-event-calendar'),
             'description'  => __(
                 'Assign an optional image to the category. Recommended size: square, minimum 400&times;400 pixels.',
-                OSEC_TXT_DOM
+                'open-source-event-calendar'
             ),
             'edit'         => true,
         ];
@@ -251,9 +251,9 @@ class AdminEventCategoryHooks extends OsecBaseClass
 
         return array_splice($columns, 0, 3) + // get only first element
                // insert at index 2
-               ['cat_color' => __('Color', OSEC_TXT_DOM)] +
+               ['cat_color' => __('Color', 'open-source-event-calendar')] +
                // insert at index 3
-               ['cat_image' => __('Image', OSEC_TXT_DOM)] +
+               ['cat_image' => __('Image', 'open-source-event-calendar')] +
                // insert rest of elements at the back
                array_splice($columns, 0);
     }

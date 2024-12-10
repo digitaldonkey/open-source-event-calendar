@@ -3,7 +3,7 @@
         <tbody>
         <tr valign="top">
             <th scope="row">
-                <?php _e('Successfully imported events:', OSEC_TXT_DOM) ?>
+                <?php _e('Successfully imported events:', 'open-source-event-calendar') ?>
             </th>
             <td>
                 <?php echo $imported_events ?>

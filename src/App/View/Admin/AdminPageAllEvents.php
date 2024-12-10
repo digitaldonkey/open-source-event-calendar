@@ -95,7 +95,7 @@ class AdminPageAllEvents extends OsecBaseClass
                 $tax_obj = get_taxonomy($tax_slug);
                 wp_dropdown_categories(
                     [
-                        'show_option_all' => __('Show All ', OSEC_TXT_DOM) . $tax_obj->label,
+                        'show_option_all' => __('Show All ', 'open-source-event-calendar') . $tax_obj->label,
                         'taxonomy'        => $tax_slug,
                         'name'            => $tax_obj->name,
                         'orderby'         => 'name',
@@ -109,7 +109,7 @@ class AdminPageAllEvents extends OsecBaseClass
             }
             $args = [
                 'name'            => 'author',
-                'show_option_all' => __('Show All Authors', OSEC_TXT_DOM),
+                'show_option_all' => __('Show All Authors', 'open-source-event-calendar'),
             ];
             if (isset($_GET['user'])) {
                 $args['selected'] = (int)$_GET['user'];
@@ -197,15 +197,15 @@ class AdminPageAllEvents extends OsecBaseClass
         $new_col_order = [
             'cb'              => $columns['cb'],
             'title'           => $columns['title'],
-            'osec_event_date' => __('Event date/time', OSEC_TXT_DOM),
+            'osec_event_date' => __('Event date/time', 'open-source-event-calendar'),
         ];
         foreach ($columns as $key => $val) {
             if ( ! isset($new_col_order[$key])) {
                 $new_col_order[$key] = $val;
             }
         }
-        $new_col_order['author'] = __('Author', OSEC_TXT_DOM);
-        $new_col_order['date']   = __('Post Date', OSEC_TXT_DOM);
+        $new_col_order['author'] = __('Author', 'open-source-event-calendar');
+        $new_col_order['date']   = __('Post Date', 'open-source-event-calendar');
 
         return $new_col_order;
     }

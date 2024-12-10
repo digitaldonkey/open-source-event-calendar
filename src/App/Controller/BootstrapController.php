@@ -859,7 +859,7 @@ class BootstrapController
     {
         if (false === $this->isTextdomainLoaded) {
             load_plugin_textdomain(
-                OSEC_TXT_DOM,
+                'open-source-event-calendar',
                 false,
                 OSEC_LANGUAGE_PATH
             );

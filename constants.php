@@ -31,13 +31,6 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     }
 
     // ===============
-    // = Plugin Textdomain =
-    // ===============
-    if ( ! defined('OSEC_TXT_DOM')) {
-        define('OSEC_TXT_DOM', OSEC_PLUGIN_NAME);
-    }
-
-    // ===============
     // = Plugin Short Name =
     // ===============
     // if ( ! defined('OSEC_PLUGIN_SHORT_NAME')) {

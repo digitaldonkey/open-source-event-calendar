@@ -1,7 +1,7 @@
 <?php if ( ! validate_current_theme()) : ?>
     <div id="message1" class="updated">
         <p>
-            <?php _e('The active theme is broken.  Reverting to the default theme.', OSEC_TXT_DOM); ?>
+            <?php _e('The active theme is broken.  Reverting to the default theme.', 'open-source-event-calendar'); ?>
         </p>
     </div>
 <?php elseif (isset($_GET['activated'])) :
@@ -13,7 +13,7 @@
                 <?php printf(
                     __(
                         'New theme activated. This theme supports widgets, please visit the <a href="%s">widgets settings</a> screen to configure them.',
-                        OSEC_TXT_DOM
+                        'open-source-event-calendar'
                     ),
                     admin_url('widgets.php')
                 ); ?>
@@ -29,7 +29,7 @@
 elseif (isset($_GET['deleted'])) : ?>
     <div id="message3" class="updated">
         <p>
-            <?php _e('Theme deleted.', OSEC_TXT_DOM) ?>
+            <?php _e('Theme deleted.', 'open-source-event-calendar') ?>
         </p>
     </div>
 <?php endif; ?>

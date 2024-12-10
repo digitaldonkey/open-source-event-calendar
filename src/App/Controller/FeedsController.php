@@ -447,7 +447,7 @@ class FeedsController extends OsecBaseClass
                         'A system error has prevented calendar data from being fetched. '
                             . 'Something is preventing the plugin from functioning correctly. '
                             . 'This message should provide a clue: %s',
-                        OSEC_TXT_DOM
+                        'open-source-event-calendar'
                     ),
                     $response->get_error_message()
                 );
@@ -455,7 +455,7 @@ class FeedsController extends OsecBaseClass
                 $message = __(
                     'Calendar data could not be fetched. If your URL is valid and contains an iCalendar resource, '
                     . 'this is likely the result of a temporary server error and time may resolve this issue',
-                    OSEC_TXT_DOM
+                    'open-source-event-calendar'
                 );
             }
             if ($message) {
@@ -468,7 +468,7 @@ class FeedsController extends OsecBaseClass
                 $output['data'] = [
                     'error'   => false,
                     'message' => sprintf(
-                        _n('Imported %s event', 'Imported %s events', $count, OSEC_TXT_DOM),
+                        _n('Imported %s event', 'Imported %s events', $count, 'open-source-event-calendar'),
                         $count
                     ),
                     'name'    => $feed_name,
@@ -478,7 +478,7 @@ class FeedsController extends OsecBaseClass
             // No feed in DB.
             $output['data'] = [
                 'error'   => true,
-                'message' => __('Invalid ICS feed ID', OSEC_TXT_DOM),
+                'message' => __('Invalid ICS feed ID', 'open-source-event-calendar'),
             ];
         }
         $output['data']['ics_id'] = $feed_id;
@@ -518,7 +518,7 @@ class FeedsController extends OsecBaseClass
                 [
                     'data' => [
                         'error'   => false,
-                        'message' => __('Feed deleted', OSEC_TXT_DOM),
+                        'message' => __('Feed deleted', 'open-source-event-calendar'),
                         'ics_id'  => $ics_id,
                     ],
                 ]
@@ -684,7 +684,7 @@ class FeedsController extends OsecBaseClass
                 'id'          => 'osec_feed_category',
                 'use_id'      => true,
                 'type'        => 'category',
-                'placeholder' => __('Categories (optional)', OSEC_TXT_DOM),
+                'placeholder' => __('Categories (optional)', 'open-source-event-calendar'),
             ],
             get_terms(
                 'events_categories',
@@ -699,13 +699,13 @@ class FeedsController extends OsecBaseClass
             $this->app,
             [
                 'id'                 => 'osec-ics-modal',
-                'header_text'        => esc_html__('Removing ICS Feed', OSEC_TXT_DOM),
+                'header_text'        => esc_html__('Removing ICS Feed', 'open-source-event-calendar'),
                 'body_text'          => esc_html__(
                     'Do you want to keep the events imported from the calendar or remove them?',
-                    OSEC_TXT_DOM
+                    'open-source-event-calendar'
                 ),
-                'keep_button_text'   => esc_html__('Keep Events', OSEC_TXT_DOM),
-                'delete_button_text' => esc_html__('Remove Events', OSEC_TXT_DOM),
+                'keep_button_text'   => esc_html__('Keep Events', 'open-source-event-calendar'),
+                'delete_button_text' => esc_html__('Remove Events', 'open-source-event-calendar'),
             ]
         );
 

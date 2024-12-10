@@ -377,9 +377,9 @@ class Timezones extends OsecBaseClass
         $options = [];
 
         if (! $only_zones) {
-            $manual             = __('Manual Offset', OSEC_TXT_DOM);
+            $manual             = __('Manual Offset', 'open-source-event-calendar');
             $options[$manual][] = [
-                'text'  => __('Choose your timezone', OSEC_TXT_DOM),
+                'text'  => __('Choose your timezone', 'open-source-event-calendar'),
                 'value' => '',
                 'args'  => ['selected' => 'selected'],
             ];

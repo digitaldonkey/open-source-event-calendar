@@ -374,7 +374,7 @@ class Settings extends OsecBaseInitialized
                         'longname'       => _n_noop(
                             'Agenda',
                             'Agenda',
-                            OSEC_TXT_DOM
+                            'open-source-event-calendar'
                         ),
                     ],
                     'oneday' => [
@@ -385,7 +385,7 @@ class Settings extends OsecBaseInitialized
                         'longname'       => _n_noop(
                             'Day',
                             'Day',
-                            OSEC_TXT_DOM
+                            'open-source-event-calendar'
                         ),
                     ],
                     'month'  => [
@@ -396,7 +396,7 @@ class Settings extends OsecBaseInitialized
                         'longname'       => _n_noop(
                             'Month',
                             'Month',
-                            OSEC_TXT_DOM
+                            'open-source-event-calendar'
                         ),
                     ],
                     'week'   => [
@@ -407,7 +407,7 @@ class Settings extends OsecBaseInitialized
                         'longname'       => _n_noop(
                             'Week',
                             'Week',
-                            OSEC_TXT_DOM
+                            'open-source-event-calendar'
                         ),
                     ],
                 ],

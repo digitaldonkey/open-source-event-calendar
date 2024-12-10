@@ -65,8 +65,8 @@ class EventContentView extends OsecBaseClass
         $args         = [
             'event'      => $event,
             'location'   => $location,
-            'text_when'  => __('When:', OSEC_TXT_DOM),
-            'text_where' => __('Where:', OSEC_TXT_DOM),
+            'text_when'  => __('When:', 'open-source-event-calendar'),
+            'text_where' => __('Where:', 'open-source-event-calendar'),
         ];
 
         return ThemeLoader::factory($this->app)
