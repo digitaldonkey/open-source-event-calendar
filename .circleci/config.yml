@@ -377,6 +377,20 @@ jobs:
           path: /tmp/integration_test_results/screenshots
           when: always
 
+  publish-github-release_job:
+    docker:
+      - image: cibuilds/github:0.10
+    working_directory: ~/open-source-event-calendar
+    steps:
+      - checkout
+      - *attach_workspace
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            VERSION=$(git describe --tags)            
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
+
+
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
 #   & https://circleci.com/docs/configuration-reference/#workflows
@@ -415,3 +429,12 @@ workflows:
       - release_test_job:
           requires:
             - create_release_job
+      - publish-github-release_job:
+          requires:
+            - release_test_job
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
+

@@ -48,7 +48,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = Plugin Version =
     // ==================
     if ( ! defined('OSEC_VERSION')) {
-        define('OSEC_VERSION', '0.9');
+        define('OSEC_VERSION', '0.9.0');
     }
 
     // =================
