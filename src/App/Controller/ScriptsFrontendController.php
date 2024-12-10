@@ -143,7 +143,7 @@ class ScriptsFrontendController extends OsecBaseClass
     public function render_js()
     {
         $common_js = '';
-        if ( ! isset($_GET[self::LOAD_JS_PARAMETER])) {
+        if (! isset($_GET[self::LOAD_JS_PARAMETER])) {
             return null;
         }
         $page_to_load = $_GET[self::LOAD_JS_PARAMETER];
@@ -315,7 +315,7 @@ JSC;
     public function create_require_js_module($object_name, array $data)
     {
         foreach ((array)$data as $key => $value) {
-            if ( ! is_scalar($value)) {
+            if (! is_scalar($value)) {
                 continue;
             }
             $data[$key] = html_entity_decode((string)$value, ENT_QUOTES, 'UTF-8');
@@ -421,13 +421,16 @@ JSC;
                     'Loading preview&nbsp;<i class="ai1ec-fa ai1ec-fa-spin ai1ec-fa-spinner"></i>'
                 ),
             ],
-            'load_views_error' => I18n::__(
+            'load_views_error'               => I18n::__(
                 'Something went wrong while fetching events.'
                 . '<br>The request status is: %STATUS% <br>The error thrown was: %ERROR%'
             ),
             'cookie_path'                    => COOKIEPATH,
             'disable_autocompletion'         => $settings->get('disable_autocompletion'),
-            'end_must_be_after_start'        => __('The end date can\'t be earlier than the start date.', 'open-source-event-calendar'),
+            'end_must_be_after_start'        => __(
+                'The end date can\'t be earlier than the start date.',
+                'open-source-event-calendar'
+            ),
             'show_at_least_six_hours'        => __(
                 'For week and day view, you must select an interval of at least 6 hours.',
                 'open-source-event-calendar'
@@ -462,7 +465,7 @@ JSC;
             ['contentHash' => md5($javascript)]
         );
         $conditional_get->sendHeaders();
-        if ( ! $conditional_get->cacheIsValid) {
+        if (! $conditional_get->cacheIsValid) {
             $http_encoder = new HttpEncoder(
                 [
                     'content' => $javascript,

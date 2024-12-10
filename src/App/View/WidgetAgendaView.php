@@ -352,7 +352,7 @@ class WidgetAgendaView extends WidgetAbstract
     protected function _valid_seek_type($value)
     {
         static $list = ['events', 'days'];
-        if ( ! in_array($value, $list)) {
+        if (! in_array($value, $list)) {
             return (string)reset($list);
         }
 
@@ -398,11 +398,11 @@ class WidgetAgendaView extends WidgetAbstract
 
         // Add params to the subscribe_url for filtering by Limits (category, tag)
         $subscribe_filter = '';
-        if ( ! is_array($args_for_widget['cat_ids'])) {
+        if (! is_array($args_for_widget['cat_ids'])) {
             $args_for_widget['cat_ids'] = explode(',', (string)$args_for_widget['cat_ids']);
         }
 
-        if ( ! is_array($args_for_widget['tag_ids'])) {
+        if (! is_array($args_for_widget['tag_ids'])) {
             $args_for_widget['tag_ids'] = explode(',', (string)$args_for_widget['tag_ids']);
         }
 
@@ -475,7 +475,10 @@ class WidgetAgendaView extends WidgetAbstract
                                                                    ->generate_href();
         $args_for_widget['subscribe_url']             = OSEC_EXPORT_URL . $subscribe_filter;
         $args_for_widget['subscribe_url_no_html']     = OSEC_EXPORT_URL . '&no_html=true' . $subscribe_filter;
-        $args_for_widget['text_upcoming_events']      = __('There are no upcoming events.', 'open-source-event-calendar');
+        $args_for_widget['text_upcoming_events']      = __(
+            'There are no upcoming events.',
+            'open-source-event-calendar'
+        );
         $args_for_widget['text_all_day']              = __('all-day', 'open-source-event-calendar');
         $args_for_widget['text_view_calendar']        = __('View Calendar', 'open-source-event-calendar');
 

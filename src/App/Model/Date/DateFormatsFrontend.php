@@ -68,9 +68,15 @@ class DateFormatsFrontend extends OsecBaseClass
                          'open-source-event-calendar'
                      )
                      . '<br />'
-                     . __('Above WordPress default "date_format" is considered as "long" format.', 'open-source-event-calendar')
+                     . __(
+                         'Above WordPress default "date_format" is considered as "long" format.',
+                         'open-source-event-calendar'
+                     )
                      . '<br />'
-                     . __('Backend Formats are in Osec Settings -> Adding/Editing Events.', 'open-source-event-calendar')
+                     . __(
+                         'Backend Formats are in Osec Settings -> Adding/Editing Events.',
+                         'open-source-event-calendar'
+                     )
                      . '</p>';
             },
             'general'
@@ -124,7 +130,7 @@ class DateFormatsFrontend extends OsecBaseClass
      */
     public function getFormat(string $format): array
     {
-        if ( ! isset(self::$default[$format])) {
+        if (! isset(self::$default[$format])) {
             throw new Exception('Unknown format. Got: ' . $format);
         }
         $def = self::$default[$format];

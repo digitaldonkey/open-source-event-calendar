@@ -75,9 +75,15 @@ class SettingsShortcodesText extends SettingsAbstract
                 'open-source-event-calendar'
             ),
             'text_filter_tag_id'            => __('Filter by event tag ID:', 'open-source-event-calendar'),
-            'text_filter_tag_id_comma'      => __('Filter by event tag IDs (separate IDs by comma):', 'open-source-event-calendar'),
+            'text_filter_tag_id_comma'      => __(
+                'Filter by event tag IDs (separate IDs by comma):',
+                'open-source-event-calendar'
+            ),
             'text_filter_post_id'           => __('Filter by post ID:', 'open-source-event-calendar'),
-            'text_filter_post_id_comma'     => __('Filter by post IDs (separate IDs by comma):', 'open-source-event-calendar'),
+            'text_filter_post_id_comma'     => __(
+                'Filter by post IDs (separate IDs by comma):',
+                'open-source-event-calendar'
+            ),
             'text_events_limit'             => __('Limit number of events per page:', 'open-source-event-calendar'),
             'text_warning'                  => __('Warning:', 'open-source-event-calendar'),
             'text_single_calendar'          => __(

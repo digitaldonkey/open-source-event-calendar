@@ -101,7 +101,7 @@ class AgendaView extends AbstractView
         $navigation       = '';
         $loader           = ThemeLoader::factory($this->app);
         $pagination_links = '';
-        if ( ! $view_args['no_navigation']) {
+        if (! $view_args['no_navigation']) {
             $pagination_links = $this->_get_agenda_like_pagination_links(
                 $view_args,
                 $results['prev'],
@@ -164,7 +164,10 @@ class AgendaView extends AbstractView
             'post_ids'                  => implode(',', $view_args['post_ids']),
             'data_type'                 => $view_args['data_type'],
             'is_ticket_button_enabled'  => $is_ticket_button_enabled,
-            'text_upcoming_events'      => __('There are no upcoming events to display at this time.', 'open-source-event-calendar'),
+            'text_upcoming_events'      => __(
+                'There are no upcoming events to display at this time.',
+                'open-source-event-calendar'
+            ),
             'text_edit'                 => __('Edit', 'open-source-event-calendar'),
             'text_read_more'            => __('Read more', 'open-source-event-calendar'),
             'text_categories'           => __('Categories:', 'open-source-event-calendar'),
@@ -226,7 +229,7 @@ class AgendaView extends AbstractView
             $timestamp = $start_time->format();
             // Ensure all-day & non-all-day categories are created in correct
             // order: "allday" preceding "notallday".
-            if ( ! isset($dates[$timestamp]['events'])) {
+            if (! isset($dates[$timestamp]['events'])) {
                 $dates[$timestamp]['events'] = [
                     'allday'    => [],
                     'notallday' => [],

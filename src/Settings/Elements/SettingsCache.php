@@ -53,7 +53,7 @@ class SettingsCache extends SettingsAbstract
                 'is_curren_cache' => $this->niceBoolean($current_cache === 'CacheFile'),
                 'notes'           => $cachePath ? '<div style="max-width: 100%; overflow-x: scroll;">'
                                       . $cachePath['path'] . '<br />'
-                                      . $cachePath['url'] . '</div>' : __('Not Available'),
+                                      . $cachePath['url'] . '</div>' : __('Not Available', 'open-source-event-calendar'),
                 'constant'        => 'OSEC_ENABLE_CACHE_FILE',
             ],
             'CacheDb'   => [
