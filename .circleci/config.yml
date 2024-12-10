@@ -380,7 +380,9 @@ jobs:
   publish-github-release_job:
     docker:
       - image: cibuilds/github:0.10
+    working_directory: ~/open-source-event-calendar
     steps:
+      - checkout
       - *attach_workspace
       - run:
           name: "Publish Release on GitHub"
