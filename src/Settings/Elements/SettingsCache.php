@@ -37,6 +37,16 @@ class SettingsCache extends SettingsAbstract
     public function get_twig_cache_args()
     {
         $cachePath        = (new CachePath())->getCacheData();
+        if ($cachePath) {
+            $cachePathTxt = '<div style="max-width: 100%; overflow-x: scroll;">'
+                                . $cachePath['path']
+                                . '<br />'
+                                . $cachePath['url']
+                            . '</div>';
+        } else {
+            $cachePathTxt = __('Not Available', 'open-source-event-calendar');
+        }
+
         $current_cache    = CacheFactory::factory($this->app)->createCache('test')->get_active_cache();
         $available_caches = [
             'CacheApcu' => [
@@ -51,9 +61,7 @@ class SettingsCache extends SettingsAbstract
                 'name'            => 'CacheFile',
                 'is_available'    => $this->niceBoolean(CacheFile::is_available()),
                 'is_curren_cache' => $this->niceBoolean($current_cache === 'CacheFile'),
-                'notes'           => $cachePath ? '<div style="max-width: 100%; overflow-x: scroll;">'
-                                      . $cachePath['path'] . '<br />'
-                                      . $cachePath['url'] . '</div>' : __('Not Available', 'open-source-event-calendar'),
+                'notes'           => $cachePathTxt,
                 'constant'        => 'OSEC_ENABLE_CACHE_FILE',
             ],
             'CacheDb'   => [
@@ -83,6 +91,7 @@ class SettingsCache extends SettingsAbstract
                 'title'   => I18n::__('Performance Report'),
             ],
         ];
+
         return $args;
     }
 
