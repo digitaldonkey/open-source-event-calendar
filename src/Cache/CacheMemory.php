@@ -16,15 +16,14 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 final class CacheMemory extends OsecBaseClass implements CacheInterface
 {
-
     /**
      * @var int Number of entries to hold in map.
      */
-    public $limit = 0;
+    public int $limit = 0;
     /**
      * @var array Map of memory entries.
      */
-    protected $_entries = [];
+    protected array $cacheData = [];
 
     /**
      * Constructor initiates stack (memory) length.
@@ -36,14 +35,14 @@ final class CacheMemory extends OsecBaseClass implements CacheInterface
     public function __construct(App $app, int $limit = 100)
     {
         parent::__construct($app);
-        $limit = (int) $limit;
+        $limit = (int)$limit;
         if ($limit < 10) {
             $limit = 10;
         }
         $this->limit = $limit;
     }
 
-    public static function is_available() : bool
+    public static function is_available(): bool
     {
         return true;
     }
@@ -56,9 +55,9 @@ final class CacheMemory extends OsecBaseClass implements CacheInterface
      *
      * @return bool Success.
      */
-    public function add($key, $value) : bool
+    public function add($key, $value): bool
     {
-        if (isset($this->_entries[ $key ])) {
+        if (isset($this->cacheData[$key])) {
             return false;
         }
 
@@ -73,12 +72,12 @@ final class CacheMemory extends OsecBaseClass implements CacheInterface
      *
      * @return bool Success.
      */
-    public function set($key, $value) : bool
+    public function set($key, $value): bool
     {
-        if (count($this->_entries) > $this->limit) {
-            array_shift($this->_entries); // discard
+        if (count($this->cacheData) > $this->limit) {
+            array_shift($this->cacheData); // discard
         }
-        $this->_entries[ $key ] = $value;
+        $this->cacheData[$key] = $value;
 
         return true;
     }
@@ -91,13 +90,13 @@ final class CacheMemory extends OsecBaseClass implements CacheInterface
      *
      * @return mixed Found value or {$default}.
      */
-    public function get($key, $default = null) : mixed
+    public function get($key, $default = null): mixed
     {
-        if ( ! isset($this->_entries[ $key ])) {
+        if ( ! isset($this->cacheData[$key])) {
             return $default;
         }
 
-        return $this->_entries[ $key ];
+        return $this->cacheData[$key];
     }
 
     /**
@@ -107,12 +106,12 @@ final class CacheMemory extends OsecBaseClass implements CacheInterface
      *
      * @return bool Success.
      */
-    public function delete($key) : bool
+    public function delete($key): bool
     {
-        if ( ! isset($this->_entries[ $key ])) {
+        if ( ! isset($this->cacheData[$key])) {
             return false;
         }
-        unset($this->_entries[ $key ]);
+        unset($this->cacheData[$key]);
 
         return true;
     }
@@ -120,9 +119,9 @@ final class CacheMemory extends OsecBaseClass implements CacheInterface
     /**
      * @inheritDoc
      */
-    public function clear_cache() : bool
+    public function clear_cache(): bool
     {
-        $this->_entries = [];
+        $this->cacheData = [];
 
         return true;
     }
@@ -130,15 +129,16 @@ final class CacheMemory extends OsecBaseClass implements CacheInterface
     /**
      * @inheritDoc
      */
-    public function delete_matching(string $pattern) : int {
+    public function delete_matching(string $pattern): int
+    {
         $count = 0;
-        foreach (array_keys($this->_entries) as $k) {
+        foreach (array_keys($this->cacheData) as $k) {
             if (str_contains($k, $pattern)) {
-                unset($this->_entries [$k]);
+                unset($this->cacheData [$k]);
                 $count++;
             }
         }
+
         return $count;
     }
-
 }

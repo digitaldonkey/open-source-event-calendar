@@ -14,7 +14,6 @@ use Osec\Exception\BootstrapException;
  */
 class CacheFactory extends OsecBaseClass
 {
-
     /**
      * create_cache_strategy_instance method
      *
@@ -26,25 +25,31 @@ class CacheFactory extends OsecBaseClass
      * @return Cache Instance of CacheType
      * @throws BootstrapException
      */
-    public function createCache($cache_id, $override = null) : Cache
+    public function createCache($cache_id, $override = null): Cache
     {
-
         // TODO ADD SOME CONFIGURABILITY.
 
-        if (OSEC_ENABLE_CACHE_ACPU && CacheApcu::is_available() && ! $override) {
-            $engine = new CacheApcu($this->app);
-        } else {
-            if (
-                true === OSEC_ENABLE_CACHE_FILE &&
-                null !== CacheFile::is_available()
-            ) {
-                $engine = CacheFile::createFileCacheInstance($this->app, $cache_id);
-            } else {
-                $engine = CacheDb::factory($this->app);
-            }
+        if (CacheApcu::is_available() && ! $override) {
+            $apcu = new CacheApcu($this->app);
+            if (!$apcu) throw new BootstrapException('Constructing CacheApcu returned null');
+            return new Cache(
+                $cache_id,
+                $apcu
+            );
         }
-
-        return new Cache($cache_id, $engine);
+        if (true === OSEC_ENABLE_CACHE_FILE && CacheFile::is_available()) {
+            $cacheFile = CacheFile::createFileCacheInstance($this->app, $cache_id);
+            if (!$cacheFile) throw new BootstrapException('Constructing CacheFile returned null');
+            return new Cache(
+                $cache_id,
+                $cacheFile
+            );
+        }
+        $cacheDb = CacheDb::factory($this->app);
+        if (!$cacheDb) throw new BootstrapException('Constructing CacheDb returned null');
+        return new Cache(
+            $cache_id,
+            CacheDb::factory($this->app)
+        );
     }
-
 }

@@ -19,7 +19,6 @@ use WP;
  */
 class RequestRedirect extends OsecBaseClass
 {
-
     /**
      * Checks if current request is direct for Events cats/tags and redirects
      * to filtered calendar.
@@ -36,35 +35,36 @@ class RequestRedirect extends OsecBaseClass
         $tags = EventTaxonomy::TAGS;
         if (
             ! isset($wp->query_vars) || (
-                ! isset($wp->query_vars[ $cats ]) &&
-                ! isset($wp->query_vars[ $tags ])
+                ! isset($wp->query_vars[$cats]) &&
+                ! isset($wp->query_vars[$tags])
             )
         ) {
             return;
         }
-        $is_cat = isset($wp->query_vars[ $cats ]);
-        $is_tag = isset($wp->query_vars[ $tags ]);
+        $is_cat = isset($wp->query_vars[$cats]);
+        $is_tag = isset($wp->query_vars[$tags]);
         if ($is_cat) {
             $query_ident = $cats;
-            $url_ident = 'cat_ids';
+            $url_ident   = 'cat_ids';
         }
         if ($is_tag) {
             $query_ident = $tags;
-            $url_ident = 'tag_ids';
+            $url_ident   = 'tag_ids';
         }
         $term = get_term_by(
             'slug',
-            $wp->query_vars[ $query_ident ],
+            $wp->query_vars[$query_ident],
             $query_ident
         );
         if ( ! $term) {
             return;
         }
         $href = HtmlFactory::factory($this->app)
-                           ->create_href_helper_instance([
-                               $url_ident => $term->term_id
-                           ]);
+                           ->create_href_helper_instance(
+                               [
+                                   $url_ident => $term->term_id,
+                               ]
+                           );
         ResponseHelper::redirect($href->generate_href(), 301);
     }
 }
-

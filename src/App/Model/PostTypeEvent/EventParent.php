@@ -23,42 +23,38 @@ use WP_Post;
  */
 class EventParent extends OsecBaseClass
 {
+    protected const POST_META_PARENT_KEY = '_osec_parent';
 
-    const POST_META_PARENT_KEY = '_osec_parent';
-
-    /**
-     * Returns a list of modified (children) event objects
-     *
-     * @param  int  $parent_id  ID of parent event
-     * @param  bool  $include_trash  Includes trashed when `true` [optional=false]
-     *
-     * @return array List (might be empty) of Event objects
-     */
-    public function get_child_event_objects(
-        $parent_id,
-        $include_trash = false
-    ) {
-        $db = $this->app->db;
-        $parent_id = (int) $parent_id;
-        $sql_query = 'SELECT ID FROM '.$db->get_table_name('posts').
-                     ' WHERE post_parent = '.$parent_id;
-        $children = (array) $db->get_col($sql_query);
-        $objects = [];
-        foreach ($children as $child_id) {
-            try {
-                $instance = new Event($this->app, $child_id);
-                if (
-                    $include_trash ||
-                    'trash' !== $instance->get('post')->post_status
-                ) {
-                    $objects[ $child_id ] = $instance;
+    public static function add_actions(App $app, bool $is_admin)
+    {
+        // If editing a child instance.
+        if (basename((string)$_SERVER['SCRIPT_NAME']) === 'post.php') {
+            add_action(
+                'admin_action_editpost',
+                function () use ($app) {
+                    self::factory($app)->admin_init_post();
                 }
-            } catch (EventNotFoundException) {
-                // ignore
-            }
+            );
+
+            // Display_trash_link
+            add_filter(
+                'user_has_cap',
+                function ($allcaps, $caps, $args, $user) use ($app) {
+                    return TrashController::factory($app)->display_trash_link($allcaps, $caps, $args, $user);
+                },
+                10,
+                4
+            );
         }
 
-        return $objects;
+        add_action(
+            'post_row_actions',
+            function ($actions, $post) use ($app) {
+                return self::factory($app)->post_row_actions($actions, $post);
+            },
+            10,
+            2
+        );
     }
 
     /**
@@ -68,16 +64,16 @@ class EventParent extends OsecBaseClass
      * method when user is editing single instance.
      * New post is created with some fields unset.
      */
-    public function admin_init_post() : void
+    public function admin_init_post(): void
     {
         if (
-            isset($_POST[ 'osec_instance_id' ]) &&
-            isset($_POST[ 'action' ]) &&
-            'editpost' === $_POST[ 'action' ]
+            isset($_POST['osec_instance_id']) &&
+            isset($_POST['action']) &&
+            'editpost' === $_POST['action']
         ) {
-            $old_post_id = $_POST[ 'post_ID' ];
-            $instance_id = $_POST[ 'osec_instance_id' ];
-            $post_id = EventEditing::factory($this->app)->create_duplicate_post();
+            $old_post_id = $_POST['post_ID'];
+            $instance_id = $_POST['osec_instance_id'];
+            $post_id     = EventEditing::factory($this->app)->create_duplicate_post();
             if (false !== $post_id) {
                 $this->_handle_instances(
                     new Event($this->app, $post_id),
@@ -149,20 +145,20 @@ class EventParent extends OsecBaseClass
         $edates = $this->_filter_exception_dates($original_event);
         $original_event->set('exception_dates', implode(',', $edates));
         $recurrence_rules = $original_event->get('recurrence_rules');
-        $rules_info = RepeatRuleToText::factory($this->app)
-                                      ->build_recurrence_rules_array($recurrence_rules);
-        if (isset($rules_info[ 'COUNT' ])) {
+        $rules_info       = RepeatRuleToText::factory($this->app)
+                                            ->build_recurrence_rules_array($recurrence_rules);
+        if (isset($rules_info['COUNT'])) {
             $next_instances_count = $this->_count_next_instances(
                 $original_event->get('post_id'),
                 $instance_id
             );
-            $rules_info[ 'COUNT' ] = (int) $next_instances_count + count($edates);
-            $rules = '';
-            if ($rules_info[ 'COUNT' ] <= 1) {
+            $rules_info['COUNT']  = (int)$next_instances_count + count($edates);
+            $rules                = '';
+            if ($rules_info['COUNT'] <= 1) {
                 $rules_info = [];
             }
             foreach ($rules_info as $key => $value) {
-                $rules .= $key.'='.$value.';';
+                $rules .= $key . '=' . $value . ';';
             }
             $original_event->set(
                 'recurrence_rules',
@@ -184,10 +180,10 @@ class EventParent extends OsecBaseClass
      */
     public function add_exception_date($post_id, DT $date)
     {
-        $event = new Event($this->app, $post_id);
-        $dates_list = explode(',', (string) $event->get('exception_dates'));
-        if (empty($dates_list[ 0 ])) {
-            unset($dates_list[ 0 ]);
+        $event      = new Event($this->app, $post_id);
+        $dates_list = explode(',', (string)$event->get('exception_dates'));
+        if (empty($dates_list[0])) {
+            unset($dates_list[0]);
         }
         $date->set_time(0, 0, 0);
         $dates_list[] = $date->format(
@@ -208,14 +204,14 @@ class EventParent extends OsecBaseClass
      */
     protected function _find_next_instance($post_id, $instance_id)
     {
-        $dbi = $this->app->db;
-        $table_instances = $dbi->get_table_name(OSEC_DB__INSTANCES);
-        $table_posts = $dbi->get_table_name('posts');
-        $query = $dbi->prepare(
-            'SELECT i.id FROM '.$table_instances.' i JOIN '.
-            $table_posts.' p ON (p.ID = i.post_id) '.
-            'WHERE i.post_id = %d AND i.id > %d '.
-            'AND p.post_status = \'publish\' '.
+        $dbi              = $this->app->db;
+        $table_instances  = $dbi->get_table_name(OSEC_DB__INSTANCES);
+        $table_posts      = $dbi->get_table_name('posts');
+        $query            = $dbi->prepare(
+            'SELECT i.id FROM ' . $table_instances . ' i JOIN ' .
+            $table_posts . ' p ON (p.ID = i.post_id) ' .
+            'WHERE i.post_id = %d AND i.id > %d ' .
+            'AND p.post_status = \'publish\' ' .
             'ORDER BY id ASC LIMIT 1',
             $post_id,
             $instance_id
@@ -238,12 +234,12 @@ class EventParent extends OsecBaseClass
      */
     protected function _filter_exception_dates(Event $event)
     {
-        $start = (int) $event->get('start')->format();
-        $exception_dates = explode(',', (string) $event->get('exception_dates'));
-        $dates = [];
+        $start           = (int)$event->get('start')->format();
+        $exception_dates = explode(',', (string)$event->get('exception_dates'));
+        $dates           = [];
         foreach ($exception_dates as $date) {
             $ex_date = new DT($date);
-            $ex_date = (int) $ex_date->format();
+            $ex_date = (int)$ex_date->format();
             if ($ex_date > $start) {
                 $dates[] = $date;
             }
@@ -262,19 +258,19 @@ class EventParent extends OsecBaseClass
      */
     protected function _count_next_instances($post_id, $instance_id)
     {
-        $dbi = $this->app->db;
+        $dbi             = $this->app->db;
         $table_instances = $dbi->get_table_name(OSEC_DB__INSTANCES);
-        $table_posts = $dbi->get_table_name('posts');
-        $query = $dbi->prepare(
-            'SELECT COUNT(i.id) FROM '.$table_instances.' i JOIN '.
-            $table_posts.' p ON (p.ID = i.post_id) '.
-            'WHERE i.post_id = %d AND i.id > %d '.
+        $table_posts     = $dbi->get_table_name('posts');
+        $query           = $dbi->prepare(
+            'SELECT COUNT(i.id) FROM ' . $table_instances . ' i JOIN ' .
+            $table_posts . ' p ON (p.ID = i.post_id) ' .
+            'WHERE i.post_id = %d AND i.id > %d ' .
             'AND p.post_status = \'publish\'',
             $post_id,
             $instance_id
         );
 
-        return (int) $dbi->get_var($query);
+        return (int)$dbi->get_var($query);
     }
 
     /**
@@ -299,11 +295,11 @@ class EventParent extends OsecBaseClass
                 isset($parent_post->post_status) &&
                 'trash' !== $parent_post->post_status
             ) {
-                $parent_link = get_edit_post_link(
+                $parent_link             = get_edit_post_link(
                     $parent_post_id,
                     'display'
                 );
-                $actions[ 'ai1ec_parent' ] = sprintf(
+                $actions['ai1ec_parent'] = sprintf(
                     '<a href="%s" title="%s">%s</a>',
                     wp_nonce_url($parent_link),
                     sprintf(
@@ -341,10 +337,12 @@ class EventParent extends OsecBaseClass
         if (null === $parent_id) {
             return $this->get_parent_event($event_id);
         }
-        $meta_value = json_encode([
-            'created'  => UIDateFormats::factory($this->app)->current_time(),
-            'instance' => $instance_id,
-        ]);
+        $meta_value = json_encode(
+            [
+                'created'  => UIDateFormats::factory($this->app)->current_time(),
+                'instance' => $instance_id,
+            ]
+        );
 
         return add_post_meta($event_id, self::POST_META_PARENT_KEY, $meta_value, true);
     }
@@ -362,17 +360,17 @@ class EventParent extends OsecBaseClass
         if (null === $parents) {
             $parents = CacheMemory::factory($this->app);
         }
-        $current_id = (int) $current_id;
+        $current_id = (int)$current_id;
         if (null === ($parent_id = $parents->get($current_id))) {
             $db = $this->app->db;
             /* @var $db |Ai1ec_Dbi */
-            $query = '
+            $query  = '
 				SELECT parent.ID, parent.post_status
 				FROM
-					'.$db->get_table_name('posts').' AS child
-					INNER JOIN '.$db->get_table_name('posts').' AS parent
+					' . $db->get_table_name('posts') . ' AS child
+					INNER JOIN ' . $db->get_table_name('posts') . ' AS parent
 						ON ( parent.ID = child.post_parent )
-				WHERE child.ID = '.$current_id;
+				WHERE child.ID = ' . $current_id;
             $parent = $db->get_row($query);
             if (
                 empty($parent) ||
@@ -389,22 +387,38 @@ class EventParent extends OsecBaseClass
         return $parent_id;
     }
 
-    public static function add_actions(App $app, bool $is_admin) {
-        // If editing a child instance.
-        if (basename((string) $_SERVER[ 'SCRIPT_NAME' ]) === 'post.php') {
-            add_action('admin_action_editpost', function () use ($app) {
-                self::factory($app)->admin_init_post();
-            });
-
-            // Display_trash_link
-            add_filter('user_has_cap', function ($allcaps, $caps, $args, $user) use ($app) {
-                return TrashController::factory($app)->display_trash_link($allcaps, $caps, $args, $user);
-            }, 10, 4);
+    /**
+     * Returns a list of modified (children) event objects
+     *
+     * @param  int  $parent_id  ID of parent event
+     * @param  bool  $include_trash  Includes trashed when `true` [optional=false]
+     *
+     * @return array List (might be empty) of Event objects
+     */
+    public function get_child_event_objects(
+        $parent_id,
+        $include_trash = false
+    ) {
+        $db        = $this->app->db;
+        $parent_id = (int)$parent_id;
+        $sql_query = 'SELECT ID FROM ' . $db->get_table_name('posts') .
+                     ' WHERE post_parent = ' . $parent_id;
+        $children  = (array)$db->get_col($sql_query);
+        $objects   = [];
+        foreach ($children as $child_id) {
+            try {
+                $instance = new Event($this->app, $child_id);
+                if (
+                    $include_trash ||
+                    'trash' !== $instance->get('post')->post_status
+                ) {
+                    $objects[$child_id] = $instance;
+                }
+            } catch (EventNotFoundException) {
+                // ignore
+            }
         }
 
-        add_action('post_row_actions', function ($actions, $post) use ($app) {
-            return self::factory($app)->post_row_actions($actions, $post);
-        }, 10, 2);
-
+        return $objects;
     }
 }

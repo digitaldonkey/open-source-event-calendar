@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<phpunit
+	bootstrap="tests/Utilities/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	testdox="true"
+	beStrictAboutTestsThatDoNotTestAnything="true"
+	beStrictAboutOutputDuringTests="false"
+	beStrictAboutChangesToGlobalState="true"
+	convertErrorsToExceptions="true"
+	failOnWarning="true"
+	failOnRisky="true"
+	failOnSkipped="true"
+	failOnIncomplete="true"
+>
+	<php>
+		<ini name="error_reporting" value="E_ALL"/>
+		<ini name="display_errors" value="1"/>
+		<ini name="display_startup_errors" value="1"/>
+		<ini name="memory_limit" value="-1"/>
+		<ini name="apc.enabled" value="1"/>
+		<ini name="apc.enable_cli" value="1"/>
+<!--		<env name="SIMPLETEST_DB" value="sqlite://localhost//dev/shm/sitetest.db"/>-->
+	</php>
+	<testsuites>
+		<testsuite name="osec">
+			<directory suffix="Test.php">./tests/</directory>
+		</testsuite>
+		<testsuite name="integration">
+			<directory>tests/Integration</directory>
+		</testsuite>
+		<testsuite name="unit">
+			<directory>tests/Unit</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

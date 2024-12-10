@@ -12,7 +12,6 @@ namespace Osec\Settings;
  */
 class ElementHref
 {
-
     /**
      * @var array the parameters that are used in the urls
      */
@@ -34,22 +33,22 @@ class ElementHref
     ];
 
     /**
-     * @var boolean
+     * @var bool
      */
     private $is_category;
 
     /**
-     * @var boolean
+     * @var bool
      */
     private $is_tag;
 
     /**
-     * @var boolean
+     * @var bool
      */
     private $is_author;
 
     /**
-     * @var boolean
+     * @var bool
      */
     private $is_custom_filter;
 
@@ -59,7 +58,7 @@ class ElementHref
     private $term_id;
 
     /**
-     * @var boolean
+     * @var bool
      */
     private $pretty_permalinks_enabled;
 
@@ -79,23 +78,23 @@ class ElementHref
         private array $args,
         private $calendar_page
     ) {
-        if (isset($this->args[ '_extra_used_parameters' ])) {
+        if (isset($this->args['_extra_used_parameters'])) {
             $this->used_paramaters = array_merge(
                 $this->used_paramaters,
-                $this->args[ '_extra_used_parameters' ]
+                $this->args['_extra_used_parameters']
             );
         }
     }
 
     /**
-     * @param  boolean  $pretty_permalinks_enabled
+     * @param  bool  $pretty_permalinks_enabled
      */
     public function set_pretty_permalinks_enabled($pretty_permalinks_enabled)
     {
         $this->pretty_permalinks_enabled = $pretty_permalinks_enabled;
         if ($pretty_permalinks_enabled) {
-            $this->calendar_page = trim((string) $this->calendar_page, '/')
-                                   .'/';
+            $this->calendar_page = trim((string)$this->calendar_page, '/')
+                                   . '/';
         }
     }
 
@@ -108,7 +107,7 @@ class ElementHref
     }
 
     /**
-     * @param  boolean  $is_category
+     * @param  bool  $is_category
      */
     public function set_is_category($is_category)
     {
@@ -116,7 +115,7 @@ class ElementHref
     }
 
     /**
-     * @param  boolean  $is_tag
+     * @param  bool  $is_tag
      */
     public function set_is_tag($is_tag)
     {
@@ -124,7 +123,7 @@ class ElementHref
     }
 
     /**
-     * @param  boolean  $is_author
+     * @param  bool  $is_author
      */
     public function set_is_author($is_author)
     {
@@ -139,15 +138,15 @@ class ElementHref
      */
     public function generate_href()
     {
-        $href = '';
+        $href       = '';
         $to_implode = [];
         foreach ($this->used_paramaters as $key) {
-            if ( ! empty($this->args[ $key ])) {
-                $value = $this->args[ $key ];
-                if (is_array($this->args[ $key ])) {
-                    $value = implode(',', $this->args[ $key ]);
+            if ( ! empty($this->args[$key])) {
+                $value = $this->args[$key];
+                if (is_array($this->args[$key])) {
+                    $value = implode(',', $this->args[$key]);
                 }
-                $to_implode[ $key ] = $key.OSEC_URI_DIRECTION_SEPARATOR.$value;
+                $to_implode[$key] = $key . OSEC_URI_DIRECTION_SEPARATOR . $value;
             }
         }
         if (
@@ -163,16 +162,16 @@ class ElementHref
 
         if ($this->pretty_permalinks_enabled) {
             $href .= implode('/', $to_implode);
-            $href = empty($href) ? $href : $href.'/';
+            $href = empty($href) ? $href : $href . '/';
         } else {
             $href .= static::get_param_delimiter_char($this->calendar_page);
-            $href .= 'ai1ec='.implode('|', $to_implode);
+            $href .= 'ai1ec=' . implode('|', $to_implode);
         }
 
-        $full_url = $this->calendar_page.$href;
+        $full_url = $this->calendar_page . $href;
         // persist the `lang` parameter if present
-        if (isset($_REQUEST[ 'lang' ])) {
-            $full_url = add_query_arg('lang', $_REQUEST[ 'lang' ], $full_url);
+        if (isset($_REQUEST['lang'])) {
+            $full_url = add_query_arg('lang', $_REQUEST['lang'], $full_url);
         }
 
         return $full_url;
@@ -194,24 +193,24 @@ class ElementHref
         }
         // Let's copy the origina cat_ids or tag_ids so we do not affect it
         $copy = [];
-        if (isset($this->args[ $array_key ])) {
-            $copy = (array) $this->args[ $array_key ];
+        if (isset($this->args[$array_key])) {
+            $copy = (array)$this->args[$array_key];
         }
         $key = array_search($this->term_id, $copy);
         // Let's check if we are already filtering for tags / categorys
-        if (isset($to_implode[ $array_key ])) {
+        if (isset($to_implode[$array_key])) {
             if ($key !== false) {
-                unset($copy[ $key ]);
+                unset($copy[$key]);
             } else {
                 $copy[] = $this->term_id;
             }
             if (empty($copy)) {
-                unset($to_implode[ $array_key ]);
+                unset($to_implode[$array_key]);
             } else {
-                $to_implode[ $array_key ] = $array_key.OSEC_URI_DIRECTION_SEPARATOR.implode(',', $copy);
+                $to_implode[$array_key] = $array_key . OSEC_URI_DIRECTION_SEPARATOR . implode(',', $copy);
             }
         } else {
-            $to_implode[ $array_key ] = $array_key.OSEC_URI_DIRECTION_SEPARATOR.$this->term_id;
+            $to_implode[$array_key] = $array_key . OSEC_URI_DIRECTION_SEPARATOR . $this->term_id;
         }
 
         return $to_implode;
@@ -224,16 +223,20 @@ class ElementHref
      */
     protected function _current_array_key()
     {
-        $map = ['category' => 'cat', 'tag' => 'tag', 'author' => 'auth'];
+        $map      = [
+            'category' => 'cat',
+            'tag'      => 'tag',
+            'author'   => 'auth',
+        ];
         $use_name = '';
         foreach ($map as $value => $name) {
-            if ($this->{'is_'.$value}) {
+            if ($this->{'is_' . $value}) {
                 $use_name = $name;
                 break;
             }
         }
 
-        return $use_name.'_ids';
+        return $use_name . '_ids';
     }
 
     /**
@@ -260,7 +263,6 @@ class ElementHref
     public function set_custom_filter($value, $uri_particle = null)
     {
         $this->is_custom_filter = $value;
-        $this->uri_particle = $uri_particle;
+        $this->uri_particle     = $uri_particle;
     }
-
 }

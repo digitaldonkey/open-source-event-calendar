@@ -1,0 +1,37 @@
+#
+#  ddev composer run  grumphp run
+#
+grumphp:
+    git_hook_variables:
+        # Using grunp inside ddev.
+        # @see https://www.patrickvanefferen.nl/blog/configuring-grumphp-ddev
+        # requires Reinit ddev exec grumphp git:init
+        EXEC_GRUMPHP_COMMAND: ddev exec -d  "/var/www/html/wp-content/plugins/open-source-event-calendar"
+parameters:
+    process_timeout: 120
+    tasks:
+        composer: ~
+#        gherkin: ~
+#        git_commit_message: ~
+#        phpcpd:
+#            exclude:
+#                - lib
+#                - tests
+#                - vendor
+#        phplint: ~
+#        phpmd:
+#            ruleset: ['codesize', 'design', 'naming', 'unusedcode']
+#            exclude:
+#                - tests
+#                - vendor
+        # Doc: https://github.com/phpro/grumphp/blob/master/doc/tasks/phpcs.md
+        phpcs:
+            standard: ['./phpcs.dist.xml']
+#        phpunit:
+#            config_file: './phpunit.xml'
+
+    testsuites:
+        code_quality:
+            tasks:
+                - composer
+                - phpcs

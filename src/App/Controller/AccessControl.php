@@ -12,13 +12,12 @@ namespace Osec\App\Controller;
  */
 class AccessControl
 {
-
     /**
      * Whether it's All event page or not.
      *
-     * @return boolean
+     * @return bool
      */
-    public static function is_all_events_page() : bool
+    public static function is_all_events_page(): bool
     {
         global $typenow;
 
@@ -33,7 +32,7 @@ class AccessControl
      *
      * @return bool True if inside WordPress administration pages.
      */
-    public static function is_admin() : bool
+    public static function is_admin(): bool
     {
         return is_admin();
     }
@@ -41,9 +40,9 @@ class AccessControl
     /**
      * Check if we are editing our custom post type.
      *
-     * @return boolean
+     * @return bool
      */
-    public static function are_we_editing_our_post() : bool
+    public static function are_we_editing_our_post(): bool
     {
         global $post;
 
@@ -59,9 +58,9 @@ class AccessControl
      *
      * @param  null  $post_to_check
      *
-     * @return boolean
+     * @return bool
      */
-    public static function is_our_post_type($post_to_check = null) : bool
+    public static function is_our_post_type($post_to_check = null): bool
     {
         if (null === $post_to_check) {
             global $post;
@@ -70,5 +69,4 @@ class AccessControl
 
         return get_post_type($post_to_check) === OSEC_POST_TYPE;
     }
-
 }

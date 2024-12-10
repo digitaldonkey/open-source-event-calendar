@@ -27,7 +27,6 @@ use Twig\Environment;
  */
 class ThemeLoader extends OsecBaseClass
 {
-
     /**
      * @const string Name of option which forces theme clean-up if set to true.
      */
@@ -41,7 +40,7 @@ class ThemeLoader extends OsecBaseClass
     /**
      * @var array contains the admin and theme paths.
      */
-    protected array $_paths = [
+    protected array $paths = [
         'admin' => [OSEC_ADMIN_PATH => OSEC_ADMIN_URL],
         'theme' => [],
     ];
@@ -49,17 +48,17 @@ class ThemeLoader extends OsecBaseClass
     /**
      * @var array Array of Twig environments.
      */
-    protected array $_twig = [];
+    protected array $twig = [];
 
     /**
      * @var bool Whether this theme is a child of the default theme
      */
-    protected bool $_child_theme = false;
+    protected bool $childTheme = false;
 
     /**
      * @var bool Whether this theme is a core theme
      */
-    protected bool $_core_theme = false;
+    protected bool $coreTheme = false;
 
     protected ?CacheFile $fileCache = null;
 
@@ -75,27 +74,27 @@ class ThemeLoader extends OsecBaseClass
         $this->fileCache = CacheFile::createFileCacheInstance($app, 'twig');
     }
 
-    private function init_themes() : void
+    private function init_themes(): void
     {
         $theme = $this->app->options->get('osec_current_theme');
 
         // Find out if this is a core theme.
-        $core_themes = explode(',', OSEC_CORE_THEMES);
-        $this->_core_theme = in_array($theme[ 'stylesheet' ], $core_themes);
+        $core_themes     = explode(',', OSEC_CORE_THEMES);
+        $this->coreTheme = in_array($theme['stylesheet'], $core_themes);
 
         // Default theme's path is always the last in the list of paths to check,
         // so add it first (path list is a stack).
         $this->add_path_theme(
-            OSEC_DEFAULT_THEME_PATH.DIRECTORY_SEPARATOR,
-            OSEC_THEMES_URL.'/'.OSEC_DEFAULT_THEME_NAME.'/'
+            OSEC_DEFAULT_THEME_PATH . DIRECTORY_SEPARATOR,
+            OSEC_THEMES_URL . '/' . OSEC_DEFAULT_THEME_NAME . '/'
         );
 
         // If using a child theme, set flag and push its path to top of stack.
-        if (OSEC_DEFAULT_THEME_NAME !== $theme[ 'stylesheet' ]) {
-            $this->_child_theme = true;
+        if (OSEC_DEFAULT_THEME_NAME !== $theme['stylesheet']) {
+            $this->childTheme = true;
             $this->add_path_theme(
-                $theme[ 'theme_dir' ].DIRECTORY_SEPARATOR,
-                $theme[ 'theme_url' ].'/'
+                $theme['theme_dir'] . DIRECTORY_SEPARATOR,
+                $theme['theme_url'] . '/'
             );
         }
     }
@@ -109,7 +108,7 @@ class ThemeLoader extends OsecBaseClass
      *
      * @return bool Success.
      */
-    public function add_path_theme($path, $url, $is_extension = false) : bool
+    public function add_path_theme($path, $url, $is_extension = false): bool
     {
         return $this->add_path('theme', $path, $url, $is_extension);
     }
@@ -126,9 +125,9 @@ class ThemeLoader extends OsecBaseClass
      *
      * @return bool Success.
      */
-    public function add_path($target, $path, $url, $is_extension = false) : bool
+    public function add_path($target, $path, $url, $is_extension = false): bool
     {
-        if ( ! isset($this->_paths[ $target ])) {
+        if ( ! isset($this->paths[$target])) {
             // Invalid target.
             return false;
         }
@@ -144,22 +143,22 @@ class ThemeLoader extends OsecBaseClass
 
         if (
             true === $is_extension &&
-            true === $this->_child_theme &&
-            false === $this->_core_theme
+            true === $this->childTheme &&
+            false === $this->coreTheme
         ) {
             // Special case: extract first element into $head and insert $new after.
-            $head = array_splice($this->_paths[ $target ], 0, 1);
+            $head = array_splice($this->paths[$target], 0, 1);
         } else {
             // Normal case: $new gets pushed to the top of the array.
             $head = [];
         }
 
-        $this->_paths[ $target ] = $head + $new + $this->_paths[ $target ];
+        $this->paths[$target] = $head + $new + $this->paths[$target];
 
         return true;
     }
 
-    public function getCachPath() : string
+    public function getCachPath(): string
     {
         return $this->fileCache->getCachePath();
     }
@@ -172,17 +171,17 @@ class ThemeLoader extends OsecBaseClass
      *
      * @return void
      */
-    public function ajax_clear_cache() : void
+    public function ajax_clear_cache(): void
     {
-        $args[ 'data' ] = [
-            'state' => (int) (false !== $this->clear_cache()),
+        $args['data'] = [
+            'state' => (int)(false !== $this->clear_cache()),
         ];
         RenderJson::factory($this->app)->render($args);
     }
 
-    public function clear_cache() : bool
+    public function clear_cache(): bool
     {
-        return (bool) $this->fileCache->clear_cache();
+        return ! $this->fileCache || (bool)$this->fileCache->clear_cache();
     }
 
     /**
@@ -191,10 +190,10 @@ class ThemeLoader extends OsecBaseClass
      * @param  string  $filename
      * @param  bool  $is_admin
      */
-    public function apply_filters_to_args(array $args, string $filename, bool $is_admin) : array
+    public function apply_filters_to_args(array $args, string $filename, bool $is_admin): array
     {
         return apply_filters(
-            self::ARGS_FILTER_PREFIX.$filename,
+            self::ARGS_FILTER_PREFIX . $filename,
             $args,
             $is_admin
         );
@@ -212,13 +211,12 @@ class ThemeLoader extends OsecBaseClass
      *
      * @return self Instance of self for chaining.
      */
-    public function register_extension($path, $url) : self
+    public function register_extension($path, $url): self
     {
-
         // Add extension's admin path.
         $this->add_path_admin(
-            $path.'/public/admin/',
-            $url.'/public/admin/'
+            $path . '/public/admin/',
+            $url . '/public/admin/'
         );
 
         // Add extension's theme path(s).
@@ -227,16 +225,16 @@ class ThemeLoader extends OsecBaseClass
         // Default theme's path is always later in the list of paths to check,
         // so add it first (path list is a stack).
         $this->add_path_theme(
-            $path.'/public/'.OSEC_THEME_FOLDER.'/'.OSEC_DEFAULT_THEME_NAME.'/',
-            $url.'/public/'.OSEC_THEME_FOLDER.'/'.OSEC_DEFAULT_THEME_NAME.'/',
+            $path . '/public/' . OSEC_THEME_FOLDER . '/' . OSEC_DEFAULT_THEME_NAME . '/',
+            $url . '/public/' . OSEC_THEME_FOLDER . '/' . OSEC_DEFAULT_THEME_NAME . '/',
             true
         );
 
         // If using a core child theme, set flag and push its path to top of stack.
-        if (true === $this->_child_theme && true === $this->_core_theme) {
+        if (true === $this->childTheme && true === $this->coreTheme) {
             $this->add_path_theme(
-                $path.'/public/'.OSEC_THEME_FOLDER.'/'.$theme[ 'stylesheet' ].'/',
-                $url.'/public/'.OSEC_THEME_FOLDER.'/'.$theme[ 'stylesheet' ].'/',
+                $path . '/public/' . OSEC_THEME_FOLDER . '/' . $theme['stylesheet'] . '/',
+                $url . '/public/' . OSEC_THEME_FOLDER . '/' . $theme['stylesheet'] . '/',
                 true
             );
         }
@@ -252,7 +250,7 @@ class ThemeLoader extends OsecBaseClass
      *
      * @return bool Success.
      */
-    public function add_path_admin($path, $url) : bool
+    public function add_path_admin($path, $url): bool
     {
         return $this->add_path('admin', $path, $url);
     }
@@ -267,7 +265,7 @@ class ThemeLoader extends OsecBaseClass
      * @param  bool  $is_admin  Set to true for admin-side views.
      * @param  bool  $throw_exception  Set to true to throw exceptions on error.
      * @param  array|null  $paths  For PHP & Twig files only: list of paths to use
-     *   instead of default.
+     *  instead of default.
      *
      * @return FileAbstract An instance of a file object with content parsed.
      * @throws Exception If File is not found or not possible to handle.
@@ -278,40 +276,40 @@ class ThemeLoader extends OsecBaseClass
         $is_admin = false,
         $throw_exception = true,
         array $paths = null
-    ) : FileAbstract {
-        $fileExt = pathinfo($filename, PATHINFO_EXTENSION);
+    ): FileAbstract {
+        $fileExt      = pathinfo($filename, PATHINFO_EXTENSION);
         $fileBasename = pathinfo($filename, PATHINFO_FILENAME);
         switch ($fileExt) {
             case 'less':
             case 'css':
-                $file = new FileLess($this->app, $fileBasename, array_keys($this->_paths[ 'theme' ]));
+                $file = new FileLess($this->app, $fileBasename, array_keys($this->paths['theme']));
                 break;
 
             case 'png':
             case 'gif':
             case 'jpg':
-                $paths = $is_admin ? $this->_paths[ 'admin' ] : $this->_paths[ 'theme' ];
-                $file = new FileImage($this->app, $filename, $paths); // Paths => URLs needed for images
+                $paths = $is_admin ? $this->paths['admin'] : $this->paths['theme'];
+                $file  = new FileImage($this->app, $filename, $paths); // Paths => URLs needed for images
                 break;
 
             case 'php':
                 $args = apply_filters(
-                    self::ARGS_FILTER_PREFIX.$filename,
+                    self::ARGS_FILTER_PREFIX . $filename,
                     $args,
                     $is_admin
                 );
                 if (null === $paths) {
-                    $paths = $is_admin ? $this->_paths[ 'admin' ] : $this->_paths[ 'theme' ];
+                    $paths = $is_admin ? $this->paths['admin'] : $this->paths['theme'];
                     $paths = array_keys($paths); // Values (URLs) not used for PHP
                 }
                 $file = new FilePhp($this->app, $filename, $paths, $args);
                 break;
 
             case 'twig':
-                $args = apply_filters(self::ARGS_FILTER_PREFIX.$filename, $args, $is_admin);
+                $args = apply_filters(self::ARGS_FILTER_PREFIX . $filename, $args, $is_admin);
 
                 if (null === $paths) {
-                    $paths = $is_admin ? $this->_paths[ 'admin' ] : $this->_paths[ 'theme' ];
+                    $paths = $is_admin ? $this->paths['admin'] : $this->paths['theme'];
                     $paths = array_keys($paths); // Values (URLs) not used for Twig
                 }
                 $file = new FileTwig($this->app, $filename, $args, $this->_get_twig_instance($paths, $is_admin));
@@ -329,7 +327,7 @@ class ThemeLoader extends OsecBaseClass
         // here file is a concrete class otherwise the exception is thrown
         if ( ! $file->process_file() && true === $throw_exception) {
             throw new Exception(
-                'The specified file "'.$filename.'" doesn\'t exist.'
+                'The specified file "' . $filename . '" doesn\'t exist.'
             );
         }
 
@@ -345,29 +343,29 @@ class ThemeLoader extends OsecBaseClass
      *
      * @return Environment
      */
-    protected function _get_twig_instance(array $paths, $is_admin) : Environment
+    protected function _get_twig_instance(array $paths, $is_admin): Environment
     {
         $instance = $is_admin ? 'admin' : 'front';
-        if ( ! isset($this->_twig[ $instance ])) {
-
+        if ( ! isset($this->twig[$instance])) {
             // Set up Twig environment.
             $loader_path = [];
 
             foreach ($paths as $path) {
-                if (is_dir($path.'twig'.DIRECTORY_SEPARATOR)) {
-                    $loader_path[] = $path.'twig'.DIRECTORY_SEPARATOR;
+                if (is_dir($path . 'twig' . DIRECTORY_SEPARATOR)) {
+                    $loader_path[] = $path . 'twig' . DIRECTORY_SEPARATOR;
                 }
             }
 
             $twigLoader = new TwigLoader($loader_path);
             unset($loader_path);
 
+            $cache = $this->get_cache_dir();
             $environment = [
-                'cache' => $this->get_cache_dir(),
+                'cache' => is_string($cache) ? $cache : false,
                 'optimizations' => -1,
                 // (default to -1 -- all optimizations are enabled; set it to 0 to disable).
                 // all
-                'auto_reload' => true,
+                'auto_reload'   => true,
             ];
             if (OSEC_DEBUG) {
                 $environment += ['debug' => true];
@@ -389,18 +387,18 @@ class ThemeLoader extends OsecBaseClass
                 $twigLoader,
                 $environment
             );
-            $this->_twig[ $instance ] = $twig_environment;
+            $this->twig[$instance] = $twig_environment;
 
             if (OSEC_DEBUG && apply_filters('osec_twig_add_debug', true)) {
-                $this->_twig[ $instance ]->addExtension(new TwigDebugExtension());
+                $this->twig[$instance]->addExtension(new TwigDebugExtension());
             }
 
             $extension = new TwigExtension();
             $extension->set_registry($this->app);
-            $this->_twig[ $instance ]->addExtension($extension);
+            $this->twig[$instance]->addExtension($extension);
         }
 
-        return $this->_twig[ $instance ];
+        return $this->twig[$instance];
     }
 
     /**
@@ -413,7 +411,7 @@ class ThemeLoader extends OsecBaseClass
      *
      * @return ?string Cache directory or false
      */
-    public function get_cache_dir(bool $rescan = false) : ?string
+    public function get_cache_dir(bool $rescan = false): ?string
     {
         $twig_cache = $this->app->settings->get('twig_cache');
 
@@ -423,20 +421,19 @@ class ThemeLoader extends OsecBaseClass
         }
         if (false === $rescan) {
             if (CacheFile::OSEC_FILE_CACHE_UNAVAILABLE === $twig_cache) {
-                return false;
+                return null;
             }
-
-            return $twig_cache;
+            // Seems we need that. In ci we had a strange string here.
+            return is_writable($twig_cache) ? $twig_cache : null;
         }
         $this->fileCache = CacheFile::createFileCacheInstance($this->app, 'twig');
         if ( ! $this->fileCache) {
-
             // TODO This doubles up saving disabled cache to DB.
-            //   It's not a setting it's an option prefixed with Cache.
+            // It's not a setting it's an option prefixed with Cache.
 
             $this->app->settings->set('twig_cache', CacheFile::OSEC_FILE_CACHE_UNAVAILABLE);
 
-            return CacheFile::OSEC_FILE_CACHE_UNAVAILABLE;
+            return null;
         }
         $this->app->settings->set('twig_cache', $this->fileCache->getCachePath());
 
@@ -448,9 +445,9 @@ class ThemeLoader extends OsecBaseClass
      *
      * @return array Bootstrap paths.
      */
-    public function get_paths() : array
+    public function get_paths(): array
     {
-        return $this->_paths;
+        return $this->paths;
     }
 
     /**
@@ -461,12 +458,12 @@ class ThemeLoader extends OsecBaseClass
      *
      * @return Environment Configured Twig instance.
      */
-    public function get_twig_instance($is_admin = false, $refresh = false) : Environment
+    public function get_twig_instance($is_admin = false, $refresh = false): Environment
     {
         if ($refresh) {
-            unset($this->_twig);
+            unset($this->twig);
         }
-        $paths = $is_admin ? $this->_paths[ 'admin' ] : $this->_paths[ 'theme' ];
+        $paths = $is_admin ? $this->paths['admin'] : $this->paths['theme'];
         $paths = array_keys($paths); // Values (URLs) not used for Twig
 
         return $this->_get_twig_instance($paths, $is_admin);
@@ -477,7 +474,7 @@ class ThemeLoader extends OsecBaseClass
      *
      * @return void Method doesn't return
      */
-    public function clean_cache_on_upgrade() : void
+    public function clean_cache_on_upgrade(): void
     {
         if (apply_filters('osec_clean_cache_on_upgrade', true)) {
             return;
@@ -492,13 +489,13 @@ class ThemeLoader extends OsecBaseClass
      * Called during 'after_setup_theme' action. Runs theme's special
      * functions.php file, if present.
      */
-    public function execute_theme_functions() : void
+    public function execute_theme_functions(): void
     {
-        $theme = $this->app->options->get('osec_current_theme');
-        $functions = $theme[ 'theme_dir' ] . '/functions.php';
+        $theme     = $this->app->options->get('osec_current_theme');
+        $functions = $theme['theme_dir'] . '/functions.php';
 
         if (file_exists($functions)) {
-            include($functions);
+            include $functions;
         }
     }
 
@@ -511,24 +508,26 @@ class ThemeLoader extends OsecBaseClass
      * @return array Method does not return.
      * @throws BootstrapException
      */
-    public function switch_to_vortex($silent = false) : array
+    public function switch_to_vortex($silent = false): array
     {
         $current_theme = $this->get_current_theme();
-        if (isset($current_theme[ 'stylesheet' ]) && 'vortex' === $current_theme[ 'stylesheet' ]) {
+        if (isset($current_theme['stylesheet']) && 'vortex' === $current_theme['stylesheet']) {
             return $current_theme;
         }
-        $root = OSEC_PATH.'public/'.OSEC_THEME_FOLDER;
+        $root  = OSEC_PATH . 'public/' . OSEC_THEME_FOLDER;
         $theme = [
             'theme_root' => $root,
-            'theme_dir'  => $root.DIRECTORY_SEPARATOR.'vortex',
-            'theme_url'  => OSEC_URL.'/public/'.OSEC_THEME_FOLDER.'/vortex',
+            'theme_dir'  => $root . DIRECTORY_SEPARATOR . 'vortex',
+            'theme_url'  => OSEC_URL . '/public/' . OSEC_THEME_FOLDER . '/vortex',
             'stylesheet' => 'vortex',
         ];
         $this->switch_theme($theme);
         if ( ! $silent) {
             NotificationAdmin::factory($this->app)->store(
                 I18n::__(
-                    "Your calendar theme has been switched to Vortex due to a rendering problem. For more information, please enable debug mode by adding this line to your WordPress <code>wp-config.php</code> file:<pre>define( 'OSEC_DEBUG', true );</pre>"
+                    "Your calendar theme has been switched to Vortex due to a rendering problem. For more '
+                    . 'information, please enable debug mode by adding this line to your WordPress <code>wp-config.php'
+                    . '</code> file:<pre>define( 'OSEC_DEBUG', true );</pre>"
                 ),
                 'error',
                 0,
@@ -545,7 +544,7 @@ class ThemeLoader extends OsecBaseClass
      *
      * @return array|null
      */
-    public function get_current_theme() : ?array
+    public function get_current_theme(): ?array
     {
         return $this->app->options->get('osec_current_theme');
     }
@@ -557,7 +556,7 @@ class ThemeLoader extends OsecBaseClass
      * @param  bool  $delete_variables  If true, deletes user variables from DB.
      *                                 Else replaces them with config file.
      */
-    public function switch_theme(array $theme, $delete_variables = true) : void
+    public function switch_theme(array $theme, $delete_variables = true): void
     {
         $this->app->options->set(
             'osec_current_theme',
@@ -567,12 +566,11 @@ class ThemeLoader extends OsecBaseClass
         // TODO
         // $delete_variables seems weird. Why we wouldn't??
 
-
         // If requested, delete theme variables from DB.;
         if ($delete_variables) {
             $this->app->options->delete(LessController::DB_KEY_FOR_LESS_VARIABLES);
-        } // Else replace them with those loaded from config file.
-        else {
+        } else {
+            // Else replace them with those loaded from config file.
             $this->app->options->set(
                 LessController::DB_KEY_FOR_LESS_VARIABLES,
                 LessController::factory($this->app)->get_less_variable_data_from_config_file()
@@ -584,5 +582,4 @@ class ThemeLoader extends OsecBaseClass
         FrontendCssController::factory($this->app)
                              ->invalidate_cache(null, false);
     }
-
 }

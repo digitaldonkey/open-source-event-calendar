@@ -21,78 +21,77 @@ use Osec\Exception\TimezoneException;
  */
 class EventEntity extends OsecBaseClass
 {
-
     /**
      * @var object Instance of WP_Post object.
      */
-    private $_post;
+    private object $post;
     /**
      * @var int Post ID.
      */
-    private $_post_id;
+    private int $post_id;
     /**
      * @var int|null Uniquely identifies the recurrence instance of this event
      *               object. Value may be null.
      */
-    private $_instance_id;
+    private ?int $instance_id;
     /**
      * @var string Name of timezone to use for event times.
      */
-    private $_timezone_name = null;
+    private string $timezone_name;
     /**
      * @var DT Start date-time specifier
      */
-    private DT $_start;
+    private DT $start;
     /**
      * @var DT End date-time specifier
      */
-    private DT $_end;
+    private DT $end;
     /**
      * @var bool Whether this copy of the event was broken up for rendering and
      *           the start time is not its "real" start time.
      */
-    private $_start_truncated;
+    private ?bool $start_truncated;
     /**
      * @var bool Whether this copy of the event was broken up for rendering and
      *           the end time is not its "real" end time.
      */
-    private $_end_truncated;
+    private ?bool $end_truncated;
     /**
      * @var int If event is all-day long
      */
-    private $_allday;
+    private bool $allday = false; // DB: TINYINT
     /**
      * @var int If event has no duration
      */
-    private $_instant_event;
+    private bool $instant_event = false; // DB: TINYINT
     /**
      * @var string Recurrence rules
      */
-    private $_recurrence_rules;
+    private ?string $recurrence_rules;
     /**
      * @var string Exception rules
      */
-    private $_exception_rules;
+    private ?string $exception_rules;
     /**
      * @var string Recurrence dates
      */
-    private $_recurrence_dates;
+    private ?string $recurrence_dates;
     /**
      * @var string Exception dates
      */
-    private $_exception_dates;
+    private ?string $exception_dates;
     /**
      * @var string Venue name - free text
      */
-    private $_venue;
+    private ?string $venue;
     /**
      * @var string Country name - free text
      */
-    private $_country;
+    private ?string $country;
     /**
      * @var string Address information - free text
      */
-    private $_address;
+    private ?string $address;
 
     /**
      * ==========================
@@ -102,87 +101,87 @@ class EventEntity extends OsecBaseClass
     /**
      * @var string City name - free text
      */
-    private $_city;
+    private ?string $city;
     /**
      * @var string Province free text definition
      */
-    private $_province;
+    private ?string $province;
     /**
-     * @var int Postal code
+     * @var str Postal code
      */
-    private $_postal_code;
+    private ?string $postal_code;
     /**
      * @var int Set to true to display map
      */
-    private $_show_map;
+    private bool $show_map = false; // DB: TINYINT
     /**
      * @var int Set to true to show coordinates in description
      */
-    private $_show_coordinates;
+    private bool $show_coordinates = false; // DB: TINYINT
     /**
      * @var float GEO information - longitude
      */
-    private $_longitude;
+    private ?float $longitude;
     /**
      * @var float GEO information - latitude
      */
-    private $_latitude;
+    private ?float $latitude;
     /**
      * @var string Event contact information - contact person
      */
-    private $_contact_name;
+    private ?string $contact_name;
     /**
      * @var string Event contact information - phone number
      */
-    private $_contact_phone;
+    private $contact_phone;
     /**
      * @var string Event contact information - email address
      */
-    private $_contact_email;
+    private $contact_email;
     /**
      * @var string Event contact information - external URL.
      */
-    private $_contact_url;
+    private $contact_url;
     /**
      * @var string Defines event cost.
      */
-    private $_cost;
+    private $cost;
     /**
      * @var bool Indicates, whereas event is free.
      */
-    private $_is_free;
+    private ?bool $is_free;
     /**
      * @var string Link to buy tickets
      */
-    private $_ticket_url;
+    private ?string $ticket_url;
     /**
      * @var string URI of source ICAL feed.
      */
-    private $_ical_feed_url;
+    private ?string $ical_feed_url;
     /**
      * @var string|null URI of source ICAL entity.
      */
-    private $_ical_source_url;
+    private ?string $ical_source_url;
     /**
      * @var string Organiser details
      */
-    private $_ical_organizer;
+    private ?string $ical_organizer;
     /**
      * @var string Contact details
      */
-    private $_ical_contact;
+    private ?string $ical_contact;
     /**
      * @var string|int UID of ICAL feed
      */
-    private $_ical_uid;
+    private ?string $ical_uid;
     /**
      * @var string Associated event tag names (*not* IDs), joined by commas.
      */
-    private $_tags;
+    private ?string $tags;
     /**
      * @var string Associated event category IDs, joined by commas.
      */
-    private $_categories;
+    private ?string $categories;
 
     // ====================================
     // = iCalendar feed (.ics) properties =
@@ -190,11 +189,11 @@ class EventEntity extends OsecBaseClass
     /**
      * @var string Associated event feed object
      */
-    private $_feed;
+    private ?object $feed;
     /**
-     * @var Event $_orig
+     * @var Event $orig
      */
-    private $_orig;
+    private ?Event $orig;
 
     /**
      * Initialize values to some sane defaults.
@@ -206,35 +205,33 @@ class EventEntity extends OsecBaseClass
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->_start = new DT('now', 'sys.default');
-        $this->_end = clone $this->_start;
-        $this->_end->adjust(1, 'hour');
+        $this->start = new DT('now', 'sys.default');
+        $this->timezone_name = $this->start->get_timezone();
+        $this->end   = clone $this->start;
+        $this->end->adjust(1, 'hour');
     }
 
     /**
      * Get list of object properties.
      *
-     * Special value `registry` ({@see App}) is excluded.
+     * Special value `app` ({@see App}) is excluded.
      *
      * @return array List of accessible properties.
      *
      * @staticvar array $known List of properties.
      */
-    public function list_properties() : array
+    public function list_properties(): array
     {
         static $known = null;
         if (null === $known) {
-            $known = [];
-            foreach ($this as $name => $value) {
-                $name = substr($name, 1);
-                if ('app' === $name) {
-                    continue;
-                }
-                $known[] = $name;
-            }
+            $known = array_filter(get_class_vars(self::class), function ($k) {
+                return !in_array($k, [
+                    // Ignored props.
+                    'app',
+                ]);
+            }, ARRAY_FILTER_USE_KEY);
         }
-
-        return $known;
+        return array_keys($known);
     }
 
     /**
@@ -245,9 +242,9 @@ class EventEntity extends OsecBaseClass
      */
     public function __clone()
     {
-        $this->_start = new DT($this->_start);
-        $this->_end = new DT($this->_end);
-        $this->_post = clone $this->_post;
+        $this->start = new DT($this->start);
+        $this->end   = new DT($this->end);
+        $this->post  = clone $this->post;
     }
 
     // ===============================
@@ -272,7 +269,7 @@ class EventEntity extends OsecBaseClass
     {
         static $time_fields = [
             'start' => true,
-            'end'   => true
+            'end'   => true,
         ];
         if ('app' === $name) {
             return $this; // short-circuit: protection mean.
@@ -280,27 +277,26 @@ class EventEntity extends OsecBaseClass
         if ('timezone_name' === $name && empty($value)) {
             return $this; // protection against invalid TZ values.
         }
-        $field = '_'.$name;
 
         // Time fields
-        if (isset($time_fields[ $name ])) {
+        if (isset($time_fields[$name])) {
             // object of DT type is now handled in it itself
-            $this->{$field}->set_date_time(
+            $this->{$name}->set_date_time(
                 $value,
-                ! $this->_timezone_name ? 'UTC' : $this->_timezone_name
+                ! $this->timezone_name ? 'UTC' : $this->timezone_name
             );
             $this->adjust_preferred_timezone();
-        } // NON-Time-fields
-        else {
-            if ( ! property_exists($this, $field)) {
-                throw new Exception('Missing property '.$field.' in '.__CLASS__);
+        } else {
+            // NON-Time-fields.
+            if ( ! property_exists($this, $name)) {
+                throw new Exception('Missing property ' . $name . ' in ' . __CLASS__);
             }
-            $this->{$field} = $value;
+            $this->{$name} = $value;
         }
         // Timezone fields
         if ('timezone_name' === $name) {
-            $this->_start->set_timezone($value);
-            $this->_end->set_timezone($value);
+            $this->start->set_timezone($value);
+            $this->end->set_timezone($value);
             $this->adjust_preferred_timezone();
         }
 
@@ -315,7 +311,7 @@ class EventEntity extends OsecBaseClass
      * @staticvar bool $do_adjust True when adjustment should be performed.
      * @throws BootstrapException
      */
-    public function adjust_preferred_timezone() : void
+    public function adjust_preferred_timezone(): void
     {
         static $do_adjust = null;
         if (null === $do_adjust) {
@@ -325,7 +321,7 @@ class EventEntity extends OsecBaseClass
         if ( ! $do_adjust) {
             return;
         }
-        $timezone = Timezones::factory($this->app)->get($this->_timezone_name);
+        $timezone = Timezones::factory($this->app)->get($this->timezone_name);
         $this->set_preferred_timezone($timezone);
     }
 
@@ -342,11 +338,11 @@ class EventEntity extends OsecBaseClass
         if ('app' === $name) {
             return $this->app;
         }
-        if ( ! isset($this->{'_'.$name})) {
+        if ( ! isset($this->{$name})) {
             return $default;
         }
 
-        return $this->{'_'.$name};
+        return $this->{$name};
     }
 
     /**
@@ -358,9 +354,7 @@ class EventEntity extends OsecBaseClass
      */
     public function set_preferred_timezone(DateTimeZone $timezone)
     {
-        $this->_start->set_preferred_timezone($timezone);
-        $this->_end->set_preferred_timezone($timezone);
+        $this->start->set_preferred_timezone($timezone);
+        $this->end->set_preferred_timezone($timezone);
     }
-
-
 }

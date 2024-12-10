@@ -1,15 +1,19 @@
 {
-    "name": "tho/all-in-one-event-calendar",
+    "name": "digitaldonkey/open-source-event-calendar",
     "type": "wordpress-plugin",
+    "description": "Open Source Event Calendar WordPress Plugin",
     "require": {
+        "cweagans/composer-patches": "~1.0",
         "ext-curl": "*",
-        "twig/twig": "^3.10",
-        "mrclay/minify": "^4.0",
-        "wikimedia/less.php": "^5.0",
+        "ext-json": "*",
         "kigkonsult/icalcreator": "~2.40.0",
-        "louis1021/sg-i-calendar": "dev-master"
+        "louis1021/sg-i-calendar": "dev-master",
+        "mrclay/minify": "^4.0",
+        "php": ">=8.1",
+        "twig/twig": "^3.10",
+        "wikimedia/less.php": "^5.0"
     },
-    "license": "GPL-v2",
+    "license": "GPL-3.0-or-later",
     "autoload": {
         "psr-4": {
             "Osec\\": "src/"
@@ -26,15 +30,25 @@
             "email": "tho@donkeymedia.eu"
         }
     ],
+    "scripts": {
+        "grumphp": "grumphp",
+        "phpcs": "phpcs --standard=phpcs.xml"
+    },
     "require-dev": {
-        "cweagans/composer-patches": "~1.0",
+        "phpcompatibility/phpcompatibility-wp": "*",
+        "phpro/grumphp": "^2.9",
         "phpunit/phpunit": "^9.6",
-        "yoast/phpunit-polyfills": "^2.0",
-        "symfony/debug-bundle": "^7.1"
+        "roave/security-advisories": "dev-latest",
+        "symfony/debug-bundle": "^7.1",
+        "wp-cli/wp-cli-bundle": "^2.11",
+        "wp-coding-standards/wpcs": "^3.0",
+        "yoast/phpunit-polyfills": "^2.0"
     },
     "config": {
         "allow-plugins": {
-            "cweagans/composer-patches": true
+            "cweagans/composer-patches": true,
+            "phpro/grumphp": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
         }
     },
     "extra": {

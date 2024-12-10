@@ -13,51 +13,50 @@ namespace Osec\App\Model\Date;
  */
 class DateValidator
 {
+    // **
+    // * Check if the date supplied is valid. It validates $date in the format given
+    // * by $pattern, which matches one of the supported date patterns.
+    // *
+    // * @param string $date Date string to validate
+    // * @param string $pattern Key of date pattern (@see
+    // *                          self::get_date_patterns()) to
+    // *                          match date string against
+    // *
+    // * @return boolean
+    // */
+    // static public function validate_date($date, $pattern = 'def'): bool {
+    // $result = self::validate_date_and_return_parsed_date($date, $pattern);
+    // if ($result === FALSE) {
+    // return FALSE;
+    // }
+    // return TRUE;
+    // }
 
-//  /**
-//   * Check if the date supplied is valid. It validates $date in the format given
-//   * by $pattern, which matches one of the supported date patterns.
-//   *
-//   * @param string $date Date string to validate
-//   * @param string $pattern Key of date pattern (@see
-//   *                          self::get_date_patterns()) to
-//   *                          match date string against
-//   *
-//   * @return boolean
-//   */
-//  static public function validate_date($date, $pattern = 'def'): bool {
-//    $result = self::validate_date_and_return_parsed_date($date, $pattern);
-//    if ($result === FALSE) {
-//      return FALSE;
-//    }
-//    return TRUE;
-//  }
-
-//  /**
-//   * Check if the date supplied is valid. It validates date in the format given
-//   * by $pattern, which matches one of the supported date patterns.
-//   *
-//   * @param string $date Date string to parse
-//   * @param string $pattern Key of date pattern (@see
-//   *                        self::get_date_patterns()) to
-//   *                        match date string against
-//   *
-//   * @return array|boolean An array with the parsed date or false if the date
-//   *                       is not valid.
-//   */
-//  static public function validate_date_and_return_parsed_date($date, $pattern = 'def'): ?array {
-//    $pattern = self::_get_pattern_regexp($pattern);
-//    if (preg_match($pattern, $date, $matches)) {
-//      if (checkdate($matches['m'], $matches['d'], $matches['y'])) {
-//        return [
-//          'month' => $matches['m'],
-//          'day' => $matches['d'],
-//          'year' => $matches['y'],
-//        ];
-//      }
-//    }
-//    return FALSE;
-//  }
+    // **
+    // * Check if the date supplied is valid. It validates date in the format given
+    // * by $pattern, which matches one of the supported date patterns.
+    // *
+    // * @param string $date Date string to parse
+    // * @param string $pattern Key of date pattern (@see
+    // *                        self::get_date_patterns()) to
+    // *                        match date string against
+    // *
+    // * @return array|boolean An array with the parsed date or false if the date
+    // *                       is not valid.
+    // */
+    // static public function validate_date_and_return_parsed_date($date, $pattern = 'def'): ?array {
+    // $pattern = self::_get_pattern_regexp($pattern);
+    // if (preg_match($pattern, $date, $matches)) {
+    // if (checkdate($matches['m'], $matches['d'], $matches['y'])) {
+    // return [
+    // 'month' => $matches['m'],
+    // 'day' => $matches['d'],
+    // 'year' => $matches['y'],
+    // ];
+    // }
+    // }
+    // return FALSE;
+    // }
 
     /**
      * Convert input into a valid ISO date.
@@ -67,7 +66,7 @@ class DateValidator
      *
      * @return string|bool Re-formatted date or false on failure.
      */
-    static public function format_as_iso($date, $pattern = 'def')
+    public static function format_as_iso($date, $pattern = 'def')
     {
         $regexp = self::_get_pattern_regexp($pattern);
         if ( ! preg_match($regexp, $date, $matches)) {
@@ -76,9 +75,9 @@ class DateValidator
 
         return sprintf(
             '%04d-%02d-%02d',
-            $matches[ 'y' ],
-            $matches[ 'm' ],
-            $matches[ 'd' ]
+            $matches['y'],
+            $matches['m'],
+            $matches['d']
         );
     }
 
@@ -89,7 +88,7 @@ class DateValidator
      *
      * @return string Regular expression pattern.
      */
-    static protected function _get_pattern_regexp($pattern)
+    protected static function _get_pattern_regexp($pattern)
     {
         $pattern = self::get_date_pattern_by_key($pattern);
         $pattern = preg_quote($pattern, '/');
@@ -108,7 +107,7 @@ class DateValidator
         // Accept hyphens and dots in place of forward slashes (for URLs).
         $pattern = str_replace('\/', '[\/\-\.]', $pattern);
 
-        return '#^'.$pattern.'$#';
+        return '#^' . $pattern . '$#';
     }
 
     /**
@@ -120,11 +119,11 @@ class DateValidator
      *
      * @return string      Associated date format pattern
      */
-    static public function get_date_pattern_by_key($key = 'def')
+    public static function get_date_pattern_by_key($key = 'def')
     {
         $patterns = self::get_date_patterns();
 
-        return $patterns[ $key ];
+        return $patterns[$key];
     }
 
     /**
@@ -142,7 +141,7 @@ class DateValidator
      *
      * @return array Supported date patterns
      */
-    static public function get_date_patterns()
+    public static function get_date_patterns()
     {
         return [
             'def' => 'd/m/yyyy',
@@ -159,17 +158,16 @@ class DateValidator
      *
      * @param  string|int  $timestamp
      *
-     * @return boolean
+     * @return bool
      */
-    static public function is_valid_time_stamp($timestamp)
+    public static function is_valid_time_stamp($timestamp)
     {
-        return
-            (
-                is_int($timestamp) ||
-                ((string) (int) $timestamp) === (string) $timestamp
-            )
-            && ($timestamp <= PHP_INT_MAX)
-            && ($timestamp >= 0 /*~ PHP_INT_MAX*/);
+        return (
+                   is_int($timestamp) ||
+                   ((string)(int)$timestamp) === (string)$timestamp
+               )
+               && ($timestamp <= PHP_INT_MAX)
+               && ($timestamp >= 0 /*~ PHP_INT_MAX*/);
         // do not allow negative timestamps until this is widely accepted
     }
 }

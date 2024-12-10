@@ -6,7 +6,7 @@ use Osec\Bootstrap\OsecBaseInitialized;
 use Osec\Cache\CacheMemory;
 
 /**
- * Abstract class for meta entries management.
+ * Abstract class for meta entry management.
  *
  * Via use of cache allows object-based access to meta entries.
  *
@@ -16,16 +16,15 @@ use Osec\Cache\CacheMemory;
  */
 abstract class MetaAdapterAbstract extends OsecBaseInitialized
 {
-
     /**
      * @var string Name of base object for storage.
      */
-    protected $_object = '';
+    protected string $objectId = '';
 
     /**
      * @var CacheMemory In-memory cache operator.
      */
-    protected ?CacheMemory $_cache = null;
+    protected ?CacheMemory $cache;
 
     /**
      * Create new entry if it does not exist and cache provided value.
@@ -41,7 +40,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
         if ( ! $this->_add($object_id, $key, $value)) {
             return false;
         }
-        $this->_cache->set($this->_cache_key($object_id, $key), $value);
+        $this->cache->set($this->_cache_key($object_id, $key), $value);
 
         return true;
     }
@@ -57,7 +56,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      */
     protected function _add($object_id, $key, mixed $value)
     {
-        $function = 'add_'.$this->_object.'_meta';
+        $function = 'add_' . $this->objectId . '_meta';
 
         return $function($object_id, $key, $value, true);
     }
@@ -77,12 +76,10 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
             if ( ! $this->_add($object_id, $key, $value)) {
                 return false;
             }
-        } else {
-            if ( ! $this->_update($object_id, $key, $value)) {
-                return false;
-            }
+        } elseif ( ! $this->_update($object_id, $key, $value)) {
+            return false;
         }
-        $this->_cache->set($this->_cache_key($object_id, $key), $value);
+        $this->cache->set($this->_cache_key($object_id, $key), $value);
 
         return true;
     }
@@ -99,10 +96,10 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
     final public function get($object_id, $key, mixed $default = null)
     {
         $cache_key = $this->_cache_key($object_id, $key);
-        $value = $this->_cache->get($cache_key, $default);
+        $value     = $this->cache->get($cache_key, $default);
         if ($default === $value) {
             $value = $this->getMeta($object_id, $key);
-            $this->_cache->set($cache_key, $value);
+            $this->cache->set($cache_key, $value);
         }
 
         return $value;
@@ -120,7 +117,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
     {
         static $separator = "\0";
 
-        return $object_id.$separator.$key;
+        return $object_id . $separator . $key;
     }
 
     /**
@@ -133,7 +130,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      */
     protected function getMeta($object_id, $key)
     {
-        $function = 'get_'.$this->_object.'_meta';
+        $function = 'get_' . $this->objectId . '_meta';
 
         return $function($object_id, $key, true);
     }
@@ -149,7 +146,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      */
     protected function _update($object_id, $key, mixed $value)
     {
-        $function = 'update_'.$this->_object.'_meta';
+        $function = 'update_' . $this->objectId . '_meta';
 
         return $function($object_id, $key, $value);
     }
@@ -168,7 +165,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
         if ( ! $this->_update($object_id, $key, $value)) {
             return false;
         }
-        $this->_cache->set($this->_cache_key($object_id, $key), $value);
+        $this->cache->set($this->_cache_key($object_id, $key), $value);
 
         return true;
     }
@@ -183,7 +180,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      */
     final public function delete($object_id, $key)
     {
-        $this->_cache->delete($this->_cache_key($object_id, $key));
+        $this->cache->delete($this->_cache_key($object_id, $key));
 
         return $this->_delete($object_id, $key);
     }
@@ -198,7 +195,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      */
     protected function _delete($object_id, $key)
     {
-        $function = 'delete_'.$this->_object.'_meta';
+        $function = 'delete_' . $this->objectId . '_meta';
 
         return $function($object_id, $key);
     }
@@ -210,9 +207,8 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      */
     protected function _initialize()
     {
-        $class = static::class;
-        $this->_object = strtolower(substr($class, strlen(__NAMESPACE__.'\MetaAdapter')));
-        $this->_cache = CacheMemory::factory($this->app);
+        $class          = static::class;
+        $this->objectId = strtolower(substr($class, strlen(__NAMESPACE__ . '\MetaAdapter')));
+        $this->cache    = CacheMemory::factory($this->app);
     }
-
 }

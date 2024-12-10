@@ -3,18 +3,18 @@
 /**
  * Define global functions
  *
- * @author     Time.ly Network Inc.
  * @since      2.0
- *
-  */
+ * @author     Time.ly Network Inc.
+ */
 
 /**
  * Executed after initialization of Front Controller.
  *
  * @return void
  */
-function osec_output_buffering_start() {
-	ob_start();
+function osec_output_buffering_start()
+{
+    ob_start();
 }
 
 /**
@@ -22,11 +22,9 @@ function osec_output_buffering_start() {
  *
  * @return void
  */
-function osec_output_buffering_finalize() {
-  if (ob_get_level()) {
-    echo ob_get_clean();
-    ob_end_clean();
-  }
+function osec_output_buffering_finalize()
+{
+    if (ob_get_length()) {
+        ob_get_clean();
+    }
 }
-
-

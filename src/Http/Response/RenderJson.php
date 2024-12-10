@@ -12,13 +12,13 @@ namespace Osec\Http\Response;
  */
 class RenderJson extends RenderJsonP
 {
-
-    /* (non-PHPdoc)
+    /*
+    (non-PHPdoc)
      * @see RenderStrategyAbstract::render()
      */
-    public function render(array $params) : void
+    public function render(array $params): void
     {
-        $params[ 'callback' ] = '';
+        $params['callback'] = '';
         parent::render($params);
     }
 }

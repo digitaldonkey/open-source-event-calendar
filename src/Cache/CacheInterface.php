@@ -11,8 +11,7 @@ namespace Osec\Cache;
  */
 interface CacheInterface
 {
-
-    public static function is_available() : bool;
+    public static function is_available(): bool;
 
     /**
      * Set entry to cache. Overwrite Existing.
@@ -22,7 +21,7 @@ interface CacheInterface
      *
      * @return bool Success.
      */
-    public function set(string $key, mixed $value) : bool;
+    public function set(string $key, mixed $value): bool;
 
     /**
      * Add entry to cache if one does not exist.
@@ -32,7 +31,7 @@ interface CacheInterface
      *
      * @return bool Success or false if $key exists.
      */
-    public function add(string $key, mixed $value) : bool;
+    public function add(string $key, mixed $value): bool;
 
     /**
      * Retrieve value from cache.
@@ -42,7 +41,7 @@ interface CacheInterface
      *
      * @return mixed Previously stored or $default value.
      */
-    public function get(string $key, mixed $default = null) : mixed;
+    public function get(string $key, mixed $default = null): mixed;
 
     /**
      * Delete value from cache.
@@ -51,20 +50,18 @@ interface CacheInterface
      *
      * @return bool Success.
      */
-    public function delete(string $key) : bool;
+    public function delete(string $key): bool;
 
     /**
      * Delete all enries.
      *
      * @return bool
      */
-    public function clear_cache() : bool;
+    public function clear_cache(): bool;
 
     /**
      *
      * @return int Count of deleted matches.
      */
-    public function delete_matching(string $pattern) : int;
-
-
+    public function delete_matching(string $pattern): int;
 }

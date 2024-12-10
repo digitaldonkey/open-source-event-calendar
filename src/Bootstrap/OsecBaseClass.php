@@ -15,7 +15,6 @@ use Osec\Exception\BootstrapException;
  */
 abstract class OsecBaseClass
 {
-
     /**
      * @var App
      */
@@ -47,22 +46,27 @@ abstract class OsecBaseClass
         mixed $arg2 = null,
         mixed $arg3 = null,
         mixed $arg4 = null
-    ) : static { // Supported only by PHP >= 8.x
+    ): static { // Supported only by PHP >= 8.x
         $classname = get_called_class();
 
         // Return existing object.
         $obj = $app->getService($classname);
         if ($obj && is_a($obj, $classname)) {
-            //  Check if we have any secondary call using
-            //  param extra params.
-            //  They would be ignored if class has already been initialized.
+            // Check if we have any secondary call using
+            // param extra params.
+            // They would be ignored if class has already been initialized.
             // Maybe this class needs to be initialized with new?
             if ( ! is_null($arg1) || ! is_null($arg2) || ! is_null($arg3)) {
-                throw new Exception('Existing registry object is initialized with additional params. '.print_r([
-                        'arg1' => $arg1,
-                        'arg2' => $arg2,
-                        'arg3' => $arg3
-                    ], true));
+                throw new Exception(
+                    'Existing registry object is initialized with additional params. ' . print_r(
+                        [
+                            'arg1' => $arg1,
+                            'arg2' => $arg2,
+                            'arg3' => $arg3,
+                        ],
+                        true
+                    )
+                );
             }
 
             return $obj;

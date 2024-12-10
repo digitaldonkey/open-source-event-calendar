@@ -21,7 +21,6 @@ use ReflectionClass;
  */
 class App
 {
-
     public readonly Options $options;
     public readonly Settings $settings;
     public readonly DatabaseController $db;
@@ -32,25 +31,14 @@ class App
      * globally available here.
      * Non-global classes should be instantiated with new ClassName();
      */
-    private array $_objects = [];
-
-//    /**
-//     * Initialize the App
-//     *
-//     * @param  Bootstrap  $loader
-//     */
-//    protected function __construct(Bootstrap $loader)
-//    {
-//        $this->_loader = $loader;
-//    }
-
+    private array $globalObjects = [];
 
     /**
      * Initialize global App.
      *
      * @return App
      */
-    public static function factory() : App
+    public static function factory(): App
     {
         global $osec_app;
         $globaleApp = new self();
@@ -69,11 +57,11 @@ class App
      *
      * @throws BootstrapException
      */
-    private function createGlobalReistryObjects(App $app) : void
+    private function createGlobalReistryObjects(App $app): void
     {
-        $this->options = Options::factory($app);
+        $this->options  = Options::factory($app);
         $this->settings = Settings::factory($app);
-        $this->db = DatabaseController::factory($app);
+        $this->db       = DatabaseController::factory($app);
     }
 
     /**
@@ -91,7 +79,7 @@ class App
                 'Attempt to inject not an object / invalid object.'
             );
         }
-        $this->_objects[ $name ] = $object;
+        $this->globalObjects[$name] = $object;
     }
 
     /**
@@ -102,10 +90,10 @@ class App
      *
      * @return mixed|null
      */
-    public function getService(string $name) : mixed
+    public function getService(string $name): mixed
     {
-        if (isset($this->_objects[ $name ])) {
-            return $this->_objects[ $name ];
+        if (isset($this->globalObjects[$name])) {
+            return $this->globalObjects[$name];
         }
 
         return null;
@@ -128,23 +116,22 @@ class App
                 return new $namespaced_class();
 
             case 1:
-                return new $namespaced_class($argv[ 0 ]);
+                return new $namespaced_class($argv[0]);
 
             case 2:
-                return new $namespaced_class($argv[ 0 ], $argv[ 1 ]);
+                return new $namespaced_class($argv[0], $argv[1]);
 
             case 3:
-                return new $namespaced_class($argv[ 0 ], $argv[ 1 ], $argv[ 2 ]);
+                return new $namespaced_class($argv[0], $argv[1], $argv[2]);
 
             case 4:
-                return new $namespaced_class($argv[ 0 ], $argv[ 1 ], $argv[ 2 ], $argv[ 3 ]);
+                return new $namespaced_class($argv[0], $argv[1], $argv[2], $argv[3]);
 
             case 5:
-                return new $namespaced_class($argv[ 0 ], $argv[ 1 ], $argv[ 2 ], $argv[ 3 ], $argv[ 4 ]);
+                return new $namespaced_class($argv[0], $argv[1], $argv[2], $argv[3], $argv[4]);
         }
         $reflected = new ReflectionClass($namespaced_class);
 
         return $reflected->newInstanceArgs($argv);
     }
-
 }

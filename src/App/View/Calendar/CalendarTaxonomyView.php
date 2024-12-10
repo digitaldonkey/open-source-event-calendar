@@ -17,7 +17,6 @@ use Osec\Theme\ThemeLoader;
  */
 class CalendarTaxonomyView extends OsecBaseClass
 {
-
     /**
      * Creates the html for tags filter
      *
@@ -38,17 +37,16 @@ class CalendarTaxonomyView extends OsecBaseClass
      */
     protected function _get_html_for_taxonomy($view_args, $tag = false)
     {
-        $taxonomy_name = 'events_categories';
-        $type = 'category';
-        $type_for_filter = 'cat_ids';
+        $taxonomy_name      = 'events_categories';
+        $type               = 'category';
+        $type_for_filter    = 'cat_ids';
         $type_for_view_args = 'categories';
         if (true === $tag) {
-            $taxonomy_name = 'events_tags';
-            $type = 'tag';
-            $type_for_filter = 'tag_ids';
+            $taxonomy_name      = 'events_tags';
+            $type               = 'tag';
+            $type_for_filter    = 'tag_ids';
             $type_for_view_args = 'tags';
         }
-
 
         $terms = get_terms($taxonomy_name, ['orderby' => 'name']);
         if (empty($terms)) {
@@ -69,18 +67,18 @@ class CalendarTaxonomyView extends OsecBaseClass
             $this->generate_href_without_arguments($view_args, [$type_for_filter]);
 
         $args = [
-            $type_for_view_args          => $terms,
-            'selected_'.$type_for_filter => $view_args[ $type_for_filter ],
-            'data_type'                  => $view_args[ 'data_type' ],
-            'clear_filter'               => $href_for_clearing_filter,
-            'text_clear_category_filter' => __('Clear category filter', OSEC_TXT_DOM),
-            'text_categories'            => __('Categories', OSEC_TXT_DOM),
-            'text_clear_tag_filter'      => __('Clear tag filter', OSEC_TXT_DOM),
-            'text_tags'                  => __('Tags', OSEC_TXT_DOM),
+            $type_for_view_args            => $terms,
+            'selected_' . $type_for_filter => $view_args[$type_for_filter],
+            'data_type'                    => $view_args['data_type'],
+            'clear_filter'                 => $href_for_clearing_filter,
+            'text_clear_category_filter'   => __('Clear category filter', OSEC_TXT_DOM),
+            'text_categories'              => __('Categories', OSEC_TXT_DOM),
+            'text_clear_tag_filter'        => __('Clear tag filter', OSEC_TXT_DOM),
+            'text_tags'                    => __('Tags', OSEC_TXT_DOM),
         ];
 
         return ThemeLoader::factory($this->app)
-                          ->get_file($type_for_view_args.'.twig', $args, false)
+                          ->get_file($type_for_view_args . '.twig', $args, false)
                           ->get_content();
     }
 
@@ -98,7 +96,7 @@ class CalendarTaxonomyView extends OsecBaseClass
         array $args_to_remove
     ) {
         $args_to_remove = array_flip($args_to_remove);
-        $args = array_diff_key($args, $args_to_remove);
+        $args           = array_diff_key($args, $args_to_remove);
 
         return HtmlFactory::factory($this->app)
                           ->create_href_helper_instance($args)
@@ -114,5 +112,4 @@ class CalendarTaxonomyView extends OsecBaseClass
     {
         return $this->_get_html_for_taxonomy($view_args);
     }
-
 }

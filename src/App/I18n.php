@@ -11,7 +11,6 @@ namespace Osec\App;
  */
 class I18n
 {
-
     /**
      * Translates string. Wrapper for WordPress `__()` function.
      *
@@ -19,7 +18,7 @@ class I18n
      *
      * @return string Translated string representation.
      */
-    static public function __($term)
+    public static function __($term)
     {
         return __($term, OSEC_TXT_DOM);
     }
@@ -32,9 +31,8 @@ class I18n
      *
      * @return string Translated string representation.
      */
-    static public function _x($term, $ctxt)
+    public static function _x($term, $ctxt)
     {
         return _x($term, $ctxt, OSEC_TXT_DOM);
     }
-
 }

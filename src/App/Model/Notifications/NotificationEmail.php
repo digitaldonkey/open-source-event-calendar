@@ -14,13 +14,12 @@ use Osec\Bootstrap\App;
  */
 class NotificationEmail extends NotificationAbstract
 {
-
     // TODO This class is not in use. Remove?
 
     /**
      * @var array
      */
-    private $_translations = [];
+    private array $translations = [];
 
     /**
      * @param  App  $app
@@ -35,29 +34,28 @@ class NotificationEmail extends NotificationAbstract
         private $_subject
     ) {
         parent::__construct($app);
-        $this->_message = $message;
-        $this->_recipients = $recipients;
+        $this->message    = $message;
+        $this->recipients = $recipients;
     }
 
     /**
-     * @param  array $translations Translations.
+     * @param  array  $translations  Translations.
      */
     public function set_translations(array $translations)
     {
-        $this->_translations = $translations;
+        $this->translations = $translations;
     }
 
     public function send()
     {
         $this->_parse_text();
 
-        return wp_mail($this->_recipients, $this->_subject, $this->_message);
+        return wp_mail($this->recipients, $this->_subject, $this->message);
     }
 
     private function _parse_text()
     {
-        $this->_message = strtr($this->_message, $this->_translations);
-        $this->_subject = strtr($this->_subject, $this->_translations);
+        $this->message  = strtr($this->message, $this->translations);
+        $this->_subject = strtr($this->_subject, $this->translations);
     }
-
 }

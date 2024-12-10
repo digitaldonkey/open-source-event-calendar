@@ -13,5 +13,4 @@ use Osec\Exception\Exception;
  */
 class CacheNotSetException extends Exception
 {
-
 }

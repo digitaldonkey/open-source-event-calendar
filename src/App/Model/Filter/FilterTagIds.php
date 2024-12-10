@@ -12,10 +12,8 @@ namespace Osec\App\Model\Filter;
  */
 class FilterTagIds extends FilterTaxonomy
 {
-
     public function get_taxonomy()
     {
         return 'events_tags';
     }
-
 }

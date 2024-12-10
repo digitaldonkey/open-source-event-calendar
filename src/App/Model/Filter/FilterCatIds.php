@@ -12,10 +12,8 @@ namespace Osec\App\Model\Filter;
  */
 class FilterCatIds extends FilterTaxonomy
 {
-
     public function get_taxonomy()
     {
         return 'events_categories';
     }
-
 }

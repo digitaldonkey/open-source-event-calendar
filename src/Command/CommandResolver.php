@@ -18,7 +18,6 @@ use Osec\Http\Request\RequestParser;
  */
 class CommandResolver
 {
-
     /**
      * @var App.
      */
@@ -27,11 +26,10 @@ class CommandResolver
     /**
      * @var CommandAbstract[] The available commands.
      */
-    private $_commands = [];
+    private array $commands = [];
 
     /**
      * Public constructor
-     *
      *
      * @return void
      */
@@ -60,7 +58,9 @@ class CommandResolver
         );
 
         $this->add_command(
-            SaveSettings::factory($this->app, $request,
+            SaveSettings::factory(
+                $this->app,
+                $request,
                 [
                     'action'       => 'osec_save_settings',
                     'nonce_action' => AdminPageSettings::NONCE_ACTION,
@@ -70,7 +70,9 @@ class CommandResolver
         );
 
         $this->add_command(
-            SaveThemeOptions::factory($this->app, $request,
+            SaveThemeOptions::factory(
+                $this->app,
+                $request,
                 [
                     'action'       => 'ai1ec_save_theme_options',
                     'nonce_action' => AdminPageThemeOptions::NONCE_ACTION,
@@ -93,15 +95,14 @@ class CommandResolver
     /**
      * Add a command.
      *
-     *
      * @return self Self for calls chaining
      */
-    public function add_command(object $command) : self
+    public function add_command(object $command): self
     {
         if ( ! $command instanceof CommandAbstract) {
-            throw new BootstrapException($command->get_class().' does not implement CommandAbstract');
+            throw new BootstrapException($command->get_class() . ' does not implement CommandAbstract');
         }
-        $this->_commands[] = $command;
+        $this->commands[] = $command;
 
         return $this;
     }
@@ -111,10 +112,10 @@ class CommandResolver
      *
      * @return array [CommandAbstract]|null
      */
-    public function get_commands() : array
+    public function get_commands(): array
     {
         $commands = [];
-        foreach ($this->_commands as $command) {
+        foreach ($this->commands as $command) {
             if ($command->is_this_to_execute()) {
                 $commands[] = $command;
             }
@@ -122,5 +123,4 @@ class CommandResolver
 
         return $commands;
     }
-
 }

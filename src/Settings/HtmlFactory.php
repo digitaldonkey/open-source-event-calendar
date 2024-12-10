@@ -24,9 +24,8 @@ use Osec\Theme\ThemeLoader;
  */
 class HtmlFactory extends OsecBaseClass
 {
-
     /**
-     * @var boolean
+     * @var bool
      */
     protected $pretty_permalinks_enabled = false;
 
@@ -42,12 +41,11 @@ class HtmlFactory extends OsecBaseClass
      *
      * @throws BootstrapException
      */
-    public function __construct(
-        App $app
-    ) {
+    public function __construct(App $app)
+    {
         parent::__construct($app);
-        $cache = CacheMemory::factory($this->app);
-        $this->page = $cache->get('calendar_base_page');
+        $cache                           = CacheMemory::factory($this->app);
+        $this->page                      = $cache->get('calendar_base_page');
         $this->pretty_permalinks_enabled = $cache->get('permalinks_enabled');
     }
 
@@ -59,7 +57,6 @@ class HtmlFactory extends OsecBaseClass
      * @param  int|string|null  $initial_date  The datepicker's initially set date
      * @param  string  $title  Title to display in datepicker button
      * @param  string  $title_short  Short names in title
-     *
      */
     public function create_datepicker_link(
         array $args,
@@ -67,7 +64,7 @@ class HtmlFactory extends OsecBaseClass
         $title = '',
         $title_short = ''
     ) {
-        $settings = $this->app->settings;
+        $settings    = $this->app->settings;
         $date_system = UIDateFormats::factory($this->app);
 
         $date_format_pattern = $date_system->get_date_pattern_by_key(
@@ -77,12 +74,14 @@ class HtmlFactory extends OsecBaseClass
         if (null === $initial_date) {
             // If exact_date argument was provided, use its value to initialize
             // datepicker.
-            if (isset($args[ 'exact_date' ]) &&
-                $args[ 'exact_date' ] !== false &&
-                $args[ 'exact_date' ] !== null) {
-                $initial_date = $args[ 'exact_date' ];
-            } // Else default to today's date.
-            else {
+            if (
+                isset($args['exact_date']) &&
+                $args['exact_date'] !== false &&
+                $args['exact_date'] !== null
+            ) {
+                $initial_date = $args['exact_date'];
+            } else {
+                // Else default to today's date.
                 $initial_date = $date_system->current_time();
             }
         }
@@ -95,10 +94,10 @@ class HtmlFactory extends OsecBaseClass
         }
 
         $href_args = [
-            'action'     => $args[ 'action' ],
-            'cat_ids'    => $args[ 'cat_ids' ],
-            'tag_ids'    => $args[ 'tag_ids' ],
-            'exact_date' => "__DATE__",
+            'action'     => $args['action'],
+            'cat_ids'    => $args['cat_ids'],
+            'tag_ids'    => $args['tag_ids'],
+            'exact_date' => '__DATE__',
         ];
         /**
          * Alter href arguments for datepicker
@@ -121,12 +120,12 @@ class HtmlFactory extends OsecBaseClass
             'data-href'           => $data_href->generate_href(),
             'data-lang'           => str_replace('_', '-', get_locale()),
         ];
-        $loader = ThemeLoader::factory($this->app);
-        $file = $loader->get_file('date-icon.png');
+        $loader     = ThemeLoader::factory($this->app);
+        $file       = $loader->get_file('date-icon.png');
 
         $args = [
             'attributes'  => $attributes,
-            'data_type'   => $args[ 'data_type' ],
+            'data_type'   => $args['data_type'],
             'icon_url'    => $file->get_url(),
             'text_date'   => __('Choose a date using calendar', OSEC_TXT_DOM),
             'title'       => $title,
@@ -194,41 +193,41 @@ class HtmlFactory extends OsecBaseClass
             'author'   => 'auth_ids',
         ];
 
-        $use_id = isset($args[ 'use_id' ]);
+        $use_id         = isset($args['use_id']);
         $options_to_add = [];
         foreach ($options as $term) {
             $option_arguments = [];
-            $color = false;
-            if ($args[ 'type' ] === 'category') {
+            $color            = false;
+            if ($args['type'] === 'category') {
                 $color = TaxonomyAdapter::factory($this->app)
                                         ->get_category_color($term->term_id);
             }
             if ($color) {
-                $option_arguments[ 'data-color' ] = $color;
+                $option_arguments['data-color'] = $color;
             }
             if (null !== $view_args) {
                 // create the href for ajax loading
                 $href = $this->create_href_helper_instance(
                     $view_args,
-                    $args[ 'type' ]
+                    $args['type']
                 );
                 $href->set_term_id($term->term_id);
-                $option_arguments[ 'data-href' ] = $href->generate_href();
+                $option_arguments['data-href'] = $href->generate_href();
                 // check if the option is selected
                 $type_to_check = '';
                 // first let's check the correct type
-                if (isset($checkable_types[ $args[ 'type' ] ])) {
-                    $type_to_check = $checkable_types[ $args[ 'type' ] ];
+                if (isset($checkable_types[$args['type']])) {
+                    $type_to_check = $checkable_types[$args['type']];
                 }
                 // let's flip the array. Just once for performance sake,
                 // the categories doesn't change in the same request
-                if ( ! isset($cached_flips[ $type_to_check ])) {
-                    $cached_flips[ $type_to_check ] = array_flip(
-                        $view_args[ $type_to_check ]
+                if ( ! isset($cached_flips[$type_to_check])) {
+                    $cached_flips[$type_to_check] = array_flip(
+                        $view_args[$type_to_check]
                     );
                 }
-                if (isset($cached_flips[ $type_to_check ][ $term->term_id ])) {
-                    $option_arguments[ 'selected' ] = 'selected';
+                if (isset($cached_flips[$type_to_check][$term->term_id])) {
+                    $option_arguments['selected'] = 'selected';
                 }
             }
             if (true === $use_id) {
@@ -247,21 +246,21 @@ class HtmlFactory extends OsecBaseClass
         }
         $select2_args = [
             'multiple'         => 'multiple',
-            'data-placeholder' => $args[ 'placeholder' ],
+            'data-placeholder' => $args['placeholder'],
             'class'            => 'ai1ec-select2-multiselect-selector span12',
         ];
-        if (isset($args[ 'class' ])) {
-            $select2_args[ 'class' ] .= ' '.$args[ 'class' ];
+        if (isset($args['class'])) {
+            $select2_args['class'] .= ' ' . $args['class'];
         }
         $container_class = false;
-        if (isset($args[ 'type' ])) {
-            $container_class = 'ai1ec-'.$args[ 'type' ].'-filter';
+        if (isset($args['type'])) {
+            $container_class = 'ai1ec-' . $args['type'] . '-filter';
         }
         $select2 = ThemeLoader::factory($this->app)->get_file(
             'select2_multiselect.twig',
             [
-                'name'            => $args[ 'name' ],
-                'id'              => $args[ 'id' ],
+                'name'            => $args['name'],
+                'id'              => $args['id'],
                 'container_class' => $container_class,
                 'select2_args'    => $select2_args,
                 'options'         => $options_to_add,
@@ -279,15 +278,18 @@ class HtmlFactory extends OsecBaseClass
      *
      * @return FileTwig
      */
-    public function create_select2_input(array $args) : FileTwig
+    public function create_select2_input(array $args): FileTwig
     {
-        if ( ! isset ($args[ 'name' ])) {
-            $args[ 'name' ] = $args[ 'id' ];
+        if ( ! isset($args['name'])) {
+            $args['name'] = $args['id'];
         }
         // Get tags.
         $tags = get_terms(
             'events_tags',
-            ['orderby' => 'name', 'hide_empty' => 0]
+            [
+                'orderby'    => 'name',
+                'hide_empty' => 0,
+            ]
         );
 
         // Build tags array to pass as JSON.
@@ -295,18 +297,18 @@ class HtmlFactory extends OsecBaseClass
         foreach ($tags as $term) {
             $tags_json[] = $term->name;
         }
-        $tags_json = json_encode($tags_json);
-        $tags_json = _wp_specialchars($tags_json, 'single', 'UTF-8');
+        $tags_json    = json_encode($tags_json);
+        $tags_json    = _wp_specialchars($tags_json, 'single', 'UTF-8');
         $select2_args = [
             'data-placeholder' => __('Tags (optional)', OSEC_TXT_DOM),
             'class'            => 'ai1ec-tags-selector span12',
             'data-ai1ec-tags'  => $tags_json,
         ];
-        $select2 = ThemeLoader::factory($this->app)->get_file(
+        $select2      = ThemeLoader::factory($this->app)->get_file(
             'select2_input.twig',
             [
-                'name'         => $args[ 'name' ],
-                'id'           => $args[ 'id' ],
+                'name'         => $args['name'],
+                'id'           => $args['id'],
                 'select2_args' => $select2_args,
             ],
             true
@@ -314,5 +316,4 @@ class HtmlFactory extends OsecBaseClass
 
         return $select2;
     }
-
 }

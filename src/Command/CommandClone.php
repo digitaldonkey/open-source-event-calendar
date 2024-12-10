@@ -23,16 +23,15 @@ use WP_Post;
  */
 class CommandClone extends CommandAbstract
 {
-
     /**
      * @var array The posts that must be cloned
      */
-    protected $_posts = [];
+    protected array $posts = [];
 
     /**
      * @var bool Whether to redirect or not
      */
-    protected $_redirect = false;
+    protected bool $doRedirect = false;
 
     /**
      * The abstract method concrete command must implement.
@@ -44,16 +43,16 @@ class CommandClone extends CommandAbstract
     public function do_execute()
     {
         $id = 0;
-        if ($this->_posts && count($this->_posts)) {
-            foreach ($this->_posts as $post) {
+        if ($this->posts && count($this->posts)) {
+            foreach ($this->posts as $post) {
                 /** @var array $post */
                 $id = $this->duplicate_post_create_duplicate(
-                    $post[ 'post' ],
-                    $post[ 'status' ]
+                    $post['post'],
+                    $post['status']
                 );
             }
-            if (true === $this->_redirect) {
-                if ('' === $post[ 'status' ]) {
+            if (true === $this->doRedirect) {
+                if ('' === $post['status']) {
                     return [
                         'url'        => admin_url(OSEC_ADMIN_BASE_URL),
                         'query_args' => [],
@@ -61,13 +60,14 @@ class CommandClone extends CommandAbstract
                 } else {
                     return [
                         'url'        => admin_url(
-                            'post.php?action=edit&post='.$id
+                            'post.php?action=edit&post=' . $id
                         ),
                         'query_args' => [],
                     ];
                 }
             }
         }
+
         // no redirect, just go on with the page
         return [];
     }
@@ -77,7 +77,7 @@ class CommandClone extends CommandAbstract
      */
     public function duplicate_post_create_duplicate($post, $status = '')
     {
-        $post = get_post($post);
+        $post            = get_post($post);
         $new_post_author = $this->_duplicate_post_get_current_user();
         $new_post_status = $status;
         if (empty($new_post_status)) {
@@ -103,12 +103,15 @@ class CommandClone extends CommandAbstract
             'to_ping'        => $post->to_ping,
         ];
 
-        $new_post_id = wp_insert_post($new_post);
+        $new_post_id    = wp_insert_post($new_post);
         $edit_event_url = esc_attr(
             admin_url("post.php?post={$new_post_id}&action=edit")
         );
-        $message = sprintf(
-	        __( '<p>The event <strong>%s</strong> was cloned succesfully. <a href="%s">Edit cloned event</a></p>', OSEC_TXT_DOM ),
+        $message        = sprintf(
+            __(
+                '<p>The event <strong>%1$s</strong> was cloned succesfully. <a href="%2$s">Edit cloned event</a></p>',
+                OSEC_TXT_DOM
+            ),
             $post->post_title,
             $edit_event_url
         );
@@ -150,9 +153,9 @@ class CommandClone extends CommandAbstract
                 $post->post_parent
             );
 
-            $new_post = [];
-            $new_post[ 'ID' ] = $new_post_id;
-            $new_post[ 'post_name' ] = $post_name;
+            $new_post              = [];
+            $new_post['ID']        = $new_post_id;
+            $new_post['post_name'] = $post_name;
 
             // Update the post into the database
             wp_update_post($new_post);
@@ -171,9 +174,9 @@ class CommandClone extends CommandAbstract
         if (function_exists('wp_get_current_user')) {
             return wp_get_current_user();
         } else {
-            $query = $this->app->db->prepare(
-                'SELECT * FROM '.$wpdb->users.' WHERE user_login = %s',
-                $_COOKIE[ USER_COOKIE ]
+            $query        = $this->app->db->prepare(
+                'SELECT * FROM ' . $wpdb->users . ' WHERE user_login = %s',
+                $_COOKIE[USER_COOKIE]
             );
             $current_user = $this->app->db->get_results($query);
 
@@ -206,7 +209,6 @@ class CommandClone extends CommandAbstract
      */
     protected function _duplicate_post_copy_post_taxonomies($new_id, $post)
     {
-
         if ($this->app->db->are_terms_set()) {
             // Clear default category (added by wp_insert_post)
             wp_set_object_terms($new_id, null, 'category');
@@ -214,17 +216,17 @@ class CommandClone extends CommandAbstract
             $post_taxonomies = get_object_taxonomies($post->post_type);
 
             $taxonomies_blacklist = [];
-            $taxonomies = array_diff($post_taxonomies, $taxonomies_blacklist);
+            $taxonomies           = array_diff($post_taxonomies, $taxonomies_blacklist);
             foreach ($taxonomies as $taxonomy) {
                 $post_terms = wp_get_object_terms(
                     $post->ID,
                     $taxonomy,
                     ['orderby' => 'term_order']
                 );
-                $terms = [];
-				$termCount = count($post_terms);
+                $terms      = [];
+                $termCount  = count($post_terms);
                 for ($i = 0; $i < $termCount; $i++) {
-                    $terms[] = $post_terms[ $i ]->slug;
+                    $terms[] = $post_terms[$i]->slug;
                 }
                 wp_set_object_terms($new_id, $terms, $taxonomy);
             }
@@ -237,7 +239,7 @@ class CommandClone extends CommandAbstract
      */
     protected function _duplicate_post_copy_attachments($new_id, $post)
     {
-        //if (get_option('duplicate_post_copyattachments') == 0) return;
+        // if (get_option('duplicate_post_copyattachments') == 0) return;
 
         // get old attachments
         $attachments = get_posts(
@@ -277,20 +279,18 @@ class CommandClone extends CommandAbstract
             $new_att_id = wp_insert_post($new_att);
 
             // get and apply a unique slug
-            $att_name = wp_unique_post_slug(
+            $att_name             = wp_unique_post_slug(
                 $att->post_name,
                 $new_att_id,
                 $att->post_status,
                 $att->post_type,
                 $new_id
             );
-            $new_att = [];
-            $new_att[ 'ID' ] = $new_att_id;
-            $new_att[ 'post_name' ] = $att_name;
+            $new_att              = [];
+            $new_att['ID']        = $new_att_id;
+            $new_att['post_name'] = $att_name;
 
             wp_update_post($new_att);
-
-
         }
     }
 
@@ -334,23 +334,24 @@ class CommandClone extends CommandAbstract
      * logic into the resolver ( oAuth or ics export for instance )
      * and this seems to me to be the most logical way to do this.
      *
-     * @return boolean
+     * @return bool
      */
     public function is_this_to_execute()
     {
         $current_action = Request::factory($this->app)->get_current_action();
-        if ($current_action === 'clone'
+        if (
+            $current_action === 'clone'
             && current_user_can('edit_osec_events')
-            && ! empty($_REQUEST[ 'post' ])
-            && ! empty($_REQUEST[ '_wpnonce' ])
-            && wp_verify_nonce($_REQUEST[ '_wpnonce' ], 'bulk-posts')
+            && ! empty($_REQUEST['post'])
+            && ! empty($_REQUEST['_wpnonce'])
+            && wp_verify_nonce($_REQUEST['_wpnonce'], 'bulk-posts')
         ) {
-            foreach ($_REQUEST[ 'post' ] as $post_id) {
+            foreach ($_REQUEST['post'] as $post_id) {
                 $post = get_post($post_id);
                 if ($post) {
-                    $this->_posts[] = [
-                        'status' => ''
-                        , 'post' => $post
+                    $this->posts[] = [
+                        'status' => '',
+                        'post'   => $post,
                     ];
                 }
             }
@@ -363,26 +364,29 @@ class CommandClone extends CommandAbstract
         // duplicate single post
         if (
             $current_action === 'duplicate_post_save_as_new_post' &&
-            ! empty($_REQUEST[ 'post' ])
+            ! empty($_REQUEST['post'])
         ) {
-            check_admin_referer('ai1ec_clone_'.$_REQUEST[ 'post' ]);
+            check_admin_referer('ai1ec_clone_' . $_REQUEST['post']);
 
-            $this->_posts[] = ['status' => '', 'post' => get_post($_REQUEST[ 'post' ])];
-            $this->_redirect = true;
+            $this->posts[]    = [
+                'status' => '',
+                'post'   => get_post($_REQUEST['post']),
+            ];
+            $this->doRedirect = true;
 
             return true;
         }
         // duplicate single post as draft
         if (
             $current_action === 'duplicate_post_save_as_new_post_draft' &&
-            ! empty($_REQUEST[ 'post' ])
+            ! empty($_REQUEST['post'])
         ) {
-            check_admin_referer('ai1ec_clone_'.$_REQUEST[ 'post' ]);
-            $this->_posts[] = [
+            check_admin_referer('ai1ec_clone_' . $_REQUEST['post']);
+            $this->posts[]    = [
                 'status' => 'draft',
-                'post'   => get_post($_REQUEST[ 'post' ]),
+                'post'   => get_post($_REQUEST['post']),
             ];
-            $this->_redirect = true;
+            $this->doRedirect = true;
 
             return true;
         }
@@ -395,13 +399,12 @@ class CommandClone extends CommandAbstract
      *
      * @param  RequestParser  $request
      */
-    public function set_render_strategy(RequestParser $request)
+    public function setRenderStrategy(RequestParser $request): void
     {
-        if (true === $this->_redirect) {
-            $this->_render_strategy = RenderRedirect::factory($this->app);
+        if (true === $this->doRedirect) {
+            $this->renderStrategy = RenderRedirect::factory($this->app);
         } else {
-            $this->_render_strategy = RenderVoid::factory($this->app);
+            $this->renderStrategy = RenderVoid::factory($this->app);
         }
     }
-
 }

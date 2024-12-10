@@ -12,7 +12,6 @@ namespace Osec\Http\Request;
  */
 interface QueryInterface
 {
-
     /**
      * Check if rewrite module is enabled
      */
@@ -28,5 +27,4 @@ interface QueryInterface
      * @return bool
      */
     public function register_rule($regexp, $landing, $priority = null);
-
 }

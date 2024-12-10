@@ -20,7 +20,6 @@ use SplFileInfo;
  */
 class ThemeHashMap extends OsecBaseClass
 {
-
     /**
      * Returns hashmap for current theme.
      *
@@ -28,10 +27,10 @@ class ThemeHashMap extends OsecBaseClass
      *
      * @throws BootstrapException
      */
-    public function get_current_theme_hashmap() : ?array
+    public function get_current_theme_hashmap(): ?array
     {
         $cur_theme = $this->app->options->get('osec_current_theme');
-        $file_location = $cur_theme[ 'theme_dir' ].'/less.sha1.map.php';
+        $file_location = $cur_theme['theme_dir'] . '/less.sha1.map.php';
         if ( ! file_exists($file_location)) {
             return null;
         }
@@ -46,13 +45,13 @@ class ThemeHashMap extends OsecBaseClass
      *
      * @throws BootstrapException
      */
-    public function build_current_theme_hashmap() : array
+    public function build_current_theme_hashmap(): array
     {
         $paths = ThemeLoader::factory($this->app)->get_paths();
 
         return $this->build_dirs_hashmap(
             array_keys(
-                $paths[ 'theme' ]
+                $paths['theme']
             ),
             ['ai1ec_parsed_css.css', 'less.sha1.map.php', 'index.php']
         );
@@ -62,8 +61,8 @@ class ThemeHashMap extends OsecBaseClass
      * Builds directory hashmap.
      *
      * @param  array|string  $paths  Paths for hashmap generation. It accepts
-     *                                 string or array of paths. Elements in
-     *                                 hashmaps are not overwritten.
+     *                                string or array of paths. Elements in
+     *                                hashmaps are not overwritten.
      * @param  array  $exclusions  List of excluded file names.
      *
      * @return array Hashmap.
@@ -102,14 +101,14 @@ class ThemeHashMap extends OsecBaseClass
         $recursive_iterator = new RecursiveIteratorIterator(
             $directory_iterator
         );
-        $files = new RegexIterator(
+        $files              = new RegexIterator(
             $recursive_iterator,
             '/^.+\.(less|css|php)$/i',
             RegexIterator::GET_MATCH
         );
-        $hashmap = [];
+        $hashmap            = [];
         foreach ($files as $file) {
-            $file_info = new SplFileInfo($file[ 0 ]);
+            $file_info = new SplFileInfo($file[0]);
             $file_path = $file_info->getPathname();
             if (in_array($file_info->getFilename(), $exclusions)) {
                 continue;
@@ -120,9 +119,9 @@ class ThemeHashMap extends OsecBaseClass
                 $file_path
             );
 
-            $hashmap[ $key ] = [
+            $hashmap[$key] = [
                 'size' => $file_info->getSize(),
-                'sha1' => sha1_file($file_path)
+                'sha1' => sha1_file($file_path),
             ];
         }
         ksort($hashmap);
@@ -137,19 +136,19 @@ class ThemeHashMap extends OsecBaseClass
      * other files should be changed accordingly.
      *
      * @param  array  $src  Source hashmap. Should be computed from current
-     *                   theme contents.
+     *                  theme contents.
      * @param  array  $dst  Base hashmap. Should be taken from less.sha1.map.php
-     *                   file.
+     *                  file.
      *
      * @return bool Comparision result. True if they are equal.
      */
-    public function compare_hashmaps(array $src, array $dst) : bool
+    public function compare_hashmaps(array $src, array $dst): bool
     {
         foreach ($src as $key => $value) {
-            if ( ! isset($dst[ $key ])) {
+            if ( ! isset($dst[$key])) {
                 continue;
             }
-            $dst_value = $dst[ $key ];
+            $dst_value = $dst[$key];
             if ($dst_value !== $value) {
                 return false;
             }
@@ -157,5 +156,4 @@ class ThemeHashMap extends OsecBaseClass
 
         return true;
     }
-
 }

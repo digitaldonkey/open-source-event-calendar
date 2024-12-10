@@ -1,0 +1,417 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/configuration-reference
+version: 2.1
+orbs:
+  php: circleci/php@1.1.0
+  browser-tools: circleci/browser-tools@1.4.9
+  node: circleci/node@6.3.0
+
+# References section
+#   @see https://carlalexander.ca/continuous-deployment-wordpress-directory-circleci/
+#
+references:
+  # Environment variables
+  #
+  WP_CORE_DIR: &WP_CORE_DIR
+      /tmp/wordpress
+  WP_HOST: &WP_HOST
+    open-source-event-calendar.test
+  WP_ORG_PLUGIN_NAME: &WP_ORG_PLUGIN_NAME
+      open-source-event-calendar
+  WP_ORG_USERNAME: &WP_ORG_USERNAME
+      digitaldonkey
+  WP_VERSION: &WP_VERSION
+      latest
+  OSEC_RELEASE_FILE: &OSEC_RELEASE_FILE
+      open-source-event-calendar.zip
+  OSEC_RELEASE_WHITE_LIST: &OSEC_RELEASE_WHITE_LIST
+        src/
+        vendor/
+        public/
+        language/
+        composer.json
+        composer.lock
+        open-source-event-calendar.php
+        constants.php
+        global-functions.php
+        constants-local.php.example                    
+        readme.txt
+        LICENSE
+        DEVELOPERS.md                             
+        hooks-and-filters.md
+  workspace_root: &workspace_root /tmp
+
+  # Default DB Docker image environement
+  ENV_DB_IMAGE: &ENV_DB_IMAGE
+    environment:
+      MYSQL_ROOT_PASSWORD: wp_ci_root
+      MYSQL_DATABASE: wp_ci
+      MYSQL_USER: wp_ci
+      MYSQL_PASSWORD: wp_ci
+
+  # Default DB Docker image environement
+  ENV_PHP_IMAGE: &ENV_PHP_IMAGE
+    environment:
+      TZ: "Europe/Berlin"
+      MYSQL_DATABASE: wp_ci
+      MYSQL_USER: wp_ci
+      MYSQL_PASSWORD: wp_ci
+
+  # Default container configuration
+  container_config: &container_config
+    docker:
+      - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
+    working_directory: ~/open-source-event-calendar
+    environment:
+      - WP_CORE_DIR: *WP_CORE_DIR
+      - WP_HOST: *WP_HOST
+      - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
+      - WP_ORG_USERNAME: *WP_ORG_USERNAME
+      - WP_VERSION: *WP_VERSION
+      - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
+      - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
+
+  attach_workspace: &attach_workspace
+    attach_workspace:
+      at: *workspace_root
+
+  copy_vendor: &copy_vendor
+    run:
+      name: Copy vendor directory
+      command: cp -R /tmp/vendor .
+
+  install_subversion: &install_subversion
+    run:
+      name: Install subversion
+      command: sudo apt-get update && sudo apt-get install -y subversion && sudo rm -rf /var/lib/apt/lists/*
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
+jobs:
+
+  # BUILD
+  build:
+    <<: *container_config
+    steps:
+      - *install_subversion
+      - checkout
+      - run:
+          name: Install dependencies
+          command: composer install --no-interaction --optimize-autoloader
+          # --no-dev option will be used production build below.
+      - persist_to_workspace:
+          root: .
+          paths:
+            - vendor
+      - run:
+          name: Install WordPress (Test scripts)
+          command: bash ./bin/install-wp-tests.sh $MYSQL_DATABASE $MYSQL_USER $MYSQL_PASSWORD $WP_HOST $WP_VERSION true false
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - wordpress
+            - wordpress-tests-lib
+
+  # STATIC CODE ANALYSE
+  static_job:
+    <<: *container_config
+    steps:
+      - checkout
+      - *attach_workspace
+      - *copy_vendor
+      - run:
+          name: Run code quality tests
+          command: vendor/bin/grumphp run --testsuite=code_quality
+
+  # Default configuration Database testing jobs
+  db_job: &db_job
+    <<: *container_config
+    docker:
+      - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+    steps:
+      - checkout
+      - run:
+          name: Add WordPress domain to hosts file
+          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
+      - *attach_workspace
+      - *copy_vendor
+      - run:
+          name: Update outdated apt key
+          command: (cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
+      - run:
+          name: Install MySQL client and PHP extension
+          command: sudo apt-get update
+                    && sudo apt-get install -y mysql-client 
+                    && sudo rm -rf /var/lib/apt/lists/*
+      - run:
+          name: Install apcu
+          command: |
+            sudo mkdir -p /tmp/pear/temp
+            sudo pecl channel-update pecl.php.net
+            echo no '' |  sudo pecl install apcu
+            sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
+      - run:
+          name: Test apcu in PHP.ini
+          command: php -i | grep -i apc
+      - run:
+          name: Start PHP server
+          command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
+          background: True
+      - run:
+          name: Run PHP unit tests
+          command: |
+            set -Eeuxo pipefail
+            mkdir -p ~/phpunit          
+            vendor/bin/phpunit --log-junit ~/phpunit/junit.xml tests
+          when: always
+      - store_test_results:
+          path: ~/phpunit
+
+  db_job_maria_10_5:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:10.5
+        <<: *ENV_DB_IMAGE
+
+# This is default job: 'db_job'
+#  db_job_maria_11:
+#    <<: *db_job
+#    docker:
+#      - image: cimg/php:8.2
+#        <<: *ENV_PHP_IMAGE
+#      - image: cimg/mariadb:11.4
+#        <<: *ENV_DB_IMAGE
+
+  db_job_php_8_1:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.1
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+
+  db_job_php_8_3:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.3
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+
+  db_job_mysql_8:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mysql:8.0
+        <<: *ENV_DB_IMAGE
+
+  #  db_job_php_8_0:
+  #    <<: *db_job
+  #    docker:
+  #      - image: cimg/php:8.0.28
+  #        <<: *ENV_PHP_IMAGE
+  #      - image: cimg/cimg/mariadb:11.4
+  #        <<: *ENV_DB_IMAGE
+  # mclay/minify && Grumphp and others require PHP > 8.1.
+
+  create_release_job:
+    <<: *container_config
+    steps:
+      #      - *install_subversion
+      - checkout
+      - *attach_workspace
+      - run:
+          name: Install dependencies (no dev)
+          command: composer install --no-dev --no-interaction --optimize-autoloader
+      - run:
+          name: Create Release package
+          command: |
+            mkdir -p /tmp/release/$WP_ORG_PLUGIN_NAME
+            (cd ~/$WP_ORG_PLUGIN_NAME && cp -R $OSEC_RELEASE_WHITE_LIST /tmp/release/$WP_ORG_PLUGIN_NAME)
+            (cd /tmp/release/ && zip -r /tmp/$OSEC_RELEASE_FILE $WP_ORG_PLUGIN_NAME)
+      - store_artifacts:
+          path: /tmp/open-source-event-calendar.zip
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - open-source-event-calendar.zip
+  release_test_job:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.2-browsers
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+    environment:
+      # Rewrite environment
+      # Standard WP at docroot. Osec release tar goes into wp-plugins.
+      - WP_CORE_DIR: /var/www/html # /tmp/docroot
+      - WP_HOST: *WP_HOST
+      - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
+      - WP_ORG_USERNAME: *WP_ORG_USERNAME
+      - WP_VERSION: *WP_VERSION
+      - WP_CLI: /tmp/vendor/bin/wp
+      - OSEC_RELEASE_FILE: open-source-event-calendar.zip
+      - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
+    steps:
+      - browser-tools/install-chrome
+      - checkout
+      - *attach_workspace
+      # @see https://circleci.com/developer/orbs/orb/circleci/browser-tools
+      - run:
+          name: Update outdated apt key
+          command: (cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
+      - run:
+          name: Install Apache, MySQL client and PHP extension
+          command: |
+            sudo apt-get update
+            sudo add-apt-repository ppa:ondrej/php -y                   
+            sudo apt-get install -y mysql-client apache2 php8.2-{fpm,cli,bz2,curl,mbstring,intl,bcmath,xml,mysql,zip,gd,mbstring,apcu}
+            sudo rm -rf /var/lib/apt/lists/*
+      - run:
+          name: Add WordPress domain to hosts file
+          command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
+      - run:
+          name: Install apcu
+          command: |
+            sudo mkdir -p /tmp/pear/temp
+            sudo pecl channel-update pecl.php.net
+            echo no '' |  sudo pecl install apcu            
+            sudo bash -c "echo 'memory_limit = 192M'  >>  /etc/php.d/circleci.ini"
+            sudo bash -c "echo 'apc.enabled = 1'  >>  /etc/php.d/circleci.ini"
+            sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
+            sudo bash -c "echo 'error_reporting = E_ALL'  >>  /etc/php.d/circleci.ini"
+            sudo bash -c "echo 'ignore_repeated_errors = On'  >>  /etc/php.d/circleci.ini"
+            sudo bash -c "echo 'log_errors = On'  >>  /etc/php.d/circleci.ini"
+            echo 'php -r "var_dump(function_exists(\"apcu_enabled\") && apcu_enabled());"' 
+            php -r "var_dump(function_exists('apcu_enabled') && apcu_enabled());"
+      - run:
+          name: Release test VARIABLES
+          command: |
+            php --version
+            php -i | grep -i "apc"
+            php -i | grep -i memory_limit
+            echo""
+            echo "NODE $( node --version)"
+            echo "NPM $( npm --version)"             
+            google-chrome --version
+            echo""
+            echo "CONSTANTS:"
+            echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
+            echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"            
+            echo " WP_HOST: $WP_HOST"
+            echo " WP_CORE_DIR: $WP_CORE_DIR"
+            echo " WP_VERSION: $WP_VERSION"
+            echo " $($WP_CLI --version) $WP_CLI"
+      - run:
+          name: Install WordPress (DB, no unit test scripts)
+          command: |
+            sudo chown root:circleci $WP_CORE_DIR/.. && sudo chmod g+w $WP_CORE_DIR/.. && sudo rm -rf $WP_CORE_DIR 
+            bash ./bin/install-wp-tests.sh $MYSQL_DATABASE $MYSQL_USER $MYSQL_PASSWORD $WP_HOST $WP_VERSION true true
+            $WP_CLI config create --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
+            $WP_CLI core install --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com"
+      - run:
+          name: Install Open source event calendar plugin (release)
+          command: |
+            unzip /tmp/$OSEC_RELEASE_FILE -d $WP_CORE_DIR/wp-content/plugins            
+            # Upload dir
+            mkdir -p $WP_CORE_DIR/wp-content/uploads
+            sudo chown circleci:www-data $WP_CORE_DIR/wp-content/uploads
+            sudo chmod 775 $WP_CORE_DIR/wp-content/uploads
+            # Plugin cache dir
+            mkdir -p $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache            
+            sudo chown circleci:www-data $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
+            sudo chmod 775 $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
+            echo "ls -al $WP_CORE_DIR/wp-content/uploads" && ls -al $WP_CORE_DIR/wp-content/uploads
+            echo "ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache" && ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
+      - run:
+          name: Apache2 webserver
+          command: |
+            sudo mkdir -p /var/run/apache2
+            sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf            
+            sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
+            sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
+            sudo bash -c "echo 'extension=apcu.so'  >>/etc/php/8.2/fpm/php.ini"
+            sudo bash -c "echo 'apc.enabled = 1'    >>/etc/php/8.2/fpm/php.ini"
+            sudo bash -c "echo 'apc.enable_cli = 1' >>/etc/php/8.2/fpm/php.ini"                
+            sudo a2enconf php8.2-fpm
+            sudo a2enmod proxy_fcgi setenvif rewrite
+            sudo /etc/init.d/php8.2-fpm start
+            sudo apachectl -DFOREGROUND
+          background: True
+      - node/install-packages:
+          app-dir: integration_tests/
+          override-ci-command: npm ci --include=dev
+      - run:
+          name: Debug Tools
+          command: |
+            sudo apt-get update && sudo apt-get install -y lynx && sudo rm -rf /var/lib/apt/lists/*            
+            sudo sed -i "s/'WP_DEBUG', false/'WP_DEBUG', true/g" /var/www/html/wp-config.php
+      - run:
+          name: Debug osec_apcu_test.php
+          command: |
+            echo "<?php echo 'Testing apcu on Apache config: '; var_dump(function_exists('apcu_enabled') && apcu_enabled()); " > $WP_CORE_DIR/osec_apcu_test.php
+            lynx -dump $WP_HOST/osec_apcu_test.php
+      - run:
+          name: Release integratiion test
+          command: |
+            set -Eeuxo pipefail
+            mkdir -p /tmp/integration_test_results/screenshots
+            (
+              cd integration_tests/ && 
+              MOCHA_FILE=/tmp/integration_test_results/mocha-junit.xml \
+              MOCHA_SCREENSHOT_DIR=/tmp/integration_test_results/screenshots \
+              npx mocha test/**/*.spec.js --timeout 60000
+            )
+          when: always
+      - store_test_results:
+          path: /tmp/integration_test_results/mocha-junit.xml
+      - store_artifacts:
+          path: /tmp/integration_test_results/screenshots
+          when: always
+
+# Orchestrate jobs using workflows
+# See: https://circleci.com/docs/workflows/
+#   & https://circleci.com/docs/configuration-reference/#workflows
+workflows:
+  build_test_deploy: # This is the name of the workflow, feel free to change it to better match your workflow.
+    # Inside the workflow, you define the jobs you want to run.
+    jobs:
+      - build
+      - static_job:
+          requires:
+            - build
+      - db_job:
+          requires:
+            - build
+      - db_job_maria_10_5:
+          requires:
+            - build
+#      - db_job_php_8_1:
+#          requires:
+#            - build
+      - db_job_php_8_3:
+          requires:
+            - build
+      - db_job_mysql_8:
+          requires:
+            - build
+      - create_release_job:
+          requires:
+            - db_job
+            - static_job
+            - db_job_maria_10_5
+# TODO      - db_job_php_8_1
+#   Maybe https://stackoverflow.com/a/43442839/308533
+            - db_job_php_8_3
+            - db_job_mysql_8
+      - release_test_job:
+          requires:
+            - create_release_job

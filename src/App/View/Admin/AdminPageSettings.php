@@ -17,7 +17,6 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageSettings extends AdminPageAbstract
 {
-
     /**
      * @var string The nonce action
      */
@@ -28,7 +27,7 @@ class AdminPageSettings extends AdminPageAbstract
      */
     public const NONCE_NAME = 'osec_settings_nonce';
 
-    public function display_page() : void
+    public function display_page(): void
     {
         $args = [
             'title'   => I18n::__(
@@ -49,7 +48,7 @@ class AdminPageSettings extends AdminPageAbstract
                 'action' => 'right',
                 'object' => null,
             ],
-            'action'  => admin_url( '?controller=front&action=osec_save_settings&plugin='. OSEC_PLUGIN_NAME ),
+            'action'  => admin_url('?controller=front&action=osec_save_settings&plugin=' . OSEC_PLUGIN_NAME),
         ];
         ThemeLoader::factory($this->app)
                    ->get_file('setting/page.twig', $args, true)
@@ -66,7 +65,7 @@ class AdminPageSettings extends AdminPageAbstract
         }
     }
 
-    public function add_page() : void
+    public function add_page(): void
     {
         $settings_page = add_submenu_page(
             OSEC_ADMIN_BASE_URL,
@@ -87,7 +86,7 @@ class AdminPageSettings extends AdminPageAbstract
      *
      * @return void
      */
-    public function add_meta_box() : void
+    public function add_meta_box(): void
     {
         // Add the 'General Settings' meta box.
         add_meta_box(
@@ -112,16 +111,9 @@ class AdminPageSettings extends AdminPageAbstract
         $tabs = [
             'viewing-events' => ['name' => I18n::__('Viewing Events')],
             'editing-events' => ['name' => I18n::__('Adding/Editing Events')],
-            'embedded-views' => ['name' => I18n::__('Shortcodes')],
-            'advanced'       => [
-                'name'  => I18n::__('Advanced'),
-                'items' => [
-                    'advanced' => I18n::__('Advanced Settings'),
-                    'email'    => I18n::__('Email Templates'),
-                    'apis'     => I18n::__('External Services'),
-                    'cache'    => I18n::__('Cache Report'),
-                ],
-            ],
+            'shortcodes' => ['name' => I18n::__('Shortcodes')],
+            'advanced' => ['name' => I18n::__('Advanced Settings')],
+            'cache' => ['name' => I18n::__('Cache Report')],
         ];
 
         /**
@@ -131,7 +123,7 @@ class AdminPageSettings extends AdminPageAbstract
          *
          * @param  array  $tabs  Current tabs
          */
-        $tabs = apply_filters('osec_admin_setting_tabs_alter', $tabs);
+        $tabs            = apply_filters('osec_admin_setting_tabs_alter', $tabs);
         $plugin_settings = $this->app->settings->get_options();
 
         $tabs = $this->_get_tabs_to_show($plugin_settings, $tabs);
@@ -140,12 +132,12 @@ class AdminPageSettings extends AdminPageAbstract
             'content_class'   => 'ai1ec-form-horizontal',
             'submit'          => [
                 'id'    => 'osec_save_settings',
-                'value' => '<i class="ai1ec-fa ai1ec-fa-save ai1ec-fa-fw"></i> '.
+                'value' => '<i class="ai1ec-fa ai1ec-fa-save ai1ec-fa-fw"></i> ' .
                            I18n::__('Save Settings'),
                 'args'  => ['class' => 'ai1ec-btn ai1ec-btn-primary ai1ec-btn-lg'],
             ],
-            'pre_tabs_markup' => '<div class="ai1ec-gzip-causes-js-failure">'.
-                                 I18n::__('loading ...').'</div>',
+            'pre_tabs_markup' => '<div class="ai1ec-gzip-causes-js-failure">' .
+                                 I18n::__('loading ...') . '</div>',
         ];
 
         ThemeLoader::factory($this->app)
@@ -161,34 +153,34 @@ class AdminPageSettings extends AdminPageAbstract
     protected function _get_tabs_to_show(array $plugin_settings, array $tabs)
     {
         $index = 0;
-//    $renderer = SettingsRenderer::factory($this->app);
+        // $renderer = SettingsRenderer::factory($this->app);
         foreach ($plugin_settings as $id => $setting) {
             // if the setting is shown
-            if (isset ($setting[ 'renderer' ])) {
-                $tab_to_use = $setting[ 'renderer' ][ 'item' ] ?? $setting[ 'renderer' ][ 'tab' ];
+            if (isset($setting['renderer'])) {
+                $tab_to_use = $setting['renderer']['item'] ?? $setting['renderer']['tab'];
                 // check if it's the first one
                 if (
-                    ! isset ($tabs[ $tab_to_use ][ 'elements' ])
+                    ! isset($tabs[$tab_to_use]['elements'])
                 ) {
-                    $tabs[ $tab_to_use ][ 'elements' ] = [];
+                    $tabs[$tab_to_use]['elements'] = [];
                 }
-                $setting[ 'id' ] = $id;
+                $setting['id'] = $id;
                 // render the settings
                 $weight = 10;
-                if (isset($setting[ 'renderer' ][ 'weight' ])) {
-                    $weight = (int) $setting[ 'renderer' ][ 'weight' ];
+                if (isset($setting['renderer']['weight'])) {
+                    $weight = (int)$setting['renderer']['weight'];
                 }
                 // NOTICE: do NOT change order of two first
                 // elements {weight,index}, otherwise sorting will fail.
-                $tabs[ $tab_to_use ][ 'elements' ][] = [
+                $tabs[$tab_to_use]['elements'][] = [
                     'weight' => $weight,
                     'index'  => ++$index,
                     'html'   => SettingsRenderer::factory($this->app)->render($setting),
                 ];
                 // if the settings has an item tab, set the item as active.
-                if (isset($setting[ 'renderer' ][ 'item' ])) {
-                    if ( ! isset($tabs[ $setting[ 'renderer' ][ 'tab' ] ][ 'items_active' ][ $setting[ 'renderer' ][ 'item' ] ])) {
-                        $tabs[ $setting[ 'renderer' ][ 'tab' ] ][ 'items_active' ][ $setting[ 'renderer' ][ 'item' ] ] = true;
+                if (isset($setting['renderer']['item'])) {
+                    if ( ! isset($tabs[$setting['renderer']['tab']]['items_active'][$setting['renderer']['item']])) {
+                        $tabs[$setting['renderer']['tab']]['items_active'][$setting['renderer']['item']] = true;
                     }
                 }
             }
@@ -197,43 +189,42 @@ class AdminPageSettings extends AdminPageAbstract
         // now let's see what tabs to display.
         foreach ($tabs as $name => $tab) {
             // sort by weights
-            if (isset($tab[ 'elements' ])) {
-                asort($tab[ 'elements' ]);
+            if (isset($tab['elements'])) {
+                asort($tab['elements']);
             }
             // if a tab has more than one item.
-            if (isset($tab[ 'items' ])) {
+            if (isset($tab['items'])) {
                 // if no item is active, nothing is shown
-                if (empty($tab[ 'items_active' ])) {
+                if (empty($tab['items_active'])) {
                     continue;
                 }
                 // if only one item is active, do not use the dropdown
-                if (count($tab[ 'items_active' ]) === 1) {
-                    $name = key($tab[ 'items_active' ]);
-                    $tab[ 'name' ] = $tab[ 'items' ][ $name ];
-                    unset ($tab[ 'items' ]);
+                if (count($tab['items_active']) === 1) {
+                    $name        = key($tab['items_active']);
+                    $tab['name'] = $tab['items'][$name];
+                    unset($tab['items']);
                 } else {
                     // check active items for the dropdown
-                    foreach ($tab[ 'items' ] as $item => $longname) {
-                        if ( ! isset($tab[ 'items_active' ][ $item ])) {
-                            unset($tab[ 'items' ][ $item ]);
+                    foreach ($tab['items'] as $item => $longname) {
+                        if ( ! isset($tab['items_active'][$item])) {
+                            unset($tab['items'][$item]);
                         }
                     }
                 }
                 // Check to avoid overriding tabs
-                if ( ! isset($tabs_to_display[ $name ])) {
-                    $tabs_to_display[ $name ] = $tab;
+                if ( ! isset($tabs_to_display[$name])) {
+                    $tabs_to_display[$name] = $tab;
                 } else {
-                    $tabs_to_display[ $name ][ 'elements' ] = $tab[ 'elements' ];
+                    $tabs_to_display[$name]['elements'] = $tab['elements'];
                 }
-
             } else {
                 // no items, just check for any element to display.
-                if (isset($tab[ 'elements' ])) {
+                if (isset($tab['elements'])) {
                     // Check to avoid overriding tabs
-                    if ( ! isset($tabs_to_display[ $name ])) {
-                        $tabs_to_display[ $name ] = $tab;
+                    if ( ! isset($tabs_to_display[$name])) {
+                        $tabs_to_display[$name] = $tab;
                     } else {
-                        $tabs_to_display[ $name ][ 'elements' ] = $tab[ 'elements' ];
+                        $tabs_to_display[$name]['elements'] = $tab['elements'];
                     }
                 }
             }
@@ -241,5 +232,4 @@ class AdminPageSettings extends AdminPageAbstract
 
         return $tabs_to_display;
     }
-
 }

@@ -15,7 +15,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class EventTaxonomy extends OsecBaseClass
 {
-
     /**
      * @var string Name of categories taxonomy.
      */
@@ -34,19 +33,18 @@ class EventTaxonomy extends OsecBaseClass
     /**
      * @var int ID of related post object
      */
-    protected $_post_id = 0;
+    protected int $postId = 0;
 
     /**
      * Store event ID in local variable.
      *
      * @param  App  $app
      * @param  int  $post_id  ID of post being managed.
-     *
      */
     public function __construct(App $app, $post_id = 0)
     {
         parent::__construct($app);
-        $this->_post_id = (int) $post_id;
+        $this->postId = (int)$post_id;
     }
 
     /**
@@ -73,7 +71,7 @@ class EventTaxonomy extends OsecBaseClass
     public function set_terms(array $terms, $taxonomy, $append = false)
     {
         $result = wp_set_post_terms(
-            $this->_post_id,
+            $this->postId,
             $terms,
             $taxonomy,
             $append
@@ -110,7 +108,7 @@ class EventTaxonomy extends OsecBaseClass
         // If the feed is not from an imported file, parse the url.
         if ( ! isset($feed->feed_imported_file)) {
             $url_components = parse_url($feed->feed_url);
-            $feed_name = $url_components[ 'host' ];
+            $feed_name      = $url_components['host'];
         }
         $term = $this->initiate_term(
             $feed_name,
@@ -121,7 +119,7 @@ class EventTaxonomy extends OsecBaseClass
         if (false === $term) {
             return false;
         }
-        $term_id = $term[ 'term_id' ];
+        $term_id = $term['term_id'];
 
         return $this->set_terms([$term_id], self::FEEDS);
     }
@@ -144,9 +142,9 @@ class EventTaxonomy extends OsecBaseClass
         array $attrs = []
     ) {
         // cast to int to have it working with term_exists
-        $term = ($is_id) ? (int) $term : $term;
+        $term          = ($is_id) ? (int)$term : $term;
         $term_to_check = term_exists($term, $taxonomy);
-        $to_return = ['taxonomy' => $taxonomy];
+        $to_return     = ['taxonomy' => $taxonomy];
         // if term doesn't exist, create it.
         if (0 === $term_to_check || null === $term_to_check) {
             /**
@@ -160,31 +158,30 @@ class EventTaxonomy extends OsecBaseClass
             // the filter will either return null, the term_id to use or the original $term
             // if the filter is not run. Thus in need to check that $term !== $alias_to_use
             if ($alias_to_use && $alias_to_use !== $term) {
-                $to_return[ 'term_id' ] = (int) $alias_to_use;
+                $to_return['term_id'] = (int)$alias_to_use;
                 // check that the term matches the taxonomy
-                $tax = $this->get_taxonomy_for_term_id(term_exists((int) $alias_to_use));
-                $to_return[ 'taxonomy' ] = $tax->taxonomy;
+                $tax                   = $this->get_taxonomy_for_term_id(term_exists((int)$alias_to_use));
+                $to_return['taxonomy'] = $tax->taxonomy;
             } else {
                 $term_to_check = wp_insert_term($term, $taxonomy, $attrs);
                 if (is_wp_error($term_to_check)) {
                     return false;
                 }
-                $term_to_check = (object) $term_to_check;
-                $to_return[ 'term_id' ] = (int) $term_to_check->term_id;
+                $term_to_check        = (object)$term_to_check;
+                $to_return['term_id'] = (int)$term_to_check->term_id;
             }
         } else {
-            $term_id = is_array($term_to_check)
-                ? $term_to_check[ 'term_id' ]
+            $term_id              = is_array($term_to_check)
+                ? $term_to_check['term_id']
                 : $term_to_check;
-            $to_return[ 'term_id' ] = (int) $term_id;
+            $to_return['term_id'] = (int)$term_id;
             // when importing categories, use the mapping of the current site
             // so place the term in the current taxonomy
             if (self::CATEGORIES === $taxonomy) {
                 // check that the term matches the taxonomy
-                $tax = $this->get_taxonomy_for_term_id($term_id);
-                $to_return[ 'taxonomy' ] = $tax->taxonomy;
+                $tax                   = $this->get_taxonomy_for_term_id($term_id);
+                $to_return['taxonomy'] = $tax->taxonomy;
             }
-
         }
 
         return $to_return;
@@ -203,12 +200,13 @@ class EventTaxonomy extends OsecBaseClass
 
         return $db->get_row(
             $db->prepare(
-                'SELECT terms_taxonomy.taxonomy FROM '.$db->get_table_name('terms').
-                ' AS terms INNER JOIN '.
-                $db->get_table_name('term_taxonomy').
-                ' AS terms_taxonomy USING(term_id) '.
-                'WHERE terms.term_id = %d LIMIT 1', $term_id)
+                'SELECT terms_taxonomy.taxonomy FROM ' . $db->get_table_name('terms') .
+                ' AS terms INNER JOIN ' .
+                $db->get_table_name('term_taxonomy') .
+                ' AS terms_taxonomy USING(term_id) ' .
+                'WHERE terms.term_id = %d LIMIT 1',
+                $term_id
+            )
         );
     }
-
 }

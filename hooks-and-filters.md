@@ -140,7 +140,7 @@ Only attempt to enable debug after all add-ons are loaded.
 
 
 
-Overriding OSEC_DEBUG in Ajax context. Used to disable debug an XHR requests as debug output would crash Json. @wp_hook osec_loaded
+Overriding OSEC_DEBUG in Ajax context. Used to disable debug an XHR requests as debug output would crash Json.
 
 #### Parameters
 
@@ -159,12 +159,12 @@ Overriding OSEC_DEBUG in Ajax context. Used to disable debug an XHR requests as 
  *
  * Overriding OSEC_DEBUG in Ajax context.
  *  Used to disable debug an XHR requests as debug output would crash Json.
+ *
  * @wp_hook osec_loaded
  *
  * @since 1.0
  *
  * @param  bool  $do_debug  Debug or not.
- *
  *
  * @file src/App/Controller/DatabaseController.php
  */
@@ -178,6 +178,76 @@ add_filter('osec_dbi_debug', $do_debug);
 
 
 @file **../src/App/Controller/FeedsController.php**
+
+### osec_ics_feed_entry <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter feed item data before feed saved in database.
+
+```php
+add_filter('osec_ics_feed_entry', $entry);
+```
+
+#### Parameters
+
+
+ - **$entry** <span style="color:crimson"> </span> Debug or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter feed item data before feed saved in database.
+ *
+ * @since 1.0
+ *
+ * @param  array  $entry  Debug or not.
+ *
+ * @file src/App/Controller/FeedsController.php
+ */
+add_filter('osec_ics_feed_entry', $entry);
+```
+
+</details>
+
+
+### osec_ics_feed_added <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Do something after ICS feed was added.
+
+```php
+do_action('osec_ics_feed_added', $feedId $entry);
+```
+
+#### Parameters
+
+
+ - **$feedId** <span style="color:crimson"> </span> 
+ - **$entry** <span style="color:crimson"> </span> Feeds entry data.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Do something after ICS feed was added.
+ *
+ * @since 1.0
+ *
+ * @param ?int  $feedId
+ * @param  array  $entry  Feeds entry data.
+ *
+ * @file src/App/Controller/FeedsController.php
+ */
+do_action('osec_ics_feed_added', $feedId $entry);
+```
+
+</details>
+
 
 ### osec_ics_before_import <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
@@ -261,77 +331,6 @@ do_action('osec_ics_after_import', $result);
 </details>
 
 
-### osec_ics_feed_entry <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter feed item data before feed saved in database.
-
-```php
-add_filter('osec_ics_feed_entry', $entry);
-```
-
-#### Parameters
-
-
- - **$entry** <span style="color:crimson"> </span> Debug or not.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter feed item data before feed saved in database.
- *
- * @since 1.0
- *
- * @param  array  $entry  Debug or not.
- *
- *
- * @file src/App/Controller/FeedsController.php
- */
-add_filter('osec_ics_feed_entry', $entry);
-```
-
-</details>
-
-
-### osec_ics_feed_added <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Do something after ICS feed was added.
-
-```php
-do_action('osec_ics_feed_added', $feedId $entry);
-```
-
-#### Parameters
-
-
- - **$feedId** <span style="color:crimson"> </span> 
- - **$entry** <span style="color:crimson"> </span> Feeds entry data.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Do something after ICS feed was added.
- *
- * @since 1.0
- *
- * @param ?int  $feedId
- * @param  array  $entry  Feeds entry data.
- *
- * @file src/App/Controller/FeedsController.php
- */
-do_action('osec_ics_feed_added', $feedId $entry);
-```
-
-</details>
-
-
 ### osec_ics_feed_deleted <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
@@ -396,7 +395,6 @@ add_filter('osec_frontend_standard_css_url', $parsed_css);
  * @since 1.0
  *
  * @param  string  $parsed_css  Css file path
- *
  *
  * @file src/App/Controller/FrontendCssController.php
  */
@@ -482,7 +480,6 @@ Alter Less variables after convert the variables to key / value
  * @since 1.0
  *
  * @param  array  $variables  Array of Less variables
- *
  *
  * @file src/App/Controller/LessController.php
  */
@@ -606,7 +603,6 @@ Allows to request theme recompile action. You may also set OSEC_PARSE_LESS_FILES
  *
  * @param  array  $variables  Array of less variables.
  *
- *
  * @file src/App/Controller/LessController.php
  */
 add_filter('osec_should_recompile_less', $variables);
@@ -641,7 +637,6 @@ add_filter('osec_less_constants_pre_hashmap', $variables);
  *
  * @param  array  $variables  Array of less variables
  *
- *
  * @file src/App/Controller/LessController.php
  */
 add_filter('osec_less_constants_pre_hashmap', $variables);
@@ -675,7 +670,6 @@ add_filter('osec_font_dirs', $variables);
  * @since 1.0
  *
  * @param  array  $variables  Array of Less variables
- *
  *
  * @file src/App/Controller/LessController.php
  */
@@ -723,7 +717,6 @@ Filter type mus also be availabel as view arg! $view_args[$type] must be set.
  * @since 1.0
  *
  * @param  array  $variables  Array filter ids.
- *
  *
  * @file src/App/Controller/Router.php
  */
@@ -815,7 +808,6 @@ if no other is set. @since 1.0
  *
  * @see ScriptsFrontendController->get_translation_data().
  *
- *
  * @file src/App/Controller/ScriptsFrontendController.php
  */
 add_filter('osec_js_translations', $data);
@@ -857,7 +849,6 @@ if no other is set. @since 1.0
  *
  * @see ScriptsFrontendController->load_admin_js().
  *
- *
  * @file src/App/Controller/ScriptsFrontendController.php
  */
 add_filter('osec_backend_js', $identifier);
@@ -896,7 +887,6 @@ add_filter('osec_avatar_fallbacks', $fallbacks);
  * @since 1.0
  *
  * @param  array  $fallbacks  Avatar image fallback
- *
  *
  * @file src/App/Model/AvatarFallbackModel.php
  */
@@ -944,7 +934,6 @@ Currently DatabaseSchema->apply_delta() is disabled. TODO Decide to throw schema
  * @since 1.0
  *
  * @param $do_schema_update
- *
  *
  * @file src/App/Model/DatabaseSchema.php
  */
@@ -1099,13 +1088,12 @@ do_action('osec_pre_save_event', $event $update);
 
 ```php
 /**
- * Do something befor save Event data.
+ * Do something befor  save Event data.
  *
  * @since 1.0
  *
  * @param  Event  $event
  * @param  bool  $update  Update or new.
- *
  *
  * @file src/App/Model/PostTypeEvent/Event.php
  */
@@ -1152,7 +1140,7 @@ add_filter('osec_event_save_new', $event);
 ### osec_save_event <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
-Do something befor save Event data.
+Do something before save Event data.
 
 ```php
 do_action('osec_save_event', $event);
@@ -1161,7 +1149,7 @@ do_action('osec_save_event', $event);
 #### Description
 
 
-Give other plugins / extensions the ability to do things when saving, like fetching authors which i removed as it's not core.
+Give other plugins / extensions the ability to do things when saving.
 
 #### Parameters
 
@@ -1174,10 +1162,10 @@ Give other plugins / extensions the ability to do things when saving, like fetch
 
 ```php
 /**
- * Do something befor save Event data.
+ * Do something before save Event data.
  *
  * Give other plugins / extensions the ability to do things
- * when saving, like fetching authors which i removed as it's not core.
+ * when saving.
  *
  * @since 1.0
  *
@@ -1272,7 +1260,6 @@ Let other extensions save their fields
  *     $e->set('start', $e->get('start')->set_timezone('Asia/Aden'));
  *    });`
  *
- *
  * @file src/App/Model/PostTypeEvent/EventEditing.php
  */
 do_action('osec_save_post', $event);
@@ -1316,7 +1303,6 @@ Basically somehow ensures that Event post types can not have a calendar shortcod
  *
  * @param  bool  $bool
  *
- *
  * @file src/App/Model/PostTypeEvent/EventEditing.php
  */
 add_filter('osec_content_remove_shortcode_{$tag[2]}', $bool);
@@ -1357,7 +1343,6 @@ add_filter('osec_filter_distinct_types_logic', $default);
  * @param  array  $default  Default distinct type logic.
  *
  * @see EventSearch->_get_filter_sql()
- *
  *
  * @file src/App/Model/PostTypeEvent/EventSearch.php
  */
@@ -1565,7 +1550,6 @@ add_filter('osec_calendar_feeds', $feed);
  * @since 1.0
  *
  * @param  FeedsController  $feed
- *
  *
  * @file src/App/View/Admin/AdminPageManageFeeds.php
  */
@@ -1893,7 +1877,6 @@ Used when rendering calendar page or widget.
  *
  * @param  array  $args  Event location.
  *
- *
  * @file src/App/View/Calendar/AbstractView.php
  */
 add_filter('osec_calendar_view_template_alter', $args);
@@ -2172,7 +2155,6 @@ add_filter('osec_agenda_ticket_button', $show_ticket_button);
  *
  * @param  bool  $show_ticket_button  $bool Set true to show ticket button.
  *
- *
  * @file src/App/View/Calendar/AgendaView.php
  */
 add_filter('osec_agenda_ticket_button', $show_ticket_button);
@@ -2194,7 +2176,7 @@ add_filter('osec_get_events_for_agenda_alter', $dates $request $filter);
 
 
  - **$dates** <span style="color:crimson"> </span> Agenda view Events of the day
- - **$request** <span style="color:crimson"> \Osec\Http\Request\RequestParser</span> Request vars.
+ - **$request** <span style="color:crimson"> </span> Request vars.
  - **$filter** <span style="color:crimson"> </span> Current filter set
 
 <details markdown="1">
@@ -2208,7 +2190,7 @@ add_filter('osec_get_events_for_agenda_alter', $dates $request $filter);
  * @since 1.0
  *
  * @param  array  $dates  Agenda view Events of the day
- * @param  \Osec\Http\Request\RequestParser $request Request vars.
+ * @param  RequestParser  $request  Request vars.
  * @param  array  $filter  Current filter set
  *
  * @file src/App/View/Calendar/AgendaView.php
@@ -2256,7 +2238,7 @@ add_filter('osec_contribution_buttons',);
 ### osec_additional_buttons <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Add adittional HTML buttons on Calendar page view @since 1.0
+Add adittional HTML buttons on Calendar page view
 
 ```php
 add_filter('osec_additional_buttons', $html $view_args);
@@ -2275,6 +2257,7 @@ add_filter('osec_additional_buttons', $html $view_args);
 ```php
 /**
  * Add adittional HTML buttons on Calendar page view
+ *
  * @since 1.0
  *
  * @param  string  $html  Return a html string.
@@ -2325,7 +2308,7 @@ add_filter('osec_calendar_page_filterargs', $filter_args);
 ### osec_html_above_calendar <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Add Html above calendar @since 1.0
+Add Html above calendar
 
 ```php
 add_filter('osec_html_above_calendar', $html);
@@ -2343,6 +2326,7 @@ add_filter('osec_html_above_calendar', $html);
 ```php
 /**
  * Add Html above calendar
+ *
  * @since 1.0
  *
  * @param  string  $html  Return a html string.
@@ -2469,7 +2453,7 @@ add_filter('osec_subscribe_buttons_arguments', $args $view_args);
 #### Description
 
 
-Alter arguments for subscribe-buttons.twig template @since 1.0
+Alter arguments for subscribe-buttons.twig template
 
 #### Parameters
 
@@ -2486,6 +2470,7 @@ Alter arguments for subscribe-buttons.twig template @since 1.0
  * Subscribe buttons alter
  *
  * Alter arguments for subscribe-buttons.twig template
+ *
  * @since 1.0
  *
  * @param  array  $args  Twig args
@@ -2650,7 +2635,6 @@ The reveal button allows the visitor sho see the fill day even tho the setting "
  *
  * @param  bool  $bool  Set true to show oneday_reveal_button button.
  *
- *
  * @file src/App/View/Calendar/OnedayView.php
  */
 add_filter('osec_oneday_reveal_button', $bool);
@@ -2771,7 +2755,6 @@ The reveal button allows the visitor sho see the fill day even tho the setting "
  *
  * @param  bool  $bool  Set true to show oneday_reveal_button button.
  *
- *
  * @file src/App/View/Calendar/WeekView.php
  */
 add_filter('osec_week_reveal_button', $bool);
@@ -2849,7 +2832,6 @@ add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
  *
  * @see $this->get_event_avatar_url(). This allows to configure
  * the order in which image will be used.
- *
  *
  * @file src/App/View/Event/EventAvatarView.php
  */
@@ -2982,7 +2964,7 @@ add_filter('osec_rendering_single_event_venues', $event $html);
 ### osec_alter_single_event_page_before_render <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
-Alter Event before rendering on a single Event page. @since 1.0
+Alter Event before rendering on a single Event page.
 
 ```php
 do_action('osec_alter_single_event_page_before_render', $event);
@@ -3000,6 +2982,7 @@ do_action('osec_alter_single_event_page_before_render', $event);
 ```php
 /**
  * Alter Event before rendering on a single Event page.
+ *
  * @since 1.0
  *
  * @param  Event  $event  passed by reference. So can be modified.
@@ -3100,7 +3083,6 @@ add_filter('osec_event_color', $color);
  *
  * @param  string  $color  Return a color string.
  *
- *
  * @file src/App/View/Event/EventTaxonomyView.php
  */
 add_filter('osec_event_color', $color);
@@ -3176,7 +3158,6 @@ add_filter('osec_buy_tickets_url_icon', $html);
  * @since 1.0
  *
  * @param  string  $html  Html do display a ticket icon.
- *
  *
  * @file src/App/View/Event/EventTicketView.php
  */
@@ -3263,7 +3244,7 @@ Added befor dtay start date at Ui Timespan displays if they are not all-day. E.g
 /**
  * Timespan pefix string/html
  *
- * Added befor dtay start date at Ui Timespan displays
+ * Added befor  dtay start date at Ui Timespan displays
  * if they are not all-day.
  * E.g. Event pages, ManageEvents table.
  *
@@ -3362,7 +3343,7 @@ add_filter('osec_timespan_allday_badge_html', $allday_html);
 #### Description
 
 
-Displayed if Event duration is all-day. @since 1.0
+Displayed if Event duration is all-day.
 
 #### Parameters
 
@@ -3378,6 +3359,7 @@ Displayed if Event duration is all-day. @since 1.0
  * Alter all-day badge html.
  *
  * Displayed if Event duration is all-day.
+ *
  * @since 1.0
  *
  * @param  string  $allday_html  Translated html string.
@@ -3452,8 +3434,8 @@ Note: Date formats are defined/changed in WordPress settings-general page.
 #### Parameters
 
 
- - **$formatter** <span style="color:crimson"> string</span> See input_date_format at Settings class.
- - **$add_year** <span style="color:crimson"> bool</span> True if year should be provided.
+ - **$formatter** <span style="color:crimson"> </span> See input_date_format at Settings class.
+ - **$add_year** <span style="color:crimson"> </span> True if year should be provided.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -3465,8 +3447,8 @@ Note: Date formats are defined/changed in WordPress settings-general page.
  *
  * Note: Date formats are defined/changed in WordPress settings-general page.
  *
- * @param string $formatter See input_date_format at Settings class.
- * @param bool $add_year True if year should be provided.
+ * @param  string  $formatter  See input_date_format at Settings class.
+ * @param  bool  $add_year  True if year should be provided.
  *
  * @file src/App/View/Event/EventTimeView.php
  */
@@ -3545,7 +3527,6 @@ add_filter('osec_filters_upcoming_widget_alter', $limit);
  * @since 1.0
  *
  * @param  array  $limit  Array of Less variables
- *
  *
  * @file src/App/View/WidgetAgendaView.php
  */
@@ -3664,7 +3645,6 @@ add_filter('osec_export_filter', $filter);
  * @since 1.0
  *
  * @param  array  $filter
- *
  *
  * @file src/Command/ExportEvents.php
  */
@@ -4089,7 +4069,6 @@ All strings should be translated in current language.
  *
  * @param  array  $args  Translated text to alter.
  *
- *
  * @file src/Settings/Elements/SettingsShortcodesText.php
  */
 add_filter('osec_viewing_events_shortcodes_alter', $args);
@@ -4135,7 +4114,6 @@ Alter default font list
  * @since 1.0
  *
  * @param  array  $default_fonts
- *
  *
  * @file src/Settings/Elements/ThemeVariableFont.php
  */
@@ -4443,7 +4421,7 @@ Only attempt to enable debug after all add-ons are loaded.
 
 
 
-Overriding OSEC_DEBUG in Ajax context. Used to disable debug an XHR requests as debug output would crash Json. @wp_hook osec_loaded
+Overriding OSEC_DEBUG in Ajax context. Used to disable debug an XHR requests as debug output would crash Json.
 
 #### Parameters
 
@@ -4462,12 +4440,12 @@ Overriding OSEC_DEBUG in Ajax context. Used to disable debug an XHR requests as 
  *
  * Overriding OSEC_DEBUG in Ajax context.
  *  Used to disable debug an XHR requests as debug output would crash Json.
+ *
  * @wp_hook osec_loaded
  *
  * @since 1.0
  *
  * @param  bool  $do_debug  Debug or not.
- *
  *
  * @file src/App/Controller/DatabaseController.php
  */
@@ -4481,6 +4459,76 @@ add_filter('osec_dbi_debug', $do_debug);
 
 
 @file **../src/App/Controller/FeedsController.php**
+
+### osec_ics_feed_entry <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter feed item data before feed saved in database.
+
+```php
+add_filter('osec_ics_feed_entry', $entry);
+```
+
+#### Parameters
+
+
+ - **$entry** <span style="color:crimson"> </span> Debug or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter feed item data before feed saved in database.
+ *
+ * @since 1.0
+ *
+ * @param  array  $entry  Debug or not.
+ *
+ * @file src/App/Controller/FeedsController.php
+ */
+add_filter('osec_ics_feed_entry', $entry);
+```
+
+</details>
+
+
+### osec_ics_feed_added <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Do something after ICS feed was added.
+
+```php
+do_action('osec_ics_feed_added', $feedId $entry);
+```
+
+#### Parameters
+
+
+ - **$feedId** <span style="color:crimson"> </span> 
+ - **$entry** <span style="color:crimson"> </span> Feeds entry data.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Do something after ICS feed was added.
+ *
+ * @since 1.0
+ *
+ * @param ?int  $feedId
+ * @param  array  $entry  Feeds entry data.
+ *
+ * @file src/App/Controller/FeedsController.php
+ */
+do_action('osec_ics_feed_added', $feedId $entry);
+```
+
+</details>
+
 
 ### osec_ics_before_import <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
@@ -4564,77 +4612,6 @@ do_action('osec_ics_after_import', $result);
 </details>
 
 
-### osec_ics_feed_entry <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter feed item data before feed saved in database.
-
-```php
-add_filter('osec_ics_feed_entry', $entry);
-```
-
-#### Parameters
-
-
- - **$entry** <span style="color:crimson"> </span> Debug or not.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter feed item data before feed saved in database.
- *
- * @since 1.0
- *
- * @param  array  $entry  Debug or not.
- *
- *
- * @file src/App/Controller/FeedsController.php
- */
-add_filter('osec_ics_feed_entry', $entry);
-```
-
-</details>
-
-
-### osec_ics_feed_added <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Do something after ICS feed was added.
-
-```php
-do_action('osec_ics_feed_added', $feedId $entry);
-```
-
-#### Parameters
-
-
- - **$feedId** <span style="color:crimson"> </span> 
- - **$entry** <span style="color:crimson"> </span> Feeds entry data.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Do something after ICS feed was added.
- *
- * @since 1.0
- *
- * @param ?int  $feedId
- * @param  array  $entry  Feeds entry data.
- *
- * @file src/App/Controller/FeedsController.php
- */
-do_action('osec_ics_feed_added', $feedId $entry);
-```
-
-</details>
-
-
 ### osec_ics_feed_deleted <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
@@ -4699,7 +4676,6 @@ add_filter('osec_frontend_standard_css_url', $parsed_css);
  * @since 1.0
  *
  * @param  string  $parsed_css  Css file path
- *
  *
  * @file src/App/Controller/FrontendCssController.php
  */
@@ -4785,7 +4761,6 @@ Alter Less variables after convert the variables to key / value
  * @since 1.0
  *
  * @param  array  $variables  Array of Less variables
- *
  *
  * @file src/App/Controller/LessController.php
  */
@@ -4909,7 +4884,6 @@ Allows to request theme recompile action. You may also set OSEC_PARSE_LESS_FILES
  *
  * @param  array  $variables  Array of less variables.
  *
- *
  * @file src/App/Controller/LessController.php
  */
 add_filter('osec_should_recompile_less', $variables);
@@ -4944,7 +4918,6 @@ add_filter('osec_less_constants_pre_hashmap', $variables);
  *
  * @param  array  $variables  Array of less variables
  *
- *
  * @file src/App/Controller/LessController.php
  */
 add_filter('osec_less_constants_pre_hashmap', $variables);
@@ -4978,7 +4951,6 @@ add_filter('osec_font_dirs', $variables);
  * @since 1.0
  *
  * @param  array  $variables  Array of Less variables
- *
  *
  * @file src/App/Controller/LessController.php
  */
@@ -5026,7 +4998,6 @@ Filter type mus also be availabel as view arg! $view_args[$type] must be set.
  * @since 1.0
  *
  * @param  array  $variables  Array filter ids.
- *
  *
  * @file src/App/Controller/Router.php
  */
@@ -5118,7 +5089,6 @@ if no other is set. @since 1.0
  *
  * @see ScriptsFrontendController->get_translation_data().
  *
- *
  * @file src/App/Controller/ScriptsFrontendController.php
  */
 add_filter('osec_js_translations', $data);
@@ -5160,7 +5130,6 @@ if no other is set. @since 1.0
  *
  * @see ScriptsFrontendController->load_admin_js().
  *
- *
  * @file src/App/Controller/ScriptsFrontendController.php
  */
 add_filter('osec_backend_js', $identifier);
@@ -5199,7 +5168,6 @@ add_filter('osec_avatar_fallbacks', $fallbacks);
  * @since 1.0
  *
  * @param  array  $fallbacks  Avatar image fallback
- *
  *
  * @file src/App/Model/AvatarFallbackModel.php
  */
@@ -5247,7 +5215,6 @@ Currently DatabaseSchema->apply_delta() is disabled. TODO Decide to throw schema
  * @since 1.0
  *
  * @param $do_schema_update
- *
  *
  * @file src/App/Model/DatabaseSchema.php
  */
@@ -5402,13 +5369,12 @@ do_action('osec_pre_save_event', $event $update);
 
 ```php
 /**
- * Do something befor save Event data.
+ * Do something befor  save Event data.
  *
  * @since 1.0
  *
  * @param  Event  $event
  * @param  bool  $update  Update or new.
- *
  *
  * @file src/App/Model/PostTypeEvent/Event.php
  */
@@ -5455,7 +5421,7 @@ add_filter('osec_event_save_new', $event);
 ### osec_save_event <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
-Do something befor save Event data.
+Do something before save Event data.
 
 ```php
 do_action('osec_save_event', $event);
@@ -5464,7 +5430,7 @@ do_action('osec_save_event', $event);
 #### Description
 
 
-Give other plugins / extensions the ability to do things when saving, like fetching authors which i removed as it's not core.
+Give other plugins / extensions the ability to do things when saving.
 
 #### Parameters
 
@@ -5477,10 +5443,10 @@ Give other plugins / extensions the ability to do things when saving, like fetch
 
 ```php
 /**
- * Do something befor save Event data.
+ * Do something before save Event data.
  *
  * Give other plugins / extensions the ability to do things
- * when saving, like fetching authors which i removed as it's not core.
+ * when saving.
  *
  * @since 1.0
  *
@@ -5575,7 +5541,6 @@ Let other extensions save their fields
  *     $e->set('start', $e->get('start')->set_timezone('Asia/Aden'));
  *    });`
  *
- *
  * @file src/App/Model/PostTypeEvent/EventEditing.php
  */
 do_action('osec_save_post', $event);
@@ -5619,7 +5584,6 @@ Basically somehow ensures that Event post types can not have a calendar shortcod
  *
  * @param  bool  $bool
  *
- *
  * @file src/App/Model/PostTypeEvent/EventEditing.php
  */
 add_filter('osec_content_remove_shortcode_{$tag[2]}', $bool);
@@ -5660,7 +5624,6 @@ add_filter('osec_filter_distinct_types_logic', $default);
  * @param  array  $default  Default distinct type logic.
  *
  * @see EventSearch->_get_filter_sql()
- *
  *
  * @file src/App/Model/PostTypeEvent/EventSearch.php
  */
@@ -5868,7 +5831,6 @@ add_filter('osec_calendar_feeds', $feed);
  * @since 1.0
  *
  * @param  FeedsController  $feed
- *
  *
  * @file src/App/View/Admin/AdminPageManageFeeds.php
  */
@@ -6196,7 +6158,6 @@ Used when rendering calendar page or widget.
  *
  * @param  array  $args  Event location.
  *
- *
  * @file src/App/View/Calendar/AbstractView.php
  */
 add_filter('osec_calendar_view_template_alter', $args);
@@ -6475,7 +6436,6 @@ add_filter('osec_agenda_ticket_button', $show_ticket_button);
  *
  * @param  bool  $show_ticket_button  $bool Set true to show ticket button.
  *
- *
  * @file src/App/View/Calendar/AgendaView.php
  */
 add_filter('osec_agenda_ticket_button', $show_ticket_button);
@@ -6497,7 +6457,7 @@ add_filter('osec_get_events_for_agenda_alter', $dates $request $filter);
 
 
  - **$dates** <span style="color:crimson"> </span> Agenda view Events of the day
- - **$request** <span style="color:crimson"> \Osec\Http\Request\RequestParser</span> Request vars.
+ - **$request** <span style="color:crimson"> </span> Request vars.
  - **$filter** <span style="color:crimson"> </span> Current filter set
 
 <details markdown="1">
@@ -6511,7 +6471,7 @@ add_filter('osec_get_events_for_agenda_alter', $dates $request $filter);
  * @since 1.0
  *
  * @param  array  $dates  Agenda view Events of the day
- * @param  \Osec\Http\Request\RequestParser $request Request vars.
+ * @param  RequestParser  $request  Request vars.
  * @param  array  $filter  Current filter set
  *
  * @file src/App/View/Calendar/AgendaView.php
@@ -6559,7 +6519,7 @@ add_filter('osec_contribution_buttons',);
 ### osec_additional_buttons <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Add adittional HTML buttons on Calendar page view @since 1.0
+Add adittional HTML buttons on Calendar page view
 
 ```php
 add_filter('osec_additional_buttons', $html $view_args);
@@ -6578,6 +6538,7 @@ add_filter('osec_additional_buttons', $html $view_args);
 ```php
 /**
  * Add adittional HTML buttons on Calendar page view
+ *
  * @since 1.0
  *
  * @param  string  $html  Return a html string.
@@ -6628,7 +6589,7 @@ add_filter('osec_calendar_page_filterargs', $filter_args);
 ### osec_html_above_calendar <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Add Html above calendar @since 1.0
+Add Html above calendar
 
 ```php
 add_filter('osec_html_above_calendar', $html);
@@ -6646,6 +6607,7 @@ add_filter('osec_html_above_calendar', $html);
 ```php
 /**
  * Add Html above calendar
+ *
  * @since 1.0
  *
  * @param  string  $html  Return a html string.
@@ -6772,7 +6734,7 @@ add_filter('osec_subscribe_buttons_arguments', $args $view_args);
 #### Description
 
 
-Alter arguments for subscribe-buttons.twig template @since 1.0
+Alter arguments for subscribe-buttons.twig template
 
 #### Parameters
 
@@ -6789,6 +6751,7 @@ Alter arguments for subscribe-buttons.twig template @since 1.0
  * Subscribe buttons alter
  *
  * Alter arguments for subscribe-buttons.twig template
+ *
  * @since 1.0
  *
  * @param  array  $args  Twig args
@@ -6953,7 +6916,6 @@ The reveal button allows the visitor sho see the fill day even tho the setting "
  *
  * @param  bool  $bool  Set true to show oneday_reveal_button button.
  *
- *
  * @file src/App/View/Calendar/OnedayView.php
  */
 add_filter('osec_oneday_reveal_button', $bool);
@@ -7074,7 +7036,6 @@ The reveal button allows the visitor sho see the fill day even tho the setting "
  *
  * @param  bool  $bool  Set true to show oneday_reveal_button button.
  *
- *
  * @file src/App/View/Calendar/WeekView.php
  */
 add_filter('osec_week_reveal_button', $bool);
@@ -7152,7 +7113,6 @@ add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
  *
  * @see $this->get_event_avatar_url(). This allows to configure
  * the order in which image will be used.
- *
  *
  * @file src/App/View/Event/EventAvatarView.php
  */
@@ -7285,7 +7245,7 @@ add_filter('osec_rendering_single_event_venues', $event $html);
 ### osec_alter_single_event_page_before_render <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
-Alter Event before rendering on a single Event page. @since 1.0
+Alter Event before rendering on a single Event page.
 
 ```php
 do_action('osec_alter_single_event_page_before_render', $event);
@@ -7303,6 +7263,7 @@ do_action('osec_alter_single_event_page_before_render', $event);
 ```php
 /**
  * Alter Event before rendering on a single Event page.
+ *
  * @since 1.0
  *
  * @param  Event  $event  passed by reference. So can be modified.
@@ -7403,7 +7364,6 @@ add_filter('osec_event_color', $color);
  *
  * @param  string  $color  Return a color string.
  *
- *
  * @file src/App/View/Event/EventTaxonomyView.php
  */
 add_filter('osec_event_color', $color);
@@ -7479,7 +7439,6 @@ add_filter('osec_buy_tickets_url_icon', $html);
  * @since 1.0
  *
  * @param  string  $html  Html do display a ticket icon.
- *
  *
  * @file src/App/View/Event/EventTicketView.php
  */
@@ -7566,7 +7525,7 @@ Added befor dtay start date at Ui Timespan displays if they are not all-day. E.g
 /**
  * Timespan pefix string/html
  *
- * Added befor dtay start date at Ui Timespan displays
+ * Added befor  dtay start date at Ui Timespan displays
  * if they are not all-day.
  * E.g. Event pages, ManageEvents table.
  *
@@ -7665,7 +7624,7 @@ add_filter('osec_timespan_allday_badge_html', $allday_html);
 #### Description
 
 
-Displayed if Event duration is all-day. @since 1.0
+Displayed if Event duration is all-day.
 
 #### Parameters
 
@@ -7681,6 +7640,7 @@ Displayed if Event duration is all-day. @since 1.0
  * Alter all-day badge html.
  *
  * Displayed if Event duration is all-day.
+ *
  * @since 1.0
  *
  * @param  string  $allday_html  Translated html string.
@@ -7755,8 +7715,8 @@ Note: Date formats are defined/changed in WordPress settings-general page.
 #### Parameters
 
 
- - **$formatter** <span style="color:crimson"> string</span> See input_date_format at Settings class.
- - **$add_year** <span style="color:crimson"> bool</span> True if year should be provided.
+ - **$formatter** <span style="color:crimson"> </span> See input_date_format at Settings class.
+ - **$add_year** <span style="color:crimson"> </span> True if year should be provided.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -7768,8 +7728,8 @@ Note: Date formats are defined/changed in WordPress settings-general page.
  *
  * Note: Date formats are defined/changed in WordPress settings-general page.
  *
- * @param string $formatter See input_date_format at Settings class.
- * @param bool $add_year True if year should be provided.
+ * @param  string  $formatter  See input_date_format at Settings class.
+ * @param  bool  $add_year  True if year should be provided.
  *
  * @file src/App/View/Event/EventTimeView.php
  */
@@ -7848,7 +7808,6 @@ add_filter('osec_filters_upcoming_widget_alter', $limit);
  * @since 1.0
  *
  * @param  array  $limit  Array of Less variables
- *
  *
  * @file src/App/View/WidgetAgendaView.php
  */
@@ -7967,7 +7926,6 @@ add_filter('osec_export_filter', $filter);
  * @since 1.0
  *
  * @param  array  $filter
- *
  *
  * @file src/Command/ExportEvents.php
  */
@@ -8392,7 +8350,6 @@ All strings should be translated in current language.
  *
  * @param  array  $args  Translated text to alter.
  *
- *
  * @file src/Settings/Elements/SettingsShortcodesText.php
  */
 add_filter('osec_viewing_events_shortcodes_alter', $args);
@@ -8438,7 +8395,6 @@ Alter default font list
  * @since 1.0
  *
  * @param  array  $default_fonts
- *
  *
  * @file src/Settings/Elements/ThemeVariableFont.php
  */
@@ -8640,7 +8596,7 @@ On Feeds admin page you can echo/print any Html sting.
 #### Parameters
 
 
- - **$feed_id** <span style="color:crimson"> int</span> DB id of the feed.
+ - **$feed_id** <span style="color:crimson"> </span> DB id of the feed.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -8654,7 +8610,7 @@ On Feeds admin page you can echo/print any Html sting.
  *
  * @since 1.0
  *
- * @param ?int $feed_id DB id of the feed.
+ * @param ?int  $feed_id  DB id of the feed.
  *
  * @file public/admin/feed_row.php
  */
@@ -8681,7 +8637,7 @@ On Feeds admin page you can echo/print any Html sting.
 #### Parameters
 
 
- - **$feed_id** <span style="color:crimson"> int</span> DB id of the feed if in feed context.
+ - **$feed_id** <span style="color:crimson"> </span> DB id of the feed if in feed context.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -8695,7 +8651,7 @@ On Feeds admin page you can echo/print any Html sting.
  *
  * @since 1.0
  *
- * @param ?int $feed_id DB id of the feed if in feed context.
+ * @param ?int  $feed_id  DB id of the feed if in feed context.
  *
  * @file public/admin/feed_row.php
  */
@@ -8722,7 +8678,7 @@ On Feeds admin page you can echo/print any Html sting.
 #### Parameters
 
 
- - **$feed_id** <span style="color:crimson"> int</span> DB id of the feed.
+ - **$feed_id** <span style="color:crimson"> </span> DB id of the feed.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -8736,7 +8692,7 @@ On Feeds admin page you can echo/print any Html sting.
  *
  * @since 1.0
  *
- * @param ?int $feed_id DB id of the feed.
+ * @param ?int  $feed_id  DB id of the feed.
  *
  * @file public/admin/feed_row.php
  */

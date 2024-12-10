@@ -16,7 +16,6 @@ use Osec\Settings\Elements\SettingsAbstract;
  */
 class ThemeVariablesFactory extends OsecBaseClass
 {
-
     public const TYPE_MAP = [
         'color' => 'Osec\Settings\Elements\ThemeVariableColor',
         'font'  => 'Osec\Settings\Elements\ThemeVariableFont',
@@ -31,29 +30,28 @@ class ThemeVariablesFactory extends OsecBaseClass
      * @return SettingsAbstract
      * @throws Exception
      */
-    public function createRenderer(array $args) : SettingsAbstract
+    public function createRenderer(array $args): SettingsAbstract
     {
         $this->assertReuiredParams($args);
-        $class = self::TYPE_MAP[ $args[ 'type' ] ];
+        $class = self::TYPE_MAP[$args['type']];
 
         return new $class($this->app, $args);
     }
 
 
-    protected function assertReuiredParams($args) : void
+    protected function assertReuiredParams($args): void
     {
-        if ( ! isset($args[ 'id' ])) {
+        if ( ! isset($args['id'])) {
             throw new Exception('Missing a required argument `id`');
         }
-        if ( ! isset($args[ 'description' ])) {
+        if ( ! isset($args['description'])) {
             throw new Exception('Missing a required argument `description`');
         }
-        if ( ! isset($args[ 'value' ])) {
+        if ( ! isset($args['value'])) {
             throw new Exception('Missing a required argument `value`');
         }
-        if ( ! isset($args[ 'type' ])) {
+        if ( ! isset($args['type'])) {
             throw new Exception('Missing a required argument `type`');
         }
     }
-
 }

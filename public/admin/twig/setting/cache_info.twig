@@ -17,7 +17,7 @@
                 <tr>
                     <th scope="row">{{ cache.name }}</th>
                     <td class="ai1ec-text-center {% if cache.is_available %}success{% else %}warning{% endif %}">
-                        {% if cache.is_available %}✔{% else %}X{% endif %}
+                        {% if cache.is_available %}✔{% else %}✖{% endif %}
                     </td>
                     <td class="ai1ec-text-center {% if cache.is_curren_cache %}success{% else %}warning{% endif %}">
                         {% if cache.is_curren_cache %}✔{% else %}✖{% endif %}

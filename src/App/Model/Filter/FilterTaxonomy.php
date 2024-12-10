@@ -15,7 +15,6 @@ use Osec\Bootstrap\App;
  */
 abstract class FilterTaxonomy extends FilterInt
 {
-
     /**
      * Sanitize input values upon construction.
      *
@@ -34,19 +33,19 @@ abstract class FilterTaxonomy extends FilterInt
      *
      * @return string Valid SQL snippet.
      */
-    public function get_join() : string
+    public function get_join(): string
     {
-        if (empty($this->_values)) {
+        if (empty($this->values)) {
             return '';
         }
         $sql_query =
-            'LEFT JOIN `{{RELATIONSHIPS_TABLE}}` AS `{{RELATIONSHIP_ALIAS}}` '.
-            'ON ( `e` . `post_id` = `{{RELATIONSHIP_ALIAS}}` . `object_id` ) '.
-            'LEFT JOIN `{{TAXONOMY_TABLE}}` AS `{{TAXONOMY_ALIAS}}` '.
-            'ON ('.
-            '`{{RELATIONSHIP_ALIAS}}` . `term_taxonomy_id` = '.
-            '`{{TAXONOMY_ALIAS}}` . `term_taxonomy_id` '.
-            'AND `{{TAXONOMY_ALIAS}}` . taxonomy = {{TAXONOMY}} '.
+            'LEFT JOIN `{{RELATIONSHIPS_TABLE}}` AS `{{RELATIONSHIP_ALIAS}}` ' .
+            'ON ( `e` . `post_id` = `{{RELATIONSHIP_ALIAS}}` . `object_id` ) ' .
+            'LEFT JOIN `{{TAXONOMY_TABLE}}` AS `{{TAXONOMY_ALIAS}}` ' .
+            'ON (' .
+            '`{{RELATIONSHIP_ALIAS}}` . `term_taxonomy_id` = ' .
+            '`{{TAXONOMY_ALIAS}}` . `term_taxonomy_id` ' .
+            'AND `{{TAXONOMY_ALIAS}}` . taxonomy = {{TAXONOMY}} ' .
             ')';
 
         return str_replace(
@@ -62,7 +61,7 @@ abstract class FilterTaxonomy extends FilterInt
                 $this->_table_alias('term_relationships'),
                 $this->app->db->get_table_name('term_taxonomy'),
                 $this->_table_alias('term_taxonomy'),
-                '\''.addslashes($this->get_taxonomy()).'\'',
+                '\'' . addslashes($this->get_taxonomy()) . '\'',
             ],
             $sql_query
         );
@@ -75,9 +74,9 @@ abstract class FilterTaxonomy extends FilterInt
      *
      * @return string Table alias.
      */
-    protected function _table_alias($table) : string
+    protected function _table_alias($table): string
     {
-        return $table.'_'.$this->get_taxonomy();
+        return $table . '_' . $this->get_taxonomy();
     }
 
     /**
@@ -94,7 +93,6 @@ abstract class FilterTaxonomy extends FilterInt
      */
     public function get_field()
     {
-        return $this->_table_alias('term_taxonomy').'.term_id';
+        return $this->_table_alias('term_taxonomy') . '.term_id';
     }
-
 }

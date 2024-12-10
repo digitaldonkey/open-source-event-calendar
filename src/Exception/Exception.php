@@ -12,7 +12,6 @@ namespace Osec\Exception;
  */
 class Exception extends \Exception
 {
-
     /**
      * A message to be displayed for admin
      *
@@ -55,5 +54,4 @@ class Exception extends \Exception
     {
         return true;
     }
-
 }

@@ -15,7 +15,8 @@ class CacheApcuTest extends CacheFileTestBase
     {
         $this->assertTrue(
             CacheApcu::is_available(),
-            'You may need to add "apc.enable_cli=1" to your php.ini or skip .... apcu tests');
+            'You may need to add "apc.enable_cli=1" to your php.ini or skip .... apcu tests'
+        );
     }
 
     public function test_apcu_cache_file_write_and_read()

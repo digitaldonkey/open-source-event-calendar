@@ -15,41 +15,41 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class ContentFilterBypassHelper extends OsecBaseClass
 {
-
     /**
      * Stored original the_content filters.
+     *
      * @var array
      */
-    protected $_filters_the_content = [];
+    protected array $contentFilters = [];
 
     /**
      * Flag if filters are cleared.
+     *
      * @var bool
      */
-    protected $_filters_the_content_cleared = false;
+    protected bool $contentFiltersCleared = false;
 
     /**
      * Clears all the_content filters excluding few defaults.
      *
      * @return self This class.
      * @global array $wp_filter
-     *
      */
-    public function clear_the_content_filters() : self
+    public function clear_the_content_filters(): self
     {
         global $wp_filter;
-        if ($this->_filters_the_content_cleared) {
+        if ($this->contentFiltersCleared) {
             return $this;
         }
-        if (isset($wp_filter[ 'the_content' ])) {
-            $this->_filters_the_content = $wp_filter[ 'the_content' ];
+        if (isset($wp_filter['the_content'])) {
+            $this->contentFilters = $wp_filter['the_content'];
         }
         remove_all_filters('the_content');
         add_filter('the_content', 'wptexturize');
         add_filter('the_content', 'convert_smilies');
         add_filter('the_content', 'convert_chars');
         add_filter('the_content', 'wpautop');
-        $this->_filters_the_content_cleared = true;
+        $this->contentFiltersCleared = true;
 
         return $this;
     }
@@ -59,20 +59,18 @@ class ContentFilterBypassHelper extends OsecBaseClass
      *
      * @return self This class.
      * @global array $wp_filter
-     *
      */
-    public function restore_the_content_filters() : self
+    public function restore_the_content_filters(): self
     {
         global $wp_filter;
         if (
-            ! $this->_filters_the_content_cleared ||
-            empty($this->_filters_the_content)
+            ! $this->contentFiltersCleared ||
+            empty($this->contentFilters)
         ) {
             return $this;
         }
-        $wp_filter[ 'the_content' ] = $this->_filters_the_content;
+        $wp_filter['the_content'] = $this->contentFilters;
 
         return $this;
     }
-
 }

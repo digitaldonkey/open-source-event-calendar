@@ -16,7 +16,6 @@ use Osec\Exception\BootstrapException;
  */
 class SettingsRenderer extends OsecBaseClass
 {
-
     /**
      * Renders single setting.
      *
@@ -28,9 +27,9 @@ class SettingsRenderer extends OsecBaseClass
      */
     public function render(array $setting)
     {
-        $namespacedClass = $setting[ 'renderer' ][ 'class' ];
+        $namespacedClass = $setting['renderer']['class'];
         if ( ! class_exists($namespacedClass)) {
-            throw new Exception($namespacedClass.' does not exist');
+            throw new Exception($namespacedClass . ' does not exist');
         }
         $renderer = new $namespacedClass($this->app, $setting);
 

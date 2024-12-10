@@ -5,6 +5,7 @@ namespace Osec\App\Controller;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
+use stdClass;
 use wpdb;
 
 /**
@@ -21,10 +22,9 @@ use wpdb;
  */
 class DatabaseController extends OsecBaseClass
 {
-
-    protected ?wpdb $_wpdb = null;
-    protected array $_queries = [];
-    protected bool $_log_enabled = false;
+    protected ?wpdb $wpdb = null;
+    protected array $queries = [];
+    protected bool $isLogEnabled = false;
 
     /**
      * Constructor assigns injected database access object to class variable.
@@ -37,7 +37,7 @@ class DatabaseController extends OsecBaseClass
     {
         parent::__construct($app);
         global $wpdb;
-        $this->_wpdb = $wpdb;
+        $this->wpdb = $wpdb;
 
         if (defined('DOING_AJAX') && ! DOING_AJAX) {
             ShutdownController::factory($this->app)->register(
@@ -56,7 +56,7 @@ class DatabaseController extends OsecBaseClass
      */
     public function set_timezone()
     {
-        $this->_wpdb->query("SET time_zone = '+0:00'");
+        $this->wpdb->query("SET time_zone = '+0:00'");
     }
 
     /**
@@ -69,7 +69,7 @@ class DatabaseController extends OsecBaseClass
     public function query($sql_query)
     {
         $this->_query_profile($sql_query);
-        $result = $this->_wpdb->query($sql_query);
+        $result = $this->wpdb->query($sql_query);
         $this->_query_profile($result);
 
         return $result;
@@ -90,17 +90,20 @@ class DatabaseController extends OsecBaseClass
     {
         static $last = null;
         if (null === $last) {
-            $last = ['d' => microtime(true), 'q' => $query_or_result];
+            $last = [
+                'd' => microtime(true),
+                'q' => $query_or_result,
+            ];
         } else {
-            if (count($this->_queries) > 200) {
-                array_shift($this->_queries);
+            if (count($this->queries) > 200) {
+                array_shift($this->queries);
             }
-            $this->_queries[] = [
-                'd' => microtime(true) - $last[ 'd' ],
-                'q' => $last[ 'q' ],
+            $this->queries[] = [
+                'd' => microtime(true) - $last['d'],
+                'q' => $last['q'],
                 'r' => $query_or_result,
             ];
-            $last = null;
+            $last             = null;
         }
     }
 
@@ -113,7 +116,7 @@ class DatabaseController extends OsecBaseClass
      */
     public static function array_value_to_sql_value(array $value)
     {
-        return '('.implode(',', array_values($value)).')';
+        return '(' . implode(',', array_values($value)) . ')';
     }
 
     /**
@@ -123,7 +126,7 @@ class DatabaseController extends OsecBaseClass
      */
     public function disable_debug()
     {
-        $this->_log_enabled = false;
+        $this->isLogEnabled = false;
     }
 
     /**
@@ -133,7 +136,6 @@ class DatabaseController extends OsecBaseClass
      *
      * @return void
      * @uses apply_filters osec_dbi_debug
-     *
      */
     public function check_debug()
     {
@@ -144,15 +146,15 @@ class DatabaseController extends OsecBaseClass
          *
          * Overriding OSEC_DEBUG in Ajax context.
          *  Used to disable debug an XHR requests as debug output would crash Json.
+         *
          * @wp_hook osec_loaded
          *
          * @since 1.0
          *
          * @param  bool  $do_debug  Debug or not.
-         *
          */
-        $shouldLog = apply_filters('osec_dbi_debug', false !== OSEC_DEBUG);
-        $this->_log_enabled = (bool) $shouldLog;
+        $shouldLog          = apply_filters('osec_dbi_debug', false !== OSEC_DEBUG);
+        $this->isLogEnabled = (bool)$shouldLog;
     }
 
     /**
@@ -170,7 +172,7 @@ class DatabaseController extends OsecBaseClass
     public function get_col($query = null, $col = 0)
     {
         $this->_query_profile($query);
-        $result = $this->_wpdb->get_col($query, $col);
+        $result = $this->wpdb->get_col($query, $col);
         $this->_query_profile(count($result));
 
         return $result;
@@ -181,7 +183,7 @@ class DatabaseController extends OsecBaseClass
      */
     public function are_terms_set()
     {
-        return isset($this->_wpdb->terms);
+        return isset($this->wpdb->terms);
     }
 
     /**
@@ -213,7 +215,6 @@ class DatabaseController extends OsecBaseClass
      */
     public function prepare($query, $args)
     {
-
         if (null === $query) {
             return null;
         }
@@ -221,14 +222,14 @@ class DatabaseController extends OsecBaseClass
         $args = func_get_args();
         array_shift($args);
         // If args were passed as an array (as in vsprintf), move them up
-        if (isset($args[ 0 ]) && is_array($args[ 0 ])) {
-            $args = $args[ 0 ];
+        if (isset($args[0]) && is_array($args[0])) {
+            $args = $args[0];
         }
         $query = str_replace("'%s'", '%s', $query); // in case someone mistakenly already singlequoted it
         $query = str_replace('"%s"', '%s', $query); // doublequote unquoting
         $query = preg_replace('|(?<!%)%f|', '%F', $query); // Force floats to be locale unaware
         $query = preg_replace('|(?<!%)%s|', "'%s'", $query); // quote the strings, avoiding escaped strings like %%s
-        array_walk($args, [$this->_wpdb, 'escape_by_ref']);
+        array_walk($args, [$this->wpdb, 'escape_by_ref']);
 
         return @vsprintf($query, $args);
     }
@@ -250,7 +251,7 @@ class DatabaseController extends OsecBaseClass
     public function get_var($query = null, $col = 0, $row = 0)
     {
         $this->_query_profile($query);
-        $result = $this->_wpdb->get_var($query, $col, $row);
+        $result = $this->wpdb->get_var($query, $col, $row);
         $this->_query_profile(null !== $result);
 
         return $result;
@@ -263,17 +264,17 @@ class DatabaseController extends OsecBaseClass
      *
      * @param  string|null  $query  SQL query.
      * @param  string  $output  Optional. one of ARRAY_A | ARRAY_N | OBJECT constants. Return an associative array
-     *     (column
-     *     => value, ...), a numerically indexed array (0 => value, ...) or an object ( ->column = value ),
-     *     respectively.
+     *         (column
+     *         => value, ...), a numerically indexed array (0 => value, ...) or an object ( ->column = value ),
+     *         respectively.
      * @param  int  $row  Optional. Row to return. Indexed from 0.
      *
-     * @return array|object|\stdClass|null Database query result in format specified by $output or null on failure
+     * @return array|object|stdClass|null Database query result in format specified by $output or null on failure
      */
     public function get_row($query = null, $output = OBJECT, $row = 0)
     {
         $this->_query_profile($query);
-        $result = $this->_wpdb->get_row($query, $output, $row);
+        $result = $this->wpdb->get_row($query, $output, $row);
         $this->_query_profile(null !== $result);
 
         return $result;
@@ -284,20 +285,20 @@ class DatabaseController extends OsecBaseClass
      *
      * @param  string  $table  table name
      * @param  array  $data  Data to insert (in column => value pairs). Both $data columns and $data values should be
-     *     "raw" (neither should be SQL escaped).
+     *           "raw" (neither should be SQL escaped).
      * @param  array|string  $format  Optional. An array of formats to be mapped to each of the value in $data. If
-     *     string, that format will be used for all of the values in $data. A format is one of '%d', '%f', '%s'
-     *     (integer, float, string). If omitted, all values in $data will be treated as strings unless otherwise
-     *     specified in wpdb::$field_types.
+     *    string, that format will be used for all of the values in $data. A format is one of '%d', '%f', '%s'
+     *    (integer, float, string). If omitted, all values in $data will be treated as strings unless otherwise
+     *    specified in wpdb::$field_types.
      *
      * @return int|false The number of rows inserted, or false on error.
      */
     public function insert($table, $data, $format = null)
     {
         $this->_query_profile(
-            'INSERT INTO '.$table.'; data: '.json_encode($data)
+            'INSERT INTO ' . $table . '; data: ' . json_encode($data)
         );
-        $result = $this->_wpdb->insert(
+        $result = $this->wpdb->insert(
             $this->get_table_name($table),
             $data,
             $format
@@ -317,18 +318,18 @@ class DatabaseController extends OsecBaseClass
     public function get_table_name($table = '')
     {
         static $prefix_len = null;
-        if ( ! isset($this->_wpdb->{$table})) {
+        if ( ! isset($this->wpdb->{$table})) {
             if (null === $prefix_len) {
-                $prefix_len = strlen($this->_wpdb->prefix);
+                $prefix_len = strlen($this->wpdb->prefix);
             }
-            if (0 === strncmp($this->_wpdb->prefix, $table, $prefix_len)) {
+            if (0 === strncmp($this->wpdb->prefix, $table, $prefix_len)) {
                 return $table;
             }
 
-            return $this->_wpdb->prefix.$table;
+            return $this->wpdb->prefix . $table;
         }
 
-        return $this->_wpdb->{$table};
+        return $this->wpdb->{$table};
     }
 
     /**
@@ -343,9 +344,9 @@ class DatabaseController extends OsecBaseClass
     public function delete($table, $where, $format = null)
     {
         $this->_query_profile(
-            'DELETE FROM '.$table.'; conditions: '.json_encode($where)
+            'DELETE FROM ' . $table . '; conditions: ' . json_encode($where)
         );
-        $result = $this->_wpdb->delete(
+        $result = $this->wpdb->delete(
             $this->get_table_name($table),
             $where,
             $format
@@ -360,24 +361,24 @@ class DatabaseController extends OsecBaseClass
      *
      * @param  string  $table  table name
      * @param  array  $data  Data to update (in column => value pairs). Both $data columns and $data values should be
-     *     "raw" (neither should be SQL escaped).
+     *           "raw" (neither should be SQL escaped).
      * @param  array  $where  A named array of WHERE clauses (in column => value pairs). Multiple clauses will be
-     *     joined
-     *     with ANDs. Both $where columns and $where values should be "raw".
+     *           joined
+     *           with ANDs. Both $where columns and $where values should be "raw".
      * @param  array|string  $format  Optional. An array of formats to be mapped to each of the values in $data. If
-     *     string, that format will be used for all of the values in $data. A format is one of '%d', '%f', '%s'
-     *     (integer, float, string). If omitted, all values in $data will be treated as strings unless otherwise
-     *     specified in wpdb::$field_types.
+     *    string, that format will be used for all of the values in $data. A format is one of '%d', '%f', '%s'
+     *    (integer, float, string). If omitted, all values in $data will be treated as strings unless otherwise
+     *    specified in wpdb::$field_types.
      * @param  array|string  $where_format  Optional. An array of formats to be mapped to each of the values in $where.
-     *     If string, that format will be used for all of the items in $where. A format is one of '%d', '%f', '%s'
-     *     (integer, float, string). If omitted, all values in $where will be treated as strings.
+     *    If string, that format will be used for all of the items in $where. A format is one of '%d', '%f', '%s'
+     *    (integer, float, string). If omitted, all values in $where will be treated as strings.
      *
      * @return int|false The number of rows updated, or false on error.
      */
     public function update($table, $data, $where, $format = null, $where_format = null)
     {
-        $this->_query_profile('UPDATE '.$table.': '.implode('//', $data));
-        $result = $this->_wpdb->update($table, $data, $where, $format, $where_format);
+        $this->_query_profile('UPDATE ' . $table . ': ' . implode('//', $data));
+        $result = $this->wpdb->update($table, $data, $where, $format, $where_format);
         $this->_query_profile($result);
 
         return $result;
@@ -394,8 +395,8 @@ class DatabaseController extends OsecBaseClass
      */
     public function select($table, array $columns, $output = OBJECT)
     {
-        $sql_query = 'SELECT `'.implode('`, `', $columns).'` FROM `'.
-                     $this->get_table_name($table).'`';
+        $sql_query = 'SELECT `' . implode('`, `', $columns) . '` FROM `' .
+                     $this->get_table_name($table) . '`';
 
         return $this->get_results($sql_query, $output);
     }
@@ -407,17 +408,17 @@ class DatabaseController extends OsecBaseClass
      *
      * @param  string  $query  SQL query.
      * @param  string  $output  Optional. Any of ARRAY_A | ARRAY_N | OBJECT | OBJECT_K constants. With one of the first
-     *     three, return an array of rows indexed from 0 by SQL result row number. Each row is an associative array
-     *     (column => value, ...), a numerically indexed array (0 => value, ...), or an object. ( ->column = value ),
-     *     respectively. With OBJECT_K, return an associative array of row objects keyed by the value of each row's
-     *     first column's value. Duplicate keys are discarded.
+     *    three, return an array of rows indexed from 0 by SQL result row number. Each row is an associative array
+     *    (column => value, ...), a numerically indexed array (0 => value, ...), or an object. ( ->column = value ),
+     *    respectively. With OBJECT_K, return an associative array of row objects keyed by the value of each row's
+     *    first column's value. Duplicate keys are discarded.
      *
-     * @return array|object|\stdClass[]|null Database query results
+     * @return array|object|stdClass[]|null Database query results
      */
     public function get_results($query, $output = OBJECT)
     {
         $this->_query_profile($query);
-        $result = $this->_wpdb->get_results($query, $output);
+        $result = $this->wpdb->get_results($query, $output);
         $this->_query_profile(count($result));
 
         return $result;
@@ -430,7 +431,7 @@ class DatabaseController extends OsecBaseClass
      */
     public function db_version()
     {
-        return $this->_wpdb->db_version();
+        return $this->wpdb->db_version();
     }
 
     /**
@@ -440,7 +441,7 @@ class DatabaseController extends OsecBaseClass
      */
     public function get_insert_id()
     {
-        return $this->_wpdb->insert_id;
+        return $this->wpdb->insert_id;
     }
 
     /**
@@ -452,7 +453,7 @@ class DatabaseController extends OsecBaseClass
      */
     public function escape($input)
     {
-        $this->_wpdb->escape_by_ref($input);
+        $this->wpdb->escape_by_ref($input);
 
         return $input;
     }
@@ -464,7 +465,7 @@ class DatabaseController extends OsecBaseClass
      */
     public function shutdown()
     {
-        if (count($this->_queries) && $this->_log_enabled && php_sapi_name() !== "cli") {
+        if (count($this->queries) && $this->isLogEnabled && php_sapi_name() !== 'cli') {
             $html = '<div class="timely timely-debug">
 		  <table class="table table-striped">
 		    <thead>
@@ -476,15 +477,15 @@ class DatabaseController extends OsecBaseClass
 		      </tr>
 		    </thead>
 		    <tbody>';
-            $i = 0;
+            $i    = 0;
             $time = 0;
-            foreach ($this->_queries as $query) {
-                $time += $query[ 'd' ];
+            foreach ($this->queries as $query) {
+                $time += $query['d'];
                 echo '<tr>
 			        <td>', ++$i, '</td>
-			        <td>', $query[ 'q' ], '</td>
-			        <td>', round($query[ 'd' ] * 1000, 2), '</td>
-			        <td>', (int) $query[ 'r' ], '</td>
+			        <td>', $query['q'], '</td>
+			        <td>', round($query['d'] * 1000, 2), '</td>
+			        <td>', (int)$query['r'], '</td>
 			      </tr>';
             }
             echo '
@@ -499,6 +500,4 @@ class DatabaseController extends OsecBaseClass
 		</div>';
         }
     }
-
 }
-

@@ -19,7 +19,7 @@ class CachePathTest extends CacheFileTestBase
         $cache_path = (new CachePath())->getCachePath();
 
         $this->assertEquals(
-            '/var/www/html/wp-content/plugins/' . OSEC_PLUGIN_NAME . '/cache/',
+            OSEC_TEST__PLUGIN_ROOT_PATH . 'cache/',
             $cache_path
         );
     }
@@ -29,7 +29,7 @@ class CachePathTest extends CacheFileTestBase
         $cachePath = (new CachePath())->getCachePath('the_new_directory');
         $this->deleteAtTeardown($cachePath);
         $this->assertEquals(
-            '/var/www/html/wp-content/plugins/' . OSEC_PLUGIN_NAME . '/cache/the_new_directory/',
+            OSEC_TEST__PLUGIN_ROOT_PATH . 'cache/the_new_directory/',
             $cachePath
         );
     }
@@ -39,7 +39,7 @@ class CachePathTest extends CacheFileTestBase
         $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
         $cache_path = (new CachePath())->getCachePath();
         $this->assertEquals(
-            '/var/www/html/phpunit_wp_cache/wordpress/wp-content/uploads/all_in_one_event_calendar_cache/',
+            ABSPATH . 'wp-content/uploads/open_source_event_calendar_cache/',
             $cache_path
         );
         $this->deleteAtTeardown($cache_path);
@@ -47,24 +47,30 @@ class CachePathTest extends CacheFileTestBase
 
     public function test_no_cache_writable_returns_NULL()
     {
-        $a = $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
-        $b = $this->makeDirReadonly($this->wp_upload_path);
+        $a          = $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
+        $b          = $this->makeDirReadonly($this->wp_upload_path);
         $cache_path = (new CachePath())->getCachePath();
         $this->assertNull($cache_path);
     }
 
     public function test_get_cache_object()
     {
+        // Force to use wp-uploads based cache,
+        // as plugin might not be in $_SERVER['DOCUMENT_ROOT'],
+        // but wp-uploads will be as defined in tests/Utilities/bootstrap.php.
+        // Depending on DOCUMENT_ROOT for Uri generation at getCacheData().
+        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
+
         $cacheData = (new CachePath())->getCacheData('another_directory');
-        $this->deleteAtTeardown($cacheData[ 'path' ]);
+        $this->deleteAtTeardown($cacheData['path']);
 
         $this->assertEquals(
-            '/var/www/html/wp-content/plugins/' . OSEC_PLUGIN_NAME . '/cache/another_directory/',
-            $cacheData[ 'path' ]
+            ABSPATH . 'wp-content/uploads/open_source_event_calendar_cache/another_directory/',
+            $cacheData['path']
         );
         $this->assertEquals(
-            'http://example.org/wp-content/plugins/' . OSEC_PLUGIN_NAME . '/cache/another_directory/',
-            $cacheData[ 'url' ]
+            'http://example.org/wp-content/uploads/open_source_event_calendar_cache/another_directory/',
+            $cacheData['url']
         );
     }
 
@@ -72,8 +78,8 @@ class CachePathTest extends CacheFileTestBase
     {
         $cachePath = (new CachePath())->getCachePath('directory_to_delete');
         $this->deleteAtTeardown($cachePath);
-        $filePath = $cachePath.'x/y/z/';
-        $file = $filePath.'my_testfile';
+        $filePath = $cachePath . 'x/y/z/';
+        $file     = $filePath . 'my_testfile';
         if ( ! wp_mkdir_p($filePath)) {
             throw new Exception('Can not create path.');
         }

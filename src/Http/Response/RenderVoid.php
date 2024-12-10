@@ -2,7 +2,6 @@
 
 namespace Osec\Http\Response;
 
-
 /**
  * Do not render anything.
  *
@@ -13,7 +12,6 @@ namespace Osec\Http\Response;
  */
 class RenderVoid extends RenderStrategyAbstract
 {
-
     public function render(array $params)
     {
     }

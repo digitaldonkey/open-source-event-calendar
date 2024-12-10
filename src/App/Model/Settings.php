@@ -20,7 +20,6 @@ use Osec\Theme\ThemeLoader;
  */
 class Settings extends OsecBaseInitialized
 {
-
     /**
      * @constant string Name of WordPress options key used to store settings.
      */
@@ -29,17 +28,17 @@ class Settings extends OsecBaseInitialized
     /**
      * @var array Map of value names and their representations.
      */
-    protected $_options = [];
+    protected $options = [];
 
     /**
      * @var bool Indicator for modified object state.
      */
-    protected $_updated = false;
+    protected $isUpdated = false;
 
     /**
      * @var array The core options of the plugin.
      */
-    protected $_standard_options;
+    protected $defaultOptions;
 
     public function uninstall(bool $purge = false)
     {
@@ -57,8 +56,8 @@ class Settings extends OsecBaseInitialized
     public function getOptionsList()
     {
         $allSettings = [];
-        foreach ($this->_options as $name => $option) {
-            $allSettings[ $name ] = array_merge(['key' => $name], $this->_standard_options[ $name ], $option);
+        foreach ($this->options as $name => $option) {
+            $allSettings[$name] = array_merge(['key' => $name], $this->defaultOptions[$name], $option);
         }
         ksort($allSettings);
 
@@ -74,11 +73,11 @@ class Settings extends OsecBaseInitialized
      */
     public function describe($option)
     {
-        if ( ! isset($this->_options[ $option ])) {
+        if ( ! isset($this->options[$option])) {
             return null;
         }
 
-        return $this->_options[ $option ];
+        return $this->options[$option];
     }
 
     /**
@@ -88,8 +87,8 @@ class Settings extends OsecBaseInitialized
      */
     public function remove_option($option)
     {
-        if (isset($this->_options[ $option ])) {
-            unset($this->_options[ $option ]);
+        if (isset($this->options[$option])) {
+            unset($this->options[$option]);
             $this->_change_update_status(true);
         }
     }
@@ -103,8 +102,8 @@ class Settings extends OsecBaseInitialized
      */
     protected function _change_update_status($new_status)
     {
-        $previous = $this->_updated;
-        $this->_updated = (bool) $new_status;
+        $previous        = $this->isUpdated;
+        $this->isUpdated = (bool)$new_status;
 
         return $previous;
     }
@@ -116,8 +115,8 @@ class Settings extends OsecBaseInitialized
      */
     public function hide_option($option)
     {
-        if (isset($this->_options[ $option ])) {
-            unset($this->_options[ $option ][ 'renderer' ]);
+        if (isset($this->options[$option])) {
+            unset($this->options[$option]['renderer']);
             $this->_change_update_status(true);
         }
     }
@@ -129,8 +128,8 @@ class Settings extends OsecBaseInitialized
      */
     public function show_option($option, array $renderer)
     {
-        if (isset($this->_options[ $option ])) {
-            $this->_options[ $option ][ 'renderer' ] = $renderer;
+        if (isset($this->options[$option])) {
+            $this->options[$option]['renderer'] = $renderer;
             $this->_change_update_status(true);
         }
     }
@@ -142,7 +141,7 @@ class Settings extends OsecBaseInitialized
      */
     public function shutdown()
     {
-        if ($this->_updated) {
+        if ($this->isUpdated) {
             $this->persist();
         }
     }
@@ -151,14 +150,14 @@ class Settings extends OsecBaseInitialized
      * Write object representation to persistence layer.
      *
      * Upon successful write to persistence layer the objects internal
-     * state {@see self::$_updated} is updated respectively.
+     * state {@see self::$updated} is updated respectively.
      *
      * @return bool Success.
      */
     public function persist()
     {
         $success = $this->app->options
-            ->set(self::WP_OPTION_KEY, $this->_options, true );
+            ->set(self::WP_OPTION_KEY, $this->options, true);
         if ($success) {
             $this->_change_update_status(false);
         }
@@ -173,28 +172,27 @@ class Settings extends OsecBaseInitialized
      * @param  mixed  $value  Actual value to be used for option.
      *
      * @return Settings Instance of self for chaining.
-     *
      */
     public function set($option, mixed $value)
     {
-        if ( ! isset($this->_options[ $option ])) {
+        if ( ! isset($this->options[$option])) {
             throw new SettingsException(
-                'Option "'.$option.'" was not registered'
+                'Option "' . $option . '" was not registered'
             );
         }
-        if ('array' === $this->_options[ $option ][ 'type' ]) {
+        if ('array' === $this->options[$option]['type']) {
             if (
-                ! is_array($this->_options[ $option ][ 'value' ]) ||
+                ! is_array($this->options[$option]['value']) ||
                 ! is_array($value) ||
-                $value != $this->_options[ $option ][ 'value' ]
+                $value != $this->options[$option]['value']
             ) {
-                $this->_options[ $option ][ 'value' ] = $value;
+                $this->options[$option]['value'] = $value;
                 $this->_change_update_status(true);
             }
         } elseif (
-            (string) $value !== (string) $this->_options[ $option ][ 'value' ]
+            (string)$value !== (string)$this->options[$option]['value']
         ) {
-            $this->_options[ $option ][ 'value' ] = $value;
+            $this->options[$option]['value'] = $value;
             $this->_change_update_status(true);
         }
 
@@ -222,8 +220,8 @@ class Settings extends OsecBaseInitialized
         }
 
         if (
-            isset($options[ $option ]) &&
-            'wp_option' === $options[ $option ][ 'type' ] &&
+            isset($options[$option]) &&
+            'wp_option' === $options[$option]['type'] &&
             $this->get($option) !== $value
         ) {
             $this->set($option, $value);
@@ -237,7 +235,7 @@ class Settings extends OsecBaseInitialized
      */
     public function get_options()
     {
-        return $this->_options;
+        return $this->options;
     }
 
     /**
@@ -251,11 +249,11 @@ class Settings extends OsecBaseInitialized
     public function get($option, mixed $default = null)
     {
         // notice, that `null` is not treated as a value
-        if ( ! isset($this->_options[ $option ])) {
+        if ( ! isset($this->options[$option])) {
             return $default;
         }
 
-        return $this->_options[ $option ][ 'value' ];
+        return $this->options[$option]['value'];
     }
 
     /**
@@ -266,22 +264,23 @@ class Settings extends OsecBaseInitialized
     protected function _initialize()
     {
         // TODO
-        //   Add doc when and how this call is cached and how to disable caching.
+        // Add doc when and how this call is cached and how to disable caching.
 
         $this->_set_standard_values();
         $values = $this->app->options->get(self::WP_OPTION_KEY, []);
         $this->_change_update_status(false);
         $test_version = false;
         if (is_array($values)) { // always assign existing values, if any
-            $this->_options = $values;
-            if (isset($values[ 'calendar_page_id' ])) {
-                $test_version = $values[ 'calendar_page_id' ][ 'version' ];
+            $this->options = $values;
+            if (isset($values['calendar_page_id'])) {
+                $test_version = $values['calendar_page_id']['version'];
             }
         }
         $upgrade = false;
         // check for updated translations
         $this->_register_standard_values();
-        if ( // process meta updates changes
+        if (
+            // process meta updates changes
             empty($values) || (
                 false !== $test_version &&
                 OSEC_VERSION !== $test_version
@@ -291,8 +290,7 @@ class Settings extends OsecBaseInitialized
             $this->_update_name_translations();
             $this->_change_update_status(true);
             $upgrade = true;
-        }
-        elseif ($values instanceof Settings) {
+        } elseif ($values instanceof Settings) {
             // TODO REMOVE process legacy...
             throw new Exception('Legacy settings are not supported anymore.');
         }
@@ -306,28 +304,43 @@ class Settings extends OsecBaseInitialized
 
     /**
      * Set the standard values for the options of the core plugin.
-     *
      */
     protected function _set_standard_values()
     {
-
         // Renderer-> class must be in this namespace (Osec\Html\Settings\XXX).
-        $this->_standard_options = [
-            'osec_db_version'               => ['type' => 'string', 'default' => false],
-            'feeds_page'                     => ['type' => 'string', 'default' => false],
-            'settings_page'                  => ['type' => 'string', 'default' => false],
-            'less_variables_page'            => ['type' => 'string', 'default' => false],
+        $this->defaultOptions = [
+            'osec_db_version'                => [
+                'type'    => 'string',
+                'default' => false,
+            ],
+            'feeds_page'                     => [
+                'type'    => 'string',
+                'default' => false,
+            ],
+            'settings_page'                  => [
+                'type'    => 'string',
+                'default' => false,
+            ],
+            'less_variables_page'            => [
+                'type'    => 'string',
+                'default' => false,
+            ],
             // TODO Is this correct?
-            //   This is the WP default format commented out.
-//      'input_date_format' => ['type' => 'string', 'default' => 'd/m/yyyy'],
-            'plugins_options'                => ['type' => 'array', 'default' => []],
-            'show_tracking_popup'            => ['type' => 'deprecated', 'default' => true],
+            // This is the WP default format commented out.
+            // 'input_date_format' => ['type' => 'string', 'default' => 'd/m/yyyy'],
+            'plugins_options'                => [
+                'type'    => 'array',
+                'default' => [],
+            ],
+            'show_tracking_popup'            => [
+                'type'    => 'deprecated',
+                'default' => true,
+            ],
             'calendar_page_id'               => [
                 'type'     => 'mixed',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCalenderPageSelect',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__('Calendar page'),
                 ],
                 'default'  => false,
@@ -350,7 +363,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsEnabledViews',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__('Available views'),
                 ],
                 'default'  => [
@@ -400,7 +412,7 @@ class Settings extends OsecBaseInitialized
                     ],
                 ],
             ],
-	        // THis is actually an ALIAS
+            // THis is actually an ALIAS
             'timezone_string'                => [
                 'type'     => 'wp_option',
                 'renderer' => [
@@ -409,8 +421,9 @@ class Settings extends OsecBaseInitialized
                     'item'    => 'viewing-events',
                     'label'   => I18n::__('Timezone'),
                     'options' => 'Osec\App\Model\Date\Timezones::get_timezones',
-                    'help'  => I18n::__(
-	                    'This is an alias to wp-settings timezone and could also be changed on /wp-admin/options-general.php.'
+                    'help'    => I18n::__(
+                        'This is an alias to wp-settings timezone and could also be '
+                        . 'changed on /wp-admin/options-general.php.'
                     ),
                 ],
                 'default'  => $this->app->options->get(
@@ -422,20 +435,21 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCatsTagsFilter',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__('Preselected calendar filters'),
                     'help'  => I18n::__(
                         'To clear, hold &#8984;/<abbr class="initialism">CTRL</abbr> and click selection.'
                     ),
                 ],
-                'default'  => ['categories' => [], 'tags' => []],
+                'default'  => [
+                    'categories' => [],
+                    'tags'       => [],
+                ],
             ],
             'exact_date'                     => [
                 'type'     => 'string',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsInput',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__('Default calendar start date (optional)'),
                     'type'  => 'date',
                 ],
@@ -482,7 +496,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         '<strong>Word-wrap event stubs</strong> in Month view'
                     ),
@@ -497,7 +510,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         'In <span class="ai1ec-tooltip-toggle"
 						data-original-title="These include Agenda view,
@@ -513,7 +525,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         'Keep all events <strong>expanded</strong> in Agenda view (disables toggler).'
                     ),
@@ -525,7 +536,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         '<strong>Show year</strong> in calendar date labels'
                     ),
@@ -537,7 +547,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         '<strong>Show location in event titles</strong> in calendar views'
                     ),
@@ -549,7 +558,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         '<strong>Exclude</strong> events from search results'
                     ),
@@ -561,9 +569,9 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
-                        'Hide <strong>Subscribe</strong>/<strong>Add to Calendar</strong> buttons in calendar and single event views '
+                        'Hide <strong>Subscribe</strong>/<strong>Add to Calendar</strong> '
+                        . 'buttons in calendar and single event views '
                     ),
                 ],
                 'default'  => false,
@@ -573,7 +581,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         ' Hide <strong>Google Maps</strong> until clicked'
                     ),
@@ -586,7 +593,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         ' <strong>Affix filter menu</strong> to top of window when it scrolls out of view'
                     ),
@@ -615,7 +621,7 @@ class Settings extends OsecBaseInitialized
                     'tab'    => 'viewing-events',
                     'item'   => 'viewing-events',
                     'label'  =>
-                        '<i class="ai1ec-fa ai1ec-fa-lg ai1ec-fa-fw ai1ec-fa-desktop"></i> '.
+                        '<i class="ai1ec-fa ai1ec-fa-lg ai1ec-fa-fw ai1ec-fa-desktop"></i> ' .
                         I18n::__('Wide screens only (&#8805; 1200px)'),
                     'type'   => 'append',
                     'append' => 'pixels',
@@ -629,7 +635,7 @@ class Settings extends OsecBaseInitialized
                     'tab'    => 'viewing-events',
                     'item'   => 'viewing-events',
                     'label'  =>
-                        '<i class="ai1ec-fa ai1ec-fa-lg ai1ec-fa-fw ai1ec-fa-tablet"></i> '.
+                        '<i class="ai1ec-fa ai1ec-fa-lg ai1ec-fa-fw ai1ec-fa-tablet"></i> ' .
                         I18n::__('Tablets only (< 980px)'),
                     'type'   => 'append',
                     'append' => 'pixels',
@@ -643,7 +649,7 @@ class Settings extends OsecBaseInitialized
                     'tab'    => 'viewing-events',
                     'item'   => 'viewing-events',
                     'label'  =>
-                        '<i class="ai1ec-fa ai1ec-fa-lg ai1ec-fa-fw ai1ec-fa-mobile"></i> '.
+                        '<i class="ai1ec-fa ai1ec-fa-lg ai1ec-fa-fw ai1ec-fa-mobile"></i> ' .
                         I18n::__('Phones only (< 768px)'),
                     'type'   => 'append',
                     'append' => 'pixels',
@@ -655,7 +661,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         'Strict compatibility content filtering'
                     ),
@@ -667,7 +672,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         ' <strong>Hide featured image</strong> from event details page'
                     ),
@@ -683,7 +687,8 @@ class Settings extends OsecBaseInitialized
                     'class'   => 'Osec\Settings\Elements\SettingsSelect',
                     'tab'     => 'editing-events',
                     'label'   => I18n::__(
-                        'Input dates in this format. Also defines formats for "date short" and "Date short without year" currently. See hook "osec_ui_date_format_short".'
+                        'Input dates in this format. Also defines formats for "date short" and '
+                        . '"Date short without year" currently. See hook "osec_ui_date_format_short".'
                     ),
                     'options' => [
                         [
@@ -692,15 +697,15 @@ class Settings extends OsecBaseInitialized
                         ],
                         [
                             'text'  => I18n::__('US (m/d/yyyy)'),
-                            'value' => 'us'
+                            'value' => 'us',
                         ],
                         [
                             'text'  => I18n::__('ISO 8601 (yyyy-m-d)'),
-                            'value' => 'iso'
+                            'value' => 'iso',
                         ],
                         [
                             'text'  => I18n::__('Dotted (m.d.yyyy)'),
-                            'value' => 'dot'
+                            'value' => 'dot',
                         ],
                     ],
                 ],
@@ -734,7 +739,8 @@ class Settings extends OsecBaseInitialized
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'editing-events',
                     'label' => I18n::__(
-                        'Use the configured <strong>region</strong> (WordPress locale) to bias the address autocomplete function '
+                        'Use the configured <strong>region</strong> (WordPress locale) '
+                        . 'to bias the address autocomplete function '
                     ),
                 ],
                 'default'  => false,
@@ -744,12 +750,12 @@ class Settings extends OsecBaseInitialized
                 'renderer' => null,
                 'default'  => false,
             ],
-            'embedding'                              => [
+            'shortcodes'                             => [
                 'type'     => 'html',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsShortcodesText',
                     'tab'   => 'advanced',
-                    'item'  => 'embedded-views',
+                    'item'  => 'shortcodes',
                 ],
                 'default'  => null,
             ],
@@ -758,7 +764,7 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsInput',
                     'tab'   => 'advanced',
-                    'item'  => 'advanced',
+//                    'item'  => 'advanced',
                     'label' => I18n::__('Move calendar into this DOM element'),
                     'type'  => 'normal',
                     'help'  => I18n::__(
@@ -779,27 +785,31 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'advanced',
-                    'item'  => 'advanced',
+//                    'item'  => 'advanced',
                     'label' => I18n::__(
-                        '<strong>Skip <tt>in_the_loop()</tt> check </strong> that protects against multiple calendar output'
+                        '<strong>Skip <tt>in_the_loop()</tt> check </strong> '
+                        . 'that protects against multiple calendar output'
                     ),
                     'help'  => I18n::__(
-                        'Try enabling this option if your calendar does not appear on the calendar page. It is needed for compatibility with a small number of themes that call <tt>the_content()</tt> from outside of The Loop. Leave disabled otherwise.'
+                        'Try enabling this option if your calendar does not appear on the calendar page. '
+                        . 'It is needed for compatibility with a small number of themes that call '
+                        . '<code>the_content()</code> from outside of The Loop. Leave disabled otherwise.'
                     ),
                 ],
                 'default'  => false,
             ],
-            'osec_use_frontend_rendering'           => [
+            'osec_use_frontend_rendering'            => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'advanced',
-                    'item'  => 'advanced',
+//                    'item'  => 'advanced',
                     'label' => I18n::__(
                         'Use frontend rendering.'
                     ),
                     'help'  => I18n::__(
-                        'Renders calendar views on the client rather than the server; significantly improvees performance.'
+                        'Renders calendar views on the client rather than the server; '
+                        . 'significantly improvees performance.'
                     ),
                 ],
                 'default'  => true,
@@ -809,12 +819,13 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'advanced',
-                    'item'  => 'advanced',
+//                    'item'  => 'advanced',
                     'label' => I18n::__(
                         '<strong>Link CSS</strong> in <code>&lt;head&gt;</code> section when file cache is unavailable.'
                     ),
                     'help'  => I18n::__(
-                        'Serve CSS as a link if file cache is not enabled rather than have it output inline (recommended).'
+                        'Serve CSS as a link if file cache is not enabled rather than have '
+                        . 'it output inline (recommended).'
                     ),
                 ],
                 'default'  => true,
@@ -824,7 +835,7 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class'    => 'Osec\Settings\Elements\SettingsTextarea',
                     'tab'      => 'advanced',
-                    'item'     => 'advanced',
+//                    'item'     => 'advanced',
                     'label'    => I18n::__('Current <strong>robots.txt</strong> on this site'),
                     'type'     => 'normal',
                     'rows'     => 6,
@@ -839,13 +850,16 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => '',
             ],
-            'ics_cron_freq'                          => ['type' => 'string', 'default' => 'hourly'],
+            'ics_cron_freq'                          => [
+                'type'    => 'string',
+                'default' => 'hourly',
+            ],
             'twig_cache'                             => [
                 'type'     => 'string',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCache',
-                    'tab'   => 'advanced',
-                    'item'  => 'cache',
+                    'tab'   => 'cache',
+//                    'item'  => 'cache',
                     'label' => sprintf(
                         I18n::__(
                             'Templates cache improves site performance'
@@ -859,12 +873,12 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'item'  => 'viewing-events',
                     'label' => I18n::__(
                         'Display events in <strong>calendar time zone</strong>'
                     ),
                     'help'  => I18n::__(
-                        'If this box is checked events will appear in the calendar time zone with time zone information displayed on the event details page.'
+                        'If this box is checked events will appear in the calendar time zone with time zone '
+                            . 'information displayed on the event details page.'
                     ),
                 ],
                 'default'  => false,
@@ -879,16 +893,16 @@ class Settings extends OsecBaseInitialized
      */
     protected function _register_standard_values()
     {
-        foreach ($this->_standard_options as $key => $option) {
+        foreach ($this->defaultOptions as $key => $option) {
             $renderer = null;
-            $value = $option[ 'default' ];
-            if (isset($option[ 'renderer' ])) {
-                $renderer = $option[ 'renderer' ];
+            $value    = $option['default'];
+            if (isset($option['renderer'])) {
+                $renderer = $option['renderer'];
             }
             $this->register(
                 $key,
                 $value,
-                $option[ 'type' ],
+                $option['type'],
                 $renderer,
                 OSEC_VERSION
             );
@@ -912,33 +926,32 @@ class Settings extends OsecBaseInitialized
         $renderer,
         $version = '2.0.0'
     ) {
-
         if ('deprecated' === $type) {
-            unset($this->_options[ $option ]);
+            unset($this->options[$option]);
         } elseif (
-            ! isset($this->_options[ $option ]) ||
-            ! isset($this->_options[ $option ][ 'version' ]) ||
-            (string) $this->_options[ $option ][ 'version' ] !== (string) $version ||
+            ! isset($this->options[$option]) ||
+            ! isset($this->options[$option]['version']) ||
+            (string)$this->options[$option]['version'] !== (string)$version ||
             (
-                isset($renderer[ 'label' ]) &&
-                isset($this->_options[ $option ][ 'renderer' ]) &&
-                (string) $this->_options[ $option ][ 'renderer' ][ 'label' ] !== (string) $renderer[ 'label' ]
+                isset($renderer['label']) &&
+                isset($this->options[$option]['renderer']) &&
+                (string)$this->options[$option]['renderer']['label'] !== (string)$renderer['label']
             ) ||
             (
-                isset($renderer[ 'help' ]) &&
-                ( ! isset($this->_options[ $option ][ 'renderer' ][ 'help' ]) || // handle the case when you are adding help
-                  (string) $this->_options[ $option ][ 'renderer' ][ 'help' ] !== (string) $renderer[ 'help' ])
+                isset($renderer['help']) &&
+                ( ! isset($this->options[$option]['renderer']['help']) || // handle the case when you are adding help
+                  (string)$this->options[$option]['renderer']['help'] !== (string)$renderer['help'])
             )
         ) {
-            $this->_options[ $option ] = [
-                'value'   => (isset($this->_options[ $option ]))
-                    ? $this->_options[ $option ][ 'value' ]
+            $this->options[$option] = [
+                'value'   => (isset($this->options[$option]))
+                    ? $this->options[$option]['value']
                     : $value,
                 'type'    => $type,
                 'version' => $version,
             ];
             if (null !== $renderer) {
-                $this->_options[ $option ][ 'renderer' ] = $renderer;
+                $this->options[$option]['renderer'] = $renderer;
             }
         }
 
@@ -952,11 +965,11 @@ class Settings extends OsecBaseInitialized
      */
     protected function _update_name_translations()
     {
-        $translations = $this->_standard_options[ 'enabled_views' ][ 'default' ];
-        $current = $this->get('enabled_views');
+        $translations = $this->defaultOptions['enabled_views']['default'];
+        $current      = $this->get('enabled_views');
         foreach ($current as $key => $view) {
-            if (isset($translations[ $key ])) {
-                $current[ $key ][ 'longname' ] = $translations[ $key ][ 'longname' ];
+            if (isset($translations[$key])) {
+                $current[$key]['longname'] = $translations[$key]['longname'];
             }
         }
         $this->set('enabled_views', $current);
@@ -978,5 +991,4 @@ class Settings extends OsecBaseInitialized
         $option->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true, true);
         $option->set(ThemeLoader::OPTION_FORCE_CLEAN, true, true);
     }
-
 }

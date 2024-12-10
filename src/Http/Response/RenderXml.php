@@ -2,7 +2,6 @@
 
 namespace Osec\Http\Response;
 
-
 /**
  * Render the request as xml.
  *
@@ -13,13 +12,12 @@ namespace Osec\Http\Response;
  */
 class RenderXml extends RenderStrategyAbstract
 {
-
     public function render(array $params)
     {
         $this->_dump_buffers();
         header('HTTP/1.1 200 OK');
         header('Content-Type: text/xml; charset=UTF-8');
-        $data = ResponseHelper::utf8($params[ 'data' ]);
+        $data   = ResponseHelper::utf8($params['data']);
         $output = $this->serialize_to_xml($data);
         echo $output;
         ResponseHelper::stop();
@@ -34,7 +32,7 @@ class RenderXml extends RenderStrategyAbstract
      * http://www.sean-barton.co.uk/2009/03/turning-an-array-or-object-into-xml-using-php/
      *
      * @param  mixed  $data  Data to serialize.
-     * @param  boolean  $wrap_json  Whether to serialize data in JSON format.
+     * @param  bool  $wrap_json  Whether to serialize data in JSON format.
      * @param  string  $node_block  Name of root-level XML element.
      * @param  string  $node_name  Name of XML element to wrap around ordinal array elements.
      *
@@ -48,15 +46,15 @@ class RenderXml extends RenderStrategyAbstract
     ) {
         $xml = '<?xml version="1.0" encoding="UTF-8" ?>';
 
-        $xml .= '<'.$node_block.'>';
+        $xml .= '<' . $node_block . '>';
 
         if ($wrap_json) {
-            $xml .= '<![CDATA['.json_encode($data).']]>';
+            $xml .= '<![CDATA[' . json_encode($data) . ']]>';
         } else {
             $xml .= self::_generate_xml_from_value($data, $node_name);
         }
 
-        $xml .= '</'.$node_block.'>';
+        $xml .= '</' . $node_block . '>';
 
         return $xml;
     }
@@ -82,15 +80,14 @@ class RenderXml extends RenderStrategyAbstract
                     $key = $node_name;
                 }
 
-                $xml .= '<'.$key.'>'.
-                        self::_generate_xml_from_value($v, $node_name).
-                        '</'.$key.'>';
+                $xml .= '<' . $key . '>' .
+                        self::_generate_xml_from_value($v, $node_name) .
+                        '</' . $key . '>';
             }
         } else {
-            $xml = htmlspecialchars((string) $value, ENT_QUOTES);
+            $xml = htmlspecialchars((string)$value, ENT_QUOTES);
         }
 
         return $xml;
     }
-
 }

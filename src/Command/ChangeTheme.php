@@ -17,7 +17,6 @@ use Osec\Theme\ThemeLoader;
  */
 class ChangeTheme extends CommandAbstract
 {
-
     /**
      * Executes the command to change the active theme.
      *
@@ -30,15 +29,17 @@ class ChangeTheme extends CommandAbstract
         $stylesheet = preg_replace(
             '|[^a-z_\-]+|i',
             '',
-            $_GET[ 'osec_theme' ]
+            $_GET['osec_theme']
         );
         ThemeLoader::factory($this->app)
-                   ->switch_theme([
-                       'theme_root' => realpath($_GET[ 'ai1ec_theme_root' ]),
-                       'theme_dir'  => realpath($_GET[ 'ai1ec_theme_dir' ]),
-                       'theme_url'  => $_GET[ 'ai1ec_theme_url' ],
-                       'stylesheet' => $stylesheet,
-                   ]);
+                   ->switch_theme(
+                       [
+                           'theme_root' => realpath($_GET['ai1ec_theme_root']),
+                           'theme_dir'  => realpath($_GET['ai1ec_theme_dir']),
+                           'theme_url'  => $_GET['ai1ec_theme_url'],
+                           'stylesheet' => $stylesheet,
+                       ]
+                   );
 
         // Return user to themes list page with success message.
         return [
@@ -49,30 +50,31 @@ class ChangeTheme extends CommandAbstract
         ];
     }
 
-    /* (non-PHPdoc)
-     * @see Ai1ec_Command_Save_Abstract::set_render_strategy()
+    /*
+    (non-PHPdoc)
+     * @see SaveAbstract::setRenderStrategy()
      *
      * @param \Osec\Http\Request\RequestParser $request
      *
      * @return void
      * @throws \Osec\Exception\BootstrapException
      */
-    public function set_render_strategy(RequestParser $request)
+    public function setRenderStrategy(RequestParser $request): void
     {
-        $this->_render_strategy = RenderRedirect::factory($this->app);
+        $this->renderStrategy = RenderRedirect::factory($this->app);
     }
 
     public function is_this_to_execute()
     {
         if (
-            isset($_GET[ 'ai1ec_action' ]) &&
-            $_GET[ 'ai1ec_action' ] === 'activate_theme' &&
+            isset($_GET['ai1ec_action']) &&
+            $_GET['ai1ec_action'] === 'activate_theme' &&
             current_user_can('switch_osec_themes') &&
-            is_dir($_GET[ 'ai1ec_theme_dir' ]) &&
-            is_dir($_GET[ 'ai1ec_theme_root' ])
+            is_dir($_GET['ai1ec_theme_dir']) &&
+            is_dir($_GET['ai1ec_theme_root'])
         ) {
             check_admin_referer(
-                'switch-ai1ec_theme_'.$_GET[ 'osec_theme' ]
+                'switch-ai1ec_theme_' . $_GET['osec_theme']
             );
 
             return true;

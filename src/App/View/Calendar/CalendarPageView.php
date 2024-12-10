@@ -32,12 +32,11 @@ use Osec\Theme\ThemeLoader;
  */
 class CalendarPageView extends OsecBaseClass
 {
-
     /**
      * @var CacheMemory Instance of memory to hold exact dates
      *    Was defined as \Ai1ec_Memory_Utility before.
      */
-    protected ?CacheMemory $_exact_dates = null;
+    protected ?CacheMemory $datesCache = null;
 
     /**
      * Public constructor
@@ -49,7 +48,7 @@ class CalendarPageView extends OsecBaseClass
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->_exact_dates = CacheMemory::factory($app);
+        $this->datesCache = CacheMemory::factory($app);
     }
 
     /**
@@ -57,8 +56,8 @@ class CalendarPageView extends OsecBaseClass
      *
      * @param  RequestParser  $request  Request object.
      * @param  string  $caller  Method caller, expected one of
-     *                                      ['shortcode', 'render-command']
-     *                                      Defaults to 'render-command'.
+     *                                            ['shortcode', 'render-command']
+     *                                            Defaults to 'render-command'.
      *
      * @return string|array Content (arbitrary WTF)
      */
@@ -70,35 +69,37 @@ class CalendarPageView extends OsecBaseClass
 
         try {
             $action = SettingsView::factory($this->app)
-                                  ->get_configured($view_args[ 'action' ]);
+                                  ->get_configured($view_args['action']);
         } catch (SettingsException $exception) {
             // short-circuit and return error message
-            return '<div id="osec-container"><div class="timely"><p>'.
+            return '<div id="osec-container"><div class="timely"><p>' .
                    I18n::__(
-                       'There was an error loading calendar. Please contact site administrator and inform him to configure calendar views.'
-                   ).
+                       'There was an error loading calendar. '
+                       . 'Please contact site administrator and inform him to configure calendar views.'
+                   ) .
                    '</p></div></div>';
         }
         $type = $request->get('request_type');
 
         $is_json = Request::factory($this->app)
-                          ->is_json_required($view_args[ 'request_format' ], $action);
+                          ->is_json_required($view_args['request_format'], $action);
 
         // Add view-specific args to the current view args.
         $exact_date = $this->get_exact_date($request);
         try {
-
-            $viewClass = 'Osec\App\View\Calendar\\'.ucfirst($action).'View';
+            $viewClass = 'Osec\App\View\Calendar\\' . ucfirst($action) . 'View';
             if ( ! class_exists($viewClass)) {
-                throw new Exception($viewClass.' not found.');
+                throw new Exception($viewClass . ' not found.');
             }
             $view_obj = new $viewClass($this->app, $request);
-
         } catch (BootstrapException) {
             NotificationAdmin::factory($this->app)->store(
                 sprintf(
-                    I18n::__('Calendar was unable to initialize %s view and has reverted to Agenda view. Please check if you have installed the latest versions of calendar add-ons.'),
-                    ucfirst((string) $action)
+                    I18n::__(
+                        'Calendar was unable to initialize %s view and has reverted to Agenda view. '
+                            . 'Please check if you have installed the latest versions of calendar add-ons.'
+                    ),
+                    ucfirst((string)$action)
                 ),
                 'error',
                 0,
@@ -111,30 +112,30 @@ class CalendarPageView extends OsecBaseClass
             // TODO
 
             $view_obj = new AgendaView($this->app, $request);
-            $action = SettingsView::factory($this->app)
-                                  ->get_configured($view_args[ 'action' ]);
+            $action   = SettingsView::factory($this->app)
+                                    ->get_configured($view_args['action']);
         }
         $view_args = $view_obj->get_extra_arguments($view_args, $exact_date);
 
         // Get HTML for views dropdown list.
         $dropdown_args = $view_args;
         if (
-            isset($dropdown_args[ 'time_limit' ]) &&
+            isset($dropdown_args['time_limit']) &&
             false !== $exact_date
         ) {
-            $dropdown_args[ 'exact_date' ] = $exact_date;
+            $dropdown_args['exact_date'] = $exact_date;
         }
         $views_dropdown =
             $this->get_html_for_views_dropdown($dropdown_args, $view_obj);
         // Add views dropdown markup to view args.
-        $view_args[ 'views_dropdown' ] = $views_dropdown;
+        $view_args['views_dropdown'] = $views_dropdown;
 
         // Get HTML for categories and for tags
         $taxonomyView = CalendarTaxonomyView::factory($this->app);
 
         // Leads to |request_format~html HTML type links
         $categories = $taxonomyView->get_html_for_categories($view_args);
-        $tags = $taxonomyView->get_html_for_tags($view_args, true);
+        $tags       = $taxonomyView->get_html_for_tags($view_args, true);
 
         // Get HTML for subscribe buttons.
         $subscribe_buttons = $this->get_html_for_subscribe_buttons($view_args);
@@ -145,8 +146,7 @@ class CalendarPageView extends OsecBaseClass
         $are_filters_set = Router::factory($this->app)
                                  ->is_at_least_one_filter_set_in_request($view_args);
 
-        if (($view_args[ 'no_navigation' ] || $type !== 'html') && $is_json) {
-
+        if (($view_args['no_navigation'] || $type !== 'html') && $is_json) {
             // send data both for json and jsonp as shortcodes are jsonp
             return [
                 'html'              => $view,
@@ -157,7 +157,6 @@ class CalendarPageView extends OsecBaseClass
                 'are_filters_set'   => $are_filters_set,
                 'is_json'           => $is_json,
             ];
-
         } else {
             $loader = ThemeLoader::factory($this->app);
 
@@ -172,6 +171,7 @@ class CalendarPageView extends OsecBaseClass
                 'contribution_buttons' => apply_filters('osec_contribution_buttons', '', $type, $caller),
                 /**
                  * Add adittional HTML buttons on Calendar page view
+                 *
                  * @since 1.0
                  *
                  * @param  string  $html  Return a html string.
@@ -207,6 +207,7 @@ class CalendarPageView extends OsecBaseClass
                 'subscribe_buttons' => $subscribe_buttons,
                 /**
                  * Add Html above calendar
+                 *
                  * @since 1.0
                  *
                  * @param  string  $html  Return a html string.
@@ -270,45 +271,48 @@ class CalendarPageView extends OsecBaseClass
          *
          * @param  array  $default_view_args  View Arguments
          */
-        $defaultViewArgs = apply_filters('osec_calendar_default_view_args', [
-            'post_ids',
-            'auth_ids',
-            'cat_ids',
-            'tag_ids',
-            'events_limit',
-            'instance_ids',
-        ]);
+        $defaultViewArgs = apply_filters(
+            'osec_calendar_default_view_args',
+            [
+                'post_ids',
+                'auth_ids',
+                'cat_ids',
+                'tag_ids',
+                'events_limit',
+                'instance_ids',
+            ]
+        );
 
-        $view_args = $request->get_dict($defaultViewArgs);
+        $view_args    = $request->get_dict($defaultViewArgs);
         $add_defaults = [
             'cat_ids' => 'categories',
             'tag_ids' => 'tags',
         ];
         foreach ($add_defaults as $query => $default) {
-            if (empty($view_args[ $query ])) {
+            if (empty($view_args[$query])) {
                 $setting = $this->app->settings->get('default_tags_categories');
-                if (isset($setting[ $default ])) {
-                    $view_args[ $query ] = $setting[ $default ];
+                if (isset($setting[$default])) {
+                    $view_args[$query] = $setting[$default];
                 }
             }
         }
 
         $type = $request->get('request_type');
 
-        $view_args[ 'data_type' ] = $this->return_data_type_for_request_type(
+        $view_args['data_type'] = $this->return_data_type_for_request_type(
             $type
         );
 
-        $view_args[ 'request_format' ] = $request->get('request_format');
-        $exact_date = $this->get_exact_date($request);
+        $view_args['request_format'] = $request->get('request_format');
+        $exact_date                  = $this->get_exact_date($request);
 
-        $view_args[ 'no_navigation' ] = $request->get('no_navigation') === 'true';
+        $view_args['no_navigation'] = $request->get('no_navigation') === 'true';
 
         // Find out which view of the calendar page was requested, and render it
         // accordingly.
-        $view_args[ 'action' ] = $action;
+        $view_args['action'] = $action;
 
-        $view_args[ 'request' ] = $request;
+        $view_args['request'] = $request;
 
         /**
          * Alter Calendar view arguments
@@ -320,7 +324,7 @@ class CalendarPageView extends OsecBaseClass
         $view_args = apply_filters('osec_calendar_view_args_alter', $view_args);
 
         // TODO
-        //  What is this Case about???
+        // What is this Case about???
         //
         if (null === $exact_date) {
             $href = HtmlFactory::factory($this->app)
@@ -350,17 +354,17 @@ class CalendarPageView extends OsecBaseClass
     /**
      * Get the exact date from request if available, or else from settings.
      *
-     * @param  RequestParser  $request Request.
+     * @param  RequestParser  $request  Request.
      *
-     * @return boolean|int
+     * @return bool|int
      */
     private function get_exact_date(RequestParser $request)
     {
         // Preprocess exact_date.
         // Check to see if a date has been specified.
         $exact_date = $request->get('exact_date');
-        $use_key = $exact_date;
-        if (null === ($exact_date = $this->_exact_dates->get($use_key))) {
+        $use_key    = $exact_date;
+        if (null === ($exact_date = $this->datesCache->get($use_key))) {
             $exact_date = $use_key;
             // Let's check if we have a date
             if (false !== $exact_date) {
@@ -380,7 +384,7 @@ class CalendarPageView extends OsecBaseClass
                     $date
                 );
             }
-            $this->_exact_dates->set($use_key, $exact_date);
+            $this->datesCache->set($use_key, $exact_date);
         }
 
         return $exact_date;
@@ -427,56 +431,56 @@ class CalendarPageView extends OsecBaseClass
         array $view_args,
         AbstractView $view
     ) {
-        $settings = $this->app->settings;
+        $settings        = $this->app->settings;
         $available_views = [];
-        $enabled_views = (array) $settings->get('enabled_views', []);
-        $view_names = [];
-        $mode = wp_is_mobile() ? '_mobile' : '';
+        $enabled_views   = (array)$settings->get('enabled_views', []);
+        $view_names      = [];
+        $mode            = wp_is_mobile() ? '_mobile' : '';
         foreach ($enabled_views as $key => $val) {
-            $view_names[ $key ] = translate_nooped_plural(
-                $val[ 'longname' ],
+            $view_names[$key] = translate_nooped_plural(
+                $val['longname'],
                 1
             );
             // Find out if view is enabled in requested mode (mobile or desktop). If
             // no mode-specific setting is available, fall back to desktop setting.
-            $view_enabled = $enabled_views[ $key ][ 'enabled'.$mode ] ?? $enabled_views[ $key ][ 'enabled' ];
-            $values = [];
-            $options = $view_args;
+            $view_enabled = $enabled_views[$key]['enabled' . $mode] ?? $enabled_views[$key]['enabled'];
+            $values       = [];
+            $options      = $view_args;
             if ($view_enabled) {
                 if ($view instanceof AgendaView) {
                     if (
-                        isset($options[ 'exact_date' ]) &&
-                        ! isset($options[ 'time_limit' ])
+                        isset($options['exact_date']) &&
+                        ! isset($options['time_limit'])
                     ) {
-                        $options[ 'time_limit' ] = $options[ 'exact_date' ];
+                        $options['time_limit'] = $options['exact_date'];
                     }
-                    unset($options[ 'exact_date' ]);
+                    unset($options['exact_date']);
                 } else {
-                    unset($options[ 'time_limit' ]);
+                    unset($options['time_limit']);
                 }
-                unset($options[ 'month_offset' ]);
-                unset($options[ 'week_offset' ]);
-                unset($options[ 'oneday_offset' ]);
-                $options[ 'action' ] = $key;
-                $values[ 'desc' ] = translate_nooped_plural(
-                    $val[ 'longname' ],
+                unset($options['month_offset']);
+                unset($options['week_offset']);
+                unset($options['oneday_offset']);
+                $options['action'] = $key;
+                $values['desc']    = translate_nooped_plural(
+                    $val['longname'],
                     1
                 );
                 if ($settings->get('osec_use_frontend_rendering')) {
-                    $options[ 'request_format' ] = 'json';
+                    $options['request_format'] = 'json';
                 }
 
-                $values[ 'href' ] = HtmlFactory::factory($this->app)
-                                               ->create_href_helper_instance($options)
-                                               ->generate_href();
-                $available_views[ $key ] = $values;
+                $values['href']        = HtmlFactory::factory($this->app)
+                                                    ->create_href_helper_instance($options)
+                                                    ->generate_href();
+                $available_views[$key] = $values;
             }
         }
         $args = [
             'view_names'      => $view_names,
             'available_views' => $available_views,
-            'current_view'    => $view_args[ 'action' ],
-            'data_type'       => $view_args[ 'data_type' ],
+            'current_view'    => $view_args['action'],
+            'data_type'       => $view_args['data_type'],
         ];
 
         return ThemeLoader::factory($this->app)
@@ -493,7 +497,7 @@ class CalendarPageView extends OsecBaseClass
      */
     public function get_html_for_subscribe_buttons(array $view_args)
     {
-        $settings = $this->app->settings;
+        $settings           = $this->app->settings;
         $turn_off_subscribe = $settings->get('turn_off_subscription_buttons');
         if ($turn_off_subscribe) {
             return '';
@@ -503,7 +507,7 @@ class CalendarPageView extends OsecBaseClass
             'url_args'           => '',
             'is_filtered'        => false,
             'export_url'         => OSEC_EXPORT_URL,
-            'export_url_no_html' => OSEC_EXPORT_URL.'&no_html=true',
+            'export_url_no_html' => OSEC_EXPORT_URL . '&no_html=true',
             'text_filtered'      => I18n::__('Subscribe to filtered calendar'),
             'text_subscribe'     => I18n::__('Subscribe'),
             'text_get_calendar'  => I18n::__('Get a Timely Calendar'),
@@ -511,25 +515,26 @@ class CalendarPageView extends OsecBaseClass
                                                                ->get_labels(),
             'placement'          => 'up',
         ];
-        if ( ! empty($view_args[ 'cat_ids' ])) {
-            $args[ 'url_args' ] .= '&osec_cat_ids='.implode(',', $view_args[ 'cat_ids' ]);
-            $args[ 'is_filtered' ] = true;
+        if ( ! empty($view_args['cat_ids'])) {
+            $args['url_args']    .= '&osec_cat_ids=' . implode(',', $view_args['cat_ids']);
+            $args['is_filtered'] = true;
         }
-        if ( ! empty($view_args[ 'tag_ids' ])) {
-            $args[ 'url_args' ] .= '&osec_tag_ids='.
-                                   implode(',', $view_args[ 'tag_ids' ]);
-            $args[ 'is_filtered' ] = true;
+        if ( ! empty($view_args['tag_ids'])) {
+            $args['url_args']    .= '&osec_tag_ids=' .
+                                    implode(',', $view_args['tag_ids']);
+            $args['is_filtered'] = true;
         }
-        if ( ! empty($view_args[ 'post_ids' ])) {
-            $args[ 'url_args' ] .= '&osec_post_ids='.
-                                   implode(',', $view_args[ 'post_ids' ]);
-            $args[ 'is_filtered' ] = true;
+        if ( ! empty($view_args['post_ids'])) {
+            $args['url_args']    .= '&osec_post_ids=' .
+                                    implode(',', $view_args['post_ids']);
+            $args['is_filtered'] = true;
         }
 
         /**
          * Subscribe buttons alter
          *
          * Alter arguments for subscribe-buttons.twig template
+         *
          * @since 1.0
          *
          * @param  array  $args  Twig args
@@ -540,12 +545,11 @@ class CalendarPageView extends OsecBaseClass
             null !== ($use_lang = WpmlHelper::factory($this->app)
                                             ->get_language())
         ) {
-            $args[ 'url_args' ] .= '&lang='.$use_lang;
+            $args['url_args'] .= '&lang=' . $use_lang;
         }
 
         return ThemeLoader::factory($this->app)
                           ->get_file('subscribe-buttons.twig', $args, false)
                           ->get_content();
     }
-
 }

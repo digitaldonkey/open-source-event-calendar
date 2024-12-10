@@ -16,14 +16,13 @@ use Osec\Http\Response\RenderRedirect;
  */
 abstract class SaveAbstract extends CommandAbstract
 {
+    protected $controllerId = 'front';
 
-    protected $_controller = 'front';
+    protected $action;
 
-    protected $_action;
+    protected string $nonceName;
 
-    protected $_nonce_name;
-
-    protected $_nonce_action;
+    protected $nonceAction;
 
     /**
      * Public constructor, set the strategy according to the type.
@@ -35,12 +34,12 @@ abstract class SaveAbstract extends CommandAbstract
     public function __construct(App $app, RequestParser $request, array $args)
     {
         parent::__construct($app, $request);
-        if ( ! is_array($args[ 'action' ])) {
-            $args[ 'action' ] = [$args[ 'action' ] => true];
+        if ( ! is_array($args['action'])) {
+            $args['action'] = [$args['action'] => true];
         }
-        $this->_action = $args[ 'action' ];
-        $this->_nonce_action = $args[ 'nonce_action' ];
-        $this->_nonce_name = $args[ 'nonce_name' ];
+        $this->action      = $args['action'];
+        $this->nonceAction = $args['nonce_action'];
+        $this->nonceName   = $args['nonce_name'];
     }
 
     public function is_this_to_execute()
@@ -49,14 +48,16 @@ abstract class SaveAbstract extends CommandAbstract
         if (false === $params) {
             return false;
         }
-        if ($params[ 'controller' ] === $this->_controller &&
-            isset($this->_action[ $params[ 'action' ] ])) {
+        if (
+            $params['controller'] === $this->controllerId &&
+            isset($this->action[$params['action']])
+        ) {
             $pass = wp_verify_nonce(
-                $_POST[ $this->_nonce_name ],
-                $this->_nonce_action
+                $_POST[$this->nonceName],
+                $this->nonceAction
             );
             if ( ! $pass) {
-                wp_die("Failed security check");
+                wp_die('Failed security check');
             }
 
             return true;
@@ -65,8 +66,8 @@ abstract class SaveAbstract extends CommandAbstract
         return false;
     }
 
-    public function set_render_strategy(RequestParser $request)
+    public function setRenderStrategy(RequestParser $request): void
     {
-        $this->_render_strategy = RenderRedirect::factory($this->app);
+        $this->renderStrategy = RenderRedirect::factory($this->app);
     }
 }

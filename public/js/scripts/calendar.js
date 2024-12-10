@@ -9224,7 +9224,7 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
             var i = 1442;
             t.find(".tablescroll_wrapper").scrollTo("-=" + r + "px", 400).animate({height: i + "px"})
         }), History.Adapter.bind(window, "statechange", n.handle_state_change), e(document).on("click", "#osec-calendar-view .ai1ec-load-event", function (t) {
-            e.cookie.raw = !1, e.cookie("ai1ec_calendar_url", document.URL, {path: a.cookie_path})
+            e.cookie.raw = !1, e.cookie("osec_calendar_url", document.URL, {path: a.cookie_path})
         })
     }, b = function () {
         c.init(e(".ai1ec-select2-filters")), e(document).on("change", ".ai1ec-select2-multiselect-selector", n.load_view_from_select2_filter)

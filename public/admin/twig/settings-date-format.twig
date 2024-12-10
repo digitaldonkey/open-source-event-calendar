@@ -4,20 +4,17 @@
     </legend>
     {% for format in time_formats %}
         <label>
-            {% apply spaceless %}
-                <input type='radio' name="{{ id }}"
+            <input type='radio' name="{{ id }}"
                    value="{{format.escaped}}"
-                   {% if current_format == format.raw %}checked="checked"{% endif %}
+                   {%~ if current_format == format.raw ~%}checked="checked"{%~ endif ~%}
                     onchange="const el = jQuery('#{{ id }}_custom'); el.val('{{ format.raw }}'); el.trigger('input');"
-                />
-                &nbsp;<span class="date-time-text format-i18n">{{ format.example }}</span>
-                <code>{{ format.escaped }}</code>
-            {% endapply %}
+            />
+            &nbsp;<span class="date-time-text format-i18n">{{ format.example }}</span>
+            <code>{{ format.escaped }}</code>
         </label>
         <br />
     {% endfor %}
     <label for="{{ id }}_custom_radio">
-        {% apply spaceless %}
         <input type="radio" name="{{ id }}" id="{{ id }}_custom_radio" value="custom"
            {% if is_custom %}checked="checked"{% endif %}
         />
@@ -36,7 +33,6 @@
                 &nbsp;<span class="example" id="{{ id }}_custom_format_example">{{ current_format_example }}</span>
                 <span class='spinner'></span>
             </p>
-        {% endapply %}
     </label>
 </fieldset>
 

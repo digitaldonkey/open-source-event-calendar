@@ -24,10 +24,10 @@ use Osec\Twig\TwigExtension;
  */
 class WeekView extends AbstractView
 {
+    protected ?CacheMemory $daysCache;
 
-    protected ?CacheMemory $_days_cache;
-
-    /* (non-PHPdoc)
+    /*
+    (non-PHPdoc)
     */
 
     public function get_content(array $view_args)
@@ -41,39 +41,41 @@ class WeekView extends AbstractView
             'instance_ids' => [],
             'exact_date'   => UIDateFormats::factory($this->app)->current_time(),
         ];
-        $args = wp_parse_args($view_args, $defaults);
+        $args     = wp_parse_args($view_args, $defaults);
 
-
-		// TODO MAYBE A TestABLE GET WEEK START FUNCTION?
-
+        // TODO MAYBE A TestABLE GET WEEK START FUNCTION?
 
         // Localize requested date and get components.
-	    $weekStart = (new DT($args[ 'exact_date' ]))->getWeekStart();
+        $weekStart = (new DT($args['exact_date']))->getWeekStart();
 
         $cell_array = $this->get_week_cell_array(
-	        $weekStart,
+            $weekStart,
             $this->getFilterDefaults($view_args),
         );
 
-        // Create pagination links.	(Translators: '%s' = week's start date.)
-        $title = sprintf(
-            __('Week of %s', OSEC_TXT_DOM),
-	        $weekStart->format_i18n('F j')
+        // Create pagination links. (Translators: '%s' = week's start date.)
+        $title            = sprintf(
+            __('Week %s', OSEC_TXT_DOM),
+            $weekStart->format_i18n('W / F Y')
         );
-        $pagination_links = $this->_get_pagination($args, $title);
+        $title_short      = sprintf(
+            __('W%s', OSEC_TXT_DOM),
+            $weekStart->format_i18n('W M/Y')
+        );
+        $pagination_links = $this->_get_pagination($args, $title, $title_short);
 
         $time_format = $this->app->options
             ->get('time_format', I18n::__('g a'));
 
         // Calculate today marker's position.
-        $now = new DT('now', 'sys.default');
+        $now      = new DT('now', 'sys.default');
         $now_text = $now->format_i18n('M j h:i a');
-        $now = (int) $now->format('G') * 60 + (int) $now->format('i');
+        $now      = (int)$now->format('G') * 60 + (int)$now->format('i');
         // Find out if the current week view contains "now" and thus should display
         // the "now" marker.
         $show_now = false;
         foreach ($cell_array as $day) {
-            if ($day[ 'today' ]) {
+            if ($day['today']) {
                 $show_now = true;
                 break;
             }
@@ -98,7 +100,6 @@ class WeekView extends AbstractView
          * @since 1.0
          *
          * @param  bool  $bool  Set true to show oneday_reveal_button button.
-         *
          */
         $show_reveal_button = apply_filters('osec_week_reveal_button', true);
 
@@ -112,16 +113,17 @@ class WeekView extends AbstractView
 
         $view_args = [
             'title'                    => $title,
+            'title_short'              => $title_short,
             'type'                     => 'week',
             'cell_array'               => $cell_array,
             'show_location_in_title'   => $this->app->settings->get('show_location_in_title'),
             'now_top'                  => $now,
             'now_text'                 => $now_text,
             'show_now'                 => $show_now,
-            'post_ids'                 => implode(',', $args[ 'post_ids' ]),
+            'post_ids'                 => implode(',', $args['post_ids']),
             'time_format'              => $time_format,
             'done_allday_label'        => false,
-            'data_type'                => $args[ 'data_type' ],
+            'data_type'                => $args['data_type'],
             'is_ticket_button_enabled' => $is_ticket_button_enabled,
             'show_reveal_button'       => $show_reveal_button,
             'text_full_day'            => __('Reveal full day', OSEC_TXT_DOM),
@@ -135,18 +137,18 @@ class WeekView extends AbstractView
         ];
 
         // Add navigation if requested.
-        $view_args[ 'navigation' ] = $this->_get_navigation(
+        $view_args['navigation'] = $this->_get_navigation(
             [
-                'no_navigation'    => $args[ 'no_navigation' ],
+                'no_navigation'    => $args['no_navigation'],
                 'pagination_links' => $pagination_links,
-                'views_dropdown'   => $args[ 'views_dropdown' ],
+                'views_dropdown'   => $args['views_dropdown'],
                 'below_toolbar'    => $this->getBelowToolbarHtml($this->get_name(), $view_args),
             ]
         );
 
         $view_args = $this->get_extra_template_arguments($view_args);
 
-        if (Request::factory($this->app)->is_json_required($args[ 'request_format' ], 'week')) {
+        if (Request::factory($this->app)->is_json_required($args['request_format'], 'week')) {
             return $this->_apply_filters_to_args($view_args);
         }
 
@@ -173,10 +175,10 @@ class WeekView extends AbstractView
      *
      * @param  DT  $start_of_week  the UNIX timestamp of the first day of the week
      * @param  array  $filter  Array of filters for the events returned:
-     *                          ['cat_ids']   => non-associatative array of category IDs
-     *                          ['tag_ids']   => non-associatative array of tag IDs
-     *                          ['post_ids']  => non-associatative array of post IDs
-     *                          ['auth_ids']  => non-associatative array of author IDs
+     *                         ['cat_ids']   => non-associatative array of category IDs
+     *                         ['tag_ids']   => non-associatative array of tag IDs
+     *                         ['post_ids']  => non-associatative array of post IDs
+     *                         ['auth_ids']  => non-associatative array of author IDs
      *
      * @return array            array of arrays as per function description
      * @throws BootstrapException
@@ -188,9 +190,9 @@ class WeekView extends AbstractView
 
         $end_of_week = clone $start_of_week;
         $end_of_week->adjust_day(6);
-	    $end_of_week->set_time(23,59,59);
+        $end_of_week->set_time(23, 59, 59);
 
-	    // Do one SQL query to find all events for the week, including spanning
+        // Do one SQL query to find all events for the week, including spanning
         $week_events = $search->get_events_between(
             $start_of_week,
             $end_of_week,
@@ -199,33 +201,30 @@ class WeekView extends AbstractView
         );
         $this->_update_meta($week_events);
         // Split up events on a per-day basis
-        $all_events = [];
-        $this->_days_cache = new CacheMemory($this->app);
+        $all_events      = [];
+        $this->daysCache = new CacheMemory($this->app);
         StrictContentFilterController::factory($this->app)->clear_the_content_filters();
-
 
         // Iterate over found Events.
         foreach ($week_events as $nthEvent => $evt) {
             [$evt_start, $evt_end] = $this->_get_view_specific_timestamps($evt);
 
-            $_nthEvent = $nthEvent;
-            $_nthEvent_start = $evt->get('start')->format('r');
+            $_nthEvent           = $nthEvent;
+            $_nthEvent_start     = $evt->get('start')->format('r');
             $_nthEvent_start_day = $evt->get('start')->format('d');
-            $_nthEvent_end = $evt->get('end')->format('r');
-            $_nthEvent_end_day = $evt->get('end')->format('d');
-
+            $_nthEvent_end       = $evt->get('end')->format('r');
+            $_nthEvent_end_day   = $evt->get('end')->format('d');
 
             // Iterate through each day of the week and generate new event object
             // based on this one for each day that it spans
-//                $day = (int) $start_of_week->format('j'),
-//                $last_week_day_index = (int) $start_of_week->format( 'j' ) + 7;
-//                $day < $last_week_day_index;
-//                $day++
+            // $day = (int) $start_of_week->format('j'),
+            // $last_week_day_index = (int) $start_of_week->format( 'j' ) + 7;
+            // $day < $last_week_day_index;
+            // $day++
 
             for ($day = 0; $day < 7; $day++) {
-
-			// TODO As $day is a simple Index counting > 31 can this lead to useful results?
-            //
+                // TODO As $day is a simple Index counting > 31 can this lead to useful results?
+                //
 
                 [$day_start, $day_end] = $this->_get_wkday_start_end($day, $start_of_week);
 
@@ -253,9 +252,9 @@ class WeekView extends AbstractView
 
                     // Place copy of event in appropriate category
                     if ($_evt->is_allday()) {
-                        $all_events[ $day_start ][ 'allday' ][] = $_evt;
+                        $all_events[$day_start]['allday'][] = $_evt;
                     } else {
-                        $all_events[ $day_start ][ 'notallday' ][] = $_evt;
+                        $all_events[$day_start]['notallday'][] = $_evt;
                     }
                 }
             }
@@ -264,37 +263,37 @@ class WeekView extends AbstractView
                                      ->restore_the_content_filters();
         // This will store the returned array
         $days = [];
-        $now = new DT('now', $start_of_week->get_timezone());
+        $now  = new DT('now', $start_of_week->get_timezone());
 
         // =========================================
         // = Iterate through each date of the week =
         // =========================================
-//        for (
-//            $day = $start_of_week->format('j'),
-//            $last_week_day_index = (int) $start_of_week->format('j') + 7;
-//            $day < $last_week_day_index;
-//            $day++
-//        ) {
-	    for ($day = 0; $day < 7; $day++) {
+        // for (
+        // $day = $start_of_week->format('j'),
+        // $last_week_day_index = (int) $start_of_week->format('j') + 7;
+        // $day < $last_week_day_index;
+        // $day++
+        // ) {
+        for ($day = 0; $day < 7; $day++) {
             [$day_date, , $day_date_ob] = $this->_get_wkday_start_end($day, $start_of_week);
 
-            $exact_date = UIDateFormats::factory($this->app)->format_datetime_for_url(
+            $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url(
                 $day_date_ob,
                 $this->app->settings->get('input_date_format')
             );
             $href_for_date = $this->_create_link_for_day_view($exact_date);
 
             // Initialize empty arrays for this day if no events to minimize warnings
-            if ( ! isset($all_events[ $day_date ][ 'allday' ])) {
-                $all_events[ $day_date ][ 'allday' ] = [];
+            if ( ! isset($all_events[$day_date]['allday'])) {
+                $all_events[$day_date]['allday'] = [];
             }
-            if ( ! isset($all_events[ $day_date ][ 'notallday' ])) {
-                $all_events[ $day_date ][ 'notallday' ] = [];
+            if ( ! isset($all_events[$day_date]['notallday'])) {
+                $all_events[$day_date]['notallday'] = [];
             }
 
             $evt_stack = [0]; // Stack to keep track of indentation
 
-            foreach ($all_events[ $day_date ] as $event_type => &$events) {
+            foreach ($all_events[$day_date] as $event_type => &$events) {
                 foreach ($events as &$evt) {
                     $event = [
                         'filtered_title'   => $evt->get_runtime('filtered_title'),
@@ -315,18 +314,23 @@ class WeekView extends AbstractView
                         'start_truncated'  => $evt->get('start_truncated'),
                         'end_truncated'    => $evt->get('end_truncated'),
                         'popup_timespan'   => TwigExtension::timespan($evt, 'short'),
-                        'avatar'           => TwigExtension::avatar($evt, [
-                            'post_thumbnail',
-                            'content_img',
-                            'location_avatar',
-                            'category_avatar',
-                        ], '', false),
+                        'avatar'           => TwigExtension::avatar(
+                            $evt,
+                            [
+                                'post_thumbnail',
+                                'content_img',
+                                'location_avatar',
+                                'category_avatar',
+                            ],
+                            '',
+                            false
+                        ),
                     ];
 
                     if ('notallday' === $event_type) {
                         $start = $evt->get('start');
                         // Calculate top and bottom edges of current event
-                        $top = $start->format('G') * 60 + $start->format('i');
+                        $top    = $start->format('G') * 60 + $start->format('i');
                         $bottom = min($top + $evt->get_duration() / 60, 1440);
                         // While there's more than one event in the stack and this event's top
                         // position is beyond the last event's bottom, pop the stack
@@ -349,13 +353,13 @@ class WeekView extends AbstractView
                 }
             }
 
-            $days[ $day_date ] = [
+            $days[$day_date] = [
                 'today'     =>
                     $day_date_ob->format('Y') == $now->format('Y')
                     && $day_date_ob->format('m') == $now->format('m')
                     && $day_date_ob->format('j') == $now->format('j'),
-                'allday'    => $all_events[ $day_date ][ 'allday' ],
-                'notallday' => $all_events[ $day_date ][ 'notallday' ],
+                'allday'    => $all_events[$day_date]['allday'],
+                'notallday' => $all_events[$day_date]['notallday'],
                 'href'      => $href_for_date,
                 'day'       => (new DT($day_date))->format_i18n('j'),
                 'weekday'   => (new DT($day_date))->format_i18n('D'),
@@ -386,18 +390,17 @@ class WeekView extends AbstractView
         int $day,
         DT $week_start
     ) {
-
-	    if (null === ($entry = $this->_days_cache->get($day))) {
-
+        if (null === ($entry = $this->daysCache->get($day))) {
             $day_start = (new DT($week_start))
                 ->adjust_day($day);
-            $entry = [
-				$day_start->format(),
-	            (new DT($day_start))->set_time(23, 59,59)->format(),
-	            $day_start
+            $entry     = [
+                $day_start->format(),
+                (new DT($day_start))->set_time(23, 59, 59)->format(),
+                $day_start,
             ];
-            $this->_days_cache->set($day, $entry);
+            $this->daysCache->set($day, $entry);
         }
+
         return $entry;
     }
 
@@ -419,24 +422,24 @@ class WeekView extends AbstractView
      *
      * @return array      Array of links
      */
-    protected function get_week_pagination_links($args, $title)
+    protected function get_week_pagination_links($args, $title, $title_short)
     {
         $links = [];
 
-        $orig_date = $args[ 'exact_date' ];
+        $orig_date = $args['exact_date'];
 
-        $negative_offset = $args[ 'week_offset' ] * 7 - 7;
-        $positive_offset = $args[ 'week_offset' ] * 7 + 7;
+        $negative_offset = $args['week_offset'] * 7 - 7;
+        $positive_offset = $args['week_offset'] * 7 + 7;
         // =================
         // = Previous week =
         // =================
-        $WeekStart = (new DT($args[ 'exact_date' ], 'sys.default'))
+        $WeekStart          = (new DT($args['exact_date'], 'sys.default'))
             ->adjust_day($negative_offset)
             ->set_time(0, 0, 0);
-        $args[ 'exact_date' ] = $WeekStart->format();
-        $href = HtmlFactory::factory($this->app)
-                           ->create_href_helper_instance($args);
-        $links[] = [
+        $args['exact_date'] = $WeekStart->format();
+        $href               = HtmlFactory::factory($this->app)
+                                         ->create_href_helper_instance($args);
+        $links[]            = [
             'enabled' => true,
             'class'   => 'ai1ec-prev-week',
             'text'    => '<i class="ai1ec-fa ai1ec-fa-chevron-left"></i>',
@@ -445,21 +448,22 @@ class WeekView extends AbstractView
         // ======================
         // = Minical datepicker =
         // ======================
-        $args[ 'exact_date' ] = $orig_date;
-        $links[] = HtmlFactory::factory($this->app)->create_datepicker_link(
+        $args['exact_date'] = $orig_date;
+        $links[]            = HtmlFactory::factory($this->app)->create_datepicker_link(
             $args,
-            $args[ 'exact_date' ],
-            $title
+            $args['exact_date'],
+            $title,
+            $title_short
         );
 
         // =============
         // = Next week =
         // =============
         $WeekStart->adjust_day($positive_offset * 2); // above was (-1), (+2) is to counteract
-        $args[ 'exact_date' ] = $WeekStart->format();
-        $href = HtmlFactory::factory($this->app)
-                           ->create_href_helper_instance($args)
-                           ->generate_href();
+        $args['exact_date'] = $WeekStart->format();
+        $href               = HtmlFactory::factory($this->app)
+                                         ->create_href_helper_instance($args)
+                                         ->generate_href();
 
         $links[] = [
             'enabled' => true,
@@ -470,5 +474,4 @@ class WeekView extends AbstractView
 
         return $links;
     }
-
 }

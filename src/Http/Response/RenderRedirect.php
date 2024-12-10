@@ -12,12 +12,11 @@ namespace Osec\Http\Response;
  */
 class RenderRedirect extends RenderStrategyAbstract
 {
-
     public function render(array $params)
     {
         $this->local_redirect(
-            $params[ 'url' ],
-            $params[ 'query_args' ]
+            $params['url'],
+            $params['query_args']
         );
     }
 
@@ -37,11 +36,11 @@ class RenderRedirect extends RenderStrategyAbstract
      * @return never Method does not return. It perform implicit `exit` to
      *              protect against further processing
      */
-    static public function local_redirect(
+    public static function local_redirect(
         $target_uri,
         array $extra = [],
         $status = 302
-    ) : never {
+    ): never {
         $target_uri = add_query_arg($extra, $target_uri);
         wp_safe_redirect($target_uri, $status);
         exit(0);

@@ -12,7 +12,6 @@ namespace Osec\Bootstrap;
  */
 class OsecBaseInitialized extends OsecBaseClass
 {
-
     /**
      * Initiate base objects.
      *
@@ -36,5 +35,4 @@ class OsecBaseInitialized extends OsecBaseClass
     protected function _initialize()
     {
     }
-
 }

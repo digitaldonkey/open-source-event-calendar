@@ -6,7 +6,7 @@ timely.define(["jquery_timely", "domReady", "ai1ec_config", "libs/utils", "scrip
         }), t === !0 && e("#ai1ec-plugins-settings").remove()
     }, o = function (t) {
         var n = e(this).attr("href");
-        e.cookie("ai1ec_general_settings_active_tab", n)
+        e.cookie("osec_general_settings_active_tab", n)
     }, u = function () {
         var t = e("#week_view_starts_at"), r = e("#week_view_ends_at"),
             i = parseInt(t.val(), 10), s = parseInt(r.val(), 10);
@@ -29,7 +29,7 @@ timely.define(["jquery_timely", "domReady", "ai1ec_config", "libs/utils", "scrip
         e("fieldset.ai1ec-captcha_provider").addClass("ai1ec-hidden"), e(".ai1ec-" + e(this).val()).removeClass("ai1ec-hidden")
     }, c = function () {
         t(function () {
-            f(), a(), r.activate_saved_tab_on_page_load(e.cookie("ai1ec_general_settings_active_tab")), e(document).on("click", '#ai1ec-general-settings .ai1ec-nav a[data-toggle="ai1ec-tab"]', o), e(document).on("click", "#disable_standard_filter_menu_toggler", function (e) {
+            f(), a(), r.activate_saved_tab_on_page_load(e.cookie("osec_general_settings_active_tab")), e(document).on("click", '#ai1ec-general-settings .ai1ec-nav a[data-toggle="ai1ec-tab"]', o), e(document).on("click", "#disable_standard_filter_menu_toggler", function (e) {
                 e.preventDefault()
             }), e(document).on("click", "#ai1ec-button-refresh", i.perform_rescan);
             var t = e("#exact_date");

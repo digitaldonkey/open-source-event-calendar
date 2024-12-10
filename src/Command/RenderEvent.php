@@ -19,7 +19,6 @@ use Osec\Http\Request\RequestParser;
  */
 class RenderEvent extends RenderCalendar
 {
-
     public function is_this_to_execute()
     {
         global $post;
@@ -39,23 +38,26 @@ class RenderEvent extends RenderCalendar
     {
         // If not on the single event page, return nothing.
         if ( ! is_single()) {
-            return ['data' => '', 'is_event' => true];
+            return [
+                'data'     => '',
+                'is_event' => true,
+            ];
         }
 
         // Else proceed with rendering valid event. Fetch all relevant details.
-        $instance = isset($_REQUEST[ 'instance_id' ]) ? (int) $_REQUEST[ 'instance_id' ] : -1;
+        $instance = isset($_REQUEST['instance_id']) ? (int)$_REQUEST['instance_id'] : -1;
 
-        $event = new Event($this->app, get_the_ID(), $instance);
-        $view = EventSingleView::factory($this->app);
+        $event       = new Event($this->app, get_the_ID(), $instance);
+        $view        = EventSingleView::factory($this->app);
         $footer_html = $view->get_footer($event);
         FrontendCssController::factory($this->app)->add_link_to_html_for_frontend();
         ScriptsFrontendController::factory($this->app)->load_frontend_js(false);
 
         // If requesting event by JSON (remotely), return fully rendered event.
-        if ('html' !== $this->_request_type) {
+        if ('html' !== $this->requestType) {
             return [
                 'data'     => [
-                    'html' => $view->get_full_article($event, $footer_html)
+                    'html' => $view->get_full_article($event, $footer_html),
                 ],
                 'callback' => RequestParser::get_param('callback', null),
             ];
@@ -69,4 +71,3 @@ class RenderEvent extends RenderCalendar
         ];
     }
 }
-

@@ -26,12 +26,6 @@ use Osec\Theme\ThemeLoader;
  */
 class WidgetAgendaView extends WidgetAbstract
 {
-
-    /**
-     * @var boolean
-     */
-    protected $_css_loaded = false;
-
     /**
      * Constructor for widget.
      */
@@ -41,10 +35,12 @@ class WidgetAgendaView extends WidgetAbstract
             $this->get_id(),
             __('Upcoming Events', OSEC_TXT_DOM),
             [
-                'description'           => __('Open Source Event Calendar: Lists upcoming events in Agenda view',
-	                OSEC_TXT_DOM),
+                'description'           => __(
+                    'Open Source Event Calendar: Lists upcoming events in Agenda view',
+                    OSEC_TXT_DOM
+                ),
                 'class'                 => __CLASS__,
-                'show_instance_in_rest' => true
+                'show_instance_in_rest' => true,
             ]
         );
     }
@@ -62,9 +58,8 @@ class WidgetAgendaView extends WidgetAbstract
      */
     public static function register_widget()
     {
-
         // TODO MAYBE CHECK FIRST IF ALLREADY REGISTERED IN WIDGETCONTROLLER?
-        //   --> How to ensure single Instance?
+        // --> How to ensure single Instance?
 
         register_widget(__CLASS__);
     }
@@ -72,7 +67,7 @@ class WidgetAgendaView extends WidgetAbstract
     public static function uninstall($purge = false)
     {
         unregister_widget(__CLASS__);
-        $wpCreatedOpt = 'widget_'.self::get_id();
+        $wpCreatedOpt = 'widget_' . self::get_id();
         if (get_option($wpCreatedOpt)) {
             delete_option($wpCreatedOpt);
         }
@@ -101,19 +96,21 @@ class WidgetAgendaView extends WidgetAbstract
                 'renderer' => [
                     'class'   => 'Osec\Settings\Elements\SettingsSelect',
                     'label'   => __(
-                        'Choose how to limit the upcoming events', OSEC_TXT_DOM),
+                        'Choose how to limit the upcoming events',
+                        OSEC_TXT_DOM
+                    ),
                     'options' => [
                         [
-                            'text'  => __('Events', OSEC_TXT_DOM ),
+                            'text'  => __('Events', OSEC_TXT_DOM),
                             'value' => 'events',
                         ],
                         [
-                            'text'  => __( 'Days', OSEC_TXT_DOM ),
+                            'text'  => __('Days', OSEC_TXT_DOM),
                             'value' => 'days',
                         ],
                     ],
                 ],
-                'value'    => $defaults[ 'events_seek_type' ],
+                'value'    => $defaults['events_seek_type'],
             ],
             'events_per_page'                          => [
                 'renderer' => [
@@ -122,7 +119,7 @@ class WidgetAgendaView extends WidgetAbstract
                     'type'   => 'append',
                     'append' => 'events',
                 ],
-                'value'    => $defaults[ 'events_per_page' ],
+                'value'    => $defaults['events_per_page'],
             ],
             'days_per_page'                            => [
                 'renderer' => [
@@ -131,28 +128,31 @@ class WidgetAgendaView extends WidgetAbstract
                     'type'   => 'append',
                     'append' => 'days',
                 ],
-                'value'    => $defaults[ 'days_per_page' ],
+                'value'    => $defaults['days_per_page'],
             ],
             'upcoming_widgets_default_tags_categories' => [
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCatsTagsFilter',
                     'label' => __(
                         'Show events filtered for the following tags/categories',
-	                    OSEC_TXT_DOM
+                        OSEC_TXT_DOM
                     ),
                     'help'  => __(
                         'To clear, hold &#8984;/<abbr class="initialism">CTRL</abbr> and click selection.',
-	                    OSEC_TXT_DOM
+                        OSEC_TXT_DOM
                     ),
                 ],
-                'value'    => ['categories' => [], 'tags' => []],
+                'value'    => [
+                    'categories' => [],
+                    'tags'       => [],
+                ],
             ],
             'show_subscribe_buttons'                   => [
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'label' => I18n::__('Show the subscribe button in the widget'),
                 ],
-                'value'    => $defaults[ 'show_subscribe_buttons' ],
+                'value'    => $defaults['show_subscribe_buttons'],
             ],
         ];
     }
@@ -163,8 +163,8 @@ class WidgetAgendaView extends WidgetAbstract
     public function get_js_widget_configurable_defaults()
     {
         $def = $this->get_defaults();
-        unset($def[ 'title' ]);
-        unset($def[ 'link_for_days' ]);
+        unset($def['title']);
+        unset($def['link_for_days']);
 
         return $def;
     }
@@ -212,56 +212,62 @@ class WidgetAgendaView extends WidgetAbstract
      * Renders the widget's configuration form for the Manage Widgets page.
      *
      * @param  array  $instance  The data array for the widget instance being
-     *   configured.
+     *  configured.
      *
      * @return void
      */
     public function form($instance)
     {
-        $default = $this->get_defaults();
-        $instance = wp_parse_args((array) $instance, $default);
+        $default  = $this->get_defaults();
+        $instance = wp_parse_args((array)$instance, $default);
 
         // Get available cats, tags, events to allow user to limit widget to certain categories
-        $events_categories = get_terms('events_categories', [
-            'orderby'    => 'name',
-            "hide_empty" => false,
-        ]);
-        $events_tags = get_terms('events_tags', [
-            'orderby'    => 'name',
-            "hide_empty" => false,
-        ]);
+        $events_categories = get_terms(
+            'events_categories',
+            [
+                'orderby'    => 'name',
+                'hide_empty' => false,
+            ]
+        );
+        $events_tags       = get_terms(
+            'events_tags',
+            [
+                'orderby'    => 'name',
+                'hide_empty' => false,
+            ]
+        );
 
         // Generate unique IDs and NAMEs of all needed form fields
         $fields = [
-            'title'                  => ['value' => $instance[ 'title' ]],
-            'events_seek_type'       => ['value' => $instance[ 'events_seek_type' ]],
-            'events_per_page'        => ['value' => $instance[ 'events_per_page' ]],
-            'days_per_page'          => ['value' => $instance[ 'days_per_page' ]],
-            'show_subscribe_buttons' => ['value' => $instance[ 'show_subscribe_buttons' ]],
-            'show_calendar_button'   => ['value' => $instance[ 'show_calendar_button' ]],
-            'hide_on_calendar_page'  => ['value' => $instance[ 'hide_on_calendar_page' ]],
-            'limit_by_cat'           => ['value' => $instance[ 'limit_by_cat' ]],
-            'limit_by_tag'           => ['value' => $instance[ 'limit_by_tag' ]],
+            'title'                  => ['value' => $instance['title']],
+            'events_seek_type'       => ['value' => $instance['events_seek_type']],
+            'events_per_page'        => ['value' => $instance['events_per_page']],
+            'days_per_page'          => ['value' => $instance['days_per_page']],
+            'show_subscribe_buttons' => ['value' => $instance['show_subscribe_buttons']],
+            'show_calendar_button'   => ['value' => $instance['show_calendar_button']],
+            'hide_on_calendar_page'  => ['value' => $instance['hide_on_calendar_page']],
+            'limit_by_cat'           => ['value' => $instance['limit_by_cat']],
+            'limit_by_tag'           => ['value' => $instance['limit_by_tag']],
             'cat_ids'                => [
-                'value'   => (array) $instance[ 'cat_ids' ],
+                'value'   => (array)$instance['cat_ids'],
                 'options' => $events_categories,
             ],
             'tag_ids'                => [
-                'value'   => (array) $instance[ 'tag_ids' ],
+                'value'   => (array)$instance['tag_ids'],
                 'options' => $events_tags,
             ],
         ];
         foreach ($fields as $field => $data) {
-            $fields[ $field ][ 'id' ] = $this->get_field_id($field);
-            $fields[ $field ][ 'name' ] = $this->get_field_name($field);
-            $fields[ $field ][ 'value' ] = $data[ 'value' ];
-            if (isset($data[ 'options' ])) {
-                $fields[ $field ][ 'options' ] = $data[ 'options' ];
+            $fields[$field]['id']    = $this->get_field_id($field);
+            $fields[$field]['name']  = $this->get_field_name($field);
+            $fields[$field]['value'] = $data['value'];
+            if (isset($data['options'])) {
+                $fields[$field]['options'] = $data['options'];
             }
         }
 
         // TODO We need to add some Admin CSS/JS here.
-        // So that the	"Events with these Categories" Chackbox toggles selector
+        // So that the  "Events with these Categories" Chackbox toggles selector
         ScriptsFrontendController::factory($this->app)->load_admin_js();
         ScriptsBackendController::factory($this->app)->admin_enqueue_scripts('widgets.php');
 
@@ -286,50 +292,50 @@ class WidgetAgendaView extends WidgetAbstract
     public function update($new_instance, $old_instance)
     {
         // Save existing data as a base to modify with new data
-        $instance = $old_instance;
-        $instance[ 'title' ] = strip_tags((string) $new_instance[ 'title' ]);
-        $instance[ 'events_per_page' ] = IntegerHelper::index(
-            $new_instance[ 'events_per_page' ],
+        $instance                           = $old_instance;
+        $instance['title']                  = strip_tags((string)$new_instance['title']);
+        $instance['events_per_page']        = IntegerHelper::index(
+            $new_instance['events_per_page'],
             1,
             1
         );
-        $instance[ 'days_per_page' ] = IntegerHelper::index(
-            $new_instance[ 'days_per_page' ],
+        $instance['days_per_page']          = IntegerHelper::index(
+            $new_instance['days_per_page'],
             1,
             1
         );
-        $instance[ 'events_seek_type' ] = $this->_valid_seek_type(
-            $new_instance[ 'events_seek_type' ]
+        $instance['events_seek_type']       = $this->_valid_seek_type(
+            $new_instance['events_seek_type']
         );
-        $instance[ 'show_subscribe_buttons' ] = isset($new_instance[ 'show_subscribe_buttons' ]) ? true : false;
-        $instance[ 'show_calendar_button' ] = isset($new_instance[ 'show_calendar_button' ]) ? true : false;
-        $instance[ 'hide_on_calendar_page' ] = isset($new_instance[ 'hide_on_calendar_page' ]) ? true : false;
+        $instance['show_subscribe_buttons'] = isset($new_instance['show_subscribe_buttons']) ? true : false;
+        $instance['show_calendar_button']   = isset($new_instance['show_calendar_button']) ? true : false;
+        $instance['hide_on_calendar_page']  = isset($new_instance['hide_on_calendar_page']) ? true : false;
 
-        // For limits, set the limit to False if no IDs were selected, or set the respective IDs to empty if "limit by" was unchecked
-        $instance[ 'limit_by_cat' ] = false;
-        $instance[ 'cat_ids' ] = [];
-        if (isset($new_instance[ 'cat_ids' ]) && $new_instance[ 'cat_ids' ] != false) {
-            $instance[ 'limit_by_cat' ] = true;
+        // For limits, set the limit to False if no IDs were selected,
+        // or set the respective IDs to empty if "limit by" was unchecked
+        $instance['limit_by_cat'] = false;
+        $instance['cat_ids']      = [];
+        if (isset($new_instance['cat_ids']) && $new_instance['cat_ids'] != false) {
+            $instance['limit_by_cat'] = true;
         }
-        if (isset($new_instance[ 'limit_by_cat' ]) && $new_instance[ 'limit_by_cat' ] != false) {
-            $instance[ 'limit_by_cat' ] = true;
+        if (isset($new_instance['limit_by_cat']) && $new_instance['limit_by_cat'] != false) {
+            $instance['limit_by_cat'] = true;
         }
-        if (isset($new_instance[ 'cat_ids' ]) && $instance[ 'limit_by_cat' ] === true) {
-            $instance[ 'cat_ids' ] = $new_instance[ 'cat_ids' ];
-        }
-
-        $instance[ 'limit_by_tag' ] = false;
-        $instance[ 'tag_ids' ] = [];
-        if (isset($new_instance[ 'tag_ids' ]) && $new_instance[ 'tag_ids' ] != false) {
-            $instance[ 'limit_by_tag' ] = true;
-        }
-        if (isset($new_instance[ 'limit_by_tag' ]) && $new_instance[ 'limit_by_tag' ] != false) {
-            $instance[ 'limit_by_tag' ] = true;
-        }
-        if (isset($new_instance[ 'tag_ids' ]) && $instance[ 'limit_by_tag' ] === true) {
-            $instance[ 'tag_ids' ] = $new_instance[ 'tag_ids' ];
+        if (isset($new_instance['cat_ids']) && $instance['limit_by_cat'] === true) {
+            $instance['cat_ids'] = $new_instance['cat_ids'];
         }
 
+        $instance['limit_by_tag'] = false;
+        $instance['tag_ids']      = [];
+        if (isset($new_instance['tag_ids']) && $new_instance['tag_ids'] != false) {
+            $instance['limit_by_tag'] = true;
+        }
+        if (isset($new_instance['limit_by_tag']) && $new_instance['limit_by_tag'] != false) {
+            $instance['limit_by_tag'] = true;
+        }
+        if (isset($new_instance['tag_ids']) && $instance['limit_by_tag'] === true) {
+            $instance['tag_ids'] = $new_instance['tag_ids'];
+        }
 
         return $instance;
     }
@@ -347,7 +353,7 @@ class WidgetAgendaView extends WidgetAbstract
     {
         static $list = ['events', 'days'];
         if ( ! in_array($value, $list)) {
-            return (string) reset($list);
+            return (string)reset($list);
         }
 
         return $value;
@@ -374,42 +380,45 @@ class WidgetAgendaView extends WidgetAbstract
      */
     public function get_content(array $args_for_widget, $remote = false)
     {
-
         $addInlineCss = ($remote || $this->isBlockEditor());
-        $request = RequestParser::factory($this->app);
-        $agendaView = new AgendaView($this->app, $request);
+        $request      = RequestParser::factory($this->app);
+        $agendaView   = new AgendaView($this->app, $request);
 
-        $time = new DT('now');
-        $search = EventSearch::factory($this->app);
+        $time     = new DT('now');
+        $search   = EventSearch::factory($this->app);
         $settings = $this->app->settings;
 
         $is_calendar_page = is_page($settings->get('calendar_page_id'));
-        if ($args_for_widget[ 'hide_on_calendar_page' ] &&
-            $is_calendar_page) {
+        if (
+            $args_for_widget['hide_on_calendar_page'] &&
+            $is_calendar_page
+        ) {
             return;
         }
 
         // Add params to the subscribe_url for filtering by Limits (category, tag)
         $subscribe_filter = '';
-        if ( ! is_array($args_for_widget[ 'cat_ids' ])) {
-            $args_for_widget[ 'cat_ids' ] = explode(',', (string) $args_for_widget[ 'cat_ids' ]);
+        if ( ! is_array($args_for_widget['cat_ids'])) {
+            $args_for_widget['cat_ids'] = explode(',', (string)$args_for_widget['cat_ids']);
         }
 
-        if ( ! is_array($args_for_widget[ 'tag_ids' ])) {
-            $args_for_widget[ 'tag_ids' ] = explode(',', (string) $args_for_widget[ 'tag_ids' ]);
+        if ( ! is_array($args_for_widget['tag_ids'])) {
+            $args_for_widget['tag_ids'] = explode(',', (string)$args_for_widget['tag_ids']);
         }
-        $subscribe_filter .= $args_for_widget[ 'cat_ids' ] ? '&osec_cat_ids='.implode(',',
-                $args_for_widget[ 'cat_ids' ]) : '';
-        $subscribe_filter .= $args_for_widget[ 'tag_ids' ] ? '&osec_tag_ids='.implode(',',
-                $args_for_widget[ 'tag_ids' ]) : '';
+
+        $subscribe_filter .= $args_for_widget['cat_ids'] ?
+            '&osec_cat_ids=' . implode(',', $args_for_widget['cat_ids']) : '';
+
+        $subscribe_filter .= $args_for_widget['tag_ids'] ?
+            '&osec_tag_ids=' . implode(',', $args_for_widget['tag_ids']) : '';
 
         // Get localized time
         $timestamp = $time->format_to_gmt();
 
         // Set $limit to the specified category/tag
         $filter = [
-            'cat_ids' => $args_for_widget[ 'cat_ids' ],
-            'tag_ids' => $args_for_widget[ 'tag_ids' ],
+            'cat_ids' => $args_for_widget['cat_ids'],
+            'tag_ids' => $args_for_widget['tag_ids'],
         ];
 
         /**
@@ -418,19 +427,18 @@ class WidgetAgendaView extends WidgetAbstract
          * @since 1.0
          *
          * @param  array  $limit  Array of Less variables
-         *
          */
         $filter = apply_filters('osec_filters_upcoming_widget_alter', $filter);
 
         // Get events, then classify into date array
         // JB: apply seek check here
-        $seek_days = ('days' === $args_for_widget[ 'events_seek_type' ]);
-        $seek_count = $args_for_widget[ 'events_per_page' ];
-        $last_day = false;
+        $seek_days  = ('days' === $args_for_widget['events_seek_type']);
+        $seek_count = $args_for_widget['events_per_page'];
+        $last_day   = false;
         if ($seek_days) {
-            $seek_count = $args_for_widget[ 'days_per_page' ] * 5;
-            $last_day = strtotime(
-                '+'.$args_for_widget[ 'days_per_page' ].' days'
+            $seek_count = $args_for_widget['days_per_page'] * 5;
+            $last_day   = strtotime(
+                '+' . $args_for_widget['days_per_page'] . ' days'
             );
         }
 
@@ -441,42 +449,43 @@ class WidgetAgendaView extends WidgetAbstract
             $filter
         );
         if ($seek_days) {
-            foreach ($event_results[ 'events' ] as $ek => $event) {
+            foreach ($event_results['events'] as $ek => $event) {
                 if ($event->get('start')->format() >= $last_day) {
-                    unset($event_results[ 'events' ][ $ek ]);
+                    unset($event_results['events'][$ek]);
                 }
             }
         }
 
-        $dates = $agendaView->get_agenda_like_date_array($event_results[ 'events' ], $request);
+        $dates = $agendaView->get_agenda_like_date_array($event_results['events'], $request);
 
-        $args_for_widget[ 'dates' ] = $dates;
+        $args_for_widget['dates'] = $dates;
         // load CSS just once for all widgets.
         // Do not load it on the calendar page as it's already loaded.
-        if (false === $this->_css_loaded && ! $is_calendar_page) {
+        if (false === $this->cssIsLoaded && ! $is_calendar_page) {
             if ($addInlineCss) {
-                $args_for_widget[ 'css' ] = FrontendCssController::factory($this->app)
-                                                                 ->get_compiled_css();
+                $args_for_widget['css'] = FrontendCssController::factory($this->app)
+                                                               ->get_compiled_css();
             }
-            $this->_css_loaded = true;
+            $this->cssIsLoaded = true;
         }
-        $args_for_widget[ 'show_location_in_title' ] = $settings->get('show_location_in_title');
-        $args_for_widget[ 'show_year_in_agenda_dates' ] = $settings->get('show_year_in_agenda_dates');
-        $args_for_widget[ 'calendar_url' ] = HtmlFactory::factory($this->app)->create_href_helper_instance($filter)
-                                                        ->generate_href();
-        $args_for_widget[ 'subscribe_url' ] = OSEC_EXPORT_URL.$subscribe_filter;
-        $args_for_widget[ 'subscribe_url_no_html' ] = OSEC_EXPORT_URL.'&no_html=true'.$subscribe_filter;
-        $args_for_widget[ 'text_upcoming_events' ] = __('There are no upcoming events.', OSEC_TXT_DOM);
-        $args_for_widget[ 'text_all_day' ] = __('all-day', OSEC_TXT_DOM);
-        $args_for_widget[ 'text_view_calendar' ] = __('View Calendar', OSEC_TXT_DOM);
+        $args_for_widget['show_location_in_title']    = $settings->get('show_location_in_title');
+        $args_for_widget['show_year_in_agenda_dates'] = $settings->get('show_year_in_agenda_dates');
+        $args_for_widget['calendar_url']              = HtmlFactory::factory($this->app)
+                                                                   ->create_href_helper_instance($filter)
+                                                                   ->generate_href();
+        $args_for_widget['subscribe_url']             = OSEC_EXPORT_URL . $subscribe_filter;
+        $args_for_widget['subscribe_url_no_html']     = OSEC_EXPORT_URL . '&no_html=true' . $subscribe_filter;
+        $args_for_widget['text_upcoming_events']      = __('There are no upcoming events.', OSEC_TXT_DOM);
+        $args_for_widget['text_all_day']              = __('all-day', OSEC_TXT_DOM);
+        $args_for_widget['text_view_calendar']        = __('View Calendar', OSEC_TXT_DOM);
 
         // TODO Just disabled that
 
-        //    $args_for_widget['calendar_url'] = get_page_uri($settings->get('calendar_page_id'));
-        $args_for_widget[ 'text_edit' ] = __('Edit', OSEC_TXT_DOM);
-        $args_for_widget[ 'text_venue_separator' ] = __('@ %s', OSEC_TXT_DOM);
-        $args_for_widget[ 'text_subscribe_label' ] = __('Add', OSEC_TXT_DOM);
-        $args_for_widget[ 'subscribe_buttons_text' ] = CalendarSubscribeButtonView::factory($this->app)->get_labels();
+        // $args_for_widget['calendar_url'] = get_page_uri($settings->get('calendar_page_id'));
+        $args_for_widget['text_edit']              = __('Edit', OSEC_TXT_DOM);
+        $args_for_widget['text_venue_separator']   = __('@ %s', OSEC_TXT_DOM);
+        $args_for_widget['text_subscribe_label']   = __('Add', OSEC_TXT_DOM);
+        $args_for_widget['subscribe_buttons_text'] = CalendarSubscribeButtonView::factory($this->app)->get_labels();
 
         // Display theme
         return ThemeLoader::factory($this->app)
@@ -484,7 +493,8 @@ class WidgetAgendaView extends WidgetAbstract
                           ->get_content();
     }
 
-    /* (non-PHPdoc)
+    /*
+    (non-PHPdoc)
      * @see \Ai1ec_Embeddable::check_requirements()
      */
 
@@ -494,7 +504,7 @@ class WidgetAgendaView extends WidgetAbstract
     private function isBlockEditor()
     {
         // e.g: wp-json/wp/v2/widget-types/osec_scheduler_hooks/encode
-        return str_contains($_SERVER[ 'REQUEST_URI' ], $this->get_id());
+        return str_contains($_SERVER['REQUEST_URI'], $this->get_id());
     }
 
     /**
@@ -504,8 +514,8 @@ class WidgetAgendaView extends WidgetAbstract
      */
     public function javascript_widget($args)
     {
-        $args[ 'show_calendar_button' ] = false;
-        $args[ 'link_for_days' ] = false;
+        $args['show_calendar_button'] = false;
+        $args['link_for_days']        = false;
 
         return parent::javascript_widget($args);
     }
@@ -514,5 +524,4 @@ class WidgetAgendaView extends WidgetAbstract
     {
         return null;
     }
-
 }
