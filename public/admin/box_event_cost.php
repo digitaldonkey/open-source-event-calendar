@@ -3,7 +3,7 @@
        data-parent="#osec-add-new-event-accordion"
        href="#osec-event-cost-box">
         <i class="ai1ec-fa ai1ec-fa-shopping-cart ai1ec-fa-fw"></i>
-        <?php _e('Event cost and Tickets', 'open-source-event-calendar'); ?>
+        <?php esc_html_e('Event cost and Tickets', 'open-source-event-calendar'); ?>
         <i class="ai1ec-fa ai1ec-fa-warning ai1ec-fa-fw ai1ec-hidden"></i>
     </a>
 </div>
@@ -14,7 +14,7 @@
             <tr>
                 <td class="ai1ec-first ai1ec-cost-label">
                     <label for="osec_cost">
-                        <?php _e('Cost', 'open-source-event-calendar'); ?>:
+                        <?php esc_html_e('Cost', 'open-source-event-calendar'); ?>:
                     </label>
                 </td>
                 <td>
@@ -32,7 +32,7 @@
                                name="osec_is_free_event"
                                id="osec_is_free_event"
                                value="1" <?php echo $is_free; ?>>
-                        <?php _e('Free event', 'open-source-event-calendar'); ?>
+                        <?php esc_html_e('Free event', 'open-source-event-calendar'); ?>
                     </label>
                 </td>
             </tr>

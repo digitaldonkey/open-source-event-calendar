@@ -1,12 +1,12 @@
 <h3><a name="ai1ec"><?php
-        _e('Open Source Event Calendar', 'open-source-event-calendar');
+        esc_html_e('Open Source Event Calendar', 'open-source-event-calendar');
         ?></a></h3>
 <table class="ai1ec-form">
     <tbody>
     <tr>
         <td class="ai1ec-first">
             <label for="osec_user_timezone">
-                <?php _e('Your preferred timezone', 'open-source-event-calendar'); ?>?
+                <?php esc_html_e('Your preferred timezone', 'open-source-event-calendar'); ?>?
             </label>
         </td>
         <td>

@@ -27,10 +27,10 @@ class EditPostActions extends OsecBaseClass
             <script type="text/javascript">
                 jQuery(document).ready(function () {
                     jQuery('<option>').val('clone')
-                        .text('<?php _e('Clone', 'open-source-event-calendar'); ?>')
+                        .text('<?php esc_html_e('Clone', 'open-source-event-calendar'); ?>')
                         .appendTo("select[name='action']");
                     jQuery('<option>').val('clone')
-                        .text('<?php _e('Clone', 'open-source-event-calendar'); ?>')
+                        .text('<?php esc_html_e('Clone', 'open-source-event-calendar'); ?>')
                         .appendTo("select[name='action2']");
                 });
             </script>

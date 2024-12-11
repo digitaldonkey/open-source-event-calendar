@@ -3,7 +3,7 @@
        data-parent="#osec-add-new-event-accordion"
        href="#osec-event-location-box">
         <i class="ai1ec-fa ai1ec-fa-map-marker ai1ec-fa-fw"></i>
-        <?php _e('Event location details', 'open-source-event-calendar'); ?>
+        <?php esc_html_e('Event location details', 'open-source-event-calendar'); ?>
     </a>
 </div>
 <div id="osec-event-location-box" class="ai1ec-panel-collapse ai1ec-collapse">
@@ -16,7 +16,7 @@
                     <tr>
                         <td class="ai1ec-first">
                             <label for="osec_venue">
-                                <?php _e('Venue name:', 'open-source-event-calendar'); ?>
+                                <?php esc_html_e('Venue name:', 'open-source-event-calendar'); ?>
                             </label>
                         </td>
                         <td>
@@ -28,7 +28,7 @@
                     <tr>
                         <td>
                             <label for="osec_address">
-                                <?php _e('Address:', 'open-source-event-calendar'); ?>
+                                <?php esc_html_e('Address:', 'open-source-event-calendar'); ?>
                             </label>
                         </td>
                         <td>
@@ -42,7 +42,7 @@
                             <label for="osec_input_coordinates">
                                 <input type="checkbox" value="1" name="osec_input_coordinates"
                                        id="osec_input_coordinates" <?php echo $show_coordinates_checkbox; ?>>
-                                <?php _e('Input Coordinates', 'open-source-event-calendar'); ?>
+                                <?php esc_html_e('Input Coordinates', 'open-source-event-calendar'); ?>
                             </label>
                         </td>
                     </tr>
@@ -54,7 +54,7 @@
                     <tr>
                         <td class="ai1ec-first">
                             <label for="osec_latitude">
-                                <?php _e('Latitude:', 'open-source-event-calendar'); ?>
+                                <?php esc_html_e('Latitude:', 'open-source-event-calendar'); ?>
                             </label>
                         </td>
                         <td>
@@ -66,7 +66,7 @@
                     <tr>
                         <td>
                             <label for="osec_longitude">
-                                <?php _e('Longitude:', 'open-source-event-calendar'); ?>
+                                <?php esc_html_e('Longitude:', 'open-source-event-calendar'); ?>
                             </label>
                         </td>
                         <td>
@@ -82,7 +82,7 @@
                 <label for="osec_google_map">
                     <input type="checkbox" value="1" name="osec_google_map"
                            id="osec_google_map" <?php echo $show_map_checkbox; ?>>
-                    <?php _e('Show Map', 'open-source-event-calendar'); ?>
+                    <?php esc_html_e('Show Map', 'open-source-event-calendar'); ?>
                 </label>
                 <div class="ai1ec-map-preview
                     <?php echo $show_map ? 'ai1ec-map-visible' : ''; ?>">

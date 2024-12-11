@@ -17,9 +17,9 @@ global $osec_app;
        href="#osec-event-children-box">
         <i class="ai1ec-fa ai1ec-fa-retweet"></i> <?php
         if ($parent) {
-            _e('Base recurrence event', 'open-source-event-calendar');
+            esc_html_e('Base recurrence event', 'open-source-event-calendar');
         } else {
-            _e('Modified recurrence events', 'open-source-event-calendar');
+            esc_html_e('Modified recurrence events', 'open-source-event-calendar');
         }
         ?>
     </a>
@@ -27,16 +27,16 @@ global $osec_app;
 <div id="osec-event-children-box" class="ai1ec-panel-collapse ai1ec-collapse">
     <div class="ai1ec-panel-body">
         <?php if ($parent) : ?>
-            <?php _e('Edit parent:', 'open-source-event-calendar'); ?>
+            <?php esc_html_e('Edit parent:', 'open-source-event-calendar'); ?>
             <a href="<?php echo get_edit_post_link($parent->get('post_id')); ?>"><?php
                 echo apply_filters('the_title', $parent->get('post')->post_title, $parent->get('post_id'));
                 ?></a>
         <?php else : /* children */ ?>
-            <h4><?php _e('Modified Events', 'open-source-event-calendar'); ?></h4>
+            <h4><?php esc_html_e('Modified Events', 'open-source-event-calendar'); ?></h4>
             <ul>
                 <?php foreach ($children as $child) : ?>
                     <li>
-                        <?php _e('Edit:', 'open-source-event-calendar'); ?>
+                        <?php esc_html_e('Edit:', 'open-source-event-calendar'); ?>
                         <a href="<?php echo get_edit_post_link($child->get('post_id')); ?>"><?php
                             echo $child->get('post')->post_title;
                             ?></a>, <?php echo EventTimeView::factory($osec_app)->get_timespan_html($child, 'long'); ?>

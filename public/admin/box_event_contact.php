@@ -4,7 +4,7 @@
        data-parent="#osec-add-new-event-accordion"
        href="#osec-event-contact-box">
         <i class="ai1ec-fa ai1ec-fa-phone ai1ec-fa-fw"></i>
-        <?php _e('Organizer contact info', 'open-source-event-calendar'); ?>
+        <?php esc_html_e('Organizer contact info', 'open-source-event-calendar'); ?>
         <i class="ai1ec-fa ai1ec-fa-warning ai1ec-fa-fw ai1ec-hidden"></i>
     </a>
 </div>
@@ -15,7 +15,7 @@
             <tr>
                 <td class="ai1ec-first">
                     <label for="osec_contact_name">
-                        <?php _e('Contact name:', 'open-source-event-calendar'); ?>
+                        <?php esc_html_e('Contact name:', 'open-source-event-calendar'); ?>
                     </label>
                 </td>
                 <td>
@@ -28,7 +28,7 @@
             <tr>
                 <td>
                     <label for="osec_contact_phone">
-                        <?php _e('Phone:', 'open-source-event-calendar'); ?>
+                        <?php esc_html_e('Phone:', 'open-source-event-calendar'); ?>
                     </label>
                 </td>
                 <td>
@@ -41,7 +41,7 @@
             <tr>
                 <td>
                     <label for="osec_contact_email">
-                        <?php _e('E-mail:', 'open-source-event-calendar'); ?>
+                        <?php esc_html_e('E-mail:', 'open-source-event-calendar'); ?>
                     </label>
                 </td>
                 <td>
@@ -55,7 +55,7 @@
             <tr>
                 <td>
                     <label for="osec_contact_url">
-                        <?php _e('Website URL:', 'open-source-event-calendar'); ?>
+                        <?php esc_html_e('Website URL:', 'open-source-event-calendar'); ?>
                     </label>
                 </td>
                 <td>

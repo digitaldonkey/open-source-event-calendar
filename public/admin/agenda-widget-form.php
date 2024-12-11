@@ -1,5 +1,5 @@
 <p>
-    <label for="<?php echo $title['id'] ?>"><?php _e('Title:', 'open-source-event-calendar') ?></label>
+    <label for="<?php echo $title['id'] ?>"><?php esc_html_e('Title:', 'open-source-event-calendar') ?></label>
     <input class="widefat" id="<?php echo $title['id'] ?>" name="<?php echo $title['name'] ?>" type="text"
            value="<?php echo $title['value'] ?>"/>
 </p>
@@ -11,7 +11,7 @@
         echo ' checked="checked"';
     }
     ?> />
-    <label for="<?php echo $events_seek_type['id']; ?>_events"><?php _e(
+    <label for="<?php echo $events_seek_type['id']; ?>_events"><?php esc_html_e(
             'Number of events to show:',
             'open-source-event-calendar'
         ) ?></label>
@@ -25,7 +25,7 @@
         echo ' checked="checked"';
     }
     ?> />
-    <label for="<?php echo $events_seek_type['id']; ?>_days"><?php _e(
+    <label for="<?php echo $events_seek_type['id']; ?>_days"><?php esc_html_e(
             'Number of days to show:',
             'open-source-event-calendar'
         ) ?></label>
@@ -34,7 +34,7 @@
 </p>
 
 <p class="ai1ec-limit-by-container">
-    <?php _e('Limit to:', 'open-source-event-calendar'); ?>
+    <?php esc_html_e('Limit to:', 'open-source-event-calendar'); ?>
     <br/>
     <input id="<?php echo $limit_by_cat['id'] ?>" class="ai1ec-limit-by-cat ai1ec-toggle-fix"
            name="<?php echo $limit_by_cat['name'] ?>" type="checkbox" value="1" <?php if ($limit_by_cat['value']) {
@@ -42,7 +42,7 @@
     } ?>
            onchange="this.parentElement.nextElementSibling.style.display = (this.parentElement.nextElementSibling.style.display === 'none') ? 'block' : 'none'; this.parentElement.nextElementSibling.children[0].value = '';"
     />
-    <label for="<?php echo $limit_by_cat['id'] ?>"><?php _e(
+    <label for="<?php echo $limit_by_cat['id'] ?>"><?php esc_html_e(
             'Events with these <strong>Categories</strong>',
             'open-source-event-calendar'
         ) ?></label>
@@ -61,7 +61,7 @@
             } ?>><?php echo $event_cat->name; ?></option>
         <?php endforeach ?>
         <?php if (count($cat_ids['options']) == 0) : ?>
-            <option disabled><?php _e('No categories found.', 'open-source-event-calendar') ?></option>
+            <option disabled><?php esc_html_e('No categories found.', 'open-source-event-calendar') ?></option>
         <?php endif ?>
     </select>
 </p>
@@ -82,7 +82,7 @@
         } ?>
             onchange="this.parentElement.nextElementSibling.style.display = (this.parentElement.nextElementSibling.style.display === 'none') ? 'block' : 'none'; this.parentElement.nextElementSibling.children[0].value = '';"
     "/>
-    <label for="<?php echo $limit_by_tag['id'] ?>"><?php _e(
+    <label for="<?php echo $limit_by_tag['id'] ?>"><?php esc_html_e(
             '<strong>Or</strong> events with these <strong>Tags</strong>',
             'open-source-event-calendar'
         ) ?></label>
@@ -101,7 +101,7 @@
             } ?>><?php echo $event_tag->name; ?></option>
         <?php endforeach ?>
         <?php if (count($tag_ids['options']) == 0) : ?>
-            <option disabled><?php _e('No tags found.', 'open-source-event-calendar') ?></option>
+            <option disabled><?php esc_html_e('No tags found.', 'open-source-event-calendar') ?></option>
         <?php endif ?>
     </select>
 </p>
@@ -115,7 +115,7 @@
             echo 'checked="checked"';
         } ?>
             onchange="this.parentElement.nextElementSibling.style.display = (this.parentElement.nextElementSibling.style.display === 'none') ? 'block' : 'none'; this.parentElement.nextElementSibling.children[0].value = '';"
-    <label for="<?php echo $show_calendar_button['id'] ?>"><?php _e(
+    <label for="<?php echo $show_calendar_button['id'] ?>"><?php esc_html_e(
             'Show <strong>View Calendar</strong> button',
             'open-source-event-calendar'
         ) ?></label>
@@ -124,7 +124,7 @@
            type="checkbox" value="1" <?php if ($show_subscribe_buttons['value']) {
         echo 'checked="checked"';
     } ?> />
-    <label for="<?php echo $show_subscribe_buttons['id'] ?>"><?php _e(
+    <label for="<?php echo $show_subscribe_buttons['id'] ?>"><?php esc_html_e(
             'Show <strong>Subscribe</strong> buttons',
             'open-source-event-calendar'
         ) ?></label>
@@ -133,7 +133,7 @@
            type="checkbox" value="1" <?php if ($hide_on_calendar_page['value']) {
         echo 'checked="checked"';
     } ?> />
-    <label for="<?php echo $hide_on_calendar_page['id'] ?>"><?php _e(
+    <label for="<?php echo $hide_on_calendar_page['id'] ?>"><?php esc_html_e(
             'Hide this widget on calendar page',
             'open-source-event-calendar'
         ) ?></label>

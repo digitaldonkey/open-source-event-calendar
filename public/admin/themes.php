@@ -7,7 +7,7 @@
 <?php elseif ($deleted) : ?>
     <div id="message3" class="updated">
         <p>
-            <?php _e('Theme deleted.', 'open-source-event-calendar') ?>
+            <?php esc_html_e('Theme deleted.', 'open-source-event-calendar') ?>
         </p>
     </div>
 <?php endif; ?>
@@ -15,7 +15,7 @@
 <div class="wrap">
 
     <h2><?php echo esc_html($page_title); ?></h2>
-    <h3><?php _e('Current Calendar Theme', 'open-source-event-calendar'); ?></h3>
+    <h3><?php esc_html_e('Current Calendar Theme', 'open-source-event-calendar'); ?></h3>
     <div id="current-theme"<?php echo ($ct->screenshot) ? ' class="has-screenshot"' : '' ?>>
         <?php if ($ct->screenshot) : ?>
             <img src="<?php echo $ct->theme_root_uri . '/' . $ct->stylesheet . '/' . $ct->screenshot; ?>"
@@ -27,7 +27,7 @@
         <p class="theme-description"><?php echo $ct->description; ?></p>
         <div class="theme-options">
             <?php if ($ct->tags) : ?>
-                <p><?php _e('Tags:', 'open-source-event-calendar'); ?><?php echo implode(', ', $ct->tags); ?></p>
+                <p><?php esc_html_e('Tags:', 'open-source-event-calendar'); ?><?php echo implode(', ', $ct->tags); ?></p>
             <?php endif; ?>
         </div>
         <?php theme_update_available($ct); ?>
@@ -46,7 +46,7 @@
     }
     ?>
 
-    <h3><?php _e('Available Calendar Themes', 'open-source-event-calendar'); ?></h3>
+    <h3><?php esc_html_e('Available Calendar Themes', 'open-source-event-calendar'); ?></h3>
 
     <?php $wp_list_table->display(); ?>
 

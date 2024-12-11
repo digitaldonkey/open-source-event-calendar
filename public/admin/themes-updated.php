@@ -1,6 +1,6 @@
 <div class="wrap">
 
-    <h2><?php _e('Update Calendar Themes', 'open-source-event-calendar'); ?></h2>
+    <h2><?php esc_html_e('Update Calendar Themes', 'open-source-event-calendar'); ?></h2>
 
     <?php echo $msg; ?>
 
@@ -10,7 +10,7 @@
         <?php endforeach; ?>
     <?php endif; ?>
 
-    <p><a class="button" href="<?php echo OSEC_SETTINGS_BASE_URL; ?>"><?php _e(
+    <p><a class="button" href="<?php echo OSEC_SETTINGS_BASE_URL; ?>"><?php esc_html_e(
                 'Open Source Event Calendar Settings »',
                 'open-source-event-calendar'
             ); ?></a></p>
