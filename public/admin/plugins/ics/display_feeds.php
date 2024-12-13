@@ -1,3 +1,7 @@
+<?php
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
+?>
 <p>
     <?php esc_html_e(
         'Configure which other calendars your own calendar subscribes to.
@@ -113,3 +117,4 @@
     <?php echo $feed_rows; ?>
 </div>
 <?php echo $modal; ?>
+<?php // phpcs:enable ?>
