@@ -3500,6 +3500,113 @@ add_filter('osec_ui_date_format_long', $date_format);
 ---
 
 
+@file **../src/App/View/KsesHelper.php**
+
+### osec_ksess_allowed_html_inline <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter allowed HTML tags and properties on inlined rendering.
+
+```php
+add_filter('osec_ksess_allowed_html_inline', $frontend);
+```
+
+#### Parameters
+
+
+ - **$frontend** <span style="color:crimson"> </span> 
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter allowed HTML tags and properties on inlined rendering.
+ *
+ * @since 1.0
+ *
+ * @param  array  $frontend
+ *
+ * @file src/App/View/KsesHelper.php
+ */
+add_filter('osec_ksess_allowed_html_inline', $frontend);
+```
+
+</details>
+
+
+### osec_ksess_allowed_html_frontend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter allowed HTML tags and properties on frontend rendering.
+
+```php
+add_filter('osec_ksess_allowed_html_frontend', $frontend);
+```
+
+#### Parameters
+
+
+ - **$frontend** <span style="color:crimson"> </span> 
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter allowed HTML tags and properties on frontend rendering.
+ *
+ * @since 1.0
+ *
+ * @param  array  $frontend
+ *
+ * @file src/App/View/KsesHelper.php
+ */
+add_filter('osec_ksess_allowed_html_frontend', $frontend);
+```
+
+</details>
+
+
+### osec_ksess_allowed_html_backend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter allowed HTML tags and properties on backend rendering.
+
+```php
+add_filter('osec_ksess_allowed_html_backend', $backend);
+```
+
+#### Parameters
+
+
+ - **$backend** <span style="color:crimson"> </span> 
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter allowed HTML tags and properties on backend rendering.
+ *
+ * @since 1.0
+ *
+ * @param  array  $backend
+ *
+ * @file src/App/View/KsesHelper.php
+ */
+add_filter('osec_ksess_allowed_html_backend', $backend);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/View/WidgetAgendaView.php**
 
 ### osec_filters_upcoming_widget_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -7773,6 +7880,113 @@ Note: Date formats are defined/changed in WordPress settings-general page.
  * @file src/App/View/Event/EventTimeView.php
  */
 add_filter('osec_ui_date_format_long', $date_format);
+```
+
+</details>
+
+
+---
+
+
+@file **../src/App/View/KsesHelper.php**
+
+### osec_ksess_allowed_html_inline <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter allowed HTML tags and properties on inlined rendering.
+
+```php
+add_filter('osec_ksess_allowed_html_inline', $frontend);
+```
+
+#### Parameters
+
+
+ - **$frontend** <span style="color:crimson"> </span> 
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter allowed HTML tags and properties on inlined rendering.
+ *
+ * @since 1.0
+ *
+ * @param  array  $frontend
+ *
+ * @file src/App/View/KsesHelper.php
+ */
+add_filter('osec_ksess_allowed_html_inline', $frontend);
+```
+
+</details>
+
+
+### osec_ksess_allowed_html_frontend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter allowed HTML tags and properties on frontend rendering.
+
+```php
+add_filter('osec_ksess_allowed_html_frontend', $frontend);
+```
+
+#### Parameters
+
+
+ - **$frontend** <span style="color:crimson"> </span> 
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter allowed HTML tags and properties on frontend rendering.
+ *
+ * @since 1.0
+ *
+ * @param  array  $frontend
+ *
+ * @file src/App/View/KsesHelper.php
+ */
+add_filter('osec_ksess_allowed_html_frontend', $frontend);
+```
+
+</details>
+
+
+### osec_ksess_allowed_html_backend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter allowed HTML tags and properties on backend rendering.
+
+```php
+add_filter('osec_ksess_allowed_html_backend', $backend);
+```
+
+#### Parameters
+
+
+ - **$backend** <span style="color:crimson"> </span> 
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter allowed HTML tags and properties on backend rendering.
+ *
+ * @since 1.0
+ *
+ * @param  array  $backend
+ *
+ * @file src/App/View/KsesHelper.php
+ */
+add_filter('osec_ksess_allowed_html_backend', $backend);
 ```
 
 </details>

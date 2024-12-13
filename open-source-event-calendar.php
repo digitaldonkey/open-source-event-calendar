@@ -9,7 +9,10 @@
  * Author: Osec rewrite by digitaldonkey, based on Time.ly Network Inc. All-in-One Event Calendar 2.3.4.
  * URI: https://github.com/digitaldonkey/open-source-event-calendar
  * Version: 0.9.0
- * Text Domain: open-source-event-calendar Domain Path: /language
+ * License: GNU General Public License, version 3 (GPL-3.0)
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
+ * Text Domain: open-source-event-calendar
+ * Domain Path: /language
  */
 
 use Osec\App\Controller\BootstrapController;
