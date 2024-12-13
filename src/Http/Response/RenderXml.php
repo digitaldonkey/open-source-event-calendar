@@ -19,7 +19,8 @@ class RenderXml extends RenderStrategyAbstract
         header('Content-Type: text/xml; charset=UTF-8');
         $data   = ResponseHelper::utf8($params['data']);
         $output = $this->serialize_to_xml($data);
-        echo $output;
+        // Untested.
+        echo esc_xml($output);
         ResponseHelper::stop();
     }
 
@@ -49,7 +50,7 @@ class RenderXml extends RenderStrategyAbstract
         $xml .= '<' . $node_block . '>';
 
         if ($wrap_json) {
-            $xml .= '<![CDATA[' . json_encode($data) . ']]>';
+            $xml .= '<![CDATA[' . wp_json_encode($data) . ']]>';
         } else {
             $xml .= self::_generate_xml_from_value($data, $node_name);
         }

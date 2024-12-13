@@ -337,7 +337,7 @@ class EventParent extends OsecBaseClass
         if (null === $parent_id) {
             return $this->get_parent_event($event_id);
         }
-        $meta_value = json_encode(
+        $meta_value = wp_json_encode(
             [
                 'created'  => UIDateFormats::factory($this->app)->current_time(),
                 'instance' => $instance_id,

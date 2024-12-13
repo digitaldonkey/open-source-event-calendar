@@ -22,7 +22,7 @@ class RenderJsonP extends RenderStrategyAbstract
         header('HTTP/1.1 200 OK');
         header('Content-Type: application/json; charset=UTF-8');
         $data   = ResponseHelper::utf8($params['data']);
-        $output = json_encode($data);
+        $output = wp_json_encode($data);
         if ( ! empty($params['callback'])) {
             $output = $params['callback'] . '(' . $output . ')';
         } elseif (isset($_GET['callback'])) {

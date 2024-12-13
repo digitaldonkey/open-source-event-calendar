@@ -296,7 +296,7 @@ class DatabaseController extends OsecBaseClass
     public function insert($table, $data, $format = null)
     {
         $this->_query_profile(
-            'INSERT INTO ' . $table . '; data: ' . json_encode($data)
+            'INSERT INTO ' . $table . '; data: ' . wp_json_encode($data)
         );
         $result = $this->wpdb->insert(
             $this->get_table_name($table),
@@ -344,7 +344,7 @@ class DatabaseController extends OsecBaseClass
     public function delete($table, $where, $format = null)
     {
         $this->_query_profile(
-            'DELETE FROM ' . $table . '; conditions: ' . json_encode($where)
+            'DELETE FROM ' . $table . '; conditions: ' . wp_json_encode($where)
         );
         $result = $this->wpdb->delete(
             $this->get_table_name($table),

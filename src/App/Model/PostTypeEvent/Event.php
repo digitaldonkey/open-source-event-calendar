@@ -1008,7 +1008,7 @@ class Event extends OsecBaseClass
             $data['is_free'] = false;
         }
 
-        return json_encode($data);
+        return wp_json_encode($data);
     }
 
     protected function _handle_property_construct_tags(mixed $tags)

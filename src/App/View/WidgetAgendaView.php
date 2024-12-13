@@ -50,7 +50,7 @@ class WidgetAgendaView extends WidgetAbstract
      */
     public static function get_id()
     {
-        return 'ai1ec_agenda_widget';
+        return 'osec_agenda_widget';
     }
 
     /**

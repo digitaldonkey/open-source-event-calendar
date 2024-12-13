@@ -66,7 +66,7 @@ class NotificationAdmin extends NotificationAbstract
         $this->retrieve();
 
         $entity            = compact('message', 'class', 'importance', 'persistent');
-        $msg_key           = sha1(json_encode($entity));
+        $msg_key           = sha1(wp_json_encode($entity));
         $entity['msg_key'] = $msg_key;
         if (isset($this->messages['_messages'][$msg_key])) {
             return true;

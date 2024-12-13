@@ -118,7 +118,7 @@ class WidgetController extends OsecBaseClass
         // load the css to hardcode, saving a call
         $css_rules = FrontendCssController::factory($this->app)->get_compiled_css();
         // Add ALL required slashes.
-        $css_rules                           = json_encode((string)$css_rules);
+        $css_rules                           = wp_json_encode((string) $css_rules);
         $translation['permalinks_structure'] = $this->app->options->get('permalink_structure');
         $translation['calendar_url']         = $permalink;
         $translation['full_calendar_url']    = get_page_link($this->app->settings->get('calendar_page_id'));

@@ -19,12 +19,12 @@ class ExceptionHandler
     /**
      * @var string The option for the messgae in the db
      */
-    public const DB_DEACTIVATE_MESSAGE = 'ai1ec_deactivate_message';
+    public const DB_DEACTIVATE_MESSAGE = 'osec_deactivate_message';
 
     /**
      * @var string The GET parameter to reactivate the plugin
      */
-    public const DB_REACTIVATE_PLUGIN = 'ai1ec_reactivate_plugin';
+    public const DB_REACTIVATE_PLUGIN = 'osec_reactivate_plugin';
 
     /**
      * @var callable|null Previously set exception handler if any
