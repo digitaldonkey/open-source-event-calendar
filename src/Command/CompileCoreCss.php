@@ -40,15 +40,16 @@ class CompileCoreCss extends CommandAbstract
 
     public function do_execute()
     {
-        $message = $this->_process_files();
-        echo $message;
+        echo wp_kses(
+            $this->_process_files,
+            'data'
+        );
         ResponseHelper::stop();
     }
 
     protected function _process_files()
     {
         $less   = LessController::factory($this->app);
-        $option = $this->app->options;
         $theme  = $this->_get_theme($_GET['theme']);
 
         if (isset($_GET['switch'])) {
@@ -74,8 +75,14 @@ class CompileCoreCss extends CommandAbstract
             return 'There has been an error writing theme CSS';
         }
 
-        return 'Theme CSS compiled succesfully and written in ' .
-               $filename . ' and classmap stored in ' . $hashmap_file;
+        return sprintf(
+            __(
+                'Theme CSS compiled succesfully and written in %s. and classmap stored in %s.',
+                'open-source-event-calendar'
+            ),
+            $filename,
+            $hashmap_file
+        );
     }
 
     /**

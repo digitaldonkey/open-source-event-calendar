@@ -28,6 +28,7 @@ class RenderJsonP extends RenderStrategyAbstract
         } elseif (isset($_GET['callback'])) {
             $output = $_GET['callback'] . '(' . $output . ')';
         }
+        /* Cant be escaped json containing html get broken.*/
         echo $output;
         ResponseHelper::stop();
     }

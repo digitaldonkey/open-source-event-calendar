@@ -56,7 +56,10 @@ abstract class FileAbstract extends OsecBaseClass implements Stringable
      */
     public function render()
     {
-        echo $this->content;
+        echo wp_kses(
+            $this->content,
+            $this->app->kses->allowed_html_backend()
+        );
     }
 
 

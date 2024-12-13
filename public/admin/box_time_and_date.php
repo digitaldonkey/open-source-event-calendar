@@ -103,7 +103,7 @@
                            value="1"
                         <?php echo $repeating_event ? 'checked' : ''; ?>>
                     <input type="hidden" name="osec_rrule" id="osec_rrule"
-                           value="<?php echo $rrule; ?>">
+                           value="<?php echo esc_attr($rrule); ?>">
                     <label for="osec_repeat" id="osec_repeat_label">
                         <?php esc_html_e('Repeat', 'open-source-event-calendar');
                         echo $repeating_event ? ':' : '...'; ?>
@@ -111,7 +111,7 @@
                 </td>
                 <td>
                     <div id="osec_repeat_text" class="osec_rule_text">
-                        <a href="#osec_repeat_box"><?php echo $rrule_text; ?></a>
+                        <a href="#osec_repeat_box"><?php echo esc_html($rrule_text); ?></a>
                     </div>
                 </td>
             </tr>

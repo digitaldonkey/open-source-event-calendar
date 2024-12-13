@@ -710,13 +710,13 @@ class FeedsController extends OsecBaseClass
         );
 
         $cron_freq = ThemeLoader::factory($this->app)
-                                ->get_file(
-                                    'cron_freq.php',
-                                    [
-                                        'cron_freq' => $this->app->settings->get('ics_cron_freq'),
-                                    ],
-                                    true
-                                );
+            ->get_file(
+                'cron_freq.php',
+                [
+                    'cron_freq' => $this->app->settings->get('ics_cron_freq'),
+                ],
+                true
+            );
 
         $args = [
             'cron_freq'        => $cron_freq->get_content(),

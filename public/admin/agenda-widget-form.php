@@ -5,13 +5,13 @@
 </p>
 
 <p>
-    <input type="radio" id="<?php echo $events_seek_type['id']; ?>_events"
+    <input type="radio" id="<?php echo esc_attr($events_seek_type['id']); ?>_events"
            name="<?php echo $events_seek_type['name']; ?>" value="events"<?php
     if ('events' === $events_seek_type['value']) {
         echo ' checked="checked"';
     }
     ?> />
-    <label for="<?php echo $events_seek_type['id']; ?>_events"><?php esc_html_e(
+    <label for="<?php echo esc_attr($events_seek_type['id']); ?>_events"><?php esc_html_e(
             'Number of events to show:',
             'open-source-event-calendar'
         ) ?></label>
@@ -19,7 +19,7 @@
            value="<?php echo $events_per_page['value'] ?>"/>
 </p>
 <p>
-    <input type="radio" id="<?php echo $events_seek_type['id']; ?>_days" name="<?php echo $events_seek_type['name']; ?>"
+    <input type="radio" id="<?php echo esc_attr($events_seek_type['id'] . '_days'); ?>" name="<?php echo esc_attr($events_seek_type['name']); ?>"
            value="days"<?php
     if ('days' === $events_seek_type['value']) {
         echo ' checked="checked"';

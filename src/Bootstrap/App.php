@@ -5,6 +5,7 @@ namespace Osec\Bootstrap;
 use Osec\App\Controller\DatabaseController;
 use Osec\App\Model\Options;
 use Osec\App\Model\Settings;
+use Osec\App\View\KsesHelper;
 use Osec\Exception\BootstrapException;
 use ReflectionClass;
 
@@ -24,6 +25,7 @@ class App
     public readonly Options $options;
     public readonly Settings $settings;
     public readonly DatabaseController $db;
+    public readonly KsesHelper $kses;
     /**
      * @var array Internal objects cache
      *
@@ -62,6 +64,7 @@ class App
         $this->options  = Options::factory($app);
         $this->settings = Settings::factory($app);
         $this->db       = DatabaseController::factory($app);
+        $this->kses     = KsesHelper::factory($app);
     }
 
     /**

@@ -167,9 +167,6 @@ class FrontendCssController extends OsecBaseClass
      */
     public function update_persistence_layer($css)
     {
-        // TODO THIS KEY SEEMS WRONG
-        // Fix Tests First
-
         if ($this->cache->is_file_cache()) {
             $cacheData = $this->cache->engine->setWithFileInfo(self::COMPILED_CSS_KEY, $css);
             $this->store_css_cache($cacheData['url']);

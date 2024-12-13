@@ -2,7 +2,10 @@
     <?php foreach ($msgs as $msg) : ?>
         <p>
             <strong>
-                <?php echo $msg; ?>
+                <?php echo wp_kses(
+                    $msg,
+                    'post'
+                ); ?>
             </strong>
         </p>
     <?php endforeach; ?>
