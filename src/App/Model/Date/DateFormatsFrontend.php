@@ -110,7 +110,10 @@ class DateFormatsFrontend extends OsecBaseClass
             'current_format'             => $current_format,
             'is_custom'                  => $is_custom,
             'custom_label'               => __('Custom:', 'all-in-one-event-calendar'),
-            'custom_accessibility'       => __('enter a custom time format in the following field:', 'all-in-one-event-calendar'),
+            'custom_accessibility'       => __(
+                'enter a custom time format in the following field:',
+                'all-in-one-event-calendar'
+            ),
             'custom_accessibility_label' => __('Custom time format:', 'all-in-one-event-calendar'),
             'preview_label'              => __('Preview:', 'all-in-one-event-calendar'),
             'current_format_example'     => date_i18n($current_format),
