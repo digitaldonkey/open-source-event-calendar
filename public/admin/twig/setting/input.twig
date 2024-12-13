@@ -1,9 +1,9 @@
-<label class="ai1ec-control-label ai1ec-col-sm-5" for="{{ id }}">
+<label class="ai1ec-control-label ai1ec-col-sm-5 ai1ec-col-md-2" for="{{ id }}">
     {{ label | raw }}
 </label>
 {% if append is defined or licence_valid is defined %}
 <div class="{{ group_class is defined ?
-group_class : 'ai1ec-col-lg-3 ai1ec-col-md-4 ai1ec-col-sm-5' }}">
+group_class : 'ai1ec-col-lg-3 ai1ec-col-md-4 ai1ec-col-sm-5 ' }}">
     <div class="ai1ec-input-group">
         {% else %}
         <div class="ai1ec-col-sm-7">

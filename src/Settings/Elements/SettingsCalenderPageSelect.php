@@ -53,9 +53,9 @@ class SettingsCalenderPageSelect extends SettingsAbstract
      */
     public function render($html = '', $wrap = true): string
     {
-        $output = '<label class="ai1ec-control-label ai1ec-col-sm-5" for="' .
+        $output = '<label class="ai1ec-control-label ai1ec-col-sm-2" for="' .
                   self::ELEMENT_ID . '">' . I18n::__('Calendar page') . '</label>'
-                  . '<div class="ai1ec-col-sm-7">' .
+                  . '<div class="ai1ec-col-sm-6">' .
                   $this->_get_pages_selector() . $this->_get_page_view_link() . '</div>';
 
         return $this->warp_in_form_group($output);
