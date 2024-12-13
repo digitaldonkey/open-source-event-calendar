@@ -1,3 +1,7 @@
+<?php
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
+?>
 <div class="updated">
     <p>
         <strong>
@@ -5,3 +9,4 @@
         </strong>
     </p>
 </div>
+<?php // phpcs:enable ?>

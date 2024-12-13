@@ -1,3 +1,7 @@
+<?php
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
+?>
 <div class="timely">
     <ul class="ai1ec-nav ai1ec-nav-tabs">
         <?php echo $tab_headers ?>
@@ -6,4 +10,4 @@
         <?php echo $tab_content ?>
     </div>
 </div>
-
+<?php // phpcs:enable ?>

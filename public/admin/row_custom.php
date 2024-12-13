@@ -1,3 +1,7 @@
+<?php
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
+?>
 <div class="ai1ec-form-group">
     <label class="ai1ec-control-label ai1ec-col-sm-3">
         <?php esc_html_e('Custom dates:', 'open-source-event-calendar'); ?>
@@ -13,3 +17,4 @@
                id="osec_rec_custom_dates" value="">
     </div>
 </div>
+<?php // phpcs:enable ?>

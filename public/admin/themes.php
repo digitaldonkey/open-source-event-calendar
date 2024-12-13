@@ -1,3 +1,7 @@
+<?php
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
+?>
 <?php if ($activated) : ?>
     <div id="message2" class="updated">
         <p>
@@ -41,15 +45,11 @@
         ! current_user_can('switch_osec_themes')
     ) {
         echo '</div>';
-
         return false;
     }
     ?>
-
     <h3><?php esc_html_e('Available Calendar Themes', 'open-source-event-calendar'); ?></h3>
-
     <?php $wp_list_table->display(); ?>
-
     <br class="clear"/>
-
 </div>
+<?php // phpcs:enable ?>

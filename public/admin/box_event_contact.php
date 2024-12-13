@@ -1,3 +1,7 @@
+<?php
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
+?>
 <div class="ai1ec-panel-heading">
     <a data-toggle="ai1ec-collapse"
        id="osec-event-contact-link"

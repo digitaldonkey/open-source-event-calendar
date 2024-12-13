@@ -1,15 +1,14 @@
 <?php
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
 
 use Osec\App\View\Event\EventTimeView;
 
 if (empty($parent) && empty($children)) {
     return '';
 }
-
-
 // TODO seems a bit hacky here.
 global $osec_app;
-
 ?>
 <div class="ai1ec-panel-heading">
     <a data-toggle="ai1ec-collapse"

@@ -1,9 +1,6 @@
 <?php
-
-/**
- * Feeds row php template.
- */
-
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
 ?>
 <div class="ai1ec-panel ai1ec-panel-default ai1ec-feed-container">
     <div class="ai1ec-panel-heading">
@@ -173,3 +170,4 @@
         </div>
     </div>
 </div>
+<?php // phpcs:enable ?>

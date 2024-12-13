@@ -1,3 +1,7 @@
+<?php
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
+?>
 <div class="wrap">
 
     <h2><?php echo $title; ?></h2>
@@ -14,7 +18,11 @@
                     <?php
                     // Show the submit button only in the settings page and not in the Feeds page.
                     if ($calendar_settings) {
-                        submit_button(esc_attr__('Update Settings', 'open-source-event-calendar'), 'primary', 'osec_save_settings');
+                        submit_button(
+                            esc_attr__('Update Settings', 'open-source-event-calendar'),
+                            'primary',
+                            'osec_save_settings'
+                        );
                     }
                     ?>
                 </div>
@@ -29,3 +37,4 @@
     </div>
 
 </div>
+<?php // phpcs:enable ?>

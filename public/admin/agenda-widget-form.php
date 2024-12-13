@@ -1,3 +1,7 @@
+<?php
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
+?>
 <p>
     <label for="<?php echo $title['id'] ?>"><?php esc_html_e('Title:', 'open-source-event-calendar') ?></label>
     <input class="widefat" id="<?php echo $title['id'] ?>" name="<?php echo $title['name'] ?>" type="text"
@@ -138,3 +142,4 @@
             'open-source-event-calendar'
         ) ?></label>
 </p>
+<?php // phpcs:enable ?>

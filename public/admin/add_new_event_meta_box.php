@@ -1,3 +1,7 @@
+<?php
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
+?>
 <div class="timely ai1ec-panel-group ai1ec-form-inline"
      id="osec-add-new-event-accordion">
     <?php foreach ($boxes as $i => $box) : ?>
@@ -7,3 +11,4 @@
         </div>
     <?php endforeach; ?>
 </div>
+<?php // phpcs:enable ?>

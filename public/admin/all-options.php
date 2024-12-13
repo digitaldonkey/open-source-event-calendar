@@ -1,5 +1,8 @@
+<?php
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
+?>
 <div class="wrap">
-
     <h1>DB options unserialized </h1>
     <p>The options and descriptions are ´distributed´ into DB among multiple wp_options rows.</p>
     <button onclick="document.body.querySelectorAll('details').forEach((e) => {(e.hasAttribute('open')) ?e.removeAttribute('open') : e.setAttribute('open',true);
@@ -18,3 +21,4 @@
     } ?>
     <br class="clear"/>
 </div>
+<?php // phpcs:enable ?>
