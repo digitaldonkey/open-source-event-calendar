@@ -123,170 +123,179 @@ class KsesHelper extends OsecBaseClass
         static $backend = null;
         if (null === $backend) {
             $backend = [
-                'div'      => [
-                    'class'             => true,
-                    'data-color'        => true,
-                    'data-color-format' => true,
-                    'id'                => true,
-                    'style'             => true,
-                ],
-                'h2'       => [
+                'a' => [
                     'class' => true,
-                    'id'    => true,
-                ],
-                'button'   => [
-                    'aria-describedby'  => true,
-                    'aria-disabled'     => true,
-                    'aria-expanded'     => true,
-                    'aria-hidden'       => true,
-                    'class'             => true,
-                    'data-dismiss'      => true,
-                    'data-loading-text' => true,
-                    'id'                => true,
-                    'name'              => true,
-                    'type'              => true,
-                ],
-                'span'     => [
-                    'aria-hidden'         => true,
-                    'class'               => true,
-                    'data-original-title' => true,
-                    'id'                  => true,
-                    'style'               => true,
-                    'title'               => true,
-                ],
-                'a'        => [
-                    'class'       => true,
                     'data-parent' => true,
                     'data-toggle' => true,
-                    'href'        => true,
-                    'id'          => true,
-                    'onclick'     => true,
-                    'rel'         => true,
-                    'style'       => true,
-                    'tabindex'    => true,
-                    'target'      => true,
+                    'href' => true,
+                    'id' => true,
+                    'onclick' => true,
+                    'rel' => true,
+                    'style' => true,
+                    'tabindex' => true,
+                    'target' => true,
                 ],
-                'i'        => [
+                'abbr' => [
                     'class' => true,
                     'style' => true,
                 ],
-                'input'    => [
-                    1                     => true,
-                    'autocomplete'        => true,
-                    'checked'             => true,
-                    'class'               => true,
-                    'data-ai1ec-tags'     => true,
-                    'data-date-format'    => true,
+                'b' => [
+                ],
+                'br' => [
+                ],
+                'button' => [
+                    'aria-describedby' => true,
+                    'aria-disabled' => true,
+                    'aria-expanded' => true,
+                    'aria-hidden' => true,
+                    'class' => true,
+                    'data-dismiss' => true,
+                    'data-loading-text' => true,
+                    'id' => true,
+                    'name' => true,
+                    'type' => true,
+                ],
+                'code' => [
+                    'class' => true,
+                ],
+                'div' => [
+                    'class' => true,
+                    'data-color' => true,
+                    'data-color-format' => true,
+                    'id' => true,
+                    'style' => true,
+                ],
+                'em' => [
+                ],
+                'fieldset' => [
+                ],
+                'form' => [
+                    'action' => true,
+                    'enctype' => true,
+                    'method' => true,
+                ],
+                'h2' => [
+                    'class' => true,
+                    'id' => true,
+                ],
+                'h3' => [
+                ],
+                'h4' => [
+                ],
+                'i' => [
+                    'class' => true,
+                    'style' => true,
+                ],
+                'iframe' => [
+                ],
+                'img' => [
+                    'alt' => true,
+                    'draggable' => true,
+                    'src' => true,
+                    'style' => true,
+                ],
+                'input' => [
+                    1 => true,
+                    'autocomplete' => true,
+                    'checked' => true,
+                    'class' => true,
+                    'data-ai1ec-tags' => true,
+                    'data-date-format' => true,
                     'data-date-weekstart' => true,
-                    'data-placeholder'    => true,
-                    'id'                  => true,
-                    'name'                => true,
-                    'placeholder'         => true,
-                    'size'                => true,
-                    'style'               => true,
-                    'tabindex'            => true,
-                    'type'                => true,
-                    'value'               => true,
-                ],
-                'table'    => [
-                    'class' => true,
-                    'id'    => true,
-                    'style' => true,
-                ],
-                'tbody'    => [
-                ],
-                'tr'       => [
-                ],
-                'td'       => [
-                    'class'   => true,
-                    'colspan' => true,
-                    'style'   => true,
-                ],
-                'label'    => [
-                    'class' => true,
-                    'for'   => true,
-                    'id'    => true,
-                ],
-                'abbr'     => [
-                    'class' => true,
-                    'style' => true,
-                ],
-                'b'        => [
-                ],
-                'ul'       => [
-                    'class' => true,
-                    'role'  => true,
-                ],
-                'select'   => [
-                    'class'            => true,
                     'data-placeholder' => true,
-                    'id'               => true,
-                    'multiple'         => true,
-                    'name'             => true,
-                    'tabindex'         => true,
+                    'id' => true,
+                    'name' => true,
+                    'onchange' => true,
+                    'onfocus' => true,
+                    'placeholder' => true,
+                    'size' => true,
+                    'style' => true,
+                    'tabindex' => true,
+                    'type' => true,
+                    'value' => true,
                 ],
-                'option'   => [
-                    'selected' => true,
-                    'value'    => true,
+                'label' => [
+                    'class' => true,
+                    'for' => true,
+                    'id' => true,
+                ],
+                'legend' => [
+                    'class' => true,
+                ],
+                'li' => [
+                    'class' => true,
+                    'id' => true,
                 ],
                 'optgroup' => [
                     'label' => true,
                 ],
-                'img'      => [
-                    'alt'       => true,
-                    'draggable' => true,
-                    'src'       => true,
-                    'style'     => true,
+                'option' => [
+                    'selected' => true,
+                    'value' => true,
                 ],
-                'form'     => [
-                    'action'  => true,
-                    'enctype' => true,
-                    'method'  => true,
-                ],
-                'li'       => [
-                    'class' => true,
-                    'id'    => true,
-                ],
-                'p'        => [
+                'p' => [
                     'class' => true,
                 ],
-                'h4'       => [
+                'pre' => [
+                    'class' => true,
+                    'data-widget-url' => true,
+                    'id' => true,
                 ],
-                'thead'    => [
+                'script' => [
                 ],
-                'th'       => [
-                    'class'   => true,
+                'select' => [
+                    'class' => true,
+                    'data-placeholder' => true,
+                    'id' => true,
+                    'multiple' => true,
+                    'name' => true,
+                    'tabindex' => true,
+                ],
+                'small' => [
+                ],
+                'span' => [
+                    'aria-hidden' => true,
+                    'class' => true,
+                    'data-original-title' => true,
+                    'id' => true,
+                    'style' => true,
+                    'title' => true,
+                ],
+                'strong' => [
+                ],
+                'table' => [
+                    'class' => true,
+                    'id' => true,
+                    'style' => true,
+                ],
+                'tbody' => [
+                ],
+                'td' => [
+                    'class' => true,
                     'colspan' => true,
-                    'scope'   => true,
-                ],
-                'small'    => [
-                ],
-                'strong'   => [
-                ],
-                'code'     => [
-                    'class' => true,
-                ],
-                'em'       => [
-                ],
-                'tt'       => [
+                    'style' => true,
                 ],
                 'textarea' => [
-                    'class'    => true,
-                    'id'       => true,
-                    'name'     => true,
+                    'class' => true,
+                    'id' => true,
+                    'name' => true,
                     'readonly' => true,
-                    'rows'     => true,
+                    'rows' => true,
                 ],
-                'h3'       => [
+                'th' => [
+                    'class' => true,
+                    'colspan' => true,
+                    'scope' => true,
                 ],
-                'br'       => [
+                'thead' => [
                 ],
-                'pre'      => [
-                    'class'           => true,
-                    'data-widget-url' => true,
-                    'id'              => true,
+                'tr' => [
                 ],
-                'iframe'   => [
+                'tt' => [
+                ],
+                'ul' => [
+                    'class' => true,
+                    'role' => true,
                 ],
             ];
         }
@@ -370,6 +379,7 @@ class KsesHelper extends OsecBaseClass
     //                'EditSettings'     => '{"div":["class","id","style"],"h2":["class"],"button":["type","class","aria-disabled","aria-describedby","aria-expanded","id","data-loading-text","name"],"span":["class","aria-hidden","id","data-original-title"],"ul":["class"],"li":["class","id"],"a":["id","href","data-toggle","target"],"label":["class","for"],"select":["id","class","name"],"option":["value","selected"],"p":[],"i":["class"],"table":["class"],"thead":[],"tr":[],"th":["scope","colspan","class"],"small":[],"tbody":[],"td":["class"],"input":["class","type","name","value","checked","id","data-date-weekstart","data-date-format","size"],"optgroup":["label"],"strong":[],"code":["class"],"em":[],"tt":[],"textarea":["name","id","class","rows","readonly"],"h3":[],"br":[]}',
     //                // #ai1ec-widget-creator
     //                'EditWidgets'      => '{"div":["class","id"],"h2":["class","id"],"button":["type","class","aria-disabled","aria-describedby","aria-expanded"],"span":["class","aria-hidden","id"],"p":[],"strong":[],"h4":[],"a":["href","data-toggle"],"ul":["class","role"],"li":["class"],"i":["class"],"label":["class","for"],"select":["name","id","class"],"option":["value","selected"],"input":["type","name","value","id","class","checked"],"pre":["id","class","data-widget-url"],"br":[],"iframe":[]}',
+    //                'wp-admin/options-general.php' => '{"tbody":[],"tr":[],"th":["scope"],"td":[],"fieldset":[],"legend":["class"],"span":["class","id"],"label":["for","class"],"input":["type","name","value","onchange","checked","id","class","onfocus"],"code":[],"br":[],"p":[],"strong":[],"script":[]}'
     //            ]
     //        ];
     //
@@ -388,6 +398,7 @@ class KsesHelper extends OsecBaseClass
     //                ksort($properties);
     //                $merged[$element] = $properties;
     //            }
+    //            ksort($merged);
     //            $merged = var_export($merged, true);
     //            // Convert to horthand array syntax.
     //            $patterns = [

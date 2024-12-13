@@ -183,7 +183,8 @@ class DateFormatsFrontend extends OsecBaseClass
         }
         if ($value === 'custom') {
             $customVal = $_POST[$format . '_custom'];
-            if ($customVal && preg_match("/^[a-zA-Z0-9_]*$/", $customVal)) {
+            // Check if it works.
+            if ($customVal && (bool)strtotime(date_format(date_create(),$customVal))) {
                 return $customVal;
             }
         }

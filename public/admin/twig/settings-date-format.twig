@@ -1,6 +1,6 @@
 <fieldset>
     <legend class="screen-reader-text">
-        <span>Time Format	Short</span>
+        <span>Time Format Short</span>
     </legend>
     {% for format in time_formats %}
         <label>
@@ -9,7 +9,7 @@
                    {%~ if current_format == format.raw ~%}checked="checked"{%~ endif ~%}
                     onchange="const el = jQuery('#{{ id }}_custom'); el.val('{{ format.raw }}'); el.trigger('input');"
             />
-            &nbsp;<span class="date-time-text format-i18n">{{ format.example }}</span>
+            &nbsp;<span class="date-time-text">{{ format.example }}</span>
             <code>{{ format.escaped }}</code>
         </label>
         <br />
@@ -22,7 +22,7 @@
             <span class="screen-reader-text">{{ custom_accessibility }}</span>
         </span>
             <label for="{{ id }}_custom" class="screen-reader-text">
-                {{ custom_accessibility_label }}
+                <span class="date-time-text">{{ custom_accessibility_label }}</span>
             </label>
             <input type="text" name="{{ id }}_custom" id="{{ id }}_custom" value="{{current_format}}" class="small-text"
                 onfocus="console.log(document.getElementById('{{ id }}_custom_radio').checked = true)"
@@ -38,10 +38,8 @@
 
 
 <script>
-
 /* Excerpt from wp-admin/includes/options.php */
 jQuery( function($) {
-
     $('input[name="{{ id }}_custom"]').on('input', function () {
         var format = $(this),
             fieldset = format.closest('fieldset'),
