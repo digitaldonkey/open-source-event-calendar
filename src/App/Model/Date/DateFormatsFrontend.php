@@ -109,10 +109,10 @@ class DateFormatsFrontend extends OsecBaseClass
             'time_formats'               => $this->getFormat(self::FORMAT_NO_YEAR),
             'current_format'             => $current_format,
             'is_custom'                  => $is_custom,
-            'custom_label'               => __('Custom:'),
-            'custom_accessibility'       => __('enter a custom time format in the following field:'),
-            'custom_accessibility_label' => __('Custom time format:'),
-            'preview_label'              => __('Preview:'),
+            'custom_label'               => __('Custom:', 'all-in-one-event-calendar'),
+            'custom_accessibility'       => __('enter a custom time format in the following field:', 'all-in-one-event-calendar'),
+            'custom_accessibility_label' => __('Custom time format:', 'all-in-one-event-calendar'),
+            'preview_label'              => __('Preview:', 'all-in-one-event-calendar'),
             'current_format_example'     => date_i18n($current_format),
         ];
         ThemeLoader::factory($this->app)
@@ -184,7 +184,7 @@ class DateFormatsFrontend extends OsecBaseClass
         if ($value === 'custom') {
             $customVal = $_POST[$format . '_custom'];
             // Check if it works.
-            if ($customVal && (bool)strtotime(date_format(date_create(),$customVal))) {
+            if ($customVal && (bool) strtotime(date_format(date_create(), $customVal))) {
                 return $customVal;
             }
         }

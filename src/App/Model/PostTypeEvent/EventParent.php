@@ -299,10 +299,11 @@ class EventParent extends OsecBaseClass
                     $parent_post_id,
                     'display'
                 );
-                $actions['ai1ec_parent'] = sprintf(
+                $actions['osec_parent'] = sprintf(
                     '<a href="%s" title="%s">%s</a>',
                     wp_nonce_url($parent_link),
                     sprintf(
+                        /* translators: Event Title */
                         __('Edit &#8220;%s&#8221;', 'open-source-event-calendar'),
                         apply_filters(
                             'the_title',

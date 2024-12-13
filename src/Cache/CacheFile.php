@@ -145,9 +145,13 @@ class CacheFile extends OsecBaseClass implements CacheInterface
                 $this->setOption($key, $fileName);
             }
         } else {
-            $message = 'An error occured while saving data to \'' .
-                       $this->_cache_path . $fileName . '\'';
-            throw new CacheWriteException($message);
+            throw new CacheWriteException(
+                sprintf(
+                    /* translators: File name */
+                    __( 'An error occured while saving data to: %s', 'open-source-event-calendar'),
+            $this->_cache_path . $fileName
+                )
+            );
         }
 
         return [
@@ -219,7 +223,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
                 .'<br /><br /><strong>Ensure that</strong><br /><code>'.ABSPATH.'wp-content/uploads/'.OSEC_FILE_CACHE_WP_UPLOAD_DIR.'</code><br />or<br /><code>'.OSEC_FILE_CACHE_DEFAULT_PATH.'</code><br /> are writable by php.',
             );
         NotificationAdmin::factory($this->app)->store(
-            "<p>$msg</p>",
+            "<p>" . wp_kses($msg,$this->app->kses->allowed_html_inline()) . "</p>",
             'error',
             1,
             [NotificationAdmin::RCPT_ADMIN],
@@ -265,7 +269,11 @@ class CacheFile extends OsecBaseClass implements CacheInterface
                 return $default;
             }
             throw new CacheNotSetException(
-                'File \'' . $key . '\' does not exist'
+                sprintf(
+                    /* translators: File name */
+                    __('File %s does not exist', 'open-source-event-calendar'),
+                    esc_attr($key)
+                )
             );
         }
 

@@ -262,8 +262,8 @@ JAVASCRIPT;
         ) {
             $line = '<p><strong>' .
                     sprintf(
-                        __('The add-on "%s" has been disabled due to an error:'),
-                        __(trim($matches[1]), dirname($addon))
+                        __('The add-on "%s" has been disabled due to an error:', 'open-source-event-calendar'),
+                        trim($matches[1]), dirname($addon)
                     ) .
                     '</strong></p>';
         }

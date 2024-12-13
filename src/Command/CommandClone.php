@@ -107,7 +107,8 @@ class CommandClone extends CommandAbstract
         $edit_event_url = esc_attr(
             admin_url("post.php?post={$new_post_id}&action=edit")
         );
-        $message        = sprintf(
+        $message = sprintf(
+            /* translators: Url to cloned event */
             __(
                 '<p>The event <strong>%1$s</strong> was cloned succesfully. <a href="%2$s">Edit cloned event</a></p>',
                 'open-source-event-calendar'

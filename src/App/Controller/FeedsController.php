@@ -467,6 +467,7 @@ class FeedsController extends OsecBaseClass
             } else {
                 $output['data'] = [
                     'error'   => false,
+                    /* translators: 1: number, 2: plural number. */
                     'message' => sprintf(
                         _n('Imported %s event', 'Imported %s events', $count, 'open-source-event-calendar'),
                         $count
