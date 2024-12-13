@@ -687,8 +687,7 @@ class Settings extends OsecBaseInitialized
                     'class'   => 'Osec\Settings\Elements\SettingsSelect',
                     'tab'     => 'editing-events',
                     'label'   => I18n::__(
-                        'Input dates in this format. Also defines formats for "date short" and '
-                        . '"Date short without year" currently. See hook "osec_ui_date_format_short".'
+                        'Input date format'
                     ),
                     'options' => [
                         [
