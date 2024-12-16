@@ -3,28 +3,19 @@
 /**
  * Plugin Name: Open Source Event Calendar
  * Plugin URI: https://github.com/digitaldonkey/open-source-event-calendar
- * Description: The Open Source Event Calendar is based on the Timely
- * All-in-one-event-calendar version v2.3.4.
- * The calendar system combines clean visual design with a basic set
- * of features to create share and aggregate Events in WordPress.
- * Ical import is possible.
- *
- * This Plugin is open source software in traditional sense.
- * I pledge this plugin will not urge you to connect to any
- * proprietary/payed service to use described features.
- *
- * URI: https://github.com/digitaldonkey/open-source-event-calendar
+ * Description: With Osec you can create, share and aggregate and import (ical, ics)
+ * Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
  * Author: Osec rewrite by digitaldonkey, based on Time.ly Network Inc. All-in-One Event Calendar 2.3.4.
+ * Author URI: https://github.com/digitaldonkey
  * Contributors: digitaldonkey, hubrik, vtowel, yani.iliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
  * Tags: calendar, events, ics, ical importer
- * Requires WordPress at least: 6.6
+ * Requires at least: 6.6
  * Tested up to: 6.7.1
  * Requires PHP: 8.2
  * License: GNU General Public License, version 3 (GPL-3.0)
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: open-source-event-calendar
  * Domain Path: /language
- * Stable tag: 0.9.0
  * Version: 0.9.0
  */
 
