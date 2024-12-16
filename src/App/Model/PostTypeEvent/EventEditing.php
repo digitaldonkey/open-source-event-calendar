@@ -324,8 +324,8 @@ class EventEditing extends OsecBaseClass
     }
 
     /**
-     * Reutrns shortcode or stripped content for given shortcode.
-     * Currently regex callback function passes as $tag argument 7-element long
+     * Returns shortcode or stripped content for given shortcode.
+     * Curently regex callback function passes as $tag argument 7-element long
      * array.
      * First element ($tag[0]) is not modified full shortcode text.
      * Third element ($tag[2]) is pure shortcode identifier.
@@ -339,24 +339,23 @@ class EventEditing extends OsecBaseClass
     public function strip_shortcode_tag($tag)
     {
         if (
-            count($tag) < 7 ||
-            ! str_starts_with((string)$tag[2], 'ai1ec') ||
+            array_key_exists( 2, $tag)
+            && str_starts_with((string)$tag[2], 'osec')
             /**
-             * Allows removing of wp-shortcode tags.
+             * Allows removing of wp-shortcode tags from Events.
              *
              * Basically somehow ensures that Event post types can not have
              * a calendar shortcode included. We don't want a calendar in calendar
-             * situation i guess :)
+             * situation I guess :)
              *
              * @since too long to understand
              *
              * @param  bool  $bool
              */
-            ! apply_filters('osec_content_remove_shortcode_' . $tag[2], false)
+            && apply_filters('osec_content_remove_shortcode_' . $tag[2], true)
         ) {
-            return $tag[0];
+            return '';
         }
-
-        return $tag[5];
+        return $tag[0];
     }
 }
