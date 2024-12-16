@@ -3,16 +3,29 @@
 /**
  * Plugin Name: Open Source Event Calendar
  * Plugin URI: https://github.com/digitaldonkey/open-source-event-calendar
- * Description: A calendar system with month, week, day, agenda views, upcoming
- * events widget, color-coded categories, recurrence, and import/export of .ics feeds.
- * This is a fork of All-in-One Event Calendar Version 2.3.4.
- * Author: Osec rewrite by digitaldonkey, based on Time.ly Network Inc. All-in-One Event Calendar 2.3.4.
+ * Description: The Open Source Event Calendar is based on the Timely
+ * All-in-one-event-calendar version v2.3.4.
+ * The calendar system combines clean visual design with a basic set
+ * of features to create share and aggregate Events in WordPress.
+ * Ical import is possible.
+ *
+ * This Plugin is open source software in traditional sense.
+ * I pledge this plugin will not urge you to connect to any
+ * proprietary/payed service to use described features.
+ *
  * URI: https://github.com/digitaldonkey/open-source-event-calendar
- * Version: 0.9.0
+ * Author: Osec rewrite by digitaldonkey, based on Time.ly Network Inc. All-in-One Event Calendar 2.3.4.
+ * Contributors: digitaldonkey, hubrik, vtowel, yani.iliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
+ * Tags: calendar, events, ics, ical importer
+ * Requires WordPress at least: 6.6
+ * Tested up to: 6.7.1
+ * Requires PHP: 8.2
  * License: GNU General Public License, version 3 (GPL-3.0)
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: open-source-event-calendar
  * Domain Path: /language
+ * Stable tag: 0.9.0
+ * Version: 0.9.0
  */
 
 use Osec\App\Controller\BootstrapController;

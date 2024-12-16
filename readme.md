@@ -1,20 +1,8 @@
-=== Open Source Event Calendar ===
-Contributors: digitaldonkey, hubrik, vtowel, yani.iliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
-Tags: calendar, events, ics, ics feed, wordpress ical importer, google, block
-calendar, ical, iCalendar, all-in-one, events sync, events widget,
-calendar widget, Osec, Open source Event Calendar
-Requires WordPress at least: 6.6
-Tested up to: 6.7.1
-Requires PHP: 8.2
-Stable tag: 1.0.0
-License: GNU General Public License, version 3 (GPL-3.0)
+# Osec - Open Source Event Calendar
 
-A calendar system with many views, upcoming events widget, color-coded
-categories, recurrence, and import/export of .ics feeds.
+### Description
 
-== Description ==
-
-The [Open Source Event Calendar]() is based on the Timely All-in-one-event-calendar version v2.3.4. by [Timely](http://time.ly/). The calendar system combines clean visual design with a basic set of features to create share and aggregate Events in WordPress. Ical import is possible.
+The [Open Source Event Calendar](https://github.com/digitaldonkey/open-source-event-calendar) is based on the Timely All-in-one-event-calendar version v2.3.4. by [Timely](http://time.ly/). The calendar system combines clean visual design with a basic set of features to create share and aggregate Events in WordPress. Ical import is possible.
 
 This Plugin is open source software in traditional sense. I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features.
 
@@ -31,7 +19,23 @@ one site and you can have it appear automatically in another website's
 calendar. You can even send events from a specific category or tag (or
 combination of categories and tags).
 
-= Features =
+### This is a fork
+
+This is a fork of the GPL licensed plugin All-in-on-Event-Calendar by Timely.
+At it's time a great plugin with a solid but unmaintainable codebase (not all required developer tools where opensourced).
+
+In later releases of the original softeware was deprived of core feature: Importing iCal feeds in favor of a service provided by Timely.
+
+If you need a professionally supported plugin you should consider using the [original all in one event calendar](https://wordpress.org/plugins/all-in-one-event-calendar/)
+
+If you love truly open source software and don't mind to get your hands dirty you should join here. Free people need free software to manage and share events in a selfhosted manner.
+
+**Please do not ask for support at Time.ly for this Plugin**.
+
+Source and developer support you can find at https://github.com/digitaldonkey/open-source-event-calendar
+
+
+### Features
 
 * Import and Export (!) of Ical feeds without additional addons.
 ** Import other calendars automatically to display in your calendar.
@@ -52,44 +56,14 @@ any other system that accepts iCalendar (.ics) feeds.
 * Your calendar can be embedded into a WordPress page without needing
 to create template files or modify the theme.
 
-= Requirements =
+### Requirements
 
 * PHP >= 8.2 is currently required at least for development. PHP 8.1 may work too with release version (using `composer install --no-dev`).
 
-= Languages =
+### Languages
 
-You may change the plugin textdomain in constants.php to use the following languages.
+This Plugin supports multiple languages. 
 
-* German
-* French
-* Russian
-* Italian
-* Dutch
-* Japanese
-* Portuguese
-* Swedish
-* Polish
-* Danish
-* Spanish
-* Bulgarian
-* Greek
-* Hungarian
-* Latvian
-
-= This is a fork =
-
-This is a fork of the GPL licensed plugin All-in-on-Event-Calendar by Timely.
-At it's time a great plugin with a solid but unmaintainable codebase (not all required developer tools where opensourced).
-
-In later releases of the original softeware was deprived of core feature: Importing iCal feeds in favor of a service provided by Timely.
-
-If you need a professionally supported plugin you should consider using the [original all in one event calendar](https://wordpress.org/plugins/all-in-one-event-calendar/)
-
-If you love truly open source software and don't mind to get your hands dirty you should join here. Free people need free software to manage and share events in a selfhosted manner.
-
-**Please do not ask for support at Time.ly for this Plugin**.
-
-Source and developer support you can find at https://github.com/digitaldonkey/open-source-event-calendar
 
 == Other notes ==
 
@@ -126,7 +100,7 @@ You may use the Widget with help of [X3P0 - Legacy Widget](https://wordpress.org
 * Filter by post ids (separate IDs by comma):
 **[ai1ec post_id="1, 2"]**
 
-== Changelog ==
+## Changelog
 
 == 0.9.0
 * Added Sourcemaps for CSS (requires OSEC_DEBUG )
@@ -140,3 +114,4 @@ You may use the Widget with help of [X3P0 - Legacy Widget](https://wordpress.org
 * Fixed Week-view date selection.
 * Fixed/rewrote caching system. Added APCU caching.
 * Added Test environment working well in ddev. Based on WP handbook standards [plugin-unit-tests](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/).
+* Rework data security and solving WordPress "Plugin Check" minimum requirements. 

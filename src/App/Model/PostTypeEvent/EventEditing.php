@@ -339,7 +339,7 @@ class EventEditing extends OsecBaseClass
     public function strip_shortcode_tag($tag)
     {
         if (
-            array_key_exists( 2, $tag)
+            array_key_exists(2, $tag)
             && str_starts_with((string)$tag[2], 'osec')
             /**
              * Allows removing of wp-shortcode tags from Events.

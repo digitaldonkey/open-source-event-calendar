@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Osec\Tests\Unit\App\Model\PostTypeEvent;
 
 use Osec\App\Model\PostTypeEvent\EventEditing;
@@ -12,7 +11,6 @@ use Osec\Tests\Utilities\TestBase;
  */
 class EventEditingTest extends TestBase
 {
-
     /**
      * @dataProvider provideContentData
      */
@@ -56,20 +54,20 @@ class EventEditingTest extends TestBase
         $content = 'Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismo vivamus sagittis';
         switch ($variant) {
             case 'osec-tag':
-                $content .= $expected? '  ' : ' [osec view="monthly"] ';
+                $content .= $expected ? '  ' : ' [osec view="monthly"] ';
                 break;
             case 'many-osec-tags':
-                $content .= $expected? '  ' : ' [osec view="daily"] ';
+                $content .= $expected ? '  ' : ' [osec view="daily"] ';
                 $content .= 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
-                $content .= $expected? '  ' : ' [osec view="agenda"] ';
+                $content .= $expected ? '  ' : ' [osec view="agenda"] ';
                 break;
             case 'mixed-tags':
-                $content .= $expected? '  ' : ' [osec view="daily"] ';
+                $content .= $expected ? '  ' : ' [osec view="daily"] ';
                 $content .= 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
                 $content .= ' [otherapp] ';
                 break;
-            default;
             case 'no-tag':
+            default:
                 break;
         }
         $content .= 'Sed posuere consectetur est at lobortis.';
@@ -79,6 +77,4 @@ class EventEditingTest extends TestBase
             'post_content' => $content,
         ];
     }
-
-
 }
