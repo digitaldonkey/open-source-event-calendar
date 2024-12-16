@@ -1,4 +1,17 @@
-# Osec - Open Source Event Calendar
+# Open Source Event Calendar
+
+Tags: calendar, events, ics, ical importer  
+Requires at least: 6.6  
+Tested up to: 6.7.1  
+Requires PHP: 8.2  
+Stable Tag: 1.0  
+License: GNU General Public License, versio  3 (GPL-3.0)  
+License URI: https://www.gnu.org/licenses/gpl-3.0.html  
+Contributors: digitaldonkey, hubrik, vtowel, yani.iliev nicolapeluchetti, jbutkus, lpawlik, bangelov  
+
+
+### Short Description
+With Osec you can create, share and aggregate and import (ical, ics) Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
 
 ### Description
 
