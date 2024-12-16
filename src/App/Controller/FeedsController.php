@@ -288,7 +288,8 @@ class FeedsController extends OsecBaseClass
                 'ics_id'  => $feed_id,
                 'error'   => true,
                 'message' => __(
-                    'Another import process in progress. Please try again later.'
+                    'Another import process in progress. Please try again later.',
+                    'open-source-event-calendar'
                 ),
             ],
         ];
