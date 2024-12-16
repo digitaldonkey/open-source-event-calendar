@@ -235,6 +235,9 @@ jobs:
           command: |
             mkdir -p /tmp/release/$WP_ORG_PLUGIN_NAME
             (cd ~/$WP_ORG_PLUGIN_NAME && cp -R $OSEC_RELEASE_WHITE_LIST /tmp/release/$WP_ORG_PLUGIN_NAME)
+            rm /tmp/release/$WP_ORG_PLUGIN_NAME/public/admin/less/build-css.sh
+            rm /tmp/release/$WP_ORG_PLUGIN_NAME/public/osec_themes/vortex/less/build-3rdparty-less.sh
+            rm /tmp/release/$WP_ORG_PLUGIN_NAME/public/admin/less/build-css.bat
             (cd /tmp/release/ && zip -r /tmp/$OSEC_RELEASE_FILE $WP_ORG_PLUGIN_NAME)
       - store_artifacts:
           path: /tmp/open-source-event-calendar.zip
