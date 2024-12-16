@@ -3,7 +3,6 @@
 namespace Osec\App\Controller;
 
 use Exception;
-use Osec\App\I18n;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\Bootstrap\App;
@@ -286,15 +285,17 @@ class FrontendCssController extends OsecBaseClass
 
             if (true === $resetting) {
                 $message = sprintf(
-                    '<p>' . I18n::__(
-                        "Theme options were successfully reset to their default values. <a href='%s'>Visit site</a>"
+                    '<p>' . __(
+                        "Theme options were successfully reset to their default values. <a href='%s'>Visit site</a>",
+                        'open-source-event-calendar'
                     ) . '</p>',
                     get_site_url()
                 );
             } else {
                 $message = sprintf(
-                    '<p>' . I18n::__(
-                        "Theme options were updated successfully. <a href='%s'>Visit site</a>"
+                    '<p>' . __(
+                        "Theme options were updated successfully. <a href='%s'>Visit site</a>",
+                        'open-source-event-calendar'
                     ) . '</p>',
                     get_site_url()
                 );
@@ -325,10 +326,12 @@ class FrontendCssController extends OsecBaseClass
         $notification = NotificationAdmin::factory($this->app);
         if ( ! MemoryCheck::check_available_memory(OSEC_LESS_MIN_AVAIL_MEMORY)) {
             $message = sprintf(
-                I18n::__(
-                    'CSS compilation failed because you don\'t have enough free memory '
-                    . '(a minimum of %s is needed). Your calendar will not render or function properly without CSS. '
-                    . 'Increase your PHP memory limit.'
+                /* translators: Minimum PHP memory required */
+                __(
+                    'CSS compilation failed because you do not have enough free memory  
+                      (a minimum of %s is needed). Your calendar will not render or function
+                      properly without CSS. Increase your PHP memory limit.',
+                    'open-source-event-calendar'
                 ),
                 OSEC_LESS_MIN_AVAIL_MEMORY
             );
@@ -357,8 +360,9 @@ class FrontendCssController extends OsecBaseClass
             }
         } catch (CacheWriteException) {
             // This means successful during parsing but problems persisting the CSS.
-            $message = '<p>' . I18n::__(
-                'The LESS file compiled correctly but there was an error while saving the generated CSS to persistence.'
+            $message = '<p>' . __(
+                'The LESS file compiled correctly but there was an error while saving the generated CSS to persistence.',
+                'open-source-event-calendar'
             ) . '</p>';
             $notification->store($message, 'error');
 
@@ -366,9 +370,10 @@ class FrontendCssController extends OsecBaseClass
         } catch (Exception $e) {
             // An error from lessphp.
             $message = sprintf(
-                I18n::__(
-                    '<p><strong>There was an error while compiling CSS.</strong> '
-                        . 'The message returned was: <em>%s</em></p>'
+                __(
+                    '<p><strong>There was an error while compiling CSS.</strong>
+                        The message returned was: <em>%s</em></p>',
+                    'open-source-event-calendar'
                 ),
                 $e->getMessage()
             );

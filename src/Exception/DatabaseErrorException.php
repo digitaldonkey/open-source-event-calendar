@@ -2,8 +2,6 @@
 
 namespace Osec\Exception;
 
-use Osec\App\I18n;
-
 /**
  * In case of database update failure this exception is thrown
  *
@@ -21,12 +19,14 @@ class DatabaseErrorException extends Exception
      */
     public function get_html_message()
     {
-        $message = '<p>' . I18n::__(
-            'Database update has failed. Please make sure, that database user, defined in <em>wp-config.php</em>'
-            . ' has permissions, to make changes (<strong>ALTER TABLE</strong>) to the database.'
-        ) .
-                   '</p><p>' . sprintf(
-                       I18n::__('Error encountered: %s'),
+        $message = '<p>' . __(
+            'Database update has failed. Please make sure, that database user, defined in <em>wp-config.php</em> 
+                has permissions, to make changes (<strong>ALTER TABLE</strong>) to the database.',
+            'open-source-event-calendar'
+        ) . '</p>'
+                   . '<p>' . sprintf(
+                   /* translators: Database exception error message */
+                       __('Error encountered: %s', 'open-source-event-calendar'),
                        $this->getMessage()
                    ) . '</p>';
 

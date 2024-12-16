@@ -349,36 +349,43 @@ JSC;
             'calendar_feeds_nonce'           => wp_create_nonce('osec_ics_feed_nonce'),
             // ICS feed error messages
             'duplicate_feed_message'         => esc_html(
-                I18n::__('This feed is already being imported.')
+                __('This feed is already being imported.', 'open-source-event-calendar')
             ),
             'invalid_url_message'            => esc_html(
-                I18n::__('Please enter a valid iCalendar URL.')
+                __('Please enter a valid iCalendar URL.', 'open-source-event-calendar')
             ),
             'invalid_email_message'          => esc_html(
-                I18n::__('Please enter a valid email address.')
+                __('Please enter a valid email address.', 'open-source-event-calendar')
             ),
-            'choose_image_message'           => I18n::__('Choose Image'),
+            'choose_image_message'           => __('Choose Image', 'open-source-event-calendar'),
             'now'                            => UIDateFormats::factory($this->app)->current_time(),
-            'size_less_variable_not_ok'      => I18n::__(
-                'The value you have entered is not a valid CSS length.'
+            'size_less_variable_not_ok'      => __(
+                'The value you have entered is not a valid CSS length.',
+                'open-source-event-calendar'
             ),
-            'confirm_reset_theme'            => I18n::__(
-                'Are you sure you want to reset your theme options to their default values?'
+            'confirm_reset_theme'            => __(
+                'Are you sure you want to reset your theme options to their default values?',
+                'open-source-event-calendar'
             ),
-            'error_message_not_valid_lat'    => I18n::__(
-                'Please enter a valid latitude. A valid latitude is comprised between +90 and -90.'
+            'error_message_not_valid_lat'    => __(
+                'Please enter a valid latitude. A valid latitude is comprised between +90 and -90.',
+                'open-source-event-calendar'
             ),
-            'error_message_not_valid_long'   => I18n::__(
-                'Please enter a valid longitude. A valid longitude is comprised between +180 and -180.'
+            'error_message_not_valid_long'   => __(
+                'Please enter a valid longitude. A valid longitude is comprised between +180 and -180.',
+                'open-source-event-calendar'
             ),
-            'error_message_not_entered_lat'  => I18n::__(
-                'When the "Input coordinates" checkbox is checked, "Latitude" is a required field.'
+            'error_message_not_entered_lat'  => __(
+                'When the "Input coordinates" checkbox is checked, "Latitude" is a required field.',
+                'open-source-event-calendar'
             ),
-            'error_message_not_entered_long' => I18n::__(
-                'When the "Input coordinates" checkbox is checked, "Longitude" is a required field.'
+            'error_message_not_entered_long' => __(
+                'When the "Input coordinates" checkbox is checked, "Longitude" is a required field.',
+                'open-source-event-calendar'
             ),
-            'osec_contact_url_not_valid'     => I18n::__(
-                'URL in <b>Organizer Contact Info</b> &gt; <b>Website URL</b> seems to be invalid.'
+            'osec_contact_url_not_valid'     => __(
+                'URL in <b>Organizer Contact Info</b> &gt; <b>Website URL</b> seems to be invalid.',
+                'open-source-event-calendar'
             ),
             'osec_ticket_url_not_valid'      => I18n::__(
                 'URL in <b>Event Cost and Tickets</b> &gt; <b>Buy Tickets URL</b> seems to be invalid.'

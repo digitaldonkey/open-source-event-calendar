@@ -2,7 +2,6 @@
 
 namespace Osec\Twig;
 
-use Osec\App\I18n;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
@@ -35,8 +34,9 @@ class TwigDebugExtension extends AbstractExtension
         $notification = NotificationAdmin::factory($osec_app);
 
         $notification->store(
-            I18n::__(
-                'You need to enable xdebug or run `composer install` to use Twig debug() in twig files. <br /><br />'
+            __(
+                'You need to enable xdebug or run `composer install` to use Twig debug() in twig files. <br /><br />',
+                'open-source-event-calendar'
             ),
             'error',
             2,

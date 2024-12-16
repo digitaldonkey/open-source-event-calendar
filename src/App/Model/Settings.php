@@ -4,7 +4,6 @@ namespace Osec\App\Model;
 
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\ShutdownController;
-use Osec\App\I18n;
 use Osec\Bootstrap\OsecBaseInitialized;
 use Osec\Exception\Exception;
 use Osec\Exception\SettingsException;
@@ -341,7 +340,7 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCalenderPageSelect',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__('Calendar page'),
+                    'label' => __('Calendar page', 'open-source-event-calendar'),
                 ],
                 'default'  => false,
             ],
@@ -351,7 +350,7 @@ class Settings extends OsecBaseInitialized
                     'class'   => 'Osec\Settings\Elements\SettingsSelect',
                     'tab'     => 'viewing-events',
                     'item'    => 'viewing-events',
-                    'label'   => I18n::__('Week starts on'),
+                    'label'   => __('Week starts on', 'open-source-event-calendar'),
                     'options' => 'get_weekdays_settings',
                 ],
                 'default'  => $this->app->options->get(
@@ -363,7 +362,7 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsEnabledViews',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__('Available views'),
+                    'label' => __('Available views', 'open-source-event-calendar'),
                 ],
                 'default'  => [
                     'agenda' => [
@@ -419,11 +418,12 @@ class Settings extends OsecBaseInitialized
                     'class'   => 'Osec\Settings\Elements\SettingsSelect',
                     'tab'     => 'viewing-events',
                     'item'    => 'viewing-events',
-                    'label'   => I18n::__('Timezone'),
+                    'label'   => __('Timezone', 'open-source-event-calendar'),
                     'options' => 'Osec\App\Model\Date\Timezones::get_timezones',
-                    'help'    => I18n::__(
-                        'This is an alias to wp-settings timezone and could also be '
-                        . 'changed on /wp-admin/options-general.php.'
+                    'help'    => __(
+                        'This is an alias to wp-settings timezone and could also be 
+                            changed on /wp-admin/options-general.php.',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => $this->app->options->get(
@@ -435,9 +435,10 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCatsTagsFilter',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__('Preselected calendar filters'),
-                    'help'  => I18n::__(
-                        'To clear, hold &#8984;/<abbr class="initialism">CTRL</abbr> and click selection.'
+                    'label' => __('Preselected calendar filters', 'open-source-event-calendar'),
+                    'help'  => __(
+                        'To clear, hold &#8984;/<abbr class="initialism">CTRL</abbr> and click selection.',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => [
@@ -450,7 +451,7 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsInput',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__('Default calendar start date (optional)'),
+                    'label' => __('Default calendar start date (optional)', 'open-source-event-calendar'),
                     'type'  => 'date',
                 ],
                 'default'  => '',
@@ -461,7 +462,7 @@ class Settings extends OsecBaseInitialized
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
                     'tab'    => 'viewing-events',
                     'item'   => 'viewing-events',
-                    'label'  => I18n::__('Agenda pages show at most'),
+                    'label'  => __('Agenda pages show at most', 'open-source-event-calendar'),
                     'type'   => 'append',
                     'append' => 'events',
                 ],
@@ -473,7 +474,7 @@ class Settings extends OsecBaseInitialized
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
                     'tab'    => 'viewing-events',
                     'item'   => 'viewing-events',
-                    'label'  => I18n::__('Week/Day view starts at'),
+                    'label'  => __('Week/Day view starts at', 'open-source-event-calendar'),
                     'type'   => 'append',
                     'append' => 'hrs',
                 ],
@@ -485,7 +486,7 @@ class Settings extends OsecBaseInitialized
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
                     'tab'    => 'viewing-events',
                     'item'   => 'viewing-events',
-                    'label'  => I18n::__('Week/Day view ends at'),
+                    'label'  => __('Week/Day view ends at', 'open-source-event-calendar'),
                     'type'   => 'append',
                     'append' => 'hrs',
                 ],
@@ -496,12 +497,8 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__(
-                        '<strong>Word-wrap event stubs</strong> in Month view'
-                    ),
-                    'help'  => I18n::__(
-                        'Only applies to events that span a single day.'
-                    ),
+                    'label' => __('<strong>Word-wrap event stubs</strong> in Month view', 'open-source-event-calendar'),
+                    'help' => __('Only applies to events that span a single day.', 'open-source-event-calendar'),
                 ],
                 'default'  => false,
             ],
@@ -510,12 +507,13 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__(
+                    'label' => __(
                         'In <span class="ai1ec-tooltip-toggle"
-						data-original-title="These include Agenda view,
-						the Upcoming Events widget, and some extended views.">
-						Agenda-like views</span>, <strong>include all events
-						from last day shown</strong>'
+                            data-original-title="These include Agenda view,
+                            the Upcoming Events widget, and some extended views.">
+                            Agenda-like views</span>, <strong>include all events
+                            from last day shown</strong>',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -525,8 +523,9 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__(
-                        'Keep all events <strong>expanded</strong> in Agenda view (disables toggler).'
+                    'label' => __(
+                        'Keep all events <strong>expanded</strong> in Agenda view (disables toggler).',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -536,8 +535,9 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__(
-                        '<strong>Show year</strong> in calendar date labels'
+                    'label' => __(
+                        '<strong>Show year</strong> in calendar date labels',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -547,8 +547,9 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__(
-                        '<strong>Show location in event titles</strong> in calendar views'
+                    'label' => __(
+                        '<strong>Show location in event titles</strong> in calendar views',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => true,
@@ -558,8 +559,9 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__(
-                        '<strong>Exclude</strong> events from search results'
+                    'label' => __(
+                        '<strong>Exclude</strong> events from search results',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -569,9 +571,10 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__(
-                        'Hide <strong>Subscribe</strong>/<strong>Add to Calendar</strong> '
-                        . 'buttons in calendar and single event views '
+                    'label' => __(
+                        'Hide <strong>Subscribe</strong>/<strong>Add to Calendar</strong> 
+                            buttons in calendar and single event views ',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -581,8 +584,9 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__(
-                        ' Hide <strong>Google Maps</strong> until clicked'
+                    'label' => __(
+                        ' Hide <strong>Google Maps</strong> until clicked',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -593,11 +597,13 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__(
-                        ' <strong>Affix filter menu</strong> to top of window when it scrolls out of view'
+                    'label' => __(
+                        ' <strong>Affix filter menu</strong> to top of window when it scrolls out of view',
+                        'open-source-event-calendar'
                     ),
-                    'help'  => I18n::__(
-                        'Only applies to first visible calendar found on the page.'
+                    'help'  => __(
+                        'Only applies to first visible calendar found on the page.',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -608,7 +614,7 @@ class Settings extends OsecBaseInitialized
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
                     'tab'    => 'viewing-events',
                     'item'   => 'viewing-events',
-                    'label'  => I18n::__('Offset affixed filter bar vertically by'),
+                    'label'  => __('Offset affixed filter bar vertically by', 'open-source-event-calendar'),
                     'type'   => 'append',
                     'append' => 'pixels',
                 ],
@@ -622,7 +628,7 @@ class Settings extends OsecBaseInitialized
                     'item'   => 'viewing-events',
                     'label'  =>
                         '<i class="ai1ec-fa ai1ec-fa-lg ai1ec-fa-fw ai1ec-fa-desktop"></i> ' .
-                        I18n::__('Wide screens only (&#8805; 1200px)'),
+                        __('Wide screens only (&#8805; 1200px)', 'open-source-event-calendar'),
                     'type'   => 'append',
                     'append' => 'pixels',
                 ],
@@ -636,7 +642,7 @@ class Settings extends OsecBaseInitialized
                     'item'   => 'viewing-events',
                     'label'  =>
                         '<i class="ai1ec-fa ai1ec-fa-lg ai1ec-fa-fw ai1ec-fa-tablet"></i> ' .
-                        I18n::__('Tablets only (< 980px)'),
+                        __('Tablets only (< 980px)', 'open-source-event-calendar'),
                     'type'   => 'append',
                     'append' => 'pixels',
                 ],
@@ -650,7 +656,7 @@ class Settings extends OsecBaseInitialized
                     'item'   => 'viewing-events',
                     'label'  =>
                         '<i class="ai1ec-fa ai1ec-fa-lg ai1ec-fa-fw ai1ec-fa-mobile"></i> ' .
-                        I18n::__('Phones only (< 768px)'),
+                        __('Phones only (< 768px)', 'open-source-event-calendar'),
                     'type'   => 'append',
                     'append' => 'pixels',
                 ],
@@ -661,8 +667,9 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__(
-                        'Strict compatibility content filtering'
+                    'label' => __(
+                        'Strict compatibility content filtering',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -672,11 +679,13 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__(
-                        ' <strong>Hide featured image</strong> from event details page'
+                    'label' => __(
+                        ' <strong>Hide featured image</strong> from event details page',
+                        'open-source-event-calendar'
                     ),
-                    'help'  => I18n::__(
-                        "Select this option if your theme already displays each post's featured image."
+                    'help'  => __(
+                        "Select this option if your theme already displays each post's featured image.",
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -686,24 +695,22 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class'   => 'Osec\Settings\Elements\SettingsSelect',
                     'tab'     => 'editing-events',
-                    'label'   => I18n::__(
-                        'Input date format'
-                    ),
+                    'label'   => __('Input date format', 'open-source-event-calendar'),
                     'options' => [
                         [
-                            'text'  => I18n::__('Default (d/m/yyyy)'),
+                            'text'  => __('Default (d/m/yyyy)', 'open-source-event-calendar'),
                             'value' => 'def',
                         ],
                         [
-                            'text'  => I18n::__('US (m/d/yyyy)'),
+                            'text'  => __('US (m/d/yyyy)', 'open-source-event-calendar'),
                             'value' => 'us',
                         ],
                         [
-                            'text'  => I18n::__('ISO 8601 (yyyy-m-d)'),
+                            'text'  => __('ISO 8601 (yyyy-m-d)', 'open-source-event-calendar'),
                             'value' => 'iso',
                         ],
                         [
-                            'text'  => I18n::__('Dotted (m.d.yyyy)'),
+                            'text'  => __('Dotted (m.d.yyyy)', 'open-source-event-calendar'),
                             'value' => 'dot',
                         ],
                     ],
@@ -715,8 +722,9 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'editing-events',
-                    'label' => I18n::__(
-                        ' Use <strong>24h time</strong> in time pickers'
+                    'label' => __(
+                        ' Use <strong>24h time</strong> in time pickers',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -726,8 +734,9 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'editing-events',
-                    'label' => I18n::__(
-                        '<strong>Disable address autocomplete</strong> function'
+                    'label' => __(
+                        '<strong>Disable address autocomplete</strong> function',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -737,9 +746,10 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'editing-events',
-                    'label' => I18n::__(
-                        'Use the configured <strong>region</strong> (WordPress locale) '
-                        . 'to bias the address autocomplete function '
+                    'label' => __(
+                        'Use the configured <strong>region</strong> (WordPress locale) 
+                            to bias the address autocomplete function ',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -764,17 +774,18 @@ class Settings extends OsecBaseInitialized
                     'class' => 'Osec\Settings\Elements\SettingsInput',
                     'tab'   => 'advanced',
 //                    'item'  => 'advanced',
-                    'label' => I18n::__('Move calendar into this DOM element'),
+                    'label' => __('Move calendar into this DOM element', 'open-source-event-calendar'),
                     'type'  => 'normal',
-                    'help'  => I18n::__(
+                    'help'  => __(
                         'Optional. Use this JavaScript-based shortcut to place the
-						calendar a DOM element other than the usual page content container
-						if you are unable to create an appropriate page template
-						 for the calendar page. To use, enter a
-						<a target="_blank" href="https://api.jquery.com/category/selectors/">
-						jQuery selector</a> that evaluates to a single DOM element.
-						Any existing markup found within the target will be replaced
-						by the calendar. Will only work if selector is <strong>outside</strong> the page content loop.'
+                            calendar a DOM element other than the usual page content container
+                            if you are unable to create an appropriate page template
+                             for the calendar page. To use, enter a
+                            <a target="_blank" href="https://api.jquery.com/category/selectors/">
+                            jQuery selector</a> that evaluates to a single DOM element.
+                            Any existing markup found within the target will be replaced
+                            by the calendar. Will only work if selector is <strong>outside</strong> the page content loop.',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => '',
@@ -785,14 +796,16 @@ class Settings extends OsecBaseInitialized
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'advanced',
 //                    'item'  => 'advanced',
-                    'label' => I18n::__(
-                        '<strong>Skip <tt>in_the_loop()</tt> check </strong> '
-                        . 'that protects against multiple calendar output'
+                    'label' => __(
+                        '<strong>Skip <tt>in_the_loop()</tt> check </strong> 
+                            that protects against multiple calendar output',
+                        'open-source-event-calendar'
                     ),
-                    'help'  => I18n::__(
-                        'Try enabling this option if your calendar does not appear on the calendar page. '
-                        . 'It is needed for compatibility with a small number of themes that call '
-                        . '<code>the_content()</code> from outside of The Loop. Leave disabled otherwise.'
+                    'help'  => __(
+                        'Try enabling this option if your calendar does not appear on the calendar page. 
+                            It is needed for compatibility with a small number of themes that call
+                            <code>the_content()</code> from outside of The Loop. Leave disabled otherwise.',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
@@ -802,13 +815,11 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'advanced',
-//                    'item'  => 'advanced',
-                    'label' => I18n::__(
-                        'Use frontend rendering.'
-                    ),
-                    'help'  => I18n::__(
-                        'Renders calendar views on the client rather than the server; '
-                        . 'significantly improvees performance.'
+                    'label' => __('Use frontend rendering.', 'open-source-event-calendar'),
+                    'help'  => __(
+                        'Renders calendar views on the client rather than the server; 
+                            significantly improvees performance.',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => true,
@@ -819,12 +830,14 @@ class Settings extends OsecBaseInitialized
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'advanced',
 //                    'item'  => 'advanced',
-                    'label' => I18n::__(
-                        '<strong>Link CSS</strong> in <code>&lt;head&gt;</code> section when file cache is unavailable.'
+                    'label' => __(
+                        '<strong>Link CSS</strong> in <code>&lt;head&gt;</code> section when file cache is unavailable.',
+                        'open-source-event-calendar'
                     ),
-                    'help'  => I18n::__(
-                        'Serve CSS as a link if file cache is not enabled rather than have '
-                        . 'it output inline (recommended).'
+                    'help'  => __(
+                        'Serve CSS as a link if file cache is not enabled rather than have  
+                            it output inline (recommended).',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => true,
@@ -835,16 +848,17 @@ class Settings extends OsecBaseInitialized
                     'class'    => 'Osec\Settings\Elements\SettingsTextarea',
                     'tab'      => 'advanced',
 //                    'item'     => 'advanced',
-                    'label'    => I18n::__('Current <strong>robots.txt</strong> on this site'),
+                    'label'    => __('Current <strong>robots.txt</strong> on this site', 'open-source-event-calendar'),
                     'type'     => 'normal',
                     'rows'     => 6,
                     'readonly' => 'readonly',
-                    'help'     => I18n::__(
+                    'help'     => __(
                         'The Robot Exclusion Standard, also known as the Robots Exclusion Protocol or
 						<code><a href="https://en.wikipedia.org/wiki/Robots.txt" target="_blank">robots.txt</a></code>
 						protocol, is a convention for cooperating web crawlers and other web robots
 						about accessing all or part of a website that is otherwise publicly viewable.
-						You can change it manually by editing <code>robots.txt</code> in your root WordPress directory.'
+						You can change it manually by editing <code>robots.txt</code> in your root WordPress directory.',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => '',
@@ -859,11 +873,7 @@ class Settings extends OsecBaseInitialized
                     'class' => 'Osec\Settings\Elements\SettingsCache',
                     'tab'   => 'cache',
 //                    'item'  => 'cache',
-                    'label' => sprintf(
-                        I18n::__(
-                            'Templates cache improves site performance'
-                        )
-                    ),
+                    'label' => __('Templates cache improves site performance', 'open-source-event-calendar'),
                 ],
                 'default'  => '',
             ],
@@ -872,12 +882,11 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => I18n::__(
-                        'Display events in <strong>calendar time zone</strong>'
-                    ),
-                    'help'  => I18n::__(
-                        'If this box is checked events will appear in the calendar time zone with time zone '
-                            . 'information displayed on the event details page.'
+                    'label' => __('Display events in <strong>calendar time zone</strong>', 'open-source-event-calendar'),
+                    'help'  => __(
+                        'If this box is checked events will appear in the calendar time zone with time zone 
+                            information displayed on the event details page.',
+                        'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,

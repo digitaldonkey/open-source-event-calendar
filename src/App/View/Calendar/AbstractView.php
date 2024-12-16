@@ -45,7 +45,8 @@ abstract class AbstractView extends OsecBaseClass
         $this->request = $request;
     }
 
-    public static function get_venue_separator_text() {
+    public static function get_venue_separator_text()
+    {
         /* translators: venue separator */
         return __(
             '@ %s',

@@ -4,7 +4,6 @@ namespace Osec\App\Controller;
 
 use Exception;
 use JetBrains\PhpStorm\NoReturn;
-use Osec\App\I18n;
 use Osec\App\Model\PostTypeEvent\EventCreateException;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\Model\PostTypeEvent\EventType;
@@ -89,10 +88,7 @@ class FeedsController extends OsecBaseClass
              * Add ICS feed by ajax.
              */
             add_action(
-            /**
-             * @throws \Osec\Exception\Exception
-             * @throws BootstrapException
-             */                'wp_ajax_osec_add_ics',
+                'wp_ajax_osec_add_ics',
                 function () use ($app) {
                     FeedsController::factory($app)->add_ics_feed();
                 }
@@ -135,12 +131,12 @@ class FeedsController extends OsecBaseClass
     public function add_ics_feed(): void
     {
         check_ajax_referer('osec_ics_feed_nonce', 'nonce');
-        if ( ! current_user_can('manage_osec_feeds')) {
-            wp_die(I18n::__('Oh, submission was not accepted.'));
+        if (! current_user_can('manage_osec_feeds')) {
+            wp_die(__('User not allowed to manage feeds.', 'open-source-event-calendar'));
         }
 
         /* @var ?int $feedId Update (int) or New (null) */
-        $feedId = ( ! empty($_REQUEST['feed_id']) && is_int(intval($_REQUEST['feed_id']))) ? intval(
+        $feedId = (! empty($_REQUEST['feed_id']) && is_int(intval($_REQUEST['feed_id']))) ? intval(
             $_REQUEST['feed_id']
         ) : null;
 
@@ -189,7 +185,7 @@ class FeedsController extends OsecBaseClass
                 ['feed_id' => $feedId]
             );
         } else {
-            if ( ! $this->app->db->insert($this->feedsTable, $entry, $format)) {
+            if (! $this->app->db->insert($this->feedsTable, $entry, $format)) {
                 throw new Exception('DB ENTRY FAILED TODO');
             }
             $feedId = $this->app->db->get_insert_id();
@@ -223,7 +219,7 @@ class FeedsController extends OsecBaseClass
         );
 
         $cat_ids = '';
-        if ( ! empty($_REQUEST['feed_category'])) {
+        if (! empty($_REQUEST['feed_category'])) {
             foreach ($_REQUEST['feed_category'] as $cat_id) {
                 $feed_category = get_term($cat_id, 'events_categories');
                 $categories[]  = $feed_category->name;
@@ -282,7 +278,7 @@ class FeedsController extends OsecBaseClass
         $ajax = false;
         $data = [];
         // if no feed is provided, we are using ajax
-        if ( ! $feed_id) {
+        if (! $feed_id) {
             $ajax    = true;
             $feed_id = (int)$_REQUEST['ics_id'];
         }
@@ -291,7 +287,7 @@ class FeedsController extends OsecBaseClass
             'data' => [
                 'ics_id'  => $feed_id,
                 'error'   => true,
-                'message' => I18n::__(
+                'message' => __(
                     'Another import process in progress. Please try again later.'
                 ),
             ],
@@ -443,7 +439,7 @@ class FeedsController extends OsecBaseClass
                 }
             } elseif (is_wp_error($response)) {
                 $message = sprintf(
-                    /* translators: WP error message */
+                /* translators: WP error message */
                     __(
                         'WP error trying to fetch. Error message: %s',
                         'open-source-event-calendar'
@@ -467,7 +463,7 @@ class FeedsController extends OsecBaseClass
                 $output['data'] = [
                     'error'   => false,
                     'message' => sprintf(
-                        /* translators: 1: number, 2: plural number. */
+                    /* translators: 1: number, 2: plural number. */
                         _n('Imported %s event', 'Imported %s events', $count, 'open-source-event-calendar'),
                         $count
                     ),
@@ -596,7 +592,8 @@ class FeedsController extends OsecBaseClass
             $output = [
                 'error'   => false,
                 'message' => sprintf(
-                    I18n::__('Deleted %d events'),
+                /* translators: Number of deleted events */
+                    __('Deleted %d events', 'open-source-event-calendar'),
                     $total
                 ),
                 'count'   => $total,
@@ -604,7 +601,7 @@ class FeedsController extends OsecBaseClass
         } else {
             $output = [
                 'error'   => true,
-                'message' => I18n::__('Invalid ICS feed ID'),
+                'message' => __('Invalid ICS feed ID', 'open-source-event-calendar'),
             ];
         }
         if ($ajax) {
@@ -668,7 +665,7 @@ class FeedsController extends OsecBaseClass
 
     public function get_tab_title()
     {
-        return I18n::__('ICS');
+        return __('ICS', 'open-source-event-calendar');
     }
 
     public function get_tab_content(): string
@@ -710,13 +707,13 @@ class FeedsController extends OsecBaseClass
         );
 
         $cron_freq = ThemeLoader::factory($this->app)
-            ->get_file(
-                'cron_freq.php',
-                [
-                    'cron_freq' => $this->app->settings->get('ics_cron_freq'),
-                ],
-                true
-            );
+                                ->get_file(
+                                    'cron_freq.php',
+                                    [
+                                        'cron_freq' => $this->app->settings->get('ics_cron_freq'),
+                                    ],
+                                    true
+                                );
 
         $args = [
             'cron_freq'        => $cron_freq->get_content(),

@@ -55,7 +55,7 @@ class WeekView extends AbstractView
 
         // Create pagination links. (Translators: '%s' = week's start date.)
         $title            = sprintf(
-            /* translators: Long week name or number */
+        /* translators: Long week name or number */
             __(
                 'Week %s',
                 'open-source-event-calendar'
@@ -63,7 +63,7 @@ class WeekView extends AbstractView
             $weekStart->format_i18n('W / F Y')
         );
         $title_short      = sprintf(
-            /* translators: Short week name or number */
+        /* translators: Short week name or number */
             __(
                 'W%s',
                 'open-source-event-calendar'
@@ -113,7 +113,7 @@ class WeekView extends AbstractView
 
         $hours = [];
         $today = new DT('now', 'sys.default');
-        for ($hour = 0;$hour < 24;$hour++) {
+        for ($hour = 0; $hour < 24; $hour++) {
             $hours[] = $today
                 ->set_time($hour, 0, 0)
                 ->format_i18n($time_format);
@@ -230,7 +230,7 @@ class WeekView extends AbstractView
             // $day < $last_week_day_index;
             // $day++
 
-            for ($day = 0;$day < 7;$day++) {
+            for ($day = 0; $day < 7; $day++) {
                 // TODO As $day is a simple Index counting > 31 can this lead to useful results?
                 //
 
@@ -282,7 +282,7 @@ class WeekView extends AbstractView
         // $day < $last_week_day_index;
         // $day++
         // ) {
-        for ($day = 0;$day < 7;$day++) {
+        for ($day = 0; $day < 7; $day++) {
             [$day_date, , $day_date_ob] = $this->_get_wkday_start_end($day, $start_of_week);
 
             $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url(
