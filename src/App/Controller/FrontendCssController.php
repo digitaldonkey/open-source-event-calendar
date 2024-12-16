@@ -361,7 +361,8 @@ class FrontendCssController extends OsecBaseClass
         } catch (CacheWriteException) {
             // This means successful during parsing but problems persisting the CSS.
             $message = '<p>' . __(
-                'The LESS file compiled correctly but there was an error while saving the generated CSS to persistence.',
+                'The LESS file compiled correctly but there was an error
+                    while saving the generated CSS to persistence.',
                 'open-source-event-calendar'
             ) . '</p>';
             $notification->store($message, 'error');

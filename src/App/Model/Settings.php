@@ -72,7 +72,7 @@ class Settings extends OsecBaseInitialized
      */
     public function describe($option)
     {
-        if ( ! isset($this->options[$option])) {
+        if (! isset($this->options[$option])) {
             return null;
         }
 
@@ -174,7 +174,7 @@ class Settings extends OsecBaseInitialized
      */
     public function set($option, mixed $value)
     {
-        if ( ! isset($this->options[$option])) {
+        if (! isset($this->options[$option])) {
             throw new SettingsException(
                 'Option "' . $option . '" was not registered'
             );
@@ -248,7 +248,7 @@ class Settings extends OsecBaseInitialized
     public function get($option, mixed $default = null)
     {
         // notice, that `null` is not treated as a value
-        if ( ! isset($this->options[$option])) {
+        if (! isset($this->options[$option])) {
             return $default;
         }
 
@@ -498,7 +498,7 @@ class Settings extends OsecBaseInitialized
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
                     'label' => __('<strong>Word-wrap event stubs</strong> in Month view', 'open-source-event-calendar'),
-                    'help' => __('Only applies to events that span a single day.', 'open-source-event-calendar'),
+                    'help'  => __('Only applies to events that span a single day.', 'open-source-event-calendar'),
                 ],
                 'default'  => false,
             ],
@@ -783,8 +783,8 @@ class Settings extends OsecBaseInitialized
                              for the calendar page. To use, enter a
                             <a target="_blank" href="https://api.jquery.com/category/selectors/">
                             jQuery selector</a> that evaluates to a single DOM element.
-                            Any existing markup found within the target will be replaced
-                            by the calendar. Will only work if selector is <strong>outside</strong> the page content loop.',
+                            Any existing markup found within the target will be replaced by the 
+                            calendar. Will only work if selector is <strong>outside</strong> the page content loop.',
                         'open-source-event-calendar'
                     ),
                 ],
@@ -831,7 +831,8 @@ class Settings extends OsecBaseInitialized
                     'tab'   => 'advanced',
 //                    'item'  => 'advanced',
                     'label' => __(
-                        '<strong>Link CSS</strong> in <code>&lt;head&gt;</code> section when file cache is unavailable.',
+                        '<strong>Link CSS</strong> in <code>&lt;head&gt;</code>
+                            section when file cache is unavailable.',
                         'open-source-event-calendar'
                     ),
                     'help'  => __(
@@ -857,7 +858,8 @@ class Settings extends OsecBaseInitialized
 						<code><a href="https://en.wikipedia.org/wiki/Robots.txt" target="_blank">robots.txt</a></code>
 						protocol, is a convention for cooperating web crawlers and other web robots
 						about accessing all or part of a website that is otherwise publicly viewable.
-						You can change it manually by editing <code>robots.txt</code> in your root WordPress directory.',
+						You can change it manually by editing <code>robots.txt</code> 
+						in your root WordPress directory.',
                         'open-source-event-calendar'
                     ),
                 ],
@@ -882,7 +884,10 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => __('Display events in <strong>calendar time zone</strong>', 'open-source-event-calendar'),
+                    'label' => __(
+                        'Display events in <strong>calendar time zone</strong>',
+                        'open-source-event-calendar'
+                    ),
                     'help'  => __(
                         'If this box is checked events will appear in the calendar time zone with time zone 
                             information displayed on the event details page.',
@@ -947,8 +952,8 @@ class Settings extends OsecBaseInitialized
             ) ||
             (
                 isset($renderer['help']) &&
-                ( ! isset($this->options[$option]['renderer']['help']) || // handle the case when you are adding help
-                  (string)$this->options[$option]['renderer']['help'] !== (string)$renderer['help'])
+                (! isset($this->options[$option]['renderer']['help']) || // handle the case when you are adding help
+                 (string)$this->options[$option]['renderer']['help'] !== (string)$renderer['help'])
             )
         ) {
             $this->options[$option] = [
