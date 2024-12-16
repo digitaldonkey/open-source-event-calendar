@@ -107,7 +107,7 @@ class OnedayView extends AbstractView
             'text_full_day'            => __('Reveal full day', 'open-source-event-calendar'),
             'text_all_day'             => __('All-day', 'open-source-event-calendar'),
             'text_now_label'           => __('Now:', 'open-source-event-calendar'),
-            'text_venue_separator'     => __('@ %s', 'open-source-event-calendar'),
+            'text_venue_separator'     => self::get_venue_separator_text(),
             'hours'                    => $hours,
             'indent_multiplier'        => 16,
             'indent_offset'            => 54,

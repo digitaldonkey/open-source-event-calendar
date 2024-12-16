@@ -76,8 +76,9 @@ class CompileCoreCss extends CommandAbstract
         }
 
         return sprintf(
+            /* translators: Filename and file */
             __(
-                'Theme CSS compiled succesfully and written in %s. and classmap stored in %s.',
+                'Theme CSS compiled succesfully and written in %1$s. and classmap stored in %2$s.',
                 'open-source-event-calendar'
             ),
             $filename,

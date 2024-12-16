@@ -5,8 +5,11 @@
 <?php if ($activated) : ?>
     <div id="message2" class="updated">
         <p>
-            /* translators: home_url() */
-            <?php printf(__('New theme activated. <a href="%s">Visit site</a>', 'open-source-event-calendar'), home_url('/')); ?>
+            <?php printf(
+                    /* translators: home_url() */
+                    __('New theme activated. <a href="%s">Visit site</a>', 'open-source-event-calendar'),
+                    home_url('/')
+            );?>
         </p>
     </div>
 <?php elseif ($deleted) : ?>

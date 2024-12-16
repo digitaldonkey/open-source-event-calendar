@@ -9,6 +9,7 @@ use Osec\App\Controller\WidgetController;
 use Osec\App\I18n;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\PostTypeEvent\EventSearch;
+use Osec\App\View\Calendar\AbstractView;
 use Osec\App\View\Calendar\AgendaView;
 use Osec\App\View\Calendar\CalendarSubscribeButtonView;
 use Osec\Exception\BootstrapException;
@@ -486,7 +487,7 @@ class WidgetAgendaView extends WidgetAbstract
 
         // $args_for_widget['calendar_url'] = get_page_uri($settings->get('calendar_page_id'));
         $args_for_widget['text_edit']              = __('Edit', 'open-source-event-calendar');
-        $args_for_widget['text_venue_separator']   = __('@ %s', 'open-source-event-calendar');
+        $args_for_widget['text_venue_separator']   = AbstractView::get_venue_separator_text();
         $args_for_widget['text_subscribe_label']   = __('Add', 'open-source-event-calendar');
         $args_for_widget['subscribe_buttons_text'] = CalendarSubscribeButtonView::factory($this->app)->get_labels();
 

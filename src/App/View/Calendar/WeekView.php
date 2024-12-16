@@ -55,11 +55,19 @@ class WeekView extends AbstractView
 
         // Create pagination links. (Translators: '%s' = week's start date.)
         $title            = sprintf(
-            __('Week %s', 'open-source-event-calendar'),
+            /* translators: Long week name or number */
+            __(
+                'Week %s',
+                'open-source-event-calendar'
+            ),
             $weekStart->format_i18n('W / F Y')
         );
         $title_short      = sprintf(
-            __('W%s', 'open-source-event-calendar'),
+            /* translators: Short week name or number */
+            __(
+                'W%s',
+                'open-source-event-calendar'
+            ),
             $weekStart->format_i18n('W M/Y')
         );
         $pagination_links = $this->_get_pagination($args, $title, $title_short);
@@ -105,7 +113,7 @@ class WeekView extends AbstractView
 
         $hours = [];
         $today = new DT('now', 'sys.default');
-        for ($hour = 0; $hour < 24; $hour++) {
+        for ($hour = 0;$hour < 24;$hour++) {
             $hours[] = $today
                 ->set_time($hour, 0, 0)
                 ->format_i18n($time_format);
@@ -129,7 +137,7 @@ class WeekView extends AbstractView
             'text_full_day'            => __('Reveal full day', 'open-source-event-calendar'),
             'text_all_day'             => __('All-day', 'open-source-event-calendar'),
             'text_now_label'           => __('Now:', 'open-source-event-calendar'),
-            'text_venue_separator'     => __('@ %s', 'open-source-event-calendar'),
+            'text_venue_separator'     => self::get_venue_separator_text(),
             'hours'                    => $hours,
             'indent_multiplier'        => 8,
             'indent_offset'            => 0,
@@ -222,7 +230,7 @@ class WeekView extends AbstractView
             // $day < $last_week_day_index;
             // $day++
 
-            for ($day = 0; $day < 7; $day++) {
+            for ($day = 0;$day < 7;$day++) {
                 // TODO As $day is a simple Index counting > 31 can this lead to useful results?
                 //
 
@@ -274,7 +282,7 @@ class WeekView extends AbstractView
         // $day < $last_week_day_index;
         // $day++
         // ) {
-        for ($day = 0; $day < 7; $day++) {
+        for ($day = 0;$day < 7;$day++) {
             [$day_date, , $day_date_ob] = $this->_get_wkday_start_end($day, $start_of_week);
 
             $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url(
@@ -284,10 +292,10 @@ class WeekView extends AbstractView
             $href_for_date = $this->_create_link_for_day_view($exact_date);
 
             // Initialize empty arrays for this day if no events to minimize warnings
-            if ( ! isset($all_events[$day_date]['allday'])) {
+            if (! isset($all_events[$day_date]['allday'])) {
                 $all_events[$day_date]['allday'] = [];
             }
-            if ( ! isset($all_events[$day_date]['notallday'])) {
+            if (! isset($all_events[$day_date]['notallday'])) {
                 $all_events[$day_date]['notallday'] = [];
             }
 

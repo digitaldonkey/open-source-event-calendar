@@ -262,6 +262,7 @@ JAVASCRIPT;
         ) {
             $line = '<p><strong>' .
                     sprintf(
+                        /* translators: Name of addon */
                         __(
                             'The add-on "%s" has been disabled due to an error:',
                             'open-source-event-calendar'

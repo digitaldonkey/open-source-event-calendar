@@ -443,18 +443,17 @@ class FeedsController extends OsecBaseClass
                 }
             } elseif (is_wp_error($response)) {
                 $message = sprintf(
+                    /* translators: WP error message */
                     __(
-                        'A system error has prevented calendar data from being fetched. '
-                            . 'Something is preventing the plugin from functioning correctly. '
-                            . 'This message should provide a clue: %s',
+                        'WP error trying to fetch. Error message: %s',
                         'open-source-event-calendar'
                     ),
                     $response->get_error_message()
                 );
             } else {
                 $message = __(
-                    'Calendar data could not be fetched. If your URL is valid and contains an iCalendar resource, '
-                    . 'this is likely the result of a temporary server error and time may resolve this issue',
+                    'Calendar data could not be fetched. If your URL is valid and contains an iCalendar resource,
+                        this is likely the result of a temporary server error and time may resolve this issue',
                     'open-source-event-calendar'
                 );
             }
@@ -467,8 +466,8 @@ class FeedsController extends OsecBaseClass
             } else {
                 $output['data'] = [
                     'error'   => false,
-                    /* translators: 1: number, 2: plural number. */
                     'message' => sprintf(
+                        /* translators: 1: number, 2: plural number. */
                         _n('Imported %s event', 'Imported %s events', $count, 'open-source-event-calendar'),
                         $count
                     ),

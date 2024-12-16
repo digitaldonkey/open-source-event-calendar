@@ -172,7 +172,7 @@ class AgendaView extends AbstractView
             'text_read_more'            => __('Read more', 'open-source-event-calendar'),
             'text_categories'           => __('Categories:', 'open-source-event-calendar'),
             'text_tags'                 => __('Tags:', 'open-source-event-calendar'),
-            'text_venue_separator'      => __('@ %s', 'open-source-event-calendar'),
+            'text_venue_separator'      => self::get_venue_separator_text(),
         ];
 
         // Allow child views to modify arguments passed to template.
