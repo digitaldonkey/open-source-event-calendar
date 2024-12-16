@@ -76,29 +76,29 @@ You may use the Widget with help of [X3P0 - Legacy Widget](https://wordpress.org
 
 = Shortcodes =
 
-* Monthly view: **[ai1ec view="monthly"]**
-* Weekly view: **[ai1ec view="weekly"]**
-* Agenda view: **[ai1ec view="agenda"]**
-* Posterboard view: **[ai1ec view="posterboard"]**
-* Default view as per settings: **[ai1ec]**
+* Monthly view: **[osec view="monthly"]**
+* Weekly view: **[osec view="weekly"]**
+* Agenda view: **[osec view="agenda"]**
+* Posterboard view: **[osec view="posterboard"]**
+* Default view as per settings: **[osec]**
 
-* Filter by event category name: **[ai1ec cat_name="Holidays"]**
+* Filter by event category name: **[osec cat_name="Holidays"]**
 * Filter by event category names (separate names by comma):
-**[ai1ec cat_name="Lunar Cycles,zodia-date-ranges"]**
-* Filter by event category id: **[ai1ec cat_id="1"]**
+**[osec cat_name="Lunar Cycles,zodia-date-ranges"]**
+* Filter by event category id: **[osec cat_id="1"]**
 * Filter by event category ids (separate IDs by comma):
-**[ai1ec cat_id="1, 2"]**
+**[osec cat_id="1, 2"]**
 
-* Filter by event tag name: **[ai1ec tag_name="tips-and-tricks"]**
+* Filter by event tag name: **[osec tag_name="tips-and-tricks"]**
 * Filter by event tag names (separate names by comma):
-**[ai1ec tag_name="creative writing,performing arts"]**
-* Filter by event tag id: **[ai1ec tag_id="1"]**
+**[osec tag_name="creative writing,performing arts"]**
+* Filter by event tag id: **[osec tag_id="1"]**
 * Filter by event tag ids (separate IDs by comma):
-**[ai1ec tag_id="1, 2"]**
+**[osec tag_id="1, 2"]**
 
-* Filter by post id: **[ai1ec post_id="1"]**
+* Filter by post id: **[osec post_id="1"]**
 * Filter by post ids (separate IDs by comma):
-**[ai1ec post_id="1, 2"]**
+**[osec post_id="1, 2"]**
 
 ## Changelog
 
