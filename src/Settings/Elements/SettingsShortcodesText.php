@@ -49,8 +49,8 @@ class SettingsShortcodesText extends SettingsAbstract
             'text_general_form'             => __('General form:', 'open-source-event-calendar'),
             'text_optional'                 => __('Optional.', 'open-source-event-calendar'),
             'text_filter_label'             => __(
-                'Add options to display a filtered calender. (You can find out category and tag IDs by inspecting '
-                . 'the URL of your filtered calendar page.)',
+                'Add options to display a filtered calender. (You can find out category and tag IDs by inspecting  
+                    the URL of your filtered calendar page.)',
                 'open-source-event-calendar'
             ),
             'text_filter_category'          => __('Filter by event category name/slug:', 'open-source-event-calendar'),
@@ -87,8 +87,8 @@ class SettingsShortcodesText extends SettingsAbstract
             'text_events_limit'             => __('Limit number of events per page:', 'open-source-event-calendar'),
             'text_warning'                  => __('Warning:', 'open-source-event-calendar'),
             'text_single_calendar'          => __(
-                'It is currently not supported to embed more than one calendar in the same page. Do not attempt to '
-                . 'embed the calendar via shortcode in a page that already displays the calendar.',
+                'It is currently not supported to embed more than one calendar in the same page. Do not attempt to 
+                    embed the calendar via shortcode in a page that already displays the calendar.',
                 'open-source-event-calendar'
             ),
         ];

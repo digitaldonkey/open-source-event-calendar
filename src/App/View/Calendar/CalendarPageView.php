@@ -75,7 +75,7 @@ class CalendarPageView extends OsecBaseClass
                    __(
                        'There was an error loading calendar. 
                             Please contact site administrator and inform him to configure calendar views.',
-                       'open-source-calendar'
+                       'open-source-event-calendar'
                    ) .
                    '</p></div></div>';
         }
@@ -95,10 +95,11 @@ class CalendarPageView extends OsecBaseClass
         } catch (BootstrapException) {
             NotificationAdmin::factory($this->app)->store(
                 sprintf(
+                    /* translators: View Name */
                     __(
                         'Calendar was unable to initialize %s view and has reverted to Agenda view. 
                             Please check if you have installed the latest versions of calendar add-ons.',
-                        'open-source-calendar'
+                        'open-source-event-calendar'
                     ),
                     ucfirst((string)$action)
                 ),
@@ -109,9 +110,6 @@ class CalendarPageView extends OsecBaseClass
             );
             // don't disable calendar - just switch to agenda which should
             // always exists
-
-            // TODO
-
             $view_obj = new AgendaView($this->app, $request);
             $action   = SettingsView::factory($this->app)
                                     ->get_configured($view_args['action']);

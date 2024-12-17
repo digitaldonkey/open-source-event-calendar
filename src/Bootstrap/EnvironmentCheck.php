@@ -60,8 +60,8 @@ class EnvironmentCheck extends OsecBaseClass
         ) {
             if ($current_user->has_cap('manage_osec_options')) {
                 $msg = sprintf(
+                /* translators: Admin url */
                     __(
-                        /* translators: Admin url */
                         'The plugin is installed, but has not been configured.  
                          <a href="%s">Click here to set it up now &raquo;</a>',
                         'open-source-event-calendar'

@@ -72,7 +72,7 @@ class WeekView extends AbstractView
         $pagination_links = $this->_get_pagination($args, $title, $title_short);
 
         $time_format = $this->app->options
-            ->get('time_format', __('g a'), 'open-source-event-calendar');
+            ->get('time_format', __('g a', 'open-source-event-calendar'));
 
         // Calculate today marker's position.
         $now      = new DT('now', 'sys.default');

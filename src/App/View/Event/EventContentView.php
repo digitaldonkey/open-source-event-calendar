@@ -147,8 +147,8 @@ class EventContentView extends OsecBaseClass
                                  ->generate_href();
             // $href = $href->generate_href();
         }
-        $text    = esc_attr(__('Back to Calendar'), 'open-source-event-calendar');
-        $tooltip = esc_attr(__('View all events'), 'open-source-event-calendar');
+        $text    = esc_attr(__('Back to Calendar', 'open-source-event-calendar'));
+        $tooltip = esc_attr(__('View all events', 'open-source-event-calendar'));
         $html    = <<<HTML
 <a class="ai1ec-calendar-link ai1ec-btn ai1ec-btn-default ai1ec-btn-sm
 		ai1ec-tooltip-trigger $class"

@@ -63,8 +63,8 @@ class DateFormatsFrontend extends OsecBaseClass
             function () {
                 echo '<p>'
                      . __(
-                         'Osec calendar uses WordPress default "date_format" and "time_format" above and '
-                         . 'provides additional <strong>frontend date formates</strong>.',
+                         'Osec calendar uses WordPress default "date_format" and "time_format" above and 
+                            provides additional <strong>frontend date formates</strong>.',
                          'open-source-event-calendar'
                      )
                      . '<br />'

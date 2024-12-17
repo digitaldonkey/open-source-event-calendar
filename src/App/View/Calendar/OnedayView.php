@@ -81,7 +81,7 @@ class OnedayView extends AbstractView
          */
         $show_reveal_button = apply_filters('osec_oneday_reveal_button', true);
 
-        $time_format = $this->app->options->get('time_format', __('g a'), 'open-source-event-calendar');
+        $time_format = $this->app->options->get('time_format', __('g a', 'open-source-event-calendar'));
 
         $hours = [];
         $today = (new DT('now', 'sys.default'));
