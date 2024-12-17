@@ -148,14 +148,15 @@ class RepeatRuleToText extends OsecBaseClass
                 $until = strtotime((string)$until);
             }
             $txt .= ' ' . sprintf(
-                __('until %s', 'open-source-event-calendar'),
-                (new DT($until))->format_i18n($this->app->options->get('date_format'))
-            );
+                    __('until %s', 'open-source-event-calendar'),
+                    (new DT($until))->format_i18n($this->app->options->get('date_format'))
+                );
         } elseif ($count = $rc->getCount()) {
             $txt .= ' ' . sprintf(
-                __('for %d occurrences', 'open-source-event-calendar'),
-                $count
-            );
+                    /* translators: Item count */
+                    __('for %d occurrences', 'open-source-event-calendar'),
+                    $count
+                );
         } else {
             $txt .= ', ' . __('forever', 'open-source-event-calendar');
         }
@@ -185,7 +186,11 @@ class RepeatRuleToText extends OsecBaseClass
                             }
                             // remove the last ' and'
                             $_days = substr($_days, 0, -1);
-                            $txt   .= ' ' . I18n::_x('on', 'Recurrence editor - weekly tab') . $_days;
+                            $txt   .= ' ' . _x(
+                                    'on',
+                                    'Recurrence editor - weekly tab',
+                                    'open-source-event-calendar'
+                                ) . $_days;
                         } else {
                             $_days = '';
                             foreach ($rc->getByDay() as $d) {
@@ -195,7 +200,11 @@ class RepeatRuleToText extends OsecBaseClass
                             }
                             // remove the last ' and'
                             $_days = substr($_days, 0, -4);
-                            $txt   .= ' ' . I18n::_x('on', 'Recurrence editor - weekly tab') . $_days;
+                            $txt   .= ' ' . _x(
+                                    'on',
+                                    'Recurrence editor - weekly tab',
+                                    'open-source-event-calendar'
+                                ) . $_days;
                         }
                     } else {
                         $_days = '';
@@ -203,7 +212,7 @@ class RepeatRuleToText extends OsecBaseClass
                             $day   = $this->get_weekday_by_id($d, true);
                             $_days .= ' ' . $wp_locale->weekday[$day];
                         }
-                        $txt .= ' ' . I18n::_x('on', 'Recurrence editor - weekly tab') . $_days;
+                        $txt .= ' ' . _x('on', 'Recurrence editor - weekly tab', 'open-source-event-calendar') . $_days;
                     }
                 }
                 break;
@@ -216,29 +225,32 @@ class RepeatRuleToText extends OsecBaseClass
                             $_days .= ' ' . $this->_ordinal($m_day) . ',';
                         }
                         $_days = substr($_days, 0, -1);
-                        $txt   .= ' ' . I18n::_x(
-                            'on',
-                            'Recurrence editor - monthly tab'
-                        ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
+                        $txt   .= ' ' . _x(
+                                'on',
+                                'Recurrence editor - monthly tab',
+                                'open-source-event-calendar'
+                            ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
                     } elseif (count($rc->getByMonthDay()) > 1) {
                         $_days = '';
                         foreach ($rc->getByMonthDay() as $m_day) {
                             $_days .= ' ' . $this->_ordinal($m_day) . ' ' . __('and', 'open-source-event-calendar');
                         }
                         $_days = substr($_days, 0, -4);
-                        $txt   .= ' ' . I18n::_x(
-                            'on',
-                            'Recurrence editor - monthly tab'
-                        ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
+                        $txt   .= ' ' . _x(
+                                'on',
+                                'Recurrence editor - monthly tab',
+                                'open-source-event-calendar'
+                            ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
                     } else {
                         $_days = '';
                         foreach ($rc->getByMonthDay() as $m_day) {
                             $_days .= ' ' . $this->_ordinal($m_day);
                         }
-                        $txt .= ' ' . I18n::_x(
-                            'on',
-                            'Recurrence editor - monthly tab'
-                        ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
+                        $txt .= ' ' . _x(
+                                'on',
+                                'Recurrence editor - monthly tab',
+                                'open-source-event-calendar'
+                            ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
                     }
                 } elseif ($rc->getByDay()) {
                     $_days = '';
@@ -256,7 +268,11 @@ class RepeatRuleToText extends OsecBaseClass
                         $day   = $this->get_weekday_by_id($_day, true);
                         $_days .= ' ' . $wp_locale->weekday[$day];
                     }
-                    $txt .= ' ' . I18n::_x('on', 'Recurrence editor - monthly tab') . $dnum . $_days;
+                    $txt .= ' ' . _x(
+                            'on',
+                            'Recurrence editor - monthly tab',
+                            'open-source-event-calendar'
+                        ) . $dnum . $_days;
                 }
                 break;
             case 'yearly':
@@ -269,7 +285,11 @@ class RepeatRuleToText extends OsecBaseClass
                             $_months .= ' ' . $wp_locale->month_abbrev[$wp_locale->month[$_m]] . ',';
                         }
                         $_months = substr($_months, 0, -1);
-                        $txt     .= ' ' . I18n::_x('on', 'Recurrence editor - yearly tab') . $_months;
+                        $txt     .= ' ' . _x(
+                                'on',
+                                'Recurrence editor - yearly tab',
+                                'open-source-event-calendar'
+                            ) . $_months;
                     } elseif (count($rc->getByMonth()) > 1) {
                         $_months = '';
                         foreach ($rc->getByMonth() as $_m) {
@@ -277,14 +297,22 @@ class RepeatRuleToText extends OsecBaseClass
                             $_months .= ' ' . $wp_locale->month[$_m] . ' ' . __('and', 'open-source-event-calendar');
                         }
                         $_months = substr($_months, 0, -4);
-                        $txt     .= ' ' . I18n::_x('on', 'Recurrence editor - yearly tab') . $_months;
+                        $txt     .= ' ' . _x(
+                                'on',
+                                'Recurrence editor - yearly tab',
+                                'open-source-event-calendar'
+                            ) . $_months;
                     } else {
                         $_months = '';
                         foreach ($rc->getByMonth() as $_m) {
                             $_m      = $_m < 10 ? 0 . $_m : $_m;
                             $_months .= ' ' . $wp_locale->month[$_m];
                         }
-                        $txt .= ' ' . I18n::_x('on', 'Recurrence editor - yearly tab') . $_months;
+                        $txt .= ' ' . _x(
+                                'on',
+                                'Recurrence editor - yearly tab',
+                                'open-source-event-calendar'
+                            ) . $_months;
                     }
                 }
                 break;

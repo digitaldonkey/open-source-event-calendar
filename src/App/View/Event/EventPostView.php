@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Event;
 
-use Osec\App\I18n;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\Bootstrap\OsecBaseClass;
@@ -48,23 +47,27 @@ class EventPostView extends OsecBaseClass
                 )
                 : false,
             6  => sprintf(
-                __('Event published. <a href="%s">View event</a>', 'open-source-event-calendar'),
-                esc_url(get_permalink($post_ID))
+                    /* translators: Url */
+                    __('Event published. <a href="%s">View event</a>', 'open-source-event-calendar'),
+                    esc_url(get_permalink($post_ID))
             ),
             7  => __('Event saved.', 'open-source-event-calendar'),
             8  => sprintf(
+                /* translators: Url */
                 __('Event submitted. <a target="_blank" href="%s">Preview event</a>', 'open-source-event-calendar'),
                 esc_url(add_query_arg('preview', 'true', get_permalink($post_ID)))
             ),
             9  => sprintf(
-                I18n::__(
-                    'Event scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview event</a>'
+                /* translators: 1: Date 2: Url */
+                __(
+                    'Event scheduled for: <strong>%1$s</strong>. <a target="_blank" href=">%2$s">Preview event</a>',
+                    'open-source-event-calendar'
                 ),
-                // translators: Publish box date format, see http://php.net/date
-                (new DT($post->post_date))->format_i18n(__('M j, Y @ G:i'), 'open-source-event-calendar'),
+                (new DT($post->post_date))->format_i18n(__('M j, Y @ G:i', 'open-source-event-calendar'), ),
                 esc_url(get_permalink($post_ID))
             ),
             10 => sprintf(
+                /* translators: Url */
                 __('Event draft updated. <a target="_blank" href="%s">Preview event</a>', 'open-source-event-calendar'),
                 esc_url(add_query_arg('preview', 'true', get_permalink($post_ID)))
             ),

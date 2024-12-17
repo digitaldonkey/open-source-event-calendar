@@ -273,7 +273,6 @@ class TwigExtension extends AbstractExtension
             new TwigFilter('month', $this->month(...)),
             new TwigFilter('year', $this->year(...)),
             new TwigFilter('theme_img_url', $this->theme_img_url(...)),
-            new TwigFilter('__', 'I18n::__'),
         ];
     }
 

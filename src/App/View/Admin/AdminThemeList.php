@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Admin;
 
-use Osec\App\I18n;
 use Osec\Bootstrap\App;
 use Osec\Theme\ThemeFinder;
 use WP_List_Table;
@@ -220,9 +219,11 @@ class AdminThemeList extends WP_List_Table
                 current_user_can('manage_network_themes')
             ) {
                 printf(
-                    I18n::__(
-                        'You only have one theme enabled for this site right now. Visit the Network Admin to '
-                            . '<a href="%1$s">enable</a> or <a href="%2$s">install</a> more themes.'
+                    /* translators: 1: Url 2: Url */
+                    __(
+                        'You only have one theme enabled for this site right now. Visit the Network Admin to 
+                            <a href="%1$s">enable</a> or <a href="%2$s">install</a> more themes.',
+                        'open-source-event-calendar'
                     ),
                     network_admin_url(
                         'site-themes.php?id=' . $GLOBALS['blog_id']
@@ -233,9 +234,11 @@ class AdminThemeList extends WP_List_Table
                 return;
             } elseif (current_user_can('manage_network_themes')) {
                 printf(
-                    I18n::__(
-                        'You only have one theme enabled for this site right now. Visit the Network Admin to '
-                            . '<a href="%1$s">enable</a> more themes.'
+                    /* translators: Url */
+                    __(
+                        'You only have one theme enabled for this site right now. Visit the Network Admin to 
+                            <a href="%1$s">enable</a> more themes.',
+                        'open-source-event-calendar'
                     ),
                     network_admin_url(
                         'site-themes.php?id=' . $GLOBALS['blog_id']
@@ -247,19 +250,21 @@ class AdminThemeList extends WP_List_Table
             // else, fallthrough. install_themes doesn't help if you
             // can't enable it.
         } elseif (current_user_can('install_themes')) {
-            printf(
-                I18n::__(
-                    'You only have one theme installed right now.'
-                ),
-                admin_url(OSEC_THEME_SELECTION_BASE_URL)
+            print(
+                __(
+                    'You only have one theme installed right now.',
+                    'open-source-event-calendar'
+                )
             );
 
             return;
         }
         // Fallthrough.
         printf(
-            I18n::__(
-                'Only the active theme is available to you. Contact the <em>%s</em> administrator to add more themes.'
+            /* translators: Site name */
+            __(
+                'Only the active theme is available to you. Contact the <em>%s</em> administrator to add more themes.',
+                'open-source-event-calendar'
             ),
             get_site_option('site_name')
         );
@@ -365,10 +370,12 @@ class AdminThemeList extends WP_List_Table
                         <p>
                             <?php
                             printf(
-                                I18n::__(
-                                    'The template files are located in <code>%2$s</code>. The stylesheet files '
-                                    . 'are located in <code>%3$s</code>. <strong>%4$s</strong> uses templates from '
-                                    . '<strong>%5$s</strong>. Changes made to the templates will affect both themes.'
+                                /* translators: 1: Title 2: template dir 3: Stylesheet Dir 4: Title 5: Parent theme */
+                                __(
+                                    'The template files are located in <code>%2$s</code>. The stylesheet files 
+                                        are located in <code>%3$s</code>. <strong>%4$s</strong> uses templates from 
+                                        <strong>%5$s</strong>. Changes made to the templates will affect both themes.',
+                                    'open-source-event-calendar'
                                 ),
                                 $title,
                                 str_replace(WP_CONTENT_DIR, '', $template_dir),
@@ -383,8 +390,9 @@ class AdminThemeList extends WP_List_Table
                         <p>
                             <?php
                             printf(
-                                I18n::__(
-                                    'All of this theme&#8217;s files are located in <code>%2$s</code>.'
+                                __(
+                                    'All of this theme&#8217;s files are located in <code>%2$s</code>.',
+                                    'open-source-event-calendar'
                                 ),
                                 $title,
                                 str_replace(WP_CONTENT_DIR, '', $template_dir),

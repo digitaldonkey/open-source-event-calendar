@@ -4,7 +4,6 @@ namespace Osec\App\View\Admin;
 
 use Louis1021\ICalendar\helpers\SG_iCal_Line;
 use Louis1021\ICalendar\helpers\SG_iCal_Recurrence;
-use Osec\App\I18n;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\Event;
@@ -630,9 +629,7 @@ class AdminDateRepeatBox extends OsecBaseClass
             // check to see if rrule is empty
             if (empty($_REQUEST['rrule'])) {
                 $error   = true;
-                $message = I18n::__(
-                    'Recurrence rule cannot be empty.'
-                );
+                $message = __('Recurrence rule cannot be empty.', 'open-source-event-calendar');
             } else {
                 $message = ucfirst(
                     (string)RepeatRuleToText::factory($this->app)->rrule_to_text($_REQUEST['rrule'])
@@ -641,9 +638,7 @@ class AdminDateRepeatBox extends OsecBaseClass
             }
         } else {
             $error   = true;
-            $message = I18n::__(
-                'Recurrence rule was not provided.'
-            );
+            $message = __('Recurrence rule was not provided.', 'open-source-event-calendar');
         }
         RenderJson::factory($this->app)->render(
             [

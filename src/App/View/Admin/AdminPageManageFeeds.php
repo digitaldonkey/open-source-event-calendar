@@ -3,7 +3,6 @@
 namespace Osec\App\View\Admin;
 
 use Osec\App\Controller\FeedsController;
-use Osec\App\I18n;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -52,7 +51,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
         // Add the 'ICS Import Settings' meta box.
         add_meta_box(
             'ai1ec-feeds',
-            I18n::_x('Feed Subscriptions', 'meta box'),
+            _x('Feed Subscriptions', 'meta box', 'open-source-event-calendar'),
             $this->display_meta_box(...),
             $this->app->settings->get('feeds_page'),
             'left',

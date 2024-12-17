@@ -3,7 +3,6 @@
 namespace Osec\App\View\Admin;
 
 use Osec\App\Controller\LessController;
-use Osec\App\I18n;
 use Osec\Settings\ThemeVariablesFactory;
 use Osec\Theme\ThemeLoader;
 
@@ -83,7 +82,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
         // Add the 'General Settings' meta box.
         add_meta_box(
             'ai1ec-less-variables-tabs',
-            I18n::_x('Calendar Theme Options', 'meta box'),
+            _x('Calendar Theme Options', 'meta box', 'open-source-event-calendar'),
             $this->display_meta_box(...),
             $this->app->settings
                 ->get('less_variables_page'),
@@ -100,8 +99,9 @@ class AdminPageThemeOptions extends AdminPageAbstract
         $settings = $this->app->settings;
 
         $args = [
-            'title'   => I18n::__(
-                'Calendar Theme Options'
+            'title'   => __(
+                'Calendar Theme Options',
+                'open-source-event-calendar'
             ),
             'nonce'   => [
                 'action'   => self::NONCE_ACTION,

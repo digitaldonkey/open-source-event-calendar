@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Event;
 
-use Osec\App\I18n;
 use Osec\App\Model\Date\DateFormatsFrontend;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\PostTypeEvent\Event;
@@ -98,7 +97,7 @@ class EventTimeView extends OsecBaseClass
                  */
                 $output .= apply_filters(
                     'osec_timespan_time_html_before_start_html',
-                    I18n::_x(' @ ', 'Event time separator')
+                    _x(' @ ', 'Event time separator', 'open-source-event-calendar')
                 );
             }
             $output .= $this->format_time($start);
@@ -122,7 +121,10 @@ class EventTimeView extends OsecBaseClass
              *
              * @param  string  $separator  Translated separator inclusing spaces.
              */
-            $output .= apply_filters('osec_timespan_time_separator_html', I18n::_x(' - ', 'Event time separator'));
+            $output .= apply_filters(
+                'osec_timespan_time_separator_html',
+                _x(' - ', 'Event time separator', 'open-source-event-calendar')
+            );
 
             // If event ends on a different day, output end date.
             if ($start_ts !== $end_ts) {
@@ -142,7 +144,7 @@ class EventTimeView extends OsecBaseClass
                      */
                     $output .= apply_filters(
                         'osec_timespan_time_separator_html_starttime',
-                        I18n::_x(' ', 'Event time separator')
+                        _x(' ', 'Event time separator', 'open-source-event-calendar')
                     );
                 }
                 $output .= $this->format_time($end);

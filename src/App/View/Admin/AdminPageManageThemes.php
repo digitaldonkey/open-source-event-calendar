@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Admin;
 
-use Osec\App\I18n;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -30,8 +29,9 @@ class AdminPageManageThemes extends AdminPageAbstract
             'deleted'       => $deleted,
             'ct'            => $ct,
             'wp_list_table' => $_list_table,
-            'page_title'    => I18n::__(
-                'Open Source Event Calendar: Themes'
+            'page_title'    => __(
+                'Open Source Event Calendar: Themes',
+                'open-source-event-calendar'
             ),
         ];
 

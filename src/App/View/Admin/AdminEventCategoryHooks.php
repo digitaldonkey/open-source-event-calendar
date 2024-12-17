@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Admin;
 
-use Osec\App\I18n;
 use Osec\App\Model\TaxonomyAdapter;
 use Osec\App\View\Event\EventTaxonomyView;
 use Osec\Bootstrap\App;
@@ -117,8 +116,9 @@ class AdminEventCategoryHooks extends OsecBaseClass
             'style'       => $style,
             'color'       => $clr,
             'label'       => __('Category Color', 'open-source-event-calendar'),
-            'description' => I18n::__(
-                'Events in this category will be identified by this color'
+            'description' => __(
+                'Events in this category will be identified by this color',
+                'open-source-event-calendar'
             ),
             'edit'        => true,
         ];

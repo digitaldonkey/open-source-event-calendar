@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Calendar;
 
-use Osec\App\I18n;
 use Osec\Bootstrap\OsecBaseClass;
 
 /**
@@ -31,8 +30,9 @@ class CalendarSubscribeButtonView extends OsecBaseClass
                 'plaintext' => __('Add to other calendar', 'open-source-event-calendar'),
             ],
             'title' => [
-                'timely'    => I18n::__(
-                    'Copy this URL for your own Timely calendar or click to add to your rich-text calendar'
+                'timely'    => __(
+                    'Copy this URL for your own Timely calendar or click to add to your rich-text calendar',
+                    'open-source-event-calendar'
                 ),
                 'google'    => __('Subscribe to this calendar in your Google Calendar', 'open-source-event-calendar'),
                 'outlook'   => __('Subscribe to this calendar in MS Outlook', 'open-source-event-calendar'),

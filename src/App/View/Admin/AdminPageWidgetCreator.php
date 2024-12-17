@@ -4,7 +4,6 @@ namespace Osec\App\View\Admin;
 
 use Osec\App\Controller\ScriptsBackendController;
 use Osec\App\Controller\WidgetController;
-use Osec\App\I18n;
 use Osec\Bootstrap\App;
 use Osec\Settings\SettingsRenderer;
 use Osec\Theme\ThemeLoader;
@@ -125,18 +124,21 @@ class AdminPageWidgetCreator extends AdminPageAbstract
         $args = [
             'tabs'              => $tabs,
             'siteurl'           => trailingslashit(get_site_url()),
-            'text_common_info'  => I18n::__(
-                'Use this tool to generate code snippets you can add to <strong>an external website</strong> '
-                    . 'to embed new calendars and widgets.'
+            'text_common_info'  => __(
+                'Use this tool to generate code snippets you can add to <strong>an external website</strong> 
+                    to embed new calendars and widgets.',
+                'open-source-event-calendar'
             ),
-            'text_alert'        => I18n::__(
-                '<h4>Attention!</h4><p>These widgets are designed to be embedded in <strong>external '
-                . 'sites only</strong> and may cause conflicts if used within the same WordPress site.</p>'
+            'text_alert'        => __(
+                '<h4>Attention!</h4><p>These widgets are designed to be embedded in <strong>external 
+                    sites only</strong> and may cause conflicts if used within the same WordPress site.</p>',
+                'open-source-event-calendar'
             ),
             'text_alternatives' => sprintf(
-                I18n::__(
-                    '<p>Use <a href="%s"><strong>X3P0 - Legacy Widget</a></strong> to add event widgets to your '
-                    . 'WordPress, or use shortcodes to embed the full calendar.</strong></p>'
+                __(
+                    '<p>Use <a href="%s"><strong>X3P0 - Legacy Widget</a></strong> to add event widgets to your  
+                        WordPress, or use shortcodes to embed the full calendar.</strong></p>',
+                    'open-source-event-calendar'
                 ),
                 'https://wordpress.org/plugins/x3p0-legacy-widget/'
             ),
@@ -152,9 +154,10 @@ class AdminPageWidgetCreator extends AdminPageAbstract
             'display_alert'     => apply_filters('osec_display_widget_creator_warning', true),
             'text_preview'      => __('Preview:', 'open-source-event-calendar'),
             'text_paste'        => __('Paste this code onto your site:', 'open-source-event-calendar'),
-            'text_updated_code' => I18n::__(
-                'This code will update to reflect changes made to the settings. Changing settings will not affect '
-                . 'previously embedded widgets.'
+            'text_updated_code' => __(
+                'This code will update to reflect changes made to the settings. Changing settings will not affect 
+                    previously embedded widgets.',
+                'open-source-event-calendar'
             ),
         ];
 

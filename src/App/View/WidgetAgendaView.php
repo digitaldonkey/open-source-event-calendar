@@ -50,7 +50,8 @@ class WidgetAgendaView extends WidgetAbstract
      */
     public static function get_id()
     {
-        return 'osec_agenda_widget';
+        // Must keep name for unknown reason.
+        return 'ai1ec_agenda_widget';
     }
 
     /**
@@ -96,7 +97,7 @@ class WidgetAgendaView extends WidgetAbstract
                 'renderer' => [
                     'class'   => 'Osec\Settings\Elements\SettingsSelect',
                     'label'   => __(
-                        'Choose how to limit the upcoming events',
+                        'Limit by',
                         'open-source-event-calendar'
                     ),
                     'options' => [

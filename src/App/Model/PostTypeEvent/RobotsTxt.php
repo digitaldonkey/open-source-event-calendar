@@ -2,7 +2,6 @@
 
 namespace Osec\App\Model\PostTypeEvent;
 
-use Osec\App\I18n;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\View\Admin\AdminPageAbstract;
 use Osec\Bootstrap\OsecBaseClass;
@@ -85,9 +84,10 @@ class RobotsTxt extends OsecBaseClass
                     // parameter but in this case second ftp credentials screen
                     // would appear
                     $notification = NotificationAdmin::factory($this->app);
-                    $err_msg      = I18n::__(
-                        '<strong>ERROR:</strong> There was an error connecting to the server, '
-                            . 'Please verify the settings are correct.'
+                    $err_msg      = __(
+                        '<strong>ERROR:</strong> There was an error connecting to the server, 
+                            Please verify the settings are correct.',
+                        'open-source-event-calendar'
                     );
                     $notification->store($err_msg, 'error', 1);
                     // we need to avoid infinity loop if FS_METHOD direct
@@ -122,9 +122,10 @@ class RobotsTxt extends OsecBaseClass
             FS_CHMOD_FILE
         );
         if (false === $robots_txt['is_installed']) {
-            $err_msg = I18n::__(
-                '<strong>ERROR:</strong> There was an error storing <strong>robots.txt</strong> '
-                    . 'to the server, the file could not be written.'
+            $err_msg = __(
+                '<strong>ERROR:</strong> There was an error storing <strong>robots.txt</strong> 
+                    to the server, the file could not be written.',
+                'open-source-event-calendar'
             );
             NotificationAdmin::factory($this->app)->store($err_msg, 'error');
             $redirect = true;

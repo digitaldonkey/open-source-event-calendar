@@ -4,7 +4,6 @@ namespace Osec\Theme;
 
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\LessController;
-use Osec\App\I18n;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
@@ -528,10 +527,11 @@ class ThemeLoader extends OsecBaseClass
         $this->switch_theme($theme);
         if ( ! $silent) {
             NotificationAdmin::factory($this->app)->store(
-                I18n::__(
-                    "Your calendar theme has been switched to Vortex due to a rendering problem. For more '
-                    . 'information, please enable debug mode by adding this line to your WordPress <code>wp-config.php'
-                    . '</code> file:<pre>define( 'OSEC_DEBUG', true );</pre>"
+                __(
+                    'Your calendar theme has been switched to Vortex due to a rendering problem. For more 
+                        information, please enable debug mode by adding this line to your WordPress <code>wp-config.php  
+                        </code> file:<pre>define( "OSEC_DEBUG", true );</pre>',
+                    'open-source-event-calendar'
                 ),
                 'error',
                 0,

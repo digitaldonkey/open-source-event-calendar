@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Event;
 
-use Osec\App\I18n;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\View\Calendar\CalendarSubscribeButtonView;
@@ -25,9 +24,10 @@ class EventSingleView extends OsecBaseClass
      */
     public function get_footer(Event $event)
     {
-        $text_calendar_feed = I18n::__(
-            'This post was replicated from another site\'s <a href="%s" title="iCalendar feed">'
-                    . '<i class="ai1ec-fa ai1ec-fa-calendar"></i> calendar feed</a>.'
+        $text_calendar_feed = __(
+            'This post was replicated from another site\'s <a href="%s" title="iCalendar feed">
+                <i class="ai1ec-fa ai1ec-fa-calendar"></i> calendar feed</a>.',
+            'open-source-event-calendar'
         );
         $text_calendar_feed = sprintf(
             $text_calendar_feed,
@@ -122,6 +122,7 @@ class EventSingleView extends OsecBaseClass
                 'show_timezone'       => true,
                 'event_timezone'      => $event->get('timezone_name'),
                 'text_timezone_title' => sprintf(
+                    /* translators: Timezone */
                     __('Event was created in the %s time zone', 'open-source-event-calendar'),
                     $event->get('start')->get_gmt_offset_as_text()
                 ),
@@ -192,6 +193,7 @@ class EventSingleView extends OsecBaseClass
                 '&action=edit&instance=' . $event->get('instance_id')
             );
             $args['edit_instance_text'] = sprintf(
+                /* translators: Date */
                 __('Edit this occurrence (%s)', 'open-source-event-calendar'),
                 $event->get('start')->format_i18n('M j')
             );

@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Admin;
 
-use Osec\App\I18n;
 use Osec\App\Model\PostTypeEvent\RobotsTxt;
 use Osec\Settings\SettingsRenderer;
 use Osec\Theme\ThemeLoader;
@@ -30,8 +29,9 @@ class AdminPageSettings extends AdminPageAbstract
     public function display_page(): void
     {
         $args = [
-            'title'   => I18n::__(
-                'Open Source Event Calendar: Settings'
+            'title'   => __(
+                'Open Source Event Calendar: Settings',
+                'open-source-event-calendar'
             ),
             'nonce'   => [
                 'action'   => self::NONCE_ACTION,
@@ -91,7 +91,7 @@ class AdminPageSettings extends AdminPageAbstract
         // Add the 'General Settings' meta box.
         add_meta_box(
             'ai1ec-general-settings',
-            I18n::_x('General Settings', 'meta box'),
+            _x('General Settings', 'meta box', 'open-source-event-calendar'),
             $this->display_meta_box(...),
             $this->app->settings->get('settings_page'),
             'left',

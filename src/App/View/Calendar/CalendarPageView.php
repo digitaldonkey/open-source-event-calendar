@@ -3,7 +3,6 @@
 namespace Osec\App\View\Calendar;
 
 use Osec\App\Controller\Router;
-use Osec\App\I18n;
 use Osec\App\Model\Date\DateValidator;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Notifications\NotificationAdmin;
@@ -73,9 +72,10 @@ class CalendarPageView extends OsecBaseClass
         } catch (SettingsException $exception) {
             // short-circuit and return error message
             return '<div id="osec-container"><div class="timely"><p>' .
-                   I18n::__(
-                       'There was an error loading calendar. '
-                       . 'Please contact site administrator and inform him to configure calendar views.'
+                   __(
+                       'There was an error loading calendar. 
+                            Please contact site administrator and inform him to configure calendar views.',
+                       'open-source-calendar'
                    ) .
                    '</p></div></div>';
         }
@@ -95,9 +95,10 @@ class CalendarPageView extends OsecBaseClass
         } catch (BootstrapException) {
             NotificationAdmin::factory($this->app)->store(
                 sprintf(
-                    I18n::__(
-                        'Calendar was unable to initialize %s view and has reverted to Agenda view. '
-                            . 'Please check if you have installed the latest versions of calendar add-ons.'
+                    __(
+                        'Calendar was unable to initialize %s view and has reverted to Agenda view. 
+                            Please check if you have installed the latest versions of calendar add-ons.',
+                        'open-source-calendar'
                     ),
                     ucfirst((string)$action)
                 ),

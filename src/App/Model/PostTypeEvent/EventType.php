@@ -2,7 +2,6 @@
 
 namespace Osec\App\Model\PostTypeEvent;
 
-use Osec\App\I18n;
 use Osec\Bootstrap\OsecBaseClass;
 use WP_Query;
 use WP_Role;
@@ -30,8 +29,8 @@ class EventType extends OsecBaseClass
         // = labels for custom post type =
         // ===============================
         $labels = [
-            'name'               => I18n::_x('Events', 'Custom post type name'),
-            'singular_name'      => I18n::_x('Event', 'Custom post type name (singular)'),
+            'name'               => _x('Events', 'Custom post type name', 'open-source-event-calendar'),
+            'singular_name'      => _x('Event', 'Custom post type name (singular)', 'open-source-event-calendar'),
             'add_new'            => __('Add New', 'open-source-event-calendar'),
             'add_new_item'       => __('Add New Event', 'open-source-event-calendar'),
             'edit_item'          => __('Edit Event', 'open-source-event-calendar'),
@@ -99,25 +98,25 @@ class EventType extends OsecBaseClass
         // = labels for event categories taxonomy =
         // ========================================
         $events_categories_labels = [
-            'name'          => I18n::_x('Categories', 'Event categories taxonomy'),
-            'singular_name' => I18n::_x('Category', 'Event categories taxonomy (singular)'),
-            'menu_name'     => I18n::_x('Organize', 'Event categories menu item'),
+            'name'          => _x('Categories', 'Event categories taxonomy', 'open-source-event-calendar'),
+            'singular_name' => _x('Category', 'Event categories taxonomy (singular)', 'open-source-event-calendar'),
+            'menu_name'     => _x('Organize', 'Event categories menu item', 'open-source-event-calendar'),
         ];
 
         // ==================================
         // = labels for event tags taxonomy =
         // ==================================
         $events_tags_labels = [
-            'name'          => I18n::_x('Tags', 'Event tags taxonomy'),
-            'singular_name' => I18n::_x('Tag', 'Event tags taxonomy (singular)'),
+            'name'          => _x('Tags', 'Event tags taxonomy', 'open-source-event-calendar'),
+            'singular_name' => _x('Tag', 'Event tags taxonomy (singular)', 'open-source-event-calendar'),
         ];
 
         // ==================================
         // = labels for event feeds taxonomy =
         // ==================================
         $events_feeds_labels = [
-            'name'          => I18n::_x('Event Feeds', 'Event feeds taxonomy'),
-            'singular_name' => I18n::_x('Event Feed', 'Event feed taxonomy (singular)'),
+            'name'          => _x('Event Feeds', 'Event feeds taxonomy', 'open-source-event-calendar'),
+            'singular_name' => _x('Event Feed', 'Event feed taxonomy (singular)', 'open-source-event-calendar'),
         ];
 
         // ======================================
@@ -293,9 +292,10 @@ class EventType extends OsecBaseClass
             if ($query->post_count > 0) {
                 // append the pending events number to the menu
                 return sprintf(
-                    I18n::__(
-                        'All Events <span class="update-plugins count-%d" title="%d Pending Events">'
-                        . '<span class="update-count">%d</span></span>'
+                    __(
+                        'All Events <span class="update-plugins count-%d" title="%d Pending Events">
+                            <span class="update-count">%d</span></span>',
+                        'open-source-event-calendar'
                     ),
                     $query->post_count,
                     $query->post_count,

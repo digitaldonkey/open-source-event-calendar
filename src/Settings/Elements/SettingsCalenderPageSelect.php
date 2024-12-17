@@ -2,7 +2,6 @@
 
 namespace Osec\Settings\Elements;
 
-use Osec\App\I18n;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -53,7 +52,7 @@ class SettingsCalenderPageSelect extends SettingsAbstract
      */
     public function render($html = '', $wrap = true): string
     {
-        $output = '<label class="ai1ec-control-label ai1ec-col-sm-2" for="' .
+        $output = '<label class="ai1ec-control-label ai1ec-col-sm-3" for="' .
                   self::ELEMENT_ID . '">' . __('Calendar page', 'open-source-event-calendar') . '</label>'
                   . '<div class="ai1ec-col-sm-6">' .
                   $this->_get_pages_selector() . $this->_get_page_view_link() . '</div>';
@@ -95,8 +94,9 @@ class SettingsCalenderPageSelect extends SettingsAbstract
             $pages = [];
         }
         $output = [
-            '__auto_page:Calendar' => I18n::__(
-                '- Auto-Create New Page -'
+            '__auto_page:Calendar' => __(
+                '- Auto-Create New Page -',
+                'open-source-event-calendar'
             ),
         ];
         foreach ($pages as $key => $value) {
