@@ -124,4 +124,5 @@ You may use the Widget with help of [X3P0 - Legacy Widget](https://wordpress.org
 * Fixed Week-view date selection.
 * Fixed/rewrote caching system. Added APCU caching.
 * Added Test environment working well in ddev. Based on WP handbook standards [plugin-unit-tests](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/).
-* Rework data security and solving WordPress "Plugin Check" minimum requirements. 
+* Upgrade strings to match current translation requirements. 
+* Solving WordPress "Plugin Check" minimum requirements. 
