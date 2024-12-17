@@ -48,8 +48,8 @@ class EventPostView extends OsecBaseClass
                 : false,
             6  => sprintf(
                     /* translators: Url */
-                    __('Event published. <a href="%s">View event</a>', 'open-source-event-calendar'),
-                    esc_url(get_permalink($post_ID))
+                __('Event published. <a href="%s">View event</a>', 'open-source-event-calendar'),
+                esc_url(get_permalink($post_ID))
             ),
             7  => __('Event saved.', 'open-source-event-calendar'),
             8  => sprintf(
@@ -63,7 +63,7 @@ class EventPostView extends OsecBaseClass
                     'Event scheduled for: <strong>%1$s</strong>. <a target="_blank" href=">%2$s">Preview event</a>',
                     'open-source-event-calendar'
                 ),
-                (new DT($post->post_date))->format_i18n(__('M j, Y @ G:i', 'open-source-event-calendar'), ),
+                (new DT($post->post_date))->format_i18n(__('M j, Y @ G:i', 'open-source-event-calendar'),),
                 esc_url(get_permalink($post_ID))
             ),
             10 => sprintf(

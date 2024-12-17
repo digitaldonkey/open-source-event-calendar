@@ -148,15 +148,15 @@ class RepeatRuleToText extends OsecBaseClass
                 $until = strtotime((string)$until);
             }
             $txt .= ' ' . sprintf(
-                    __('until %s', 'open-source-event-calendar'),
-                    (new DT($until))->format_i18n($this->app->options->get('date_format'))
-                );
+                __('until %s', 'open-source-event-calendar'),
+                (new DT($until))->format_i18n($this->app->options->get('date_format'))
+            );
         } elseif ($count = $rc->getCount()) {
             $txt .= ' ' . sprintf(
-                    /* translators: Item count */
-                    __('for %d occurrences', 'open-source-event-calendar'),
-                    $count
-                );
+                /* translators: Item count */
+                __('for %d occurrences', 'open-source-event-calendar'),
+                $count
+            );
         } else {
             $txt .= ', ' . __('forever', 'open-source-event-calendar');
         }
@@ -187,10 +187,10 @@ class RepeatRuleToText extends OsecBaseClass
                             // remove the last ' and'
                             $_days = substr($_days, 0, -1);
                             $txt   .= ' ' . _x(
-                                    'on',
-                                    'Recurrence editor - weekly tab',
-                                    'open-source-event-calendar'
-                                ) . $_days;
+                                'on',
+                                'Recurrence editor - weekly tab',
+                                'open-source-event-calendar'
+                            ) . $_days;
                         } else {
                             $_days = '';
                             foreach ($rc->getByDay() as $d) {
@@ -201,10 +201,10 @@ class RepeatRuleToText extends OsecBaseClass
                             // remove the last ' and'
                             $_days = substr($_days, 0, -4);
                             $txt   .= ' ' . _x(
-                                    'on',
-                                    'Recurrence editor - weekly tab',
-                                    'open-source-event-calendar'
-                                ) . $_days;
+                                'on',
+                                'Recurrence editor - weekly tab',
+                                'open-source-event-calendar'
+                            ) . $_days;
                         }
                     } else {
                         $_days = '';
@@ -226,10 +226,10 @@ class RepeatRuleToText extends OsecBaseClass
                         }
                         $_days = substr($_days, 0, -1);
                         $txt   .= ' ' . _x(
-                                'on',
-                                'Recurrence editor - monthly tab',
-                                'open-source-event-calendar'
-                            ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
+                            'on',
+                            'Recurrence editor - monthly tab',
+                            'open-source-event-calendar'
+                        ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
                     } elseif (count($rc->getByMonthDay()) > 1) {
                         $_days = '';
                         foreach ($rc->getByMonthDay() as $m_day) {
@@ -237,20 +237,20 @@ class RepeatRuleToText extends OsecBaseClass
                         }
                         $_days = substr($_days, 0, -4);
                         $txt   .= ' ' . _x(
-                                'on',
-                                'Recurrence editor - monthly tab',
-                                'open-source-event-calendar'
-                            ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
+                            'on',
+                            'Recurrence editor - monthly tab',
+                            'open-source-event-calendar'
+                        ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
                     } else {
                         $_days = '';
                         foreach ($rc->getByMonthDay() as $m_day) {
                             $_days .= ' ' . $this->_ordinal($m_day);
                         }
                         $txt .= ' ' . _x(
-                                'on',
-                                'Recurrence editor - monthly tab',
-                                'open-source-event-calendar'
-                            ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
+                            'on',
+                            'Recurrence editor - monthly tab',
+                            'open-source-event-calendar'
+                        ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
                     }
                 } elseif ($rc->getByDay()) {
                     $_days = '';
@@ -269,10 +269,10 @@ class RepeatRuleToText extends OsecBaseClass
                         $_days .= ' ' . $wp_locale->weekday[$day];
                     }
                     $txt .= ' ' . _x(
-                            'on',
-                            'Recurrence editor - monthly tab',
-                            'open-source-event-calendar'
-                        ) . $dnum . $_days;
+                        'on',
+                        'Recurrence editor - monthly tab',
+                        'open-source-event-calendar'
+                    ) . $dnum . $_days;
                 }
                 break;
             case 'yearly':
@@ -286,10 +286,10 @@ class RepeatRuleToText extends OsecBaseClass
                         }
                         $_months = substr($_months, 0, -1);
                         $txt     .= ' ' . _x(
-                                'on',
-                                'Recurrence editor - yearly tab',
-                                'open-source-event-calendar'
-                            ) . $_months;
+                            'on',
+                            'Recurrence editor - yearly tab',
+                            'open-source-event-calendar'
+                        ) . $_months;
                     } elseif (count($rc->getByMonth()) > 1) {
                         $_months = '';
                         foreach ($rc->getByMonth() as $_m) {
@@ -298,10 +298,10 @@ class RepeatRuleToText extends OsecBaseClass
                         }
                         $_months = substr($_months, 0, -4);
                         $txt     .= ' ' . _x(
-                                'on',
-                                'Recurrence editor - yearly tab',
-                                'open-source-event-calendar'
-                            ) . $_months;
+                            'on',
+                            'Recurrence editor - yearly tab',
+                            'open-source-event-calendar'
+                        ) . $_months;
                     } else {
                         $_months = '';
                         foreach ($rc->getByMonth() as $_m) {
@@ -309,10 +309,10 @@ class RepeatRuleToText extends OsecBaseClass
                             $_months .= ' ' . $wp_locale->month[$_m];
                         }
                         $txt .= ' ' . _x(
-                                'on',
-                                'Recurrence editor - yearly tab',
-                                'open-source-event-calendar'
-                            ) . $_months;
+                            'on',
+                            'Recurrence editor - yearly tab',
+                            'open-source-event-calendar'
+                        ) . $_months;
                     }
                 }
                 break;

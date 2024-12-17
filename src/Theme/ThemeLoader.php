@@ -528,8 +528,8 @@ class ThemeLoader extends OsecBaseClass
         if ( ! $silent) {
             NotificationAdmin::factory($this->app)->store(
                 __(
-                    'Your calendar theme has been switched to Vortex due to a rendering problem. For more 
-                        information, please enable debug mode by adding this line to your WordPress <code>wp-config.php  
+                    'Your calendar theme has been switched to Vortex due to a rendering problem. For more information, 
+                        please enable debug mode by adding this line to your WordPress <code>wp-config.php  
                         </code> file:<pre>define( "OSEC_DEBUG", true );</pre>',
                     'open-source-event-calendar'
                 ),
