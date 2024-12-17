@@ -54,8 +54,8 @@ class AdminPageThemeOptions extends AdminPageAbstract
     {
         $theme_options_page = add_submenu_page(
             OSEC_ADMIN_BASE_URL,
-            I18n::__('Theme Options'),
-            I18n::__('Theme Options'),
+            __('Theme Options', 'open-source-event-calendar'),
+            __('Theme Options', 'open-source-event-calendar'),
             'manage_osec_options',
             self::ADMIN_PAGE_PREFIX . 'edit-css',
             $this->display_page(...)
@@ -63,7 +63,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
         if (false !== $this->app->settings->get('less_variables_page')) {
             // Make copy of Theme Options page at its old location.
             $submenu['themes.php'][] = [
-                I18n::__('Calendar Theme Options'),
+                __('Calendar Theme Options', 'open-source-event-calendar'),
                 'manage_osec_options',
                 OSEC_THEME_OPTIONS_BASE_URL,
             ];
@@ -132,25 +132,25 @@ class AdminPageThemeOptions extends AdminPageAbstract
     {
         $tabs = [
             'general'  => [
-                'name' => I18n::__('General'),
+                'name' => __('General', 'open-source-event-calendar'),
             ],
             'table'    => [
-                'name' => I18n::__('Tables'),
+                'name' => __('Tables', 'open-source-event-calendar'),
             ],
             'buttons'  => [
-                'name' => I18n::__('Buttons'),
+                'name' => __('Buttons', 'open-source-event-calendar'),
             ],
             'forms'    => [
-                'name' => I18n::__('Forms'),
+                'name' => __('Forms', 'open-source-event-calendar'),
             ],
             'calendar' => [
-                'name' => I18n::__('Calendar general'),
+                'name' => __('Calendar general', 'open-source-event-calendar'),
             ],
             'month'    => [
-                'name' => I18n::__('Month/week/day view'),
+                'name' => __('Month/week/day view', 'open-source-event-calendar'),
             ],
             'agenda'   => [
-                'name' => I18n::__('Agenda view'),
+                'name' => __('Agenda view', 'open-source-event-calendar'),
             ],
         ];
 
@@ -172,13 +172,13 @@ class AdminPageThemeOptions extends AdminPageAbstract
             'submit'        => [
                 'id'    => self::SUBMIT_ID,
                 'value' => '<i class="ai1ec-fa ai1ec-fa-save ai1ec-fa-fw"></i> ' .
-                           I18n::__('Save Options'),
+                           __('Save Options', 'open-source-event-calendar'),
                 'args'  => ['class' => 'ai1ec-btn ai1ec-btn-primary ai1ec-btn-lg'],
             ],
             'reset'         => [
                 'id'    => self::RESET_ID,
                 'value' => '<i class="ai1ec-fa ai1ec-fa-undo ai1ec-fa-fw"></i> ' .
-                           I18n::__('Reset to Defaults'),
+                           __('Reset to Defaults', 'open-source-event-calendar'),
                 'args'  => ['class' => 'ai1ec-btn ai1ec-btn-danger ai1ec-btn-lg'],
             ],
         ];

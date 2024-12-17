@@ -2,7 +2,6 @@
 
 namespace Osec\Settings\Elements;
 
-use Osec\App\I18n;
 use Osec\Cache\CacheApcu;
 use Osec\Cache\CacheDb;
 use Osec\Cache\CacheFactory;
@@ -73,22 +72,21 @@ class SettingsCache extends SettingsAbstract
             ],
         ];
 
+        $twigCache = CacheFile::createFileCacheInstance($this->app, 'twig');
+
         $args = [
             'current_cache'        => $current_cache,
             'available_caches'     => $available_caches,
-            'twig_cache_available' => (
-                CacheFile::OSEC_FILE_CACHE_UNAVAILABLE !== $this->args['value']
-                && ! empty($this->args['value'])
-            ),
-            'twig_path'            => $this->args['value'],
+            'twig_cache_available' => (bool) $twigCache,
+            'twig_path'            => $twigCache ? $twigCache->getCachePath() : CacheFile::OSEC_FILE_CACHE_UNAVAILABLE,
             'id'                   => $this->args['id'],
             'label'                => $this->args['renderer']['label'],
             'text'                 => [
-                'refresh' => I18n::__('Check again'),
-                'nocache' => I18n::__('Templates cache is not writable'),
-                'okcache' => I18n::__('Twig cache is writable (FileCache("twig"))'),
-                'rescan'  => I18n::__('Checking...'),
-                'title'   => I18n::__('Performance Report'),
+                'refresh' => __('Check again', 'open-source-event-calendar'),
+                'nocache' => __('Templates cache is not writable', 'open-source-event-calendar'),
+                'okcache' => __('Twig cache is writable (FileCache("twig"))', 'open-source-event-calendar'),
+                'rescan'  => __('Checking...', 'open-source-event-calendar'),
+                'title'   => __('Performance Report', 'open-source-event-calendar'),
             ],
         ];
 

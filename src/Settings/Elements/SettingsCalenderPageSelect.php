@@ -54,7 +54,7 @@ class SettingsCalenderPageSelect extends SettingsAbstract
     public function render($html = '', $wrap = true): string
     {
         $output = '<label class="ai1ec-control-label ai1ec-col-sm-2" for="' .
-                  self::ELEMENT_ID . '">' . I18n::__('Calendar page') . '</label>'
+                  self::ELEMENT_ID . '">' . __('Calendar page', 'open-source-event-calendar') . '</label>'
                   . '<div class="ai1ec-col-sm-6">' .
                   $this->_get_pages_selector() . $this->_get_page_view_link() . '</div>';
 
@@ -121,7 +121,7 @@ class SettingsCalenderPageSelect extends SettingsAbstract
             return '';
         }
         $args = [
-            'view'  => I18n::__('View'),
+            'view'  => __('View', 'open-source-event-calendar'),
             'link'  => get_permalink($post->ID),
             'title' => apply_filters(
                 'the_title',

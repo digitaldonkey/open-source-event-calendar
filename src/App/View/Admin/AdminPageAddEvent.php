@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Admin;
 
-use Osec\App\I18n;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\Event;
@@ -38,7 +37,7 @@ class AdminPageAddEvent extends OsecBaseClass
     {
         add_meta_box(
             OSEC_POST_TYPE,
-            I18n::__('Event Details'),
+            __('Event Details', 'open-source-event-calendar'),
             $this->meta_box_view(...),
             OSEC_POST_TYPE,
             'normal',

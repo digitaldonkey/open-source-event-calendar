@@ -2,7 +2,6 @@
 
 namespace Osec\Settings\Elements;
 
-use Osec\App\I18n;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -37,7 +36,7 @@ class SettingsCatsTagsFilter extends SettingsAbstract
         if ( ! empty($tags)) {
             $args['tags'] = $this->_get_select_for_terms(
                 'tags',
-                I18n::__('Tags'),
+                __('Tags', 'open-source-event-calendar'),
                 $tags
             );
         }
@@ -45,7 +44,7 @@ class SettingsCatsTagsFilter extends SettingsAbstract
         if ( ! empty($categories)) {
             $args['categories'] = $this->_get_select_for_terms(
                 'categories',
-                I18n::__('Categories'),
+                __('Categories', 'open-source-event-calendar'),
                 $categories
             );
         }

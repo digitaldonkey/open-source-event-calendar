@@ -32,16 +32,16 @@ class EventType extends OsecBaseClass
         $labels = [
             'name'               => I18n::_x('Events', 'Custom post type name'),
             'singular_name'      => I18n::_x('Event', 'Custom post type name (singular)'),
-            'add_new'            => I18n::__('Add New'),
-            'add_new_item'       => I18n::__('Add New Event'),
-            'edit_item'          => I18n::__('Edit Event'),
-            'new_item'           => I18n::__('New Event'),
-            'view_item'          => I18n::__('View Event'),
-            'search_items'       => I18n::__('Search Events'),
-            'not_found'          => I18n::__('No Events found'),
-            'not_found_in_trash' => I18n::__('No Events found in Trash'),
-            'parent_item_colon'  => I18n::__('Parent Event'),
-            'menu_name'          => I18n::__('Events'),
+            'add_new'            => __('Add New', 'open-source-event-calendar'),
+            'add_new_item'       => __('Add New Event', 'open-source-event-calendar'),
+            'edit_item'          => __('Edit Event', 'open-source-event-calendar'),
+            'new_item'           => __('New Event', 'open-source-event-calendar'),
+            'view_item'          => __('View Event', 'open-source-event-calendar'),
+            'search_items'       => __('Search Events', 'open-source-event-calendar'),
+            'not_found'          => __('No Events found', 'open-source-event-calendar'),
+            'not_found_in_trash' => __('No Events found in Trash', 'open-source-event-calendar'),
+            'parent_item_colon'  => __('Parent Event', 'open-source-event-calendar'),
+            'menu_name'          => __('Events', 'open-source-event-calendar'),
             'all_items'          => $this->get_all_items_name(),
         ];
 
@@ -68,7 +68,7 @@ class EventType extends OsecBaseClass
             $page_base = get_page_uri($settings->get('calendar_page_id'));
         }
 
-        $rewrite     = ['slug' => I18n::__('event')];
+        $rewrite     = ['slug' => __('event', 'open-source-event-calendar')];
         $has_archive = true;
         if (
             $settings->get('calendar_base_url_for_permalinks') &&
@@ -305,7 +305,7 @@ class EventType extends OsecBaseClass
         }
 
         // no pending events, or the user doesn't have sufficient capabilities
-        return I18n::__('All Events');
+        return __('All Events', 'open-source-event-calendar');
     }
 
     /**

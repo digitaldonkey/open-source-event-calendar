@@ -69,8 +69,8 @@ class AdminPageSettings extends AdminPageAbstract
     {
         $settings_page = add_submenu_page(
             OSEC_ADMIN_BASE_URL,
-            I18n::__('Settings'),
-            I18n::__('Settings'),
+            __('Settings', 'open-source-event-calendar'),
+            __('Settings', 'open-source-event-calendar'),
             'manage_osec_options',
             self::ADMIN_PAGE_PREFIX . 'settings',
             $this->display_page(...)
@@ -109,11 +109,11 @@ class AdminPageSettings extends AdminPageAbstract
     public function display_meta_box(mixed $object, mixed $box)
     {
         $tabs = [
-            'viewing-events' => ['name' => I18n::__('Viewing Events')],
-            'editing-events' => ['name' => I18n::__('Adding/Editing Events')],
-            'shortcodes' => ['name' => I18n::__('Shortcodes')],
-            'advanced' => ['name' => I18n::__('Advanced Settings')],
-            'cache' => ['name' => I18n::__('Cache Report')],
+            'viewing-events' => ['name' => __('Viewing Events', 'open-source-event-calendar')],
+            'editing-events' => ['name' => __('Adding/Editing Events', 'open-source-event-calendar')],
+            'shortcodes' => ['name' => __('Shortcodes', 'open-source-event-calendar')],
+            'advanced' => ['name' => __('Advanced Settings', 'open-source-event-calendar')],
+            'cache' => ['name' => __('Cache Report', 'open-source-event-calendar')],
         ];
 
         /**
@@ -133,11 +133,11 @@ class AdminPageSettings extends AdminPageAbstract
             'submit'          => [
                 'id'    => 'osec_save_settings',
                 'value' => '<i class="ai1ec-fa ai1ec-fa-save ai1ec-fa-fw"></i> ' .
-                           I18n::__('Save Settings'),
+                           __('Save Settings', 'open-source-event-calendar'),
                 'args'  => ['class' => 'ai1ec-btn ai1ec-btn-primary ai1ec-btn-lg'],
             ],
             'pre_tabs_markup' => '<div class="ai1ec-gzip-causes-js-failure">' .
-                                 I18n::__('loading ...') . '</div>',
+                                 __('loading ...', 'open-source-event-calendar') . '</div>',
         ];
 
         ThemeLoader::factory($this->app)

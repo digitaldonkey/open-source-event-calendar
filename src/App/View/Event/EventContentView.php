@@ -3,7 +3,6 @@
 namespace Osec\App\View\Event;
 
 use Osec\App\Controller\AccessControl;
-use Osec\App\I18n;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
@@ -148,8 +147,8 @@ class EventContentView extends OsecBaseClass
                                  ->generate_href();
             // $href = $href->generate_href();
         }
-        $text    = esc_attr(I18n::__('Back to Calendar'));
-        $tooltip = esc_attr(I18n::__('View all events'));
+        $text    = esc_attr(__('Back to Calendar'), 'open-source-event-calendar');
+        $tooltip = esc_attr(__('View all events'), 'open-source-event-calendar');
         $html    = <<<HTML
 <a class="ai1ec-calendar-link ai1ec-btn ai1ec-btn-default ai1ec-btn-sm
 		ai1ec-tooltip-trigger $class"

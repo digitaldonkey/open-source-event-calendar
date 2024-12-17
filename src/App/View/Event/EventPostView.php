@@ -34,26 +34,26 @@ class EventPostView extends OsecBaseClass
             0  => '',
             // Unused. Messages start at index 1.
             1  => sprintf(
-                I18n::__('Event updated. <a href="%s">View event</a>'),
+                __('Event updated. <a href="%s">View event</a>', 'open-source-event-calendar'),
                 esc_url(get_permalink($post_ID))
             ),
-            2  => I18n::__('Custom field updated.'),
-            3  => I18n::__('Custom field deleted.'),
-            4  => I18n::__('Event updated.'),
+            2  => __('Custom field updated.', 'open-source-event-calendar'),
+            3  => __('Custom field deleted.', 'open-source-event-calendar'),
+            4  => __('Event updated.', 'open-source-event-calendar'),
             /* translators: %s: date and time of the revision */
             5  => isset($_GET['revision'])
                 ? sprintf(
-                    I18n::__('Event restored to revision from %s'),
+                    __('Event restored to revision from %s', 'open-source-event-calendar'),
                     wp_post_revision_title((int)$_GET['revision'], false)
                 )
                 : false,
             6  => sprintf(
-                I18n::__('Event published. <a href="%s">View event</a>'),
+                __('Event published. <a href="%s">View event</a>', 'open-source-event-calendar'),
                 esc_url(get_permalink($post_ID))
             ),
-            7  => I18n::__('Event saved.'),
+            7  => __('Event saved.', 'open-source-event-calendar'),
             8  => sprintf(
-                I18n::__('Event submitted. <a target="_blank" href="%s">Preview event</a>'),
+                __('Event submitted. <a target="_blank" href="%s">Preview event</a>', 'open-source-event-calendar'),
                 esc_url(add_query_arg('preview', 'true', get_permalink($post_ID)))
             ),
             9  => sprintf(
@@ -61,11 +61,11 @@ class EventPostView extends OsecBaseClass
                     'Event scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview event</a>'
                 ),
                 // translators: Publish box date format, see http://php.net/date
-                (new DT($post->post_date))->format_i18n(I18n::__('M j, Y @ G:i')),
+                (new DT($post->post_date))->format_i18n(__('M j, Y @ G:i'), 'open-source-event-calendar'),
                 esc_url(get_permalink($post_ID))
             ),
             10 => sprintf(
-                I18n::__('Event draft updated. <a target="_blank" href="%s">Preview event</a>'),
+                __('Event draft updated. <a target="_blank" href="%s">Preview event</a>', 'open-source-event-calendar'),
                 esc_url(add_query_arg('preview', 'true', get_permalink($post_ID)))
             ),
         ];

@@ -153,8 +153,9 @@ class EventTimeView extends OsecBaseClass
 
         // Add all-day label.
         if ($event->is_allday()) {
-            $allday_html = ' <span class="ai1ec-allday-badge">' . I18n::__('all-day') . '</span>';
-
+            $allday_html = ' <span class="ai1ec-allday-badge">'
+                            . __('all-day', 'open-source-event-calendar')
+                           . '</span>';
             /**
              * Alter all-day badge html.
              *
@@ -273,6 +274,6 @@ class EventTimeView extends OsecBaseClass
                 $rrule->exdate_to_text($exception_dates);
         }
 
-        return implode(I18n::__(', and '), $excludes);
+        return implode(__(', and ', 'open-source-event-calendar'), $excludes);
     }
 }

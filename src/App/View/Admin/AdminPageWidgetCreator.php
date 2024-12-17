@@ -150,8 +150,8 @@ class AdminPageWidgetCreator extends AdminPageAbstract
              * @param  bool  $bool  Set fals to hide warnings.
              */
             'display_alert'     => apply_filters('osec_display_widget_creator_warning', true),
-            'text_preview'      => I18n::__('Preview:'),
-            'text_paste'        => I18n::__('Paste this code onto your site:'),
+            'text_preview'      => __('Preview:', 'open-source-event-calendar'),
+            'text_paste'        => __('Paste this code onto your site:', 'open-source-event-calendar'),
             'text_updated_code' => I18n::__(
                 'This code will update to reflect changes made to the settings. Changing settings will not affect '
                 . 'previously embedded widgets.'

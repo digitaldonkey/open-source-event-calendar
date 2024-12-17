@@ -97,7 +97,7 @@ class AdminDateRepeatBox extends OsecBaseClass
             'count'        => $this->create_count_input(
                 'osec_count',
                 $count
-            ) . I18n::__('times'),
+            ) . __('times', 'open-source-event-calendar'),
             'end'          => $this->create_end_dropdown($end),
             'until'        => $until,
             'repeat'       => $repeat,
@@ -127,7 +127,7 @@ class AdminDateRepeatBox extends OsecBaseClass
                 'osec_daily_count',
                 $selected,
                 365
-            ) . I18n::__('day(s)'),
+            ) . __('day(s)', 'open-source-event-calendar'),
         ];
 
         return ThemeLoader::factory($this->app)->get_file('row_daily.php', $args, true)
@@ -193,7 +193,7 @@ class AdminDateRepeatBox extends OsecBaseClass
                 'osec_weekly_count',
                 $count,
                 52
-            ) . I18n::__('week(s)'),
+            ) . __('week(s)', 'open-source-event-calendar'),
             'week_days' => $this->create_list_element(
                 'osec_weekly_date_select',
                 $options,
@@ -306,7 +306,7 @@ class AdminDateRepeatBox extends OsecBaseClass
             $options_dn[$_dn] = (new DT(strtotime($_dn . '-01-1998 12:00:00')))
                 ->format_i18n('jS');
         }
-        $options_dn['-1'] = I18n::__('last');
+        $options_dn['-1'] = __('last', 'open-source-event-calendar');
 
         $byday_checked       = $bymonthday ? '' : 'checked';
         $byday_expanded      = $bymonthday ? 'ai1ec-collapse' : 'ai1ec-in';
@@ -319,7 +319,7 @@ class AdminDateRepeatBox extends OsecBaseClass
                 'osec_monthly_count',
                 $count,
                 12
-            ) . I18n::__('month(s)'),
+            ) . __('month(s)', 'open-source-event-calendar'),
             'month'               => $this->create_monthly_date_select(
                 $month
             ),
@@ -451,7 +451,7 @@ class AdminDateRepeatBox extends OsecBaseClass
                 'osec_yearly_count',
                 $count,
                 10
-            ) . I18n::__('year(s)'),
+            ) . __('year(s)', 'open-source-event-calendar'),
             'year'          => $this->create_yearly_date_select($year),
             'on_the_select' => $this->create_on_the_select(
                 $first,
@@ -496,12 +496,12 @@ class AdminDateRepeatBox extends OsecBaseClass
         $ret = '';
 
         $first_options = [
-            '0' => I18n::__('first'),
-            '1' => I18n::__('second'),
-            '2' => I18n::__('third'),
-            '3' => I18n::__('fourth'),
+            '0' => __('first', 'open-source-event-calendar'),
+            '1' => __('second', 'open-source-event-calendar'),
+            '2' => __('third', 'open-source-event-calendar'),
+            '3' => __('fourth', 'open-source-event-calendar'),
             '4' => '------',
-            '5' => I18n::__('last'),
+            '5' => __('last', 'open-source-event-calendar'),
         ];
         $ret           = $this->create_select_element(
             'osec_monthly_each_select',
@@ -511,17 +511,17 @@ class AdminDateRepeatBox extends OsecBaseClass
         );
 
         $second_options = [
-            '0'  => I18n::__('Sunday'),
-            '1'  => I18n::__('Monday'),
-            '2'  => I18n::__('Tuesday'),
-            '3'  => I18n::__('Wednesday'),
-            '4'  => I18n::__('Thursday'),
-            '5'  => I18n::__('Friday'),
-            '6'  => I18n::__('Saturday'),
+            '0'  => __('Sunday', 'open-source-event-calendar'),
+            '1'  => __('Monday', 'open-source-event-calendar'),
+            '2'  => __('Tuesday', 'open-source-event-calendar'),
+            '3'  => __('Wednesday', 'open-source-event-calendar'),
+            '4'  => __('Thursday', 'open-source-event-calendar'),
+            '5'  => __('Friday', 'open-source-event-calendar'),
+            '6'  => __('Saturday', 'open-source-event-calendar'),
             '7'  => '--------',
-            '8'  => I18n::__('day'),
-            '9'  => I18n::__('weekday'),
-            '10' => I18n::__('weekend day'),
+            '8'  => __('day', 'open-source-event-calendar'),
+            '9'  => __('weekday', 'open-source-event-calendar'),
+            '10' => __('weekend day', 'open-source-event-calendar'),
         ];
 
         return $ret . $this->create_select_element(
@@ -587,9 +587,9 @@ class AdminDateRepeatBox extends OsecBaseClass
         ob_start();
 
         $options = [
-            0 => I18n::__('Never'),
-            1 => I18n::__('After'),
-            2 => I18n::__('On date'),
+            0 => __('Never', 'open-source-event-calendar'),
+            1 => __('After', 'open-source-event-calendar'),
+            2 => __('On date', 'open-source-event-calendar'),
         ];
 
         ?>

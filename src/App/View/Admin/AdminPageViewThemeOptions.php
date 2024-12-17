@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Admin;
 
-use Osec\App\I18n;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -27,8 +26,8 @@ class AdminPageViewThemeOptions extends AdminPageAbstract
     {
         $theme_options_page = add_submenu_page(
             OSEC_ADMIN_BASE_URL,
-            I18n::__('Options lookup'),
-            I18n::__('Options lookup'),
+            __('Options lookup', 'open-source-event-calendar'),
+            __('Options lookup', 'open-source-event-calendar'),
             'manage_osec_options',
             self::ADMIN_PAGE_PREFIX . 'view-all-variables',
             $this->display_page(...)

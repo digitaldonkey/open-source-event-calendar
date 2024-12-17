@@ -38,7 +38,7 @@ class EventSingleView extends OsecBaseClass
         $args               = [
             'event'              => $event,
             'text_calendar_feed' => $text_calendar_feed,
-            'text_view_post'     => I18n::__('View original'),
+            'text_view_post'     => __('View original', 'open-source-event-calendar'),
         ];
 
         return ThemeLoader::factory($this->app)
@@ -122,7 +122,7 @@ class EventSingleView extends OsecBaseClass
                 'show_timezone'       => true,
                 'event_timezone'      => $event->get('timezone_name'),
                 'text_timezone_title' => sprintf(
-                    I18n::__('Event was created in the %s time zone'),
+                    __('Event was created in the %s time zone', 'open-source-event-calendar'),
                     $event->get('start')->get_gmt_offset_as_text()
                 ),
             ];
@@ -161,7 +161,7 @@ class EventSingleView extends OsecBaseClass
             'text_add_calendar'      => __('Add to Calendar', 'open-source-event-calendar'),
             'subscribe_buttons_text' => CalendarSubscribeButtonView::factory($this->app)
                                                                    ->get_labels(),
-            'text_get_calendar'      => I18n::__('Get a Timely Calendar'),
+            'text_get_calendar'      => __('Get a Timely Calendar', 'open-source-event-calendar'),
             'text_when'              => __('When:', 'open-source-event-calendar'),
             'text_where'             => __('Where:', 'open-source-event-calendar'),
             'text_cost'              => __('Cost:', 'open-source-event-calendar'),
@@ -192,7 +192,7 @@ class EventSingleView extends OsecBaseClass
                 '&action=edit&instance=' . $event->get('instance_id')
             );
             $args['edit_instance_text'] = sprintf(
-                I18n::__('Edit this occurrence (%s)'),
+                __('Edit this occurrence (%s)', 'open-source-event-calendar'),
                 $event->get('start')->format_i18n('M j')
             );
         }

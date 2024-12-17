@@ -46,8 +46,8 @@ class AdminPageManageThemes extends AdminPageAbstract
     {
         add_submenu_page(
             OSEC_ADMIN_BASE_URL,
-            I18n::__('Calendar Themes'),
-            I18n::__('Calendar Themes'),
+            __('Calendar Themes', 'open-source-event-calendar'),
+            __('Calendar Themes', 'open-source-event-calendar'),
             'switch_osec_themes',
             self::ADMIN_PAGE_PREFIX . 'themes',
             $this->display_page(...)

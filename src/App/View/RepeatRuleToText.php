@@ -80,52 +80,52 @@ class RepeatRuleToText extends OsecBaseClass
         switch ($freq) {
             case 'daily':
                 // check if interval is set
-                if ( ! $interval || $interval == 1) {
-                    $txt = I18n::__('Daily');
+                if (! $interval || $interval == 1) {
+                    $txt = __('Daily', 'open-source-event-calendar');
                 } elseif ($interval == 2) {
-                    $txt = I18n::__('Every other day');
+                    $txt = __('Every other day', 'open-source-event-calendar');
                 } else {
                     $txt = sprintf(
-                        I18n::__('Every %d days'),
+                        __('Every %d days', 'open-source-event-calendar'),
                         $interval
                     );
                 }
                 break;
             case 'weekly':
                 // check if interval is set
-                if ( ! $interval || $interval == 1) {
-                    $txt = I18n::__('Weekly');
+                if (! $interval || $interval == 1) {
+                    $txt = __('Weekly', 'open-source-event-calendar');
                 } elseif ($interval == 2) {
-                    $txt = I18n::__('Every other week');
+                    $txt = __('Every other week', 'open-source-event-calendar');
                 } else {
                     $txt = sprintf(
-                        I18n::__('Every %d weeks'),
+                        __('Every %d weeks', 'open-source-event-calendar'),
                         $interval
                     );
                 }
                 break;
             case 'monthly':
                 // check if interval is set
-                if ( ! $interval || $interval == 1) {
-                    $txt = I18n::__('Monthly');
+                if (! $interval || $interval == 1) {
+                    $txt = __('Monthly', 'open-source-event-calendar');
                 } elseif ($interval == 2) {
-                    $txt = I18n::__('Every other month');
+                    $txt = __('Every other month', 'open-source-event-calendar');
                 } else {
                     $txt = sprintf(
-                        I18n::__('Every %d months'),
+                        __('Every %d months', 'open-source-event-calendar'),
                         $interval
                     );
                 }
                 break;
             case 'yearly':
                 // check if interval is set
-                if ( ! $interval || $interval == 1) {
-                    $txt = I18n::__('Yearly');
+                if (! $interval || $interval == 1) {
+                    $txt = __('Yearly', 'open-source-event-calendar');
                 } elseif ($interval == 2) {
-                    $txt = I18n::__('Every other year');
+                    $txt = __('Every other year', 'open-source-event-calendar');
                 } else {
                     $txt = sprintf(
-                        I18n::__('Every %d years'),
+                        __('Every %d years', 'open-source-event-calendar'),
                         $interval
                     );
                 }
@@ -144,20 +144,20 @@ class RepeatRuleToText extends OsecBaseClass
     protected function _ending_sentence(&$txt, &$rc)
     {
         if ($until = $rc->getUntil()) {
-            if ( ! is_int($until)) {
+            if (! is_int($until)) {
                 $until = strtotime((string)$until);
             }
             $txt .= ' ' . sprintf(
-                I18n::__('until %s'),
+                __('until %s', 'open-source-event-calendar'),
                 (new DT($until))->format_i18n($this->app->options->get('date_format'))
             );
         } elseif ($count = $rc->getCount()) {
             $txt .= ' ' . sprintf(
-                I18n::__('for %d occurrences'),
+                __('for %d occurrences', 'open-source-event-calendar'),
                 $count
             );
         } else {
-            $txt .= ', ' . I18n::__('forever');
+            $txt .= ', ' . __('forever', 'open-source-event-calendar');
         }
     }
 
@@ -190,7 +190,8 @@ class RepeatRuleToText extends OsecBaseClass
                             $_days = '';
                             foreach ($rc->getByDay() as $d) {
                                 $day   = $this->get_weekday_by_id($d, true);
-                                $_days .= ' ' . $wp_locale->weekday[$day] . ' ' . I18n::__('and');
+                                $_days .= ' ' . $wp_locale->weekday[$day]
+                                          . ' ' . __('and', 'open-source-event-calendar');
                             }
                             // remove the last ' and'
                             $_days = substr($_days, 0, -4);
@@ -218,17 +219,17 @@ class RepeatRuleToText extends OsecBaseClass
                         $txt   .= ' ' . I18n::_x(
                             'on',
                             'Recurrence editor - monthly tab'
-                        ) . $_days . ' ' . I18n::__('of the month');
+                        ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
                     } elseif (count($rc->getByMonthDay()) > 1) {
                         $_days = '';
                         foreach ($rc->getByMonthDay() as $m_day) {
-                            $_days .= ' ' . $this->_ordinal($m_day) . ' ' . I18n::__('and');
+                            $_days .= ' ' . $this->_ordinal($m_day) . ' ' . __('and', 'open-source-event-calendar');
                         }
                         $_days = substr($_days, 0, -4);
                         $txt   .= ' ' . I18n::_x(
                             'on',
                             'Recurrence editor - monthly tab'
-                        ) . $_days . ' ' . I18n::__('of the month');
+                        ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
                     } else {
                         $_days = '';
                         foreach ($rc->getByMonthDay() as $m_day) {
@@ -237,18 +238,18 @@ class RepeatRuleToText extends OsecBaseClass
                         $txt .= ' ' . I18n::_x(
                             'on',
                             'Recurrence editor - monthly tab'
-                        ) . $_days . ' ' . I18n::__('of the month');
+                        ) . $_days . ' ' . __('of the month', 'open-source-event-calendar');
                     }
                 } elseif ($rc->getByDay()) {
                     $_days = '';
                     foreach ($rc->getByDay() as $d) {
-                        if ( ! preg_match('|^((-?)\d+)([A-Z]{2})$|', (string)$d, $matches)) {
+                        if (! preg_match('|^((-?)\d+)([A-Z]{2})$|', (string)$d, $matches)) {
                             continue;
                         }
                         $_dnum = $matches[1];
                         $_day  = $matches[3];
                         if ('-' === $matches[2]) {
-                            $dnum = ' ' . I18n::__('last');
+                            $dnum = ' ' . __('last', 'open-source-event-calendar');
                         } else {
                             $dnum = ' ' . (new DT(strtotime($_dnum . '-01-1998 12:00:00')))->format_i18n('jS');
                         }
@@ -273,7 +274,7 @@ class RepeatRuleToText extends OsecBaseClass
                         $_months = '';
                         foreach ($rc->getByMonth() as $_m) {
                             $_m      = $_m < 10 ? 0 . $_m : $_m;
-                            $_months .= ' ' . $wp_locale->month[$_m] . ' ' . I18n::__('and');
+                            $_months .= ' ' . $wp_locale->month[$_m] . ' ' . __('and', 'open-source-event-calendar');
                         }
                         $_months = substr($_months, 0, -4);
                         $txt     .= ' ' . I18n::_x('on', 'Recurrence editor - yearly tab') . $_months;
@@ -380,7 +381,7 @@ class RepeatRuleToText extends OsecBaseClass
         $rules     = [];
         $rule_list = explode(';', $rule);
         foreach ($rule_list as $single_rule) {
-            if ( ! str_contains($single_rule, '=')) {
+            if (! str_contains($single_rule, '=')) {
                 continue;
             }
             [$key, $val] = explode('=', $single_rule);
@@ -406,7 +407,7 @@ class RepeatRuleToText extends OsecBaseClass
 
                 case 'BYMONTHDAY':
                 case 'BYMONTH':
-                    if ( ! str_contains($val, ',')) {
+                    if (! str_contains($val, ',')) {
                         $rules[$key] = $val;
                     } else {
                         $rules[$key] = explode(',', $val);

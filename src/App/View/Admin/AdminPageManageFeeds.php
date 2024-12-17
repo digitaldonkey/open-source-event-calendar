@@ -30,8 +30,8 @@ class AdminPageManageFeeds extends AdminPageAbstract
         // =======================
         $calendar_feeds = add_submenu_page(
             OSEC_ADMIN_BASE_URL,
-            I18n::__('Calendar Feeds'),
-            I18n::__('Calendar Feeds'),
+            __('Calendar Feeds', 'open-source-event-calendar'),
+            __('Calendar Feeds', 'open-source-event-calendar'),
             'manage_osec_feeds',
             self::ADMIN_PAGE_PREFIX . 'feeds',
             $this->display_page(...)

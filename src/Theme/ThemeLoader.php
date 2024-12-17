@@ -318,7 +318,11 @@ class ThemeLoader extends OsecBaseClass
             default:
                 throw new Exception(
                     sprintf(
-                        I18n::__("We couldn't find a suitable loader for filename with extension '%s'"),
+                        /* translators: Missing file extensions */
+                        __(
+                            "We couldn't find a suitable loader for filename with extension '%s'",
+                            'open-source-event-calendar'
+                        ),
                         $fileExt
                     )
                 );

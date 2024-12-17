@@ -2,7 +2,6 @@
 
 namespace Osec\App\View;
 
-use Osec\App\I18n;
 use Osec\Bootstrap\OsecBaseClass;
 
 /**
@@ -24,7 +23,7 @@ class WpPluginActonLinks extends OsecBaseClass
     public function plugin_action_links(array $links)
     {
         $settings_link = sprintf(
-            I18n::__('<a href="%s">Settings</a>'),
+            __('<a href="%s">Settings</a>', 'open-source-event-calendar'),
             admin_url(OSEC_SETTINGS_BASE_URL)
         );
         array_unshift($links, $settings_link);
@@ -34,7 +33,7 @@ class WpPluginActonLinks extends OsecBaseClass
         //
         // if (current_user_can('update_plugins')) {
         // $updates_link = sprintf(
-        // I18n::__('<a href="%s">Check for updates</a>'),
+        // __('<a href="%s">Check for updates</a>', 'open-source-event-calendar'),
         // admin_url(OSEC_FORCE_UPDATES_URL)
         // );
         // array_push($links, $updates_link);

@@ -3,7 +3,6 @@
 namespace Osec\App\View\Calendar;
 
 use Osec\App\Controller\StrictContentFilterController;
-use Osec\App\I18n;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\EventSearch;
@@ -73,7 +72,7 @@ class WeekView extends AbstractView
         $pagination_links = $this->_get_pagination($args, $title, $title_short);
 
         $time_format = $this->app->options
-            ->get('time_format', I18n::__('g a'));
+            ->get('time_format', __('g a'), 'open-source-event-calendar');
 
         // Calculate today marker's position.
         $now      = new DT('now', 'sys.default');

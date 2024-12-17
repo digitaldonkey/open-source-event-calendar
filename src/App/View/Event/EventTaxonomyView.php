@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Event;
 
-use Osec\App\I18n;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventTaxonomy;
 use Osec\App\Model\TaxonomyAdapter;
@@ -197,7 +196,7 @@ class EventTaxonomyView extends OsecBaseClass
         $image = $this->taxonomyModel->get_category_image($term_id);
         if (null !== $image) {
             return '<img src="' . $image . '" alt="' .
-                   I18n::__('Category image') .
+                   __('Category image', 'open-source-event-calendar') .
                    '" class="osec_category_small_image_preview" />';
         }
 

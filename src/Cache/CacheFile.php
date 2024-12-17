@@ -3,7 +3,6 @@
 namespace Osec\Cache;
 
 use Exception;
-use Osec\App\I18n;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
@@ -92,7 +91,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
 
             return null;
         }
-
+        self::setAvailable($app, $cache_id);
         return new self($app, $cacheData['path'], $cacheData['url'], $cache_id);
     }
 
@@ -113,6 +112,22 @@ class CacheFile extends OsecBaseClass implements CacheInterface
             true
         );
         // TODO : Maybe add Admin message?
+    }
+
+    /**
+     * Setting entire directory unavailable in wp-options.
+     *
+     * @param  App  $app
+     * @param  string|null  $cache_id
+     *
+     * @return void
+     */
+    private static function setAvailable(App $app, ?string $cache_id): void
+    {
+        $cache_id = ! empty($cache_id) ? $cache_id : 'default_cache';
+        $app->options->delete(
+            self::optionKey($cache_id)
+        );
     }
 
     public function set(string $key, mixed $value): bool
@@ -213,15 +228,22 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         // Throw a mean message.
 
         //  if ($notification->are_notices_available(2)) {}
-        $msg = I18n::__(
-                'Can not use WP_Filesystem() method to write to file: ',
-            )
-               . "<br /><code>$file</code><br />"
-               . I18n::__(
-                'You may set OSEC_ENABLE_CACHE_FILE false to use other cache methods like APCU or DB and ignore this message.'
-                .'<br /><br /><strong>BUT: If we can not write files Twig cache is disabled.</strong>'
-                .'<br /><br /><strong>Ensure that</strong><br /><code>'.ABSPATH.'wp-content/uploads/'.OSEC_FILE_CACHE_WP_UPLOAD_DIR.'</code><br />or<br /><code>'.OSEC_FILE_CACHE_DEFAULT_PATH.'</code><br /> are writable by php.',
-            );
+        $msg = sprintf(
+        /* translators: 1: Filename 2: ABSPATH 3: OSEC_FILE_CACHE_WP_UPLOAD_DIR 4: OSEC_FILE_CACHE_DEFAULT_PATH */
+            __(
+                'Can not use WP_Filesystem() method to write to file: %1$s
+                        <br /><br />
+                        You may set OSEC_ENABLE_CACHE_FILE false to use other cache methods like APCU or DB and ignore this message.
+                        <br /><br /><strong>BUT: If we can not write files Twig cache is disabled.</strong>
+                        <br /><br /><strong>Ensure that</strong><br /><code>%2$swp-content/uploads/%3$s
+                        </code><br />or<br /><code>%4$</code><br /> are writable by php.',
+                'open-source-event-calendar'
+            ),
+            $file,
+            ABSPATH,
+            OSEC_FILE_CACHE_WP_UPLOAD_DIR,
+            OSEC_FILE_CACHE_DEFAULT_PATH
+        );
         NotificationAdmin::factory($this->app)->store(
             "<p>" . wp_kses($msg,$this->app->kses->allowed_html_inline()) . "</p>",
             'error',
@@ -338,7 +360,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         if ($cache && CachePath::clean_and_check_dir($cache['path'])) {
             $this->_cache_path = $cache['path'];
             $this->_cache_url  = $cache['url'];
-
+            self::setAvailable($this->app, $this->_cache_id);
             return true;
         }
         self::setUnavailable($this->app, $this->_cache_id);

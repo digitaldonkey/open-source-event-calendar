@@ -3,7 +3,6 @@
 namespace Osec\App\Controller;
 
 use HTTP_ConditionalGet;
-use Osec\App\I18n;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\Settings;
 use Osec\App\View\Admin\AdminPageAbstract;
@@ -387,14 +386,17 @@ JSC;
                 'URL in <b>Organizer Contact Info</b> &gt; <b>Website URL</b> seems to be invalid.',
                 'open-source-event-calendar'
             ),
-            'osec_ticket_url_not_valid'      => I18n::__(
-                'URL in <b>Event Cost and Tickets</b> &gt; <b>Buy Tickets URL</b> seems to be invalid.'
+            'osec_ticket_url_not_valid'      => __(
+                'URL in <b>Event Cost and Tickets</b> &gt; <b>Buy Tickets URL</b> seems to be invalid.',
+                'open-source-event-calendar'
             ),
-            'general_url_not_valid'          => I18n::__(
-                'Please remember that URLs must start with either "http://" or "https://".'
+            'general_url_not_valid'          => __(
+                'Please remember that URLs must start with either "http://" or "https://".',
+                'open-source-event-calendar'
             ),
-            'calendar_loading'               => I18n::__(
-                'Loading&hellip;'
+            'calendar_loading'               => __(
+                'Loading&hellip;',
+                'open-source-event-calendar'
             ),
             'language'                       => WpmlHelper::factory($this->app)->get_lang(),
             'ajax_url'                       => $ajax_url,
@@ -423,14 +425,14 @@ JSC;
             ),
             'javascript_widgets'             => [],
             'widget_creator'                 => [
-                'preview'         => I18n::__('Preview:'),
-                'preview_loading' => I18n::__(
-                    'Loading preview&nbsp;<i class="ai1ec-fa ai1ec-fa-spin ai1ec-fa-spinner"></i>'
-                ),
+                'preview'         => __('Preview:', 'open-source-event-calendar'),
+                'preview_loading' => __('Loading preview', 'open-source-event-calendar')
+                                     . '&nbsp;<i class="ai1ec-fa ai1ec-fa-spin ai1ec-fa-spinner"></i>',
             ],
-            'load_views_error'               => I18n::__(
-                'Something went wrong while fetching events.'
-                . '<br>The request status is: %STATUS% <br>The error thrown was: %ERROR%'
+            'load_views_error'               => __(
+                'Something went wrong while fetching events. 
+                    <br>The request status is: %STATUS% <br>The error thrown was: %ERROR%',
+                'open-source-event-calendar'
             ),
             'cookie_path'                    => COOKIEPATH,
             'disable_autocompletion'         => $settings->get('disable_autocompletion'),

@@ -508,9 +508,9 @@ class CalendarPageView extends OsecBaseClass
             'is_filtered'        => false,
             'export_url'         => OSEC_EXPORT_URL,
             'export_url_no_html' => OSEC_EXPORT_URL . '&no_html=true',
-            'text_filtered'      => I18n::__('Subscribe to filtered calendar'),
-            'text_subscribe'     => I18n::__('Subscribe'),
-            'text_get_calendar'  => I18n::__('Get a Timely Calendar'),
+            'text_filtered'      => __('Subscribe to filtered calendar', 'open-source-event-calendar'),
+            'text_subscribe'     => __('Subscribe', 'open-source-event-calendar'),
+            'text_get_calendar'  => __('Get a Timely Calendar', 'open-source-event-calendar'),
             'text'               => CalendarSubscribeButtonView::factory($this->app)
                                                                ->get_labels(),
             'placement'          => 'up',

@@ -116,7 +116,7 @@ class AdminEventCategoryHooks extends OsecBaseClass
         $args = [
             'style'       => $style,
             'color'       => $clr,
-            'label'       => I18n::__('Category Color'),
+            'label'       => __('Category Color', 'open-source-event-calendar'),
             'description' => I18n::__(
                 'Events in this category will be identified by this color'
             ),

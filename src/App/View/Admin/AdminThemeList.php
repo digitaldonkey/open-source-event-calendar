@@ -326,14 +326,14 @@ class AdminThemeList extends WP_List_Table
 
                     $activate_text = esc_attr(
                         sprintf(
-                            I18n::__('Activate &#8220;%s&#8221;'),
+                            __('Activate &#8220;%s&#8221;', 'open-source-event-calendar'),
                             $title
                         )
                     );
                     $actions       = [];
                     $actions[]     = '<a href="' . $activate_link .
                                      '" class="activatelink" title="' . $activate_text . '">' .
-                                     I18n::__('Activate') . '</a>';
+                                     __('Activate', 'open-source-event-calendar') . '</a>';
 
                     $actions = apply_filters(
                         'theme_action_links',
@@ -350,7 +350,7 @@ class AdminThemeList extends WP_List_Table
                         <?php
                         /* translators: 1: theme title, 2: theme version, 3: theme author */
                         printf(
-                            I18n::__('%1$s %2$s by %3$s'),
+                            __('%1$s %2$s by %3$s', 'open-source-event-calendar'),
                             $title,
                             $version,
                             $author
@@ -398,7 +398,7 @@ class AdminThemeList extends WP_List_Table
                     if ($tags) : ?>
                         <p>
                             <?php
-                            echo I18n::__('Tags:'); ?><?php
+                            echo __('Tags:', 'open-source-event-calendar'); ?><?php
                             echo implode(', ', $tags); ?>
                         </p>
                     <?php endif; ?>

@@ -4,7 +4,6 @@ namespace Osec\App\Model\Date;
 
 use DateTimeZone;
 use Exception;
-use Osec\App\I18n;
 use Osec\App\Model\MetaAdapterUser;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\Bootstrap\App;
@@ -434,11 +433,13 @@ class Timezones extends OsecBaseClass
                 $default_timezone = 'UTC';
                 NotificationAdmin::factory($this->app)->store(
                     sprintf(
-                        I18n::__(
-                            'Please select site timezone in %s <em>Timezone</em> dropdown menu.'
+                        /* translators: Link options-general timezone settings */
+                        __(
+                            'Please select site timezone in %s <em>Timezone</em> dropdown menu.',
+                            'open-source-event-calendar'
                         ),
                         '<a href="' . admin_url('options-general.php') .
-                        '">' . I18n::__('Settings') . '</a>'
+                        '">' . __('Settings', 'open-source-event-calendar') . '</a>'
                     ),
                     'error'
                 );
@@ -514,7 +515,7 @@ class Timezones extends OsecBaseClass
                 // Add warning
                 NotificationAdmin::factory($this->app)->store(
                     sprintf(
-                        I18n::__('Selected timezone "UTC%+d" will be treated as %s.'),
+                        __('Selected timezone "UTC%+d" will be treated as %s.', 'open-source-event-calendar'),
                         $zone,
                         $decoded_zone
                     )
@@ -565,9 +566,11 @@ class Timezones extends OsecBaseClass
         }
         NotificationAdmin::factory($this->app)->store(
             sprintf(
-                I18n::__(
-                    'Timezone "UTC%+d" is not recognized. Please %suse valid%s timezone name, '
-                    . 'until then events will be created in UTC timezone.'
+                /* translators: 1: Timezone offset 2: LinkOpen 3: 2: LinkClose */
+                __(
+                    'Timezone "UTC%1$" is not recognized. Please %2$suse valid%3$ timezone name, 
+                        until then events will be created in UTC timezone.',
+                    'open-source-event-calendar'
                 ),
                 $zone,
                 '<a href="' . admin_url('options-general.php') . '">',

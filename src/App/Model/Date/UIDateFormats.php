@@ -3,7 +3,6 @@
 namespace Osec\App\Model\Date;
 
 use DateTime;
-use Osec\App\I18n;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 
@@ -183,7 +182,7 @@ class UIDateFormats extends OsecBaseClass
         $offset_h = (int)($timezone / 60);
         $offset_m = absint($timezone - $offset_h * 60);
         $timezone = sprintf(
-            I18n::__('GMT%+d:%02d'),
+            __('GMT%+d:%02d', 'open-source-event-calendar'),
             $offset_h,
             $offset_m
         );

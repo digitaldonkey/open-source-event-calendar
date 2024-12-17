@@ -6,7 +6,6 @@ use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\ScriptsBackendController;
 use Osec\App\Controller\ScriptsFrontendController;
 use Osec\App\Controller\WidgetController;
-use Osec\App\I18n;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\View\Calendar\AbstractView;
@@ -116,7 +115,7 @@ class WidgetAgendaView extends WidgetAbstract
             'events_per_page'                          => [
                 'renderer' => [
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
-                    'label'  => I18n::__('Number of events to show'),
+                    'label'  => __('Number of events to show', 'open-source-event-calendar'),
                     'type'   => 'append',
                     'append' => 'events',
                 ],
@@ -125,7 +124,7 @@ class WidgetAgendaView extends WidgetAbstract
             'days_per_page'                            => [
                 'renderer' => [
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
-                    'label'  => I18n::__('Number of days to show'),
+                    'label'  => __('Number of days to show', 'open-source-event-calendar'),
                     'type'   => 'append',
                     'append' => 'days',
                 ],
@@ -151,7 +150,7 @@ class WidgetAgendaView extends WidgetAbstract
             'show_subscribe_buttons'                   => [
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
-                    'label' => I18n::__('Show the subscribe button in the widget'),
+                    'label' => __('Show the subscribe button in the widget', 'open-source-event-calendar'),
                 ],
                 'value'    => $defaults['show_subscribe_buttons'],
             ],

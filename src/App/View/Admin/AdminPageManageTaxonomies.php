@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Admin;
 
-use Osec\App\I18n;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Theme\ThemeLoader;
 
@@ -120,7 +119,7 @@ class AdminPageManageTaxonomies extends OsecBaseClass
              * @param  array  $taxonomies  Array of current taxonomies.
              */
             'taxonomies' => apply_filters('osec_custom_taxonomies', $this->taxonomies),
-            'text_title' => I18n::__('Organize Events'),
+            'text_title' => __('Organize Events', 'open-source-event-calendar'),
         ];
 
         return ThemeLoader::factory($this->app)

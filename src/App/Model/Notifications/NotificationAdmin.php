@@ -3,7 +3,6 @@
 namespace Osec\App\Model\Notifications;
 
 use Osec\App\Controller\AccessControl;
-use Osec\App\I18n;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -182,9 +181,9 @@ class NotificationAdmin extends NotificationAbstract
              */
             $entity['text_label']          = apply_filters(
                 'osec_notification_label',
-                I18n::__('Open Source Event Calendar')
+                __('Open Source Event Calendar', 'open-source-event-calendar')
             );
-            $entity['text_dismiss_button'] = I18n::__('Got it – dismiss this');
+            $entity['text_dismiss_button'] = __('Got it – dismiss this', 'open-source-event-calendar');
             $file                          = $theme->get_file(
                 'notification/admin.twig',
                 $entity,

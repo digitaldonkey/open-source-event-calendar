@@ -2,7 +2,6 @@
 
 namespace Osec\Bootstrap;
 
-use Osec\App\I18n;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\View\Admin\AdminPageAbstract;
 
@@ -48,9 +47,10 @@ class EnvironmentCheck extends OsecBaseClass
         $notifications   = [];
 
         // check if is set calendar page
-        if ( ! $this->app->settings->get('calendar_page_id')) {
-            $msg             = I18n::__(
-                'Select an option in the <strong>Calendar page</strong> dropdown list.'
+        if (! $this->app->settings->get('calendar_page_id')) {
+            $msg             = __(
+                'Select an option in the <strong>Calendar page</strong> dropdown list.',
+                'open-source-event-calendar'
             );
             $notifications[] = $msg;
         }
@@ -60,9 +60,10 @@ class EnvironmentCheck extends OsecBaseClass
         ) {
             if ($current_user->has_cap('manage_osec_options')) {
                 $msg = sprintf(
-                    I18n::__(
-                        'The plugin is installed, but has not been configured. '
-                        . '<a href="%s">Click here to set it up now &raquo;</a>'
+                    __(
+                        'The plugin is installed, but has not been configured.  
+                         <a href="%s">Click here to set it up now &raquo;</a>',
+                        'open-source-event-calendar'
                     ),
                     admin_url(OSEC_SETTINGS_BASE_URL)
                 );
@@ -73,9 +74,10 @@ class EnvironmentCheck extends OsecBaseClass
                     [NotificationAdmin::RCPT_ADMIN]
                 );
             } else {
-                $msg = I18n::__(
-                    'The plugin is installed, but has not been configured. '
-                    . 'Please log in as an Administrator to set it up.'
+                $msg = __(
+                    'The plugin is installed, but has not been configured. 
+                        Please log in as an Administrator to set it up.',
+                    'open-source-event-calendar'
                 );
                 $notificationApi->store(
                     $msg,
