@@ -135,6 +135,7 @@ class AdminPageWidgetCreator extends AdminPageAbstract
                 'open-source-event-calendar'
             ),
             'text_alternatives' => sprintf(
+                /* translators: Plugin url */
                 __(
                     '<p>Use <a href="%s"><strong>X3P0 - Legacy Widget</a></strong> to add event widgets to your  
                         WordPress, or use shortcodes to embed the full calendar.</strong></p>',

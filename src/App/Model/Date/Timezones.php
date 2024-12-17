@@ -515,7 +515,8 @@ class Timezones extends OsecBaseClass
                 // Add warning
                 NotificationAdmin::factory($this->app)->store(
                     sprintf(
-                        __('Selected timezone "UTC%+d" will be treated as %s.', 'open-source-event-calendar'),
+                        /* translators: 1: chosen timezone 2: calculated timezone */
+                        __('Selected timezone "UTC%1$s" will be treated as %2$s.', 'open-source-event-calendar'),
                         $zone,
                         $decoded_zone
                     )

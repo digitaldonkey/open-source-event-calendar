@@ -138,9 +138,10 @@ class FrontendCssController extends OsecBaseClass
                 if ( ! self::PARSE_LESS_FILES_AT_EVERY_REQUEST) {
                     NotificationAdmin::factory($this->app)->store(
                         sprintf(
+                            /* translators: Compile error */
                             __(
-                                'Your CSS is being compiled on every request, '
-                                    . 'which causes your calendar to perform slowly. The following error occurred: %s',
+                                'Your CSS is being compiled on every request, 
+                                    which causes your calendar to perform slowly. The following error occurred: %s',
                                 'open-source-event-calendar'
                             ),
                             $e->getMessage()
@@ -285,6 +286,7 @@ class FrontendCssController extends OsecBaseClass
 
             if (true === $resetting) {
                 $message = sprintf(
+                    /* translators: Url */
                     '<p>' . __(
                         "Theme options were successfully reset to their default values. <a href='%s'>Visit site</a>",
                         'open-source-event-calendar'
@@ -293,6 +295,7 @@ class FrontendCssController extends OsecBaseClass
                 );
             } else {
                 $message = sprintf(
+                    /* translators: Site url */
                     '<p>' . __(
                         "Theme options were updated successfully. <a href='%s'>Visit site</a>",
                         'open-source-event-calendar'
@@ -371,6 +374,7 @@ class FrontendCssController extends OsecBaseClass
         } catch (Exception $e) {
             // An error from lessphp.
             $message = sprintf(
+            /* translators: Error message */
                 __(
                     '<p><strong>There was an error while compiling CSS.</strong>
                         The message returned was: <em>%s</em></p>',

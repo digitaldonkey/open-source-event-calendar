@@ -24,13 +24,13 @@ class EventSingleView extends OsecBaseClass
      */
     public function get_footer(Event $event)
     {
-        $text_calendar_feed = __(
-            'This post was replicated from another site\'s <a href="%s" title="iCalendar feed">
-                <i class="ai1ec-fa ai1ec-fa-calendar"></i> calendar feed</a>.',
-            'open-source-event-calendar'
-        );
         $text_calendar_feed = sprintf(
-            $text_calendar_feed,
+            /* translators: Url */
+            __(
+                'This post was replicated from another site\'s <a href="%s" title="iCalendar feed">
+                <i class="ai1ec-fa ai1ec-fa-calendar"></i> calendar feed</a>.',
+                'open-source-event-calendar'
+            ),
             esc_attr(
                 str_replace('http://', 'webcal://', $event->get('ical_feed_url') ?: '')
             )

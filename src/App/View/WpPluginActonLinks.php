@@ -23,6 +23,7 @@ class WpPluginActonLinks extends OsecBaseClass
     public function plugin_action_links(array $links)
     {
         $settings_link = sprintf(
+            /* translators: Admin url */
             __('<a href="%s">Settings</a>', 'open-source-event-calendar'),
             admin_url(OSEC_SETTINGS_BASE_URL)
         );

@@ -431,7 +431,7 @@ JSC;
             ],
             'load_views_error'               => __(
                 'Something went wrong while fetching events. 
-                    <br>The request status is: %STATUS% <br>The error thrown was: %ERROR%',
+                    <br>The request status is: #STATUS# <br>The error thrown was: #ERROR#',
                 'open-source-event-calendar'
             ),
             'cookie_path'                    => COOKIEPATH,

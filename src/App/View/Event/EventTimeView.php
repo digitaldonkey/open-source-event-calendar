@@ -140,12 +140,13 @@ class EventTimeView extends OsecBaseClass
             if ( ! $event->is_allday()) {
                 if ($start_ts !== $end_ts) {
                     /**
-                     * Filter doc: See above.
+                     * Time span separator.
+                     *
+                     * @since 1.0
+                     *
+                     * @param  string  $separator Time span separator. Defaults to single space.
                      */
-                    $output .= apply_filters(
-                        'osec_timespan_time_separator_html_starttime',
-                        _x(' ', 'Event time separator', 'open-source-event-calendar')
-                    );
+                    $output .= apply_filters('osec_timespan_time_separator_html_starttime', ' ');
                 }
                 $output .= $this->format_time($end);
             }

@@ -8983,7 +8983,7 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
                 t.find(".osec-calendar-view").html(o ? o.render(i.html) : e(i.html).find(".osec-calendar-view").length ? e(i.html).find(".osec-calendar-view").html() : i.html), m(t)
             }), o.fail(function (n, r, i) {
                 var o = u.load_views_error;
-                o = o.replace("%STATUS%", n.status), o = o.replace("%ERROR%", i);
+                o = o.replace("#STATUS#", n.status), o = o.replace("#ERROR#", i);
                 var a = s.make_alert(o, "error", !0);
                 e("#osec-container").prepend(a), g(t), m(t)
             }), o.always(function () {

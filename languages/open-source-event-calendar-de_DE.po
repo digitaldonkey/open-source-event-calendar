@@ -3311,8 +3311,8 @@ msgid "The end date can't be earlier than the start date."
 msgstr "Das Enddatum kann nicht vor dem Anfangsdatum liegen."
 
 #: app/controller/javascript.php:581
-msgid "Something went wrong while fetching events.<br>The request status is: %STATUS% <br>The error thrown was: %ERROR%"
-msgstr "Etwas ging schief beim Ermitteln der Veranstaltungen.<br>Der Abrufstatus ist: %STATUS% <br>Folgender Fehler trat auf: %ERROR%"
+msgid "Something went wrong while fetching events.<br>The request status is: #STATUS# <br>The error thrown was: #ERROR#"
+msgstr "Etwas ging schief beim Ermitteln der Veranstaltungen.<br>Der Abrufstatus ist: #STATUS# <br>Folgender Fehler trat auf: #ERROR#"
 
 #: app/controller/javascript.php:546
 msgid "Loading preview&nbsp;<i class=\"ai1ec-fa ai1ec-fa-spin ai1ec-fa-spinner\"></i>"

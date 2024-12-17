@@ -48,7 +48,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = Language Path =
     // =================
     if ( ! defined('OSEC_LANGUAGE_PATH')) {
-        define('OSEC_LANGUAGE_PATH', OSEC_PLUGIN_NAME . '/language/');
+        define('OSEC_LANGUAGE_PATH', OSEC_PLUGIN_NAME . '/languages/');
     }
 
     // ==============

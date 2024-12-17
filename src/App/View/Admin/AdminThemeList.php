@@ -7,7 +7,7 @@ use Osec\Theme\ThemeFinder;
 use WP_List_Table;
 
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
-if ( ! class_exists('WP_List_Table')) {
+if (! class_exists('WP_List_Table')) {
     require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
 
@@ -49,7 +49,7 @@ class AdminThemeList extends WP_List_Table
     public function __construct(App $app, $args = [])
     {
         $this->app = $app;
-        if ( ! isset($args['inhibit'])) {
+        if (! isset($args['inhibit'])) {
             parent::__construct($args);
         }
     }
@@ -109,13 +109,13 @@ class AdminThemeList extends WP_List_Table
     {
         $themes        = ThemeFinder::factory($this->app)->filter_themes();
         $current_theme = $this->get_current_theme();
-        if ( ! $themes) {
+        if (! $themes) {
             return (object)[
                 'name' => $current_theme,
             ];
         }
 
-        if ( ! isset($themes[$current_theme])) {
+        if (! isset($themes[$current_theme])) {
             delete_option('osec_current_theme');
             $current_theme = $this->get_current_theme();
         }
@@ -219,7 +219,7 @@ class AdminThemeList extends WP_List_Table
                 current_user_can('manage_network_themes')
             ) {
                 printf(
-                    /* translators: 1: Url 2: Url */
+                /* translators: 1: Url 2: Url */
                     __(
                         'You only have one theme enabled for this site right now. Visit the Network Admin to 
                             <a href="%1$s">enable</a> or <a href="%2$s">install</a> more themes.',
@@ -234,7 +234,7 @@ class AdminThemeList extends WP_List_Table
                 return;
             } elseif (current_user_can('manage_network_themes')) {
                 printf(
-                    /* translators: Url */
+                /* translators: Url */
                     __(
                         'You only have one theme enabled for this site right now. Visit the Network Admin to 
                             <a href="%1$s">enable</a> more themes.',
@@ -251,17 +251,17 @@ class AdminThemeList extends WP_List_Table
             // can't enable it.
         } elseif (current_user_can('install_themes')) {
             print(
-                __(
-                    'You only have one theme installed right now.',
-                    'open-source-event-calendar'
-                )
+            __(
+                'You only have one theme installed right now.',
+                'open-source-event-calendar'
+            )
             );
 
             return;
         }
         // Fallthrough.
         printf(
-            /* translators: Site name */
+        /* translators: Site name */
             __(
                 'Only the active theme is available to you. Contact the <em>%s</em> administrator to add more themes.',
                 'open-source-event-calendar'
@@ -295,7 +295,7 @@ class AdminThemeList extends WP_List_Table
             $class = ['available-theme'];
             ?>
             <div class="<?php echo implode(' ', $class); ?>">
-                <?php if ( ! empty($theme_name)) :
+                <?php if (! empty($theme_name)) :
                     $template = $themes[$theme_name]['Template'];
                     $stylesheet = $themes[$theme_name]['Stylesheet'];
                     $title = $themes[$theme_name]['Title'];
@@ -331,6 +331,7 @@ class AdminThemeList extends WP_List_Table
 
                     $activate_text = esc_attr(
                         sprintf(
+                        /* translators: Theme Name */
                             __('Activate &#8220;%s&#8221;', 'open-source-event-calendar'),
                             $title
                         )
@@ -367,14 +368,42 @@ class AdminThemeList extends WP_List_Table
                     <span class='action-links'><?php
                         echo $actions; ?></span>
                     <?php if (current_user_can('edit_themes') && $parent_theme) { ?>
-                        <p>
-                            <?php
-                            printf(
-                                /* translators: 1: Title 2: template dir 3: Stylesheet Dir 4: Title 5: Parent theme */
-                                __(
-                                    'The template files are located in <code>%2$s</code>. The stylesheet files 
+                    <p>
+                        <?php
+                        printf(
+                        /* translators: 1: Title 2: template dir 3: Stylesheet Dir 4: Title 5: Parent theme */
+                            __(
+                                'The template files are located in <code>%2$s</code>. The stylesheet files 
                                         are located in <code>%3$s</code>. <strong>%4$s</strong> uses templates from 
                                         <strong>%5$s</strong>. Changes made to the templates will affect both themes.',
+                                'open-source-event-calendar'
+                            ),
+                            $title,
+                            str_replace(WP_CONTENT_DIR, '', $template_dir),
+                            str_replace(WP_CONTENT_DIR, '', $stylesheet_dir),
+                            $title,
+                            $parent_theme
+                        );
+                        ?>
+                    </p>
+                        <?php
+                    } else { ?>
+                    <p>
+                            <?php
+                            printf(
+                            /* translators:
+                            1: Theme name
+                            2: Template Dir
+                            3: Stylesheet dir
+                            4: Theme name
+                            5: Parent theme
+                            */
+                                __(
+                                    'The template    files are located in <code>%2$s</code>.
+                                        The stylesheet files are located in <code>%3$s</code>.
+                                        <strong>%4$s</strong> uses templates from 
+                                        <strong>%5$s</strong>.
+                                         Changes made to the templates will affect both themes.',
                                     'open-source-event-calendar'
                                 ),
                                 $title,
@@ -384,22 +413,7 @@ class AdminThemeList extends WP_List_Table
                                 $parent_theme
                             );
                             ?>
-                        </p>
-                        <?php
-                    } else { ?>
-                        <p>
-                            <?php
-                            printf(
-                                __(
-                                    'All of this theme&#8217;s files are located in <code>%2$s</code>.',
-                                    'open-source-event-calendar'
-                                ),
-                                $title,
-                                str_replace(WP_CONTENT_DIR, '', $template_dir),
-                                str_replace(WP_CONTENT_DIR, '', $stylesheet_dir)
-                            );
-                            ?>
-                        </p>
+                    </p>
                         <?php
                     } ?>
                     <?php

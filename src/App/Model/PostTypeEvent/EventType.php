@@ -292,9 +292,10 @@ class EventType extends OsecBaseClass
             if ($query->post_count > 0) {
                 // append the pending events number to the menu
                 return sprintf(
+                    /* translators: 1,2,3: Pending Events count */
                     __(
-                        'All Events <span class="update-plugins count-%d" title="%d Pending Events">
-                            <span class="update-count">%d</span></span>',
+                        'All Events <span class="update-plugins count-%1$d" title="%2$d Pending Events">
+                            <span class="update-count">%3$d</span></span>',
                         'open-source-event-calendar'
                     ),
                     $query->post_count,

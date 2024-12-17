@@ -86,6 +86,7 @@ class RepeatRuleToText extends OsecBaseClass
                     $txt = __('Every other day', 'open-source-event-calendar');
                 } else {
                     $txt = sprintf(
+                    /* translators: nth-day */
                         __('Every %d days', 'open-source-event-calendar'),
                         $interval
                     );
@@ -99,6 +100,7 @@ class RepeatRuleToText extends OsecBaseClass
                     $txt = __('Every other week', 'open-source-event-calendar');
                 } else {
                     $txt = sprintf(
+                        /* translators: nth-week */
                         __('Every %d weeks', 'open-source-event-calendar'),
                         $interval
                     );
@@ -112,6 +114,7 @@ class RepeatRuleToText extends OsecBaseClass
                     $txt = __('Every other month', 'open-source-event-calendar');
                 } else {
                     $txt = sprintf(
+                        /* translators: nth-month */
                         __('Every %d months', 'open-source-event-calendar'),
                         $interval
                     );
@@ -125,6 +128,7 @@ class RepeatRuleToText extends OsecBaseClass
                     $txt = __('Every other year', 'open-source-event-calendar');
                 } else {
                     $txt = sprintf(
+                        /* translators: nth-year */
                         __('Every %d years', 'open-source-event-calendar'),
                         $interval
                     );
@@ -148,12 +152,13 @@ class RepeatRuleToText extends OsecBaseClass
                 $until = strtotime((string)$until);
             }
             $txt .= ' ' . sprintf(
+                /* translators: Date */
                 __('until %s', 'open-source-event-calendar'),
                 (new DT($until))->format_i18n($this->app->options->get('date_format'))
             );
         } elseif ($count = $rc->getCount()) {
             $txt .= ' ' . sprintf(
-                /* translators: Item count */
+                /* translators: number of occurrences */
                 __('for %d occurrences', 'open-source-event-calendar'),
                 $count
             );

@@ -1271,7 +1271,7 @@ do_action('osec_save_post', $event);
 ### osec_content_remove_shortcode_{$tag[2]} <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Allows removing of wp-shortcode tags.
+Allows removing of wp-shortcode tags from Events.
 
 ```php
 add_filter('osec_content_remove_shortcode_{$tag[2]}', $bool);
@@ -1280,7 +1280,7 @@ add_filter('osec_content_remove_shortcode_{$tag[2]}', $bool);
 #### Description
 
 
-Basically somehow ensures that Event post types can not have a calendar shortcode included. We don't want a calendar in calendar situation i guess :)
+Basically somehow ensures that Event post types can not have a calendar shortcode included. We don't want a calendar in calendar situation I guess :)
 
 #### Parameters
 
@@ -1293,11 +1293,11 @@ Basically somehow ensures that Event post types can not have a calendar shortcod
 
 ```php
 /**
- * Allows removing of wp-shortcode tags.
+ * Allows removing of wp-shortcode tags from Events.
  *
  * Basically somehow ensures that Event post types can not have
  * a calendar shortcode included. We don't want a calendar in calendar
- * situation i guess :)
+ * situation I guess :)
  *
  * @since too long to understand
  *
@@ -3305,15 +3305,16 @@ add_filter('osec_timespan_time_separator_html', $separator);
 ### osec_timespan_time_separator_html_starttime <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-
+Time span separator.
 
 ```php
-add_filter('osec_timespan_time_separator_html_starttime',);
+add_filter('osec_timespan_time_separator_html_starttime', $separator);
 ```
 
 #### Parameters
 
 
+ - **$separator** <span style="color:crimson"> </span> Time span separator. Defaults to single space.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -3321,11 +3322,15 @@ add_filter('osec_timespan_time_separator_html_starttime',);
 
 ```php
 /**
- * Filter doc: See above.
+ * Time span separator.
+ *
+ * @since 1.0
+ *
+ * @param  string  $separator Time span separator. Defaults to single space.
  *
  * @file src/App/View/Event/EventTimeView.php
  */
-add_filter('osec_timespan_time_separator_html_starttime',);
+add_filter('osec_timespan_time_separator_html_starttime', $separator);
 ```
 
 </details>
@@ -5659,7 +5664,7 @@ do_action('osec_save_post', $event);
 ### osec_content_remove_shortcode_{$tag[2]} <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Allows removing of wp-shortcode tags.
+Allows removing of wp-shortcode tags from Events.
 
 ```php
 add_filter('osec_content_remove_shortcode_{$tag[2]}', $bool);
@@ -5668,7 +5673,7 @@ add_filter('osec_content_remove_shortcode_{$tag[2]}', $bool);
 #### Description
 
 
-Basically somehow ensures that Event post types can not have a calendar shortcode included. We don't want a calendar in calendar situation i guess :)
+Basically somehow ensures that Event post types can not have a calendar shortcode included. We don't want a calendar in calendar situation I guess :)
 
 #### Parameters
 
@@ -5681,11 +5686,11 @@ Basically somehow ensures that Event post types can not have a calendar shortcod
 
 ```php
 /**
- * Allows removing of wp-shortcode tags.
+ * Allows removing of wp-shortcode tags from Events.
  *
  * Basically somehow ensures that Event post types can not have
  * a calendar shortcode included. We don't want a calendar in calendar
- * situation i guess :)
+ * situation I guess :)
  *
  * @since too long to understand
  *
@@ -7693,15 +7698,16 @@ add_filter('osec_timespan_time_separator_html', $separator);
 ### osec_timespan_time_separator_html_starttime <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-
+Time span separator.
 
 ```php
-add_filter('osec_timespan_time_separator_html_starttime',);
+add_filter('osec_timespan_time_separator_html_starttime', $separator);
 ```
 
 #### Parameters
 
 
+ - **$separator** <span style="color:crimson"> </span> Time span separator. Defaults to single space.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -7709,11 +7715,15 @@ add_filter('osec_timespan_time_separator_html_starttime',);
 
 ```php
 /**
- * Filter doc: See above.
+ * Time span separator.
+ *
+ * @since 1.0
+ *
+ * @param  string  $separator Time span separator. Defaults to single space.
  *
  * @file src/App/View/Event/EventTimeView.php
  */
-add_filter('osec_timespan_time_separator_html_starttime',);
+add_filter('osec_timespan_time_separator_html_starttime', $separator);
 ```
 
 </details>

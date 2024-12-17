@@ -182,7 +182,8 @@ class UIDateFormats extends OsecBaseClass
         $offset_h = (int)($timezone / 60);
         $offset_m = absint($timezone - $offset_h * 60);
         $timezone = sprintf(
-            __('GMT%+d:%02d', 'open-source-event-calendar'),
+            /* translators: 1: Offset hours 2: Offset minutes */
+            __('GMT%1$s:%2$s', 'open-source-event-calendar'),
             $offset_h,
             $offset_m
         );

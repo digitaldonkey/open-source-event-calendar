@@ -33,6 +33,7 @@ class EventPostView extends OsecBaseClass
             0  => '',
             // Unused. Messages start at index 1.
             1  => sprintf(
+                /* translators: Post Url */
                 __('Event updated. <a href="%s">View event</a>', 'open-source-event-calendar'),
                 esc_url(get_permalink($post_ID))
             ),
@@ -42,6 +43,7 @@ class EventPostView extends OsecBaseClass
             /* translators: %s: date and time of the revision */
             5  => isset($_GET['revision'])
                 ? sprintf(
+                    /* translators: Revision ID */
                     __('Event restored to revision from %s', 'open-source-event-calendar'),
                     wp_post_revision_title((int)$_GET['revision'], false)
                 )
