@@ -294,7 +294,7 @@ class WidgetAgendaView extends WidgetAbstract
     {
         // Save existing data as a base to modify with new data
         $instance                           = $old_instance;
-        $instance['title']                  = strip_tags((string)$new_instance['title']);
+        $instance['title']                  = wp_strip_all_tags((string)$new_instance['title']);
         $instance['events_per_page']        = IntegerHelper::index(
             $new_instance['events_per_page'],
             1,

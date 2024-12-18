@@ -138,9 +138,12 @@ class WidgetController extends OsecBaseClass
             ScriptsFrontendController::FRONTEND_CONFIG_MODULE,
             $translation
         );
-        // get requirejs
+        // phpcs:disable
+        // WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+        // makes no sense on local files.
         $require        = file_get_contents($require_main);
         $main_widget    = file_get_contents($widget_file);
+        // phpcs:enable
         $require_config = $jscontroller->create_require_js_config_object();
         $config         = $jscontroller->create_require_js_module(
             'ai1ec_config',

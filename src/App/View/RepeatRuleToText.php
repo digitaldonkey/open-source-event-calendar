@@ -4,7 +4,6 @@ namespace Osec\App\View;
 
 use Louis1021\ICalendar\helpers\SG_iCal_Line;
 use Louis1021\ICalendar\helpers\SG_iCal_Recurrence;
-use Osec\App\I18n;
 use Osec\App\Model\Date\DT;
 use Osec\App\View\Admin\AdminDateRepeatBox;
 use Osec\Bootstrap\OsecBaseClass;

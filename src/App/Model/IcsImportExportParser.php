@@ -911,7 +911,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         if (isset($params['no_html']) && $params['no_html']) {
             $e->setDescription(
                 $this->_sanitize_value(
-                    strip_tags(strip_shortcodes($content))
+                    wp_strip_all_tags(strip_shortcodes($content))
                 )
             );
             if (! empty($content)) {

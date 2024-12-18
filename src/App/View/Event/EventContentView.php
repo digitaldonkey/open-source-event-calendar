@@ -91,17 +91,13 @@ class EventContentView extends OsecBaseClass
 
     public function get_post_excerpt(Event $event)
     {
-        $content = strip_tags(
+        $content = wp_strip_all_tags(
             strip_shortcodes(
-                preg_replace(
-                    '#<\s*script[^>]*>.+<\s*/\s*script\s*>#x',
-                    '',
+                apply_filters(
+                    'osec_the_content',
                     apply_filters(
-                        'osec_the_content',
-                        apply_filters(
-                            'the_content',
-                            $event->get('post')->post_content
-                        )
+                        'the_content',
+                        $event->get('post')->post_content
                     )
                 )
             )

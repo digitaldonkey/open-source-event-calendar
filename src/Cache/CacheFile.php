@@ -154,7 +154,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         if ($result !== false) {
             // Delete old file if on update.
             if ($oldFile && file_exists($this->_cache_path . $oldFile)) {
-                unlink($this->_cache_path . $oldFile);
+                wp_delete_file($this->_cache_path . $oldFile);
             } else {
                 // Update
                 $this->setOption($key, $fileName);
@@ -343,7 +343,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         $count = 0;
         while (false !== ($entry = readdir($dirhandle))) {
             if ('.' !== $entry[0] && str_contains($entry, $pattern)) {
-                if (unlink($this->_cache_path . $entry)) {
+                if (wp_delete_file($this->_cache_path . $entry)) {
                     ++$count;
                 }
             }
@@ -405,7 +405,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         if ($filename) {
             $this->app->options->delete($this->optionKey($key));
             if (file_exists($filename)) {
-                return unlink($filename);
+                return wp_delete_file($filename);
             }
         }
 

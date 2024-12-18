@@ -2866,10 +2866,6 @@ timely.define("domReady", [], function () {
                     };
                 })(),
                 u = function (t, n) {
-
-
-                    console.log('Hello Timepicker');
-
                     (this.dates = new o()),
                         (this.viewDate = i()),
                         (this.focusDate = null),

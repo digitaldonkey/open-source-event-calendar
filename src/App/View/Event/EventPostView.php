@@ -100,9 +100,7 @@ class EventPostView extends OsecBaseClass
             $raw_excerpt = '&nbsp;';
         }
 
-        $text = preg_replace(
-            '#<\s*script[^>]*>.+<\s*/\s*script\s*>#x',
-            '',
+        $text =  wp_strip_all_tags(
             apply_filters(
                 'the_excerpt',
                 $raw_excerpt
@@ -110,7 +108,7 @@ class EventPostView extends OsecBaseClass
         );
         $text = strip_shortcodes($text);
         $text = str_replace(']]>', ']]&gt;', $text);
-        $text = strip_tags($text);
+        $text = wp_strip_all_tags($text);
 
         $excerpt_length = apply_filters('excerpt_length', $length);
         $excerpt_more   = apply_filters('excerpt_more', $more);

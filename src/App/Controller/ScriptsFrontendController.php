@@ -171,6 +171,10 @@ class ScriptsFrontendController extends OsecBaseClass
             }
         }
 
+        // phpcs:disable
+        // WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+        // makes no sense on local files.
+
         // Create the config object for Require.js.
         $require_config = $this->create_require_js_config_object();
 
@@ -185,6 +189,7 @@ class ScriptsFrontendController extends OsecBaseClass
         if (isset($this->corePages[$page_to_load])) {
             $page_js = file_get_contents(OSEC_ADMIN_THEME_JS_PATH . 'pages/' . $page_to_load);
         }
+        // phpcs:enable
 
         // Load translation module.
         $translation                 = $this->get_frontend_translation_data();
@@ -193,8 +198,7 @@ class ScriptsFrontendController extends OsecBaseClass
         ) : '';
 
         // TODO
-        // If settings arn't initialized, No Page set we will fail here.
-
+        // If settings aren't initialized, No Page set we will fail here.
         $translation['full_calendar_url'] = $this->settings->get('calendar_page_id') ? get_page_link(
             $this->settings->get('calendar_page_id')
         ) : '';
