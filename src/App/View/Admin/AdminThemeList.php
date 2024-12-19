@@ -354,8 +354,8 @@ class AdminThemeList extends WP_List_Table
                     <?php endif; ?>
                     <h3>
                         <?php
-                        /* translators: 1: theme title, 2: theme version, 3: theme author */
                         printf(
+                            /* translators: 1: theme title, 2: theme version, 3: theme author */
                             __('%1$s %2$s by %3$s', 'open-source-event-calendar'),
                             $title,
                             $version,
