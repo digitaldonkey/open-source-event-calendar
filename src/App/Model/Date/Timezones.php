@@ -527,7 +527,7 @@ class Timezones extends OsecBaseClass
         }
 
         // Try to guess non standard TZ names.
-        $zone         = $this->_olson_lookup($zone);
+        $zone         = $this->olsonLookup($zone);
         $valid_legacy = false;
         try {
             new DateTimeZone($zone); // throw away instantly
@@ -590,7 +590,7 @@ class Timezones extends OsecBaseClass
      *
      * @return string Timezone name to use. Might be the same as $zone.
      */
-    protected function _olson_lookup($zone)
+    protected function olsonLookup($zone)
     {
         return $this->timeZones[$zone] ?? $zone;
     }

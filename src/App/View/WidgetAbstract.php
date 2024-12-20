@@ -149,7 +149,7 @@ abstract class WidgetAbstract extends WP_Widget
         $args['widget_html'] = $this->get_content($instance);
         if ( ! empty($args['widget_html'])) {
             $args['title'] = $instance['title'];
-            $args          = $this->_filter_widget_args($args);
+            $args          = $this->filterArgs($args);
             FrontendCssController::factory($this->app)
                                  ->add_link_to_html_for_frontend();
             // Display theme
@@ -189,7 +189,7 @@ abstract class WidgetAbstract extends WP_Widget
      *
      * @return array Filtered arguments.
      */
-    protected function _filter_widget_args($args)
+    protected function filterArgs($args)
     {
         return $args;
     }

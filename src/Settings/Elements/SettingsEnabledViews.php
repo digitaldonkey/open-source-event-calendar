@@ -16,7 +16,7 @@ class SettingsEnabledViews extends SettingsAbstract
 {
     public function render($html = '', $wrap = true): string
     {
-        $this->_convert_values();
+        $this->convertValues();
         $args = [
             'views'        => $this->args['value'],
             'label'        => $this->args['renderer']['label'],
@@ -34,7 +34,7 @@ class SettingsEnabledViews extends SettingsAbstract
     /**
      * Convert values to bo used in rendering
      */
-    protected function _convert_values()
+    protected function convertValues()
     {
         foreach ($this->args['value'] as &$view) {
             $view['enabled'] = $view['enabled'] ?

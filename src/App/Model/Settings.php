@@ -88,7 +88,7 @@ class Settings extends OsecBaseInitialized
     {
         if (isset($this->options[$option])) {
             unset($this->options[$option]);
-            $this->_change_update_status(true);
+            $this->changeUpdateStatus(true);
         }
     }
 
@@ -99,7 +99,7 @@ class Settings extends OsecBaseInitialized
      *
      * @return bool Previous status flag value.
      */
-    protected function _change_update_status($new_status)
+    protected function changeUpdateStatus($new_status)
     {
         $previous        = $this->isUpdated;
         $this->isUpdated = (bool)$new_status;
@@ -116,7 +116,7 @@ class Settings extends OsecBaseInitialized
     {
         if (isset($this->options[$option])) {
             unset($this->options[$option]['renderer']);
-            $this->_change_update_status(true);
+            $this->changeUpdateStatus(true);
         }
     }
 
@@ -129,7 +129,7 @@ class Settings extends OsecBaseInitialized
     {
         if (isset($this->options[$option])) {
             $this->options[$option]['renderer'] = $renderer;
-            $this->_change_update_status(true);
+            $this->changeUpdateStatus(true);
         }
     }
 
@@ -158,7 +158,7 @@ class Settings extends OsecBaseInitialized
         $success = $this->app->options
             ->set(self::WP_OPTION_KEY, $this->options, true);
         if ($success) {
-            $this->_change_update_status(false);
+            $this->changeUpdateStatus(false);
         }
 
         return $success;
@@ -186,13 +186,13 @@ class Settings extends OsecBaseInitialized
                 $value != $this->options[$option]['value']
             ) {
                 $this->options[$option]['value'] = $value;
-                $this->_change_update_status(true);
+                $this->changeUpdateStatus(true);
             }
         } elseif (
             (string)$value !== (string)$this->options[$option]['value']
         ) {
             $this->options[$option]['value'] = $value;
-            $this->_change_update_status(true);
+            $this->changeUpdateStatus(true);
         }
 
         return $this;
@@ -260,14 +260,14 @@ class Settings extends OsecBaseInitialized
      *
      * @return void Return from this method is ignored.
      */
-    protected function _initialize()
+    protected function initialize()
     {
         // TODO
         // Add doc when and how this call is cached and how to disable caching.
 
-        $this->_set_standard_values();
+        $this->setDefaults();
         $values = $this->app->options->get(self::WP_OPTION_KEY, []);
-        $this->_change_update_status(false);
+        $this->changeUpdateStatus(false);
         $test_version = false;
         if (is_array($values)) { // always assign existing values, if any
             $this->options = $values;
@@ -277,7 +277,7 @@ class Settings extends OsecBaseInitialized
         }
         $upgrade = false;
         // check for updated translations
-        $this->_register_standard_values();
+        $this->registerDefaultValues();
         if (
             // process meta updates changes
             empty($values) || (
@@ -285,9 +285,9 @@ class Settings extends OsecBaseInitialized
                 OSEC_VERSION !== $test_version
             )
         ) {
-            $this->_register_standard_values();
-            $this->_update_name_translations();
-            $this->_change_update_status(true);
+            $this->registerDefaultValues();
+            $this->updateNameTranslations();
+            $this->changeUpdateStatus(true);
             $upgrade = true;
         } elseif ($values instanceof Settings) {
             // TODO REMOVE process legacy...
@@ -304,7 +304,7 @@ class Settings extends OsecBaseInitialized
     /**
      * Set the standard values for the options of the core plugin.
      */
-    protected function _set_standard_values()
+    protected function setDefaults()
     {
         // Renderer-> class must be in this namespace (Osec\Html\Settings\XXX).
         $this->defaultOptions = [
@@ -904,7 +904,7 @@ class Settings extends OsecBaseInitialized
      *
      * @return void Method doesn't return.
      */
-    protected function _register_standard_values()
+    protected function registerDefaultValues()
     {
         foreach ($this->defaultOptions as $key => $option) {
             $renderer = null;
@@ -976,7 +976,7 @@ class Settings extends OsecBaseInitialized
      *
      * @return void
      */
-    protected function _update_name_translations()
+    protected function updateNameTranslations()
     {
         $translations = $this->defaultOptions['enabled_views']['default'];
         $current      = $this->get('enabled_views');

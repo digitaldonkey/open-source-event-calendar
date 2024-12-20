@@ -65,7 +65,7 @@ class SaveSettings extends SaveAbstract
                             break;
                         case 'array':
                         case 'mixed':
-                            $method = '_handle_saving_' . $name;
+                            $method = 'handleSaving_' . $name;
                             $value  = null;
                             if (method_exists($this, $method)) {
                                 $value = $this->$method();
@@ -73,7 +73,7 @@ class SaveSettings extends SaveAbstract
                             /**
                              * Post process saving of save handler value.
                              *
-                             * Settings can have save handler. Like: _handle_saving_$option_name()
+                             * Settings can have save handler. Like: handleSaving_$option_name()
                              *
                              * @since 1.0
                              *
@@ -141,7 +141,7 @@ class SaveSettings extends SaveAbstract
      *
      * @return array
      */
-    protected function _handle_saving_enabled_views()
+    protected function handleSaving_enabled_views()
     {
         $enabled_views = $this->app->settings->get('enabled_views');
         foreach ($enabled_views as $view => &$options) {
@@ -164,7 +164,7 @@ class SaveSettings extends SaveAbstract
      *
      * @return array
      */
-    protected function _handle_saving_default_tags_categories()
+    protected function handleSaving_default_tags_categories()
     {
         return [
             'tags'       => $_POST['default_tags_categories_default_tags'] ?? [],
@@ -177,7 +177,7 @@ class SaveSettings extends SaveAbstract
      *
      * @return int
      */
-    protected function _handle_saving_calendar_page_id()
+    protected function handleSaving_calendar_page_id()
     {
         $calendar_page = isset($_POST['calendar_page_id']) ? $_POST['calendar_page_id'] : null;
         if (

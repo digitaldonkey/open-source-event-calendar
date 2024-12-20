@@ -75,13 +75,4 @@ abstract class SettingsAbstract extends OsecBaseClass implements SettingsInterfa
      * @return string Finalized HTML snippet.
      */
     abstract public function render($html = '', $wrap = true): string;
-
-    /**
-     * Override to include any initialization logics.
-     *
-     * @return void Method output is ignored.
-     */
-    protected function _initialize(): void
-    {
-    }
 }

@@ -48,12 +48,12 @@ class NotificationEmail extends NotificationAbstract
 
     public function send()
     {
-        $this->_parse_text();
+        $this->parseText();
 
         return wp_mail($this->recipients, $this->_subject, $this->message);
     }
 
-    private function _parse_text()
+    private function parseText()
     {
         $this->message  = strtr($this->message, $this->translations);
         $this->_subject = strtr($this->_subject, $this->translations);

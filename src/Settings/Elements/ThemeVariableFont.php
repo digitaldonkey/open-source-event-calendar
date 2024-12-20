@@ -105,7 +105,7 @@ class ThemeVariableFont extends SettingsAbstract
             'select' => [
                 'id'      => $this->args['id'],
                 'args'    => ['class' => 'ai1ec_font'],
-                'options' => $this->_get_options(),
+                'options' => $this->getOptions(),
             ],
         ];
 
@@ -120,7 +120,7 @@ class ThemeVariableFont extends SettingsAbstract
                           ->get_content();
     }
 
-    public function _get_options()
+    public function getOptions()
     {
         $options = [];
         foreach ($this->fonts as $text => $key) {

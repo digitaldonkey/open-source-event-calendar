@@ -58,9 +58,9 @@ abstract class FilterTaxonomy extends FilterInt
             ],
             [
                 $this->app->db->get_table_name('term_relationships'),
-                $this->_table_alias('term_relationships'),
+                $this->tableAlias('term_relationships'),
                 $this->app->db->get_table_name('term_taxonomy'),
-                $this->_table_alias('term_taxonomy'),
+                $this->tableAlias('term_taxonomy'),
                 '\'' . addslashes($this->get_taxonomy()) . '\'',
             ],
             $sql_query
@@ -74,7 +74,7 @@ abstract class FilterTaxonomy extends FilterInt
      *
      * @return string Table alias.
      */
-    protected function _table_alias($table): string
+    protected function tableAlias($table): string
     {
         return $table . '_' . $this->get_taxonomy();
     }
@@ -93,6 +93,6 @@ abstract class FilterTaxonomy extends FilterInt
      */
     public function get_field()
     {
-        return $this->_table_alias('term_taxonomy') . '.term_id';
+        return $this->tableAlias('term_taxonomy') . '.term_id';
     }
 }

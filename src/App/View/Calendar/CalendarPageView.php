@@ -165,7 +165,7 @@ class CalendarPageView extends OsecBaseClass
                 'categories'           => $categories,
                 'tags'                 => $tags,
                 /**
-                 * @see Filter documentation 'osec_contribution_buttons' at AbstractView->_get_navigation().
+                 * @see Filter documentation 'osec_contribution_buttons' at AbstractView->getNavigation().
                  */
                 'contribution_buttons' => apply_filters('osec_contribution_buttons', '', $type, $caller),
                 /**

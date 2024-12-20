@@ -282,7 +282,7 @@ class FeedsController extends OsecBaseClass
             $ajax    = true;
             $feed_id = (int)$_REQUEST['ics_id'];
         }
-        $cron_name = $this->_import_lock_name($feed_id);
+        $cron_name = $this->importLockName($feed_id);
         $output    = [
             'data' => [
                 'ics_id'  => $feed_id,
@@ -312,14 +312,10 @@ class FeedsController extends OsecBaseClass
      *
      * @return string Name to use in xguard.
      */
-    protected function _import_lock_name(int $feed_id)
+    protected function importLockName(int $feed_id)
     {
         return 'ics_import_' . $feed_id;
     }
-
-    // protected function _install_schema() {)
-    // --> Moved to DatabaseSchema::class
-    // TODO Not sure if this wasn't better here before.
 
     private function getUpdateTimout(): int
     {
@@ -720,7 +716,7 @@ class FeedsController extends OsecBaseClass
             'cron_freq'        => $cron_freq->get_content(),
             'event_categories' => $select2_cats,
             'event_tags'       => $select2_tags,
-            'feed_rows'        => $this->_get_feed_rows(),
+            'feed_rows'        => $this->getRows(),
             'modal'            => $modal->render(),
         ];
 
@@ -739,7 +735,7 @@ class FeedsController extends OsecBaseClass
      *
      * @return String feed rows
      **/
-    protected function _get_feed_rows()
+    protected function getRows()
     {
         // Select all added feeds
         $rows = $this->app->db->select(

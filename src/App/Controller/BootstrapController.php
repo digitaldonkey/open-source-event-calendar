@@ -93,8 +93,8 @@ class BootstrapController
         ];
         osec_output_buffering_start();
 
-        $this->_bootstrap($app);
-        $this->_initialize_actions_and_filters();
+        $this->doBootstrap($app);
+        $this->createWpActions();
 
         ShutdownController::factory($this->app)->register('osec_output_buffering_finalize');
         add_action('plugins_loaded', $this->register_extensions(...), 1);
@@ -113,7 +113,7 @@ class BootstrapController
      *
      * @throws ConstantsNotSetException
      */
-    protected function _bootstrap(App $app): void
+    protected function doBootstrap(App $app): void
     {
         $this->app = $app;
         $exception = null;
@@ -136,7 +136,7 @@ class BootstrapController
             // Initialize the crons
             Scheduler::factory($this->app)->delete('osec_n_cron');
             // set the default theme if not set
-            $this->_add_default_theme_if_not_set();
+            $this->verifyTheme();
         } catch (ConstantsNotSetException $e) {
             // This is blocking, throw it and disable the plugin
             $exception = $e;
@@ -156,7 +156,7 @@ class BootstrapController
      * @uses apply_filters() Calls 'osec_pre_save_current_theme' hook to allow
      *       overwriting of theme information before being stored.
      */
-    protected function _add_default_theme_if_not_set(): void
+    protected function verifyTheme(): void
     {
         $theme = $this->app->options->get('osec_current_theme', []);
 
@@ -187,7 +187,7 @@ class BootstrapController
      *
      * @return void
      */
-    protected function _initialize_actions_and_filters()
+    protected function createWpActions()
     {
         $app = $this->app;
         //
@@ -701,7 +701,7 @@ class BootstrapController
      */
     public function route_request()
     {
-        $this->_process_request();
+        $this->processRequest();
         // get the resolver
         $resolver = new CommandResolver($this->app, $this->request);
 
@@ -726,7 +726,7 @@ class BootstrapController
      *
      * @return void
      **/
-    protected function _process_request()
+    protected function processRequest()
     {
         $settings = $this->app->settings;
         $page_id  = $settings->get('calendar_page_id');
@@ -736,7 +736,7 @@ class BootstrapController
             is_page($page_id)
         ) {
             foreach (['cat', 'tag'] as $name) {
-                $implosion = $this->_add_defaults($name);
+                $implosion = $this->addDefaults($name);
                 if ($implosion) {
                     $this->request['osec_' . $name . '_ids'] = $implosion;
                     $_REQUEST['osec_' . $name . '_ids']      = $implosion;
@@ -746,7 +746,7 @@ class BootstrapController
     }
 
     /**
-     * _add_defaults method
+     * addDefaults method
      *
      * Add (merge) default options to given query variable.
      *
@@ -755,7 +755,7 @@ class BootstrapController
      * @staticvar array          $mapper         Mapping of query names to
      *                                           default in settings
      */
-    protected function _add_defaults($name)
+    protected function addDefaults($name)
     {
         $settings = $this->app->settings;
         static $mapper = [
@@ -867,19 +867,19 @@ class BootstrapController
         }
     }
 
-    /**
-     * Check if the schema is up to date.
-     *
-     * Keep it for now as a reminder why we have this schema vars.
-     */
-    protected function _initialize_schema()
-    {
-        // If existing DB version is not consistent with current plugin's version,
-        // or does not exist, then create/update table structure using dbDelta().
-        //
-        // Disabled schema updating for simplicity.
-        // $schema_sql = $this->get_current_db_schema();
-        // $version    = sha1( $schema_sql );
-        // if ($option->get('osec_db_version') != $version) { ...  }
-    }
+    //    /**
+    //     * Check if the schema is up to date.
+    //     *
+    //     * Keep it for now as a reminder why we have this schema vars.
+    //     */
+    //    protected function _initialize_schema()
+    //    {
+    //        // If existing DB version is not consistent with current plugin's version,
+    //        // or does not exist, then create/update table structure using dbDelta().
+    //        //
+    //        // Disabled schema updating for simplicity.
+    //         $schema_sql = $this->get_current_db_schema();
+    //         $version    = sha1( $schema_sql );
+    //         if ($option->get('osec_db_version') != $version) { ...  }
+    //    }
 }

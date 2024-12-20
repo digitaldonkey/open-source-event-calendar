@@ -34,7 +34,7 @@ class SettingsCatsTagsFilter extends SettingsAbstract
             'help'  => $this->args['renderer']['help'],
         ];
         if ( ! empty($tags)) {
-            $args['tags'] = $this->_get_select_for_terms(
+            $args['tags'] = $this->getSelectForTerms(
                 'tags',
                 __('Tags', 'open-source-event-calendar'),
                 $tags
@@ -42,7 +42,7 @@ class SettingsCatsTagsFilter extends SettingsAbstract
         }
         $categories_html = '';
         if ( ! empty($categories)) {
-            $args['categories'] = $this->_get_select_for_terms(
+            $args['categories'] = $this->getSelectForTerms(
                 'categories',
                 __('Categories', 'open-source-event-calendar'),
                 $categories
@@ -62,7 +62,7 @@ class SettingsCatsTagsFilter extends SettingsAbstract
      *
      * @return string The html for the select
      */
-    protected function _get_select_for_terms($type, $label, array $terms)
+    protected function getSelectForTerms($type, $label, array $terms)
     {
         $options = [];
         foreach ($terms as $term) {

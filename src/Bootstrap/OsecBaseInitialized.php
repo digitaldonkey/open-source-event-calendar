@@ -22,7 +22,7 @@ class OsecBaseInitialized extends OsecBaseClass
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->_initialize();
+        $this->initialize();
     }
 
     /**
@@ -32,7 +32,7 @@ class OsecBaseInitialized extends OsecBaseClass
      *
      * @return void Return from this method is ignored.
      */
-    protected function _initialize()
+    protected function initialize()
     {
     }
 }

@@ -9,7 +9,7 @@ use Osec\Exception\DatabaseErrorException;
 
 // TODO
 // There was a very complicated Schema management.
-// Not really disabled but deactivated the $this->_check_delta() --> sucess ...
+// Not really disabled but deactivated the $this->checkDelta() --> sucess ...
 // So far tested only against blank/new DB, so enabling works.
 // Needs review,
 
@@ -201,16 +201,16 @@ class DatabaseSchema extends OsecBaseClass
         // WAS
         // $success = false;
         // $this->schemaDelta = [];
-        // $queries = $this->_prepare_delta( $query );
+        // $queries = $this->prepareDelta( $query );
         // $result  = dbDelta( $queries );
-        // $success = $this->_check_delta();
+        // $success = $this->checkDelta();
         // return $success;
 
         $success           = false;
         $this->schemaDelta = [];
-        $queries           = $this->_prepare_delta($query);
+        $queries           = $this->prepareDelta($query);
         $result              = dbDelta($queries);
-        $success             = $this->_check_delta();
+        $success             = $this->checkDelta();
         // TODO
         // THIS IS A REAL MESS
 
@@ -218,7 +218,7 @@ class DatabaseSchema extends OsecBaseClass
     }
 
     /**
-     * _prepare_delta method
+     * prepareDelta method
      *
      * Prepare statements for execution.
      * Attempt to parse various SQL definitions and compose the one, that is
@@ -230,7 +230,7 @@ class DatabaseSchema extends OsecBaseClass
      *
      * @throws DatabaseErrorException In case of any error
      */
-    protected function _prepare_delta($queries)
+    protected function prepareDelta($queries)
     {
         if ( ! is_array($queries)) {
             $queries = explode(';', $queries);
@@ -255,7 +255,7 @@ class DatabaseSchema extends OsecBaseClass
                 ];
             }
         }
-        $this->_parse_delta();
+        $this->parseDelta();
         $sane_queries = [];
         foreach ($this->schemaDelta as $table => $definition) {
             $create = 'CREATE TABLE ' . $table . " (\n";
@@ -276,7 +276,7 @@ class DatabaseSchema extends OsecBaseClass
     }
 
     /**
-     * _parse_delta method
+     * parseDelta method
      *
      * Parse table application (creation) statements into atomical particles.
      * Here "atomical particles" stands for either columns, or indexes.
@@ -285,11 +285,11 @@ class DatabaseSchema extends OsecBaseClass
      *
      * @throws DatabaseErrorException In case of any error
      */
-    protected function _parse_delta()
+    protected function parseDelta()
     {
         foreach ($this->schemaDelta as $table => $definitions) {
             $listing = explode("\n", (string)$definitions['content']);
-            $listing = array_filter($listing, $this->_is_not_empty_line(...));
+            $listing = array_filter($listing, $this->isNotEmptyLine(...));
             $lines   = count($listing);
             $lineno  = 0;
             foreach ($listing as $line) {
@@ -307,9 +307,9 @@ class DatabaseSchema extends OsecBaseClass
                 $line = $line_new;
                 unset($line_new);
                 $type = 'indexes';
-                if (false === ($record = $this->_parse_index($line))) {
+                if (false === ($record = $this->parseIndex($line))) {
                     $type   = 'columns';
-                    $record = $this->_parse_column($line);
+                    $record = $this->parseColumn($line);
                 }
                 if (
                     isset(
@@ -328,7 +328,7 @@ class DatabaseSchema extends OsecBaseClass
     }
 
     /**
-     * _parse_index method
+     * parseIndex method
      *
      * Given string attempts to detect, if it is an index, and if yes - parse
      * it to more navigable index definition for future validations.
@@ -340,7 +340,7 @@ class DatabaseSchema extends OsecBaseClass
      *
      * @throws DatabaseErrorException In case of any error
      */
-    protected function _parse_index($description)
+    protected function parseIndex($description)
     {
         $description = preg_replace(
             '#^CONSTRAINT(\s+`?[^ ]+`?)?\s+#six',
@@ -381,7 +381,7 @@ class DatabaseSchema extends OsecBaseClass
             default:
                 return false;
         }
-        $index['content'] = $this->_parse_index_content($description);
+        $index['content'] = $this->parseIndex_content($description);
         $index['create']  .= ' (';
         foreach ($index['content'] as $column => $length) {
             $index['create'] .= $column;
@@ -397,7 +397,7 @@ class DatabaseSchema extends OsecBaseClass
     }
 
     /**
-     * _parse_index_content method
+     * parseIndex_content method
      *
      * Parse index content, to a map of columns and their length.
      * All index (content) cases shall be covered, although it is only tested.
@@ -408,7 +408,7 @@ class DatabaseSchema extends OsecBaseClass
      *
      * @throws DatabaseErrorException In case of any error
      */
-    protected function _parse_index_content($description)
+    protected function parseIndex_content($description)
     {
         if ( ! preg_match('#^[^(]+\((.+)\)$#', (string)$description, $matches)) {
             throw new DatabaseErrorException(
@@ -441,7 +441,7 @@ class DatabaseSchema extends OsecBaseClass
     }
 
     /**
-     * _parse_column method
+     * parseColumn method
      *
      * Parse column to parseable definition.
      * Some valid definitions may still be not recognizes (namely SET and ENUM)
@@ -454,7 +454,7 @@ class DatabaseSchema extends OsecBaseClass
      *
      * @throws DatabaseErrorException In case of any error
      */
-    protected function _parse_column($description)
+    protected function parseColumn($description)
     {
         $column_regexp = '#^
 			([a-z][a-z_]+)\s+
@@ -512,7 +512,7 @@ class DatabaseSchema extends OsecBaseClass
     }
 
     /**
-     * _check_delta method
+     * checkDelta method
      *
      * Given parsed schema definitions (in {@see self::$schemaDelta} map) this
      * method performs checks, to ensure that table exists, columns are of
@@ -522,7 +522,7 @@ class DatabaseSchema extends OsecBaseClass
      *
      * @throws DatabaseErrorException In case of any error
      */
-    protected function _check_delta()
+    protected function checkDelta()
     {
         if (empty($this->schemaDelta)) {
             return true;
@@ -681,7 +681,7 @@ class DatabaseSchema extends OsecBaseClass
      */
     public function get_indices($table)
     {
-        // if ( ! $this->_is_table($table)) {
+        // if ( ! $this->isTable($table)) {
         // return [];
         // }
         // $list = $this->app->db->get_results('SHOW INDEX FROM `'.$table.'`');
@@ -731,7 +731,7 @@ class DatabaseSchema extends OsecBaseClass
      *
      * @return bool Existence.
      */
-    protected function _is_table($table)
+    protected function isTable($table)
     {
         $name = $this->app->db->get_var(
             $this->app->db->prepare('SHOW TABLES LIKE %s', $table)
@@ -741,7 +741,7 @@ class DatabaseSchema extends OsecBaseClass
     }
 
     /**
-     * _is_not_empty_line method
+     * isNotEmptyLine method
      *
      * Helper method, to check that any given line is not empty.
      * Aids array_filter in detecting empty SQL query lines.
@@ -750,7 +750,7 @@ class DatabaseSchema extends OsecBaseClass
      *
      * @return bool True if line is not empty, false otherwise
      */
-    protected function _is_not_empty_line($line)
+    protected function isNotEmptyLine($line)
     {
         $line = trim($line);
 

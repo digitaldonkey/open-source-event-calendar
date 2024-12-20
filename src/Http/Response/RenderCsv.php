@@ -17,7 +17,7 @@ class RenderCsv extends RenderStrategyAbstract
      */
     public function render(array $params)
     {
-        $this->_dump_buffers();
+        $this->cleanOutputBuffers();
 
         $now      = gmdate('D, d M Y H:i:s');
         $filename = $params['filename'];

@@ -249,7 +249,7 @@ class ScriptsFrontendController extends OsecBaseClass
         // add to blank spaces to fix issues with js
         // being truncated onn some installs
         $javascript .= '  ';
-        $this->_echo_javascript($javascript);
+        $this->printJavascript($javascript);
     }
 
     /**
@@ -472,7 +472,7 @@ JSC;
      *
      * @return void
      */
-    private function _echo_javascript($javascript)
+    private function printJavascript($javascript)
     {
         $conditional_get = new HTTP_ConditionalGet(
             ['contentHash' => md5($javascript)]
@@ -508,33 +508,33 @@ JSC;
             $script_to_load = self::CALENDAR_FEEDS_PAGE;
         }
         // Start the scripts for the event category page
-        if ($this->_are_we_editing_event_categories() === true) {
+        if ($this->isPageEventategories() === true) {
             // Load script required when editing categories
             $script_to_load = self::EVENT_CATEGORY_PAGE;
             wp_enqueue_media();
         }
-        if ($this->_are_we_editing_less_variables() === true) {
+        if ($this->isPageLessVariables() === true) {
             // Load script required when editing categories
             $script_to_load = self::LESS_VARIBALES_PAGE;
         }
         // Load the js needed when you edit an event / add a new event
         if (
-            true === $this->_are_we_creating_a_new_event() ||
-            true === $this->_are_we_editing_an_event()
+            true === $this->isPageNewEvent() ||
+            true === $this->isPageEditEvent()
         ) {
             // Load script for adding / modifying events
             $script_to_load = self::ADD_NEW_EVENT_PAGE;
         }
-        if ($this->_are_we_accessing_the_calendar_settings_page() === true) {
+        if ($this->isPageOsecSettings() === true) {
             $script_to_load = self::SETTINGS_PAGE;
         }
-        if (true === $this->_are_we_creating_widgets()) {
+        if (true === $this->isPageWidgetCreator()) {
             $script_to_load = self::WIDGET_CREATOR;
         }
 
         // TODO This prevents loading of Event Edit Above
 
-        if (true === $this->_are_we_editing_page_with_widget()) {
+        if (true === $this->isPageEditWithOsecWidget()) {
             // TODO WHAT SHOULD WE LOAD TO MAKE IT NICE?? At least it works.
             $script_to_load = self::FRONTEND_CONFIG_MODULE;
         }
@@ -580,7 +580,7 @@ JSC;
      *
      * @return bool TRUE if we are accessing the events category page FALSE otherwise
      */
-    private function _are_we_editing_event_categories()
+    private function isPageEventategories(): bool
     {
         $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
         $post_type    = $_GET['post_type'] ?? '';
@@ -602,7 +602,7 @@ JSC;
      *
      * @return bool TRUE if we are accessing a single event page FALSE otherwise
      */
-    private function _are_we_editing_less_variables()
+    private function isPageLessVariables()
     {
         $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
         $page         = $_GET['page'] ?? '';
@@ -615,7 +615,7 @@ JSC;
      *
      * @return bool TRUE if we are creating a new event FALSE otherwise
      */
-    private function _are_we_creating_a_new_event()
+    private function isPageNewEvent()
     {
         $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
         $post_type    = $_GET['post_type'] ?? '';
@@ -629,7 +629,7 @@ JSC;
      *
      * @return bool TRUE if we are editing an event FALSE otherwise
      */
-    private function _are_we_editing_an_event()
+    private function isPageEditEvent()
     {
         $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
         $post_id      = $_GET['post'] ?? false;
@@ -652,7 +652,7 @@ JSC;
      *
      * @return bool TRUE if we are accessing the settings page FALSE otherwise
      */
-    private function _are_we_accessing_the_calendar_settings_page()
+    private function isPageOsecSettings()
     {
         $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
         $page         = $_GET['page'] ?? '';
@@ -661,7 +661,7 @@ JSC;
                $page === AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings';
     }
 
-    protected function _are_we_creating_widgets()
+    protected function isPageWidgetCreator()
     {
         $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
         $page         = $_GET['page'] ?? '';
@@ -670,7 +670,7 @@ JSC;
                $page === AdminPageAbstract::ADMIN_PAGE_PREFIX . 'widget-creator';
     }
 
-    protected function _are_we_editing_page_with_widget()
+    protected function isPageEditWithOsecWidget()
     {
         // If we are using "X3P0 - Legacy Widget" Edit.
         // Must not be loaded on our post type or other scripts will be missing.
@@ -766,7 +766,7 @@ JSC;
         // ======
         // = JS =
         // ======
-        if ($this->_are_we_accessing_the_single_event_page() === true) {
+        if ($this->isPageSingleEvent() === true) {
             $page = self::EVENT_PAGE_JS;
         }
         if ($is_calendar_page === true) {
@@ -782,7 +782,7 @@ JSC;
      *
      * @return bool TRUE if we are accessing a single event page FALSE otherwise
      */
-    private function _are_we_accessing_the_single_event_page()
+    private function isPageSingleEvent()
     {
         return $this->aco->is_our_post_type();
     }

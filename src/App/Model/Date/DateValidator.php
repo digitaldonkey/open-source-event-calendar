@@ -45,7 +45,7 @@ class DateValidator
     // *                       is not valid.
     // */
     // static public function validate_date_and_return_parsed_date($date, $pattern = 'def'): ?array {
-    // $pattern = self::_get_pattern_regexp($pattern);
+    // $pattern = self::getPatternRegexp($pattern);
     // if (preg_match($pattern, $date, $matches)) {
     // if (checkdate($matches['m'], $matches['d'], $matches['y'])) {
     // return [
@@ -68,7 +68,7 @@ class DateValidator
      */
     public static function format_as_iso($date, $pattern = 'def')
     {
-        $regexp = self::_get_pattern_regexp($pattern);
+        $regexp = self::getPatternRegexp($pattern);
         if ( ! preg_match($regexp, $date, $matches)) {
             return false;
         }
@@ -88,7 +88,7 @@ class DateValidator
      *
      * @return string Regular expression pattern.
      */
-    protected static function _get_pattern_regexp($pattern)
+    protected static function getPatternRegexp($pattern)
     {
         $pattern = self::get_date_pattern_by_key($pattern);
         $pattern = preg_quote($pattern, '/');

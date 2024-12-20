@@ -69,7 +69,7 @@ class WeekView extends AbstractView
             ),
             $weekStart->format_i18n('W M/Y')
         );
-        $pagination_links = $this->_get_pagination($args, $title, $title_short);
+        $pagination_links = $this->getPagination($args, $title, $title_short);
 
         $time_format = $this->app->options
             ->get('time_format', __('g a', 'open-source-event-calendar'));
@@ -144,7 +144,7 @@ class WeekView extends AbstractView
         ];
 
         // Add navigation if requested.
-        $view_args['navigation'] = $this->_get_navigation(
+        $view_args['navigation'] = $this->getNavigation(
             [
                 'no_navigation'    => $args['no_navigation'],
                 'pagination_links' => $pagination_links,
@@ -156,10 +156,10 @@ class WeekView extends AbstractView
         $view_args = $this->get_extra_template_arguments($view_args);
 
         if (Request::factory($this->app)->is_json_required($args['request_format'], 'week')) {
-            return $this->_apply_filters_to_args($view_args);
+            return $this->apply_filters_to_args($view_args);
         }
 
-        return $this->_get_view($view_args);
+        return $this->getView($view_args);
     }
 
     /**
@@ -206,7 +206,7 @@ class WeekView extends AbstractView
             $filter,
             true
         );
-        $this->_update_meta($week_events);
+        $this->updateMeta($week_events);
         // Split up events on a per-day basis
         $all_events      = [];
         $this->daysCache = new CacheMemory($this->app);
@@ -214,7 +214,7 @@ class WeekView extends AbstractView
 
         // Iterate over found Events.
         foreach ($week_events as $nthEvent => $evt) {
-            [$evt_start, $evt_end] = $this->_get_view_specific_timestamps($evt);
+            [$evt_start, $evt_end] = $this->getView_specific_timestamps($evt);
 
             $_nthEvent           = $nthEvent;
             $_nthEvent_start     = $evt->get('start')->format('r');
@@ -233,7 +233,7 @@ class WeekView extends AbstractView
                 // TODO As $day is a simple Index counting > 31 can this lead to useful results?
                 //
 
-                [$day_start, $day_end] = $this->_get_wkday_start_end($day, $start_of_week);
+                [$day_start, $day_end] = $this->getDayStartAndEnd($day, $start_of_week);
 
                 if ($evt_end < $day_start) {
                     break; // save cycles
@@ -255,7 +255,7 @@ class WeekView extends AbstractView
 
                     // Store reference to original, unmodified event, required by view.
                     $_evt->set('orig', $evt);
-                    $this->_add_runtime_properties($_evt);
+                    $this->addRuntimeProperties($_evt);
 
                     // Place copy of event in appropriate category
                     if ($_evt->is_allday()) {
@@ -282,13 +282,13 @@ class WeekView extends AbstractView
         // $day++
         // ) {
         for ($day = 0; $day < 7; $day++) {
-            [$day_date, , $day_date_ob] = $this->_get_wkday_start_end($day, $start_of_week);
+            [$day_date, , $day_date_ob] = $this->getDayStartAndEnd($day, $start_of_week);
 
             $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url(
                 $day_date_ob,
                 $this->app->settings->get('input_date_format')
             );
-            $href_for_date = $this->_create_link_for_day_view($exact_date);
+            $href_for_date = $this->create_link_for_day_view($exact_date);
 
             // Initialize empty arrays for this day if no events to minimize warnings
             if (! isset($all_events[$day_date]['allday'])) {
@@ -393,7 +393,7 @@ class WeekView extends AbstractView
      *
      * @return array List of start and and timestamps, 0-indexed array.
      */
-    protected function _get_wkday_start_end(
+    protected function getDayStartAndEnd(
         int $day,
         DT $week_start
     ) {

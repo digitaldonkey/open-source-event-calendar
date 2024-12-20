@@ -305,7 +305,7 @@ class WidgetAgendaView extends WidgetAbstract
             1,
             1
         );
-        $instance['events_seek_type']       = $this->_valid_seek_type(
+        $instance['events_seek_type']       = $this->ensureSeekType(
             $new_instance['events_seek_type']
         );
         $instance['show_subscribe_buttons'] = isset($new_instance['show_subscribe_buttons']) ? true : false;
@@ -342,7 +342,7 @@ class WidgetAgendaView extends WidgetAbstract
     }
 
     /**
-     * _valid_seek_type method.
+     * Ensure valid seek type.
      *
      * Return valid seek type for given user input (selection).
      *
@@ -350,7 +350,7 @@ class WidgetAgendaView extends WidgetAbstract
      *
      * @return string        Seek type to use
      */
-    protected function _valid_seek_type($value)
+    protected function ensureSeekType($value): string
     {
         static $list = ['events', 'days'];
         if (! in_array($value, $list)) {

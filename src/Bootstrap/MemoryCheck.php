@@ -24,8 +24,8 @@ class MemoryCheck extends OsecBaseClass
         if (0 === $required_limit) {
             return true;
         }
-        $required = self::_string_to_bytes($required_limit);
-        $limit    = self::_string_to_bytes(ini_get('memory_limit'));
+        $required = self::stringToBytes($required_limit);
+        $limit    = self::stringToBytes(ini_get('memory_limit'));
         $used     = self::get_usage();
 
         return ($limit - $used) >= $required;
@@ -38,7 +38,7 @@ class MemoryCheck extends OsecBaseClass
      *
      * @return int Number.
      */
-    protected static function _string_to_bytes($v)
+    protected static function stringToBytes($v)
     {
         $letter     = substr($v, -1);
         $value      = (int)substr($v, 0, -1);

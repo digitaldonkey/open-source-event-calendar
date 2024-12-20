@@ -78,12 +78,12 @@ class CommandClone extends CommandAbstract
     public function duplicate_post_create_duplicate($post, $status = '')
     {
         $post            = get_post($post);
-        $new_post_author = $this->_duplicate_post_get_current_user();
+        $new_post_author = $this->duplicatePostGetCurrentUser();
         $new_post_status = $status;
         if (empty($new_post_status)) {
             $new_post_status = $post->post_status;
         }
-        $new_post_status = $this->_get_new_post_status($new_post_status);
+        $new_post_status = $this->getNewPostStatus($new_post_status);
 
         $new_post = [
             'menu_order'     => $post->menu_order,
@@ -117,9 +117,9 @@ class CommandClone extends CommandAbstract
             $edit_event_url
         );
         NotificationAdmin::factory($this->app)->store($message);
-        $this->_duplicate_post_copy_post_taxonomies($new_post_id, $post);
-        $this->_duplicate_post_copy_attachments($new_post_id, $post);
-        $this->_duplicate_post_copy_post_meta_info($new_post_id, $post);
+        $this->copyPostTaxonomies($new_post_id, $post);
+        $this->copyAttachments($new_post_id, $post);
+        $this->copyMeta($new_post_id, $post);
 
         if (AccessControl::is_our_post_type($post)) {
             try {
@@ -168,7 +168,7 @@ class CommandClone extends CommandAbstract
     /**
      * Get the currently registered user
      */
-    protected function _duplicate_post_get_current_user()
+    protected function duplicatePostGetCurrentUser()
     {
         global $wpdb;
 
@@ -196,7 +196,7 @@ class CommandClone extends CommandAbstract
      *
      * @return string Status for new post
      */
-    protected function _get_new_post_status($old_status)
+    protected function getNewPostStatus($old_status)
     {
         if ('publish' === $old_status && ! current_user_can('publish_osec_events')) {
             return 'pending';
@@ -208,7 +208,7 @@ class CommandClone extends CommandAbstract
     /**
      * Copy the taxonomies of a post to another post
      */
-    protected function _duplicate_post_copy_post_taxonomies($new_id, $post)
+    protected function copyPostTaxonomies($new_id, $post)
     {
         if ($this->app->db->are_terms_set()) {
             // Clear default category (added by wp_insert_post)
@@ -238,7 +238,7 @@ class CommandClone extends CommandAbstract
      * Copy the attachments
      * It simply copies the table entries, actual file won't be duplicated
      */
-    protected function _duplicate_post_copy_attachments($new_id, $post)
+    protected function copyAttachments($new_id, $post)
     {
         // if (get_option('duplicate_post_copyattachments') == 0) return;
 
@@ -253,7 +253,7 @@ class CommandClone extends CommandAbstract
         );
         // clone old attachments
         foreach ($attachments as $att) {
-            $new_att_author = $this->_duplicate_post_get_current_user();
+            $new_att_author = $this->duplicatePostGetCurrentUser();
 
             $new_att = [
                 'menu_order'     => $att->menu_order,
@@ -269,7 +269,7 @@ class CommandClone extends CommandAbstract
                 'post_mime_type' => $att->post_mime_type,
                 'post_parent'    => $new_id,
                 'post_password'  => $att->post_password,
-                'post_status'    => $this->_get_new_post_status(
+                'post_status'    => $this->getNewPostStatus(
                     $att->post_status
                 ),
                 'post_title'     => $att->post_title,
@@ -298,7 +298,7 @@ class CommandClone extends CommandAbstract
     /**
      * Copy the meta information of a post to another post
      */
-    protected function _duplicate_post_copy_post_meta_info(int $new_id, WP_Post $post)
+    protected function copyMeta(int $new_id, WP_Post $post)
     {
         $post_meta_keys = get_post_custom_keys($post->ID);
         if (empty($post_meta_keys)) {

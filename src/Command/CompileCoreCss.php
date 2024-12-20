@@ -41,16 +41,16 @@ class CompileCoreCss extends CommandAbstract
     public function do_execute()
     {
         echo wp_kses(
-            $this->_process_files,
+            $this->processFiles,
             'data'
         );
         ResponseHelper::stop();
     }
 
-    protected function _process_files()
+    protected function processFiles()
     {
         $less   = LessController::factory($this->app);
-        $theme  = $this->_get_theme($_GET['theme']);
+        $theme  = $this->getTheme($_GET['theme']);
 
         if (isset($_GET['switch'])) {
             $this->app->options->delete(LessController::DB_KEY_FOR_LESS_VARIABLES);
@@ -61,7 +61,7 @@ class CompileCoreCss extends CommandAbstract
 
         $css          = $less->parse_less_files(null, true);
         $hashmap      = $less->get_less_hashmap();
-        $hashmap      = $this->_get_hashmap_array($hashmap);
+        $hashmap      = $this->getHashmapPhp($hashmap);
         $filename     = $theme['theme_dir'] . DIRECTORY_SEPARATOR .
                         'css' . DIRECTORY_SEPARATOR . 'ai1ec_parsed_css.css';
         $hashmap_file = $theme['theme_dir'] . '/less.sha1.map.php';
@@ -96,7 +96,7 @@ class CompileCoreCss extends CommandAbstract
      *
      * @throws InvalidArgumentException
      */
-    protected function _get_theme($stylesheet)
+    protected function getTheme($stylesheet)
     {
         $themes = ['plana', 'vortex', 'umbra', 'gamma'];
 
@@ -122,7 +122,7 @@ class CompileCoreCss extends CommandAbstract
      *
      * @return string PHP code.
      */
-    protected function _get_hashmap_array($hashmap): string
+    protected function getHashmapPhp($hashmap): string
     {
         return '<?php return ' . var_export($hashmap, true) . ';';
     }

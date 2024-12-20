@@ -80,7 +80,7 @@ class AdminDateRepeatBox extends OsecBaseClass
             'row_monthly'  => $this->row_monthly(
                 false,
                 $rc->getInterval() ?: 1,
-                ! $this->_is_monthday_empty($rc),
+                ! $this->isMonthdayEmpty($rc),
                 $rc->getByMonthDay() ?: [],
                 $rc->getByDay() ?: []
             ),
@@ -325,12 +325,12 @@ class AdminDateRepeatBox extends OsecBaseClass
             'day_nums'            => $this->create_select_element(
                 'osec_monthly_byday_num',
                 $options_dn,
-                $this->_get_day_number_from_byday($day)
+                $this->getDayNumberFromDayArray($day)
             ),
             'week_days'           => $this->create_select_element(
                 'osec_monthly_byday_weekday',
                 $options_wd,
-                $this->_get_day_shortname_from_byday($day)
+                $this->getDayShortnameFromDayArray($day)
             ),
             'bymonthday_checked'  => $bymonthday_checked,
             'byday_checked'       => $byday_checked,
@@ -399,7 +399,7 @@ class AdminDateRepeatBox extends OsecBaseClass
      *
      * @return bool|int Day of false if empty array.
      */
-    protected function _get_day_number_from_byday(array $day)
+    protected function getDayNumberFromDayArray(array $day)
     {
         return isset($day[0]) ? (int)$day[0] : false;
     }
@@ -412,7 +412,7 @@ class AdminDateRepeatBox extends OsecBaseClass
      * @return bool|string False if empty or not matched, otherwise short day
      *                     name.
      */
-    protected function _get_day_shortname_from_byday($day)
+    protected function getDayShortnameFromDayArray($day)
     {
         if (empty($day)) {
             return false;
@@ -432,7 +432,7 @@ class AdminDateRepeatBox extends OsecBaseClass
      *
      * @return bool True or false.
      */
-    protected function _is_monthday_empty(SG_iCal_Recurrence $rc)
+    protected function isMonthdayEmpty(SG_iCal_Recurrence $rc)
     {
         return false === $rc->getByMonthDay();
     }

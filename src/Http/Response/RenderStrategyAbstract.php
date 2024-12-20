@@ -24,14 +24,13 @@ abstract class RenderStrategyAbstract extends OsecBaseClass
      *
      * @return bool True unless an error occurs
      */
-    protected function _dump_buffers()
+    protected function cleanOutputBuffers()
     {
         $this->app->db->disable_debug();
         $success = true;
         while (ob_get_level()) {
             $success = ob_end_flush();
         }
-
         return $success;
     }
 }

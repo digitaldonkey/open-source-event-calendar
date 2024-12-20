@@ -29,7 +29,7 @@ class ThemeVariableColor extends SettingsAbstract
             'readonly' => $readonly,
             'id'       => $this->args['id'],
             'value'    => $this->args['value'],
-            'format'   => $this->_get_format(),
+            'format'   => $this->getFormat(),
         ];
 
         return ThemeLoader::factory($this->app)
@@ -37,7 +37,7 @@ class ThemeVariableColor extends SettingsAbstract
                           ->get_content();
     }
 
-    protected function _get_format()
+    protected function getFormat()
     {
         $format = 'hex';
         if (str_starts_with($this->args['value'], 'rgb')) {

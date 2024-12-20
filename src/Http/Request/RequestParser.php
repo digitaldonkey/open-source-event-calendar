@@ -152,13 +152,13 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
         if ( ! is_scalar($field)) {
             return false;
         }
-        if (false === $this->_valid_type($type)) {
+        if (false === $this->isValidType($type)) {
             return false;
         }
         $mandatory = (bool)$mandatory;
         $is_list   = false !== $list_sep && is_scalar($list_sep);
-        $field     = $this->_name_without_prefix($field);
-        $prefix    = $this->_get_prefix();
+        $field     = $this->removeNamePrefix($field);
+        $prefix    = $this->getActionPrefix();
         $record    = compact(
             'field',
             'mandatory',
@@ -176,7 +176,7 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
     }
 
     /**
-     * _sane_value method
+     * sanitizeValue method
      *
      * Check if given type definition is valid.
      * Return sanitizer function name (if applicable) for valid type.
@@ -185,7 +185,7 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
      *
      * @return string|bool Name of sanitization function or false
      */
-    protected function _valid_type($name)
+    protected function isValidType($name)
     {
         static $map = [
             'int'     => 'intval',
@@ -203,9 +203,9 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
         return $map[$name];
     }
 
-    protected function _name_without_prefix($name)
+    protected function removeNamePrefix($name)
     {
-        $prefix = $this->_get_prefix();
+        $prefix = $this->getActionPrefix();
         $length = strlen((string)$prefix);
         if (0 === strncmp((string)$name, (string)$prefix, $length)) {
             return substr((string)$name, $length);
@@ -213,11 +213,6 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
 
         return $name;
     }
-
-    // **
-    // * Return prefix that shall be used to access values
-    // */
-    // abstract protected function _get_prefix();
 
     /**
      * Get query argument name prefix.
@@ -227,8 +222,9 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
      *
      * @return string Query prefix 'ai1ec_'
      */
-    protected function _get_prefix()
+    protected function getActionPrefix()
     {
+        // Some JS-based actions still using outdated prefix.
         return 'ai1ec_';
     }
 
@@ -295,8 +291,8 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
         }
         foreach ($this->rules as $field => $options) {
             $value = $options['default'];
-            if (($ext_var = $this->_get_var($field))) {
-                $value = $this->_sane_value(
+            if (($ext_var = $this->getVariable($field))) {
+                $value = $this->sanitizeValue(
                     $ext_var,
                     $options
                 );
@@ -325,9 +321,9 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
      * @return bool|mixed|null
      * @throws BootstrapException
      */
-    protected function _get_var($name, $prefix = '')
+    protected function getVariable($name, $prefix = '')
     {
-        $name     = $this->_name_without_prefix($name);
+        $name     = $this->removeNamePrefix($name);
         $use_name = $prefix . $name;
         if (isset($this->request[$use_name])) {
             return $this->request[$use_name];
@@ -335,9 +331,9 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
 
         $result = WordpressAdaptor::factory($this->app)->variable($use_name);
         if (null === $result || false === $result) {
-            $defined_prefix = $this->_get_prefix();
+            $defined_prefix = $this->getActionPrefix();
             if ('' === $prefix && $defined_prefix !== $prefix) {
-                return $this->_get_var($name, $defined_prefix);
+                return $this->getVariable($name, $defined_prefix);
             }
         }
 
@@ -345,37 +341,37 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
     }
 
     /**
-     * _sane_value method
+     * sanitizeValue method
      *
      * Parse single input value according to processing rules.
-     * Relies on {@see self::_type_cast()} for value conversion.
+     * Relies on {@see self::typeCast()} for value conversion.
      *
      * @param  mixed  $input  Original request value
      * @param  array  $options  Type definition options
      *
      * @return mixed Sanitized value
      */
-    protected function _sane_value(mixed $input, array $options)
+    protected function sanitizeValue(mixed $input, array $options)
     {
         $sane_value = null;
         if ($options['is_list']) {
             $value      = explode($options['list_sep'], (string)$input);
             $sane_value = [];
             foreach ($value as $element) {
-                $cast_element = $this->_type_cast($element, $options);
+                $cast_element = $this->typeCast($element, $options);
                 if ( ! empty($cast_element)) {
                     $sane_value[] = $cast_element;
                 }
             }
         } else {
-            $sane_value = $this->_type_cast($input, $options);
+            $sane_value = $this->typeCast($input, $options);
         }
 
         return $sane_value;
     }
 
     /**
-     * _type_cast method
+     * typeCast method
      *
      * Cast value to given type.
      * Non-PHP type 'enum' is accepted
@@ -385,7 +381,7 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
      *
      * @return mixed Casted value
      */
-    protected function _type_cast(mixed $value, array $options)
+    protected function typeCast(mixed $value, array $options)
     {
         if ('enum' === $options['type']) {
             if (in_array($value, $options['list_sep'])) {
@@ -394,7 +390,7 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
 
             return null;
         }
-        $cast  = $this->_valid_type($options['type']);
+        $cast  = $this->isValidType($options['type']);
         $value = $cast($value);
 
         return $value;

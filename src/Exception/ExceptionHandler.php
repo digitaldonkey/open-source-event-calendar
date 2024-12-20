@@ -106,11 +106,15 @@ class ExceptionHandler
     public function handleException(Throwable $exception)
     {
         if (defined('OSEC_DEBUG') && true === OSEC_DEBUG) {
-            die('<pre>' . print_r($exception, true) . '</pre>');
+            /** @noinspection ForgottenDebugOutputInspection */
+            wp_die(
+                '<pre style="color: black; background: darkorange; font-size: smaller; width: fit-content; padding: .5em">'
+                . $exception
+                . '</pre>'
+            );
         }
         // if it's something we handle, handle it
-        throw $exception;
-        $backtrace = $this->_get_backtrace($exception);
+        $backtrace = $this->getBacktrace($exception);
         if ($exception instanceof $this->_exception_class) {
             // check if it's a plugin instead of core
             $disable_addon = $this->is_caused_by_addon($exception);
@@ -156,7 +160,7 @@ class ExceptionHandler
      *
      * @return string HTML code.
      */
-    protected function _get_backtrace(Exception $exception)
+    protected function getBacktrace(Throwable $exception)
     {
         $backtrace = '';
         $trace     = nl2br($exception->getTraceAsString());
@@ -165,22 +169,21 @@ class ExceptionHandler
             $request_uri  = $_SERVER['REQUEST_URI'];
             $button_label = __('Toggle error details', 'open-source-event-calendar');
             $title        = __('Error Details:', 'open-source-event-calendar');
-            $backtrace    = <<<JAVASCRIPT
-			<script type="text/javascript">
-			jQuery( function($) {
-				$( "a[data-rel='$ident']" ).click( function() {
-					jQuery( "#ai1ec-error-$ident" ).slideToggle( "fast" );
-					return false;
-				});
-			});
-			</script>
-			<blockquote id="ai1ec-error-$ident" style="display: none;">
-				<strong>$title</strong>
-				<p>$trace</p>
-				<p>Request Uri: $request_uri</p>
-			</blockquote>
-			<a href="#" data-rel="$ident" class="button">$button_label</a>
-JAVASCRIPT;
+            $backtrace    = '<script type="text/javascript">
+                jQuery( function($) {
+                    $( "a[data-rel=\'$ident\']" ).click( function() {
+                        jQuery( "#ai1ec-error-$ident" ).slideToggle( "fast" );
+                        return false;
+                    });
+                });
+                </script>
+                <blockquote id="ai1ec-error-$ident" style="display: none;">
+                    <strong>$title</strong>
+                    <p>$trace</p>
+                    <p>Request Uri: $request_uri</p>
+                </blockquote>
+                <a href="#" data-rel="$ident" class="button">$button_label</a>
+                ';
         }
 
         return $backtrace;
@@ -322,13 +325,14 @@ JAVASCRIPT;
         $errline,
         $errcontext = []
     ) {
+        $args = func_get_args();
         // if the error is not in our plugin, let PHP handle things.
         $position = strpos($errfile, (string)OSEC_PLUGIN_NAME);
         if (false === $position) {
             if (is_callable($this->prevErrorHandler)) {
                 return call_user_func_array(
                     $this->prevErrorHandler,
-                    func_get_args()
+                    $args
                 );
             }
 

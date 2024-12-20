@@ -139,7 +139,7 @@ class NotificationAdmin extends NotificationAbstract
                     if (
                         isset($this->messages['_messages'][$key])
                     ) {
-                        $this->_render_message(
+                        $this->renderMessage(
                             $this->messages['_messages'][$key]
                         );
                         if (
@@ -161,7 +161,7 @@ class NotificationAdmin extends NotificationAbstract
         return $this->write();
     }
 
-    protected function _render_message(array $entity)
+    protected function renderMessage(array $entity)
     {
         $importance = 0;
         if (isset($entity['importance'])) {

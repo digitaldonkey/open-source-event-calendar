@@ -18,13 +18,13 @@ class EventColorView extends OsecBaseClass
 {
     public function get_faded_color(Event $event)
     {
-        return $this->_get_color($event, 'faded');
+        return $this->getColor($event, 'faded');
     }
 
     /**
      * Faded version of event category color
      */
-    protected function _get_color(Event $event, $type)
+    protected function getColor(Event $event, $type)
     {
         static $categories_cache = [
             'rgba'  => [],
@@ -56,7 +56,7 @@ class EventColorView extends OsecBaseClass
      */
     public function get_rgba_color(Event $event)
     {
-        return $this->_get_color($event, 'rgba');
+        return $this->getColor($event, 'rgba');
     }
 
     /**

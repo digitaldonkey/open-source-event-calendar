@@ -104,7 +104,7 @@ abstract class AbstractView extends OsecBaseClass
      *
      * @param  string  $exact_date
      */
-    protected function _create_link_for_day_view($exact_date)
+    protected function create_link_for_day_view($exact_date)
     {
         $href = HtmlFactory::factory($this->app)
                            ->create_href_helper_instance(
@@ -122,7 +122,7 @@ abstract class AbstractView extends OsecBaseClass
      *
      * @return string
      */
-    protected function _get_view(array $view_args)
+    protected function getView(array $view_args)
     {
         $view = $this->get_name();
         $file = ThemeLoader::factory($this->app)
@@ -150,7 +150,7 @@ abstract class AbstractView extends OsecBaseClass
     /**
      * Applies filters to view args for front end rendering
      */
-    protected function _apply_filters_to_args(array $args): array
+    protected function apply_filters_to_args(array $args): array
     {
         $view = $this->get_name();
 
@@ -165,7 +165,7 @@ abstract class AbstractView extends OsecBaseClass
      *
      * @return array Start and end respectively in 0 and 1 positions.
      */
-    protected function _get_view_specific_timestamps(Event $event)
+    protected function getView_specific_timestamps(Event $event)
     {
         if ($event->is_allday()) {
             // reset to be day-contained with respect to current timezone
@@ -190,7 +190,7 @@ abstract class AbstractView extends OsecBaseClass
      *
      * @return void
      */
-    protected function _update_meta(array $events)
+    protected function updateMeta(array $events)
     {
         $post_ids = [];
         foreach ($events as $event) {
@@ -208,7 +208,7 @@ abstract class AbstractView extends OsecBaseClass
      *
      * @return string
      */
-    protected function _get_navigation(array $nav_args)
+    protected function getNavigation(array $nav_args)
     {
         /**
          * Add Html at calendar navigarion header.
@@ -240,7 +240,7 @@ abstract class AbstractView extends OsecBaseClass
      *
      * @return string
      */
-    protected function _get_pagination(array $args, $title, $title_short = '')
+    protected function getPagination(array $args, $title, $title_short = '')
     {
         /* @uses OnedayView:get_oneday_pagination_links() */
         $method = 'get_' . $this->get_name() . '_pagination_links';
@@ -257,7 +257,7 @@ abstract class AbstractView extends OsecBaseClass
     /**
      * Adds runtime properties to the event.
      */
-    protected function _add_runtime_properties(Event $event)
+    protected function addRuntimeProperties(Event $event)
     {
         global $post;
         $original_post      = $post;
@@ -317,14 +317,14 @@ abstract class AbstractView extends OsecBaseClass
             'short_start_time',
             EventTimeView::factory($this->app)->format_time($event->get('start'))
         );
-        $this->_add_view_specific_runtime_properties($event);
+        $this->add_view_specific_runtime_properties($event);
         $post = $original_post;
     }
 
     /**
      * If some views have specific runtime properties they must extend this method
      */
-    protected function _add_view_specific_runtime_properties(Event $event)
+    protected function add_view_specific_runtime_properties(Event $event)
     {
     }
 

@@ -50,7 +50,7 @@ class OnedayView extends AbstractView
             $this->app->options
                 ->get('date_format', 'l, M j, Y')
         );
-        $pagination_links = $this->_get_pagination($args, $title);
+        $pagination_links = $this->getPagination($args, $title);
 
         // Calculate today marker's position.
         $midnight = (new DT('now', 'sys.default'))
@@ -114,7 +114,7 @@ class OnedayView extends AbstractView
         ];
 
         // Add navigation if requested.
-        $view_args['navigation'] = $this->_get_navigation(
+        $view_args['navigation'] = $this->getNavigation(
             [
                 'no_navigation'    => $args['no_navigation'],
                 'pagination_links' => $pagination_links,
@@ -128,10 +128,10 @@ class OnedayView extends AbstractView
             Request::factory($this->app)
                    ->is_json_required($args['request_format'], 'oneday')
         ) {
-            return $this->_apply_filters_to_args($view_args);
+            return $this->apply_filters_to_args($view_args);
         }
 
-        return $this->_get_view($view_args);
+        return $this->getView($view_args);
     }
 
     /**
@@ -182,7 +182,7 @@ class OnedayView extends AbstractView
             ->set_time(0, 0, 0);
 
         $day_events = $search->get_events_for_day($loc_start_time, $filter);
-        $this->_update_meta($day_events);
+        $this->updateMeta($day_events);
         // Split up events on a per-day basis
         $all_events = [];
 
@@ -191,7 +191,7 @@ class OnedayView extends AbstractView
         StrictContentFilterController::factory($this->app)
                                      ->clear_the_content_filters();
         foreach ($day_events as $evt) {
-            [$evt_start, $evt_end] = $this->_get_view_specific_timestamps($evt);
+            [$evt_start, $evt_end] = $this->getView_specific_timestamps($evt);
 
             // If event falls on this day, make a copy.
             if ($evt_end > $day_start_ts && $evt_start < $day_end_ts) {
@@ -209,7 +209,7 @@ class OnedayView extends AbstractView
 
                 // Store reference to original, unmodified event, required by view.
                 $_evt->set('orig', $evt);
-                $this->_add_runtime_properties($_evt);
+                $this->addRuntimeProperties($_evt);
                 // Place copy of event in appropriate category
                 if ($_evt->is_allday()) {
                     $all_events[$day_start_ts]['allday'][] = $_evt;
@@ -339,7 +339,7 @@ class OnedayView extends AbstractView
      *
      * @return array Array of links.
      * @throws BootstrapException
-     * @see AbstractView->_get_pagination() for usage.
+     * @see AbstractView->getPagination() for usage.
      *
      */
     public function get_oneday_pagination_links($args, $title): array
@@ -390,7 +390,7 @@ class OnedayView extends AbstractView
         return $links;
     }
 
-    protected function _add_view_specific_runtime_properties(Event $event)
+    protected function add_view_specific_runtime_properties(Event $event)
     {
         $event->set_runtime(
             'multiday',

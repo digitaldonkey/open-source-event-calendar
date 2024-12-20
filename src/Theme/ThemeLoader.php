@@ -76,7 +76,6 @@ class ThemeLoader extends OsecBaseClass
     private function init_themes(): void
     {
         $theme = $this->app->options->get('osec_current_theme');
-
         // Find out if this is a core theme.
         $core_themes     = explode(',', OSEC_CORE_THEMES);
         $this->coreTheme = in_array($theme['stylesheet'], $core_themes);
@@ -311,7 +310,7 @@ class ThemeLoader extends OsecBaseClass
                     $paths = $is_admin ? $this->paths['admin'] : $this->paths['theme'];
                     $paths = array_keys($paths); // Values (URLs) not used for Twig
                 }
-                $file = new FileTwig($this->app, $filename, $args, $this->_get_twig_instance($paths, $is_admin));
+                $file = new FileTwig($this->app, $filename, $args, $this->getTwigInstance($paths, $is_admin));
                 break;
 
             default:
@@ -346,7 +345,7 @@ class ThemeLoader extends OsecBaseClass
      *
      * @return Environment
      */
-    protected function _get_twig_instance(array $paths, $is_admin): Environment
+    protected function getTwigInstance(array $paths, $is_admin): Environment
     {
         $instance = $is_admin ? 'admin' : 'front';
         if ( ! isset($this->twig[$instance])) {
@@ -469,7 +468,7 @@ class ThemeLoader extends OsecBaseClass
         $paths = $is_admin ? $this->paths['admin'] : $this->paths['theme'];
         $paths = array_keys($paths); // Values (URLs) not used for Twig
 
-        return $this->_get_twig_instance($paths, $is_admin);
+        return $this->getTwigInstance($paths, $is_admin);
     }
 
     /**

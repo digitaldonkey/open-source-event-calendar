@@ -31,23 +31,23 @@ class RepeatRuleToText extends OsecBaseClass
         $rc  = new SG_iCal_Recurrence(new SG_iCal_Line('RRULE:' . $rrule));
         switch ($rc->getFreq()) {
             case 'DAILY':
-                $this->_get_interval($txt, 'daily', $rc->getInterval());
-                $this->_ending_sentence($txt, $rc);
+                $this->getInterval($txt, 'daily', $rc->getInterval());
+                $this->finalSentence($txt, $rc);
                 break;
             case 'WEEKLY':
-                $this->_get_interval($txt, 'weekly', $rc->getInterval());
-                $this->_get_sentence_by($txt, 'weekly', $rc);
-                $this->_ending_sentence($txt, $rc);
+                $this->getInterval($txt, 'weekly', $rc->getInterval());
+                $this->intervalSentence($txt, 'weekly', $rc);
+                $this->finalSentence($txt, $rc);
                 break;
             case 'MONTHLY':
-                $this->_get_interval($txt, 'monthly', $rc->getInterval());
-                $this->_get_sentence_by($txt, 'monthly', $rc);
-                $this->_ending_sentence($txt, $rc);
+                $this->getInterval($txt, 'monthly', $rc->getInterval());
+                $this->intervalSentence($txt, 'monthly', $rc);
+                $this->finalSentence($txt, $rc);
                 break;
             case 'YEARLY':
-                $this->_get_interval($txt, 'yearly', $rc->getInterval());
-                $this->_get_sentence_by($txt, 'yearly', $rc);
-                $this->_ending_sentence($txt, $rc);
+                $this->getInterval($txt, 'yearly', $rc->getInterval());
+                $this->intervalSentence($txt, 'yearly', $rc);
+                $this->finalSentence($txt, $rc);
                 break;
             default:
                 $processed = explode('=', $rrule);
@@ -74,7 +74,7 @@ class RepeatRuleToText extends OsecBaseClass
      * @return void
      * @internal
      */
-    protected function _get_interval(&$txt, $freq, $interval)
+    protected function getInterval(&$txt, $freq, $interval)
     {
         switch ($freq) {
             case 'daily':
@@ -137,14 +137,14 @@ class RepeatRuleToText extends OsecBaseClass
     }
 
     /**
-     * _ending_sentence function
+     * finalSentence function
      *
      * Ends rrule to text sentence
      *
      * @return void
      * *@internal
      */
-    protected function _ending_sentence(&$txt, &$rc)
+    protected function finalSentence(&$txt, &$rc)
     {
         if ($until = $rc->getUntil()) {
             if (! is_int($until)) {
@@ -167,12 +167,12 @@ class RepeatRuleToText extends OsecBaseClass
     }
 
     /**
-     * _get_sentence_by function
+     * intervalSentence function
      *
      * @return void
      * *@internal
      */
-    protected function _get_sentence_by(&$txt, $freq, $rc)
+    protected function intervalSentence(&$txt, $freq, $rc)
     {
         global $wp_locale;
 
@@ -226,7 +226,7 @@ class RepeatRuleToText extends OsecBaseClass
                     if (count($rc->getByMonthDay()) > 2) {
                         $_days = '';
                         foreach ($rc->getByMonthDay() as $m_day) {
-                            $_days .= ' ' . $this->_ordinal($m_day) . ',';
+                            $_days .= ' ' . $this->ordinal($m_day) . ',';
                         }
                         $_days = substr($_days, 0, -1);
                         $txt   .= ' ' . _x(
@@ -237,7 +237,7 @@ class RepeatRuleToText extends OsecBaseClass
                     } elseif (count($rc->getByMonthDay()) > 1) {
                         $_days = '';
                         foreach ($rc->getByMonthDay() as $m_day) {
-                            $_days .= ' ' . $this->_ordinal($m_day) . ' ' . __('and', 'open-source-event-calendar');
+                            $_days .= ' ' . $this->ordinal($m_day) . ' ' . __('and', 'open-source-event-calendar');
                         }
                         $_days = substr($_days, 0, -4);
                         $txt   .= ' ' . _x(
@@ -248,7 +248,7 @@ class RepeatRuleToText extends OsecBaseClass
                     } else {
                         $_days = '';
                         foreach ($rc->getByMonthDay() as $m_day) {
-                            $_days .= ' ' . $this->_ordinal($m_day);
+                            $_days .= ' ' . $this->ordinal($m_day);
                         }
                         $txt .= ' ' . _x(
                             'on',
@@ -339,12 +339,13 @@ class RepeatRuleToText extends OsecBaseClass
     }
 
     /**
-     * _ordinal function
+     * Something like n-th as text.
+     * Maybe.
      *
      * @return string
      * *@internal
      */
-    protected function _ordinal($cdnl)
+    protected function ordinal($cdnl)
     {
         $locale = explode('_', get_locale());
 

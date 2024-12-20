@@ -110,7 +110,7 @@ class EventAvatarView extends OsecBaseClass
             $fallback_order = ['post_thumbnail', 'content_img', 'category_avatar', 'default_avatar'];
         }
 
-        $valid_fallbacks = $this->_get_valid_fallbacks();
+        $valid_fallbacks = $this->getValidFallbacks();
 
         foreach ($fallback_order as $fallback) {
             if ( ! isset($valid_fallbacks[$fallback])) {
@@ -145,7 +145,7 @@ class EventAvatarView extends OsecBaseClass
      *
      * @return array List of valid fallbacks.
      */
-    protected function _get_valid_fallbacks()
+    protected function getValidFallbacks()
     {
         static $fallbacks;
         if (null === $fallbacks) {
@@ -181,7 +181,7 @@ class EventAvatarView extends OsecBaseClass
      */
     public function get_post_thumbnail_url(Event $event, &$size): ?string
     {
-        return $this->_get_post_attachment_url($event, ['medium', 'large', 'full'], $size);
+        return $this->getPostAttachmentUrl($event, ['medium', 'large', 'full'], $size);
     }
 
     /**
@@ -194,7 +194,7 @@ class EventAvatarView extends OsecBaseClass
      *
      * @return  string|null
      */
-    protected function _get_post_attachment_url(
+    protected function getPostAttachmentUrl(
         Event $event,
         array $ordered_img_sizes,
         &$size
@@ -226,7 +226,7 @@ class EventAvatarView extends OsecBaseClass
      */
     public function get_post_image_url(Event $event, &$size = null)
     {
-        return $this->_get_post_attachment_url(
+        return $this->getPostAttachmentUrl(
             $event,
             ['full', 'large', 'medium'],
             $size

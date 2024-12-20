@@ -94,12 +94,12 @@ class EventSearch extends OsecBaseClass
         }
 
         // Get post status Where snippet and associated SQL arguments
-        $where_parameters  = $this->_get_post_status_sql();
+        $where_parameters  = $this->getPostStatusSql();
         $post_status_where = $where_parameters['post_status_where'];
 
         // Get the Join (filter_join) and Where (filter_where) statements based
         // on $filter elements specified
-        $filter = $this->_get_filter_sql($filter);
+        $filter = $this->getFilterSql($filter);
 
         // Query arguments
         $args = [$time];
@@ -170,7 +170,7 @@ class EventSearch extends OsecBaseClass
         $events = $this->db->get_results($query, ARRAY_A);
 
         // Limit the number of records to convert to data-object
-        $events = $this->_limit_result_set(
+        $events = $this->limitResults(
             $events,
             $limit,
             (false !== $last_day)
@@ -184,7 +184,7 @@ class EventSearch extends OsecBaseClass
         $date_first = $date_last = null;
 
         foreach ($events as &$event) {
-            $event['allday'] = $this->_is_all_day($event);
+            $event['allday'] = $this->isAllDay($event);
             $event           = new Event($this->app, $event);
             if (null === $date_first) {
                 $date_first = $event->get('start');
@@ -207,17 +207,16 @@ class EventSearch extends OsecBaseClass
     }
 
     /**
-     * _get_post_status_sql function
+     * getPostStatusSql function
      *
      * Returns SQL snippet for properly matching event posts, as well as array
      * of arguments to pass to $this_dbi->prepare, in function argument
      * references.
-     * Nothing is returned by the function.
      *
      * @return array An array containing post_status_where: the sql string,
      * args: the arguments for prepare()
      */
-    protected function _get_post_status_sql()
+    protected function getPostStatusSql()
     {
         global $current_user;
 
@@ -280,7 +279,7 @@ class EventSearch extends OsecBaseClass
      *                   ['filter_join']  the Join statements for the SQL
      *                   ['filter_where'] the Where statements for the SQL
      */
-    protected function _get_filter_sql($filter)
+    protected function getFilterSql($filter)
     {
         $filter_join = $filter_where = [];
 
@@ -346,7 +345,7 @@ class EventSearch extends OsecBaseClass
          *
          * @param  array  $default  Default distinct type logic.
          *
-         * @see EventSearch->_get_filter_sql()
+         * @see EventSearch->getFilterSql()
          */
         $distinct_types = apply_filters('osec_filter_distinct_types_logic', $default);
         $where_operator = strtoupper(trim((string)$distinct_types));
@@ -358,7 +357,7 @@ class EventSearch extends OsecBaseClass
     }
 
     /**
-     * _limit_result_set function
+     * limitResults function
      *
      * Slice given number of events from list, with exception when all
      * events from last day shall be included.
@@ -369,7 +368,7 @@ class EventSearch extends OsecBaseClass
      *
      * @return array Sliced events list
      */
-    protected function _limit_result_set(
+    protected function limitResults(
         array $events,
         $limit,
         $last_day
@@ -409,7 +408,7 @@ class EventSearch extends OsecBaseClass
      *
      * @return bool True if event is all-day event.
      */
-    protected function _is_all_day(array $event)
+    protected function isAllDay(array $event)
     {
         if (isset($event['event_allday']) && $event['event_allday']) {
             return true;
@@ -492,13 +491,13 @@ class EventSearch extends OsecBaseClass
         ];
 
         // Get post status Where snippet and associated SQL arguments
-        $where_parameters  = $this->_get_post_status_sql();
+        $where_parameters  = $this->getPostStatusSql();
         $post_status_where = $where_parameters['post_status_where'];
         $args              = array_merge($args, $where_parameters['args']);
 
         // Get the Join (filter_join) and Where (filter_where) statements based
         // on $filter elements specified
-        $filter = $this->_get_filter_sql($filter);
+        $filter = $this->getFilterSql($filter);
 
         $localization_helper = WpmlHelper::factory($this->app);
 
@@ -595,7 +594,7 @@ class EventSearch extends OsecBaseClass
         // TODO Inline type change?
 
         foreach ($events as $i => &$event) {
-            $event['allday'] = $this->_is_all_day($event);
+            $event['allday'] = $this->isAllDay($event);
             $events[$i]      = new Event($this->app, $event);
         }
 

@@ -55,7 +55,7 @@ class SettingsCalenderPageSelect extends SettingsAbstract
         $output = '<label class="ai1ec-control-label ai1ec-col-sm-3" for="' .
                   self::ELEMENT_ID . '">' . __('Calendar page', 'open-source-event-calendar') . '</label>'
                   . '<div class="ai1ec-col-sm-6">' .
-                  $this->_get_pages_selector() . $this->_get_page_view_link() . '</div>';
+                  $this->getPageSelector() . $this->getPageViewLink() . '</div>';
 
         return $this->warp_in_form_group($output);
     }
@@ -65,11 +65,11 @@ class SettingsCalenderPageSelect extends SettingsAbstract
      *
      * @return string HTML snippet.
      */
-    protected function _get_pages_selector()
+    protected function getPageSelector()
     {
         $html = '<select id="' . self::ELEMENT_ID .
                 '" class="ai1ec-form-control" name="' . self::ELEMENT_ID . '">';
-        $list = $this->_get_pages();
+        $list = $this->getPages();
         foreach ($list as $key => $value) {
             $html .= '<option value="' . esc_attr($key) . '"';
             if ($this->args['value'] === $key) {
@@ -87,7 +87,7 @@ class SettingsCalenderPageSelect extends SettingsAbstract
      *
      * @return array Map of page keys and titles.
      */
-    protected function _get_pages()
+    protected function getPages()
     {
         $pages = get_pages();
         if ( ! is_array($pages)) {
@@ -111,7 +111,7 @@ class SettingsCalenderPageSelect extends SettingsAbstract
      *
      * @return string HTML snippet.
      */
-    protected function _get_page_view_link()
+    protected function getPageViewLink()
     {
         if (empty($this->args['value'])) {
             return '';

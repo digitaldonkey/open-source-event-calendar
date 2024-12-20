@@ -124,7 +124,7 @@ class Router extends OsecBaseClass
         if (str_contains($base, '?')) {
             return $this;
         }
-        $base       = $this->_fix_encoded_uri($base);
+        $base       = $this->fixEncodedUri($base);
         $base       = '(?:.+/)?' . $base;
         $named_args = str_replace(
             '[:DS:]',
@@ -162,7 +162,7 @@ class Router extends OsecBaseClass
      *
      * @return string Modified URL.
      */
-    protected function _fix_encoded_uri($url)
+    protected function fixEncodedUri($url)
     {
         $particles = preg_split(
             '|(%[a-f0-9]{2})|',

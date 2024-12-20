@@ -46,7 +46,7 @@ class ArrayHelper
     {
         $result = [];
         foreach ($arr1 as $key => $value) {
-            self::_merge_value($result, $key, $value);
+            self::mergeValue($result, $key, $value);
             if (isset($arr2[$key])) {
                 if (is_array($result[$key]) || is_array($arr2[$key])) {
                     $result[$key] = (array)$result[$key];
@@ -56,13 +56,13 @@ class ArrayHelper
                         $arr2[$key]
                     );
                 } else {
-                    self::_merge_value($result, $key, $arr2[$key]);
+                    self::mergeValue($result, $key, $arr2[$key]);
                 }
             }
             unset($arr2[$key]);
         }
         foreach ($arr2 as $key => $value) {
-            self::_merge_value($result, $key, $value);
+            self::mergeValue($result, $key, $value);
         }
 
         return $result;
@@ -80,7 +80,7 @@ class ArrayHelper
      *
      * @return bool Success If it is not true - something wrong happened
      */
-    protected static function _merge_value(array &$result, $key, mixed $value)
+    protected static function mergeValue(array &$result, $key, mixed $value)
     {
         if (is_int($key) || ctype_digit($key)) {
             $result[] = $value;

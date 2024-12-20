@@ -60,8 +60,8 @@ class EventInstance extends OsecBaseClass
      */
     public function recreate(Event $event): void
     {
-        $old_instances = $this->_load_instances($event->get('post_id'));
-        $instances     = $this->_create_instances_collection($event);
+        $old_instances = $this->loadInstances($event->get('post_id'));
+        $instances     = $this->createCollection($event);
         $insert        = [];
 
         foreach ($instances as $instance) {
@@ -71,8 +71,8 @@ class EventInstance extends OsecBaseClass
             }
             unset($old_instances[$instance['start'] . ':' . $instance['end']]);
         }
-        $this->_remove_instances_by_ids(array_values($old_instances));
-        $this->_add_instances($insert);
+        $this->removeInstances(array_values($old_instances));
+        $this->addinstances($insert);
     }
 
     /**
@@ -82,7 +82,7 @@ class EventInstance extends OsecBaseClass
      *
      * @return array Array of data.
      */
-    protected function _load_instances($post_id)
+    protected function loadInstances($post_id)
     {
         $query     = $this->app->db->prepare(
             'SELECT `id`, `start`, `end` FROM ' .
@@ -106,7 +106,7 @@ class EventInstance extends OsecBaseClass
      *
      * @return array Success.
      */
-    protected function _create_instances_collection(Event $event)
+    protected function createCollection(Event $event)
     {
         $events     = [];
         $event_item = [
@@ -208,7 +208,7 @@ class EventInstance extends OsecBaseClass
 
         $recurrence_dates = [];
         if ($event->get('recurrence_dates')) {
-            $this->_populate_recurring_dates(
+            $this->createRecurringDates(
                 $recurrence_dates,
                 $event->get('recurrence_dates'),
                 $origEventTime,
@@ -218,7 +218,7 @@ class EventInstance extends OsecBaseClass
 
         $exclude_dates = [];
         if ($exception_dates = $event->get('exception_dates')) {
-            $this->_populate_recurring_dates(
+            $this->createRecurringDates(
                 $exclude_dates,
                 $exception_dates,
                 $origEventTime,
@@ -227,7 +227,7 @@ class EventInstance extends OsecBaseClass
         }
 
         if ($event->get('exception_rules')) {
-            $this->_populate_repeat_dates(
+            $this->createRepeatDates(
                 $exclude_dates,
                 $event->get('exception_rules'),
                 $wdate,
@@ -237,7 +237,7 @@ class EventInstance extends OsecBaseClass
         }
 
         if ($event->get('recurrence_rules')) {
-            $this->_populate_repeat_dates(
+            $this->createRepeatDates(
                 $recurrence_dates,
                 $event->get('recurrence_rules'),
                 $wdate,
@@ -282,7 +282,7 @@ class EventInstance extends OsecBaseClass
     // return false;
     // }
 
-    protected function _populate_recurring_dates(array &$dates, string $rule, DT $start, $timezone): void
+    protected function createRecurringDates(array &$dates, string $rule, DT $start, $timezone): void
     {
         foreach (explode(',', (string)$rule) as $date) {
             $i_date = clone $start;
@@ -306,7 +306,7 @@ class EventInstance extends OsecBaseClass
      * @return void
      * @throws Exception
      */
-    protected function _populate_repeat_dates(
+    protected function createRepeatDates(
         array &$data,
         string $rrule,
         DateTime $wdate,
@@ -356,7 +356,7 @@ class EventInstance extends OsecBaseClass
      *
      * @return bool Result.
      */
-    protected function _remove_instances_by_ids(array $ids)
+    protected function removeInstances(array $ids)
     {
         if (empty($ids)) {
             return false;
@@ -378,7 +378,7 @@ class EventInstance extends OsecBaseClass
      *
      * @return void
      */
-    protected function _add_instances(array $instances)
+    protected function addinstances(array $instances)
     {
         $chunks = array_chunk($instances, 50);
         foreach ($chunks as $chunk) {
@@ -404,41 +404,41 @@ class EventInstance extends OsecBaseClass
      */
     public function create(Event $event)
     {
-        $this->_add_instances(
-            $this->_create_instances_collection($event)
+        $this->addinstances(
+            $this->createCollection($event)
         );
 
         return true;
     }
 
-    /**
-     * Prepare date range list for fast exdate search.
-     *
-     * NOTICE: timezone is relevant in only first run.
-     *
-     * @param  string  $date_list  ICS list provided from data model.
-     * @param  string  $timezone  Timezone in which to evaluate.
-     *
-     * @return array List of date ranges, sorted in increasing order.
-     */
-    protected function _get_date_ranges($date_list, $timezone)
-    {
-        static $ranges = [];
-        if ( ! isset($ranges[$date_list])) {
-            $ranges[$date_list] = [];
-            $exploded           = explode(',', $date_list);
-            sort($exploded);
-            foreach ($exploded as $date) {
-                // COMMENT on `rtrim( $date, 'Z' )`:
-                // user selects exclusion date in event timezone thus it
-                // must be parsed as such as opposed to UTC which happen
-                // when 'Z' is preserved.
-                $date                 = new DT(rtrim($date, 'Z'), $timezone);
-                $date                 = (int)$date->format_to_gmt();
-                $ranges[$date_list][] = [$date, $date + (24 * 60 * 60) - 1];
-            }
-        }
-
-        return $ranges[$date_list];
-    }
+//    /**
+//     * Prepare date range list for fast exdate search.
+//     *
+//     * NOTICE: timezone is relevant in only first run.
+//     *
+//     * @param  string  $date_list  ICS list provided from data model.
+//     * @param  string  $timezone  Timezone in which to evaluate.
+//     *
+//     * @return array List of date ranges, sorted in increasing order.
+//     */
+//    protected function _get_date_ranges($date_list, $timezone)
+//    {
+//        static $ranges = [];
+//        if ( ! isset($ranges[$date_list])) {
+//            $ranges[$date_list] = [];
+//            $exploded           = explode(',', $date_list);
+//            sort($exploded);
+//            foreach ($exploded as $date) {
+//                // COMMENT on `rtrim( $date, 'Z' )`:
+//                // user selects exclusion date in event timezone thus it
+//                // must be parsed as such as opposed to UTC which happen
+//                // when 'Z' is preserved.
+//                $date                 = new DT(rtrim($date, 'Z'), $timezone);
+//                $date                 = (int)$date->format_to_gmt();
+//                $ranges[$date_list][] = [$date, $date + (24 * 60 * 60) - 1];
+//            }
+//        }
+//
+//        return $ranges[$date_list];
+//    }
 }

@@ -76,7 +76,7 @@ class ThemeFinder extends OsecBaseClass
      */
     public function get_themes(): array
     {
-        $this->_pre_search($this->get_theme_dirs());
+        $this->preSearch($this->get_theme_dirs());
 
         $options   = [
             'errors'  => null,
@@ -85,17 +85,12 @@ class ThemeFinder extends OsecBaseClass
         ];
         $theme_map = wp_get_themes($options);
 
-        add_filter(
-            'theme_root_uri',
-            $this->get_root_uri_for_our_themes(...),
-            10,
-            3
-        );
+        add_filter('theme_root_uri', $this->get_root_uri_for_our_themes(...), 10, 3);
         foreach ($theme_map as $theme) {
             $theme->get_theme_root_uri();
         }
 
-        $this->_post_search();
+        $this->postSearch();
 
         return $theme_map;
     }
@@ -103,9 +98,9 @@ class ThemeFinder extends OsecBaseClass
     /**
      * Set some globals to allow theme searching.
      */
-    protected function _pre_search(array $directories): void
+    protected function preSearch(array $directories): void
     {
-        $this->restoreGlobals = $this->_replace_search_globals(
+        $this->restoreGlobals = $this->replaceSearchGlobals(
             [
                 'wp_theme_directories' => $directories,
                 'wp_broken_themes'     => [],
@@ -123,9 +118,11 @@ class ThemeFinder extends OsecBaseClass
      *
      * @return array
      */
-    protected function _replace_search_globals(array $variables_map): array
+    protected function replaceSearchGlobals(array $variables_map): array
     {
         foreach ($variables_map as $key => $current_value) {
+            // No clue how to fix.
+            // phpcs:ignore PHPCompatibility.Variables.ForbiddenGlobalVariableVariable.NonBareVariableFound
             global ${$key};
             $variables_map[$key] = ${$key};
             ${$key}              = $current_value;
@@ -143,7 +140,7 @@ class ThemeFinder extends OsecBaseClass
     public function get_theme_dirs(): array
     {
         $theme_dirs = [
-            WP_CONTENT_DIR . DIRECTORY_SEPARATOR . OSEC_THEME_FOLDER,
+            WP_CONTENT_DIR . '/' . OSEC_THEME_FOLDER,
             OSEC_DEFAULT_THEME_ROOT,
         ];
 
@@ -168,14 +165,14 @@ class ThemeFinder extends OsecBaseClass
     /**
      * Reset globals and filters post scan.
      */
-    protected function _post_search(): void
+    protected function postSearch(): void
     {
         remove_filter(
             'wp_cache_themes_persistently',
             '__return_false',
             1
         );
-        $this->_replace_search_globals($this->restoreGlobals);
+        $this->replaceSearchGlobals($this->restoreGlobals);
     }
 
     /**

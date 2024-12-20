@@ -126,7 +126,7 @@ class AdminPageSettings extends AdminPageAbstract
         $tabs            = apply_filters('osec_admin_setting_tabs_alter', $tabs);
         $plugin_settings = $this->app->settings->get_options();
 
-        $tabs = $this->_get_tabs_to_show($plugin_settings, $tabs);
+        $tabs = $this->getVisibleTabs($plugin_settings, $tabs);
         $args = [
             'tabs'            => $tabs,
             'content_class'   => 'ai1ec-form-horizontal',
@@ -150,7 +150,7 @@ class AdminPageSettings extends AdminPageAbstract
      *
      * @return array
      */
-    protected function _get_tabs_to_show(array $plugin_settings, array $tabs)
+    protected function getVisibleTabs(array $plugin_settings, array $tabs)
     {
         $index = 0;
         // $renderer = SettingsRenderer::factory($this->app);

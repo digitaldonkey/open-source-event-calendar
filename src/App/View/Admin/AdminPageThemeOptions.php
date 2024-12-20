@@ -163,7 +163,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
          */
         $tabs           = apply_filters('osec_admin_theme_options_tabs_alter', $tabs);
         $less_variables = LessController::factory($this->app)->get_saved_variables();
-        $tabs           = $this->_get_tabs_to_show($less_variables, $tabs);
+        $tabs           = $this->getVisibleTabs($less_variables, $tabs);
 
         $args = [
             'stacked'       => true,
@@ -194,7 +194,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
      *
      * @return array the array of tabs to display
      */
-    protected function _get_tabs_to_show(array $less_variables, array $tabs)
+    protected function getVisibleTabs(array $less_variables, array $tabs)
     {
         // Inizialize the array of tabs that will be added to the layout
         $bootstrap_tabs_to_add = [];

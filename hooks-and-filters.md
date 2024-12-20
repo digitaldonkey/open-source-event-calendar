@@ -1342,7 +1342,7 @@ add_filter('osec_filter_distinct_types_logic', $default);
  *
  * @param  array  $default  Default distinct type logic.
  *
- * @see EventSearch->_get_filter_sql()
+ * @see EventSearch->getFilterSql()
  *
  * @file src/App/Model/PostTypeEvent/EventSearch.php
  */
@@ -2225,7 +2225,7 @@ add_filter('osec_contribution_buttons',);
 
 ```php
 /**
- * @see Filter documentation 'osec_contribution_buttons' at AbstractView->_get_navigation().
+ * @see Filter documentation 'osec_contribution_buttons' at AbstractView->getNavigation().
  *
  * @file src/App/View/Calendar/CalendarPageView.php
  */
@@ -3825,7 +3825,7 @@ add_filter('osec{$method}', $method $value $_REQUEST);
 #### Description
 
 
-Settings can have save handler. Like: _handle_saving_$option_name()
+Settings can have save handler. Like: handleSaving_$option_name()
 
 #### Parameters
 
@@ -3842,7 +3842,7 @@ Settings can have save handler. Like: _handle_saving_$option_name()
 /**
  * Post process saving of save handler value.
  *
- * Settings can have save handler. Like: _handle_saving_$option_name()
+ * Settings can have save handler. Like: handleSaving_$option_name()
  *
  * @since 1.0
  *
@@ -5735,7 +5735,7 @@ add_filter('osec_filter_distinct_types_logic', $default);
  *
  * @param  array  $default  Default distinct type logic.
  *
- * @see EventSearch->_get_filter_sql()
+ * @see EventSearch->getFilterSql()
  *
  * @file src/App/Model/PostTypeEvent/EventSearch.php
  */
@@ -6618,7 +6618,7 @@ add_filter('osec_contribution_buttons',);
 
 ```php
 /**
- * @see Filter documentation 'osec_contribution_buttons' at AbstractView->_get_navigation().
+ * @see Filter documentation 'osec_contribution_buttons' at AbstractView->getNavigation().
  *
  * @file src/App/View/Calendar/CalendarPageView.php
  */
@@ -8218,7 +8218,7 @@ add_filter('osec{$method}', $method $value $_REQUEST);
 #### Description
 
 
-Settings can have save handler. Like: _handle_saving_$option_name()
+Settings can have save handler. Like: handleSaving_$option_name()
 
 #### Parameters
 
@@ -8235,7 +8235,7 @@ Settings can have save handler. Like: _handle_saving_$option_name()
 /**
  * Post process saving of save handler value.
  *
- * Settings can have save handler. Like: _handle_saving_$option_name()
+ * Settings can have save handler. Like: handleSaving_$option_name()
  *
  * @since 1.0
  *

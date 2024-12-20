@@ -591,12 +591,12 @@ msgid "No Tickets"
 msgstr "Keine Tickets"
 
 #: lib/environment/check.php:145
-msgid "PHP extension \"mbstring\" needed for All-In-One-Event-Calendar is missing. Please, check your PHP configuration.<br />"
-msgstr "Die für All-In-One-Event-Calendar erforderliche PHP-Erweiterung „mbstring“ wurde nicht gefunden. Bitte überprüfe deine PHP-Konfiguration.<br />"
+msgid "PHP extension \"mbstring\" needed for open-source-event-calendar is missing. Please, check your PHP configuration.<br />"
+msgstr "Die für open-source-event-calendar erforderliche PHP-Erweiterung „mbstring“ wurde nicht gefunden. Bitte überprüfe deine PHP-Konfiguration.<br />"
 
 #: lib/environment/check.php:129
-msgid "PHP extension \"iconv\" needed for All-In-One-Event-Calendar is missing. Please, check your PHP configuration.<br />"
-msgstr "Die für All-In-One-Event-Calendar erforderliche PHP-Erweiterung „iconv“ wurde nicht gefunden. Bitte überprüfe deine PHP-Konfiguration.<br />"
+msgid "PHP extension \"iconv\" needed for open-source-event-calendar is missing. Please, check your PHP configuration.<br />"
+msgstr "Die für open-source-event-calendar erforderliche PHP-Erweiterung „iconv“ wurde nicht gefunden. Bitte überprüfe deine PHP-Konfiguration.<br />"
 
 #: app/view/admin/add-new-event.php:450
 msgid "<span class=\"ai1ec-info-text\">The event was submitted by %s.</span>"

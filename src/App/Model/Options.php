@@ -46,7 +46,7 @@ class Options extends OsecBaseClass
      */
     public function add($name, mixed $value, $autoload = false)
     {
-        $autoload = $this->_parse_autoload($autoload);
+        $autoload = $this->parseAutoload($autoload);
         if ( ! add_option($name, $value, '', $autoload)) {
             return false;
         }
@@ -62,7 +62,7 @@ class Options extends OsecBaseClass
      *
      * @return string Autoload identifier.
      */
-    protected function _parse_autoload($input)
+    protected function parseAutoload($input)
     {
         return $input ? 'yes' : 'no';
     }

@@ -243,8 +243,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             /*
             AllDay */
             // Event is all-day if no time components are defined
-            $allday = $this->_is_timeless($startValue['value']) &&
-                      $this->_is_timeless($endValue['value']);
+            $allday = $this->isTimeless($startValue['value']) &&
+                      $this->isTimeless($endValue['value']);
             // Also check the proprietary MS all-day field.
             $ms_allday = $e->getXprop('X-MICROSOFT-CDO-ALLDAYEVENT');
             if (! empty($ms_allday) && $ms_allday[1] == 'TRUE') {
@@ -298,7 +298,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 // We may have two formats:
                 // one exdate with many dates ot more EXDATE rules
                 $exdates      = explode('EXDATE', (string)$exdates);
-                $def_timezone = $this->_get_import_timezone($eventTimezone);
+                $def_timezone = $this->getTimezone($eventTimezone);
                 foreach ($exdates as $exd) {
                     if (empty($exd)) {
                         continue;
@@ -460,7 +460,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 'ical_source_url'  => $e->getXprop('url'),
                 'ical_organizer'   => $organizer,
                 'ical_contact'     => $contact,
-                'ical_uid'         => $this->_get_ical_uid($e),
+                'ical_uid'         => $this->getIcalUid($e),
                 'categories'       => array_keys($imported_cat[EventTaxonomy::CATEGORIES]),
                 'tags'             => array_keys($imported_tags[EventTaxonomy::TAGS]),
                 'feed'             => $feed,
@@ -480,7 +480,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 ],
             ];
             // register any custom exclusions for given event
-            $exclusions = $this->_add_recurring_events_exclusions(
+            $exclusions = $this->addRecurringEventsExclusions(
                 $e,
                 $exclusions,
                 $start
@@ -642,7 +642,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      *
      * @return bool Timelessness.
      */
-    protected function _is_timeless(DateTime $datetime)
+    protected function isTimeless(DateTime $datetime)
     {
         return $datetime->format('His') === '000000';
         // WAS array format before
@@ -681,7 +681,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
 
         // Params value might be DATE
         $isDateValue = isset($time['params']['VALUE']) && $time['params']['VALUE'] === 'DATE'
-                       && $this->_is_timeless($dateTime);
+                       && $this->isTimeless($dateTime);
 
         $date_time = new DT($dateTime);
 
@@ -718,7 +718,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      *
      * @return string Valid timezone name to use.
      */
-    protected function _get_import_timezone($def_timezone)
+    protected function getTimezone($def_timezone)
     {
         $parser   = Timezones::factory($this->app);
         $timezone = $parser->get_name($def_timezone);
@@ -736,7 +736,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      *
      * @return string ICAL uid.
      */
-    protected function _get_ical_uid($e)
+    protected function getIcalUid($e)
     {
         $ical_uid      = $e->getUid();
         $recurrence_id = $e->getRecurrenceid();
@@ -757,7 +757,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      *
      * @return array Modified exclusions structure.
      */
-    protected function _add_recurring_events_exclusions($e, $exclusions, $start)
+    protected function addRecurringEventsExclusions($e, $exclusions, $start)
     {
         $recurrence_id = $e->getXprop('recurrence-id');
         if (
@@ -824,7 +824,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         StrictContentFilterController::factory($this->app)
                                      ->clear_the_content_filters();
         foreach ($arguments['events'] as $event) {
-            $c = $this->_insert_event_in_calendar(
+            $c = $this->insertEventInCalendar(
                 $event,
                 $c,
                 true,
@@ -849,7 +849,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      *
      * @return Vcalendar
      */
-    protected function _insert_event_in_calendar(
+    protected function insertEventInCalendar(
         Event $event,
         Vcalendar $calendar,
         $export = false,
@@ -869,14 +869,14 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $event->set('ical_uid', $uid);
             $event->save(true);
         }
-        $e->setUid($this->_sanitize_value($uid));
+        $e->setUid($this->sanitizeValue($uid));
         $e->setUrl(get_permalink($event->get('post_id')));
 
         // =========================
         // = Summary & description =
         // =========================
         $e->setSummary(
-            $this->_sanitize_value(
+            $this->sanitizeValue(
                 html_entity_decode(
                     apply_filters('the_title', $event->get('post')->post_title),
                     ENT_QUOTES,
@@ -910,7 +910,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
 
         if (isset($params['no_html']) && $params['no_html']) {
             $e->setDescription(
-                $this->_sanitize_value(
+                $this->sanitizeValue(
                     wp_strip_all_tags(strip_shortcodes($content))
                 )
             );
@@ -920,13 +920,13 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                                 '</BODY></HTML>';
                 $e->setXprop(
                     'X-ALT-DESC',
-                    $this->_sanitize_value($html_content),
+                    $this->sanitizeValue($html_content),
                     ['FMTTYPE' => 'text/html']
                 );
                 unset($html_content);
             }
         } else {
-            $e->setDescription($this->_sanitize_value($content));
+            $e->setDescription($this->sanitizeValue($content));
         }
         $revision = (int)current(
             array_keys(
@@ -950,26 +950,26 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // For exportin' all day events, only set the date not the time
             if ($export) {
                 $e->setDtstart(
-                    $this->_sanitize_value(
+                    $this->sanitizeValue(
                         $event->get('start')->format('Ymd')
                     ),
                     $dtstart
                 );
                 $e->setDtend(
-                    $this->_sanitize_value(
+                    $this->sanitizeValue(
                         $event->get('end')->format('Ymd')
                     ),
                     $dtend
                 );
             } else {
                 $e->setDtstart(
-                    $this->_sanitize_value(
+                    $this->sanitizeValue(
                         $event->get('start')->format('Ymd\T')
                     ),
                     $dtstart
                 );
                 $e->setDtend(
-                    $this->_sanitize_value(
+                    $this->sanitizeValue(
                         $event->get('end')->format('Ymd\T')
                     ),
                     $dtend
@@ -982,13 +982,13 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // This is used later.
             $dtstartstring = $event->get('start')->format('Ymd\THis');
             $e->setDtstart(
-                $this->_sanitize_value($dtstartstring),
+                $this->sanitizeValue($dtstartstring),
                 $dtstart
             );
 
             if (false === (bool)$event->get('instant_event')) {
                 $e->setDtend(
-                    $this->_sanitize_value(
+                    $this->sanitizeValue(
                         $event->get('end')->format('Ymd\THis')
                     ),
                     $dtend
@@ -1013,7 +1013,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $location = [$event->get('venue'), $event->get('address')];
             $location = array_filter($location);
             $location = implode(' @ ', $location);
-            $e->setLocation($this->_sanitize_value($location));
+            $e->setLocation($this->sanitizeValue($location));
         }
 
         $categories = [];
@@ -1047,13 +1047,13 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         if ($event->get('cost')) {
             $e->setXprop(
                 'X-COST',
-                $this->_sanitize_value($event->get('cost'))
+                $this->sanitizeValue($event->get('cost'))
             );
         }
         if ($event->get('ticket_url')) {
             $e->setXprop(
                 'X-TICKETS-URL',
-                $this->_sanitize_value(
+                $this->sanitizeValue(
                     $event->get('ticket_url')
                 )
             );
@@ -1064,7 +1064,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         if ($event->is_instant()) {
             $e->setXprop(
                 'X-INSTANT-EVENT',
-                $this->_sanitize_value($event->is_instant())
+                $this->sanitizeValue($event->is_instant())
             );
         }
 
@@ -1079,14 +1079,14 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         ];
         $contact = array_filter($contact);
         $contact = implode('; ', $contact);
-        $e->setContact($this->_sanitize_value($contact));
+        $e->setContact($this->sanitizeValue($contact));
 
         // ====================
         // = Recurrence rules =
         // ====================
         $rrule      = [];
         $recurrence = $event->get('recurrence_rules');
-        $recurrence = $this->_filter_rule($recurrence);
+        $recurrence = $this->filterRule($recurrence);
         if (! empty($recurrence)) {
             $rules = [];
             foreach (explode(';', $recurrence) as $v) {
@@ -1129,7 +1129,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // = Exception rules =
         // ===================
         $exceptions = $event->get('exception_rules');
-        $exceptions = $this->_filter_rule($exceptions);
+        $exceptions = $this->filterRule($exceptions);
         $exrule     = [];
         if (! empty($exceptions)) {
             $rules = [];
@@ -1172,11 +1172,11 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
 
         // add rrule to exported calendar
         if (! empty($rrule) && ! isset($rrule['RDATE'])) {
-            $e->setRrule($this->_sanitize_value($rrule));
+            $e->setRrule($this->sanitizeValue($rrule));
         }
         // add exrule to exported calendar
         if (! empty($exrule) && ! isset($exrule['EXDATE'])) {
-            $e->setExrule($this->_sanitize_value($exrule));
+            $e->setExrule($this->sanitizeValue($exrule));
         }
 
         // ===================
@@ -1186,7 +1186,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // For other other events which use DATETIME, we must use that as well
         // We must also match the exact starting time
         $recurrence_dates = $event->get('recurrence_dates');
-        $recurrence_dates = $this->_filter_rule($recurrence_dates);
+        $recurrence_dates = $this->filterRule($recurrence_dates);
         if (! empty($recurrence_dates)) {
             $params    = [
                 'VALUE' => 'DATE-TIME',
@@ -1206,7 +1206,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             }
         }
         $exception_dates = $event->get('exception_dates');
-        $exception_dates = $this->_filter_rule($exception_dates);
+        $exception_dates = $this->filterRule($exception_dates);
         if (! empty($exception_dates)) {
             $params    = [
                 'VALUE' => 'DATE-TIME',
@@ -1230,7 +1230,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
     }
 
     /**
-     * _sanitize_value method
+     * sanitizeValue method
      *
      * Convert value, so it be safe to use on ICS feed. Used before passing to
      * iCalcreator methods, for rendering.
@@ -1239,7 +1239,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      *
      * @return string Safe value, for use in HTML
      */
-    protected function _sanitize_value($value)
+    protected function sanitizeValue($value)
     {
         if (! is_scalar($value)) {
             return $value;
@@ -1272,7 +1272,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      *
      * @return string Fixed rule or dates value.
      */
-    protected function _filter_rule($rule)
+    protected function filterRule($rule)
     {
         if (null === $this->ruleFilter) {
             $this->ruleFilter = RepeatRuleToText::factory($this->app);

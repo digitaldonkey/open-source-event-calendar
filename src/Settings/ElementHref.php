@@ -189,7 +189,7 @@ class ElementHref
     {
         $array_key = $this->uri_particle;
         if (null === $this->uri_particle) {
-            $array_key = $this->_current_array_key();
+            $array_key = $this->currentArrayKey();
         }
         // Let's copy the origina cat_ids or tag_ids so we do not affect it
         $copy = [];
@@ -221,7 +221,7 @@ class ElementHref
      *
      * @return string Name of current argument key
      */
-    protected function _current_array_key()
+    protected function currentArrayKey()
     {
         $map      = [
             'category' => 'cat',

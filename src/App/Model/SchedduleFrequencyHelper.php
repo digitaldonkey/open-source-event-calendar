@@ -104,7 +104,7 @@ class SchedduleFrequencyHelper
 
             return true;
         }
-        $match = $this->_match($input);
+        $match = $this->extractTimeIdentifiers($input);
         if ( ! $match) {
             return false;
         }
@@ -124,7 +124,7 @@ class SchedduleFrequencyHelper
      *
      * @return array|NULL Extracted time identifiers
      */
-    protected function _match($input): ?array
+    protected function extractTimeIdentifiers($input): ?array
     {
         $regexp  = '/(\d*\.?\d+)([' .
                    implode('|', array_keys($this->multipliers)) .

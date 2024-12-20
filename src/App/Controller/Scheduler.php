@@ -23,8 +23,6 @@ class Scheduler extends OsecBaseClass
      */
     public const OPTION_NAME = 'osec_scheduler_hooks';
 
-    public const CURRENT_VERSION = OSEC_VERSION;
-
     /**
      * @var array Map of hooks currently registered
      */
@@ -76,7 +74,7 @@ class Scheduler extends OsecBaseClass
             $details = $this->get_details($hook);
             if (
                 null === $details ||
-                $this->_override_default($hook, $details)
+                $this->shouldDefaultsBeOverwritten($hook, $details)
             ) {
                 $this->schedule($hook, $freq);
             }
@@ -92,7 +90,7 @@ class Scheduler extends OsecBaseClass
      */
     public function get_default_schedules()
     {
-        return ['ai1ec_purge_events_cache' => '3h'];
+        return ['osec_purge_events_cache' => '3h'];
     }
 
     // TODO
@@ -108,7 +106,7 @@ class Scheduler extends OsecBaseClass
     // * @return void Method does not return
     // */
     // public function background( $hook ) {
-    // return $this->_install( $hook, time() );
+    // return $this->installScheduleEvents( $hook, time() );
     // }
 
     /**
@@ -120,7 +118,7 @@ class Scheduler extends OsecBaseClass
      */
     public function get_details($hook)
     {
-        $existing = $this->_get_hooks_list();
+        $existing = $this->getRegisteredHooks();
         if ( ! isset($existing[$hook])) {
             return null;
         }
@@ -135,7 +133,7 @@ class Scheduler extends OsecBaseClass
      *
      * @return array Map of hooks, mapped on hook name
      */
-    protected function _get_hooks_list()
+    protected function getRegisteredHooks()
     {
         return $this->configuration['hooks'];
     }
@@ -143,15 +141,17 @@ class Scheduler extends OsecBaseClass
     /**
      * In some cases we need to override existing values
      *
+     * TODO I guess this is always true
+     *
      * @param  string  $hook  Name of hook being checked
      * @param  array  $current  Hook details
      *
      * @return bool True if hook needs to be re-installed
      */
-    protected function _override_default($hook, array $current)
+    protected function shouldDefaultsBeOverwritten($hook, array $current): bool
     {
         if (
-            'ai1ec_purge_events_cache' === $hook &&
+            'osec_purge_events_cache' === $hook &&
             '5m' === $current['freq'] &&
             version_compare('1.11', $this->configuration['version']) >= 0
         ) {
@@ -178,7 +178,7 @@ class Scheduler extends OsecBaseClass
             $first = time();
         }
 
-        return $this->_install($hook, $first, $freq, $version);
+        return $this->installScheduleEvents($hook, $first, $freq, $version);
     }
 
     /**
@@ -191,7 +191,7 @@ class Scheduler extends OsecBaseClass
      *
      * @return bool Success
      */
-    protected function _install(
+    protected function installScheduleEvents(
         $hook,
         $timestamp,
         $freq = null,
@@ -210,7 +210,7 @@ class Scheduler extends OsecBaseClass
             $installable['freq']       = $parsed_freq->to_string();
             unset($parsed_freq);
         }
-        if ( ! $this->_merge_hook($hook, $installable)) {
+        if ( ! $this->mergeHook($hook, $installable)) {
             return false;
         }
         wp_clear_scheduled_hook($installable['hook']);
@@ -232,11 +232,11 @@ class Scheduler extends OsecBaseClass
      */
     public function get_valid_freq_details($hook, $input): SchedduleFrequencyHelper
     {
-        $freq = $this->_parse_freq($input);
+        $freq = $this->parseFreq($input);
         if (0 === $freq->to_seconds()) { // input was empty/parseable to empty
             $defaults = $this->get_default_schedules();
             if (isset($defaults[$hook])) {
-                $freq = $this->_parse_freq($defaults[$hook]);
+                $freq = $this->parseFreq($defaults[$hook]);
             }
         }
 
@@ -258,7 +258,7 @@ class Scheduler extends OsecBaseClass
      *
      * @return SchedduleFrequencyHelper Parsed frequency object
      */
-    protected function _parse_freq($freq): SchedduleFrequencyHelper
+    protected function parseFreq($freq): SchedduleFrequencyHelper
     {
         $parsed = new SchedduleFrequencyHelper();
         if (false === $parsed->parse($freq)) {
@@ -294,14 +294,14 @@ class Scheduler extends OsecBaseClass
             unset($wpschedules);
         }
         $seconds = $seconds->to_seconds();
-        $current = $this->_get_freqs_list();
+        $current = $this->frequencyList();
         if ( ! isset($current[$seconds])) {
             $current[$seconds] = [
                 'hash'    => 'every_' . $seconds,
                 'name'    => $name,
                 'seconds' => $seconds,
             ];
-            $this->_set_freqs_list($current);
+            $this->setFrequencyList($current);
         }
 
         return $current[$seconds]['hash'];
@@ -314,7 +314,7 @@ class Scheduler extends OsecBaseClass
      *
      * @return array Map of frequencies, mapped on offset seconds
      */
-    protected function _get_freqs_list()
+    protected function frequencyList()
     {
         return $this->configuration['freqs'];
     }
@@ -329,7 +329,7 @@ class Scheduler extends OsecBaseClass
      *
      * @return bool Success
      */
-    protected function _set_freqs_list(array $freqs)
+    protected function setFrequencyList(array $freqs)
     {
         $this->configuration['freqs'] = $freqs;
         $this->isUpdated              = true;
@@ -345,15 +345,15 @@ class Scheduler extends OsecBaseClass
      *
      * @return bool Success
      */
-    protected function _merge_hook($hook, array $installable)
+    protected function mergeHook($hook, array $installable)
     {
-        $existing = $this->_get_hooks_list();
+        $existing = $this->getRegisteredHooks();
         if (isset($existing[$hook])) {
             $installable = array_merge($existing[$hook], $installable);
         }
         $existing[$hook] = $installable;
 
-        return $this->_set_hooks_list($existing);
+        return $this->setHooks($existing);
     }
 
     /**
@@ -365,7 +365,7 @@ class Scheduler extends OsecBaseClass
      *
      * @return bool Success
      */
-    protected function _set_hooks_list(array $hooks)
+    protected function setHooks(array $hooks)
     {
         $this->configuration['hooks'] = $hooks;
         $this->isUpdated              = true;
@@ -395,8 +395,8 @@ class Scheduler extends OsecBaseClass
             $reschedule = true;
         } else {
             // unify frequencies to avoid unnecessary rescheduling
-            $curr_freq = $this->_parse_freq($existing['freq'])->to_string();
-            $new_freq  = $this->_parse_freq($freq)->to_string();
+            $curr_freq = $this->parseFreq($existing['freq'])->to_string();
+            $new_freq  = $this->parseFreq($freq)->to_string();
             if (
                 0 !== strcmp($curr_freq, $new_freq) ||
                 ! isset($existing['version']) ||
@@ -424,7 +424,7 @@ class Scheduler extends OsecBaseClass
      */
     public function cron_schedules(array $wp_map)
     {
-        $freqs = $this->_get_freqs_list();
+        $freqs = $this->frequencyList();
         foreach ($freqs as $entry) {
             $wp_map[$entry['hash']] = [
                 'interval' => $entry['seconds'],
@@ -445,8 +445,8 @@ class Scheduler extends OsecBaseClass
     public function shutdown()
     {
         if ($this->isUpdated) {
-            $this->_compact_frequencies();
-            $this->configuration['version'] = self::CURRENT_VERSION;
+            $this->compactFrequencies();
+            $this->configuration['version'] = OSEC_VERSION;
             update_option(self::OPTION_NAME, $this->configuration);
         }
     }
@@ -454,13 +454,13 @@ class Scheduler extends OsecBaseClass
     /**
      * Remove frequencies, that are no longer associated to any of the hooks
      */
-    protected function _compact_frequencies()
+    protected function compactFrequencies()
     {
-        $hook_list = $this->_get_hooks_list();
-        $this->_set_freqs_list([]);
+        $hook_list = $this->getRegisteredHooks();
+        $this->setFrequencyList([]);
         foreach ($hook_list as $hook) {
             $this->get_named_frequency(
-                $this->_parse_freq($hook['freq'])
+                $this->parseFreq($hook['freq'])
             );
         }
 
@@ -480,7 +480,7 @@ class Scheduler extends OsecBaseClass
      */
     public function uninstall(bool $purge = false): void
     {
-        $cron_list = $this->_get_hooks_list();
+        $cron_list = $this->getRegisteredHooks();
         foreach ($cron_list as $cron) {
             wp_clear_scheduled_hook($cron['hook']);
         }
@@ -495,11 +495,11 @@ class Scheduler extends OsecBaseClass
      */
     public function delete($hook)
     {
-        $existing = $this->_get_hooks_list();
+        $existing = $this->getRegisteredHooks();
         $success  = wp_clear_scheduled_hook($hook);
         if (isset($existing[$hook])) {
             unset($existing[$hook]);
-            $this->_set_hooks_list($existing);
+            $this->setHooks($existing);
         }
 
         return $success;
@@ -516,7 +516,7 @@ class Scheduler extends OsecBaseClass
     public function settings_initiated_hook(Settings $settings): Settings
     {
         if (property_exists($settings, 'view_cache_refresh_interval')) {
-            $cache_schedule                        = $this->get_details('ai1ec_purge_events_cache');
+            $cache_schedule                        = $this->get_details('osec_purge_events_cache');
             $settings->view_cache_refresh_interval = $cache_schedule['freq'];
         }
 

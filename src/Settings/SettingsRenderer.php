@@ -29,10 +29,8 @@ class SettingsRenderer extends OsecBaseClass
     {
         $namespacedClass = $setting['renderer']['class'];
         if ( ! class_exists($namespacedClass)) {
-            throw new Exception($namespacedClass . ' does not exist');
+            throw new Exception(esc_html($namespacedClass . ' does not exist'));
         }
-        $renderer = new $namespacedClass($this->app, $setting);
-
-        return $renderer->render();
+        return (new $namespacedClass($this->app, $setting))->render();
     }
 }

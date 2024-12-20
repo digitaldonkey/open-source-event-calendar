@@ -37,10 +37,10 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      */
     final public function add($object_id, $key, mixed $value)
     {
-        if ( ! $this->_add($object_id, $key, $value)) {
+        if ( ! $this->addMeta($object_id, $key, $value)) {
             return false;
         }
-        $this->cache->set($this->_cache_key($object_id, $key), $value);
+        $this->cache->set($this->cacheKey($object_id, $key), $value);
 
         return true;
     }
@@ -54,7 +54,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      *
      * @return bool Success.
      */
-    protected function _add($object_id, $key, mixed $value)
+    protected function addMeta($object_id, $key, mixed $value)
     {
         $function = 'add_' . $this->objectId . '_meta';
 
@@ -73,13 +73,13 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
     final public function set($object_id, $key, mixed $value)
     {
         if ( ! $this->get($object_id, $key)) {
-            if ( ! $this->_add($object_id, $key, $value)) {
+            if ( ! $this->addMeta($object_id, $key, $value)) {
                 return false;
             }
-        } elseif ( ! $this->_update($object_id, $key, $value)) {
+        } elseif ( ! $this->updateMeta($object_id, $key, $value)) {
             return false;
         }
-        $this->cache->set($this->_cache_key($object_id, $key), $value);
+        $this->cache->set($this->cacheKey($object_id, $key), $value);
 
         return true;
     }
@@ -95,7 +95,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      */
     final public function get($object_id, $key, mixed $default = null)
     {
-        $cache_key = $this->_cache_key($object_id, $key);
+        $cache_key = $this->cacheKey($object_id, $key);
         $value     = $this->cache->get($cache_key, $default);
         if ($default === $value) {
             $value = $this->getMeta($object_id, $key);
@@ -113,7 +113,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      *
      * @return string EventSingleView identifier for given keys.
      */
-    protected function _cache_key($object_id, $key)
+    protected function cacheKey($object_id, $key)
     {
         static $separator = "\0";
 
@@ -144,7 +144,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      *
      * @return bool Success.
      */
-    protected function _update($object_id, $key, mixed $value)
+    protected function updateMeta($object_id, $key, mixed $value)
     {
         $function = 'update_' . $this->objectId . '_meta';
 
@@ -162,10 +162,10 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      */
     final public function update($object_id, $key, mixed $value)
     {
-        if ( ! $this->_update($object_id, $key, $value)) {
+        if ( ! $this->updateMeta($object_id, $key, $value)) {
             return false;
         }
-        $this->cache->set($this->_cache_key($object_id, $key), $value);
+        $this->cache->set($this->cacheKey($object_id, $key), $value);
 
         return true;
     }
@@ -180,9 +180,9 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      */
     final public function delete($object_id, $key)
     {
-        $this->cache->delete($this->_cache_key($object_id, $key));
+        $this->cache->delete($this->cacheKey($object_id, $key));
 
-        return $this->_delete($object_id, $key);
+        return $this->deleteMeta($object_id, $key);
     }
 
     /**
@@ -193,7 +193,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      *
      * @return bool Success.
      */
-    protected function _delete($object_id, $key)
+    protected function deleteMeta($object_id, $key)
     {
         $function = 'delete_' . $this->objectId . '_meta';
 
@@ -205,7 +205,7 @@ abstract class MetaAdapterAbstract extends OsecBaseInitialized
      *
      * @return void Method does not return.
      */
-    protected function _initialize()
+    protected function initialize()
     {
         $class          = static::class;
         $this->objectId = strtolower(substr($class, strlen(__NAMESPACE__ . '\MetaAdapter')));

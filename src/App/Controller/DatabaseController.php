@@ -68,9 +68,9 @@ class DatabaseController extends OsecBaseClass
      */
     public function query($sql_query)
     {
-        $this->_query_profile($sql_query);
+        $this->queryProfile($sql_query);
         $result = $this->wpdb->query($sql_query);
-        $this->_query_profile($result);
+        $this->queryProfile($result);
 
         return $result;
     }
@@ -79,14 +79,14 @@ class DatabaseController extends OsecBaseClass
      * Method aiding query profiling.
      *
      * How to use:
-     * - on method resulting in query start call _query_profiler( 'SQL query' )
-     * - on it's end call _query_profiler( (int)number_of_rows|(bool)false )
+     * - on method resulting in query start call queryProfiler( 'SQL query' )
+     * - on it's end call queryProfiler( (int)number_of_rows|(bool)false )
      *
      * @param  mixed  $query_or_result  Query on first call, result on second.
      *
      * @return void
      */
-    protected function _query_profile(mixed $query_or_result)
+    protected function queryProfile(mixed $query_or_result)
     {
         static $last = null;
         if (null === $last) {
@@ -171,9 +171,9 @@ class DatabaseController extends OsecBaseClass
      */
     public function get_col($query = null, $col = 0)
     {
-        $this->_query_profile($query);
+        $this->queryProfile($query);
         $result = $this->wpdb->get_col($query, $col);
-        $this->_query_profile(count($result));
+        $this->queryProfile(count($result));
 
         return $result;
     }
@@ -213,12 +213,12 @@ class DatabaseController extends OsecBaseClass
      * @return string|null Sanitized query string, null if there is no query, false if there is an error and
      *     string if there was something to prepare
      */
-    public function prepare($query, $args)
+    public function prepare($query)
     {
         if (null === $query) {
             return null;
         }
-
+        // phpcs:ignore PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.NeedsInspection
         $args = func_get_args();
         array_shift($args);
         // If args were passed as an array (as in vsprintf), move them up
@@ -250,9 +250,9 @@ class DatabaseController extends OsecBaseClass
      */
     public function get_var($query = null, $col = 0, $row = 0)
     {
-        $this->_query_profile($query);
+        $this->queryProfile($query);
         $result = $this->wpdb->get_var($query, $col, $row);
-        $this->_query_profile(null !== $result);
+        $this->queryProfile(null !== $result);
 
         return $result;
     }
@@ -273,9 +273,9 @@ class DatabaseController extends OsecBaseClass
      */
     public function get_row($query = null, $output = OBJECT, $row = 0)
     {
-        $this->_query_profile($query);
+        $this->queryProfile($query);
         $result = $this->wpdb->get_row($query, $output, $row);
-        $this->_query_profile(null !== $result);
+        $this->queryProfile(null !== $result);
 
         return $result;
     }
@@ -295,7 +295,7 @@ class DatabaseController extends OsecBaseClass
      */
     public function insert($table, $data, $format = null)
     {
-        $this->_query_profile(
+        $this->queryProfile(
             'INSERT INTO ' . $table . '; data: ' . wp_json_encode($data)
         );
         $result = $this->wpdb->insert(
@@ -303,7 +303,7 @@ class DatabaseController extends OsecBaseClass
             $data,
             $format
         );
-        $this->_query_profile($result);
+        $this->queryProfile($result);
 
         return $result;
     }
@@ -343,7 +343,7 @@ class DatabaseController extends OsecBaseClass
      */
     public function delete($table, $where, $format = null)
     {
-        $this->_query_profile(
+        $this->queryProfile(
             'DELETE FROM ' . $table . '; conditions: ' . wp_json_encode($where)
         );
         $result = $this->wpdb->delete(
@@ -351,7 +351,7 @@ class DatabaseController extends OsecBaseClass
             $where,
             $format
         );
-        $this->_query_profile($result);
+        $this->queryProfile($result);
 
         return $result;
     }
@@ -377,9 +377,9 @@ class DatabaseController extends OsecBaseClass
      */
     public function update($table, $data, $where, $format = null, $where_format = null)
     {
-        $this->_query_profile('UPDATE ' . $table . ': ' . implode('//', $data));
+        $this->queryProfile('UPDATE ' . $table . ': ' . implode('//', $data));
         $result = $this->wpdb->update($table, $data, $where, $format, $where_format);
-        $this->_query_profile($result);
+        $this->queryProfile($result);
 
         return $result;
     }
@@ -417,9 +417,9 @@ class DatabaseController extends OsecBaseClass
      */
     public function get_results($query, $output = OBJECT)
     {
-        $this->_query_profile($query);
+        $this->queryProfile($query);
         $result = $this->wpdb->get_results($query, $output);
-        $this->_query_profile(count($result));
+        $this->queryProfile(count($result));
 
         return $result;
     }

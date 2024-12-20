@@ -440,7 +440,7 @@ class LessController extends OsecBaseClass
         }
         $variables = $this->convert_less_variables_for_parsing($variables);
 
-        $variables = $this->_compilation_check_clear_variables($variables);
+        $variables = $this->cleanUp($variables);
         ksort($variables);
 
         /**
@@ -469,7 +469,7 @@ class LessController extends OsecBaseClass
      *
      * @return array Modified variables.
      */
-    protected function _compilation_check_clear_variables(array $variables)
+    protected function cleanUp(array $variables)
     {
         foreach ($variables as $key => $value) {
             if (str_starts_with($key, 'fontdir_')) {

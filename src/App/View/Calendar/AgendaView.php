@@ -69,7 +69,7 @@ class AgendaView extends AbstractView
             /* Filter doc @see AbstractView->getFilterDefaults()*/
             apply_filters('osec_show_unique_events', false)
         );
-        $this->_update_meta($results['events']);
+        $this->updateMeta($results['events']);
         $dates = $this->get_agenda_like_date_array(
             $results['events'],
             $view_args['request']
@@ -102,7 +102,7 @@ class AgendaView extends AbstractView
         $loader           = ThemeLoader::factory($this->app);
         $pagination_links = '';
         if (! $view_args['no_navigation']) {
-            $pagination_links = $this->_get_agenda_like_pagination_links(
+            $pagination_links = $this->getPaginationLinks(
                 $view_args,
                 $results['prev'],
                 $results['next'],
@@ -139,7 +139,7 @@ class AgendaView extends AbstractView
                     ->get_file('agenda-buttons.twig', $button_args, false)
                     ->get_content();
             }
-            $navigation = $this->_get_navigation($nav_args);
+            $navigation = $this->getNavigation($nav_args);
         }
 
         /**
@@ -185,7 +185,7 @@ class AgendaView extends AbstractView
             return $loader->apply_filters_to_args($args, 'agenda.twig', false);
         }
 
-        return $this->_get_view($args);
+        return $this->getView($args);
     }
 
     public function get_name(): string
@@ -223,7 +223,7 @@ class AgendaView extends AbstractView
                 $start_time,
                 $this->app->settings->get('input_date_format')
             );
-            $href_for_date = $this->_create_link_for_day_view($exact_date);
+            $href_for_date = $this->create_link_for_day_view($exact_date);
             // timestamp is used to have correctly sorted array as UNIX
             // timestamp never goes in decreasing order for increasing dates.
             $timestamp = $start_time->format();
@@ -235,7 +235,7 @@ class AgendaView extends AbstractView
                     'notallday' => [],
                 ];
             }
-            $this->_add_runtime_properties($event);
+            $this->addRuntimeProperties($event);
             // Add the event.
             $category                                 = $event->is_allday()
                 ? 'allday'
@@ -332,7 +332,7 @@ class AgendaView extends AbstractView
      * @throws BootstrapException
      * @throws TimezoneException
      */
-    protected function _get_agenda_like_pagination_links(
+    protected function getPaginationLinks(
         array $args,
         bool $prev = false,
         bool $next = false,
@@ -409,7 +409,7 @@ class AgendaView extends AbstractView
         return $view_args;
     }
 
-    protected function _add_view_specific_runtime_properties(Event $event)
+    protected function add_view_specific_runtime_properties(Event $event)
     {
         $taxonomyView = EventTaxonomyView::factory($this->app);
         $event->set_runtime(

@@ -56,7 +56,7 @@ class MonthView extends AbstractView
         );
         // Create pagination links.
         $title            = $local_date->format_i18n('F Y');
-        $pagination_links = $this->_get_pagination($args, $title);
+        $pagination_links = $this->getPagination($args, $title);
 
         /**
          * Should ticket button be enabled in month view
@@ -82,7 +82,7 @@ class MonthView extends AbstractView
         ];
 
         // Add navigation if requested.
-        $view_args['navigation'] = $this->_get_navigation(
+        $view_args['navigation'] = $this->getNavigation(
             [
                 'no_navigation'    => $args['no_navigation'],
                 'pagination_links' => $pagination_links,
@@ -97,10 +97,10 @@ class MonthView extends AbstractView
             Request::factory($this->app)
                    ->is_json_required($args['request_format'], 'month')
         ) {
-            return $this->_apply_filters_to_args($view_args);
+            return $this->apply_filters_to_args($view_args);
         }
 
-        return $this->_get_view($view_args);
+        return $this->getView($view_args);
     }
 
     /**
@@ -159,7 +159,7 @@ class MonthView extends AbstractView
         );
         $start_time   = $start_time->format();
         $end_time     = $end_time->format();
-        $this->_update_meta($month_events);
+        $this->updateMeta($month_events);
         StrictContentFilterController::factory($this->app)->clear_the_content_filters();
         foreach ($month_events as $event) {
             $event_start = $event->get('start')->format();
@@ -200,7 +200,7 @@ class MonthView extends AbstractView
 
             // TODO DATE SEEMS WRONG AT NEXT CALL
 
-            $this->_add_runtime_properties($event);
+            $this->addRuntimeProperties($event);
             $days_events[$day][$priority][] = $event;
         }
         StrictContentFilterController::factory($this->app)
@@ -330,7 +330,7 @@ class MonthView extends AbstractView
             }
             $weeks[$week][] = [
                 'date'      => $i,
-                'date_link' => $this->_create_link_for_day_view($exact_date),
+                'date_link' => $this->create_link_for_day_view($exact_date),
                 'today'     =>
                     $timestamp->format('Y') == $today->format('Y') &&
                     $timestamp->format('m') == $today->format('m') &&
@@ -516,7 +516,7 @@ class MonthView extends AbstractView
         return $links;
     }
 
-    protected function _add_view_specific_runtime_properties(Event $event)
+    protected function add_view_specific_runtime_properties(Event $event)
     {
         $end_day = (new DT($event->get('end')))
             ->adjust(-1, 'second')

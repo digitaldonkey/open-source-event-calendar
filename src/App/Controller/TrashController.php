@@ -95,7 +95,7 @@ class TrashController extends OsecBaseClass
      */
     public function delete_children(int $post_id)
     {
-        $this->_manage_children($post_id, 'delete');
+        $this->manageChildren($post_id, 'delete');
     }
 
     /**
@@ -104,7 +104,7 @@ class TrashController extends OsecBaseClass
      * @param  int  $post_id
      * @param  string  $action
      */
-    protected function _manage_children(int $post_id, string $action)
+    protected function manageChildren(int $post_id, string $action)
     {
         try {
             $event = new Event($this->app, $post_id);
@@ -146,7 +146,7 @@ class TrashController extends OsecBaseClass
      */
     public function trash_children(int $post_id)
     {
-        $this->_manage_children($post_id, 'trash');
+        $this->manageChildren($post_id, 'trash');
     }
 
     /**
@@ -170,7 +170,7 @@ class TrashController extends OsecBaseClass
      */
     public function untrash_children(int $post_id)
     {
-        $this->_manage_children($post_id, 'untrash');
+        $this->manageChildren($post_id, 'untrash');
     }
 
     /**

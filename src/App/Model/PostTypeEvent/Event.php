@@ -124,7 +124,7 @@ class Event extends OsecBaseClass
             isset($this->mutatorMethods[$property]) &&
             $this->mutatorMethods[$property] >= 0
         ) {
-            $method = '_handle_property_construct_' . $property;
+            $method = 'handlePropertyConstruct_' . $property;
             $value  = $this->{$method}($value);
         }
         $this->entity->set($property, $value);
@@ -678,7 +678,7 @@ class Event extends OsecBaseClass
             isset($this->mutatorMethods[$field]) &&
             $this->mutatorMethods[$field] <= 0
         ) {
-            $value = $this->{'_handle_property_destruct_' . $field}($value);
+            $value = $this->{'handlePropertyDestruct_' . $field}($value);
         }
 
         return $value;
@@ -796,7 +796,7 @@ class Event extends OsecBaseClass
         $this->entity = clone $this->entity;
     }
 
-    protected function _handle_property_construct_recurrence_dates($value)
+    protected function handlePropertyConstruct_recurrence_dates($value)
     {
         if ($value) {
             $this->entity->set('recurrence_rules', 'RDATE=' . $value);
@@ -805,7 +805,7 @@ class Event extends OsecBaseClass
         return $value;
     }
 
-    protected function _handle_property_construct_exception_dates($value)
+    protected function handlePropertyConstruct_exception_dates($value)
     {
         if ($value) {
             $this->entity->set('exception_rules', 'EXDATE=' . $value);
@@ -814,7 +814,7 @@ class Event extends OsecBaseClass
         return $value;
     }
 
-    protected function _handle_property_destruct_instant_event($value)
+    protected function handlePropertyDestruct_instant_event($value)
     {
         return $this->destructBoolean($value);
     }
@@ -835,7 +835,7 @@ class Event extends OsecBaseClass
         return $value;
     }
 
-    protected function _handle_property_destruct_latitude($value)
+    protected function handlePropertyDestruct_latitude($value)
     {
         return $this->destructCoordinates($value);
     }
@@ -848,23 +848,23 @@ class Event extends OsecBaseClass
         return 'NULL';
     }
 
-    protected function _handle_property_destruct_longitude($value)
+    protected function handlePropertyDestruct_longitude($value)
     {
         return $this->destructCoordinates($value);
     }
 
 
-    protected function _handle_property_destruct_allday($value)
+    protected function handlePropertyDestruct_allday($value)
     {
         return $this->destructBoolean($value);
     }
 
-    protected function _handle_property_destruct_show_map($value)
+    protected function handlePropertyDestruct_show_map($value)
     {
         return $this->destructBoolean($value);
     }
 
-    protected function _handle_property_destruct_show_coordinates($value)
+    protected function handlePropertyDestruct_show_coordinates($value)
     {
         return $this->destructBoolean($value);
     }
@@ -881,7 +881,7 @@ class Event extends OsecBaseClass
      *
      * @return string Timezone name to use for event in future.
      */
-    protected function _handle_property_destruct_timezone_name(
+    protected function handlePropertyDestruct_timezone_name(
         $timezone_name
     ) {
         if (empty($timezone_name)) {
@@ -901,7 +901,7 @@ class Event extends OsecBaseClass
      *
      * @return string UNIX timestamp.
      */
-    protected function _handle_property_destruct_start(DT $start): string
+    protected function handlePropertyDestruct_start(DT $start): string
     {
         return $this->destructDate($start);
     }
@@ -911,7 +911,7 @@ class Event extends OsecBaseClass
         return $date->format_to_gmt();
     }
 
-    protected function _handle_property_construct_start($value)
+    protected function handlePropertyConstruct_start($value)
     {
         return $this->constructDate($value);
     }
@@ -932,7 +932,7 @@ class Event extends OsecBaseClass
         return new DT($date);
     }
 
-    protected function _handle_property_construct_timezone_name($value)
+    protected function handlePropertyConstruct_timezone_name($value)
     {
         if (is_null($value)) {
             return 'sys.default';
@@ -948,7 +948,7 @@ class Event extends OsecBaseClass
      *
      * @return string UNIX timestamp.
      */
-    protected function _handle_property_destruct_end(DT $end)
+    protected function handlePropertyDestruct_end(DT $end)
     {
         return $this->destructDate($end);
     }
@@ -957,7 +957,7 @@ class Event extends OsecBaseClass
      * @throws TimezoneException
      * @throws BootstrapException
      */
-    protected function _handle_property_construct_end($value): DT
+    protected function handlePropertyConstruct_end($value): DT
     {
         return $this->constructDate($value);
     }
@@ -969,7 +969,7 @@ class Event extends OsecBaseClass
      *
      * @return string Success: true, always
      */
-    protected function _handle_property_construct_cost(string $value)
+    protected function handlePropertyConstruct_cost(string $value)
     {
         $cost    = '';
         $is_free = true;
@@ -998,7 +998,7 @@ class Event extends OsecBaseClass
      *
      * @return string Serialized value to store.
      */
-    protected function _handle_property_destruct_cost($cost)
+    protected function handlePropertyDestruct_cost($cost)
     {
         $data = [
             'cost'    => $cost,
@@ -1011,7 +1011,7 @@ class Event extends OsecBaseClass
         return wp_json_encode($data);
     }
 
-    protected function _handle_property_construct_tags(mixed $tags)
+    protected function handlePropertyConstruct_tags(mixed $tags)
     {
         return $this->construct_taxonomies($tags);
     }
@@ -1028,7 +1028,7 @@ class Event extends OsecBaseClass
         throw new Exception('Illegal value');
     }
 
-    protected function _handle_property_construct_categories(mixed $tags)
+    protected function handlePropertyConstruct_categories(mixed $tags)
     {
         return $this->construct_taxonomies($tags);
     }

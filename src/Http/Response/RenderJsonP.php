@@ -18,7 +18,7 @@ class RenderJsonP extends RenderStrategyAbstract
      */
     public function render(array $params): void
     {
-        $this->_dump_buffers();
+        $this->cleanOutputBuffers();
         header('HTTP/1.1 200 OK');
         header('Content-Type: application/json; charset=UTF-8');
         $data   = ResponseHelper::utf8($params['data']);

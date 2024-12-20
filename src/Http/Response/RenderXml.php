@@ -14,7 +14,7 @@ class RenderXml extends RenderStrategyAbstract
 {
     public function render(array $params)
     {
-        $this->_dump_buffers();
+        $this->cleanOutputBuffers();
         header('HTTP/1.1 200 OK');
         header('Content-Type: text/xml; charset=UTF-8');
         $data   = ResponseHelper::utf8($params['data']);
@@ -52,7 +52,7 @@ class RenderXml extends RenderStrategyAbstract
         if ($wrap_json) {
             $xml .= '<![CDATA[' . wp_json_encode($data) . ']]>';
         } else {
-            $xml .= self::_generate_xml_from_value($data, $node_name);
+            $xml .= self::xmlFromValue($data, $node_name);
         }
 
         $xml .= '</' . $node_block . '>';
@@ -71,7 +71,7 @@ class RenderXml extends RenderStrategyAbstract
      *
      * @return string               Valid XML document.
      */
-    private static function _generate_xml_from_value($value, $node_name)
+    private static function xmlFromValue($value, $node_name)
     {
         if (is_array($value) || is_object($value)) {
             $xml = '';
@@ -82,7 +82,7 @@ class RenderXml extends RenderStrategyAbstract
                 }
 
                 $xml .= '<' . $key . '>' .
-                        self::_generate_xml_from_value($v, $node_name) .
+                        self::xmlFromValue($v, $node_name) .
                         '</' . $key . '>';
             }
         } else {

@@ -75,7 +75,7 @@ class EventParent extends OsecBaseClass
             $instance_id = $_POST['osec_instance_id'];
             $post_id     = EventEditing::factory($this->app)->create_duplicate_post();
             if (false !== $post_id) {
-                $this->_handle_instances(
+                $this->handleInstances(
                     new Event($this->app, $post_id),
                     new Event($this->app, $old_post_id),
                     $instance_id
@@ -113,7 +113,7 @@ class EventParent extends OsecBaseClass
      *
      * @return void Method does not return.
      */
-    protected function _handle_instances(
+    protected function handleInstances(
         Event $created_event,
         Event $original_event,
         $instance_id
@@ -130,7 +130,7 @@ class EventParent extends OsecBaseClass
 
             return;
         }
-        $next_instance = $this->_find_next_instance(
+        $next_instance = $this->findNextInstance(
             $original_event->get('post_id'),
             $instance_id
         );
@@ -142,13 +142,13 @@ class EventParent extends OsecBaseClass
         }
         $original_event->set('start', new DT($next_instance->get('start')));
         $original_event->set('end', new DT($next_instance->get('end')));
-        $edates = $this->_filter_exception_dates($original_event);
+        $edates = $this->filterExceptionDates($original_event);
         $original_event->set('exception_dates', implode(',', $edates));
         $recurrence_rules = $original_event->get('recurrence_rules');
         $rules_info       = RepeatRuleToText::factory($this->app)
                                             ->build_recurrence_rules_array($recurrence_rules);
         if (isset($rules_info['COUNT'])) {
-            $next_instances_count = $this->_count_next_instances(
+            $next_instances_count = $this->countNextInstances(
                 $original_event->get('post_id'),
                 $instance_id
             );
@@ -202,7 +202,7 @@ class EventParent extends OsecBaseClass
      *
      * @return null|Event Result.
      */
-    protected function _find_next_instance($post_id, $instance_id)
+    protected function findNextInstance($post_id, $instance_id)
     {
         $dbi              = $this->app->db;
         $table_instances  = $dbi->get_table_name(OSEC_DB__INSTANCES);
@@ -232,7 +232,7 @@ class EventParent extends OsecBaseClass
      *
      * @return array Filtered exception dates.
      */
-    protected function _filter_exception_dates(Event $event)
+    protected function filterExceptionDates(Event $event)
     {
         $start           = (int)$event->get('start')->format();
         $exception_dates = explode(',', (string)$event->get('exception_dates'));
@@ -256,7 +256,7 @@ class EventParent extends OsecBaseClass
      *
      * @return int Result.
      */
-    protected function _count_next_instances($post_id, $instance_id)
+    protected function countNextInstances($post_id, $instance_id)
     {
         $dbi             = $this->app->db;
         $table_instances = $dbi->get_table_name(OSEC_DB__INSTANCES);

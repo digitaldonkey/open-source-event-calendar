@@ -24,7 +24,7 @@ class CalendarTaxonomyView extends OsecBaseClass
      */
     public function get_html_for_tags(array $view_args)
     {
-        return $this->_get_html_for_taxonomy($view_args, true);
+        return $this->get_html_for_taxonomy($view_args, true);
     }
 
     /**
@@ -35,7 +35,7 @@ class CalendarTaxonomyView extends OsecBaseClass
      *
      * @return string          Markup for categories selector
      */
-    protected function _get_html_for_taxonomy($view_args, $tag = false)
+    protected function get_html_for_taxonomy($view_args, $tag = false)
     {
         $taxonomy_name      = 'events_categories';
         $type               = 'category';
@@ -110,6 +110,6 @@ class CalendarTaxonomyView extends OsecBaseClass
      */
     public function get_html_for_categories(array $view_args)
     {
-        return $this->_get_html_for_taxonomy($view_args);
+        return $this->get_html_for_taxonomy($view_args);
     }
 }

@@ -74,14 +74,14 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
         $particles = explode('/', trim((string)$query, '/'));
         $imported  = 0;
         foreach ($particles as $element) {
-            if ($this->_add_serialized_var($element)) {
+            if ($this->addSerializedVariable($element)) {
                 ++$imported;
             }
         }
         if (isset($_REQUEST['ai1ec'])) {
             $particles = explode('|', trim((string)$_REQUEST['ai1ec'], '|'));
             foreach ($particles as $element) {
-                if ($this->_add_serialized_var($element)) {
+                if ($this->addSerializedVariable($element)) {
                     ++$imported;
                 }
             }
@@ -115,7 +115,7 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
     /**
      * Add serialized (key:value) value to query arguments list
      */
-    protected function _add_serialized_var($element)
+    protected function addSerializedVariable($element)
     {
         if ( ! str_contains((string)$element, OSEC_URI_DIRECTION_SEPARATOR)) {
             return false;
@@ -151,7 +151,7 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
             $priority = 1;
         }
         $priority = ($priority > 0) ? 'top' : 'bottom';
-        $regexp   = $this->_inject_route_groups($regexp);
+        $regexp   = $this->injectRouteGroups($regexp);
         $existing = $this->rewrite->wp_rewrite_rules();
         if ( ! isset($existing[$regexp])) {
             $this->rewrite->add_rule(
@@ -168,7 +168,7 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
     /**
      * Adjust regexp groupping identifiers using WP_Rewrite object
      */
-    protected function _inject_route_groups($query)
+    protected function injectRouteGroups($query)
     {
         $elements = preg_split(
             '/\$(\d+)/',

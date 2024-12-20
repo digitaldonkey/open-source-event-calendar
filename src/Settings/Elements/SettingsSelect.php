@@ -50,10 +50,10 @@ class SettingsSelect extends SettingsAbstract
             // if the key is a string, it's an optgroup
             if (is_string($key)) {
                 foreach ($option as &$opt) {
-                    $opt = $this->_set_selected_value($opt);
+                    $opt = $this->setSelectedValue($opt);
                 }
             } else {
-                $option = $this->_set_selected_value($option);
+                $option = $this->setSelectedValue($option);
                 if (isset($option['settings'])) {
                     throw new Exception('This case must not exists anymore.');
                     // $fieldsets[] = $this->_render_fieldset(
@@ -87,7 +87,7 @@ class SettingsSelect extends SettingsAbstract
      *
      * @return array Optionally modified option entry.
      */
-    protected function _set_selected_value(array $option)
+    protected function setSelectedValue(array $option)
     {
         if ($option['value'] === $this->args['value']) {
             $option['args'] = ['selected' => 'selected'];
