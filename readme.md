@@ -75,7 +75,7 @@ to create template files or modify the theme.
 This Plugin supports multiple languages. 
 
 
-== Other notes ==
+### Blocks, Widgets and the future
 
 There is no Block provided yet :(
 Plan is to provide a simple shortcode-based Block before releasing 1.0.
@@ -84,7 +84,9 @@ For now it might be better to use "Shortcodes".
 
 You may use the Widget with help of [X3P0 - Legacy Widget](https://wordpress.org/support/plugin/x3p0-legacy-widget/), but it is considered deprecated and will be removed in favor of "Shortcode-Block".
 
-= Shortcodes =
+On the long run it might be nice to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice Bootstrap stuff. 
+
+### Shortcodes
 
 * Monthly view: **[osec view="monthly"]**
 * Weekly view: **[osec view="weekly"]**
@@ -112,7 +114,8 @@ You may use the Widget with help of [X3P0 - Legacy Widget](https://wordpress.org
 
 ## Changelog
 
-== 0.9.0
+#### 0.9.0
+
 * Added Sourcemaps for CSS (requires OSEC_DEBUG )
 * Documented hooks and actions (@see hooks-and-filters.md)
 * Added WP > 6 compatibility
