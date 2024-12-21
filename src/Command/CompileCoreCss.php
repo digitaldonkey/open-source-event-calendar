@@ -20,12 +20,17 @@ class CompileCoreCss extends CommandAbstract
 {
     public function is_this_to_execute()
     {
+        /**
+         * Unsure what this is made for.
+         * But allows to manually trigger recompilation.
+         * Make sure OSEC_DEBUG is false.
+         */
         if (
-            isset($_GET['ai1ec_compile_css']) &&
-            isset($_GET['theme']) &&
-            // $_SERVER['SERVER_ADDR'] === $_SERVER['REMOTE_ADDR'] &&
-            current_user_can('administrator') &&
-            ! OSEC_DEBUG // Or there will be debug maps.
+            isset($_GET['osec_compile_css'])
+            && isset($_GET['theme'])
+            && current_user_can('switch_osec_themes')
+            && current_user_can('manage_osec_options')
+            && ! OSEC_DEBUG // Or there will be debug maps.
         ) {
             return true;
         }

@@ -259,9 +259,6 @@ abstract class AbstractView extends OsecBaseClass
      */
     protected function addRuntimeProperties(Event $event)
     {
-        global $post;
-        $original_post      = $post;
-        $post               = $event->get('post');
         $instance_permalink = get_permalink(
             $event->get('post_id')
         );
@@ -318,7 +315,6 @@ abstract class AbstractView extends OsecBaseClass
             EventTimeView::factory($this->app)->format_time($event->get('start'))
         );
         $this->add_view_specific_runtime_properties($event);
-        $post = $original_post;
     }
 
     /**

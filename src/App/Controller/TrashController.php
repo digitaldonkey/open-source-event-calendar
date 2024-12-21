@@ -106,6 +106,7 @@ class TrashController extends OsecBaseClass
      */
     protected function manageChildren(int $post_id, string $action)
     {
+        // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
         try {
             $event = new Event($this->app, $post_id);
             if (
@@ -123,6 +124,7 @@ class TrashController extends OsecBaseClass
         } catch (EventNotFoundException) {
             // ignore - not an event
         }
+        // phpcs:enable
     }
 
     /**

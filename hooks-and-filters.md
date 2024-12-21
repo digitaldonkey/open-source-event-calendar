@@ -899,6 +899,55 @@ add_filter('osec_avatar_fallbacks', $fallbacks);
 ---
 
 
+@file **../src/App/Model/ContentFilterBypassHelper.php**
+
+### osec_event_the_content_strict_filters <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Event content strict-filters in use.
+
+```php
+add_filter('osec_event_the_content_strict_filters', $entry);
+```
+
+#### Description
+
+
+By default, content filters for post type Event are dripped/replaced by the following set. Only applies if "Strict compatibility content filtering" is activated on settings page.
+
+#### Parameters
+
+
+ - **$entry** <span style="color:crimson"> </span> Debug or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Event content strict-filters in use.
+ *
+ * By default, content filters for post type Event are
+ * dripped/replaced by the following set.
+ * Only applies if "Strict compatibility content filtering"
+ * is activated on settings page.
+ *
+ * @since 1.0
+ *
+ * @param  array  $entry  Debug or not.
+ *
+ * @file src/App/Model/ContentFilterBypassHelper.php
+ */
+add_filter('osec_event_the_content_strict_filters', $entry);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/Model/DatabaseSchema.php**
 
 ### osec_perform_scheme_update <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -2646,7 +2695,7 @@ add_filter('osec_oneday_reveal_button', $bool);
 ### osec_get_events_for_oneday_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter the events displayed in a oneday view.
+Alter the events displayed in oneday view.
 
 ```php
 add_filter('osec_get_events_for_oneday_alter', $days_events $time $filter);
@@ -2665,7 +2714,7 @@ add_filter('osec_get_events_for_oneday_alter', $days_events $time $filter);
 
 ```php
 /**
- * Alter the events displayed in a oneday view.
+ * Alter the events displayed in oneday view.
  *
  * @since 1.0
  *
@@ -5292,6 +5341,55 @@ add_filter('osec_avatar_fallbacks', $fallbacks);
 ---
 
 
+@file **../src/App/Model/ContentFilterBypassHelper.php**
+
+### osec_event_the_content_strict_filters <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Event content strict-filters in use.
+
+```php
+add_filter('osec_event_the_content_strict_filters', $entry);
+```
+
+#### Description
+
+
+By default, content filters for post type Event are dripped/replaced by the following set. Only applies if "Strict compatibility content filtering" is activated on settings page.
+
+#### Parameters
+
+
+ - **$entry** <span style="color:crimson"> </span> Debug or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Event content strict-filters in use.
+ *
+ * By default, content filters for post type Event are
+ * dripped/replaced by the following set.
+ * Only applies if "Strict compatibility content filtering"
+ * is activated on settings page.
+ *
+ * @since 1.0
+ *
+ * @param  array  $entry  Debug or not.
+ *
+ * @file src/App/Model/ContentFilterBypassHelper.php
+ */
+add_filter('osec_event_the_content_strict_filters', $entry);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/Model/DatabaseSchema.php**
 
 ### osec_perform_scheme_update <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -7039,7 +7137,7 @@ add_filter('osec_oneday_reveal_button', $bool);
 ### osec_get_events_for_oneday_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter the events displayed in a oneday view.
+Alter the events displayed in oneday view.
 
 ```php
 add_filter('osec_get_events_for_oneday_alter', $days_events $time $filter);
@@ -7058,7 +7156,7 @@ add_filter('osec_get_events_for_oneday_alter', $days_events $time $filter);
 
 ```php
 /**
- * Alter the events displayed in a oneday view.
+ * Alter the events displayed in oneday view.
  *
  * @since 1.0
  *

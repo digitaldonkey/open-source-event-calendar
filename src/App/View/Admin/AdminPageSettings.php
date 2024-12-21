@@ -111,9 +111,9 @@ class AdminPageSettings extends AdminPageAbstract
         $tabs = [
             'viewing-events' => ['name' => __('Viewing Events', 'open-source-event-calendar')],
             'editing-events' => ['name' => __('Adding/Editing Events', 'open-source-event-calendar')],
-            'shortcodes' => ['name' => __('Shortcodes', 'open-source-event-calendar')],
-            'advanced' => ['name' => __('Advanced Settings', 'open-source-event-calendar')],
-            'cache' => ['name' => __('Cache Report', 'open-source-event-calendar')],
+            'shortcodes'     => ['name' => __('Shortcodes', 'open-source-event-calendar')],
+            'advanced'       => ['name' => __('Advanced Settings', 'open-source-event-calendar')],
+            'cache'          => ['name' => __('Cache Report', 'open-source-event-calendar')],
         ];
 
         /**
@@ -153,7 +153,6 @@ class AdminPageSettings extends AdminPageAbstract
     protected function getVisibleTabs(array $plugin_settings, array $tabs)
     {
         $index = 0;
-        // $renderer = SettingsRenderer::factory($this->app);
         foreach ($plugin_settings as $id => $setting) {
             // if the setting is shown
             if (isset($setting['renderer'])) {
@@ -179,7 +178,7 @@ class AdminPageSettings extends AdminPageAbstract
                 ];
                 // if the settings has an item tab, set the item as active.
                 if (isset($setting['renderer']['item'])) {
-                    if ( ! isset($tabs[$setting['renderer']['tab']]['items_active'][$setting['renderer']['item']])) {
+                    if (! isset($tabs[$setting['renderer']['tab']]['items_active'][$setting['renderer']['item']])) {
                         $tabs[$setting['renderer']['tab']]['items_active'][$setting['renderer']['item']] = true;
                     }
                 }
@@ -206,26 +205,23 @@ class AdminPageSettings extends AdminPageAbstract
                 } else {
                     // check active items for the dropdown
                     foreach ($tab['items'] as $item => $longname) {
-                        if ( ! isset($tab['items_active'][$item])) {
+                        if (! isset($tab['items_active'][$item])) {
                             unset($tab['items'][$item]);
                         }
                     }
                 }
                 // Check to avoid overriding tabs
-                if ( ! isset($tabs_to_display[$name])) {
+                if (! isset($tabs_to_display[$name])) {
                     $tabs_to_display[$name] = $tab;
                 } else {
                     $tabs_to_display[$name]['elements'] = $tab['elements'];
                 }
-            } else {
-                // no items, just check for any element to display.
-                if (isset($tab['elements'])) {
-                    // Check to avoid overriding tabs
-                    if ( ! isset($tabs_to_display[$name])) {
-                        $tabs_to_display[$name] = $tab;
-                    } else {
-                        $tabs_to_display[$name]['elements'] = $tab['elements'];
-                    }
+            } elseif (isset($tab['elements'])) {
+                // Check to avoid overriding tabs
+                if (! isset($tabs_to_display[$name])) {
+                    $tabs_to_display[$name] = $tab;
+                } else {
+                    $tabs_to_display[$name]['elements'] = $tab['elements'];
                 }
             }
         }

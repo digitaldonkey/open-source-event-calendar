@@ -298,7 +298,11 @@ class WeekView extends AbstractView
                 $all_events[$day_date]['notallday'] = [];
             }
 
-            $evt_stack = [0]; // Stack to keep track of indentation
+            // Stack to keep track of indentation
+            // Very confusing, but ensures, that the earliest start time
+            // in overlapping events is "at the bottom of the visual stack"
+            // and later starting ones are not hidden under.
+            $evt_stack = [0];
 
             foreach ($all_events[$day_date] as $event_type => &$events) {
                 foreach ($events as &$evt) {
@@ -341,7 +345,8 @@ class WeekView extends AbstractView
                         $bottom = min($top + $evt->get_duration() / 60, 1440);
                         // While there's more than one event in the stack and this event's top
                         // position is beyond the last event's bottom, pop the stack
-                        while (count($evt_stack) > 1 && $top >= end($evt_stack)) {
+                        $stackcount = count($evt_stack);
+                        while ($stackcount > 1 && $top >= end($evt_stack)) {
                             array_pop($evt_stack);
                         }
                         // Indentation is number of stacked events minus 1

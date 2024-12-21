@@ -119,6 +119,7 @@ class BootstrapController
         $exception = null;
         // Load the textdomain
         add_action('plugins_loaded', $this->load_textdomain(...));
+        // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
         try {
             $this->request = RequestParser::factory($this->app);
 
@@ -143,6 +144,7 @@ class BootstrapController
         } catch (ScheduleException) {
             // not blocking
         }
+        // phpcs:enable
 
         if (null !== $exception) {
             throw $exception;
@@ -731,9 +733,9 @@ class BootstrapController
         $settings = $this->app->settings;
         $page_id  = $settings->get('calendar_page_id');
         if (
-            ! AccessControl::is_admin() &&
-            $page_id &&
-            is_page($page_id)
+            ! is_admin()
+            && $page_id
+            && is_page($page_id)
         ) {
             foreach (['cat', 'tag'] as $name) {
                 $implosion = $this->addDefaults($name);

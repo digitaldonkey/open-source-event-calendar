@@ -26,7 +26,7 @@ parameters:
 #                - vendor
         # Doc: https://github.com/phpro/grumphp/blob/master/doc/tasks/phpcs.md
         phpcs:
-            standard: ['./phpcs.dist.xml']
+            standard: ['./phpcs.xml']
 #        phpunit:
 #            config_file: './phpunit.xml'
 

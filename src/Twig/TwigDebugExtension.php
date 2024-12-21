@@ -83,11 +83,16 @@ class TwigDebugExtension extends AbstractExtension
     {
         // @see Twig\Extension\DebugExtension
         // dump is safe if var_dump is overridden by xdebug
-        $isDumpOutputHtmlSafe = extension_loaded('xdebug')
-                                // Xdebug overloads var_dump in develop mode when html_errors is enabled
-                                && str_contains(ini_get('xdebug.mode'), 'develop')
-                                && (false === ini_get('html_errors') || ini_get('html_errors'))
-                                || 'cli' === PHP_SAPI;
+        $isDumpOutputHtmlSafe = (
+            'cli' === PHP_SAPI
+            || (
+                extension_loaded('xdebug')
+                // Xdebug overloads var_dump in develop mode when html_errors is enabled
+                && str_contains(ini_get('xdebug.mode'), 'develop')
+                && (false === ini_get('html_errors') || ini_get('html_errors'))
+            )
+        );
+
 
         if ($isDumpOutputHtmlSafe) {
             // If xdebug is enables we can dump fast here.

@@ -45,7 +45,11 @@ class SettingsSelect extends SettingsAbstract
          * @param  array  $options  Select options
          */
         $options   = apply_filters('osec_settings_select_options', $options, $this->args['id']);
-        $fieldsets = is_array($this->args['renderer']['fieldsets']) ? $this->args['renderer']['fieldsets'] : [];
+
+        $hasFieldsets = isset($this->args['renderer']['fieldsets'])
+                            && is_array($this->args['renderer']['fieldsets']);
+        $fieldsets = $hasFieldsets ? $this->args['renderer']['fieldsets'] : [];
+
         foreach ($options as $key => &$option) {
             // if the key is a string, it's an optgroup
             if (is_string($key)) {

@@ -92,10 +92,7 @@ class EventPostView extends OsecBaseClass
      */
     public function trim_excerpt(Event $event, $length = 35, $more = '[...]'): string
     {
-        global $post;
-        $original_post = $post;
-        $post          = $event->get('post');
-        $raw_excerpt   = $event->get('post')->post_content;
+        $raw_excerpt = $event->get('post')->post_content;
         if ( ! isset($raw_excerpt[0])) {
             $raw_excerpt = '&nbsp;';
         }
@@ -125,8 +122,6 @@ class EventPostView extends OsecBaseClass
         } else {
             $text = implode(' ', $words);
         }
-        $post = $original_post;
-
         return apply_filters('wp_trim_excerpt', $text, $raw_excerpt);
     }
 }

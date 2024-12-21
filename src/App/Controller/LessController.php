@@ -244,17 +244,12 @@ class LessController extends OsecBaseClass
             // current config file (exceptions thrown if this is not handled here).
             if ( ! isset($variables_from_config[$name])) {
                 unset($variables[$name]);
-            } else {
+            } elseif ($with_description && isset($variables_from_config[$name]['description']) ) {
                 // If description is requested and is available in config file, use it.
-                if (
-                    $with_description &&
-                    isset($variables_from_config[$name]['description'])
-                ) {
-                    $variables[$name]['description'] =
-                        $variables_from_config[$name]['description'];
-                } else {
-                    unset($variables[$name]['description']);
-                }
+                $variables[$name]['description'] =
+                    $variables_from_config[$name]['description'];
+            } else {
+                unset($variables[$name]['description']);
             }
         }
 

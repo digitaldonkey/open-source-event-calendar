@@ -99,12 +99,14 @@ class Event extends OsecBaseClass
         }
 
         if ($this->is_allday()) {
+            // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
             try {
                 $timezone = Timezones::factory($this->app)->get($this->get('timezone_name'));
                 $this->entity->set_preferred_timezone($timezone);
             } catch (Exception) {
                 // ignore
             }
+            // phpcs:enable
         }
     }
 

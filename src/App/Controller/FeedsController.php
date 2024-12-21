@@ -680,10 +680,10 @@ class FeedsController extends OsecBaseClass
                 'type'        => 'category',
                 'placeholder' => __('Categories (optional)', 'open-source-event-calendar'),
             ],
-            get_terms(
-                'events_categories',
-                ['hide_empty' => false]
-            )
+            get_terms([
+                'taxonomy' => 'events_categories',
+                'hide_empty' => false
+            ])
         );
         $select2_tags = $factory->create_select2_input(
             ['id' => 'osec_feed_tags']

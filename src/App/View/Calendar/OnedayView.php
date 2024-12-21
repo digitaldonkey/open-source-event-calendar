@@ -46,9 +46,8 @@ class OnedayView extends AbstractView
             $this->getFilterDefaults($view_args),
         );
         // Create pagination links.
-        $title            = $local_date->format_i18n(
-            $this->app->options
-                ->get('date_format', 'l, M j, Y')
+        $title = $local_date->format_i18n(
+            $this->app->options->get('date_format', 'l, M j, Y')
         );
         $pagination_links = $this->getPagination($args, $title);
 
@@ -234,7 +233,11 @@ class OnedayView extends AbstractView
 
         $today_ymd = (new DT(UIDateFormats::factory($this->app)->current_time()))->format('Y-m-d');
 
-        $evt_stack = [0]; // Stack to keep track of indentation
+        // Stack to keep track of indentation
+        // Very confusing, but ensures, that the earliest start time
+        // in overlapping events is "at the bottom of the visual stack"
+        // and later starting ones are not hidden under.
+        $evt_stack = [0];
 
         foreach ($all_events[$day_start_ts] as $event_type => &$events) {
             foreach ($events as &$evt) {
@@ -281,7 +284,8 @@ class OnedayView extends AbstractView
                     );
                     // While there's more than one event in the stack and this event's
                     // top position is beyond the last event's bottom, pop the stack
-                    while (count($evt_stack) > 1 && $top >= end($evt_stack)) {
+                    $stackcount = count($evt_stack);
+                    while ($stackcount > 1 && $top >= end($evt_stack)) {
                         array_pop($evt_stack);
                     }
                     // Indentation is number of stacked events minus 1
@@ -311,7 +315,7 @@ class OnedayView extends AbstractView
         ];
 
         /**
-         * Alter the events displayed in a oneday view.
+         * Alter the events displayed in oneday view.
          *
          * @since 1.0
          *

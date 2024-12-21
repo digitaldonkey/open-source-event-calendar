@@ -407,6 +407,7 @@ class EventParent extends OsecBaseClass
         $children  = (array)$db->get_col($sql_query);
         $objects   = [];
         foreach ($children as $child_id) {
+            // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
             try {
                 $instance = new Event($this->app, $child_id);
                 if (
@@ -418,6 +419,7 @@ class EventParent extends OsecBaseClass
             } catch (EventNotFoundException) {
                 // ignore
             }
+            // phpcs:enable
         }
 
         return $objects;

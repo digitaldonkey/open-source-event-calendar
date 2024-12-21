@@ -692,11 +692,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             if (false === $this->isRecognizedTz($timezone)) {
                 throw new TimezoneException('Invalid timzone: ' . (string)$timezone);
             }
-        } else {
+        } elseif (! $dateTime->getTimezone() instanceof DateTimeZone) {
             // No TZ in date? Set default.
-            if (! $dateTime->getTimezone() instanceof DateTimeZone) {
-                $timezone = $def_timezone;
-            }
+            $timezone = $def_timezone;
         }
 
         // Apply Timezone.

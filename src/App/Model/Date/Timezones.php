@@ -529,12 +529,14 @@ class Timezones extends OsecBaseClass
         // Try to guess non standard TZ names.
         $zone         = $this->olsonLookup($zone);
         $valid_legacy = false;
+        // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
         try {
             new DateTimeZone($zone); // throw away instantly
             $valid_legacy = true;
         } catch (Exception) {
             // ignore.
         }
+        // phpcs:enable
         if (! $valid_legacy || isset($this->invalidLegacyZones[$zone])) {
             return $this->guess_zone($zone);
         }

@@ -223,10 +223,7 @@ class EventSearch extends OsecBaseClass
         $args = [];
 
         // Query the correct post status
-        if (
-            current_user_can('administrator') ||
-            current_user_can('editor')
-        ) {
+        if (current_user_can('read_private_osec_events')) {
             // User has privilege of seeing all published and private
             $post_status_where = 'AND post_status IN ( %s, %s ) ';
             $args[]            = 'publish';

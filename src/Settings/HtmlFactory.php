@@ -284,13 +284,11 @@ class HtmlFactory extends OsecBaseClass
             $args['name'] = $args['id'];
         }
         // Get tags.
-        $tags = get_terms(
-            'events_tags',
-            [
-                'orderby'    => 'name',
-                'hide_empty' => 0,
-            ]
-        );
+        $tags = get_terms([
+            'taxonomy'   => 'events_tags',
+            'orderby'    => 'name',
+            'hide_empty' => false,
+        ]);
 
         // Build tags array to pass as JSON.
         $tags_json = [];

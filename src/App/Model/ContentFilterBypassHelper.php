@@ -18,9 +18,9 @@ class ContentFilterBypassHelper extends OsecBaseClass
     /**
      * Stored original the_content filters.
      *
-     * @var array
+     * @var \WP_Hook
      */
-    protected array $contentFilters = [];
+    protected \WP_Hook $contentFilters;
 
     /**
      * Flag if filters are cleared.
@@ -38,17 +38,41 @@ class ContentFilterBypassHelper extends OsecBaseClass
     public function clear_the_content_filters(): self
     {
         global $wp_filter;
-        if ($this->contentFiltersCleared) {
+        $hook = 'the_content';
+
+        if (
+            $this->contentFiltersCleared
+            || empty($hook)
+            || ! isset($wp_filter[$hook])
+        ) {
             return $this;
         }
-        if (isset($wp_filter['the_content'])) {
-            $this->contentFilters = $wp_filter['the_content'];
+
+        // Save for restore.
+        $this->contentFilters = $wp_filter[$hook];
+        remove_all_filters($hook);
+
+        /**
+         * Alter Event content strict-filters in use.
+         *
+         * By default, content filters for post type Event are
+         * dripped/replaced by the following set.
+         * Only applies if "Strict compatibility content filtering"
+         * is activated on settings page.
+         *
+         * @since 1.0
+         *
+         * @param  array  $entry  Debug or not.
+         */
+        $filters = apply_filters('osec_event_the_content_strict_filters', [
+            'wptexturize',
+            'convert_smilies',
+            'convert_chars',
+            'wpautop',
+        ]);
+        foreach ($filters as $filter) {
+            add_filter('the_content', $filter);
         }
-        remove_all_filters('the_content');
-        add_filter('the_content', 'wptexturize');
-        add_filter('the_content', 'convert_smilies');
-        add_filter('the_content', 'convert_chars');
-        add_filter('the_content', 'wpautop');
         $this->contentFiltersCleared = true;
 
         return $this;
@@ -64,13 +88,13 @@ class ContentFilterBypassHelper extends OsecBaseClass
     {
         global $wp_filter;
         if (
-            ! $this->contentFiltersCleared ||
-            empty($this->contentFilters)
+            ! $this->contentFiltersCleared
+            || empty($this->contentFilters)
         ) {
             return $this;
         }
+        // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
         $wp_filter['the_content'] = $this->contentFilters;
-
         return $this;
     }
 }

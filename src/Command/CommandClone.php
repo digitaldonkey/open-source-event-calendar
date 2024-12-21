@@ -122,6 +122,7 @@ class CommandClone extends CommandAbstract
         $this->copyMeta($new_post_id, $post);
 
         if (AccessControl::is_our_post_type($post)) {
+            // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
             try {
                 $old_event = new Event($this->app, $post->ID);
                 $old_event->set('post_id', $new_post_id);
@@ -135,6 +136,7 @@ class CommandClone extends CommandAbstract
             } catch (EventNotFoundException) {
                 /* ignore */
             }
+            // phpcs:enable
         }
 
         $meta_post = MetaAdapterPost::factory($this->app);

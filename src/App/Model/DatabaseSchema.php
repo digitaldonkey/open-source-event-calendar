@@ -297,8 +297,8 @@ class DatabaseSchema extends OsecBaseClass
                 $line     = trim((string)preg_replace('#\s+#', ' ', $line));
                 $line_new = rtrim($line, ',');
                 if (
-                    $lineno < $lines && $line === $line_new ||
-                    $lineno == $lines && $line !== $line_new
+                    ($lineno < $lines && $line === $line_new)
+                    || ($lineno === $lines && $line !== $line_new)
                 ) {
                     throw new DatabaseErrorException(
                         'Missing comma in line \'' . $line . '\''
@@ -600,13 +600,14 @@ class DatabaseSchema extends OsecBaseClass
                         '` is of incompatible type'
                     );
                 }
-                if (
-                    'YES' === $column->Null &&
-                    false === $description['columns'][$column->Field]
-                    ['content']['NULL'] ||
-                    'NO' === $column->Null &&
-                    true === $description['columns'][$column->Field]
-                    ['content']['NULL']
+                if ((
+                        'YES' === $column->Null
+                        && false === $description['columns'][$column->Field]['content']['NULL']
+                    )
+                    || (
+                        'NO' === $column->Null
+                        && true === $description['columns'][$column->Field]['content']['NULL']
+                    )
                 ) {
                     throw new DatabaseErrorException(
                         'Field `' . $table . '`.`' . $column->Field .
@@ -636,10 +637,6 @@ class DatabaseSchema extends OsecBaseClass
                     // '` is defined for table `' . $table . '`'
                     // );
                 }
-
-                $XXX = $description['indexes'][$name]['content'];
-                $YYY = $definition['columns'];
-
                 if (
                     $missed = array_diff_assoc(
                         $description['indexes'][$name]['content'],

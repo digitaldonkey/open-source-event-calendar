@@ -21,7 +21,7 @@ class CompileThemes extends CommandAbstract
     {
         return (
             OSEC_DEBUG
-            && isset($_GET['ai1ec_recompile_templates'])
+            && isset($_GET['osec_recompile_templates'])
             && current_user_can('switch_osec_themes')
         );
     }

@@ -223,20 +223,16 @@ class WidgetAgendaView extends WidgetAbstract
         $instance = wp_parse_args((array)$instance, $default);
 
         // Get available cats, tags, events to allow user to limit widget to certain categories
-        $events_categories = get_terms(
-            'events_categories',
-            [
-                'orderby'    => 'name',
-                'hide_empty' => false,
-            ]
-        );
-        $events_tags       = get_terms(
-            'events_tags',
-            [
-                'orderby'    => 'name',
-                'hide_empty' => false,
-            ]
-        );
+        $events_categories = get_terms([
+            'taxonomy'   => 'events_categories',
+            'orderby'    => 'name',
+            'hide_empty' => false,
+        ]);
+        $events_tags       = get_terms([
+            'taxonomy'   => 'events_tags',
+            'orderby'    => 'name',
+            'hide_empty' => false,
+        ]);
 
         // Generate unique IDs and NAMEs of all needed form fields
         $fields = [

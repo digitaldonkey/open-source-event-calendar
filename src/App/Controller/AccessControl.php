@@ -25,19 +25,6 @@ class AccessControl
     }
 
     /**
-     * Whether the current request is for a network or blog admin page
-     *
-     * Does not inform on whether the user is an admin! Use capability checks to
-     * tell if the user should be accessing a section or not.
-     *
-     * @return bool True if inside WordPress administration pages.
-     */
-    public static function is_admin(): bool
-    {
-        return is_admin();
-    }
-
-    /**
      * Check if we are editing our custom post type.
      *
      * @return bool

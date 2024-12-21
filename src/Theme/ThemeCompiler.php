@@ -62,15 +62,15 @@ class ThemeCompiler extends OsecBaseClass
      */
     public function get_files(Environment $twig)
     {
-        $files = [];
         try {
             $paths = $twig->getLoader()->getPaths();
+            $files = [];
             foreach ($paths as $path) {
                 $files += $this->read_files($path, strlen((string)$path) + 1);
             }
         } catch (Exception) {
+            $files = [];
         }
-
         return $files;
     }
 
