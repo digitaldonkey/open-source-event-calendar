@@ -27,6 +27,7 @@ parameters:
         # Doc: https://github.com/phpro/grumphp/blob/master/doc/tasks/phpcs.md
         phpcs:
             standard: ['./phpcs.xml']
+#            warning_severity: 0
 #        phpunit:
 #            config_file: './phpunit.xml'
 
@@ -34,4 +35,4 @@ parameters:
         code_quality:
             tasks:
                 - composer
-                - phpcs -n
+                - phpcs

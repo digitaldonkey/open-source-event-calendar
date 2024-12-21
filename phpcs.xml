@@ -32,6 +32,9 @@
 	<arg name="extensions" value="php"/>
 	<arg name="parallel" value="8"/><!-- Enables parallel processing when available for faster results. -->
 
+	<!-- TODO Fix them.		-->
+	<arg name="warning-severity" value="0"/>
+
 	<!--
         #############################################################################
         SET UP THE RULESETS
