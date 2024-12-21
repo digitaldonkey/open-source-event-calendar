@@ -34,4 +34,4 @@ parameters:
         code_quality:
             tasks:
                 - composer
-                - phpcs
+                - phpcs -n
