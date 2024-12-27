@@ -482,18 +482,19 @@ class DatabaseController extends OsecBaseClass
             foreach ($this->queries as $query) {
                 $time += $query['d'];
                 echo '<tr>
-			        <td>', ++$i, '</td>
-			        <td>', $query['q'], '</td>
-			        <td>', round($query['d'] * 1000, 2), '</td>
-			        <td>', (int)$query['r'], '</td>
+			        <td>', esc_html(++$i), '</td>
+			        <td>', esc_html($query['q']), '</td>
+			        <td>', esc_html(round($query['d'] * 1000, 2)), '</td>
+			        <td>', esc_html((int)$query['r']), '</td>
 			      </tr>';
             }
             echo '
 		    </tbody>
             <tfoot>
               <tr>
-                <th colspan="4">Total time, ms: ',
-            round($time * 1000, 2), '</th>
+                <th colspan="4">Total time, ms: ';
+            echo esc_html(round($time * 1000, 2));
+            echo '</th>
               </tr>
             </tfoot>
 		  </table>

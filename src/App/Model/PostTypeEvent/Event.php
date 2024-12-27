@@ -93,8 +93,10 @@ class Event extends OsecBaseClass
             $this->initialize_from_id($data, $instance);
         } else {
             throw new InvalidArgumentException(
-                'Argument to constructor must be integer, array or NULL' .
-                ', not ' . var_export($data, true)
+                esc_html(
+                    'Argument to constructor must be integer, array or NULL' .
+                    ', not ' . var_export($data, true)
+                )
             );
         }
 
@@ -182,8 +184,10 @@ class Event extends OsecBaseClass
         $post = get_post($post_id);
         if (! $post || $post->post_status == 'auto-draft') {
             throw new EventNotFoundException(
-                'Post with ID \'' . $post_id .
-                '\' could not be retrieved from the database.'
+                esc_html(
+                    'Post with ID \'' . $post_id .
+                    '\' could not be retrieved from the database.'
+                )
             );
         }
         $post_id = (int)$post_id;
@@ -272,8 +276,10 @@ class Event extends OsecBaseClass
         $event = $dbi->get_row($query, ARRAY_A);
         if (null === $event || null === $event['post_id']) {
             throw new EventNotFoundException(
-                'Event with ID \'' . $post_id .
-                '\' could not be retrieved from the database.'
+                esc_html(
+                    'Event with ID \'' . $post_id .
+                    '\' could not be retrieved from the database.'
+                )
             );
         }
 
@@ -519,7 +525,9 @@ class Event extends OsecBaseClass
             $response = apply_filters('osec_event_save_new', $this);
             if (is_wp_error($response)) {
                 throw new EventCreateException(
-                    'Failed to create event: ' . $response->get_error_message()
+                    esc_html(
+                        'Failed to create event: ' . $response->get_error_message()
+                    )
                 );
             }
         }

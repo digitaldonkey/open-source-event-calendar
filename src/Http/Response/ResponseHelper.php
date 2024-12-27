@@ -41,8 +41,9 @@ class ResponseHelper
      *
      * @return never Method does not return
      */
-    public static function stop($code = 0): never
+    public static function stop(int $code = 0): never
     {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         exit($code);
     }
 

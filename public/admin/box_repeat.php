@@ -3,16 +3,13 @@
 // Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
 ?>
 <div class="ai1ec-modal-content">
-
     <div class="ai1ec-modal-header">
         <h4 class="ai1ec-modal-title">
             <?php esc_html_e('Select recurrence pattern:', 'open-source-event-calendar'); ?>
         </h4>
     </div>
-
     <div class="ai1ec-modal-body ai1ec-form-horizontal">
         <div class="ai1ec-alert ai1ec-alert-danger ai1ec-hide"></div>
-
         <div class="ai1ec-lead">
             <ul class="ai1ec-nav ai1ec-nav-pills ai1ec-row">
                 <li class="ai1ec-col-xs-4 ai1ec-col-sm-4 ai1ec-text-center ai1ec-freq-daily ai1ec-freq">
@@ -41,7 +38,6 @@
                     </a>
                 </li>
             </ul>
-
             <p></p>
         </div>
 
@@ -75,8 +71,8 @@
                 <label for="end-input" class="ai1ec-control-label ai1ec-col-sm-3">
                     <?php esc_html_e('End', 'open-source-event-calendar'); ?>:
                 </label>
-                <div class="ai1ec-col-sm-9" id="end-input" data-ending-type="<?php echo $ending_type; ?>">
-                    <?php echo $end; ?>
+                <div class="ai1ec-col-sm-9" id="end-input" data-ending-type="<?php echo esc_attr($ending_type); ?>">
+                    <?php echo esc_html($end); ?>
                 </div>
             </div>
 
@@ -86,7 +82,7 @@
                     <?php esc_html_e('Ending after', 'open-source-event-calendar'); ?>:
                 </label>
                 <div class="ai1ec-col-sm-9">
-                    <?php echo $count; ?>
+                    <?php echo esc_html($count); ?>
                 </div>
             </div>
 
@@ -99,13 +95,11 @@
                 <div class="ai1ec-col-sm-9">
                     <input type="text" class="ai1ec-date-input" id="osec_until-date-input">
                     <input type="hidden" name="osec_until_time" id="osec_until-time"
-                           value="<?php echo ! is_null($until) && $until > 0 ? $until : ''; ?>">
+                           value="<?php echo ! is_null($until) && $until > 0 ? esc_attr($until) : ''; ?>">
                 </div>
             </div>
         </div>
-
-        <input type="hidden" id="osec_is_box_repeat" value="<?php echo $repeat; ?>">
-
+        <input type="hidden" id="osec_is_box_repeat" value="<?php echo  esc_attr($repeat); ?>">
         <button type="button" id="osec_repeat_apply"
                 class="ai1ec-btn ai1ec-btn-primary ai1ec-btn-lg"
                 data-loading-text="<?php echo esc_attr(
@@ -118,9 +112,8 @@
         <a id="osec_repeat_cancel"
            class="ai1ec-btn ai1ec-btn-default ai1ec-text-danger ai1ec-btn-lg">
             <i class="ai1ec-fa ai1ec-fa-undo ai1ec-fa-fw"></i
-            ><?php esc_html_e('Cancel', 'open-source-event-calendar'); ?>
-        </a>
+            ><?php
+            esc_html_e('Cancel', 'open-source-event-calendar');
+        ?></a>
     </div>
-
 </div>
-<?php // phpcs:enable ?>

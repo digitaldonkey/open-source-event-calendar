@@ -89,7 +89,11 @@ class RenderCalendar extends CommandAbstract
                 $this->renderStrategy = RenderVoid::factory($this->app);
                 break;
             default:
-                throw new BootstrapException('Could not resolve render strategy: ' . $this->renderStrategy);
+                throw new BootstrapException(
+                    esc_html(
+                        'Could not resolve render strategy for: ' . $this->requestType
+                    )
+                );
         }
     }
 

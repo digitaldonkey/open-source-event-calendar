@@ -100,7 +100,9 @@ class CommandResolver
     public function add_command(object $command): self
     {
         if ( ! $command instanceof CommandAbstract) {
-            throw new BootstrapException($command->get_class() . ' does not implement CommandAbstract');
+            throw new BootstrapException(
+                esc_html($command->get_class() . ' does not implement CommandAbstract')
+            );
         }
         $this->commands[] = $command;
 

@@ -18,6 +18,7 @@ class RenderJsonP extends RenderStrategyAbstract
      */
     public function render(array $params): void
     {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         $this->cleanOutputBuffers();
         header('HTTP/1.1 200 OK');
         header('Content-Type: application/json; charset=UTF-8');
@@ -28,7 +29,8 @@ class RenderJsonP extends RenderStrategyAbstract
         } elseif (isset($_GET['callback'])) {
             $output = $_GET['callback'] . '(' . $output . ')';
         }
-        /* Cant be escaped json containing html get broken.*/
+        // No way to escape this html/JS mix here.
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         echo $output;
         ResponseHelper::stop();
     }

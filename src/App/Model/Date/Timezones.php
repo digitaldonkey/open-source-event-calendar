@@ -476,7 +476,7 @@ class Timezones extends OsecBaseClass
                 $exception = $invalid_tz;
             }
             if (null !== $exception) {
-                throw new TimezoneException($exception->getMessage());
+                throw new TimezoneException(esc_html($exception->getMessage()));
             }
             $this->cache->set($name, $zone);
         }

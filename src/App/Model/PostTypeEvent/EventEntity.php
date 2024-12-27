@@ -289,7 +289,11 @@ class EventEntity extends OsecBaseClass
         } else {
             // NON-Time-fields.
             if ( ! property_exists($this, $name)) {
-                throw new Exception('Missing property ' . $name . ' in ' . __CLASS__);
+                throw new Exception(
+                    esc_html(
+                        'Missing property ' . $name . ' in ' . __CLASS__
+                    )
+                );
             }
             $this->{$name} = $value;
         }

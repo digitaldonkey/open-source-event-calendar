@@ -50,7 +50,11 @@ function osec_manually_load_plugin()
     $plugin_file = OSEC_TEST__PLUGIN_ROOT_PATH . '/open-source-event-calendar.php';
 
     if (! file_exists($plugin_file)) {
-        throw new Exception("Plugin \"{$plugin_file}\" not found.");
+        throw new Exception(
+            esc_html(
+                "Plugin \"{$plugin_file}\" not found."
+            )
+        );
     }
 
     require_once $plugin_file;

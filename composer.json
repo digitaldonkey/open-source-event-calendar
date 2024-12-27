@@ -32,7 +32,9 @@
     ],
     "scripts": {
         "grumphp": "grumphp",
-        "phpcs": "phpcs --standard=phpcs.xml"
+        "phpcs": "phpcs --standard=phpcs.xml",
+        "post-install-cmd": "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility,vendor/phpcompatibility/phpcompatibility-wp,vendor/phpcompatibility/phpcompatibility-paragonie,vendor/wp-coding-standards/wpcs,vendor/phpcsstandards/phpcsextra",
+        "post-update-cmd" : "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility,vendor/phpcompatibility/phpcompatibility-wp,vendor/phpcompatibility/phpcompatibility-paragonie,vendor/wp-coding-standards/wpcs,vendor/phpcsstandards/phpcsextra"
     },
     "require-dev": {
         "phpcompatibility/phpcompatibility-wp": "*",
@@ -42,7 +44,8 @@
         "symfony/debug-bundle": "^7.1",
         "wp-cli/wp-cli-bundle": "^2.11",
         "wp-coding-standards/wpcs": "^3.1",
-        "yoast/phpunit-polyfills": "^2.0"
+        "yoast/phpunit-polyfills": "^2.0",
+        "phpcompatibility/php-compatibility": "^9.3"
     },
     "config": {
         "allow-plugins": {

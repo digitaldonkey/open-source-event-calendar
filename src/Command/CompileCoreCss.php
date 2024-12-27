@@ -107,7 +107,9 @@ class CompileCoreCss extends CommandAbstract
 
         if ( ! in_array($stylesheet, $themes)) {
             throw new InvalidArgumentException(
-                'Theme ' . $stylesheet . ' compilation is not supported.'
+                esc_html(
+                    'Theme ' . $stylesheet . ' compilation is not supported.'
+                )
             );
         }
         $root = OSEC_PATH . 'public/' . OSEC_THEME_FOLDER;

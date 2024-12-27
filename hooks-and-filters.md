@@ -3556,13 +3556,13 @@ add_filter('osec_ui_date_format_long', $date_format);
 
 @file **../src/App/View/KsesHelper.php**
 
-### osec_ksess_allowed_html_inline <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_kses_allowed_html_inline <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter allowed HTML tags and properties on inlined rendering.
 
 ```php
-add_filter('osec_ksess_allowed_html_inline', $frontend);
+add_filter('osec_kses_allowed_html_inline', $frontend);
 ```
 
 #### Parameters
@@ -3584,7 +3584,7 @@ add_filter('osec_ksess_allowed_html_inline', $frontend);
  *
  * @file src/App/View/KsesHelper.php
  */
-add_filter('osec_ksess_allowed_html_inline', $frontend);
+add_filter('osec_kses_allowed_html_inline', $frontend);
 ```
 
 </details>
@@ -3624,13 +3624,13 @@ add_filter('osec_ksess_allowed_html_frontend', $frontend);
 </details>
 
 
-### osec_ksess_allowed_html_backend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_kses_allowed_html_backend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter allowed HTML tags and properties on backend rendering.
 
 ```php
-add_filter('osec_ksess_allowed_html_backend', $backend);
+add_filter('osec_kses_allowed_html_backend', $backend);
 ```
 
 #### Parameters
@@ -3652,7 +3652,7 @@ add_filter('osec_ksess_allowed_html_backend', $backend);
  *
  * @file src/App/View/KsesHelper.php
  */
-add_filter('osec_ksess_allowed_html_backend', $backend);
+add_filter('osec_kses_allowed_html_backend', $backend);
 ```
 
 </details>
@@ -7998,13 +7998,13 @@ add_filter('osec_ui_date_format_long', $date_format);
 
 @file **../src/App/View/KsesHelper.php**
 
-### osec_ksess_allowed_html_inline <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_kses_allowed_html_inline <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter allowed HTML tags and properties on inlined rendering.
 
 ```php
-add_filter('osec_ksess_allowed_html_inline', $frontend);
+add_filter('osec_kses_allowed_html_inline', $frontend);
 ```
 
 #### Parameters
@@ -8026,7 +8026,7 @@ add_filter('osec_ksess_allowed_html_inline', $frontend);
  *
  * @file src/App/View/KsesHelper.php
  */
-add_filter('osec_ksess_allowed_html_inline', $frontend);
+add_filter('osec_kses_allowed_html_inline', $frontend);
 ```
 
 </details>
@@ -8066,13 +8066,13 @@ add_filter('osec_ksess_allowed_html_frontend', $frontend);
 </details>
 
 
-### osec_ksess_allowed_html_backend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_kses_allowed_html_backend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter allowed HTML tags and properties on backend rendering.
 
 ```php
-add_filter('osec_ksess_allowed_html_backend', $backend);
+add_filter('osec_kses_allowed_html_backend', $backend);
 ```
 
 #### Parameters
@@ -8094,7 +8094,7 @@ add_filter('osec_ksess_allowed_html_backend', $backend);
  *
  * @file src/App/View/KsesHelper.php
  */
-add_filter('osec_ksess_allowed_html_backend', $backend);
+add_filter('osec_kses_allowed_html_backend', $backend);
 ```
 
 </details>

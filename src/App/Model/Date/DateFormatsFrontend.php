@@ -62,18 +62,18 @@ class DateFormatsFrontend extends OsecBaseClass
             __('Osec Frontend Date Formats', 'open-source-event-calendar'),
             function () {
                 echo '<p>'
-                     . __(
+                     . esc_html__(
                          'Osec calendar uses WordPress default "date_format" and "time_format" above and 
-                            provides additional <strong>frontend date formates</strong>.',
+                            provides additional <strong>frontend date formats</strong>.',
                          'open-source-event-calendar'
                      )
                      . '<br />'
-                     . __(
+                     . esc_html__(
                          'Above WordPress default "date_format" is considered as "long" format.',
                          'open-source-event-calendar'
                      )
                      . '<br />'
-                     . __(
+                     . esc_html__(
                          'Backend Formats are in Osec Settings -> Adding/Editing Events.',
                          'open-source-event-calendar'
                      )
@@ -134,7 +134,11 @@ class DateFormatsFrontend extends OsecBaseClass
     public function getFormat(string $format): array
     {
         if (! isset(self::$default[$format])) {
-            throw new Exception('Unknown format. Got: ' . $format);
+            throw new Exception(
+                esc_html(
+                    'Unknown format. Got: ' . $format
+                )
+            );
         }
         $def = self::$default[$format];
         foreach ($def as $id => $fmt) {
@@ -194,7 +198,9 @@ class DateFormatsFrontend extends OsecBaseClass
                 return $customVal;
             }
         }
-        throw new Exception('Unknown format. Got: ' . $format);
+        throw new Exception(esc_html(
+            'Unknown format. Got: ' . $format
+        ));
     }
 
     public function sanitizeNoYear(string $value): string

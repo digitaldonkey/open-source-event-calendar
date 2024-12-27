@@ -100,12 +100,14 @@ Alternatively...
 apt update && install subversion 
 ```
 
-**initialize once **
+#### Initialize once
 
 ```
-PHP_TMP=$($(command -v php) -r 'echo  sys_get_temp_dir();')
+ddev ssh 
+
+PHP_TMP=$($(command -v php) -r 'echo  sys_get_temp_dir();') \
 && cd /var/www/html/wp-content/plugins/open-source-event-calendar \
-&& bin/install-wp-tests.sh phpunit root root db:3306 6.6.1
+&& bin/install-wp-tests.sh phpunit root root db:3306 6.7
 ```
 
 

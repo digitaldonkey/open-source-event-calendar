@@ -58,13 +58,15 @@ abstract class OsecBaseClass
             // Maybe this class needs to be initialized with new?
             if ( ! is_null($arg1) || ! is_null($arg2) || ! is_null($arg3)) {
                 throw new Exception(
-                    'Existing registry object is initialized with additional params. ' . print_r(
-                        [
-                            'arg1' => $arg1,
-                            'arg2' => $arg2,
-                            'arg3' => $arg3,
-                        ],
-                        true
+                    esc_html(
+                        'Existing registry object is initialized with additional params. ' . print_r(
+                            [
+                                'arg1' => $arg1,
+                                'arg2' => $arg2,
+                                'arg3' => $arg3,
+                            ],
+                            true
+                        )
                     )
                 );
             }

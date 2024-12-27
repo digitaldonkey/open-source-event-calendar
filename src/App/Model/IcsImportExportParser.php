@@ -61,8 +61,10 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 );
             } catch (ImportExportParseException $exception) {
                 throw new ImportExportParseException(
-                    'Processing "' . $arguments['source'] .
-                    '" triggered error: ' . $exception->getMessage()
+                    esc_html(
+                        'Processing "' . $arguments['source'] .
+                        '" triggered error: ' . $exception->getMessage()
+                    )
                 );
             }
 
@@ -257,8 +259,10 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $end   = $this->createDTFromValue($endValue, $eventTimezone, $TzEnforced);
             if (false === $start || false === $end) {
                 throw new ImportExportParseException(
-                    'Failed to parse one or more dates given timezone "' .
-                    var_export($eventTimezone, true) . '"'
+                    esc_html(
+                        'Failed to parse one or more dates given timezone "' .
+                        var_export($eventTimezone, true) . '"'
+                    )
                 );
             }
 
@@ -690,7 +694,11 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $timezone = $time['params']['TZID'];
             // Verify custom timezone.
             if (false === $this->isRecognizedTz($timezone)) {
-                throw new TimezoneException('Invalid timzone: ' . (string)$timezone);
+                throw new TimezoneException(
+                    esc_html(
+                        'Invalid timzone: ' . (string) $timezone
+                    )
+                );
             }
         } elseif (! $dateTime->getTimezone() instanceof DateTimeZone) {
             // No TZ in date? Set default.

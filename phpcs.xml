@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="OSEC-PSR-12">
-	<description>Generally PSR-12 with some Wordpress Fragments.</description>
+<ruleset name="WordPress-PSR-12">
+	<description>PSR-12 with WordPress Plugin Check requirements.</description>
 
 	<!-- What to scan -->
 
@@ -61,8 +61,33 @@
 	</rule>
 
 <!--
-	Add WordPress-Extra Rolset WOTHOUT WordPress-Core
+	Add WordPress-Extra Rulset
+
+	without WordPress-Core and their weird PSR-4 incompatible
+	Copied from
 		@see https://github.com/WordPress/WordPress-Coding-Standards/blob/develop/WordPress-Extra/ruleset.xml
+
+
+
+	TODO
+		Automatically import and upgrade these rulsets.
+	    Like described below from here.
+	    @source https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-Ruleset#selectively-applying-rules
+
+
+    Include everything in another ruleset.xml file. This is
+    really handy if you want to customise another developer's
+    custom standard. They just need to distribute their single
+    ruleset file to allow this.
+	<rule ref="/home/username/standards/custom.xml"/>
+
+   Relative paths can also be used everywhere absolute paths are used.
+   Make sure the reference starts with ./ or ../ so PHP_CodeSniffer
+   knows it is a relative path.
+
+	<rule ref="./standards/mystandard"/>
+	<rule ref="../username/custom.xml"/>
+
 -->
 
 	<!-- Generic PHP best practices.
@@ -122,8 +147,7 @@
 		<severity>5</severity>
 	</rule>
 
-	<!--	TODO FIX THIS   -->
-	<!--	<rule ref="WordPress.Security.EscapeOutput"/>-->
+	<rule ref="WordPress.Security.EscapeOutput"/>
 
 	<!-- Encourage use of wp_safe_redirect() to avoid open redirect vulnerabilities.
 		 https://github.com/WordPress/WordPress-Coding-Standards/pull/1264 -->
@@ -133,7 +157,7 @@
 		 https://github.com/WordPress/WordPress-Coding-Standards/issues/73 -->
 
 	<!--	TODO FIX THIS   -->
-	<!--	<rule ref="WordPress.Security.NonceVerification"/>-->
+<!--	<rule ref="WordPress.Security.NonceVerification"/>-->
 
 	<rule ref="WordPress.PHP.DevelopmentFunctions"/>
 	<rule ref="WordPress.PHP.DiscouragedPHPFunctions"/>

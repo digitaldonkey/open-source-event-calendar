@@ -94,19 +94,11 @@ class AdminPageManageTaxonomies extends OsecBaseClass
     }
 
     /**
-     * Render tabbed header to manage taxonomies.
-     */
-    public function render_header()
-    {
-        echo $this->get_header();
-    }
-
-    /**
      * Generate and return tabbed header to manage taxonomies.
      *
      * @return string HTML markup for tabbed header
      */
-    public function get_header()
+    public function render_header()
     {
         $args = [
             /**
@@ -122,8 +114,8 @@ class AdminPageManageTaxonomies extends OsecBaseClass
             'text_title' => __('Organize Events', 'open-source-event-calendar'),
         ];
 
-        return ThemeLoader::factory($this->app)
+        ThemeLoader::factory($this->app)
                           ->get_file('organize/header.twig', $args, true)
-                          ->get_content();
+                          ->render();
     }
 }

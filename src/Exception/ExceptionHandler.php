@@ -109,7 +109,9 @@ class ExceptionHandler
             /** @noinspection ForgottenDebugOutputInspection */
             wp_die(
                 '<pre style="color: black; background: darkorange; font-size: smaller; width: fit-content; padding: .5em">'
-                . $exception
+                . esc_html(
+                    $exception
+                )
                 . '</pre>'
             );
         }
@@ -360,8 +362,8 @@ class ExceptionHandler
                 $errline,
                 $errno
             );
-
-            return error_log($message, 0);
+            /* @noinspection ForgottenDebugOutputInspection */
+            return error_log(esc_html($message), 0);
         }
         // let's get the plugin folder
         $tail       = substr($errfile, $position);
@@ -393,15 +395,15 @@ class ExceptionHandler
                     $errline,
                     $errno
                 );
-                throw new $exc($message);
+                throw new $exc(esc_html($message));
             }
         }
         throw new ErrorException(
-            $errstr,
-            $errno,
+            esc_html($errstr),
+            esc_html($errno),
             0,
-            $errfile,
-            $errline
+            esc_html($errfile),
+            esc_html($errline)
         );
     }
 
@@ -464,6 +466,7 @@ class ExceptionHandler
      */
     public function render_admin_notice()
     {
+        global $osec_app;
         $redirect_url = add_query_arg(
             self::DB_REACTIVATE_PLUGIN,
             'true',
@@ -481,6 +484,9 @@ class ExceptionHandler
                          __('Try reactivating plugin', 'open-source-event-calendar');
         $message      .= '</a>';
         $message      .= '<p></p></div>';
-        echo $message;
+        echo wp_kses(
+            $message,
+            $osec_app->kses->allowed_html_backend()
+        );
     }
 }

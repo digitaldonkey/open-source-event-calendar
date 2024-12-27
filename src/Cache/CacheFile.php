@@ -405,7 +405,8 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         if ($filename) {
             $this->app->options->delete($this->optionKey($key));
             if (file_exists($filename)) {
-                return wp_delete_file($filename);
+                wp_delete_file($filename);
+                return !file_exists($filename);
             }
         }
 

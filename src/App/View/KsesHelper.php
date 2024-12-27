@@ -30,7 +30,7 @@ class KsesHelper extends OsecBaseClass
          * @param  array  $frontend
          */
         return apply_filters(
-            'osec_ksess_allowed_html_inline',
+            'osec_kses_allowed_html_inline',
             wp_kses_allowed_html('data')
         );
     }
@@ -306,7 +306,7 @@ class KsesHelper extends OsecBaseClass
          *
          * @param  array  $backend
          */
-        $backend = apply_filters('osec_ksess_allowed_html_backend', $backend);
+        $backend = apply_filters('osec_kses_allowed_html_backend', $backend);
 
         return $backend;
     }

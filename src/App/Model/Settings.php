@@ -176,7 +176,7 @@ class Settings extends OsecBaseInitialized
     {
         if (! isset($this->options[$option])) {
             throw new SettingsException(
-                'Option "' . $option . '" was not registered'
+                esc_html('Option "' . $option . '" was not registered')
             );
         }
         if ('array' === $this->options[$option]['type']) {

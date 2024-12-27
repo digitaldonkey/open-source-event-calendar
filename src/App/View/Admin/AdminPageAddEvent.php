@@ -280,8 +280,8 @@ class AdminPageAddEvent extends OsecBaseClass
         if ( ! isset($post->post_type) || OSEC_POST_TYPE != $post->post_type) {
             return;
         }
-        echo ThemeLoader::factory($this->app)
+        ThemeLoader::factory($this->app)
                         ->get_file('box_inline_warning.twig', [], true)
-                        ->get_content();
+                        ->render();
     }
 }

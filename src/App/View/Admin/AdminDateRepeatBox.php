@@ -148,11 +148,11 @@ class AdminDateRepeatBox extends OsecBaseClass
             $count = 100;
         }
         ?>
-        <input type="range" name="<?php echo $name; ?>" id="<?php echo $name; ?>"
-               min="1" max="<?php echo $max; ?>"
+        <input type="range" name="<?php echo esc_attr($name); ?>" id="<?php echo esc_attr($name); ?>"
+               min="1" max="<?php echo esc_attr($max); ?>"
             <?php
             if ($count) {
-                echo 'value="' . $count . '"';
+                echo 'value="' . esc_attr($count) . '"';
             }
             ?>
         />
@@ -250,22 +250,26 @@ class AdminDateRepeatBox extends OsecBaseClass
     {
         ob_start();
         ?>
-        <div class="ai1ec-btn-group-grid" id="<?php echo $name; ?>">
+        <div class="ai1ec-btn-group-grid" id="<?php echo esc_attr($name); ?>">
             <?php foreach ($options as $key => $val) : ?>
                 <div class="ai1ec-pull-left">
                     <a class="ai1ec-btn ai1ec-btn-default ai1ec-btn-block
                 <?php echo in_array($key, $selected) ? 'ai1ec-active' : ''; ?>">
-                        <?php echo $val; ?>
+                        <?php echo esc_html($val); ?>
                     </a>
-                    <input type="hidden" name="<?php echo $name . '_' . $key; ?>"
-                           value="<?php echo $key; ?>">
+                    <input type="hidden" name="<?php echo esc_attr($name . '_' . $key); ?>"
+                           value="<?php echo esc_attr($key); ?>">
                 </div class="ai1ec-pull-left">
             <?php endforeach; ?>
         </div>
-        <input type="hidden" name="<?php echo $name; ?>"
-               value="<?php echo implode(',', $selected); ?>">
+        <input type="hidden" name="<?php echo esc_attr($name); ?>"
+               value="<?php echo esc_attr(implode(',', $selected)); ?>">
         <?php
-        return ob_get_clean();
+
+        return wp_kses(
+            ob_get_clean(),
+            $this->app->kses->allowed_html_backend()
+        );
     }
 
     /**
@@ -381,12 +385,12 @@ class AdminDateRepeatBox extends OsecBaseClass
     ) {
         ob_start();
         ?>
-        <select name="<?php echo $name; ?>" id="<?php echo $name; ?>">
+        <select name="<?php echo esc_attr($name); ?>" id="<?php echo esc_attr($name); ?>">
             <?php foreach ($options as $key => $val) : ?>
-                <option value="<?php echo $key; ?>"
+                <option value="<?php echo esc_attr($key); ?>"
                     <?php echo $key === $selected ? 'selected="selected"' : ''; ?>
                     <?php echo in_array($key, $disabled_keys) ? 'disabled' : ''; ?>>
-                    <?php echo $val; ?>
+                    <?php echo esc_attr($val); ?>
                 </option>
             <?php endforeach ?>
         </select>
@@ -594,14 +598,14 @@ class AdminDateRepeatBox extends OsecBaseClass
         ?>
         <select name="osec_table_coordinates" id="osec_table_coordinates">
             <?php foreach ($options as $key => $val) : ?>
-                <option value="<?php echo $key; ?>"
+                <option value="<?php echo esc_attr($key); ?>"
                     <?php
                     if ($key === $selected) {
                         echo 'selected="selected"';
                     }
                     ?>
                 >
-                    <?php echo $val; ?>
+                    <?php echo esc_html($val); ?>
                 </option>
             <?php endforeach ?>
         </select>

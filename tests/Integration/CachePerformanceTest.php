@@ -71,7 +71,7 @@ class CachePerformanceTest extends CacheFileTestBase
             microtime(true) - $start,
             4
         );
-        echo '   TIME: ' . $time_elapsed_secs . 's (Repeats: ' . self::REPEAT_COUNT . ")\n";
+        echo esc_html('   TIME: ' . $time_elapsed_secs . 's (Repeats: ' . self::REPEAT_COUNT . ")\n");
     }
 
     public function test_cache_db_with_timer()

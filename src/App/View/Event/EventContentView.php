@@ -36,11 +36,16 @@ class EventContentView extends OsecBaseClass
 
         ob_start();
         echo '<div class="wp-block-event-excerpt">';
-        echo $this->excerpt_view($event);
+        echo wp_kses(
+            $this->excerpt_view($event),
+            $this->app->kses->allowed_html_frontend()
+        );
         // Re-apply any filters to the post content that normally would have
         // been applied if it weren't for our interference (below).
         echo '<div class="wp-block-event-excerpt__excerpt has-small-font-size">';
-        echo shortcode_unautop(wpautop(EventPostView::factory($this->app)->trim_excerpt($event)));
+        echo esc_html(
+            EventPostView::factory($this->app)->trim_excerpt($event)
+        );
         echo '</div>';
         echo '</div>';
 

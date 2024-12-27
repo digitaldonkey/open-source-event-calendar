@@ -144,6 +144,9 @@ class DT implements Stringable
         $success = true;
         if ('UTC' !== $default) {
             // issue admin notice
+            // TODO Maybe ignore
+            //   @see https://github.com/Automattic/VIP-Coding-Standards/issues/426
+            //   @see https://wordpress.org/support/topic/force-timezone-to-be-utc0/
             $success = date_default_timezone_set('UTC');
         }
 
@@ -537,7 +540,7 @@ class DT implements Stringable
             6 => 'saturday',
         ];
         if ( ! isset($dayInt)) {
-            throw new Exception('Weekday integer should be [0-6]. Got: ' . $dayInt);
+            throw new Exception(esc_html('Weekday integer should be [0-6]. Got: ' . $dayInt));
         }
 
         return $mapper[$dayInt];

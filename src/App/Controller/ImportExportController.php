@@ -156,7 +156,9 @@ class ImportExportController
     {
         if ( ! isset($this->engines[$engineName])) {
             throw new EngineNotSetException(
-                'The engine ' . $engineName . 'is not registered.'
+                esc_html(
+                    'The engine ' . $engineName . 'is not registered.'
+                )
             );
         } else {
             $engineClass = $this->engines[$engineName];
@@ -185,7 +187,7 @@ class ImportExportController
     {
         if ( ! isset($this->engines[$engine])) {
             throw new EngineNotSetException(
-                'The engine ' . $engine . 'is not registered.'
+                esc_html('The engine ' . $engine . 'is not registered.')
             );
         }
         $className = $this->engines[$engine];

@@ -40,6 +40,7 @@ class RenderCsv extends RenderStrategyAbstract
         );
         header('Content-Transfer-Encoding: binary');
 
+        // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
         $columns = $params['columns'];
         for ($i = 0, $iMax = count($columns); $i < $iMax; $i++) {
             if ($i > 0) {
@@ -60,6 +61,7 @@ class RenderCsv extends RenderStrategyAbstract
             }
             echo("\n");
         }
+        // phpcs:enable
         ResponseHelper::stop();
     }
 }

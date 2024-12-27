@@ -182,7 +182,7 @@ class WidgetController extends OsecBaseClass
 			
 		})(); // We call our anonymous function immediately
 JS;
-        // $compatibility_ob->gzip_if_possible( $js );
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         echo $js;
         exit(0);
     }

@@ -130,9 +130,12 @@ class FeedsController extends OsecBaseClass
      */
     public function add_ics_feed(): void
     {
-        check_ajax_referer('osec_ics_feed_nonce', 'nonce');
-        if (! current_user_can('manage_osec_feeds')) {
-            wp_die(__('User not allowed to manage feeds.', 'open-source-event-calendar'));
+
+        if (
+            !check_ajax_referer('osec_ics_feed_nonce', 'nonce')
+            || !current_user_can('manage_osec_feeds')) {
+            /** @noinspection ForgottenDebugOutputInspection */
+            wp_die(esc_html__('User not allowed to manage feeds.', 'open-source-event-calendar'));
         }
 
         /* @var ?int $feedId Update (int) or New (null) */
@@ -144,10 +147,11 @@ class FeedsController extends OsecBaseClass
             ',',
             $_REQUEST['feed_category']
         );
+        $url = wp_http_validate_url(trim($_REQUEST['feed_url']));
         $entry           = [
             // TODO Maybe some validation?
-            'feed_url'             => wp_http_validate_url(trim($_REQUEST['feed_url'])),
-            'feed_name'            => $_REQUEST['feed_url'],
+            'feed_url'             => $url,
+            'feed_name'            => $url,
             'feed_category'        => $feed_categories,
             'feed_tags'            => $_REQUEST['feed_tags'],
             'comments_enabled'     => IntegerHelper::db_bool($_REQUEST['comments_enabled']),

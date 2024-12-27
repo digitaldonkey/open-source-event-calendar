@@ -174,7 +174,10 @@ class AdminPageAllEvents extends OsecBaseClass
         if ('osec_event_date' === $column) {
             try {
                 $event = new Event($this->app, $post_id);
-                echo EventTimeView::factory($this->app)->get_timespan_html($event);
+                echo wp_kses(
+                    EventTimeView::factory($this->app)->get_timespan_html($event),
+                    $this->app->kses->allowed_html_frontend()
+                );
             } catch (Exception) {
                 // event wasn't found, output empty string
                 echo '';

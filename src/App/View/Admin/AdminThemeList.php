@@ -181,8 +181,7 @@ class AdminThemeList extends WP_List_Table
             return;
         }
         ?>
-        <div class="tablenav themes <?php
-        echo $which; ?>">
+        <div class="tablenav themes <?php echo esc_attr($which); ?>">
             <?php
             $this->pagination($which); ?>
             <img src="<?php
@@ -220,28 +219,34 @@ class AdminThemeList extends WP_List_Table
             ) {
                 printf(
                 /* translators: 1: Url 2: Url */
-                    __(
+                    esc_html__(
                         'You only have one theme enabled for this site right now. Visit the Network Admin to 
                             <a href="%1$s">enable</a> or <a href="%2$s">install</a> more themes.',
                         'open-source-event-calendar'
                     ),
-                    network_admin_url(
-                        'site-themes.php?id=' . $GLOBALS['blog_id']
+                    esc_url(
+                        network_admin_url(
+                            'site-themes.php?id=' . $GLOBALS['blog_id']
+                        ),
                     ),
-                    network_admin_url('theme-install.php')
+                    esc_url(
+                        network_admin_url('theme-install.php')
+                    )
                 );
 
                 return;
             } elseif (current_user_can('manage_network_themes')) {
                 printf(
                 /* translators: Url */
-                    __(
+                    esc_html__(
                         'You only have one theme enabled for this site right now. Visit the Network Admin to 
                             <a href="%1$s">enable</a> more themes.',
                         'open-source-event-calendar'
                     ),
-                    network_admin_url(
-                        'site-themes.php?id=' . $GLOBALS['blog_id']
+                    esc_url(
+                        network_admin_url(
+                            'site-themes.php?id=' . $GLOBALS['blog_id']
+                        )
                     )
                 );
 
@@ -251,7 +256,7 @@ class AdminThemeList extends WP_List_Table
             // can't enable it.
         } elseif (current_user_can('install_themes')) {
             print(
-            __(
+            esc_html__(
                 'You only have one theme installed right now.',
                 'open-source-event-calendar'
             )
@@ -262,11 +267,11 @@ class AdminThemeList extends WP_List_Table
         // Fallthrough.
         printf(
         /* translators: Site name */
-            __(
+            esc_html__(
                 'Only the active theme is available to you. Contact the <em>%s</em> administrator to add more themes.',
                 'open-source-event-calendar'
             ),
-            get_site_option('site_name')
+            esc_html(get_site_option('site_name'))
         );
     }
 
@@ -294,7 +299,7 @@ class AdminThemeList extends WP_List_Table
         foreach ($theme_names as $theme_name) {
             $class = ['available-theme'];
             ?>
-            <div class="<?php echo implode(' ', $class); ?>">
+            <div class="<?php echo esc_attr(implode(' ', $class)); ?>">
                 <?php if (! empty($theme_name)) :
                     $template = $themes[$theme_name]['Template'];
                     $stylesheet = $themes[$theme_name]['Stylesheet'];
@@ -350,78 +355,79 @@ class AdminThemeList extends WP_List_Table
                     $actions = implode(' | ', $actions);
                     ?>
                     <?php if ($screenshot) : ?>
-                    <img src="<?php echo $theme_root_uri . '/' . $stylesheet . '/' . $screenshot; ?>" alt=""/>
+                    <img src="<?php echo esc_url($theme_root_uri . '/' . $stylesheet . '/' . $screenshot); ?>" alt=""/>
                     <?php endif; ?>
                     <h3>
                         <?php
                         printf(
-                            /* translators: 1: theme title, 2: theme version, 3: theme author */
-                            __('%1$s %2$s by %3$s', 'open-source-event-calendar'),
-                            $title,
-                            $version,
-                            $author
+                        /* translators: 1: theme title, 2: theme version, 3: theme author */
+                            esc_html__('%1$s %2$s by %3$s', 'open-source-event-calendar'),
+                            esc_html($title),
+                            esc_html($version),
+                            esc_html($author)
                         );
                         ?>
                     </h3>
                     <p class="description"><?php
-                        echo $description; ?></p>
-                    <span class='action-links'><?php
-                        echo $actions; ?></span>
+                        echo esc_html($description); ?></p>
+                    <span class='action-links'>
+                        <?php echo wp_kses(
+                            $actions,
+                            $this->app->kses->allowed_html_frontend()
+                        ); ?>
+                    </span>
                     <?php if (current_user_can('edit_themes') && $parent_theme) { ?>
                     <p>
                         <?php
                         printf(
                         /* translators: 1: Title 2: template dir 3: Stylesheet Dir 4: Title 5: Parent theme */
-                            __(
+                            esc_html__(
                                 'The template files are located in <code>%2$s</code>. The stylesheet files 
                                         are located in <code>%3$s</code>. <strong>%4$s</strong> uses templates from 
                                         <strong>%5$s</strong>. Changes made to the templates will affect both themes.',
                                 'open-source-event-calendar'
                             ),
-                            $title,
-                            str_replace(WP_CONTENT_DIR, '', $template_dir),
-                            str_replace(WP_CONTENT_DIR, '', $stylesheet_dir),
-                            $title,
-                            $parent_theme
+                            esc_html($title),
+                            esc_html(str_replace(WP_CONTENT_DIR, '', $template_dir)),
+                            esc_html(str_replace(WP_CONTENT_DIR, '', $stylesheet_dir)),
+                            esc_html($title),
+                            esc_html($parent_theme)
                         );
                         ?>
                     </p>
-                        <?php
-                    } else { ?>
+                    <?php } else { ?>
                     <p>
-                            <?php
-                            printf(
-                            /* translators:
+                        <?php printf(
+                        /* translators:
                             1: Theme name
                             2: Template Dir
                             3: Stylesheet dir
                             4: Theme name
                             5: Parent theme
-                            */
-                                __(
-                                    'The template    files are located in <code>%2$s</code>.
+                        */
+                            esc_html__(
+                                'The template    files are located in <code>%2$s</code>.
                                         The stylesheet files are located in <code>%3$s</code>.
                                         <strong>%4$s</strong> uses templates from 
                                         <strong>%5$s</strong>.
                                          Changes made to the templates will affect both themes.',
-                                    'open-source-event-calendar'
-                                ),
-                                $title,
-                                str_replace(WP_CONTENT_DIR, '', $template_dir),
-                                str_replace(WP_CONTENT_DIR, '', $stylesheet_dir),
-                                $title,
-                                $parent_theme
-                            );
-                            ?>
+                                'open-source-event-calendar'
+                            ),
+                            esc_html($title),
+                            esc_html(str_replace(WP_CONTENT_DIR, '', $template_dir)),
+                            esc_html(str_replace(WP_CONTENT_DIR, '', $stylesheet_dir)),
+                            esc_html($title),
+                            esc_html($parent_theme)
+                        );
+                        ?>
                     </p>
-                        <?php
-                    } ?>
+                    <?php } ?>
                     <?php
                     if ($tags) : ?>
                         <p>
                             <?php
-                            echo __('Tags:', 'open-source-event-calendar'); ?><?php
-                            echo implode(', ', $tags); ?>
+                            echo esc_html__('Tags:', 'open-source-event-calendar'); ?><?php
+                            echo esc_html(implode(', ', $tags)); ?>
                         </p>
                     <?php endif; ?>
                 <?php endif; // end if not empty theme_name ?>

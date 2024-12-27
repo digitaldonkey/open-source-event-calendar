@@ -41,7 +41,9 @@ class SaveSettings extends SaveAbstract
 
             // Sanity check.
             if ( ! isset($data['renderer']['validator']) && ! isset($data['type'])) {
-                throw new Exception('No validation defined for ' . $name);
+                throw new Exception(
+                    esc_html('No validation defined for ' . $name)
+                );
             }
 
             if ( ! isset($_POST[$name]) && isset($data['type']) && 'bool' === $data['type']) {
@@ -89,7 +91,9 @@ class SaveSettings extends SaveAbstract
                             $value = (string)$_POST[$name];
                             break;
                         default:
-                            throw new Exception('No validation defined datatype ' . $data['type']);
+                            throw new Exception(
+                                esc_html('No validation defined datatype ' . $data['type'])
+                            );
                     }
                 }
             }

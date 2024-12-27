@@ -116,7 +116,7 @@ class TrashController extends OsecBaseClass
                 // when untrashing also get trashed object
                 $children = EventParent::factory($this->app)
                                        ->get_child_event_objects($event->get('post_id'), $action === 'untrash');
-                $function = 'wp_' . $action . 'post';
+                $function = 'wp_' . $action . '_post';
                 foreach ($children as $child) {
                     $function($child->get('post_id'));
                 }

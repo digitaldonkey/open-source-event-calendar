@@ -317,11 +317,11 @@ class ThemeLoader extends OsecBaseClass
                 throw new Exception(
                     sprintf(
                         /* translators: Missing file extensions */
-                        __(
+                        esc_html__(
                             "We couldn't find a suitable loader for filename with extension '%s'",
                             'open-source-event-calendar'
                         ),
-                        $fileExt
+                        esc_html($fileExt)
                     )
                 );
         }
@@ -329,7 +329,7 @@ class ThemeLoader extends OsecBaseClass
         // here file is a concrete class otherwise the exception is thrown
         if ( ! $file->process_file() && true === $throw_exception) {
             throw new Exception(
-                'The specified file "' . $filename . '" doesn\'t exist.'
+                esc_html('The specified file "' . $filename . '" doesn\'t exist.')
             );
         }
 
