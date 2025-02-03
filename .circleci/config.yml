@@ -25,6 +25,7 @@ references:
   OSEC_RELEASE_FILE: &OSEC_RELEASE_FILE
       open-source-event-calendar.zip
   OSEC_RELEASE_WHITE_LIST: &OSEC_RELEASE_WHITE_LIST
+        calendar_block/
         src/
         vendor/
         public/
