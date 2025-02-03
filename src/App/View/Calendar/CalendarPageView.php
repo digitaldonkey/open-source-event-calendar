@@ -156,7 +156,7 @@ class CalendarPageView extends OsecBaseClass
         $are_filters_set = Router::factory($this->app)
                                  ->is_at_least_one_filter_set_in_request($view_args);
 
-        if (($view_args['display_date_navigation'] === 'true' || $type !== 'html') && $is_json) {
+        if (($type !== 'html') && $is_json) {
             // send data both for json and jsonp as shortcodes are jsonp
             return [
                 'html'              => $view,
@@ -292,7 +292,6 @@ class CalendarPageView extends OsecBaseClass
                 'instance_ids',
             ]
         );
-
         $view_args    = $request->get_dict($defaultViewArgs);
         $add_defaults = [
             'cat_ids' => 'categories',
@@ -333,8 +332,7 @@ class CalendarPageView extends OsecBaseClass
         $view_args = apply_filters('osec_calendar_view_args_alter', $view_args);
 
         // TODO
-        // What is this Case about???
-        //
+        //   What is this Case about???
         if (null === $exact_date) {
             $href = HtmlFactory::factory($this->app)
                                ->create_href_helper_instance($view_args)
@@ -482,9 +480,9 @@ class CalendarPageView extends OsecBaseClass
                     $options['request_format'] = 'json';
                 }
 
-                $values['href']        = HtmlFactory::factory($this->app)
-                                                    ->create_href_helper_instance($options)
-                                                    ->generate_href();
+                $values['href'] = HtmlFactory::factory($this->app)
+                                    ->create_href_helper_instance($options)
+                                    ->generate_href();
                 $available_views[$key] = $values;
             }
         }
@@ -496,8 +494,8 @@ class CalendarPageView extends OsecBaseClass
         ];
 
         return ThemeLoader::factory($this->app)
-                          ->get_file('views_dropdown.twig', $args, false)
-                          ->get_content();
+                  ->get_file('views_dropdown.twig', $args, false)
+                  ->get_content();
     }
 
     /**

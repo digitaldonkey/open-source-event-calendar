@@ -4,8 +4,8 @@
 		{% if display_date_navigation %}
 			{{ before_pagination | raw }}
 			{{ pagination_links | raw }}
-			{{ after_pagination | raw }}
 		{% endif %}
+		{{ after_pagination | raw }}
 		{% if contribution_buttons is defined %}
 			{{ contribution_buttons | raw }}
 		{% endif %}

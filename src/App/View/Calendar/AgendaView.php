@@ -101,7 +101,7 @@ class AgendaView extends AbstractView
         $navigation       = '';
         $loader           = ThemeLoader::factory($this->app);
         $pagination_links = '';
-        if ($view_args['display_date_navigation'] === 'true') {
+        if ($view_args['display_date_navigation'] !== 'false') {
             $pagination_links = $this->getPaginationLinks(
                 $view_args,
                 $results['prev'],
@@ -120,27 +120,27 @@ class AgendaView extends AbstractView
                 ],
                 false
             )->get_content();
-
-            // Get HTML for navigation bar.
-            $nav_args = [
-                'display_date_navigation' => ($view_args['display_date_navigation'] === 'true'),
-                'pagination_links' => $pagination_links,
-                'views_dropdown'   => $view_args['views_dropdown'],
-                'below_toolbar'    => $this->getBelowToolbarHtml($type, $view_args),
-            ];
-            // Add extra buttons to Agenda view's nav bar if events were returned.
-            if ($type === 'agenda' && $dates) {
-                $button_args                  = [
-                    'text_collapse_all' => __('Collapse All', 'open-source-event-calendar'),
-                    'text_expand_all'   => __('Expand All', 'open-source-event-calendar'),
-                    'no_toggle'         => $this->app->settings->get('agenda_events_expanded'),
-                ];
-                $nav_args['after_pagination'] = $loader
-                    ->get_file('agenda-buttons.twig', $button_args, false)
-                    ->get_content();
-            }
-            $navigation = $this->getNavigation($nav_args);
         }
+
+        // Get HTML for navigation bar.
+        $nav_args = [
+            'display_date_navigation' => ($view_args['display_date_navigation'] !== 'false'),
+            'pagination_links' => $pagination_links,
+            'views_dropdown'   => $view_args['views_dropdown'],
+            'below_toolbar'    => $this->getBelowToolbarHtml($type, $view_args),
+        ];
+        // Add extra buttons to Agenda view's nav bar if events were returned.
+        if ($type === 'agenda' && $dates) {
+            $button_args                  = [
+                'text_collapse_all' => __('Collapse All', 'open-source-event-calendar'),
+                'text_expand_all'   => __('Expand All', 'open-source-event-calendar'),
+                'no_toggle'         => $this->app->settings->get('agenda_events_expanded'),
+            ];
+            $nav_args['after_pagination'] = $loader
+                ->get_file('agenda-buttons.twig', $button_args, false)
+                ->get_content();
+        }
+        $navigation = $this->getNavigation($nav_args);
 
         /**
          * Should ticket button be aenabled in agenda view
@@ -150,7 +150,7 @@ class AgendaView extends AbstractView
          * @param  bool  $show_ticket_button  $bool Set true to show ticket button.
          */
         $is_ticket_button_enabled = apply_filters('osec_agenda_ticket_button', false);
-        $args                     = [
+        $args = [
             'title'                     => $title,
             'dates'                     => $dates,
             'type'                      => $type,
