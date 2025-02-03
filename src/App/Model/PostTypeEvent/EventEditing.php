@@ -259,6 +259,12 @@ class EventEditing extends OsecBaseClass
      * Create copy of event by calling {@uses wp_insert_post} function.
      * Using 'post_parent' to add hierarchy.
      *
+     * TODO
+     *   This does not work if Gutenberg is enabled,
+     *   bevause the clone is based on $_POST data,
+     *   which is not available with Gutenberg enabled.
+ *       @see filtered by 'use_block_editor_for_post_type'.
+     *
      * @return int|bool New post ID or false on failure
      * @throws BootstrapException
      */

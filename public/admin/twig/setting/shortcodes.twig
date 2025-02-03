@@ -3,6 +3,7 @@
         <div id="ai1ec-embedding">
             <div class="ai1ec-well ai1ec-prose">
                 <p>{{ text_insert_shortcode }}</p>
+                <p><strong>{{ text_view_title }}</strong></p>
                 <ul>
                     <li>{{ text_month_view }} <code class="ai1ec-autoselect">[{{ base_shortcode }} view="monthly"]</code></li>
                     <li>{{ text_week_view }} <code class="ai1ec-autoselect">[{{ base_shortcode }} view="weekly"]</code></li>
@@ -16,8 +17,7 @@
                     <li>{{ text_default_view }} <code class="ai1ec-autoselect">[{{ base_shortcode }}]</code></li>
                 </ul>
                 <p>
-                    <span class="ai1ec-text-muted">{{ text_optional }}</span>
-                    {{ text_filter_label }}
+                    <strong>{{ text_filter_title }}</strong>
                 </p>
                 <ul>
                     <li>{{ text_filter_category }} <code class="ai1ec-autoselect">[{{ base_shortcode }}
@@ -39,6 +39,16 @@
                     <li>{{ text_filter_post_id_comma }} <code class="ai1ec-autoselect">[{{ base_shortcode }} post_id="1,2"]</code></li>
                     <li>{{ text_events_limit }} <code class="ai1ec-autoselect">[{{ base_shortcode }} events_limit="5"]</code></li>
                 </ul>
+                <p>
+                    <strong>{{ text_display_options_title }}</strong>
+                </p>
+                <ul>
+                    <li><code class="ai1ec-autoselect">[{{ base_shortcode }} display_filters="false"]</code></li>
+                    <li><code class="ai1ec-autoselect">[{{ base_shortcode }} display_subscribe="false"]</code></li>
+                    <li><code class="ai1ec-autoselect">[{{ base_shortcode }} display_view_switch="false"]</code></li>
+                    <li><code class="ai1ec-autoselect">[{{ base_shortcode }} display_date_navigation="false"]</code></li>
+                </ul>
+
                 <div class="ai1ec-alert ai1ec-alert-warning">
                     <strong>{{ text_warning }}</strong>
                     {{ text_single_calendar }}

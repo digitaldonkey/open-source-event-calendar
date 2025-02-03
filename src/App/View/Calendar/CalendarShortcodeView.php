@@ -23,7 +23,7 @@ class CalendarShortcodeView extends OsecBaseClass
      *
      * @param  array  $atts  Attributes provided on shortcode
      * @param  string  $content  Tag internal content (shall be empty)
-     * @param  string  $tag  Used tag name (must be 'ai1ec' always)
+     * @param  string  $tag  Used tag name (must be 'osec' always)
      *
      * @staticvar $call_count Used to restrict to single calendar per page
      *
@@ -44,7 +44,7 @@ class CalendarShortcodeView extends OsecBaseClass
         $_events_categories = $_events_tags = $post_ids = [];
 
         if (isset($atts['view'])) {
-            // TODO ???
+            // Comes with some 'ly's attached.
             if (str_ends_with((string)$atts['view'], 'ly')) {
                 $atts['view'] = substr((string)$atts['view'], 0, -2);
             }
@@ -57,7 +57,9 @@ class CalendarShortcodeView extends OsecBaseClass
 
         $mappings          = [
             'cat_name'     => 'events_categories',
+            'events_categories' => 'events_categories',
             'cat_id'       => 'events_categories',
+            'events_tags'     => 'events_tags',
             'tag_name'     => 'events_tags',
             'tag_id'       => 'events_tags',
             'post_id'      => 'post_ids',
@@ -137,12 +139,23 @@ class CalendarShortcodeView extends OsecBaseClass
                 // definition above casts values as array, so we take first element,
                 // as there won't be others
                 ? (int)$atts['events_limit'] : null,
+            'display_filters' => 'true',
+            'display_subscribe' => 'true',
+            'display_view_switch' => 'true',
+            'display_date_navigation' => 'true',
         ];
-        if ( ! isset($atts['display_filters'])) {
-            $query['display_filters'] = 'true';
-        } else {
-            $query['display_filters'] = $atts['display_filters'];
+
+        foreach ([
+            'display_filters',
+            'display_subscribe',
+            'display_view_switch',
+            'display_date_navigation',
+        ] as $query_prop) {
+            if (isset($atts[$query_prop])) {
+                $query[$query_prop] = CalendarPageView::booleanStringArg($atts[$query_prop]);
+            }
         }
+
 
         foreach ($custom_taxonomies as $taxonomy) {
             $query['osec_' . $taxonomy . '_ids'] = implode(',', ${'_' . $taxonomy});
@@ -150,9 +163,7 @@ class CalendarShortcodeView extends OsecBaseClass
         if (isset($atts['exact_date'])) {
             $query['exact_date'] = $atts['exact_date'];
         }
-        // $request = RequestParser::factory($this->app, [$query, $default_view]);
         $request = new RequestParser($this->app, $query, $view);
-
         $request->parse();
         $page_content = CalendarPageView::factory($this->app)->get_content($request, 'shortcode');
         FrontendCssController::factory($this->app)

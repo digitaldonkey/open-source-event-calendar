@@ -76,7 +76,7 @@ class EventType extends OsecBaseClass
             $rewrite     = ['slug' => $page_base];
             $has_archive = OSEC_ALTERNATIVE_ARCHIVE_URL;
         }
-        $args = [
+        $post_type_args = [
             'labels'              => $labels,
             'public'              => true,
             'publicly_queryable'  => true,
@@ -92,6 +92,7 @@ class EventType extends OsecBaseClass
             'menu_icon'           => 'dashicons-calendar-alt',
             'supports'            => $supports,
             'exclude_from_search' => $settings->get('exclude_from_search'),
+            'show_in_rest' => true,
         ];
 
         // ========================================
@@ -126,6 +127,7 @@ class EventType extends OsecBaseClass
             'labels'       => $events_categories_labels,
             'hierarchical' => true,
             'rewrite'      => ['slug' => 'events_categories'],
+            'show_in_rest' => true,
             'capabilities' => [
                 'manage_terms' => 'manage_events_categories',
                 'edit_terms'   => 'manage_events_categories',
@@ -142,6 +144,7 @@ class EventType extends OsecBaseClass
             'hierarchical' => false,
             'rewrite'      => ['slug' => 'events_tags'],
             'show_ui'      => true,
+            'show_in_rest' => true,
             'capabilities' => [
                 'manage_terms' => 'manage_events_categories',
                 'edit_terms'   => 'manage_events_categories',
@@ -196,7 +199,7 @@ class EventType extends OsecBaseClass
         // ========================================
         // = register custom post type for events =
         // ========================================
-        register_post_type(OSEC_POST_TYPE, $args);
+        register_post_type(OSEC_POST_TYPE, $post_type_args);
 
         // get event contributor if saved in the db
         $contributor = get_role('osec_event_assistant');

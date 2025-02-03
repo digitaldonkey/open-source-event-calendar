@@ -101,7 +101,9 @@ class RobotsTxt extends OsecBaseClass
             }
         }
         if (null === $wp_filesystem) {
+            // Should be defined in WP Backend.
             // TODO seems like robots.txt might silently fail.
+
             return;
         }
         $redirect = false;

@@ -1530,7 +1530,7 @@ add_filter('osec_post_form_after_venue_html', $html);
 ### osec_admin_edit_event_input_panels_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter content boces in Event Edit
+Alter content boxes in Event Edit
 
 ```php
 add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
@@ -1553,7 +1553,7 @@ Like Date-and-time, Location, Tickets... Allows you to add or limit Event inform
 
 ```php
 /**
- * Alter content boces in Event Edit
+ * Alter content boxes in Event Edit
  *
  * Like Date-and-time, Location, Tickets...
  * Allows you to add or limit Event information options.
@@ -1831,52 +1831,6 @@ add_filter('osec_admin_theme_options_tabs_alter', $tabs);
  * @file src/App/View/Admin/AdminPageThemeOptions.php
  */
 add_filter('osec_admin_theme_options_tabs_alter', $tabs);
-```
-
-</details>
-
-
----
-
-
-@file **../src/App/View/Admin/AdminPageWidgetCreator.php**
-
-### osec_display_widget_creator_warning <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Prevent display of warnings in Widget creator
-
-```php
-add_filter('osec_display_widget_creator_warning', $bool);
-```
-
-#### Description
-
-
-Apllies to in `super-widget-contents.twig`
-
-#### Parameters
-
-
- - **$bool** <span style="color:crimson"> </span> Set fals to hide warnings.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Prevent display of warnings in Widget creator
- *
- * Apllies to in `super-widget-contents.twig`
- *
- * @since 1.0
- *
- * @param  bool  $bool  Set fals to hide warnings.
- *
- * @file src/App/View/Admin/AdminPageWidgetCreator.php
- */
-add_filter('osec_display_widget_creator_warning', $bool);
 ```
 
 </details>
@@ -3653,45 +3607,6 @@ add_filter('osec_kses_allowed_html_backend', $backend);
  * @file src/App/View/KsesHelper.php
  */
 add_filter('osec_kses_allowed_html_backend', $backend);
-```
-
-</details>
-
-
----
-
-
-@file **../src/App/View/WidgetAgendaView.php**
-
-### osec_filters_upcoming_widget_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Add or alter filters in Agenda widget.
-
-```php
-add_filter('osec_filters_upcoming_widget_alter', $limit);
-```
-
-#### Parameters
-
-
- - **$limit** <span style="color:crimson"> </span> Array of Less variables
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Add or alter filters in Agenda widget.
- *
- * @since 1.0
- *
- * @param  array  $limit  Array of Less variables
- *
- * @file src/App/View/WidgetAgendaView.php
- */
-add_filter('osec_filters_upcoming_widget_alter', $limit);
 ```
 
 </details>
@@ -5972,7 +5887,7 @@ add_filter('osec_post_form_after_venue_html', $html);
 ### osec_admin_edit_event_input_panels_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter content boces in Event Edit
+Alter content boxes in Event Edit
 
 ```php
 add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
@@ -5995,7 +5910,7 @@ Like Date-and-time, Location, Tickets... Allows you to add or limit Event inform
 
 ```php
 /**
- * Alter content boces in Event Edit
+ * Alter content boxes in Event Edit
  *
  * Like Date-and-time, Location, Tickets...
  * Allows you to add or limit Event information options.
@@ -6273,52 +6188,6 @@ add_filter('osec_admin_theme_options_tabs_alter', $tabs);
  * @file src/App/View/Admin/AdminPageThemeOptions.php
  */
 add_filter('osec_admin_theme_options_tabs_alter', $tabs);
-```
-
-</details>
-
-
----
-
-
-@file **../src/App/View/Admin/AdminPageWidgetCreator.php**
-
-### osec_display_widget_creator_warning <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Prevent display of warnings in Widget creator
-
-```php
-add_filter('osec_display_widget_creator_warning', $bool);
-```
-
-#### Description
-
-
-Apllies to in `super-widget-contents.twig`
-
-#### Parameters
-
-
- - **$bool** <span style="color:crimson"> </span> Set fals to hide warnings.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Prevent display of warnings in Widget creator
- *
- * Apllies to in `super-widget-contents.twig`
- *
- * @since 1.0
- *
- * @param  bool  $bool  Set fals to hide warnings.
- *
- * @file src/App/View/Admin/AdminPageWidgetCreator.php
- */
-add_filter('osec_display_widget_creator_warning', $bool);
 ```
 
 </details>
@@ -8095,45 +7964,6 @@ add_filter('osec_kses_allowed_html_backend', $backend);
  * @file src/App/View/KsesHelper.php
  */
 add_filter('osec_kses_allowed_html_backend', $backend);
-```
-
-</details>
-
-
----
-
-
-@file **../src/App/View/WidgetAgendaView.php**
-
-### osec_filters_upcoming_widget_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Add or alter filters in Agenda widget.
-
-```php
-add_filter('osec_filters_upcoming_widget_alter', $limit);
-```
-
-#### Parameters
-
-
- - **$limit** <span style="color:crimson"> </span> Array of Less variables
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Add or alter filters in Agenda widget.
- *
- * @since 1.0
- *
- * @param  array  $limit  Array of Less variables
- *
- * @file src/App/View/WidgetAgendaView.php
- */
-add_filter('osec_filters_upcoming_widget_alter', $limit);
 ```
 
 </details>

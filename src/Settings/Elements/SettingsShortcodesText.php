@@ -40,6 +40,7 @@ class SettingsShortcodesText extends SettingsAbstract
                 'Use these shortcodes into your page body to embed the calendar into any arbitrary WordPress Page:',
                 'open-source-event-calendar'
             ),
+            'text_view_title'               => __('Views', 'open-source-event-calendar'),
             'text_month_view'               => __('Month view:', 'open-source-event-calendar'),
             'text_week_view'                => __('Week view:', 'open-source-event-calendar'),
             'text_day_view'                 => __('Day view:', 'open-source-event-calendar'),
@@ -47,12 +48,8 @@ class SettingsShortcodesText extends SettingsAbstract
             'text_other_view'               => __('Some Other view:', 'open-source-event-calendar'),
             'text_default_view'             => __('Default view as per settings:', 'open-source-event-calendar'),
             'text_general_form'             => __('General form:', 'open-source-event-calendar'),
+            'text_filter_title'                 => __('Filters', 'open-source-event-calendar'),
             'text_optional'                 => __('Optional.', 'open-source-event-calendar'),
-            'text_filter_label'             => __(
-                'Add options to display a filtered calender. (You can find out category and tag IDs by inspecting  
-                    the URL of your filtered calendar page.)',
-                'open-source-event-calendar'
-            ),
             'text_filter_category'          => __('Filter by event category name/slug:', 'open-source-event-calendar'),
             'text_filter_category_1'        => __('Holidays', 'open-source-event-calendar'),
             'text_filter_category_2'        => __('Lunar Cycles', 'open-source-event-calendar'),
@@ -91,6 +88,7 @@ class SettingsShortcodesText extends SettingsAbstract
                     embed the calendar via shortcode in a page that already displays the calendar.',
                 'open-source-event-calendar'
             ),
+            'text_display_options_title' => __('Display options', 'open-source-event-calendar'),
         ];
 
         /**

@@ -50,6 +50,17 @@ class CalendarPageView extends OsecBaseClass
         $this->datesCache = CacheMemory::factory($app);
     }
 
+    public static function booleanStringArg(mixed $value): string
+    {
+        if (is_string($value)) {
+            if ($value === 'false') {
+                return $value;
+            }
+            return 'true';
+        }
+        return (bool)$value ? 'true' : 'false';
+    }
+
     /**
      * Get the content if the calendar page
      *
@@ -88,14 +99,14 @@ class CalendarPageView extends OsecBaseClass
         $exact_date = $this->get_exact_date($request);
         try {
             $viewClass = 'Osec\App\View\Calendar\\' . ucfirst($action) . 'View';
-            if ( ! class_exists($viewClass)) {
+            if (! class_exists($viewClass)) {
                 throw new Exception($viewClass . ' not found.');
             }
             $view_obj = new $viewClass($this->app, $request);
         } catch (BootstrapException) {
             NotificationAdmin::factory($this->app)->store(
                 sprintf(
-                    /* translators: View Name */
+                /* translators: View Name */
                     __(
                         'Calendar was unable to initialize %s view and has reverted to Agenda view. 
                             Please check if you have installed the latest versions of calendar add-ons.',
@@ -145,7 +156,7 @@ class CalendarPageView extends OsecBaseClass
         $are_filters_set = Router::factory($this->app)
                                  ->is_at_least_one_filter_set_in_request($view_args);
 
-        if (($view_args['no_navigation'] || $type !== 'html') && $is_json) {
+        if (($view_args['display_date_navigation'] === 'true' || $type !== 'html') && $is_json) {
             // send data both for json and jsonp as shortcodes are jsonp
             return [
                 'html'              => $view,
@@ -189,14 +200,14 @@ class CalendarPageView extends OsecBaseClass
              * @param  array  $filter_args  Twig arguments for filter-menu.twig.
              */
             $filter_args = apply_filters('osec_calendar_page_filter args', $filter_args);
-            $filter_menu = $loader->get_file(
-                'filter-menu.twig',
-                $filter_args,
-                false
-            )->get_content();
             // hide filters in the SW
-            if ('true' !== $request->get('display_filters') && 'jsonp' === $type) {
-                $filter_menu = '';
+            $filter_menu = '';
+            if ('true' === $request->get('display_filters')) {
+                $filter_menu = $loader->get_file(
+                    'filter-menu.twig',
+                    $filter_args,
+                    false
+                )->get_content();
             }
 
             $calendar_args = [
@@ -305,10 +316,9 @@ class CalendarPageView extends OsecBaseClass
         $view_args['request_format'] = $request->get('request_format');
         $exact_date                  = $this->get_exact_date($request);
 
-        $view_args['no_navigation'] = $request->get('no_navigation') === 'true';
+        $view_args['display_date_navigation'] = $request->get('display_date_navigation');
 
-        // Find out which view of the calendar page was requested, and render it
-        // accordingly.
+        // 'action' decides which view of the calendar page is requested.
         $view_args['action'] = $action;
 
         $view_args['request'] = $request;
@@ -368,7 +378,7 @@ class CalendarPageView extends OsecBaseClass
             // Let's check if we have a date
             if (false !== $exact_date) {
                 // If it's not a timestamp
-                if ( ! DateValidator::is_valid_time_stamp($exact_date)) {
+                if (! DateValidator::is_valid_time_stamp($exact_date)) {
                     // Try to parse it
                     $exact_date = $this->return_gmtime_from_exact_date($exact_date);
                     if (false === $exact_date) {
@@ -430,9 +440,12 @@ class CalendarPageView extends OsecBaseClass
         array $view_args,
         AbstractView $view
     ) {
-        $settings        = $this->app->settings;
+        if ($view_args['request']->get('display_view_switch') === 'false') {
+            return '';
+        }
+
         $available_views = [];
-        $enabled_views   = (array)$settings->get('enabled_views', []);
+        $enabled_views   = (array) $this->app->settings->get('enabled_views', []);
         $view_names      = [];
         $mode            = wp_is_mobile() ? '_mobile' : '';
         foreach ($enabled_views as $key => $val) {
@@ -465,7 +478,7 @@ class CalendarPageView extends OsecBaseClass
                     $val['longname'],
                     1
                 );
-                if ($settings->get('osec_use_frontend_rendering')) {
+                if ($this->app->settings->get('osec_use_frontend_rendering')) {
                     $options['request_format'] = 'json';
                 }
 
@@ -496,9 +509,7 @@ class CalendarPageView extends OsecBaseClass
      */
     public function get_html_for_subscribe_buttons(array $view_args)
     {
-        $settings           = $this->app->settings;
-        $turn_off_subscribe = $settings->get('turn_off_subscription_buttons');
-        if ($turn_off_subscribe) {
+        if ($view_args['request']->get('display_subscribe') === 'false') {
             return '';
         }
 
@@ -514,16 +525,16 @@ class CalendarPageView extends OsecBaseClass
                                                                ->get_labels(),
             'placement'          => 'up',
         ];
-        if ( ! empty($view_args['cat_ids'])) {
+        if (! empty($view_args['cat_ids'])) {
             $args['url_args']    .= '&osec_cat_ids=' . implode(',', $view_args['cat_ids']);
             $args['is_filtered'] = true;
         }
-        if ( ! empty($view_args['tag_ids'])) {
+        if (! empty($view_args['tag_ids'])) {
             $args['url_args']    .= '&osec_tag_ids=' .
                                     implode(',', $view_args['tag_ids']);
             $args['is_filtered'] = true;
         }
-        if ( ! empty($view_args['post_ids'])) {
+        if (! empty($view_args['post_ids'])) {
             $args['url_args']    .= '&osec_post_ids=' .
                                     implode(',', $view_args['post_ids']);
             $args['is_filtered'] = true;

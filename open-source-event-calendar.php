@@ -26,7 +26,6 @@ use Osec\App\Model\DatabaseSchema;
 use Osec\App\Model\PostTypeEvent\EventType;
 use Osec\App\Model\Settings;
 use Osec\App\Model\TaxonomyAdapter;
-use Osec\App\View\WidgetAgendaView;
 use Osec\Exception\BootstrapException;
 use Osec\Exception\DatabaseSchemaException;
 use Osec\Exception\DatabaseUpdateException;
@@ -76,8 +75,6 @@ register_deactivation_hook(
         FrontendCssController::factory($osec_app)->uninstall($purge);
         EventType::factory($osec_app)->uninstall($purge);
         ThemeLoader::factory($osec_app)->clear_cache();
-        // WP option 'widget_osec_scheduler_hooks' seems to come from WP when adding a Widget.
-        WidgetAgendaView::uninstall(); // Does not help.
 
         // Purges all $app->options & $app->settings
         Settings::factory($osec_app)->uninstall($purge);

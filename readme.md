@@ -75,14 +75,9 @@ to create template files or modify the theme.
 This Plugin supports multiple languages. 
 
 
-### Blocks, Widgets and the future
+### Blocks
 
-There is no Block provided yet :(
-Plan is to provide a simple shortcode-based Block before releasing 1.0.
-
-For now it might be better to use "Shortcodes".
-
-You may use the Widget with help of [X3P0 - Legacy Widget](https://wordpress.org/support/plugin/x3p0-legacy-widget/), but it is considered deprecated and will be removed in favor of "Shortcode-Block".
+Plan is to provide a simple Block before releasing 1.0.
 
 On the long run it might be nice to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice Bootstrap stuff. 
 

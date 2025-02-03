@@ -44,50 +44,6 @@ msgstr ""
 msgid "Example Dynamic – hello from a dynamic block !!!"
 msgstr ""
 
-#: public/admin/agenda-widget-form.php:6
-msgid "Title:"
-msgstr ""
-
-#: public/admin/agenda-widget-form.php:18
-msgid "Number of events to show:"
-msgstr ""
-
-#: public/admin/agenda-widget-form.php:32
-msgid "Number of days to show:"
-msgstr ""
-
-#: public/admin/agenda-widget-form.php:41
-msgid "Limit to:"
-msgstr ""
-
-#: public/admin/agenda-widget-form.php:49
-msgid "Events with these <strong>Categories</strong>"
-msgstr ""
-
-#: public/admin/agenda-widget-form.php:68
-msgid "No categories found."
-msgstr ""
-
-#: public/admin/agenda-widget-form.php:89
-msgid "<strong>Or</strong> events with these <strong>Tags</strong>"
-msgstr ""
-
-#: public/admin/agenda-widget-form.php:108
-msgid "No tags found."
-msgstr ""
-
-#: public/admin/agenda-widget-form.php:122
-msgid "Show <strong>View Calendar</strong> button"
-msgstr ""
-
-#: public/admin/agenda-widget-form.php:131
-msgid "Show <strong>Subscribe</strong> buttons"
-msgstr ""
-
-#: public/admin/agenda-widget-form.php:140
-msgid "Hide this widget on calendar page"
-msgstr ""
-
 #: public/admin/box_event_children.php:19
 msgid "Base recurrence event"
 msgstr ""
@@ -350,7 +306,6 @@ msgstr ""
 
 #: public/admin/feed_row.php:156
 #: src/App/View/Calendar/AgendaView.php:171
-#: src/App/View/WidgetAgendaView.php:489
 msgid "Edit"
 msgstr ""
 
@@ -833,7 +788,6 @@ msgstr ""
 #: src/App/Controller/ScriptsFrontendController.php:432
 #: src/App/Model/Date/DateFormatsFrontend.php:118
 #: src/App/Model/Date/DateFormatsFrontend.php:167
-#: src/App/View/Admin/AdminPageWidgetCreator.php:156
 msgid "Preview:"
 msgstr ""
 
@@ -853,10 +807,6 @@ msgstr ""
 
 #: src/App/Controller/ScriptsFrontendController.php:447
 msgid "For week and day view, you must select an interval of at least 6 hours."
-msgstr ""
-
-#: src/App/Controller/WidgetController.php:224
-msgid "You must choose the Calendar page before using the Super Widget"
 msgstr ""
 
 #: src/App/Model/Date/DateFormatsFrontend.php:62
@@ -1014,7 +964,6 @@ msgid "Parent Event"
 msgstr ""
 
 #: src/App/Model/PostTypeEvent/EventType.php:43
-#: src/App/View/WidgetAgendaView.php:105
 msgid "Events"
 msgstr ""
 
@@ -1132,7 +1081,6 @@ msgid "Preselected calendar filters"
 msgstr ""
 
 #: src/App/Model/Settings.php:439
-#: src/App/View/WidgetAgendaView.php:141
 msgid "To clear, hold &#8984;/<abbr class=\"initialism\">CTRL</abbr> and click selection."
 msgstr ""
 

@@ -89,10 +89,10 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
         $this->add_rule('request_format', false, 'string', 'html', false);
         // The callback function for jsonp calls
         $this->add_rule('callback', false, 'string', null, false);
-        // Whether to include navigation controls
-        $this->add_rule('no_navigation', false, 'string', false, false);
-        // whether to display the filter bar in the super widget
-        $this->add_rule('display_filters', false, 'string', false, false);
+        $this->add_rule('display_filters', false, 'string', true, false);
+        $this->add_rule('display_date_navigation', false, 'string', true, false);
+        $this->add_rule('display_view_switch', false, 'string', true, false);
+        $this->add_rule('display_subscribe', false, 'string', !$app->settings->get('turn_off_subscription_buttons'), false);
         $this->add_rule('applying_filters', false, 'string', false, false);
         $this->add_rule('shortcode', false, 'string', false, false);
         $this->add_rule('events_limit', false, 'int', null, false);

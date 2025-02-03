@@ -298,6 +298,16 @@ class Event extends OsecBaseClass
         return (bool)$this->get('allday');
     }
 
+    public function get_instance_edit_link()
+    {
+        // Defaults to 1.
+        $instance_id = $this->get('instance_id') ? $this->get('instance_id') : 1;
+        return admin_url(
+            'post.php?post=' . $this->entity->get('post_id')
+            . '&action=edit'
+            . '&instance=' . $instance_id
+        );
+    }
     /**
      * Wrapper to get property value.
      *

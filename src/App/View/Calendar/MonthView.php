@@ -84,7 +84,7 @@ class MonthView extends AbstractView
         // Add navigation if requested.
         $view_args['navigation'] = $this->getNavigation(
             [
-                'no_navigation'    => $args['no_navigation'],
+                'display_date_navigation' => $args['display_date_navigation'],
                 'pagination_links' => $pagination_links,
                 'views_dropdown'   => $args['views_dropdown'],
                 'below_toolbar'    => $this->getBelowToolbarHtml($this->get_name(), $view_args),

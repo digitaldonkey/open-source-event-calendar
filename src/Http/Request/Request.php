@@ -58,9 +58,6 @@ class Request extends OsecBaseClass
         ) {
             return true;
         }
-        if (isset($_GET['osec_legacy_widget'])) {
-            return true;
-        }
         if (
             isset($_GET[ScriptsFrontendController::LOAD_JS_PARAMETER]) ||
             isset($_GET[FrontendCssController::REQUEST_CSS_PARAM])

@@ -30,6 +30,7 @@ class EventParent extends OsecBaseClass
         // If editing a child instance.
         if (basename((string)$_SERVER['SCRIPT_NAME']) === 'post.php') {
             add_action(
+                // If $_POST updates. Gutenberg unsupported.
                 'admin_action_editpost',
                 function () use ($app) {
                     self::factory($app)->admin_init_post();

@@ -232,7 +232,7 @@ class AdminPageAddEvent extends OsecBaseClass
         }
 
         /**
-         * Alter content boces in Event Edit
+         * Alter content boxes in Event Edit
          *
          * Like Date-and-time, Location, Tickets...
          * Allows you to add or limit Event information options.

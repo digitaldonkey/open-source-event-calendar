@@ -71,8 +71,6 @@ class ScriptsFrontendController extends OsecBaseClass
     // settings page
     public const SETTINGS_PAGE = 'admin_settings.js';
 
-    // widget creator page
-    public const WIDGET_CREATOR = 'widget-creator.js';
     /**
      * @var bool
      */
@@ -91,7 +89,6 @@ class ScriptsFrontendController extends OsecBaseClass
         self::SETTINGS_PAGE       => true,
         self::EVENT_PAGE_JS       => true,
         self::CALENDAR_PAGE_JS    => true,
-        self::WIDGET_CREATOR      => true,
     ];
     /**
      * Holds an instance of the settings object
@@ -428,11 +425,6 @@ JSC;
                 get_site_url()
             ),
             'javascript_widgets'             => [],
-            'widget_creator'                 => [
-                'preview'         => __('Preview:', 'open-source-event-calendar'),
-                'preview_loading' => __('Loading preview', 'open-source-event-calendar')
-                                     . '&nbsp;<i class="ai1ec-fa ai1ec-fa-spin ai1ec-fa-spinner"></i>',
-            ],
             'load_views_error'               => __(
                 'Something went wrong while fetching events. 
                     <br>The request status is: #STATUS# <br>The error thrown was: #ERROR#',
@@ -527,16 +519,6 @@ JSC;
         }
         if ($this->isPageOsecSettings() === true) {
             $script_to_load = self::SETTINGS_PAGE;
-        }
-        if (true === $this->isPageWidgetCreator()) {
-            $script_to_load = self::WIDGET_CREATOR;
-        }
-
-        // TODO This prevents loading of Event Edit Above
-
-        if (true === $this->isPageEditWithOsecWidget()) {
-            // TODO WHAT SHOULD WE LOAD TO MAKE IT NICE?? At least it works.
-            $script_to_load = self::FRONTEND_CONFIG_MODULE;
         }
         if (false === $script_to_load) {
             // TODO What is the main sense heren?
@@ -659,24 +641,6 @@ JSC;
 
         return $path_details['basename'] === 'edit.php' &&
                $page === AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings';
-    }
-
-    protected function isPageWidgetCreator()
-    {
-        $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
-        $page         = $_GET['page'] ?? '';
-
-        return $path_details['basename'] === 'edit.php' &&
-               $page === AdminPageAbstract::ADMIN_PAGE_PREFIX . 'widget-creator';
-    }
-
-    protected function isPageEditWithOsecWidget()
-    {
-        // If we are using "X3P0 - Legacy Widget" Edit.
-        // Must not be loaded on our post type or other scripts will be missing.
-        $is_not_event = isset($_GET['post']) && get_post_type($_GET['post']) !== OSEC_POST_TYPE;
-
-        return $is_not_event && isset($_GET['action']) && $_GET['action'] === 'edit';
     }
 
     /**

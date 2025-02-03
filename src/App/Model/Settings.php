@@ -508,10 +508,7 @@ class Settings extends OsecBaseInitialized
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
                     'label' => __(
-                        'In <span class="ai1ec-tooltip-toggle"
-                            data-original-title="These include Agenda view,
-                            the Upcoming Events widget, and some extended views.">
-                            Agenda-like views</span>, <strong>include all events
+                        'In Agenda-like views, <strong>include all events
                             from last day shown</strong>',
                         'open-source-event-calendar'
                     ),

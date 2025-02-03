@@ -493,11 +493,16 @@ input.ai1ec-timepicker[readonly] {
 	.ai1ec-agenda-view {
 		max-width: var(--wp--style--global--wide-size);
 	}
-
-	.ai1ec-agenda-view {
-		@media (min-width: @screen-sm) {
-			padding-right: var(--wp--style--root--padding-right);
-			padding-left: var(--wp--style--root--padding-left);
+	.alignfull & {
+		padding-left: .5em;
+		padding-right: .5em;
+	}
+	// Applies for calendar page and Shortcode. Not in Blocks.
+	.wp-block-post-content > & {
+		.ai1ec-agenda-view {
+			@media (min-width: @screen-sm) {
+				padding: 2em var(--wp--style--root--padding-right) 2em var(--wp--style--root--padding-left);
+			}
 		}
 	}
 	.ai1ec-month-view .ai1ec-day-stretcher {

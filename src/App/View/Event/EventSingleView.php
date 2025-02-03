@@ -188,10 +188,7 @@ class EventSingleView extends OsecBaseClass
             $event->get('instance_id') &&
             current_user_can('edit_osec_events')
         ) {
-            $args['edit_instance_url']  = admin_url(
-                'post.php?post=' . $event->get('post_id') .
-                '&action=edit&instance=' . $event->get('instance_id')
-            );
+            $args['edit_instance_url']  = $event->get_instance_edit_link();
             $args['edit_instance_text'] = sprintf(
                 /* translators: Date */
                 __('Edit this occurrence (%s)', 'open-source-event-calendar'),

@@ -64,11 +64,10 @@ class HtmlFactory extends OsecBaseClass
         $title = '',
         $title_short = ''
     ) {
-        $settings    = $this->app->settings;
         $date_system = UIDateFormats::factory($this->app);
 
         $date_format_pattern = $date_system->get_date_pattern_by_key(
-            $settings->get('input_date_format')
+            $this->app->settings->get('input_date_format')
         );
 
         if (null === $initial_date) {
@@ -89,7 +88,7 @@ class HtmlFactory extends OsecBaseClass
         if (DateValidator::is_valid_time_stamp($initial_date)) {
             $initial_date = $date_system->format_date(
                 $initial_date,
-                $settings->get('input_date_format')
+                $this->app->settings->get('input_date_format')
             );
         }
 
@@ -115,7 +114,7 @@ class HtmlFactory extends OsecBaseClass
         $attributes = [
             'data-date'           => $initial_date,
             'data-date-format'    => $date_format_pattern,
-            'data-date-weekstart' => $settings->get('week_start_day'),
+            'data-date-weekstart' => $this->app->settings->get('week_start_day'),
             'href'                => '#',
             'data-href'           => $data_href->generate_href(),
             'data-lang'           => str_replace('_', '-', get_locale()),

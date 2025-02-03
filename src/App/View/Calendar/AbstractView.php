@@ -204,7 +204,7 @@ abstract class AbstractView extends OsecBaseClass
      * Gets the navigation bar HTML.
      *
      * @param  array  $nav_args  Args for the navigation bar template, including
-     *                       'no_navigation' which determines whether to show it
+     *                       'display_date_navigation' which determines whether to show it
      *
      * @return string
      */
@@ -222,9 +222,6 @@ abstract class AbstractView extends OsecBaseClass
          * @param  array  $html  Event location.
          */
         $nav_args['contribution_buttons'] = apply_filters('osec_contribution_buttons', '', 'html', 'render-command');
-        if ($nav_args['no_navigation']) {
-            return '';
-        }
 
         return ThemeLoader::factory($this->app)
                           ->get_file('navigation.twig', $nav_args, false)
@@ -242,6 +239,10 @@ abstract class AbstractView extends OsecBaseClass
      */
     protected function getPagination(array $args, $title, $title_short = '')
     {
+        if ($args['display_date_navigation'] === 'false') {
+            return '';
+        }
+
         /* @uses OnedayView:get_oneday_pagination_links() */
         $method = 'get_' . $this->get_name() . '_pagination_links';
         $args   = [
@@ -299,13 +300,7 @@ abstract class AbstractView extends OsecBaseClass
         $event->set_runtime('category_colors', $taxonomyView->get_category_colors($event));
         $event->set_runtime('ticket_url_label', $ticketView->get_tickets_url_label($event, false));
         $event->set_runtime('edit_post_link', get_edit_post_link($event->get('post_id')));
-        $event->set_runtime(
-            'edit_post_instance_link',
-            admin_url(
-                'post.php?post=' . $event->get('post_id') .
-                '&action=edit&instance=' . $event->get('instance_id', 1)
-            )
-        );
+        $event->set_runtime('edit_post_instance_link', $event->get_instance_edit_link());
         $event->set_runtime('post_excerpt', EventPostView::factory($this->app)->trim_excerpt($event));
         $color = EventColorView::factory($this->app);
         $event->set_runtime('faded_color', $color->get_faded_color($event));

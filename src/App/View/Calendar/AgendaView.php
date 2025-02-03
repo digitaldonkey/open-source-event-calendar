@@ -101,7 +101,7 @@ class AgendaView extends AbstractView
         $navigation       = '';
         $loader           = ThemeLoader::factory($this->app);
         $pagination_links = '';
-        if (! $view_args['no_navigation']) {
+        if ($view_args['display_date_navigation'] === 'true') {
             $pagination_links = $this->getPaginationLinks(
                 $view_args,
                 $results['prev'],
@@ -123,7 +123,7 @@ class AgendaView extends AbstractView
 
             // Get HTML for navigation bar.
             $nav_args = [
-                'no_navigation'    => $view_args['no_navigation'],
+                'display_date_navigation' => ($view_args['display_date_navigation'] === 'true'),
                 'pagination_links' => $pagination_links,
                 'views_dropdown'   => $view_args['views_dropdown'],
                 'below_toolbar'    => $this->getBelowToolbarHtml($type, $view_args),

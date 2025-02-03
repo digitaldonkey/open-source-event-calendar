@@ -87,6 +87,7 @@ class SettingsCatsTagsFilter extends SettingsAbstract
                 'class'    => 'ai1ec-form-control',
                 'multiple' => 'multiple',
                 // for Widget creator
+                // TODO Remove?
                 'data-id'  => 'tags' === $type ? 'tag_ids' : 'cat_ids',
             ],
         ];

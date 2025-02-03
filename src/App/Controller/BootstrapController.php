@@ -41,8 +41,6 @@ use Osec\Http\Request\RequestRedirect;
 use Osec\Theme\ThemeLoader;
 use WP_Post;
 
-// use Osec\App\View\WidgetAgendaView;
-
 /**
  * The front controller of the plugin.
  *
@@ -63,11 +61,6 @@ class BootstrapController
      * @var bool Whether the domain has allredy been loaded or not.
      */
     protected bool $isTextdomainLoaded = false;
-
-    // **
-    // * @var string The pagebase used by Ai1ec_Href_Helper.
-    // */
-    // protected $_pagebase_for_href;
 
     /**
      * @var RequestParser Instance of the request pa
@@ -183,7 +176,7 @@ class BootstrapController
      *
      * TODO
      *   Maybe it makes sense to separate out admin/frontend actions
-     *   to have a smaler footprint if not logged in?
+     *   to have a smaller footprint if not logged in?
      *
      * Complete this when writing the dispatcher.
      *
@@ -195,14 +188,12 @@ class BootstrapController
         //
         // TODO BLOCK TESTING - calendar_block not comitted yet.
         //
-        //add_action(
-        //    'init',
-        //    function () {
-        //        // Point to each folder that corresponds to each block within build
-        //        $XXX = register_block_type(OSEC_PATH . 'calendar_block/build');
-        //        // $YYY = register_block_type( 'all-in-one-event-calendar/cal2' );
-        //    }
-        //);
+        /**
+         * Register a shortcode based block.
+         */
+        add_action('init', function () use ($app) {
+            BlockController::factory($app)->registerCalendarBlock();
+        });
 
         /**
          * Add date formats on Serrings-general.php
@@ -222,11 +213,21 @@ class BootstrapController
             10,
             1
         );
+        add_filter(
+            'use_block_editor_for_post_type',
+            function ($current_status, $post_type) {
+                if ($post_type === OSEC_POST_TYPE) {
+                    return false;
+                }
+                return $current_status;
+            },
+            10,
+            2
+        );
+
 
         // Initialize router
         add_action('init', $this->initialize_router(...), PHP_INT_MAX - 1);
-
-        WidgetController::add_actions($app, is_admin());
 
         // Route the request.
         if (is_admin()) {
@@ -562,9 +563,6 @@ class BootstrapController
                 }
             );
         }
-
-        // Widget Creator
-        AdminPageWidgetCreator::add_actions($app, is_admin());
 
         FeedsController::add_actions($app, is_admin());
         // If AdminPageAllEvents.

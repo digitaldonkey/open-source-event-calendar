@@ -146,7 +146,7 @@ class WeekView extends AbstractView
         // Add navigation if requested.
         $view_args['navigation'] = $this->getNavigation(
             [
-                'no_navigation'    => $args['no_navigation'],
+                'display_date_navigation'    => $args['display_date_navigation'],
                 'pagination_links' => $pagination_links,
                 'views_dropdown'   => $args['views_dropdown'],
                 'below_toolbar'    => $this->getBelowToolbarHtml($this->get_name(), $view_args),
@@ -347,7 +347,11 @@ class WeekView extends AbstractView
                         // position is beyond the last event's bottom, pop the stack
                         $stackcount = count($evt_stack);
                         while ($stackcount > 1 && $top >= end($evt_stack)) {
-                            array_pop($evt_stack);
+                            if (count($evt_stack) > 1) {
+                                array_pop($evt_stack);
+                            } else {
+                                break;
+                            }
                         }
                         // Indentation is number of stacked events minus 1
                         $indent = count($evt_stack) - 1;
