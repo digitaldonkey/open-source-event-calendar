@@ -229,7 +229,7 @@ export default function Edit(props) {
 								'open source-event-calendar'
 							)}
 							value={ (attributes.limitBy !== 'days' &&  attributes.displayDateNavigation) }
-							disabled={ attributes.limitBy === 'days' }
+							disabled={ (attributes.view === 'agenda' && attributes.limitBy === 'days') }
 							onChange={(val) => {
 								setAttributes({
 									displayDateNavigation: val
