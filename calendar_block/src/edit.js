@@ -1,10 +1,13 @@
 /**
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-i18n/
  */
+import {useCallback, useEffect, useState} from 'react';
+
 import {__} from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import {useSelect} from "@wordpress/data";
 import {useBlockProps} from '@wordpress/block-editor';
+import {store as coreDataStore} from '@wordpress/core-data';
 
 /**
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
@@ -12,17 +15,14 @@ import {useBlockProps} from '@wordpress/block-editor';
 /**
  * @see https://www.npmjs.com/package/@wordpress/scripts#using-css
  */
-import './editor.scss';
-
-import {store as coreDataStore} from '@wordpress/core-data';
-import {useCallback, useEffect, useState} from 'react';
-
 import TaxonomySelect from "./components/TaxonomySelect";
 import ViewSelect from "./components/ViewSelect";
 import BoolSwitch from "./components/BoolSwitch";
 import DateAndTime from "./components/DateAndTime/DateAndTime";
 import OsecEventsFilter from "./components/OsecEventsFilter";
 import LimitBy from "./components/LimitBy";
+
+import './editor.scss';
 
 /**
  * Edit()
@@ -91,7 +91,7 @@ export default function Edit(props) {
 				</p>
 			</div>
 
-			{isSelected && (
+			{isSelected && settings && (
 				<>
 					<p>
 						<strong>{__(
@@ -255,4 +255,17 @@ export default function Edit(props) {
 			)}
 		</div>
 	);
+}
+
+/**
+ * Sloppy transform fixed set of PHP date formats into JS equivalents.
+ *
+ * @type {{s: *, const: {d: string, m: string}, let: string}}
+ */
+const transformDateInputFormat = (inputformat) => {
+	const replaceMe = {
+		'm': 'mm',
+		'd': 'dd'
+	};
+	return inputformat.replace(/[abc]/g, m => replaceMe[m]);
 }
