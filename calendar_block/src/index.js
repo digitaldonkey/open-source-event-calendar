@@ -26,8 +26,6 @@ import metadata from './block.json';
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/
  */
 
-console.log({metadata})
-
 registerBlockType( metadata.name, {
 	title: metadata.title,
 	category: metadata.category,
@@ -35,42 +33,8 @@ registerBlockType( metadata.name, {
 	description: metadata.description,
 	supports: metadata.supports,
 	attributes: metadata.attributes,
-	attributesIformalOnly: {
-		view: {
-			// General form: Some Other view
-			//   [osec view="someother"]
-			// monthly, weekly, oneday, agenda
-			type: "string",
-			default: 'agenda',
-			enum: [
-				'monthly',
-				'weekly',
-				'oneday',
-				'agenda',
-			]
-		},
-		taxonomies: {
-			// Filter by event category names/slugs (separate names by comma)
-			//   [osec cat_name="Lunar Cycles,zodiac-date-ranges"]
-			// [{id: <tax_name>, values: ['term-slug1', 'term-slug2']}]
-			default: [],
-			type: 'array',
-
-		},
-		postIds: {
-			// Filter by post IDs (separate IDs by comma): [osec post_id="1,2"]
-		},
-		limit: {
-			// Limit number of events per page
-			//   [osec events_limit="5"]
-		},
-		limitBy: {
-			//  Limit by events, days ?
-		},
-		displaySubscribe: {
-			// Show the subscribe button in the widget
-		}
-	},
+	editorScript: "file:./index.js",
+	"editorStyle": "file:./index.css",
 	/**
 	 * @see ./edit.js
 	 */

@@ -707,7 +707,7 @@ class Settings extends OsecBaseInitialized
                             'value' => 'iso',
                         ],
                         [
-                            'text'  => __('Dotted (m.d.yyyy)', 'open-source-event-calendar'),
+                            'text'  => __('Dotted (d.m.yyyy)', 'open-source-event-calendar'),
                             'value' => 'dot',
                         ],
                     ],

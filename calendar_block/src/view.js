@@ -22,5 +22,4 @@
 
 /* eslint-disable no-console */
 // TODO This file is obsolete
-console.log( 'Hello World! (from open-source-event-calendar-cal2 block)' );
 /* eslint-enable no-console */

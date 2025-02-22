@@ -62,9 +62,6 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
 
         $settings_view = SettingsView::factory($this->app);
         $action_list   = array_keys($settings_view->get_all());
-        foreach ($action_list as $action) {
-            $action_list[] = 'ai1ec_' . $action;
-        }
 
         if (null === $default_action) {
             $default_action = $settings_view->get_default();
@@ -75,7 +72,8 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
         $this->add_rule('month_offset', false, 'int', 0, false);
         $this->add_rule('oneday_offset', false, 'int', 0, false);
         $this->add_rule('week_offset', false, 'int', 0, false);
-        $this->add_rule('time_limit', false, 'int', 0, false);
+        // Contains final date for "limit by days" on agenda views.
+        $this->add_rule('time_limit', false, 'int', null, false);
         $this->add_rule('cat_ids', false, 'int', null, ',');
         $this->add_rule('tag_ids', false, 'int', null, ',');
         $this->add_rule('post_ids', false, 'int', null, ',');
@@ -222,7 +220,7 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
      *
      * @return string Query prefix 'ai1ec_'
      */
-    protected function getActionPrefix()
+    protected function getActionPrefix(): string
     {
         // Some JS-based actions still using outdated prefix.
         return 'ai1ec_';

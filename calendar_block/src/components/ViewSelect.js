@@ -32,7 +32,6 @@ export default function ViewSelect ({defaultValue = [], onChange}) {
 
 	const handleChange = (options) => {
 		// const value = options.map(k => k.value)
-		console.log(options, 'onCHANGE options')
 		setSelectedOptions(options);
 		onChange(options.value);
 	}

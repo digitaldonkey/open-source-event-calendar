@@ -1196,7 +1196,7 @@ msgid "ISO 8601 (yyyy-m-d)"
 msgstr ""
 
 #: src/App/Model/Settings.php:713
-msgid "Dotted (m.d.yyyy)"
+msgid "Dotted (d.m.yyyy)"
 msgstr ""
 
 #: src/App/Model/Settings.php:725

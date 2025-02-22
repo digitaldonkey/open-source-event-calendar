@@ -29,10 +29,12 @@
 		"@wordpress/components": "^29.2.0",
 		"@wordpress/core-data": "^7.16.0",
 		"@wordpress/data": "^10.16.0",
+		"ajv": "^8.17.1",
+		"react-datepicker": "^8.0.0",
 		"react-select": "^5.9.0",
 		"react-switch": "^7.1.0"
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "^30.8.1"
+		"@wordpress/scripts": "^30.11.0"
 	}
 }

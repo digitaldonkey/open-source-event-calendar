@@ -30,6 +30,7 @@ class ElementHref
         'instance_ids',
         'events_limit',
         'request_format',
+        'display_view_switch',
     ];
 
     /**
