@@ -69,8 +69,7 @@ class AgendaView extends AbstractView
 
         // When time_limit, 'Limit by number of days') is set.
         if ($use_time_limit) {
-
-            // Fixed times, no navi.
+            // Fixed times -> no navi.
             $view_args['display_date_navigation'] = 'false';
 
             $dtStart = new DT($exact_date);
@@ -137,7 +136,6 @@ class AgendaView extends AbstractView
         $pagination_links = '';
 
         if ($view_args['display_date_navigation'] !== 'false') {
-
             $pagination_links = $this->getPaginationLinks(
                 $view_args, // array_filter($view_args, function ($k) {  return $k !== 'time_limit';  }, ARRAY_FILTER_USE_KEY),
                 $results['prev'],

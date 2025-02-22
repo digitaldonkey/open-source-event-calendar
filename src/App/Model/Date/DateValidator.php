@@ -13,7 +13,6 @@ namespace Osec\App\Model\Date;
  */
 class DateValidator
 {
-
     /**
      * Convert input into a valid ISO date.
      *
