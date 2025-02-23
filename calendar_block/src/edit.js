@@ -200,7 +200,7 @@ export default function Edit(props) {
 								'Display filters',
 								'open source-event-calendar'
 							)}
-							defaultValue={attributes.displayFilters}
+							value={attributes.displayFilters}
 							onChange={(val) => {
 								setAttributes({
 									displayFilters: val
@@ -214,7 +214,7 @@ export default function Edit(props) {
 								'Display view select',
 								'open source-event-calendar'
 							)}
-							defaultValue={attributes.displayViewSwitch}
+							value={attributes.displayViewSwitch}
 							onChange={(val) => {
 								setAttributes({
 									displayViewSwitch: val
@@ -243,7 +243,7 @@ export default function Edit(props) {
 								'Display iCal Feeds',
 								'open source-event-calendar'
 							)}
-							defaultValue={attributes.displaySubscribe}
+							value={attributes.displaySubscribe}
 							onChange={(val) => {
 								setAttributes({
 									displaySubscribe: val
