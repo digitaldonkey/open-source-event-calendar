@@ -12,7 +12,6 @@ use Osec\App\View\Event\EventAvatarView;
 use Osec\App\View\Event\EventTaxonomyView;
 use Osec\App\View\Event\EventTimeView;
 use Osec\Exception\BootstrapException;
-use Osec\Exception\Exception;
 use Osec\Exception\TimezoneException;
 use Osec\Http\Request\Request;
 use Osec\Http\Request\RequestParser;
@@ -43,8 +42,8 @@ class AgendaView extends AbstractView
         if (isset($view_args['exact_date']) && DT::is_timestamp($view_args['exact_date'])) {
             $exact_date = $view_args['exact_date'];
         } else {
-            //  This shouls not happen. $timestamp = UIDateFormats::factory($this->app)->currentDay();
-            throw new Exception('Param exact_date is missing or not a timestamp.');
+            //  This should not happen, but it does.
+            $exact_date = UIDateFormats::factory($this->app)->currentDay();
         }
 
         // Get events, then classify into date array
