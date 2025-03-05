@@ -51,7 +51,7 @@ class SettingsCache extends SettingsAbstract
             'CacheApcu' => [
                 'name'            => 'CacheApcu',
                 'is_available'    => $this->niceBoolean(CacheApcu::is_available()),
-                'is_curren_cache' => $this->niceBoolean($current_cache === 'CacheApcu'),
+                'is_current_cache' => $this->niceBoolean($current_cache === 'CacheApcu'),
                 'notes'           => '@see: <a target="_blank" href="https://www.php.net/manual/en/book.apcu.php">'
                                      . 'php.net/manual/en/book.apcu.php</a>',
                 'constant'        => 'OSEC_ENABLE_CACHE_APCU',
@@ -59,14 +59,14 @@ class SettingsCache extends SettingsAbstract
             'CacheFile' => [
                 'name'            => 'CacheFile',
                 'is_available'    => $this->niceBoolean(CacheFile::is_available()),
-                'is_curren_cache' => $this->niceBoolean($current_cache === 'CacheFile'),
+                'is_current_cache' => $this->niceBoolean($current_cache === 'CacheFile'),
                 'notes'           => $cachePathTxt,
                 'constant'        => 'OSEC_ENABLE_CACHE_FILE',
             ],
             'CacheDb'   => [
                 'name'            => 'CacheDb',
                 'is_available'    => $this->niceBoolean(CacheDb::is_available()),
-                'is_curren_cache' => $this->niceBoolean($current_cache === 'CacheDb'),
+                'is_current_cache' => $this->niceBoolean($current_cache === 'CacheDb'),
                 'notes'           => '',
                 'constant'        => 'Can\'t be disabled',
             ],

@@ -49,6 +49,7 @@ class EventSearch extends OsecBaseClass
      *
      * @param  int  $time  limit to events starting after this (local) UNIX time
      * @param  int  $limit  return a maximum of this number of items
+     *                      - $upper_boundary inn SQL. Increased by 5x if
      * @param  int  $page_offset  offset the result set by $limit times this number
      * @param  array  $filter  Array of filters for the events returned.
      *                           ['cat_ids']      => non-associatative array of category IDs
@@ -57,6 +58,17 @@ class EventSearch extends OsecBaseClass
      *                           ['auth_ids']     => non-associatative array of author IDs
      *                           ['instance_ids'] => non-associatative array of author IDs
      * @param  int  $last_day  Last day (time), that was displayed.
+     *                             - When 0 OR flase is set it defaults to $time. Showing the "set" starting at $time
+     *                               =default.
+     *                             - Can be
+     *                                 false (default)) -
+     *                                 0  / integer ? :
+     *                                   0: defaults to $time
+     *                                   integer date:
+     *                                        "last day" which actually might be first day to display
+     *                                      ---> Depending on $page_offset
+     *                                           date > defaults to "from last day to time" [sic!])
+*                                      true:   Set to true to include all events from last day ignoring {$limit}
      *                             NOTE FROM NICOLA: be careful, if you want a query with events
      *                             that have a start date which is greater than today, pass 0 as
      *                             this parameter. If you pass false ( or pass nothing ) you end up with a query
@@ -81,13 +93,12 @@ class EventSearch extends OsecBaseClass
         $unique = false
     ) {
         $localization_helper = WpmlHelper::factory($this->app);
-        $settings            = $this->app->settings;
 
         // Even if there ARE more than 5 times the limit results - we shall not
         // try to fetch and display these, as it would crash system
         $upper_boundary = $limit;
         if (
-            $settings->get('agenda_include_entire_last_day') &&
+            $this->app->settings->get('agenda_include_entire_last_day') &&
             (false !== $last_day)
         ) {
             $upper_boundary *= 5;

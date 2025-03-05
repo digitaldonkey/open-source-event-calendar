@@ -3137,8 +3137,8 @@ msgid " Use <strong>24h time</strong> in time pickers"
 msgstr "<strong>24h-Format</strong> in den Auswahlboxen benutzen"
 
 #: app/model/settings.php:804
-msgid "Dotted (m.d.yyyy)"
-msgstr "Punkte (m.d.yyyy)"
+msgid "Dotted (d.m.yyyy)"
+msgstr "Punkte (d.m.yyyy)"
 
 #: app/model/settings.php:800
 msgid "ISO 8601 (yyyy-m-d)"

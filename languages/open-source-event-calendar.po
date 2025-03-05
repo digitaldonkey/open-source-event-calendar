@@ -331,8 +331,8 @@ msgid "ISO 8601 (yyyy-m-d)"
 msgstr "ISO 8601 (yyyy-m-d)"
 
 #: app/model/settings.php:773
-msgid "Dotted (m.d.yyyy)"
-msgstr "Dotted (m.d.yyyy)"
+msgid "Dotted (d.m.yyyy)"
+msgstr "Dotted (d.m.yyyy)"
 
 #: app/model/settings.php:785
 msgid " Use <strong>24h time</strong> in time pickers"

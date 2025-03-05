@@ -7,7 +7,7 @@
             <tr>
                 <th scope="col">Name</th>
                 <th scope="col">is_available</th>
-                <th scope="col">is_curren_cache
+                <th scope="col">is_current_cache
                 <th scope="col">Constant</th>
                 <th scope="col">Notes</th>
             </tr>
@@ -19,8 +19,8 @@
                     <td class="ai1ec-text-center {% if cache.is_available %}success{% else %}warning{% endif %}">
                         {% if cache.is_available %}✔{% else %}✖{% endif %}
                     </td>
-                    <td class="ai1ec-text-center {% if cache.is_curren_cache %}success{% else %}warning{% endif %}">
-                        {% if cache.is_curren_cache %}✔{% else %}✖{% endif %}
+                    <td class="ai1ec-text-center {% if cache.is_current_cache %}success{% else %}warning{% endif %}">
+                        {% if cache.is_current_cache %}✔{% else %}✖{% endif %}
                     </td>
                     <td class="">
                         {{ cache.constant }}

@@ -20,7 +20,7 @@
   "textdomain": "open-source-event-calendar",
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
-  "style": "file:./style-index.css",
+  "style": "file:./style.scss",
   "render": "file:./render.php",
   "viewScript": "file:./view.js",
   "attributes": {
@@ -34,13 +34,9 @@
         "agenda"
       ]
     },
-    "displayViewSwitch": {
-      "default": true,
-      "type": "boolean"
-    },
-    "displayDateNavigation": {
-      "default": true,
-      "type": "boolean"
+    "fixedDate": {
+      "type": "string",
+      "default": null
     },
     "taxonomies": {
       "default": [],
@@ -51,16 +47,24 @@
       "type": "array"
     },
     "limit": {
-      "default": -1,
+      "default": 10,
       "type": "integer"
     },
     "limitBy": {
       "type": "string",
-      "default": "days",
+      "default": "events",
       "enum": [
-        "days",
-        "events"
+        "events",
+        "days"
       ]
+    },
+    "displayViewSwitch": {
+      "default": true,
+      "type": "boolean"
+    },
+    "displayDateNavigation": {
+      "default": true,
+      "type": "boolean"
     },
     "displayFilters": {
       "default": true,

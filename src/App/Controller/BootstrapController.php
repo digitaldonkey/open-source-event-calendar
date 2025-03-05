@@ -185,9 +185,7 @@ class BootstrapController
     protected function createWpActions()
     {
         $app = $this->app;
-        //
-        // TODO BLOCK TESTING - calendar_block not comitted yet.
-        //
+
         /**
          * Register a shortcode based block.
          */
@@ -195,6 +193,12 @@ class BootstrapController
             BlockController::factory($app)->registerCalendarBlock();
         });
 
+        /**
+         * Register Reast Endpoint.
+         */
+        add_action('init', function () use ($app) {
+            RestController::factory($app)->registerApi();
+        });
         /**
          * Add date formats on Serrings-general.php
          */

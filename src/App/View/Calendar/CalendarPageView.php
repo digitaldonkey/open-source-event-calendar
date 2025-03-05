@@ -128,15 +128,8 @@ class CalendarPageView extends OsecBaseClass
         $view_args = $view_obj->get_extra_arguments($view_args, $exact_date);
 
         // Get HTML for views dropdown list.
-        $dropdown_args = $view_args;
-        if (
-            isset($dropdown_args['time_limit']) &&
-            false !== $exact_date
-        ) {
-            $dropdown_args['exact_date'] = $exact_date;
-        }
         $views_dropdown =
-            $this->get_html_for_views_dropdown($dropdown_args, $view_obj);
+            $this->get_html_for_views_dropdown($view_args, $view_obj);
         // Add views dropdown markup to view args.
         $view_args['views_dropdown'] = $views_dropdown;
 
@@ -313,9 +306,14 @@ class CalendarPageView extends OsecBaseClass
         );
 
         $view_args['request_format'] = $request->get('request_format');
-        $exact_date                  = $this->get_exact_date($request);
+        $exact_date = $this->get_exact_date($request);
+        if ($exact_date) {
+            $view_args['exact_date'] = $exact_date;
+        }
 
         $view_args['display_date_navigation'] = $request->get('display_date_navigation');
+        $view_args['display_date_navigation'] = $request->get('display_date_navigation');
+
 
         // 'action' decides which view of the calendar page is requested.
         $view_args['action'] = $action;
@@ -438,7 +436,7 @@ class CalendarPageView extends OsecBaseClass
         array $view_args,
         AbstractView $view
     ) {
-        if ($view_args['request']->get('display_view_switch') === 'false') {
+        if (isset($view_args['display_view_switch']) && $view_args['display_view_switch'] === 'false') {
             return '';
         }
 
@@ -457,17 +455,6 @@ class CalendarPageView extends OsecBaseClass
             $values       = [];
             $options      = $view_args;
             if ($view_enabled) {
-                if ($view instanceof AgendaView) {
-                    if (
-                        isset($options['exact_date']) &&
-                        ! isset($options['time_limit'])
-                    ) {
-                        $options['time_limit'] = $options['exact_date'];
-                    }
-                    unset($options['exact_date']);
-                } else {
-                    unset($options['time_limit']);
-                }
                 unset($options['month_offset']);
                 unset($options['week_offset']);
                 unset($options['oneday_offset']);

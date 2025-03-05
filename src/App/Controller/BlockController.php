@@ -2,6 +2,8 @@
 
 namespace Osec\App\Controller;
 
+use Osec\App\Model\Date\DT;
+use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\SettingsView;
 use Osec\App\View\Calendar\CalendarPageView;
 use Osec\Bootstrap\App;
@@ -35,12 +37,25 @@ class BlockController extends OsecBaseClass
                 'wp-block-editor',
                 'wp-data',
                 'wp-core-data',
-                'wp-components'
-                // wp-api-fetch??
-                // Data??
-                // @wordpress/data
             ]
         );
+        wp_register_style(
+            'osec-editor-style',
+            plugins_url(OSEC_PLUGIN_NAME . '/calendar_block/build/index.css', OSEC_PLUGIN_NAME),
+        );
+        register_block_style(
+            'open-source-event-calendar/osec-calendar-classic',
+            [
+                'name' => 'osec-editor-style',
+                'label' => __('osec-editor-style', 'textdomain'),
+                'style_handle' => 'osec-editor-style',
+            ]
+        );
+        wp_register_style(
+            OSEC_PLUGIN_NAME . '-frontend',
+            plugins_url(OSEC_PLUGIN_NAME . '/calendar_block/build/style-index.css', OSEC_PLUGIN_NAME),
+        );
+        wp_enqueue_style(OSEC_PLUGIN_NAME . '-frontend');
 
         register_block_type(
             $this->blockFile['name'],
@@ -82,10 +97,7 @@ class BlockController extends OsecBaseClass
             'display_subscribe' => 'true',
             'display_view_switch' => 'true',
             'display_date_navigation' => 'true',
-            'events_limit' => isset($atts['events_limit'])
-                // definition above casts values as array, so we take first element,
-                // as there won't be others
-                ? (int)$atts['events_limit'] : null,
+            'events_limit' => $this->app->settings->get('agenda_events_per_page'),
         ];
 
         //    TODO Custom taxonomies.
@@ -107,9 +119,35 @@ class BlockController extends OsecBaseClass
             }
         }
 
-        if (isset($atts['exact_date'])) {
-            $query['exact_date'] = $atts['exact_date'];
+        if (isset($atts['fixedDate']) && DT::isValidTimeStamp($atts['fixedDate'])) {
+            $query['exact_date'] = $atts['fixedDate'];
+        } else {
+            $today = new DT('now', Timezones::factory($this->app)->get_default_timezone());
+            $today->set_time(0, 0, 0);
+            $query['exact_date'] = $today->format();
         }
+
+
+        if (isset($atts['limit']) && isset($atts['limitBy'])) {
+            $number = (int)$atts['limit'];
+            if ($atts['limitBy'] === 'events') {
+                $query['events_limit'] = $number;
+            }
+            if ($atts['limitBy'] === 'days') {
+                // Add limit to fixed date.
+                if (isset($atts['fixedDate'])) {
+                    $dateLimit = new DT($atts['fixedDate']);
+                    // Add a day on fixed date to match UI.
+                    $dateLimit->adjust_day(1);
+                } else {
+                    $dateLimit = new DT('now', Timezones::factory($this->app)->get_default_timezone());
+                }
+                $dateLimit->adjust_day($number);
+                $dateLimit->set_time(0, 0, 0);
+                $query['time_limit'] = $dateLimit->format();
+            }
+        }
+
         return $query;
     }
 

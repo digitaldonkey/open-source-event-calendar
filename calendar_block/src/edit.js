@@ -1,49 +1,52 @@
 /**
- * Retrieves the translation of text.
- *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-i18n/
  */
+import {useCallback, useEffect, useState} from 'react';
+
 import {__} from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
+import {useSelect} from "@wordpress/data";
+import {useBlockProps} from '@wordpress/block-editor';
+import {store as coreDataStore} from '@wordpress/core-data';
 
 /**
- * React hook that is used to mark the block wrapper element.
- * It provides all the necessary props like the class name.
- *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
-import {useBlockProps} from '@wordpress/block-editor';
-
-
 /**
- * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
- * Those files can contain any CSS code that gets applied to the editor.
- *
  * @see https://www.npmjs.com/package/@wordpress/scripts#using-css
  */
+import TaxonomySelect from "./components/TaxonomySelect";
+import ViewSelect from "./components/ViewSelect";
+import BoolSwitch from "./components/BoolSwitch";
+import DateAndTime from "./components/DateAndTime/DateAndTime";
+import OsecEventsFilter from "./components/OsecEventsFilter";
+import LimitBy from "./components/LimitBy";
+
 import './editor.scss';
 
 /**
- * The edit function describes the structure of your block in the context of the
- * editor. This represents what the editor will render when the block is used.
+ * Edit()
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#edit
  *
  * @return {Element} Element to render.
  */
-import {useSelect, select} from "@wordpress/data";
-import {store as coreDataStore} from '@wordpress/core-data';
-import React, {useState} from 'react';
-import { store as blockEditorStore } from '@wordpress/block-editor';
-
-import './components/TaxonomySelect';
-import TaxonomySelect from "./components/TaxonomySelect";
-import ViewSelect from "./components/ViewSelect";
-import BoolSwitch from "./components/BoolSwitch";
-import OsecEventsFilter from "./components/OsecEventsFilter";
-
 export default function Edit(props) {
-	console.log({props})
 	const {attributes, setAttributes, isSelected, toggleSelection} = props;
+	const [settings, setSettings] = useState();
+
+	const fetchSettings = useCallback(async()=> {
+		const url =  'osec/v1/settings';
+		const fetched = await apiFetch( { path:url } );
+		setSettings(fetched);
+
+	}, [setSettings])
+
+	useEffect(() => {
+		(async () => {
+			await fetchSettings()
+		})()
+	}, [fetchSettings]);
 
 	const postType = 'osec_event';
 	const taxonomies = useSelect((select) => {
@@ -54,9 +57,11 @@ export default function Edit(props) {
 		});
 	});
 
+
 	const blockProps = useBlockProps({
 		className: 'inline-edit-wrapper',
 	});
+
 	return (
 		<div {...blockProps}>
 			<div
@@ -72,54 +77,79 @@ export default function Edit(props) {
 				<p>
 					{__(
 						'Osec Calendar',
-						'all-in-one-event-calendar'
+						'open source-event-calendar'
 					)}
 					{!isSelected && (
 						<>
 							<br/>
 							<small><a style={{cursor: 'pointer'}}>{__(
 								'Edit',
-								'all-in-one-event-calendar'
+								'open source-event-calendar'
 							)}</a></small>
 						</>
 					)}
 				</p>
 			</div>
 
-			{isSelected && (
+			{isSelected && settings && (
 				<>
-					<p><strong>{__(
-						'Display View',
-						'all-in-one-event-calendar'
-					)}</strong>
-					</p>
-					<ViewSelect
-						defaultValue={attributes.view}
-						onChange={(val) => {
-							setAttributes({
-								view: val
-							})
-						}}
-					/>
 					<p>
-						<BoolSwitch
-							labelText={__(
-								'Display view select',
-								'all-in-one-event-calendar'
-							)}
-							defaultValue={attributes.displayViewSwitch}
+						<strong>{__(
+							'View',
+							'open source-event-calendar'
+						)}
+						</strong>
+						<br/>
+						<ViewSelect
+							defaultValue={attributes.view}
 							onChange={(val) => {
 								setAttributes({
-									displayViewSwitch: val
+									view: val
 								})
 							}}
 						/>
 					</p>
 
+					{attributes.view === 'agenda' && (
+						<LimitBy
+							defaultLimitBy={attributes.limitBy}
+							defaultLimit={attributes.limit}
+							onChange={(obj) => {
+								if (obj.limitBy === 'days') {
+									setAttributes({displayDateNavigation: false})
+								}
+								setAttributes(obj)
+							}}
+						/>
+					)}
+			<p>
+			<strong>{__(
+						'Fixed calendar date',
+						'open source-event-calendar'
+						)}
+						</strong>
+						<br />
+						<DateAndTime
+							id={'fixedDate'}
+							labelText={'Selected date for fixed calendar start time'}
+							onChange={(date) => {
+								const timestamp = date ? '' + (date.getTime()/1000) : null;
+								setAttributes({
+									fixedDate: timestamp
+								})
+							}}
+							placeholder={'Defaults to current day'}
+							defaultValue={attributes.fixedDate}
+							isRequired={false}
+							dateFormat={settings.dateFormat}
+						/>
+					</p>
+
+
 					<p>
 						<strong>{__(
 							'Filters',
-							'all-in-one-event-calendar'
+							'open source-event-calendar'
 						)}
 						</strong>
 					</p>
@@ -130,8 +160,6 @@ export default function Edit(props) {
 								const defaultValue = attributes.taxonomies.filter(t => {
 									return t.id === taxonomy.slug
 								})
-								console.log(defaultValue)
-
 								const defaultValueFinal = (defaultValue && defaultValue[0]) ? defaultValue[0].value : [];
 								return (
 									<TaxonomySelect
@@ -153,7 +181,6 @@ export default function Edit(props) {
 
 					<OsecEventsFilter
 						onChange={(array) => {
-							console.log('OsecEventsFilter CHANGE', array)
 							setAttributes({
 								postIds: array
 							})
@@ -161,12 +188,19 @@ export default function Edit(props) {
 						defaultValue={attributes.postIds}
 					/>
 					<p>
+						<strong>{__(
+							'View settings',
+							'open source-event-calendar'
+						)}
+						</strong>
+					</p>
+					<p>
 						<BoolSwitch
 							labelText={__(
 								'Display filters',
-								'all-in-one-event-calendar'
+								'open source-event-calendar'
 							)}
-							defaultValue={attributes.displayFilters}
+							value={attributes.displayFilters}
 							onChange={(val) => {
 								setAttributes({
 									displayFilters: val
@@ -174,14 +208,28 @@ export default function Edit(props) {
 							}}
 						/>
 					</p>
-
+					<p>
+						<BoolSwitch
+							labelText={__(
+								'Display view select',
+								'open source-event-calendar'
+							)}
+							value={attributes.displayViewSwitch}
+							onChange={(val) => {
+								setAttributes({
+									displayViewSwitch: val
+								})
+							}}
+						/>
+					</p>
 					<p>
 						<BoolSwitch
 							labelText={__(
 								'Display date navigation',
-								'all-in-one-event-calendar'
+								'open source-event-calendar'
 							)}
-							defaultValue={attributes.displayDateNavigation}
+							value={ (attributes.limitBy !== 'days' &&  attributes.displayDateNavigation) }
+							disabled={ (attributes.view === 'agenda' && attributes.limitBy === 'days') }
 							onChange={(val) => {
 								setAttributes({
 									displayDateNavigation: val
@@ -193,9 +241,9 @@ export default function Edit(props) {
 						<BoolSwitch
 							labelText={__(
 								'Display iCal Feeds',
-								'all-in-one-event-calendar'
+								'open source-event-calendar'
 							)}
-							defaultValue={attributes.displaySubscribe}
+							value={attributes.displaySubscribe}
 							onChange={(val) => {
 								setAttributes({
 									displaySubscribe: val
@@ -207,4 +255,17 @@ export default function Edit(props) {
 			)}
 		</div>
 	);
+}
+
+/**
+ * Sloppy transform fixed set of PHP date formats into JS equivalents.
+ *
+ * @type {{s: *, const: {d: string, m: string}, let: string}}
+ */
+const transformDateInputFormat = (inputformat) => {
+	const replaceMe = {
+		'm': 'mm',
+		'd': 'dd'
+	};
+	return inputformat.replace(/[abc]/g, m => replaceMe[m]);
 }

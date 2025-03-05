@@ -6,16 +6,12 @@ import apiFetch from '@wordpress/api-fetch';
 
 const animatedComponents = makeAnimated();
 
-//
 export default function OsecEventsFilter ({defaultValue = [], onChange}) {
-
-	console.log({defaultValue}, 'OsecEventsFilter')
-
-	// TODO Get the defaultValues from IDs
-	// https://ddev-wordpress.ddev.site/wp-json/wp/v2/osec_event?include=185,225
 
 	const [selectedOptions, setSelectedOptions] = useState([]);
 
+	// Get the defaultValues from IDs
+	// .../wp-json/wp/v2/osec_event?include=185,225
 	const fetchData = useCallback(async()=> {
 		if (defaultValue && defaultValue.length) {
 			const url =  'wp/v2/osec_event?include=' + defaultValue.join(',');
@@ -23,8 +19,6 @@ export default function OsecEventsFilter ({defaultValue = [], onChange}) {
 			const labels = events.map(e =>{
 				return { value: e.id, label: decodeHtml(e.title.rendered) }
 			})
-			console.log('events FETCHED', {events, labels})
-
 			setSelectedOptions(labels);
 		}
 	}, [setSelectedOptions])
@@ -38,7 +32,6 @@ export default function OsecEventsFilter ({defaultValue = [], onChange}) {
 
 	const handleChange = (options) => {
 		const value = options.map(k => k.value)
-		console.log(options, 'onCHANGE options')
 		setSelectedOptions(options);
 		onChange(value);
 	}

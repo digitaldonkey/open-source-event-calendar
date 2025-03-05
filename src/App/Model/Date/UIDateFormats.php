@@ -136,7 +136,7 @@ class UIDateFormats extends OsecBaseClass
      *     'def' => 'd/m/yyyy',
      *     'us'  => 'm/d/yyyy',
      *     'iso' => 'yyyy-m-d',
-     *     'dot' => 'm.d.yyyy',
+     *     'dot' => 'd.m.yyyy',
      *   );
      *
      * 'd' or 'dd' represent the day, 'm' or 'mm' represent the month, and 'yy'
@@ -150,7 +150,7 @@ class UIDateFormats extends OsecBaseClass
             'def' => 'd/m/yyyy',
             'us'  => 'm/d/yyyy',
             'iso' => 'yyyy-m-d',
-            'dot' => 'm.d.yyyy',
+            'dot' => 'd.m.yyyy',
         ];
     }
 
