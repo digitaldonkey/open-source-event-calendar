@@ -35,8 +35,14 @@ class EventTimeView extends OsecBaseClass
      *
      * @return string Formatted timespan HTML element.
      */
-    public function get_timespan_html(Event $event, string $start_date_display = 'long')
+    public function get_timespan_html(Event $event, string $start_date_display = 'long'): string
     {
+        /* @var boolean $displayEndDate Wheather to show end Date and time (multiday events only) */
+        $displayEndDate = !$event->is_allday() && !$event->is_instant() && $event->is_multiday();
+
+        /* @var boolean $displayEndDate Display end time only as date would double. If end is set (´not-instant´) and not multiday. */
+        $displayEndTime  = !$displayEndDate && !$event->is_allday() && !$event->is_instant();
+
         // Makes no sense to hide start date for all-day events, so fix argument
         if ('hidden' === $start_date_display && $event->is_allday()) {
             $start_date_display = 'short';
@@ -46,27 +52,9 @@ class EventTimeView extends OsecBaseClass
         $start = new DT($event->get('start'));
         $end   = new DT($event->get('end'));
 
-        // All-day events need to have their end time shifted by 1 second less
-        // to land on the correct day.
-        $end_offset = 0;
-        if ($event->is_allday()) {
-            $end->set_time(
-                $end->format('H'),
-                $end->format('i'),
-                $end->format('s') - 1
-            );
-        }
-
-        // Get timestamps of start & end dates without time component.
-        $start_ts = (new DT($start))
-            ->set_time(0, 0, 0)
-            ->format();
-        $end_ts   = (new DT($end))
-            ->set_time(0, 0, 0)
-            ->format();
-
         $break_years = $start->format('Y') !== $end->format('Y');
-        $output      = '';
+        $date_string = '';
+        $end_date_string = '';
 
         // Display start date, depending on $start_date_display.
         switch ($start_date_display) {
@@ -75,84 +63,39 @@ class EventTimeView extends OsecBaseClass
             case 'short':
             case 'long':
                 $function = 'format_' . $start_date_display . '_date';
-                $output   .= $this->{$function}($start, $break_years);
+                $date_string .= $this->{$function}($start, $break_years);
+                if ($displayEndDate) {
+                    // Prepare end date
+                    $end_date_string .= $this->{$function}($end, $break_years);
+                }
                 break;
             default:
-                $start_date_display = 'long';
+                break;
         }
 
         // Output start time for non-all-day events.
-        if ( ! $event->is_allday()) {
+        if (! $event->is_allday()) {
             if ('hidden' !== $start_date_display) {
-                /**
-                 * Timespan pefix string/html
-                 *
-                 * Added befor  dtay start date at Ui Timespan displays
-                 * if they are not all-day.
-                 * E.g. Event pages, ManageEvents table.
-                 *
-                 * @since 1.0
-                 *
-                 * @param  string  $separator  Translated separator inclusing spaces.
-                 */
-                $output .= apply_filters(
-                    'osec_timespan_time_html_before_start_html',
-                    _x(' @ ', 'Event time separator', 'open-source-event-calendar')
-                );
+                $date_string .= self::timeSeparator();
             }
-            $output .= $this->format_time($start);
+            $date_string .= $this->format_time($start);
         }
 
         // Find out if we need to output the end time/date. Do not output it for
         // instantaneous events and all-day events lasting only one day.
-        if (
-            ! (
-                $event->is_instant() ||
-                ($event->is_allday() && $start_ts === $end_ts)
-            )
-        ) {
-            /**
-             * Timespan separator string/html
-             *
-             * Separates from to time and to time values.
-             * if they are not all-day.
-             *
-             * @since 1.0
-             *
-             * @param  string  $separator  Translated separator inclusing spaces.
-             */
-            $output .= apply_filters(
-                'osec_timespan_time_separator_html',
-                _x(' - ', 'Event time separator', 'open-source-event-calendar')
-            );
-
-            // If event ends on a different day, output end date.
-            if ($start_ts !== $end_ts) {
-                // for short date, use short display type
-                if ('short' === $start_date_display) {
-                    $output .= $this->format_short_date($end, $break_years);
-                } else {
-                    $output .= $this->format_long_date($end);
-                }
-            }
-
-            // Output end time for non-all-day events.
-            if ( ! $event->is_allday()) {
-                if ($start_ts !== $end_ts) {
-                    /**
-                     * Time span separator.
-                     *
-                     * @since 1.0
-                     *
-                     * @param  string  $separator Time span separator. Defaults to single space.
-                     */
-                    $output .= apply_filters('osec_timespan_time_separator_html_starttime', ' ');
-                }
-                $output .= $this->format_time($end);
-            }
+        if ($displayEndDate) {
+            $date_string  .= self::timespanSeparator();
+            $date_string  .= $end_date_string;
+            $date_string .= self::timeSeparator();
+            $date_string .= $this->format_time($end);
+            unset($end_date_string);
+        }
+        if ($displayEndTime) {
+            $date_string  .= self::timespanSeparator();
+            $date_string .= $this->format_time($end);
         }
 
-        $output = esc_html($output);
+        $date_string = esc_html($date_string);
 
         // Add all-day label.
         if ($event->is_allday()) {
@@ -168,7 +111,7 @@ class EventTimeView extends OsecBaseClass
              *
              * @param  string  $allday_html  Translated html string.
              */
-            $output .= apply_filters('osec_timespan_allday_badge_html', $allday_html);
+            $date_string .= apply_filters('osec_timespan_allday_badge_html', $allday_html);
         }
 
         /**
@@ -178,11 +121,11 @@ class EventTimeView extends OsecBaseClass
          *
          * @since 1.0
          *
-         * @param  string  $output  Html string for timespan
+         * @param  string  $date_string  Html string for timespan
          * @param  Event  $event  Event object.
          * @param  string  $start_date_display  Display mode
          */
-        return apply_filters('osec_timespan_html', $output, $event, $start_date_display);
+        return apply_filters('osec_timespan_html', $date_string, $event, $start_date_display);
     }
 
     /**
@@ -213,8 +156,11 @@ class EventTimeView extends OsecBaseClass
      */
     public static function format_short_date(DT $time, $add_year = false)
     {
-        $formatCfg = $add_year ? DateFormatsFrontend::FORMAT_SHORT : DateFormatsFrontend::FORMAT_NO_YEAR;
-        $format    = get_option($formatCfg);
+        if ($add_year) {
+            $format = get_option(DateFormatsFrontend::FORMAT_SHORT, DateFormatsFrontend::FORMAT_SHORT_DEFAULT);
+        } else {
+            $format = get_option(DateFormatsFrontend::FORMAT_NO_YEAR, DateFormatsFrontend::FORMAT_NO_YEAR_DEFAULT);
+        }
 
         /**
          * Alter frontend date format "short".
@@ -278,5 +224,51 @@ class EventTimeView extends OsecBaseClass
         }
 
         return implode(__(', and ', 'open-source-event-calendar'), $excludes);
+    }
+
+
+    public static function timeSpanSeparator(): string
+    {
+        static $timespanSeparator = null;
+        if (null === $timespanSeparator) {
+            /**
+             * Timespan separator string/html
+             *
+             * Separates from to time and to time values.
+             * if they are not all-day. Defaults to &mdash;
+             *
+             * @since 1.0
+             *
+             * @param  string  $separator  Translated separator inclusing spaces.
+             */
+            $timespanSeparator = apply_filters(
+                'osec_timespan_time_separator_html',
+                _x(' — ', 'Event time separator', 'open-source-event-calendar')
+            );
+        }
+        return $timespanSeparator;
+    }
+
+    public static function timeSeparator(): string
+    {
+        static $timeSeparator = null;
+        if (null === $timeSeparator) {
+            /**
+             * Timespan pefix string/html
+             *
+             * Added befor  dtay start date at Ui Timespan displays
+             * if they are not all-day.
+             * E.g. Event pages, ManageEvents table.
+             *
+             * @since 1.0
+             *
+             * @param  string  $separator  Translated separator inclusing spaces.
+             */
+            $timeSeparator = apply_filters(
+                'osec_timespan_time_html_before_start_html',
+                _x(' @ ', 'Event time separator', 'open-source-event-calendar')
+            );
+        }
+        return $timeSeparator;
     }
 }

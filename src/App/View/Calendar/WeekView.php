@@ -6,6 +6,7 @@ use Osec\App\Controller\StrictContentFilterController;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\EventSearch;
+use Osec\App\View\Event\EventTimeView;
 use Osec\Cache\CacheMemory;
 use Osec\Exception\BootstrapException;
 use Osec\Exception\TimezoneException;
@@ -216,12 +217,6 @@ class WeekView extends AbstractView
         foreach ($week_events as $nthEvent => $evt) {
             [$evt_start, $evt_end] = $this->getView_specific_timestamps($evt);
 
-            $_nthEvent           = $nthEvent;
-            $_nthEvent_start     = $evt->get('start')->format('r');
-            $_nthEvent_start_day = $evt->get('start')->format('d');
-            $_nthEvent_end       = $evt->get('end')->format('r');
-            $_nthEvent_end_day   = $evt->get('end')->format('d');
-
             // Iterate through each day of the week and generate new event object
             // based on this one for each day that it spans
             // $day = (int) $start_of_week->format('j'),
@@ -230,9 +225,6 @@ class WeekView extends AbstractView
             // $day++
 
             for ($day = 0; $day < 7; $day++) {
-                // TODO As $day is a simple Index counting > 31 can this lead to useful results?
-                //
-
                 [$day_start, $day_end] = $this->getDayStartAndEnd($day, $start_of_week);
 
                 if ($evt_end < $day_start) {
@@ -272,15 +264,6 @@ class WeekView extends AbstractView
         $days = [];
         $now  = new DT('now', $start_of_week->get_timezone());
 
-        // =========================================
-        // = Iterate through each date of the week =
-        // =========================================
-        // for (
-        // $day = $start_of_week->format('j'),
-        // $last_week_day_index = (int) $start_of_week->format('j') + 7;
-        // $day < $last_week_day_index;
-        // $day++
-        // ) {
         for ($day = 0; $day < 7; $day++) {
             [$day_date, , $day_date_ob] = $this->getDayStartAndEnd($day, $start_of_week);
 
@@ -324,7 +307,7 @@ class WeekView extends AbstractView
                         'ticket_url'       => $evt->get('ticket_url'),
                         'start_truncated'  => $evt->get('start_truncated'),
                         'end_truncated'    => $evt->get('end_truncated'),
-                        'popup_timespan'   => TwigExtension::timespan($evt, 'short'),
+                        'popup_timespan'   => EventTimeView::factory($this->app)->get_timespan_html($evt->get('orig'), 'short'),
                         'avatar'           => TwigExtension::avatar(
                             $evt,
                             [

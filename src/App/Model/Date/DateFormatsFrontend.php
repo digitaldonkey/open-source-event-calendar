@@ -20,20 +20,22 @@ class DateFormatsFrontend extends OsecBaseClass
 {
     private const SECTION_ID = 'osec_date_format_section';
     public const FORMAT_SHORT = 'osec_date_format_short';
+    public const FORMAT_SHORT_DEFAULT = 'd/m/y';
     public const FORMAT_NO_YEAR = 'osec_date_format_no_year';
+    public const FORMAT_NO_YEAR_DEFAULT = 'd/m';
 
     private static array $default = [
         'osec_date_format_short'   => [
             'd/m/Y',
             'm/d/Y',
             'Y-m-d',
-            'j.m.Y',
+            'd.m.Y',
         ],
         'osec_date_format_no_year' => [
             'd/m',
             'M d',
             'm-d',
-            'j.m.',
+            'd.m.',
         ],
     ];
 
@@ -43,7 +45,7 @@ class DateFormatsFrontend extends OsecBaseClass
             'general',
             self::FORMAT_SHORT,
             [
-                'default'           => 'Y-M-D',
+                'default'           => self::FORMAT_SHORT_DEFAULT,
                 'sanitize_callback' => [$this, 'sanitizeShort'],
             ]
         );
@@ -52,7 +54,7 @@ class DateFormatsFrontend extends OsecBaseClass
             'general',
             self::FORMAT_NO_YEAR,
             [
-                'default'           => 'M-D',
+                'default'           => self::FORMAT_NO_YEAR_DEFAULT,
                 'sanitize_callback' => [$this, 'sanitizeNoYear'],
             ]
         );
@@ -79,7 +81,7 @@ class DateFormatsFrontend extends OsecBaseClass
                      )
                      . '</p>';
             },
-            'general'
+            'general' // Page to add to.
         );
 
         add_settings_field(
