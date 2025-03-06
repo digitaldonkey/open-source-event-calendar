@@ -451,8 +451,7 @@ class Event extends OsecBaseClass
         if (null === $this->isMultiday) {
             $start            = $this->get('start');
             $end              = $this->get('end');
-            $diff             = $end->diff_sec($start);
-            $this->isMultiday = ($diff > 86400 && ($start->format('Y-m-d') !== $end->format('Y-m-d')));
+            $this->isMultiday = ($start->format('Y-m-d') !== $end->format('Y-m-d'));
         }
         return $this->isMultiday;
     }
