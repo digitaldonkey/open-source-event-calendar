@@ -259,13 +259,13 @@ class ScriptsFrontendController extends OsecBaseClass
         $js_url    = OSEC_ADMIN_THEME_JS_URL;
         $version   = OSEC_VERSION;
         $namespace = self::REQUIRE_NAMESPACE;
-        $config    = <<<JSC
-		$namespace.require.config( {
-			waitSeconds : 15,
-			urlArgs     : 'ver=$version',
-			baseUrl     : '$js_url'
-		} );
-JSC;
+        $config    = "
+            $namespace.require.config( {
+			    waitSeconds : 15,
+			    urlArgs     : 'ver=$version',
+			    baseUrl     : '$js_url'
+		    } );
+        ";
 
         return $config;
     }

@@ -161,11 +161,11 @@ class CacheFile extends OsecBaseClass implements CacheInterface
             }
         } else {
             throw new CacheWriteException(
-                sprintf(
+                esc_html(sprintf(
                     /* translators: File name */
-                    esc_html__( 'An error occured while saving data to: %s', 'open-source-event-calendar'),
+                    __( 'An error occured while saving data to: %s', 'open-source-event-calendar'),
                     $this->_cache_path . $fileName
-                )
+                ))
             );
         }
 
@@ -291,10 +291,12 @@ class CacheFile extends OsecBaseClass implements CacheInterface
                 return $default;
             }
             throw new CacheNotSetException(
-                sprintf(
-                    /* translators: File name */
-                    esc_html__('File %s does not exist', 'open-source-event-calendar'),
-                    $key
+                esc_html(
+                    sprintf(
+                        /* translators: File name */
+                        esc_html__('File %s does not exist', 'open-source-event-calendar'),
+                        $key
+                    )
                 )
             );
         }

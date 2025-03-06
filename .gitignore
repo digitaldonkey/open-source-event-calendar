@@ -1,7 +1,7 @@
 .phpunit.result.cache
 cache/*
 /vendor/
-/hookster
+/hookster_markdown
 
 # From Block Editor gitignore.
 *.log
