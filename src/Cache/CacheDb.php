@@ -47,7 +47,7 @@ class CacheDb extends OsecBaseClass implements CacheInterface
         $data = $this->app->options->get($key);
         if (false === $data) {
             throw new CacheNotSetException(
-                'No data under \'' . wp_kses_attr($key) . '\' present'
+                'No data under `' . esc_html($key) . '` present'
             );
         }
 
@@ -85,7 +85,7 @@ class CacheDb extends OsecBaseClass implements CacheInterface
         );
         if (false === $result) {
             throw new CacheWriteException(
-                'An error occured while saving data to \'' . wp_kses_attr($key) . '\''
+                'An error occured while saving data to `' . esc_html($key) . '`'
             );
         }
 

@@ -16,7 +16,6 @@ use RecursiveIteratorIterator;
  */
 class CachePath
 {
-
     public const CLEAN_DIR_DEFAULT_PERMISSIONS = 0754;
 
     public function __construct()
@@ -59,7 +58,7 @@ class CachePath
     public static function delete_directory_content(string $dir): void
     {
         if ( ! $dir || $dir === '' || ! is_dir($dir) || ! (realpath($dir) === untrailingslashit($dir))) {
-            throw new \Exception('Empty directory, relative or not a directory. Got : ' . $dir);
+            throw new \Exception('Empty directory, relative or not a directory. Got : ' . esc_html($dir));
         }
         // @see https://stackoverflow.com/a/3352564/308533;
         $files = new RecursiveIteratorIterator(

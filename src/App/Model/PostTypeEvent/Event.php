@@ -408,7 +408,7 @@ class Event extends OsecBaseClass
         }
         static $format = null;
         if (null === $format) {
-            $site_url = parse_url((string)get_site_url());
+            $site_url = wp_parse_url((string)get_site_url());
             $format   = 'OSEC-%d@' . $site_url['host'];
             if (isset($site_url['path'])) {
                 $format .= $site_url['path'];
