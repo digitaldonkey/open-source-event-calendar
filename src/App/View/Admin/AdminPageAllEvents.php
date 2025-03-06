@@ -141,7 +141,7 @@ class AdminPageAllEvents extends OsecBaseClass
                         $term = get_term_by('slug', $var, $tax_slug);
                     }
 
-                    if (property_exists($term, 'slug')) {
+                    if (is_object($term) && property_exists($term, 'slug')) {
                         $var = $term->slug;
                     }
                 }

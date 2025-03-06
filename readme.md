@@ -109,6 +109,13 @@ On the long run it might be nice to have a Rest API to allow the calendar being 
 
 ## Changelog
 
+#### 0.9.1
+
+* Rework query params, fixed date pagers
+* Add flexible width Gutenberg Calendar Block
+* Removed Widget and Agenda Widget. 
+* Reworked date display to be consistent.
+
 #### 0.9.0
 
 * Added Sourcemaps for CSS (requires OSEC_DEBUG )

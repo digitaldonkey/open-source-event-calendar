@@ -3,6 +3,7 @@
 namespace Osec\App\Controller;
 
 use Osec\App\Model\Date\DateFormatsFrontend;
+use Osec\App\Model\Date\DT;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\Model\PostTypeEvent\ContentNotEmptyCheck;
 use Osec\App\Model\PostTypeEvent\EditPostActions;
@@ -21,7 +22,6 @@ use Osec\App\View\Admin\AdminPageManageThemes;
 use Osec\App\View\Admin\AdminPageSettings;
 use Osec\App\View\Admin\AdminPageThemeOptions;
 use Osec\App\View\Admin\AdminPageViewThemeOptions;
-use Osec\App\View\Admin\AdminPageWidgetCreator;
 use Osec\App\View\Calendar\CalendarShortcodeView;
 use Osec\App\View\Event\EventContentView;
 use Osec\App\View\Event\EventPostView;
@@ -35,6 +35,7 @@ use Osec\Exception\ConstantsNotSetException;
 use Osec\Exception\Exception;
 use Osec\Exception\ExceptionHandler;
 use Osec\Exception\ScheduleException;
+use Osec\Exception\TimezoneException;
 use Osec\Http\Request\Request;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Request\RequestRedirect;
@@ -112,8 +113,11 @@ class BootstrapController
         $exception = null;
         // Load the textdomain
         add_action('plugins_loaded', $this->load_textdomain(...));
+
         // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
         try {
+            DT::require_php_timezone_utc();
+
             $this->request = RequestParser::factory($this->app);
 
             // Load the css if needed
@@ -131,9 +135,9 @@ class BootstrapController
             Scheduler::factory($this->app)->delete('osec_n_cron');
             // set the default theme if not set
             $this->verifyTheme();
-        } catch (ConstantsNotSetException $e) {
+        } catch (ConstantsNotSetException | TimezoneException $error) {
             // This is blocking, throw it and disable the plugin
-            $exception = $e;
+            $exception = $error;
         } catch (ScheduleException) {
             // not blocking
         }

@@ -2,6 +2,8 @@
 
 namespace Osec\Settings\Elements;
 
+use Osec\Theme\ThemeLoader;
+
 /**
  * A class that renders bootstrap modals.
  *
@@ -20,34 +22,16 @@ class ModalQuestion extends SettingsAbstract
      */
     public function render($html = '', $wrap = true): string
     {
-        $header              = $this->render_header_if_present();
-        $id                  = $this->render_id_if_present();
-        $remove_event_button = $this->render_remove_button_if_present();
-        $keep_event_button   = $this->render_keep_button_if_present();
-        $body                = $this->args['body_text'];
-        // $classes             = implode( ' ', $this->classes );
-        $html .= <<<HTML
-<div class="ai1ec-modal ai1ec-fade timely" $id>
-	<div class="ai1ec-modal-dialog">
-		<div class="ai1ec-modal-content">
-			<div class="ai1ec-modal-header">
-				<button type="button" class="ai1ec-close" data-dismiss="ai1ec-modal"
-					aria-hidden="true">×</button>
-				$header
-			</div>
-			<div class="ai1ec-modal-body">
-				$body
-			</div>
-			<div class="ai1ec-modal-footer">
-				$remove_event_button
-				$keep_event_button
-			</div>
-		</div>
-	</div>
-</div>
-HTML;
-
-        return $html;
+        $args = [
+            'id' =>  $this->render_id_if_present(),
+            'header' => $this->render_header_if_present(),
+            'body' => $this->args['body_text'],
+            'remove_event_button' => $this->render_remove_button_if_present(),
+            'keep_event_button' => $this->render_keep_button_if_present(),
+        ];
+        return ThemeLoader::factory($this->app)
+                          ->get_file('modal_question.twig', $args, true)
+                          ->get_content();
     }
 
     private function render_header_if_present(): string

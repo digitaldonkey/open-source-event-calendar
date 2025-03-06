@@ -60,6 +60,6 @@ class RestController extends OsecBaseClass
 //                ]
             ]);
         }
-        return new \WP_Error(401, __('Not allowed'), '');
+        return new \WP_Error(401, __('Not allowed'), 'open-source-event-calendar');
     }
 }

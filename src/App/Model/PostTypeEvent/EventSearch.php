@@ -384,7 +384,7 @@ class EventSearch extends OsecBaseClass
         $limited_events     = [];
         $start_day_previous = 0;
         foreach ($events as $event) {
-            $start_day = date(
+            $start_day = gmdate(
                 'Y-m-d',
                 $event['start']
             );

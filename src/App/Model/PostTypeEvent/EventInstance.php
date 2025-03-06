@@ -130,7 +130,6 @@ class EventInstance extends OsecBaseClass
              */
             /* @var DT $start_datetime */
             $start_datetime = $event->get('start');
-            $start_datetime->assert_utc_timezone();
 
             $start_timezone = Timezones::factory($this->app)->get_name(
                 $start_datetime->get_timezone()
@@ -328,7 +327,9 @@ class EventInstance extends OsecBaseClass
         );
 
         if ( ! empty($rulesArray)) {
-            date_default_timezone_set($timezone);
+            // Removed unnecessary date_default_timezone_set('UTC'). Just to be  sure.
+            DT::require_php_timezone_utc();
+
             // The first array is the result and it is passed by reference
             RecurFactory::recur2date(
                 $unprocessedData,

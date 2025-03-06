@@ -107,7 +107,7 @@ class EventTaxonomy extends OsecBaseClass
         $feed_name = $feed->feed_url;
         // If the feed is not from an imported file, parse the url.
         if ( ! isset($feed->feed_imported_file)) {
-            $url_components = parse_url($feed->feed_url);
+            $url_components = wp_parse_url($feed->feed_url);
             $feed_name      = $url_components['host'];
         }
         $term = $this->initiate_term(

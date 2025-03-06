@@ -47,7 +47,7 @@ class BlockController extends OsecBaseClass
             'open-source-event-calendar/osec-calendar-classic',
             [
                 'name' => 'osec-editor-style',
-                'label' => __('osec-editor-style', 'textdomain'),
+                'label' => __('osec-editor-style', 'open-source-event-calendar'),
                 'style_handle' => 'osec-editor-style',
             ]
         );

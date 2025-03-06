@@ -6,7 +6,6 @@ use DateTime;
 use DateTimeZone;
 use Osec\Bootstrap\App;
 use Osec\Exception\BootstrapException;
-use Osec\Exception\Exception;
 use Osec\Exception\TimezoneException;
 use Stringable;
 
@@ -94,7 +93,6 @@ class DT implements Stringable
 
             return $this;
         }
-        $this->assert_utc_timezone();
         $date_time_tz  = Timezones::factory($this->app)->get($timezone);
         $reset_tz      = false;
         $this->isEmpty = false;
@@ -102,7 +100,7 @@ class DT implements Stringable
             $this->isEmpty = true;
             $time          = '@' . ~PHP_INT_MAX;
             $reset_tz      = true;
-        } elseif ($this->is_timestamp($time)) {
+        } elseif (self::is_timestamp($time)) {
             $time     = '@' . $time; // treat as UNIX timestamp
             $reset_tz = true; // store intended TZ
         }
@@ -134,23 +132,21 @@ class DT implements Stringable
     }
 
     /**
-     * Assert that current timezone is UTC.
+     * Ensures that PHP timezone is UTC.
      *
+     * @throws TimezoneException if PHP timezone is not UTC.
      * @return bool Success.
      */
-    public function assert_utc_timezone(): bool
+    public static function require_php_timezone_utc(): void
     {
-        $default = date_default_timezone_get();
-        $success = true;
-        if ('UTC' !== $default) {
-            // issue admin notice
-            // TODO Maybe ignore
-            //   @see https://github.com/Automattic/VIP-Coding-Standards/issues/426
-            //   @see https://wordpress.org/support/topic/force-timezone-to-be-utc0/
-            $success = date_default_timezone_set('UTC');
+        if ('UTC' !== date_default_timezone_get()) {
+            throw new TimezoneException(
+                esc_html__(
+                    'Wordpress requires PHP default timezone to be UTC. This plugin assumes this too. Ensure date_default_timezone_get() will return `UTC`',
+                    'open-source-event-calendar'
+                )
+            );
         }
-
-        return $success;
     }
 
     /**
@@ -301,11 +297,12 @@ class DT implements Stringable
      * @return string JavaScript date/time string.
      * @throws TimezoneException|BootstrapException
      */
-    public function format_to_javascript(bool $event_timezone = false): string
+    public function format_to_javascript(?bool $event_timezone = null): string
     {
-        $event_timezone = ($event_timezone) ? $this->get_timezone() : null;
-
-        return $this->format('Y-m-d\TH:i:s', $event_timezone);
+        if ($event_timezone) {
+            return $this->format('Y-m-d\TH:i:s', $this->get_timezone());
+        }
+        return $this->format('Y-m-d\TH:i:s');
     }
 
     /**
@@ -553,23 +550,17 @@ class DT implements Stringable
 
     public function utcOffsetInSeconds(string $time_zone)
     {
-        $restorTz = date_default_timezone_get();
-        // Set UTC as default time zone.
-        date_default_timezone_set('UTC');
+        // UTC must be default in WP.
+        self::require_php_timezone_utc();
 
         $utc = new DateTime('@' . $this->format_to_gmt());
 
         // Calculate offset.
         $current = timezone_open($time_zone);
-        $offset  = timezone_offset_get($current, $utc); // seconds
 
-        // Reset to previous.
-        date_default_timezone_set($restorTz);
-
-        return $offset;
+        return timezone_offset_get($current, $utc); // in seconds
     }
 
-    // Todo Maybe put this somewhere else?
 
     /**
      * Commodity method to format to UTC.
