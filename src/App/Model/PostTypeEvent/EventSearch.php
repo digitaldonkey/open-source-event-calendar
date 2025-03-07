@@ -682,7 +682,7 @@ class EventSearch extends OsecBaseClass
         $select = 'SELECT `post_id` FROM `' . $table_name .
                   '` WHERE `ical_uid` = %s';
 
-        return $dbi->get_var($dbi->prepare($select, $argv));
+        return $dbi->get_var($dbi->prepare($select, $argv[0]));
     }
 
     /**
