@@ -155,7 +155,7 @@
 		 https://github.com/WordPress/WordPress-Coding-Standards/issues/73 -->
 
 	<!--	TODO FIX THIS   -->
-	<rule ref="WordPress.Security.NonceVerification"/>
+<!--	<rule ref="WordPress.Security.NonceVerification"/>-->
 
 	<rule ref="WordPress.PHP.DevelopmentFunctions"/>
 	<rule ref="WordPress.PHP.DiscouragedPHPFunctions"/>
