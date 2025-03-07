@@ -18,11 +18,22 @@ class CachePath
 {
     public const CLEAN_DIR_DEFAULT_PERMISSIONS = 0754;
 
+    private Object $wpFs;
+
     public function __construct()
     {
-        include_once ABSPATH . 'wp-admin/includes/file.php';
+        $this->wpFs = self::get_wpfs();
     }
 
+    public static function get_wpfs() : object
+    {
+        global $wp_filesystem;
+        if ( ! is_a( $wp_filesystem, 'WP_Filesystem_Base') ){
+            include_once(ABSPATH . 'wp-admin/includes/file.php');
+            WP_Filesystem();
+        }
+        return $wp_filesystem;
+    }
     /**
      * Ensure cache directory pre-conditions.
      *
@@ -40,8 +51,7 @@ class CachePath
         }
         try {
             self::delete_directory_content($dir);
-
-            return chmod($dir, self::CLEAN_DIR_DEFAULT_PERMISSIONS);
+            return self::get_wpfs()->chmod($dir, self::CLEAN_DIR_DEFAULT_PERMISSIONS);
         } catch (\Exception) {
             return false;
         }
@@ -57,7 +67,7 @@ class CachePath
      */
     public static function delete_directory_content(string $dir): void
     {
-        if ( ! $dir || $dir === '' || ! is_dir($dir) || ! (realpath($dir) === untrailingslashit($dir))) {
+        if ( ! $dir || ! is_dir($dir) || ! (realpath($dir) === untrailingslashit($dir))) {
             throw new \Exception('Empty directory, relative or not a directory. Got : ' . esc_html($dir));
         }
         // @see https://stackoverflow.com/a/3352564/308533;
@@ -80,12 +90,10 @@ class CachePath
         $url = str_starts_with($path, $_SERVER['DOCUMENT_ROOT']) ?
             get_bloginfo('wpurl') . substr($path, strlen(untrailingslashit($_SERVER['DOCUMENT_ROOT']))) : null;
 
-        $data = [
+        return [
             'path' => $path,
             'url'  => $url,
         ];
-
-        return $data;
     }
 
     /**
@@ -109,16 +117,12 @@ class CachePath
             if ( ! is_dir($directory_path)) {
                 wp_mkdir_p($directory_path);
             }
-            if (is_writable($directory_path)) {
+            if ($this->wpFs->is_writable($directory_path)) {
                 return $directory_path;
             }
         }
 
-        // TODO add a Notice/Info if we are not useing the default cache path.
-
-        // Facllback on wp-content/uploads if possible.
-        // Reset the filesystem to defaults.
-        WP_Filesystem();
+        // TODO Maybe add a Notice/Info if we are not using the default cache path.
 
         $wp_upload = wp_upload_dir();
         if ($wp_upload['error']) {
@@ -129,15 +133,12 @@ class CachePath
                      . trailingslashit(OSEC_FILE_CACHE_WP_UPLOAD_DIR)
                      . $subDirectory;
 
-        //    $cacheUrl = trailingslashit($wp_upload['baseurl']) . $cacheDir;
         if ( ! is_dir($cachePath)) {
             wp_mkdir_p($cachePath);
         }
-        if (is_writable($cachePath)) {
+        if ($this->wpFs->is_writable($cachePath)) {
             return trailingslashit(realpath($cachePath));
         }
-
-        // TODO Disable cache?
         return null;
     }
 
@@ -149,13 +150,13 @@ class CachePath
     private function _default_cache(): ?string
     {
         if (is_dir(OSEC_FILE_CACHE_DEFAULT_PATH)) {
-            if (is_writable(OSEC_FILE_CACHE_DEFAULT_PATH)) {
+            if ($this->wpFs->is_writable(OSEC_FILE_CACHE_DEFAULT_PATH)) {
                 return OSEC_FILE_CACHE_DEFAULT_PATH;
             }
         } else {
             wp_mkdir_p(OSEC_FILE_CACHE_DEFAULT_PATH);
         }
 
-        return is_writable(OSEC_FILE_CACHE_DEFAULT_PATH) ? trailingslashit(OSEC_FILE_CACHE_DEFAULT_PATH) : null;
+        return $this->wpFs->is_writable(OSEC_FILE_CACHE_DEFAULT_PATH) ? trailingslashit(OSEC_FILE_CACHE_DEFAULT_PATH) : null;
     }
 }
