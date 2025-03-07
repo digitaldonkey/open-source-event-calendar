@@ -231,7 +231,7 @@ class DatabaseController extends OsecBaseClass
         $query = preg_replace('|(?<!%)%s|', "'%s'", $query); // quote the strings, avoiding escaped strings like %%s
         array_walk($args, [$this->wpdb, 'escape_by_ref']);
 
-        return @vsprintf($query, $args);
+        return $this->wpdb->prepare($query, $args);
     }
 
     /**
