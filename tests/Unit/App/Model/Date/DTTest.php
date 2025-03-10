@@ -23,12 +23,14 @@ class DTTest extends TestBase
     public function test_date_object_timezone()
     {
         global $osec_app;
+        // phpcs:disable WordPress.DateTime.RestrictedFunctions.date_date
 
         /* @var DT $randomDate Monday, November 11, 2024 at 5:00:00 AM Coordinated Universal Time */
         $randomDate      = 1731301200;
         $LocalRandomDate = strtotime('2024-11-11 05:00');
 
         $phpTimeZoneIs = date_default_timezone_get(); // Which is a WP requirement to be UTC.
+
         $LocalRandomDateOffset = date('P', $LocalRandomDate);
 
         // Verify timezone using PHP functions.
