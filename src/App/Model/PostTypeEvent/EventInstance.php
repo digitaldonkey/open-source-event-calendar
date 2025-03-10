@@ -3,6 +3,7 @@
 namespace Osec\App\Model\PostTypeEvent;
 
 use DateTime;
+use DateTimeZone;
 use Exception;
 use Kigkonsult\Icalcreator\Util\RecurFactory;
 use Osec\App\Model\Date\DT;
@@ -280,6 +281,16 @@ class EventInstance extends OsecBaseClass
     // return false;
     // }
 
+    /**
+     * @param  array  $dates
+     * @param  string  $rule
+     * @param  DT  $start
+     * @param $timezone
+     *
+     * @return void
+     * @throws \Osec\Exception\BootstrapException
+     * @throws \Osec\Exception\TimezoneException
+     */
     protected function createRecurringDates(array &$dates, string $rule, DT $start, $timezone): void
     {
         foreach (explode(',', (string)$rule) as $date) {
@@ -325,7 +336,7 @@ class EventInstance extends OsecBaseClass
         );
 
         if ( ! empty($rulesArray)) {
-            // Removed unnecessary date_default_timezone_set('UTC'). Just to be  sure.
+            // Removed unnecessary date_default_timezone_set('UTC'). Just to be sure.
             DT::require_php_timezone_utc();
 
             if (isset($rulesArray['UNTIL'])) {
@@ -343,7 +354,7 @@ class EventInstance extends OsecBaseClass
             );
             // Change format to match UTC->DATE
             foreach ($unprocessedData as $dateStamp => $bool) {
-                $instanceDate = new DateTime($dateStamp);
+                $instanceDate = new DateTime($dateStamp, new DateTimeZone($timezone));
                 $instanceDate->setTime(
                     (int)$wdate->format('H'),
                     (int)$wdate->format('i'),
