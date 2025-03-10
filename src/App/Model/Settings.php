@@ -48,12 +48,11 @@ class Settings extends OsecBaseInitialized
      */
     public function uninstall(bool $purge = false)
     {
-
-
         global $wpdb;
         if ($purge) {
-            $query = $wpdb->prepare("DELETE FROM {$wpdb->options} WHERE `option_name` LIKE %s", 'osec_%');
-            $wpdb->query($query);
+            $wpdb->query(
+                $wpdb->prepare("DELETE FROM {$wpdb->options} WHERE `option_name` LIKE %s", 'osec_%')
+            );
         }
     }
 

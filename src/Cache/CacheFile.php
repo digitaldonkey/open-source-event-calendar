@@ -385,13 +385,15 @@ class CacheFile extends OsecBaseClass implements CacheInterface
     public function get_all_cache_files(): array
     {
         $db        = $this->app->db;
-        $sql_query = $db->prepare(
-            'SELECT option_name as name, option_value as filename FROM ' . $db->get_table_name('options') .
-            ' WHERE option_name LIKE %s',
-            '%%' . (string)self::OPTION_PREFIX . '%%'
-        );
+
         $files     = [];
-        foreach ($db->get_results($sql_query) as $result) {
+        foreach ($db->get_results(
+            $db->prepare(
+                'SELECT option_name as name, option_value as filename FROM ' . $db->get_table_name('options') .
+                ' WHERE option_name LIKE %s',
+                '%%' . (string)self::OPTION_PREFIX . '%%'
+            )
+        ) as $result) {
             $files[] = $result;
         }
 

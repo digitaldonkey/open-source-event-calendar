@@ -33,16 +33,16 @@ use Osec\Theme\ThemeLoader;
 
 // phpcs:disable PSR1.Files.SideEffects
 
-$osec_base_dir = __DIR__;
 
 // PHP Composer @see package.json.
 if (
     // Try fixing a bug where
     ! class_exists("\Osec\App\Controller\BootstrapController")) {
+    $osec_base_dir = __DIR__;
     require_once $osec_base_dir . '/vendor/autoload.php';
+    BootstrapController::createApp($osec_base_dir);
 }
 
-BootstrapController::createApp($osec_base_dir);
 
 /**
  * Activate plugin.

@@ -632,8 +632,7 @@ class EventSearch extends OsecBaseClass
         $has_recurrence = false,
         $exclude_post_id = null
     ) {
-        $dbi        = $this->app->db;
-        $table_name = $dbi->get_table_name(OSEC_DB__EVENTS);
+        $table_name = $this->db->get_table_name(OSEC_DB__EVENTS);
         $query      = 'SELECT `post_id` FROM ' . $table_name . '
 			WHERE ical_feed_url   = %s
 				AND ical_uid        = %s
@@ -650,7 +649,7 @@ class EventSearch extends OsecBaseClass
             $args[] = $exclude_post_id;
         }
 
-        return $dbi->get_var($dbi->prepare($query, $args));
+        return $this->db->get_var($this->db->prepare($query, $args));
     }
 
     /**
@@ -668,21 +667,25 @@ class EventSearch extends OsecBaseClass
         if ( ! isset($uid[1])) {
             return null;
         }
-        $dbi        = $this->app->db;
-        $table_name = $dbi->get_table_name(OSEC_DB__EVENTS);
+        $table_name = $this->db->get_table_name(OSEC_DB__EVENTS);
         $argv       = [$uid, $url];
         // fix issue where invalid feed URLs were assigned
-        $delete   = 'SELECT `post_id` FROM `' . $table_name .
-                    '` WHERE `ical_uid` = %s AND `ical_feed_url` != %s';
-        $post_ids = $dbi->get_col($dbi->prepare($delete, $argv));
+        $post_ids = $this->db->get_col(
+            $this->db->prepare(
+                "SELECT `post_id` FROM {$table_name} WHERE `ical_uid` = %s AND `ical_feed_url` != %s",
+                $argv
+            )
+        );
         foreach ($post_ids as $pid) {
             wp_delete_post($pid, true);
         }
         // retrieve actual feed ID if any
-        $select = 'SELECT `post_id` FROM `' . $table_name .
-                  '` WHERE `ical_uid` = %s';
-
-        return $dbi->get_var($dbi->prepare($select, $argv[0]));
+        return $this->db->get_var(
+            $this->db->prepare(
+                "SELECT post_id FROM {$table_name} WHERE `ical_uid` = %s",
+                $argv[0]
+            )
+        );
     }
 
     /**
@@ -692,12 +695,13 @@ class EventSearch extends OsecBaseClass
      */
     public function get_event_ids_for_feed($feed_url)
     {
-        $dbi        = $this->app->db;
-        $table_name = $dbi->get_table_name(OSEC_DB__EVENTS);
-        $query      = 'SELECT `post_id` FROM ' . $table_name .
-                      ' WHERE ical_feed_url = %s';
-
-        return $dbi->get_col($dbi->prepare($query, [$feed_url]));
+        $table_name = $this->db->get_table_name(OSEC_DB__EVENTS);
+        return $this->db->get_col(
+            $this->db->prepare(
+                "SELECT `post_id` FROM {$table_name} WHERE ical_feed_url = %s",
+                $feed_url
+            )
+        );
     }
 
     /**
@@ -715,16 +719,18 @@ class EventSearch extends OsecBaseClass
             $where_events_ids = 'i.post_id IN ('
                                 . implode(',', $events_ids) . ') AND ';
         }
-        $query = 'SELECT i.id, i.post_id FROM ' .
-                 $this->db->get_table_name(OSEC_DB__INSTANCES) .
-                 ' i WHERE ' .
-                 $where_events_ids .
-                 ' i.start > %d ' .
-                 ' GROUP BY i.post_id';
         $today = new DT('now', 'sys.default');
         $today->set_time(0, 0, 0);
-        $query   = $this->db->prepare($query, $today->format('U'));
-        $results = $this->db->get_results($query);
+        $results = $this->db->get_results(
+            $this->db->prepare(
+                "
+                        SELECT i.id, i.post_id FROM {$this->db->get_table_name(OSEC_DB__INSTANCES)} i 
+                        WHERE {$where_events_ids} i.start > %d 
+                        GROUP BY i.post_id
+                      ",
+                $today->format('U')
+            )
+        );
         $events  = [];
         foreach ($results as $result) {
             $events[] = $this->get_event(

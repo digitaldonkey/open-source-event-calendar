@@ -548,8 +548,12 @@ class DatabaseSchema extends OsecBaseClass
                 if (! isset($description['columns'][$column->Field])) {
                     if (
                         $this->app->db->query(
-                            'ALTER TABLE `' . $table .
-                            '` DROP COLUMN `' . $column->Field . '`'
+                            $this->app->db->prepare(
+                                $this->app->db->prepare(
+                                    "ALTER TABLE `$table` DROP COLUMN %s",
+                                    $column->Field
+                                )
+                            )
                         )
                     ) {
                         continue;
@@ -694,18 +698,12 @@ class DatabaseSchema extends OsecBaseClass
      *
      * @return array Map of index names.
      */
-    public function get_indices($table)
+    public function get_indices(string $table)
     {
-        // if ( ! $this->isTable($table)) {
-        // return [];
-        // }
-        // $list = $this->app->db->get_results('SHOW INDEX FROM `'.$table.'`');
-        // $currentTableIndexColumns = [];
-        // foreach ($list as $column) {
-        // $currentTableIndexColumns[ strtolower($column->Key_name) ] = $column->Key_name;
-        // }
-        //
-        // return $currentTableIndexColumns;
+        if (! $this->isTable($table)) {
+            return [];
+        }
+
         $result  = $this->app->db->get_results('SHOW INDEX FROM `' . $table . '`');
         $indices = [];
         foreach ($result as $index) {
@@ -732,10 +730,16 @@ class DatabaseSchema extends OsecBaseClass
             $event_instances     = $dbi->get_table_name(OSEC_DB__INSTANCES);
             $event_feeds         = $dbi->get_table_name(OSEC_DB__FEEDS);
             $event_category_meta = $dbi->get_table_name(OSEC_DB__META);
-            $dbi->query("DROP TABLE IF EXISTS $events, $event_instances, $event_feeds, $event_category_meta;");
+            $dbi->query($dbi->prepare(
+                "DROP TABLE IF EXISTS %s, %s,  %s,  %s",
+                [$events, $event_instances, $event_feeds, $event_category_meta]
+            ));
             // View
             $debug_view_name = $event_instances . '_readable_date';
-            $dbi->query("DROP VIEW IF EXISTS $debug_view_name;");
+            $dbi->query($dbi->prepare(
+                "DROP VIEW IF EXISTS %s;",
+                $debug_view_name
+            ));
         }
     }
 

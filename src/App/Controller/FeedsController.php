@@ -499,7 +499,12 @@ class FeedsController extends OsecBaseClass
         if ($ics_id === false) {
             $ics_id = (int)$_REQUEST['ics_id'];
         }
-        $this->app->db->query($this->app->db->prepare("DELETE FROM {$this->feedsTable} WHERE feed_id = %d", $ics_id));
+        $this->app->db->query(
+            $this->app->db->prepare(
+                "DELETE FROM {$this->feedsTable} WHERE feed_id = %d",
+                $ics_id
+            )
+        );
 
         /**
          * Do something after feed is deleted
@@ -581,8 +586,10 @@ class FeedsController extends OsecBaseClass
         // Delete Events
         if ($feed_url) {
             $eventsTable = $this->app->db->get_table_name(OSEC_DB__EVENTS);
-            $sql         = $this->app->db
-                ->prepare('SELECT `post_id` FROM ' . $eventsTable . ' WHERE `ical_feed_url` = %s', $feed_url);
+            $sql = $this->app->db->prepare(
+                "SELECT `post_id` FROM {$eventsTable} WHERE `ical_feed_url` = %s",
+                $feed_url
+            );
             $events      = $this->app->db->get_col($sql);
             $total       = count($events);
             foreach ($events as $event_id) {
@@ -631,7 +638,7 @@ class FeedsController extends OsecBaseClass
         // = Select all feed IDs =
         // =======================
         /** @noinspection SqlResolve */
-        $sql   = 'SELECT `feed_id` FROM ' . $this->feedsTable;
+        $sql   = "SELECT `feed_id` FROM {$this->feedsTable}";
         $feeds = $this->app->db->get_col($sql);
 
         // ===============================
@@ -816,7 +823,7 @@ class FeedsController extends OsecBaseClass
     public function run_uninstall_procedures()
     {
         // Delete tables
-        $this->app->db->query('DROP TABLE IF EXISTS ' . $this->feedsTable);
+        $this->app->db->query("DROP TABLE IF EXISTS {$this->feedsTable}");
         // Delete scheduled tasks
         Scheduler::factory($this->app)
                  ->delete(self::HOOK_NAME);
@@ -825,29 +832,30 @@ class FeedsController extends OsecBaseClass
         delete_option(self::ICS_OPTION_DB_VERSION);
     }
 
-    /**
-     * Returns the translations array
-     *
-     * @return array
-     */
-    private function get_translations()
-    {
-        $categories = $_POST['osec_categories'] ?? [];
-        foreach ($categories as &$cat) {
-            $term = get_term($cat, 'events_categories');
-            $cat  = $term->name;
-        }
-        $translations = [
-            '[feed_url]'   => $_POST['osec_calendar_url'],
-            '[categories]' => implode(', ', $categories),
-            '[user_email]' => $_POST['osec_submitter_email'],
-            '[site_title]' => get_bloginfo('name'),
-            '[site_url]'   => site_url(),
-            '[feeds_url]'  => admin_url(
-                OSEC_FEED_SETTINGS_BASE_URL . '#ics'
-            ),
-        ];
-
-        return $translations;
-    }
+//    /**
+//     * Returns the translations array
+//     *
+//     * @return array
+//     */
+//    private function get_translations()
+//    {
+//        $categories = $_POST['osec_categories'] ?? [];
+//        foreach ($categories as &$cat) {
+//            $term = get_term($cat, 'events_categories');
+//            $cat  = $term->name;
+//        }
+//        unset($cat);
+//        $translations = [
+//            '[feed_url]'   => $_POST['osec_calendar_url'],
+//            '[categories]' => implode(', ', $categories),
+//            '[user_email]' => $_POST['osec_submitter_email'],
+//            '[site_title]' => get_bloginfo('name'),
+//            '[site_url]'   => site_url(),
+//            '[feeds_url]'  => admin_url(
+//                OSEC_FEED_SETTINGS_BASE_URL . '#ics'
+//            ),
+//        ];
+//
+//        return $translations;
+//    }
 }

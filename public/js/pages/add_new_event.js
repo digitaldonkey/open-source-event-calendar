@@ -1917,13 +1917,13 @@ timely.define("domReady", [], function () {
                     else if ("2" === E && f) {
                         var S = e("#osec_until-date-input").val();
                         S = r.parseDate(S, t.date_format);
-                        var x = e("#osec_table_coordinates-time").val();
+                        var x = e("#osec_end-time").val();
                         (x = r.parseDate(x, t.date_format)), (x = new Date(x));
                         var T = S.getUTCDate(),
                             N = S.getUTCMonth() + 1,
                             C = x.getUTCHours(),
                             k = x.getUTCMinutes();
-                        (N = N < 10 ? "0" + N : N), (T = T < 10 ? "0" + T : T), (C = C < 10 ? "0" + C : C), (k = k < 10 ? "0" + k : k), (S = S.getUTCFullYear() + "" + N + T + "T235959Z"), (o += "UNTIL=" + S + ";");
+                        (N = N < 10 ? "0" + N : N), (T = T < 10 ? "0" + T : T), (C = C < 10 ? "0" + C : C), (k = k < 10 ? "0" + k : k), (S = S.getUTCFullYear() + "" + N + T + "T000000Z"), (o += "UNTIL=" + S + ";");
                     }
                     var L = {action: "osec_rrule_to_text", rrule: o};
                     i.button("loading").next().addClass("ai1ec-disabled"),
@@ -2080,8 +2080,7 @@ timely.define("domReady", [], function () {
                                 var r = t.parseDate(this.value, u.date_format);
                                 isNaN(r) ? n(e(this)) : (e(this).data("timespan.stored", this.value), e(this).val(t.formatDate(r, u.date_format)));
                             }),
-                            a
-                                .bind("focus.timespan", function () {
+                            a.bind("focus.timespan", function () {
                                     var e = t.parseDate(a.val(), u.date_format).getTime() / 1e3;
                                 })
                                 .bind("blur.timespan", function () {

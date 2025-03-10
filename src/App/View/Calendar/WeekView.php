@@ -54,7 +54,7 @@ class WeekView extends AbstractView
         );
 
         // Create pagination links. (Translators: '%s' = week's start date.)
-        $title            = sprintf(
+        $title = sprintf(
         /* translators: Long week name or number */
             __(
                 'Week %s',
@@ -62,7 +62,7 @@ class WeekView extends AbstractView
             ),
             $weekStart->format_i18n('W / F Y')
         );
-        $title_short      = sprintf(
+        $title_short = sprintf(
         /* translators: Short week name or number */
             __(
                 'W%s',

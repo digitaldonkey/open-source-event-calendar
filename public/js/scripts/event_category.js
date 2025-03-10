@@ -62,7 +62,6 @@ timely.define(["jquery_timely", "ai1ec_config", "domReady", "external_libs/color
     }, f = function () {
         n(function () {
             e("#osec_category_image_uploader").click(i);
-            console.log('click')
             var t = e("#osec_category_imag_preview").attr("src");
             t && t.length > 0 && e("#osec_category_image_url").val(t)
         })

@@ -36,12 +36,13 @@ class ExecutionLimitController extends OsecBaseClass
         ];
         $table = $dbi->get_table_name('options');
         $dbi->query('START TRANSACTION');
-        $query = $dbi->prepare(
-            'SELECT option_value FROM ' . $table .
-            ' WHERE option_name = %s',
-            $name
+        $prev  = $dbi->get_var(
+            $dbi->prepare(
+                'SELECT option_value FROM ' . $table .
+                ' WHERE option_name = %s',
+                $name
+            )
         );
-        $prev  = $dbi->get_var($query);
         if ( ! empty($prev)) {
             $prev = json_decode((string)$prev, true);
         }
@@ -58,8 +59,9 @@ class ExecutionLimitController extends OsecBaseClass
         if ( ! empty($prev)) {
             $query .= ' WHERE `option_name` = %s';
         }
-        $query   = $dbi->prepare($query, $name, wp_json_encode($entry), $name);
-        $success = $dbi->query($query);
+        $success = $dbi->query(
+            $dbi->prepare($query, $name, wp_json_encode($entry), $name)
+        );
         if ( ! $success) {
             $dbi->query('ROLLBACK');
 
