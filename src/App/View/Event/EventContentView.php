@@ -126,9 +126,6 @@ class EventContentView extends OsecBaseClass
      */
     public function get_back_to_calendar_button_html($timestamp = null)
     {
-        $class     = '';
-        $data_type = '';
-
         $iComeFromAdminPage = isset($_SERVER['HTTP_REFERER']) && str_contains($_SERVER['HTTP_REFERER'], 'wp-admin');
 
         // Load last calendar view from cookie.
@@ -146,31 +143,25 @@ class EventContentView extends OsecBaseClass
             $href   = HtmlFactory::factory($this->app)
                                  ->create_href_helper_instance($params)
                                  ->generate_href();
-            // $href = $href->generate_href();
         }
-        $text    = esc_attr(__('Back to Calendar', 'open-source-event-calendar'));
-        $tooltip = esc_attr(__('View all events', 'open-source-event-calendar'));
-        $html    = <<<HTML
-<a class="ai1ec-calendar-link ai1ec-btn ai1ec-btn-default ai1ec-btn-sm
-		ai1ec-tooltip-trigger $class"
-	href="$href"
-	$data_type
-	data-placement="left"
-	title="$tooltip">
-	<i class="ai1ec-fa ai1ec-fa-calendar ai1ec-fa-fw"></i>
-	<span class="ai1ec-hidden-xs">$text</span>
-</a>
-HTML;
-
+        // Render Button
+        $args  = [
+            'href' => $href,
+            'text' => esc_attr(__('Back to Calendar', 'open-source-event-calendar')),
+            'tooltip' => esc_attr(__('View all events', 'open-source-event-calendar')),
+            'template' => 'back-to-calendar-button.twig'
+        ];
         /**
          * Alter the back-to calendar button on single Events
          *
          * @since 1.0
          *
-         * @param  string  $html  Css file path
-         * @param  string  $href  Css file path
+         * @param  array  $args  Twig template arguments
          */
-        return apply_filters('osec_back_to_calendar_button_html_alter', $html, $href);
+        $args = apply_filters('osec_back_to_calendar_button_html_alter', $args);
+        return ThemeLoader::factory($this->app)
+                    ->get_file($args['template'], $args, false)
+                    ->get_content();
     }
 
     /**

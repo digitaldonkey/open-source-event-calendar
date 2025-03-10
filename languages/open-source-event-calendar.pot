@@ -132,62 +132,6 @@ msgstr ""
 msgid "Show Map"
 msgstr ""
 
-#: public/admin/box_repeat.php:9
-msgid "Select recurrence pattern:"
-msgstr ""
-
-#: public/admin/box_repeat.php:20
-#: public/admin/cron_freq.php:13
-#: src/App/View/RepeatRuleToText.php:83
-msgid "Daily"
-msgstr ""
-
-#: public/admin/box_repeat.php:25
-#: src/App/View/RepeatRuleToText.php:97
-msgid "Weekly"
-msgstr ""
-
-#: public/admin/box_repeat.php:30
-#: src/App/View/RepeatRuleToText.php:111
-msgid "Monthly"
-msgstr ""
-
-#: public/admin/box_repeat.php:35
-#: src/App/View/RepeatRuleToText.php:125
-msgid "Yearly"
-msgstr ""
-
-#: public/admin/box_repeat.php:40
-msgid "Custom"
-msgstr ""
-
-#: public/admin/box_repeat.php:76
-msgid "End"
-msgstr ""
-
-#: public/admin/box_repeat.php:86
-msgid "Ending after"
-msgstr ""
-
-#: public/admin/box_repeat.php:97
-#: src/App/View/Admin/AdminDateRepeatBox.php:591
-msgid "On date"
-msgstr ""
-
-#: public/admin/box_repeat.php:113
-#: public/admin/plugins/ics/display_feeds.php:103
-msgid "Please wait&#8230;"
-msgstr ""
-
-#: public/admin/box_repeat.php:116
-msgid "Apply"
-msgstr ""
-
-#: public/admin/box_repeat.php:121
-#: public/admin/plugins/ics/display_feeds.php:97
-msgid "Cancel"
-msgstr ""
-
 #: public/admin/box_time_and_date.php:10
 msgid "Event date and time"
 msgstr ""

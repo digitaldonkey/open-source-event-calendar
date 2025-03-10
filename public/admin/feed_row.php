@@ -155,13 +155,12 @@
                         <i class="ai1ec-fa ai1ec-fa-edit ai1ec-fa-fw"></i>
                         <?php esc_html_e('Edit', 'open-source-event-calendar'); ?>
                     </button>
-                    <button type="button"
-                            class="ai1ec-btn ai1ec-btn-sm ai1ec-btn-default ai1ec-text-danger
-                            osec_delete_ics"
-                            data-loading-text="<?php echo esc_attr(
-                                '<i class="ai1ec-fa ai1ec-fa-spinner ai1ec-fa-spin ai1ec-fa-fw"></i> ' .
-                                __('Removing&#8230;', 'open-source-event-calendar')
-                            ); ?>">
+                    <button
+                        type="button"
+                        class="ai1ec-btn ai1ec-btn-sm ai1ec-btn-default ai1ec-text-danger
+                        osec_delete_ics"
+                        data-loading-text=" <?php esc_html_e('Removing&#8230;', 'open-source-event-calendar')?>"
+                    >
                         <i class="ai1ec-fa ai1ec-fa-times ai1ec-fa-fw"></i>
                         <?php esc_html_e('Remove', 'open-source-event-calendar'); ?>
                     </button>

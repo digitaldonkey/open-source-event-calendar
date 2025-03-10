@@ -32,7 +32,8 @@
     ],
     "scripts": {
         "grumphp": "grumphp",
-        "phpcs": "phpcs --standard=phpcs.xml",
+        "phpcs": "phpcs --standard=phpcs.xml --runtime-set testVersion 8.1-",
+        "phpcs-warnings": "phpcs --warning-severity=1 --runtime-set testVersion 8.1- --standard=phpcs.xml",
         "post-install-cmd": "[ $COMPOSER_DEV_MODE -eq 0 ] || \"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility,vendor/phpcompatibility/phpcompatibility-wp,vendor/phpcompatibility/phpcompatibility-paragonie,vendor/wp-coding-standards/wpcs,vendor/phpcsstandards/phpcsextra",
         "post-update-cmd" : "[ $COMPOSER_DEV_MODE -eq 0 ] || \"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility,vendor/phpcompatibility/phpcompatibility-wp,vendor/phpcompatibility/phpcompatibility-paragonie,vendor/wp-coding-standards/wpcs,vendor/phpcsstandards/phpcsextra"
     },

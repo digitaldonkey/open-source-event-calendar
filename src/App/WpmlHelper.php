@@ -115,9 +115,12 @@ class WpmlHelper extends OsecBaseClass
         $translations = (array)$sitepress->get_element_translations($page_id);
         if (empty($translations)) {
             $parent_id = $wpdb->get_var(
-                'SELECT trid FROM ' . $wpdb->prefix . 'icl_translations ' .
-                'WHERE element_type = \'post_page\' ' .
-                'AND   element_id   = ' . $page_id
+                $wpdb->prepare(
+                    "SELECT trid FROM {$wpdb->prefix}icl_translations
+                     WHERE element_type = 'post_page'
+                     AND element_id = %d",
+                    $page_id
+                )
             );
             if ($parent_id) {
                 $translations += (array)$sitepress->get_element_translations(

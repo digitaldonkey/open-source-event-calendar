@@ -53,7 +53,7 @@ timely.define(["jquery_timely", "ai1ec_config", "scripts/add_new_event/event_dat
         if ("1" === E && f) o += "COUNT=" + e("#osec_count").val() + ";"; else if ("2" === E && f) {
             var S = e("#osec_until-date-input").val();
             S = r.parseDate(S, t.date_format);
-            var x = e("#osec_table_coordinates-time").val();
+            var x = e("#osec_end-time").val();
             x = r.parseDate(x, t.date_format), x = new Date(x);
             var T = S.getUTCDate(), N = S.getUTCMonth() + 1, C = x.getUTCHours(), k = x.getUTCMinutes();
             N = N < 10 ? "0" + N : N, T = T < 10 ? "0" + T : T, C = C < 10 ? "0" + C : C, k = k < 10 ? "0" + k : k, S = S.getUTCFullYear() + "" + N + T + "T235959Z", o += "UNTIL=" + S + ";"

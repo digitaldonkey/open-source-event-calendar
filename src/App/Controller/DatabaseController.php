@@ -39,12 +39,11 @@ class DatabaseController extends OsecBaseClass
         global $wpdb;
         $this->wpdb = $wpdb;
 
-        if (defined('DOING_AJAX') && ! DOING_AJAX) {
+        if (!(defined('DOING_AJAX') || (defined('DOING_AJAX') && !DOING_AJAX))) {
             ShutdownController::factory($this->app)->register(
                 $this->shutdown(...)
             );
         }
-
         add_action('osec_loaded', $this->check_debug(...), PHP_INT_MAX);
         $this->set_timezone();
     }
@@ -69,6 +68,9 @@ class DatabaseController extends OsecBaseClass
     public function query($sql_query)
     {
         $this->queryProfile($sql_query);
+        // All queries are all prepared using $this->prepare.
+        // Exception: if build with constants.
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
         $result = $this->wpdb->query($sql_query);
         $this->queryProfile($result);
 
@@ -88,6 +90,10 @@ class DatabaseController extends OsecBaseClass
      */
     protected function queryProfile(mixed $query_or_result)
     {
+        if (!$this->isLogEnabled) {
+            return;
+        }
+
         static $last = null;
         if (null === $last) {
             $last = [
@@ -105,18 +111,6 @@ class DatabaseController extends OsecBaseClass
             ];
             $last             = null;
         }
-    }
-
-    /**
-     * Returns SQL string for INSERT statement.
-     *
-     * @param  array  $value  Array of values.
-     *
-     * @return string SQL statement.
-     */
-    public static function array_value_to_sql_value(array $value)
-    {
-        return '(' . implode(',', array_values($value)) . ')';
     }
 
     /**
@@ -172,6 +166,9 @@ class DatabaseController extends OsecBaseClass
     public function get_col($query = null, $col = 0)
     {
         $this->queryProfile($query);
+        // All queries are all prepared using $this->prepare.
+        // Exception: if build with constants.
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
         $result = $this->wpdb->get_col($query, $col);
         $this->queryProfile(count($result));
 
@@ -225,13 +222,14 @@ class DatabaseController extends OsecBaseClass
         if (isset($args[0]) && is_array($args[0])) {
             $args = $args[0];
         }
-        $query = str_replace("'%s'", '%s', $query); // in case someone mistakenly already singlequoted it
-        $query = str_replace('"%s"', '%s', $query); // doublequote unquoting
+        // in case someone mistakenly already singlequoted it and doublequote unquoting.
+        $query = str_replace(array ("'%s'", '"%s"'), '%s', $query);
         $query = preg_replace('|(?<!%)%f|', '%F', $query); // Force floats to be locale unaware
         $query = preg_replace('|(?<!%)%s|', "'%s'", $query); // quote the strings, avoiding escaped strings like %%s
         array_walk($args, [$this->wpdb, 'escape_by_ref']);
-
-        return @vsprintf($query, $args);
+        // False positive.
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        return $this->wpdb->prepare($query, $args);
     }
 
     /**
@@ -251,9 +249,11 @@ class DatabaseController extends OsecBaseClass
     public function get_var($query = null, $col = 0, $row = 0)
     {
         $this->queryProfile($query);
+        // All queries are all prepared using $this->prepare.
+        // Exception: if build with constants.
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
         $result = $this->wpdb->get_var($query, $col, $row);
         $this->queryProfile(null !== $result);
-
         return $result;
     }
 
@@ -274,9 +274,11 @@ class DatabaseController extends OsecBaseClass
     public function get_row($query = null, $output = OBJECT, $row = 0)
     {
         $this->queryProfile($query);
+        // Queries are all prepared using $this->prepare.
+        // Some are ensured to be plain by other means.
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
         $result = $this->wpdb->get_row($query, $output, $row);
         $this->queryProfile(null !== $result);
-
         return $result;
     }
 
@@ -418,6 +420,9 @@ class DatabaseController extends OsecBaseClass
     public function get_results($query, $output = OBJECT)
     {
         $this->queryProfile($query);
+        // Queries are all prepared using $this->prepare.
+        // Some are ensured to be plain by other means or consist of static variables.
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
         $result = $this->wpdb->get_results($query, $output);
         $this->queryProfile(count($result));
 
@@ -466,8 +471,9 @@ class DatabaseController extends OsecBaseClass
     public function shutdown()
     {
         if (count($this->queries) && $this->isLogEnabled && php_sapi_name() !== 'cli') {
-            $html = '<div class="timely timely-debug">
-		  <table class="table table-striped">
+            echo '
+        <div class="timely timely-debug" style="max-width: 90%; margin: 0 auto">
+		  <table class="ai1ec-table ai1ec-table-striped">
 		    <thead>
 		      <tr>
 		        <th>N.</th>

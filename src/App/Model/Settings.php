@@ -39,13 +39,20 @@ class Settings extends OsecBaseInitialized
      */
     protected $defaultOptions;
 
+    /**
+     * Delete all Osec prefixed options.
+     *
+     * @param  bool  $purge
+     *
+     * @return void
+     */
     public function uninstall(bool $purge = false)
     {
         global $wpdb;
         if ($purge) {
-            // DELETE FROM wp_options WHERE `option_name` LIKE 'osec_%'
-            $query = $wpdb->prepare("DELETE FROM $wpdb->options WHERE option_name LIKE %s", 'osec_%');
-            $wpdb->query($query);
+            $wpdb->query(
+                $wpdb->prepare("DELETE FROM {$wpdb->options} WHERE `option_name` LIKE %s", 'osec_%')
+            );
         }
     }
 

@@ -3,6 +3,7 @@
 namespace Osec\App\Model\PostTypeEvent;
 
 use DateTime;
+use DateTimeZone;
 use Exception;
 use Kigkonsult\Icalcreator\Util\RecurFactory;
 use Osec\App\Model\Date\DT;
@@ -130,12 +131,11 @@ class EventInstance extends OsecBaseClass
              */
             /* @var DT $start_datetime */
             $start_datetime = $event->get('start');
-            $start_datetime->assert_utc_timezone();
 
             $start_timezone = Timezones::factory($this->app)->get_name(
                 $start_datetime->get_timezone()
             );
-            $events         += $this->create_instances_by_recurrence(
+            $events += $this->create_instances_by_recurrence(
                 $event,
                 $event_item,
                 $_start,
@@ -200,10 +200,9 @@ class EventInstance extends OsecBaseClass
         $wdate         = $origEventTime->getObject();
 
         $recurrenceEndDate = clone $origEventTime->getObject();
-        //
-        // TODO Seems we repeat for max 3 Years.
-        // Shouldn't this be a transparent by having a setting in App?
-        //
+
+        // TODO Seems we repeat for max 3 Years (on Save).
+        //   This should be a transparent by having a setting in App.
         $recurrenceEndDate->modify('+ 3 years');
 
         $recurrence_dates = [];
@@ -282,6 +281,16 @@ class EventInstance extends OsecBaseClass
     // return false;
     // }
 
+    /**
+     * @param  array  $dates
+     * @param  string  $rule
+     * @param  DT  $start
+     * @param $timezone
+     *
+     * @return void
+     * @throws \Osec\Exception\BootstrapException
+     * @throws \Osec\Exception\TimezoneException
+     */
     protected function createRecurringDates(array &$dates, string $rule, DT $start, $timezone): void
     {
         foreach (explode(',', (string)$rule) as $date) {
@@ -318,7 +327,6 @@ class EventInstance extends OsecBaseClass
             'EXDATE',
             'RDATE',
         ];
-
         $rulesArray = array_filter(
             RecurFactory::parseRexrule($rrule),
             function ($k) use ($ignoreKeys) {
@@ -328,7 +336,14 @@ class EventInstance extends OsecBaseClass
         );
 
         if ( ! empty($rulesArray)) {
-            date_default_timezone_set($timezone);
+            // Removed unnecessary date_default_timezone_set('UTC'). Just to be sure.
+            DT::require_php_timezone_utc();
+
+            if (isset($rulesArray['UNTIL'])) {
+                // @see https://github.com/iCalcreator/iCalcreator/issues/119
+                $rulesArray['UNTIL'] = new DateTime($rulesArray['UNTIL']);
+            }
+
             // The first array is the result and it is passed by reference
             RecurFactory::recur2date(
                 $unprocessedData,
@@ -339,7 +354,7 @@ class EventInstance extends OsecBaseClass
             );
             // Change format to match UTC->DATE
             foreach ($unprocessedData as $dateStamp => $bool) {
-                $instanceDate = new DateTime($dateStamp);
+                $instanceDate = new DateTime($dateStamp, new DateTimeZone($timezone));
                 $instanceDate->setTime(
                     (int)$wdate->format('H'),
                     (int)$wdate->format('i'),
@@ -364,6 +379,7 @@ class EventInstance extends OsecBaseClass
         $query = 'DELETE FROM ' . $this->app->db->get_table_name(
             OSEC_DB__INSTANCES
         ) . ' WHERE id IN (';
+        // Ensure insert values ar integer, so we can omit db->prepare().
         $ids   = array_filter(array_map('intval', $ids));
         $query .= implode(',', $ids) . ')';
         $this->app->db->query($query);
@@ -386,7 +402,7 @@ class EventInstance extends OsecBaseClass
                 OSEC_DB__INSTANCES
             ) . '(`post_id`, `start`, `end`) VALUES';
             $chunk = array_map(
-                $this->app->db->array_value_to_sql_value(...),
+                $this->saveInsertIdValues(...),
                 $chunk
             );
             $query .= implode(',', $chunk);
@@ -411,34 +427,9 @@ class EventInstance extends OsecBaseClass
         return true;
     }
 
-//    /**
-//     * Prepare date range list for fast exdate search.
-//     *
-//     * NOTICE: timezone is relevant in only first run.
-//     *
-//     * @param  string  $date_list  ICS list provided from data model.
-//     * @param  string  $timezone  Timezone in which to evaluate.
-//     *
-//     * @return array List of date ranges, sorted in increasing order.
-//     */
-//    protected function _get_date_ranges($date_list, $timezone)
-//    {
-//        static $ranges = [];
-//        if ( ! isset($ranges[$date_list])) {
-//            $ranges[$date_list] = [];
-//            $exploded           = explode(',', $date_list);
-//            sort($exploded);
-//            foreach ($exploded as $date) {
-//                // COMMENT on `rtrim( $date, 'Z' )`:
-//                // user selects exclusion date in event timezone thus it
-//                // must be parsed as such as opposed to UTC which happen
-//                // when 'Z' is preserved.
-//                $date                 = new DT(rtrim($date, 'Z'), $timezone);
-//                $date                 = (int)$date->format_to_gmt();
-//                $ranges[$date_list][] = [$date, $date + (24 * 60 * 60) - 1];
-//            }
-//        }
-//
-//        return $ranges[$date_list];
-//    }
+    private function saveInsertIdValues(array $values)
+    {
+        $ids   = array_filter(array_map('intval', $values));
+        return '(' . implode(',', array_values($ids)) . ')';
+    }
 }

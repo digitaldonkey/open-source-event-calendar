@@ -48,11 +48,9 @@ class AdminDateRepeatBox extends OsecBaseClass
             }
 
             $rule = RepeatRuleToText::factory($this->app)->filter_rule($rule);
-
             $rc = new SG_iCal_Recurrence(
                 new SG_iCal_Line('RRULE:' . $rule)
             );
-
             if ($until = $rc->getUntil()) {
                 $until = (is_numeric($until)) ? $until : strtotime((string)$until);
                 $end   = 2;
@@ -67,50 +65,56 @@ class AdminDateRepeatBox extends OsecBaseClass
             );
         }
 
-        $args   = [
-            'row_daily'    => $this->row_daily(
+        $args = [
+            'title'             => esc_html__('Select recurrence pattern:', 'open-source-event-calendar'),
+            'label_daily'       => esc_html__('Daily', 'open-source-event-calendar'),
+            'row_daily'         => $this->row_daily(
                 false,
                 $rc->getInterval() ?: 1
             ),
-            'row_weekly'   => $this->row_weekly(
+            'label_weekly'      => esc_html__('Weekly', 'open-source-event-calendar'),
+            'row_weekly'        => $this->row_weekly(
                 false,
                 $rc->getInterval() ?: 1,
                 is_array($rc->getByDay()) ? $rc->getByDay() : []
             ),
-            'row_monthly'  => $this->row_monthly(
+            'label_monthly'     => esc_html__('Monthly', 'open-source-event-calendar'),
+            'row_monthly'       => $this->row_monthly(
                 false,
                 $rc->getInterval() ?: 1,
                 ! $this->isMonthdayEmpty($rc),
                 $rc->getByMonthDay() ?: [],
                 $rc->getByDay() ?: []
             ),
-            'row_yearly'   => $this->row_yearly(
+            'label_yearly'      => esc_html__('Yearly', 'open-source-event-calendar'),
+            'row_yearly'        => $this->row_yearly(
                 false,
                 $rc->getInterval() ?: 1,
                 is_array($rc->getByMonth()) ? $rc->getByMonth() : []
             ),
-            'row_custom'   => $this->row_custom(
-                false,
-                $this->get_date_array_from_rule($rule)
-            ),
-            'count'        => $this->create_count_input(
-                'osec_count',
-                $count
-            ) . __('times', 'open-source-event-calendar'),
-            'end'          => $this->create_end_dropdown($end),
-            'until'        => $until,
-            'repeat'       => $repeat,
-            'ending_type'  => $end,
-            'selected_tab' => $rc->getFreq() ? strtolower((string)$rc->getFreq()) : 'custom',
+            'label_custom'      => esc_html__('Custom', 'open-source-event-calendar'),
+            'row_custom'        => $this->row_custom(false, $this->get_date_array_from_rule($rule)),
+            'label_event_count' => esc_html__('Ending after', 'open-source-event-calendar'),
+            'count'             => $this->create_count_input('osec_count', $count)
+                                        . __('times', 'open-source-event-calendar'),
+            'label_endtime'     => esc_html__('End:', 'open-source-event-calendar'),
+            'end'               => $this->create_end_dropdown($end),
+            'until_label'       => esc_html__('On date:', 'open-source-event-calendar'),
+            'until_value'       => ! is_null($until) && $until > 0 ? esc_attr($until) : '',
+            'repeat'            => esc_attr($repeat),
+            'loading_text'      => esc_html__('Please wait&#8230;', 'open-source-event-calendar'),
+            'ending_type'       => esc_attr($end),
+            'selected_tab'      => $rc->getFreq() ? strtolower((string)$rc->getFreq()) : 'custom',
+            'label_submit'      => esc_html__('Apply', 'open-source-event-calendar'),
+            'label_cancel'      => esc_html__('Cancel', 'open-source-event-calendar'),
         ];
-        $output = [
+        RenderJson::factory($this->app)->render(['data' => [
             'error'   => false,
             'message' => ThemeLoader::factory($this->app)
-                                    ->get_file('box_repeat.php', $args, true)
-                                    ->get_content(),
+                            ->get_file('repeat-rules-form.twig', $args, true)
+                            ->get_content(),
             'repeat'  => $repeat,
-        ];
-        RenderJson::factory($this->app)->render(['data' => $output]);
+        ]]);
     }
 
     /**
@@ -188,11 +192,7 @@ class AdminDateRepeatBox extends OsecBaseClass
 
         $args = [
             'visible'   => $visible,
-            'count'     => $this->create_count_input(
-                'osec_weekly_count',
-                $count,
-                52
-            ) . __('week(s)', 'open-source-event-calendar'),
+            'count'     => $this->create_count_input('osec_weekly_count', $count, 52) . __('week(s)', 'open-source-event-calendar'),
             'week_days' => $this->create_list_element(
                 'osec_weekly_date_select',
                 $options,

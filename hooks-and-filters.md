@@ -2855,14 +2855,13 @@ add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
 Alter the back-to calendar button on single Events
 
 ```php
-add_filter('osec_back_to_calendar_button_html_alter', $html $href);
+add_filter('osec_back_to_calendar_button_html_alter', $args);
 ```
 
 #### Parameters
 
 
- - **$html** <span style="color:crimson"> </span> Css file path
- - **$href** <span style="color:crimson"> </span> Css file path
+ - **$args** <span style="color:crimson"> </span> Twig template arguments
 
 <details markdown="1">
 <summary>Source</summary>
@@ -2874,12 +2873,11 @@ add_filter('osec_back_to_calendar_button_html_alter', $html $href);
  *
  * @since 1.0
  *
- * @param  string  $html  Css file path
- * @param  string  $href  Css file path
+ * @param  array  $args  Twig template arguments
  *
  * @file src/App/View/Event/EventContentView.php
  */
-add_filter('osec_back_to_calendar_button_html_alter', $html $href);
+add_filter('osec_back_to_calendar_button_html_alter', $args);
 ```
 
 </details>
@@ -3220,125 +3218,6 @@ add_filter('osec_contact_url_link', $contact_url $event_website_link);
 
 @file **../src/App/View/Event/EventTimeView.php**
 
-### osec_timespan_time_html_before_start_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Timespan pefix string/html
-
-```php
-add_filter('osec_timespan_time_html_before_start_html', $separator);
-```
-
-#### Description
-
-
-Added befor dtay start date at Ui Timespan displays if they are not all-day. E.g. Event pages, ManageEvents table.
-
-#### Parameters
-
-
- - **$separator** <span style="color:crimson"> </span> Translated separator inclusing spaces.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Timespan pefix string/html
- *
- * Added befor  dtay start date at Ui Timespan displays
- * if they are not all-day.
- * E.g. Event pages, ManageEvents table.
- *
- * @since 1.0
- *
- * @param  string  $separator  Translated separator inclusing spaces.
- *
- * @file src/App/View/Event/EventTimeView.php
- */
-add_filter('osec_timespan_time_html_before_start_html', $separator);
-```
-
-</details>
-
-
-### osec_timespan_time_separator_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Timespan separator string/html
-
-```php
-add_filter('osec_timespan_time_separator_html', $separator);
-```
-
-#### Description
-
-
-Separates from to time and to time values. if they are not all-day.
-
-#### Parameters
-
-
- - **$separator** <span style="color:crimson"> </span> Translated separator inclusing spaces.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Timespan separator string/html
- *
- * Separates from to time and to time values.
- * if they are not all-day.
- *
- * @since 1.0
- *
- * @param  string  $separator  Translated separator inclusing spaces.
- *
- * @file src/App/View/Event/EventTimeView.php
- */
-add_filter('osec_timespan_time_separator_html', $separator);
-```
-
-</details>
-
-
-### osec_timespan_time_separator_html_starttime <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Time span separator.
-
-```php
-add_filter('osec_timespan_time_separator_html_starttime', $separator);
-```
-
-#### Parameters
-
-
- - **$separator** <span style="color:crimson"> </span> Time span separator. Defaults to single space.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Time span separator.
- *
- * @since 1.0
- *
- * @param  string  $separator Time span separator. Defaults to single space.
- *
- * @file src/App/View/Event/EventTimeView.php
- */
-add_filter('osec_timespan_time_separator_html_starttime', $separator);
-```
-
-</details>
-
-
 ### osec_timespan_allday_badge_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -3386,7 +3265,7 @@ add_filter('osec_timespan_allday_badge_html', $allday_html);
 Alter timespan Html Display.
 
 ```php
-add_filter('osec_timespan_html', $output $event $start_date_display);
+add_filter('osec_timespan_html', $date_string $event $start_date_display);
 ```
 
 #### Description
@@ -3397,7 +3276,7 @@ You might alter some parts of this in other hooks.
 #### Parameters
 
 
- - **$output** <span style="color:crimson"> </span> Html string for timespan
+ - **$date_string** <span style="color:crimson"> </span> Html string for timespan
  - **$event** <span style="color:crimson"> </span> Event object.
  - **$start_date_display** <span style="color:crimson"> </span> Display mode
 
@@ -3413,13 +3292,13 @@ You might alter some parts of this in other hooks.
  *
  * @since 1.0
  *
- * @param  string  $output  Html string for timespan
+ * @param  string  $date_string  Html string for timespan
  * @param  Event  $event  Event object.
  * @param  string  $start_date_display  Display mode
  *
  * @file src/App/View/Event/EventTimeView.php
  */
-add_filter('osec_timespan_html', $output $event $start_date_display);
+add_filter('osec_timespan_html', $date_string $event $start_date_display);
 ```
 
 </details>
@@ -3500,6 +3379,91 @@ Note: Date formats are defined/changed in WordPress settings-general page.
  * @file src/App/View/Event/EventTimeView.php
  */
 add_filter('osec_ui_date_format_long', $date_format);
+```
+
+</details>
+
+
+### osec_timespan_time_separator_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Timespan separator string/html
+
+```php
+add_filter('osec_timespan_time_separator_html', $separator);
+```
+
+#### Description
+
+
+Separates from to time and to time values. if they are not all-day. Defaults to &mdash;
+
+#### Parameters
+
+
+ - **$separator** <span style="color:crimson"> </span> Translated separator inclusing spaces.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Timespan separator string/html
+ *
+ * Separates from to time and to time values.
+ * if they are not all-day. Defaults to &mdash;
+ *
+ * @since 1.0
+ *
+ * @param  string  $separator  Translated separator inclusing spaces.
+ *
+ * @file src/App/View/Event/EventTimeView.php
+ */
+add_filter('osec_timespan_time_separator_html', $separator);
+```
+
+</details>
+
+
+### osec_timespan_time_html_before_start_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Timespan pefix string/html
+
+```php
+add_filter('osec_timespan_time_html_before_start_html', $separator);
+```
+
+#### Description
+
+
+Added befor dtay start date at Ui Timespan displays if they are not all-day. E.g. Event pages, ManageEvents table.
+
+#### Parameters
+
+
+ - **$separator** <span style="color:crimson"> </span> Translated separator inclusing spaces.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Timespan pefix string/html
+ *
+ * Added befor  dtay start date at Ui Timespan displays
+ * if they are not all-day.
+ * E.g. Event pages, ManageEvents table.
+ *
+ * @since 1.0
+ *
+ * @param  string  $separator  Translated separator inclusing spaces.
+ *
+ * @file src/App/View/Event/EventTimeView.php
+ */
+add_filter('osec_timespan_time_html_before_start_html', $separator);
 ```
 
 </details>
@@ -7212,14 +7176,13 @@ add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
 Alter the back-to calendar button on single Events
 
 ```php
-add_filter('osec_back_to_calendar_button_html_alter', $html $href);
+add_filter('osec_back_to_calendar_button_html_alter', $args);
 ```
 
 #### Parameters
 
 
- - **$html** <span style="color:crimson"> </span> Css file path
- - **$href** <span style="color:crimson"> </span> Css file path
+ - **$args** <span style="color:crimson"> </span> Twig template arguments
 
 <details markdown="1">
 <summary>Source</summary>
@@ -7231,12 +7194,11 @@ add_filter('osec_back_to_calendar_button_html_alter', $html $href);
  *
  * @since 1.0
  *
- * @param  string  $html  Css file path
- * @param  string  $href  Css file path
+ * @param  array  $args  Twig template arguments
  *
  * @file src/App/View/Event/EventContentView.php
  */
-add_filter('osec_back_to_calendar_button_html_alter', $html $href);
+add_filter('osec_back_to_calendar_button_html_alter', $args);
 ```
 
 </details>
@@ -7577,125 +7539,6 @@ add_filter('osec_contact_url_link', $contact_url $event_website_link);
 
 @file **../src/App/View/Event/EventTimeView.php**
 
-### osec_timespan_time_html_before_start_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Timespan pefix string/html
-
-```php
-add_filter('osec_timespan_time_html_before_start_html', $separator);
-```
-
-#### Description
-
-
-Added befor dtay start date at Ui Timespan displays if they are not all-day. E.g. Event pages, ManageEvents table.
-
-#### Parameters
-
-
- - **$separator** <span style="color:crimson"> </span> Translated separator inclusing spaces.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Timespan pefix string/html
- *
- * Added befor  dtay start date at Ui Timespan displays
- * if they are not all-day.
- * E.g. Event pages, ManageEvents table.
- *
- * @since 1.0
- *
- * @param  string  $separator  Translated separator inclusing spaces.
- *
- * @file src/App/View/Event/EventTimeView.php
- */
-add_filter('osec_timespan_time_html_before_start_html', $separator);
-```
-
-</details>
-
-
-### osec_timespan_time_separator_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Timespan separator string/html
-
-```php
-add_filter('osec_timespan_time_separator_html', $separator);
-```
-
-#### Description
-
-
-Separates from to time and to time values. if they are not all-day.
-
-#### Parameters
-
-
- - **$separator** <span style="color:crimson"> </span> Translated separator inclusing spaces.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Timespan separator string/html
- *
- * Separates from to time and to time values.
- * if they are not all-day.
- *
- * @since 1.0
- *
- * @param  string  $separator  Translated separator inclusing spaces.
- *
- * @file src/App/View/Event/EventTimeView.php
- */
-add_filter('osec_timespan_time_separator_html', $separator);
-```
-
-</details>
-
-
-### osec_timespan_time_separator_html_starttime <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Time span separator.
-
-```php
-add_filter('osec_timespan_time_separator_html_starttime', $separator);
-```
-
-#### Parameters
-
-
- - **$separator** <span style="color:crimson"> </span> Time span separator. Defaults to single space.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Time span separator.
- *
- * @since 1.0
- *
- * @param  string  $separator Time span separator. Defaults to single space.
- *
- * @file src/App/View/Event/EventTimeView.php
- */
-add_filter('osec_timespan_time_separator_html_starttime', $separator);
-```
-
-</details>
-
-
 ### osec_timespan_allday_badge_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -7743,7 +7586,7 @@ add_filter('osec_timespan_allday_badge_html', $allday_html);
 Alter timespan Html Display.
 
 ```php
-add_filter('osec_timespan_html', $output $event $start_date_display);
+add_filter('osec_timespan_html', $date_string $event $start_date_display);
 ```
 
 #### Description
@@ -7754,7 +7597,7 @@ You might alter some parts of this in other hooks.
 #### Parameters
 
 
- - **$output** <span style="color:crimson"> </span> Html string for timespan
+ - **$date_string** <span style="color:crimson"> </span> Html string for timespan
  - **$event** <span style="color:crimson"> </span> Event object.
  - **$start_date_display** <span style="color:crimson"> </span> Display mode
 
@@ -7770,13 +7613,13 @@ You might alter some parts of this in other hooks.
  *
  * @since 1.0
  *
- * @param  string  $output  Html string for timespan
+ * @param  string  $date_string  Html string for timespan
  * @param  Event  $event  Event object.
  * @param  string  $start_date_display  Display mode
  *
  * @file src/App/View/Event/EventTimeView.php
  */
-add_filter('osec_timespan_html', $output $event $start_date_display);
+add_filter('osec_timespan_html', $date_string $event $start_date_display);
 ```
 
 </details>
@@ -7857,6 +7700,91 @@ Note: Date formats are defined/changed in WordPress settings-general page.
  * @file src/App/View/Event/EventTimeView.php
  */
 add_filter('osec_ui_date_format_long', $date_format);
+```
+
+</details>
+
+
+### osec_timespan_time_separator_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Timespan separator string/html
+
+```php
+add_filter('osec_timespan_time_separator_html', $separator);
+```
+
+#### Description
+
+
+Separates from to time and to time values. if they are not all-day. Defaults to &mdash;
+
+#### Parameters
+
+
+ - **$separator** <span style="color:crimson"> </span> Translated separator inclusing spaces.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Timespan separator string/html
+ *
+ * Separates from to time and to time values.
+ * if they are not all-day. Defaults to &mdash;
+ *
+ * @since 1.0
+ *
+ * @param  string  $separator  Translated separator inclusing spaces.
+ *
+ * @file src/App/View/Event/EventTimeView.php
+ */
+add_filter('osec_timespan_time_separator_html', $separator);
+```
+
+</details>
+
+
+### osec_timespan_time_html_before_start_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Timespan pefix string/html
+
+```php
+add_filter('osec_timespan_time_html_before_start_html', $separator);
+```
+
+#### Description
+
+
+Added befor dtay start date at Ui Timespan displays if they are not all-day. E.g. Event pages, ManageEvents table.
+
+#### Parameters
+
+
+ - **$separator** <span style="color:crimson"> </span> Translated separator inclusing spaces.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Timespan pefix string/html
+ *
+ * Added befor  dtay start date at Ui Timespan displays
+ * if they are not all-day.
+ * E.g. Event pages, ManageEvents table.
+ *
+ * @since 1.0
+ *
+ * @param  string  $separator  Translated separator inclusing spaces.
+ *
+ * @file src/App/View/Event/EventTimeView.php
+ */
+add_filter('osec_timespan_time_html_before_start_html', $separator);
 ```
 
 </details>

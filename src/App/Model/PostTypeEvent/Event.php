@@ -235,11 +235,9 @@ class Event extends OsecBaseClass
         ) {
             $select_sql .= ', IF( aei.start IS NOT NULL, aei.start, e.start ) as start,' .
                            '  IF( aei.start IS NOT NULL, aei.end,   e.end )   as end ';
-
-            $instance = (int)$instance;
             $this->set('instance_id', $instance);
             $left_join = 'LEFT JOIN ' . $dbi->get_table_name(OSEC_DB__INSTANCES) .
-                         ' aei ON aei.id = ' . $instance . ' AND e.post_id = aei.post_id ';
+                         ' aei ON aei.id = ' . absint($instance) . ' AND e.post_id = aei.post_id ';
         } else {
             $select_sql .= ', e.start as start, e.end as end, e.allday ';
             if (-1 === (int)$instance) {
@@ -270,9 +268,9 @@ class Event extends OsecBaseClass
 						ttt.taxonomy = \'events_tags\'
 					)
 				' . $left_join . '
-			WHERE e.post_id = ' . $post_id . '
+			WHERE e.post_id = ' . absint($post_id) . '
 			GROUP BY e.post_id';
-
+        // FYI Not prepared but absint-secured ;)
         $event = $dbi->get_row($query, ARRAY_A);
         if (null === $event || null === $event['post_id']) {
             throw new EventNotFoundException(
@@ -408,7 +406,7 @@ class Event extends OsecBaseClass
         }
         static $format = null;
         if (null === $format) {
-            $site_url = parse_url((string)get_site_url());
+            $site_url = wp_parse_url((string)get_site_url());
             $format   = 'OSEC-%d@' . $site_url['host'];
             if (isset($site_url['path'])) {
                 $format .= $site_url['path'];
@@ -451,8 +449,7 @@ class Event extends OsecBaseClass
         if (null === $this->isMultiday) {
             $start            = $this->get('start');
             $end              = $this->get('end');
-            $diff             = $end->diff_sec($start);
-            $this->isMultiday = ($diff > 86400 && ($start->format('Y-m-d') !== $end->format('Y-m-d')));
+            $this->isMultiday = ($start->format('Y-m-d') !== $end->format('Y-m-d'));
         }
         return $this->isMultiday;
     }

@@ -7,7 +7,6 @@ use Osec\Tests\Utilities\TestBase;
 
 /**
  * @group date
- * Sample test case.
  */
 class DTTest extends TestBase
 {
@@ -24,16 +23,14 @@ class DTTest extends TestBase
     public function test_date_object_timezone()
     {
         global $osec_app;
-
-        // Let's set a date in a local timezone.
-        // Osec actually uses UTC internally.
-        date_default_timezone_set('America/New_York');
+        // phpcs:disable WordPress.DateTime.RestrictedFunctions.date_date
 
         /* @var DT $randomDate Monday, November 11, 2024 at 5:00:00 AM Coordinated Universal Time */
         $randomDate      = 1731301200;
         $LocalRandomDate = strtotime('2024-11-11 05:00');
 
-        $localTimezoneIs       = date_default_timezone_get();
+        $phpTimeZoneIs = date_default_timezone_get(); // Which is a WP requirement to be UTC.
+
         $LocalRandomDateOffset = date('P', $LocalRandomDate);
 
         // Verify timezone using PHP functions.
@@ -51,9 +48,13 @@ class DTTest extends TestBase
         // Add a test to visualize this behavior.
     }
 
+    /**
+     * @group date-start-of-week
+     */
     public function test_start_of_the_week()
     {
         global $osec_app;
+
         /* @var int $weekStartInUTC Date and time (GMT): Monday, 11. November 2024 00:00:00 */
         $weekStartInUTC = 1731283200;
 

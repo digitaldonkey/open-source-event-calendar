@@ -47,7 +47,7 @@ class CacheDb extends OsecBaseClass implements CacheInterface
         $data = $this->app->options->get($key);
         if (false === $data) {
             throw new CacheNotSetException(
-                'No data under \'' . wp_kses_attr($key) . '\' present'
+                'No data under `' . esc_html($key) . '` present'
             );
         }
 
@@ -85,7 +85,7 @@ class CacheDb extends OsecBaseClass implements CacheInterface
         );
         if (false === $result) {
             throw new CacheWriteException(
-                'An error occured while saving data to \'' . wp_kses_attr($key) . '\''
+                'An error occured while saving data to `' . esc_html($key) . '`'
             );
         }
 
@@ -105,17 +105,17 @@ class CacheDb extends OsecBaseClass implements CacheInterface
      */
     public function delete_matching(string $pattern): int
     {
-        $db        = $this->app->db;
-        $sql_query = $db->prepare(
-            'SELECT option_name FROM ' . $db->get_table_name('options') .
-            ' WHERE option_name LIKE %s',
-            '%%' . $pattern . '%%'
+        $db = $this->app->db;
+        $keys = $db->get_col(
+            $db->prepare(
+                'SELECT option_name FROM ' . $db->get_table_name('options') .
+                ' WHERE option_name LIKE %s',
+                '%%' . $pattern . '%%'
+            )
         );
-        $keys      = $db->get_col($sql_query);
         foreach ($keys as $key) {
             $this->app->options->delete($key);
         }
-
         return count($keys);
     }
 

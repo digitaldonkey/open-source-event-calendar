@@ -173,18 +173,10 @@ class CommandClone extends CommandAbstract
     protected function duplicatePostGetCurrentUser()
     {
         global $wpdb;
-
-        if (function_exists('wp_get_current_user')) {
-            return wp_get_current_user();
-        } else {
-            $query        = $this->app->db->prepare(
-                'SELECT * FROM ' . $wpdb->users . ' WHERE user_login = %s',
-                $_COOKIE[USER_COOKIE]
-            );
-            $current_user = $this->app->db->get_results($query);
-
-            return $current_user;
+        if (!function_exists('wp_get_current_user')) {
+            include(ABSPATH . "wp-includes/pluggable.php");
         }
+        return wp_get_current_user();
     }
 
     /**

@@ -41,7 +41,11 @@ You might require a `composer install` to load dev dependencies.
 
 ```
 # Codesniffer 
-composer run-script phpcs
+ddev composer run-script phpcs
+
+# Non blocking sniffs
+ddev composer run phpcs-warnings
+
 ddev phpunit
 
 # A few phpunit tests @see phpunit.xml 

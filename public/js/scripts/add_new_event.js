@@ -22,11 +22,11 @@ timely.define([
             var t = new Date(config.now * 1e3), r = {
                 allday: "#osec_all_day_event",
                 start_date_input: "#osec_start-date-input",
-                start_time_input: "#osec_table_coordinates-time-input",
-                start_time: "#osec_table_coordinates-time",
-                end_date_input: "#osec_table_coordinates-date-input",
-                end_time_input: "#osec_table_coordinates-time-input",
-                end_time: "#osec_table_coordinates-time",
+                start_time_input: "#osec_start-time-input",
+                start_time: "#osec_start-time",
+                end_date_input: "#osec_end-date-input",
+                end_time_input: "#osec_end-time-input",
+                end_time: "#osec_end-time",
                 date_format: config.date_format,
                 month_names: config.month_names,
                 day_names: config.day_names,
@@ -34,7 +34,6 @@ timely.define([
                 twentyfour_hour: config.twentyfour_hour,
                 now: t
             };
-            console.log('Hello World', t);
             jQuery.timespan(r)
         },
         l = function () {

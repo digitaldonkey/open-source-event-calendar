@@ -161,11 +161,11 @@ class CacheFile extends OsecBaseClass implements CacheInterface
             }
         } else {
             throw new CacheWriteException(
-                sprintf(
+                esc_html(sprintf(
                     /* translators: File name */
                     __( 'An error occured while saving data to: %s', 'open-source-event-calendar'),
-            $this->_cache_path . $fileName
-                )
+                    $this->_cache_path . $fileName
+                ))
             );
         }
 
@@ -251,7 +251,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
             [NotificationAdmin::RCPT_ADMIN],
             true
         );
-        throw new CacheWriteException($file);
+        throw new CacheWriteException(esc_html($file));
     }
 
     /**
@@ -291,10 +291,12 @@ class CacheFile extends OsecBaseClass implements CacheInterface
                 return $default;
             }
             throw new CacheNotSetException(
-                sprintf(
-                    /* translators: File name */
-                    __('File %s does not exist', 'open-source-event-calendar'),
-                    esc_attr($key)
+                esc_html(
+                    sprintf(
+                        /* translators: File name */
+                        esc_html__('File %s does not exist', 'open-source-event-calendar'),
+                        $key
+                    )
                 )
             );
         }
@@ -383,13 +385,15 @@ class CacheFile extends OsecBaseClass implements CacheInterface
     public function get_all_cache_files(): array
     {
         $db        = $this->app->db;
-        $sql_query = $db->prepare(
-            'SELECT option_name as name, option_value as filename FROM ' . $db->get_table_name('options') .
-            ' WHERE option_name LIKE %s',
-            '%%' . (string)self::OPTION_PREFIX . '%%'
-        );
+
         $files     = [];
-        foreach ($db->get_results($sql_query) as $result) {
+        foreach ($db->get_results(
+            $db->prepare(
+                'SELECT option_name as name, option_value as filename FROM ' . $db->get_table_name('options') .
+                ' WHERE option_name LIKE %s',
+                '%%' . (string)self::OPTION_PREFIX . '%%'
+            )
+        ) as $result) {
             $files[] = $result;
         }
 

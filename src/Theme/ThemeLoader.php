@@ -425,8 +425,8 @@ class ThemeLoader extends OsecBaseClass
             if (CacheFile::OSEC_FILE_CACHE_UNAVAILABLE === $twig_cache) {
                 return null;
             }
-            // Seems we need that. In ci we had a strange string here.
-            return is_writable($twig_cache) ? $twig_cache : null;
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+            return @is_writable($twig_cache) ? $twig_cache : null;
         }
         $this->fileCache = CacheFile::createFileCacheInstance($this->app, 'twig');
         if ( ! $this->fileCache) {

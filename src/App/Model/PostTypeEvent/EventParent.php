@@ -3,6 +3,7 @@
 namespace Osec\App\Model\PostTypeEvent;
 
 use Osec\App\Controller\AccessControl;
+use Osec\App\Controller\DatabaseController;
 use Osec\App\Controller\TrashController;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
@@ -208,22 +209,21 @@ class EventParent extends OsecBaseClass
         $dbi              = $this->app->db;
         $table_instances  = $dbi->get_table_name(OSEC_DB__INSTANCES);
         $table_posts      = $dbi->get_table_name('posts');
-        $query            = $dbi->prepare(
-            'SELECT i.id FROM ' . $table_instances . ' i JOIN ' .
-            $table_posts . ' p ON (p.ID = i.post_id) ' .
-            'WHERE i.post_id = %d AND i.id > %d ' .
-            'AND p.post_status = \'publish\' ' .
-            'ORDER BY id ASC LIMIT 1',
-            $post_id,
-            $instance_id
+        $next_instance_id = $dbi->get_var(
+            $dbi->prepare(
+                'SELECT i.id FROM ' . $table_instances . ' i JOIN ' .
+                $table_posts . ' p ON (p.ID = i.post_id) ' .
+                'WHERE i.post_id = %d AND i.id > %d ' .
+                'AND p.post_status = \'publish\' ' .
+                'ORDER BY id ASC LIMIT 1',
+                $post_id,
+                $instance_id
+            )
         );
-        $next_instance_id = $dbi->get_var($query);
-        if ( ! $next_instance_id) {
-            return null;
+        if ($next_instance_id) {
+            return EventSearch::factory($this->app)->get_event($post_id, $next_instance_id);
         }
-
-        return EventSearch::factory($this->app)
-                          ->get_event($post_id, $next_instance_id);
+        return null;
     }
 
     /**
@@ -262,16 +262,15 @@ class EventParent extends OsecBaseClass
         $dbi             = $this->app->db;
         $table_instances = $dbi->get_table_name(OSEC_DB__INSTANCES);
         $table_posts     = $dbi->get_table_name('posts');
-        $query           = $dbi->prepare(
-            'SELECT COUNT(i.id) FROM ' . $table_instances . ' i JOIN ' .
-            $table_posts . ' p ON (p.ID = i.post_id) ' .
-            'WHERE i.post_id = %d AND i.id > %d ' .
-            'AND p.post_status = \'publish\'',
-            $post_id,
-            $instance_id
+        return (int) $dbi->get_var(
+            $dbi->prepare(
+                "SELECT COUNT(i.id) FROM {$table_instances} i 
+                         JOIN {$table_posts} p ON (p.ID = i.post_id)  
+                         WHERE i.post_id = %d AND i.id > %d AND p.post_status = 'publish'",
+                $post_id,
+                $instance_id
+            )
         );
-
-        return (int)$dbi->get_var($query);
     }
 
     /**
@@ -364,16 +363,15 @@ class EventParent extends OsecBaseClass
         }
         $current_id = (int)$current_id;
         if (null === ($parent_id = $parents->get($current_id))) {
+            /* @var $db DatabaseController */
             $db = $this->app->db;
-            /* @var $db |Ai1ec_Dbi */
-            $query  = '
-				SELECT parent.ID, parent.post_status
-				FROM
-					' . $db->get_table_name('posts') . ' AS child
-					INNER JOIN ' . $db->get_table_name('posts') . ' AS parent
-						ON ( parent.ID = child.post_parent )
-				WHERE child.ID = ' . $current_id;
-            $parent = $db->get_row($query);
+            $parent = $db->get_row($db->prepare("
+                SELECT parent.ID, parent.post_status
+                FROM {$db->get_table_name('posts')} AS child
+                INNER JOIN {$db->get_table_name('posts')} AS parent
+                    ON ( parent.ID = child.post_parent )
+                WHERE child.ID = %d
+            ", $current_id));
             if (
                 empty($parent) ||
                 'trash' === $parent->post_status
@@ -383,9 +381,7 @@ class EventParent extends OsecBaseClass
                 $parent_id = $parent->ID;
             }
             $parents->set($current_id, $parent_id);
-            unset($query);
         }
-
         return $parent_id;
     }
 
@@ -403,9 +399,12 @@ class EventParent extends OsecBaseClass
     ) {
         $db        = $this->app->db;
         $parent_id = (int)$parent_id;
-        $sql_query = 'SELECT ID FROM ' . $db->get_table_name('posts') .
-                     ' WHERE post_parent = ' . $parent_id;
-        $children  = (array)$db->get_col($sql_query);
+        $children  = (array)$db->get_col(
+            $db->prepare(
+                "SELECT ID FROM {$db->get_table_name('posts')} WHERE post_parent = %d",
+                $parent_id
+            )
+        );
         $objects   = [];
         foreach ($children as $child_id) {
             // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch

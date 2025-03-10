@@ -90,7 +90,7 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
             return $default;
         }
         if (false === $data) {
-            throw new CacheNotSetException("$dist_key not set");
+            throw new CacheNotSetException(esc_html($dist_key) . " not set");
         }
 
         return $data;
