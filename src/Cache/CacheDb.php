@@ -13,9 +13,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class CacheDb extends OsecBaseClass implements CacheInterface
 {
-    // TODO
-    //   REPLACE + Add test.
-
     public const OPTION_PREFIX = 'osec_cache_';
 
     /**

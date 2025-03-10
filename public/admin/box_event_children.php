@@ -7,7 +7,7 @@ use Osec\App\View\Event\EventTimeView;
 if (empty($parent) && empty($children)) {
     return '';
 }
-// TODO seems a bit hacky here.
+// TODO Seems a bit hacky here.One day all stuff in public might be twig.
 global $osec_app;
 ?>
 <div class="ai1ec-panel-heading">

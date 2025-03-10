@@ -2,16 +2,6 @@
 <ruleset name="WordPress-PSR-12">
 	<description>PSR-12 with WordPress Plugin Check requirements.</description>
 
-	<!-- What to scan -->
-
-	<!-- WHITELIST -->
-	<!--	<file>./src/</file>-->
-	<!--	<file>./tests/</file>-->
-	<!--	<file>./public/</file>-->
-	<!--	<file>./constants.php</file>-->
-	<!--	<file>./global-functions.php</file>-->
-	<!--	<file>./open-source-event-calendar.php</file>-->
-
 	<!-- BLACKLIST  -->
 	<file>./</file>
 	<exclude-pattern>/vendor/</exclude-pattern>
@@ -20,8 +10,6 @@
 	<exclude-pattern>/public/</exclude-pattern>
 	<exclude-pattern>/cache/</exclude-pattern>
 	<exclude-pattern>/node_modules/</exclude-pattern>
-
-	<!-- TODO Decide :)  -->
 
 	<!-- How to scan -->
 	<!-- Usage instructions: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage -->

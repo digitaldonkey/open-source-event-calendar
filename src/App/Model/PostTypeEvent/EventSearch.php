@@ -642,7 +642,7 @@ class EventSearch extends OsecBaseClass
         $args       = [$feed, $uid];
 
         // Ensure a Int timestamp.
-        $args[] = $start instanceof DT ? (int)$start->format() : (int)$start;
+        $args[] = ($start instanceof DT) ? (int)$start->format() : (int)$start;
 
         if (null !== $exclude_post_id) {
             $query  .= ' AND post_id <> %d';

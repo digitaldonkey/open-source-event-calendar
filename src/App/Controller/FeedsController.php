@@ -139,9 +139,7 @@ class FeedsController extends OsecBaseClass
         }
 
         /* @var ?int $feedId Update (int) or New (null) */
-        $feedId = (! empty($_REQUEST['feed_id']) && is_int(intval($_REQUEST['feed_id']))) ? intval(
-            $_REQUEST['feed_id']
-        ) : null;
+        $feedId = (! empty($_REQUEST['feed_id']) && is_int($_REQUEST['feed_id'])) ? (int)$_REQUEST['feed_id'] : null;
 
         $feed_categories = empty($_REQUEST['feed_category']) ? '' : implode(
             ',',
@@ -149,7 +147,6 @@ class FeedsController extends OsecBaseClass
         );
         $url = wp_http_validate_url(trim($_REQUEST['feed_url']));
         $entry           = [
-            // TODO Maybe some validation?
             'feed_url'             => $url,
             'feed_name'            => $url,
             'feed_category'        => $feed_categories,

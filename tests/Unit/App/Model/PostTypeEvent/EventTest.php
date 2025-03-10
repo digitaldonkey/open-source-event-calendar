@@ -15,7 +15,6 @@ class EventTest extends TestBase
     {
         global $osec_app;
         $event  = new Event($osec_app);
-        // TODO
         //. This prints Event(Entity) default values.
         // var_dump($event->prepare_store_entity());
 

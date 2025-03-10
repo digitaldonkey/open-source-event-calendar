@@ -93,22 +93,6 @@ class Scheduler extends OsecBaseClass
         return ['osec_purge_events_cache' => '3h'];
     }
 
-    // TODO
-    // Remove. Didn't find any implementations
-    // **
-    // * Run designated hook in background thread
-    // *
-    // * So far it is just re-scheduling the hook to be run at earliest
-    // * time possible.
-    // *
-    // * @param string $hook Name of registered schedulable hook
-    // *
-    // * @return void Method does not return
-    // */
-    // public function background( $hook ) {
-    // return $this->installScheduleEvents( $hook, time() );
-    // }
-
     /**
      * Retrieve information about scheduled hook
      *

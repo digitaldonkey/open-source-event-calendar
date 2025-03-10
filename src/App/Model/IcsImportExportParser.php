@@ -495,10 +495,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
              *
              * @since 1.0
              *
+             * @param  array  $data  Preprocessed Feeds data.
              * @param  CalendarComponent  $e
              * @param  ImportExportParserInterface  $feed
-             *
-             * @param  array  $data  Preprocessed Feeds data.
              */
             $data  = apply_filters('osec_ics_import_pre_init_event', $data, $e, $feed);
             $event = new Event($this->app, $data);

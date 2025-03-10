@@ -122,7 +122,8 @@ class CachePath
             }
         }
 
-        // TODO Maybe add a Notice/Info if we are not using the default cache path.
+        // TODO
+        //   Maybe add a Notice/Info if we are not using the default cache path.
 
         $wp_upload = wp_upload_dir();
         if ($wp_upload['error']) {

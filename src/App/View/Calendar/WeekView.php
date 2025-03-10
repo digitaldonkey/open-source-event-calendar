@@ -43,8 +43,6 @@ class WeekView extends AbstractView
         ];
         $args     = wp_parse_args($view_args, $defaults);
 
-        // TODO MAYBE A TestABLE GET WEEK START FUNCTION?
-
         // Localize requested date and get components.
         $weekStart = (new DT($args['exact_date']))->getWeekStart();
 

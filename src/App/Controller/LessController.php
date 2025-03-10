@@ -403,9 +403,6 @@ class LessController extends OsecBaseClass
      */
     public function is_compilation_needed(?array $variables = [])
     {
-        // TODO Fix or not?
-        // return true;
-
         /**
          * Hook to trigger less processing
          *

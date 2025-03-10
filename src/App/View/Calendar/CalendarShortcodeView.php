@@ -127,9 +127,6 @@ class CalendarShortcodeView extends OsecBaseClass
         $request_type = $this->app->settings
             ->get('osec_use_frontend_rendering') ? 'json' : 'jsonp';
         $query        = [
-
-            // TODO How to transform into Osec_...?
-
             'cat_ids'      => implode(',', $_events_categories),
             'tag_ids'      => implode(',', $_events_tags),
             'post_ids'     => implode(',', $post_ids),

@@ -116,10 +116,6 @@ class AdminPageThemeOptions extends AdminPageAbstract
             'action'  =>
                 '?controller=front&action=ai1ec_save_theme_options&plugin=' . OSEC_PLUGIN_NAME,
         ];
-
-        // TODO SEEMS TO BE UNUSED LEFTOVER. Remove it.
-        // $frontend = FrontendCssController::service($this->app);
-
         ThemeLoader::factory($this->app)
                    ->get_file('theme-options/page.twig', $args, true)
                    ->render();

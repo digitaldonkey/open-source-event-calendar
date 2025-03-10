@@ -99,8 +99,6 @@ class RenderCalendar extends CommandAbstract
 
     public function do_execute()
     {
-        // TODO Shouldn't this be only render Strategy == HTML??
-
         return [
             'data'     => CalendarPageView::factory($this->app)->get_content($this->request),
             'callback' => RequestParser::get_param(

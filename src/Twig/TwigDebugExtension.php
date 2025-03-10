@@ -117,8 +117,6 @@ class TwigDebugExtension extends AbstractExtension
                 new TwigFunction('dump', ['Symfony\Component\VarDumper\VarDumper', 'dump']),
             ];
         }
-
-        // Todo maybe we need an alternative?
         return [
             new TwigFunction('dump', [self::class, 'no_dump']),
         ];

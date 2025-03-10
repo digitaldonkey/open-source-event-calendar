@@ -312,8 +312,6 @@ class CalendarPageView extends OsecBaseClass
         }
 
         $view_args['display_date_navigation'] = $request->get('display_date_navigation');
-        $view_args['display_date_navigation'] = $request->get('display_date_navigation');
-
 
         // 'action' decides which view of the calendar page is requested.
         $view_args['action'] = $action;

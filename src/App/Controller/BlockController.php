@@ -100,7 +100,9 @@ class BlockController extends OsecBaseClass
             'events_limit' => $this->app->settings->get('agenda_events_per_page'),
         ];
 
-        //    TODO Custom taxonomies.
+        //    TODO
+        //      Custom taxonomies are rendered in Block Editor but not yet here
+        //      For now you might need to implement using osec_block_query_alter.
         //     foreach ($taxonomies as $taxonomy => $terms) {
         //          if (! in_array($taxonomy, ['events_categories', 'events_tags'])) {
         //             // $query add custom Taxo???
@@ -148,6 +150,14 @@ class BlockController extends OsecBaseClass
             }
         }
 
+        /**
+         * Alter Block query.
+         *
+         * @since 1.0
+         * @param  array  $query  Return query variables for request.
+         * @param  array  $atts  Input attributes (Block variables)
+         */
+        $query = apply_filters('osec_block_query_alter', $query, $atts);
         return $query;
     }
 
