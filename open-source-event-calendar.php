@@ -38,9 +38,8 @@ use Osec\Theme\ThemeLoader;
 if (
     // Try fixing a bug where
     ! class_exists("\Osec\App\Controller\BootstrapController")) {
-    $osec_base_dir = __DIR__;
-    require_once $osec_base_dir . '/vendor/autoload.php';
-    BootstrapController::createApp($osec_base_dir);
+    require_once __DIR__ . '/vendor/autoload.php';
+    BootstrapController::createApp(__DIR__);
 }
 
 
@@ -59,6 +58,9 @@ if (
 function osec_plugin_activate()
 {
     global $osec_app;
+    if (is_null($osec_app)) {
+        BootstrapController::createApp(__DIR__);
+    }
     DatabaseSchema::factory($osec_app)->verifySqlSchema();
 }
 
