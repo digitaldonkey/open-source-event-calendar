@@ -30,7 +30,10 @@ class ElementHref
         'instance_ids',
         'events_limit',
         'request_format',
+        'display_filters',
+        'display_subscribe',
         'display_view_switch',
+        'display_date_navigation',
     ];
 
     /**

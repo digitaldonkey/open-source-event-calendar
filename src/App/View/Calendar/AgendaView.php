@@ -386,7 +386,6 @@ class AgendaView extends AbstractView
             $args['request_format'] = 'json';
         }
 
-        // TODO PREV LINK
         $args['page_offset'] = $make_absolute ? 0 : -1;
         $timeLimit = (new DT($date_first))->set_time(
             $date_first->format('H'),
@@ -412,7 +411,6 @@ class AgendaView extends AbstractView
             $title_short
         );
 
-        // TODO NEXT LINK
         $args['page_offset'] = $make_absolute ? 0 : 1;
         $timeLimit          = (new DT($date_last))->set_time(
             $date_first->format('H'),

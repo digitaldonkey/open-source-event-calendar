@@ -97,6 +97,10 @@ class HtmlFactory extends OsecBaseClass
             'cat_ids'    => $args['cat_ids'],
             'tag_ids'    => $args['tag_ids'],
             'exact_date' => '__DATE__',
+            'display_filters' => $args['display_filters'],
+            'display_subscribe' => $args['display_subscribe'],
+            'display_view_switch' => $args['display_view_switch'],
+            'display_date_navigation' => $args['display_date_navigation'],
         ];
         /**
          * Alter href arguments for datepicker

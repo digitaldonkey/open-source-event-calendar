@@ -283,6 +283,10 @@ class CalendarPageView extends OsecBaseClass
                 'tag_ids',
                 'events_limit',
                 'instance_ids',
+                'display_filters',
+                'display_subscribe',
+                'display_view_switch',
+                'display_date_navigation',
             ]
         );
         $view_args    = $request->get_dict($defaultViewArgs);
