@@ -41,7 +41,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = Plugin Version =
     // ==================
     if (! defined('OSEC_VERSION')) {
-        define('OSEC_VERSION', '0.9.0');
+        define('OSEC_VERSION', '1.0.0');
     }
 
     // =================
@@ -398,10 +398,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // Some things might be left if you did SWITCH caches.
     // ================================================
     if (! defined('OSEC_UNINSTALL_PLUGIN_DATA')) {
-        define(
-            'OSEC_UNINSTALL_PLUGIN_DATA',
-            true
-        );
+        define('OSEC_UNINSTALL_PLUGIN_DATA', false);
     }
 
     /**

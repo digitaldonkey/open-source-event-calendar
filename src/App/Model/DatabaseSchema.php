@@ -730,10 +730,10 @@ class DatabaseSchema extends OsecBaseClass
             $event_instances     = $dbi->get_table_name(OSEC_DB__INSTANCES);
             $event_feeds         = $dbi->get_table_name(OSEC_DB__FEEDS);
             $event_category_meta = $dbi->get_table_name(OSEC_DB__META);
-            $dbi->query($dbi->prepare(
-                "DROP TABLE IF EXISTS %s, %s,  %s,  %s",
-                [$events, $event_instances, $event_feeds, $event_category_meta]
-            ));
+            // Build from Constants. Omitting prepare as single quotes break the query.
+            $dbi->query(
+                "DROP TABLE IF EXISTS {$events},{$event_instances},{$event_feeds},{$event_category_meta}"
+            );
             // View
             $debug_view_name = $event_instances . '_readable_date';
             $dbi->query($dbi->prepare(

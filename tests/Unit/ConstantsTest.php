@@ -27,9 +27,9 @@ class ConstantsTest extends TestBase
         $this->assertFalse(OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST);
     }
 
-//    public function is_delete_on_uninstall_disabled()
-//    {
-//        global $osec_app;
-//        $this->assertFalse(OSEC_UNINSTALL_PLUGIN_DATA);
-//    }
+    public function is_delete_on_uninstall_disabled()
+    {
+        global $osec_app;
+        $this->assertFalse(OSEC_UNINSTALL_PLUGIN_DATA);
+    }
 }
