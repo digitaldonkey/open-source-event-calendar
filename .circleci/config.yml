@@ -36,7 +36,7 @@ references:
         constants.php
         global-functions.php
         constants-local.php.example                    
-        readme.md
+        README.md
         LICENSE
         DEVELOPERS.md                             
         hooks-and-filters.md
