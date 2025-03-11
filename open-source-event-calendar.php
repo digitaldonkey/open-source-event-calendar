@@ -10,13 +10,13 @@
  * Contributors: digitaldonkey, hubrik, vtowel, yani.iliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
  * Tags: calendar, events, ics, ical importer
  * Requires at least: 6.6
- * Tested up to: 6.7.1
+ * Tested up to: 6.7.2
  * Requires PHP: 8.2
- * Stable Tag: 0.9.0
+ * Stable Tag: 1.0.0
  * License: GPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: open-source-event-calendar
- * Version: 0.9.0
+ * Version: 1.0.0
  */
 
 use Osec\App\Controller\BootstrapController;

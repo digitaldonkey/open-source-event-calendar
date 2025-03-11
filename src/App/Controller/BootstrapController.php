@@ -370,7 +370,7 @@ class BootstrapController
             /**
              * save rrurle and convert it to text
              *
-             * On Event editing you may add a reoccuring event.
+             * On Event editing you may add a reoccurring event.
              * Ui is loaded via admin-ajax.php... action=osec_get_repeat_box&repeat=1&post_id=1295
              */
             add_action(
