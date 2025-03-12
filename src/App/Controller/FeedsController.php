@@ -33,10 +33,6 @@ class FeedsController extends OsecBaseClass
      */
     public const HOOK_NAME = 'osec_cron';
 
-    public const ICS_OPTION_DB_VERSION = 'osec_ics_db_version';
-
-    public const ICS_DB_VERSION = 221;
-
     /**
      * @var array
      *   title: The title of the tab and the title of the configuration section
@@ -139,14 +135,14 @@ class FeedsController extends OsecBaseClass
         }
 
         /* @var ?int $feedId Update (int) or New (null) */
-        $feedId = (! empty($_REQUEST['feed_id']) && is_int($_REQUEST['feed_id'])) ? (int)$_REQUEST['feed_id'] : null;
+        $feedId = (! empty($_REQUEST['feed_id']) && ctype_digit((string) $_REQUEST['feed_id'])) ? (int)$_REQUEST['feed_id'] : null;
 
         $feed_categories = empty($_REQUEST['feed_category']) ? '' : implode(
             ',',
             $_REQUEST['feed_category']
         );
         $url = wp_http_validate_url(trim($_REQUEST['feed_url']));
-        $entry           = [
+        $entry = [
             'feed_url'             => $url,
             'feed_name'            => $url,
             'feed_category'        => $feed_categories,
@@ -284,7 +280,7 @@ class FeedsController extends OsecBaseClass
             $feed_id = (int)$_REQUEST['ics_id'];
         }
         $cron_name = $this->importLockName($feed_id);
-        $output    = [
+        $data    = [
             'data' => [
                 'ics_id'  => $feed_id,
                 'error'   => true,
@@ -494,8 +490,17 @@ class FeedsController extends OsecBaseClass
     public function delete_ics_feed(bool $ajax = true, $ics_id = false)
     {
         if ($ics_id === false) {
-            $ics_id = (int)$_REQUEST['ics_id'];
+            $ics_id = (int) $_REQUEST['ics_id'];
         }
+
+        // Delete Term
+        $feedName = self::get_term_name_from_uri(
+            $this->get_feed_uri_by_id($ics_id)
+        );
+        $term = get_term_by('name', $feedName, 'events_feeds');
+        wp_delete_term($term->term_id, 'events_feeds');
+
+        // Delete Table Entry.
         $this->app->db->query(
             $this->app->db->prepare(
                 "DELETE FROM {$this->feedsTable} WHERE feed_id = %d",
@@ -544,6 +549,7 @@ class FeedsController extends OsecBaseClass
     {
         $remove_events = $_POST['remove_events'] === 'true' ? true : false;
         $ics_id        = isset($_POST['ics_id']) ? (int)$_REQUEST['ics_id'] : 0;
+
         if ($remove_events) {
             $output = $this->flush_ics_feed(true, false);
             if ($output['error'] === false) {
@@ -572,13 +578,7 @@ class FeedsController extends OsecBaseClass
             $ics_id = (int)$_REQUEST['ics_id'];
         }
         if (false === $feed_url) {
-            $feed_url = $this->app->db->get_var(
-                $this->app->db->prepare(
-                    'SELECT feed_url FROM ' . $this->feedsTable .
-                    ' WHERE feed_id = %d',
-                    $ics_id
-                )
-            );
+            $feed_url = $this->get_feed_uri_by_id($ics_id);
         }
         // Delete Events
         if ($feed_url) {
@@ -789,21 +789,11 @@ class FeedsController extends OsecBaseClass
                 ),
                 'tags_ids'             => esc_attr($row->feed_tags),
                 'feed_id'              => $row->feed_id,
-                'comments_enabled'     => (bool)intval(
-                    $row->comments_enabled
-                ),
-                'map_display_enabled'  => (bool)intval(
-                    $row->map_display_enabled
-                ),
-                'keep_tags_categories' => (bool)intval(
-                    $row->keep_tags_categories
-                ),
-                'keep_old_events'      => (bool)intval(
-                    $row->keep_old_events
-                ),
-                'feed_import_timezone' => (bool)intval(
-                    $row->import_timezone
-                ),
+                'comments_enabled'     => (bool)(int)$row->comments_enabled,
+                'map_display_enabled'  => (bool)(int)$row->map_display_enabled,
+                'keep_tags_categories' => (bool)(int)$row->keep_tags_categories,
+                'keep_old_events'      => (bool)(int)$row->keep_old_events,
+                'feed_import_timezone' => (bool)(int)$row->import_timezone,
             ];
             $html .= ThemeLoader::factory($this->app)->get_file('feed_row.php', $args, true)
                                 ->get_content();
@@ -812,47 +802,26 @@ class FeedsController extends OsecBaseClass
         return $html;
     }
 
-    public function display_admin_notices()
+    public function get_feed_uri_by_id(int $ics_id): string
     {
-        return;
+        return $this->app->db->get_var(
+            $this->app->db->prepare(
+                "SELECT feed_url FROM {$this->feedsTable} WHERE feed_id = %d",
+                $ics_id
+            )
+        );
     }
-
-    public function run_uninstall_procedures()
+    /**
+     * Feeds have a 1:1 relation with terms for filtering.
+     * Term name is derived from feed Uri.
+     *
+     * @param  string  $url
+     *
+     * @return void
+     */
+    public static function get_term_name_from_uri(string $url): string
     {
-        // Delete tables
-        $this->app->db->query("DROP TABLE IF EXISTS {$this->feedsTable}");
-        // Delete scheduled tasks
-        Scheduler::factory($this->app)
-                 ->delete(self::HOOK_NAME);
-        // Delete options
-        delete_option(self::ICS_DB_VERSION);
-        delete_option(self::ICS_OPTION_DB_VERSION);
+        $url_components = wp_parse_url($url);
+        return $url_components['host'];
     }
-
-//    /**
-//     * Returns the translations array
-//     *
-//     * @return array
-//     */
-//    private function get_translations()
-//    {
-//        $categories = $_POST['osec_categories'] ?? [];
-//        foreach ($categories as &$cat) {
-//            $term = get_term($cat, 'events_categories');
-//            $cat  = $term->name;
-//        }
-//        unset($cat);
-//        $translations = [
-//            '[feed_url]'   => $_POST['osec_calendar_url'],
-//            '[categories]' => implode(', ', $categories),
-//            '[user_email]' => $_POST['osec_submitter_email'],
-//            '[site_title]' => get_bloginfo('name'),
-//            '[site_url]'   => site_url(),
-//            '[feeds_url]'  => admin_url(
-//                OSEC_FEED_SETTINGS_BASE_URL . '#ics'
-//            ),
-//        ];
-//
-//        return $translations;
-//    }
 }

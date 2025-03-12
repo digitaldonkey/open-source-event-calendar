@@ -204,23 +204,4 @@ class TaxonomyAdapter extends OsecBaseClass
     {
         return $this->get_category_field($term_id, 'image');
     }
-
-    /*
-     * Remove any (temp) content created by this class.
-     */
-    public function uninstall(bool $purge = false)
-    {
-        if ($purge) {
-            foreach (array_keys($this->taxonomyMap) as $taxonomy) {
-                $terms = get_terms($taxonomy);
-
-                // delete all terms in $taxonomy
-                foreach ($terms as $term) {
-                    wp_delete_term($term->term_id, $taxonomy);
-                }
-                // deregister $taxonomy
-                unregister_taxonomy_for_object_type($taxonomy, OSEC_POST_TYPE);
-            }
-        }
-    }
 }

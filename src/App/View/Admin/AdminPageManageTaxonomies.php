@@ -42,7 +42,7 @@ class AdminPageManageTaxonomies extends OsecBaseClass
         $taxonomy_metadata = apply_filters('osec_add_custom_taxonomies_meta', $taxonomy_metadata);
 
         /**
-         * Do something on admin taxinomy or tags management page.
+         * Do something on admin taxonomy or tags management page.
          */
         do_action('osec_admin_manage_taxonomies');
 

@@ -2,6 +2,7 @@
 
 namespace Osec\App\Model\PostTypeEvent;
 
+use Osec\App\Controller\FeedsController;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 
@@ -106,9 +107,8 @@ class EventTaxonomy extends OsecBaseClass
     {
         $feed_name = $feed->feed_url;
         // If the feed is not from an imported file, parse the url.
-        if ( ! isset($feed->feed_imported_file)) {
-            $url_components = wp_parse_url($feed->feed_url);
-            $feed_name      = $url_components['host'];
+        if ( !isset($feed->feed_imported_file)) {
+            $feed_name = FeedsController::get_term_name_from_uri($feed->feed_url);
         }
         $term = $this->initiate_term(
             $feed_name,
@@ -142,7 +142,7 @@ class EventTaxonomy extends OsecBaseClass
         array $attrs = []
     ) {
         // cast to int to have it working with term_exists
-        $term          = ($is_id) ? (int)$term : $term;
+        $term          = ($is_id) ? (int) $term : $term;
         $term_to_check = term_exists($term, $taxonomy);
         $to_return     = ['taxonomy' => $taxonomy];
         // if term doesn't exist, create it.

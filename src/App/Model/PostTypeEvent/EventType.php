@@ -23,61 +23,116 @@ class EventType extends OsecBaseClass
      */
     public function register()
     {
-        $settings = $this->app->settings;
-
-        // ===============================
-        // = labels for custom post type =
-        // ===============================
-        $labels = [
-            'name'               => _x('Events', 'Custom post type name', 'open-source-event-calendar'),
-            'singular_name'      => _x('Event', 'Custom post type name (singular)', 'open-source-event-calendar'),
-            'add_new'            => __('Add New', 'open-source-event-calendar'),
-            'add_new_item'       => __('Add New Event', 'open-source-event-calendar'),
-            'edit_item'          => __('Edit Event', 'open-source-event-calendar'),
-            'new_item'           => __('New Event', 'open-source-event-calendar'),
-            'view_item'          => __('View Event', 'open-source-event-calendar'),
-            'search_items'       => __('Search Events', 'open-source-event-calendar'),
-            'not_found'          => __('No Events found', 'open-source-event-calendar'),
-            'not_found_in_trash' => __('No Events found in Trash', 'open-source-event-calendar'),
-            'parent_item_colon'  => __('Parent Event', 'open-source-event-calendar'),
-            'menu_name'          => __('Events', 'open-source-event-calendar'),
-            'all_items'          => $this->get_all_items_name(),
-        ];
-
-        // ================================
-        // = support for custom post type =
-        // ================================
-        $supports = [
-            'title',
-            'editor',
-            'comments',
-            'custom-fields',
-            'thumbnail',
-            'author',
-            // TDOD Add??
-            // https://stackoverflow.com/questions/45436051/how-to-add-excerpt-in-custom-post-type-in-wordpress
-            'excerpt',
-        ];
 
         // =============================
         // = args for custom post type =
         // =============================
         $page_base = false;
-        if ($settings->get('calendar_page_id')) {
-            $page_base = get_page_uri($settings->get('calendar_page_id'));
+        if ($this->app->settings->get('calendar_page_id')) {
+            $page_base = get_page_uri($this->app->settings->get('calendar_page_id'));
         }
 
         $rewrite     = ['slug' => __('event', 'open-source-event-calendar')];
         $has_archive = true;
         if (
-            $settings->get('calendar_base_url_for_permalinks') &&
+            $this->app->settings->get('calendar_base_url_for_permalinks') &&
             $page_base
         ) {
             $rewrite     = ['slug' => $page_base];
             $has_archive = OSEC_ALTERNATIVE_ARCHIVE_URL;
         }
-        $post_type_args = [
-            'labels'              => $labels,
+
+        // ======================================
+        // = register event categories taxonomy =
+        // ======================================
+        register_taxonomy(
+            'events_categories',
+            [OSEC_POST_TYPE],
+            [
+                'labels'       => [
+                    'name'          => _x('Categories', 'Event categories taxonomy', 'open-source-event-calendar'),
+                    'singular_name' => _x('Category', 'Event categories taxonomy (singular)', 'open-source-event-calendar'),
+                    'menu_name'     => _x('Organize', 'Event categories menu item', 'open-source-event-calendar'),
+                ],
+                'hierarchical' => true,
+                'rewrite'      => ['slug' => 'events_categories'],
+                'show_in_rest' => true,
+                'capabilities' => [
+                    'manage_terms' => 'manage_events_categories',
+                    'edit_terms'   => 'manage_events_categories',
+                    'delete_terms' => 'manage_events_categories',
+                    'assign_terms' => 'edit_osec_events',
+                ],
+            ]
+        );
+
+        // ================================
+        // = register event tags taxonomy =
+        // ================================
+        register_taxonomy(
+            'events_tags',
+            [OSEC_POST_TYPE],
+            [
+                'labels'       => [
+                    'name'          => _x('Tags', 'Event tags taxonomy', 'open-source-event-calendar'),
+                    'singular_name' => _x('Tag', 'Event tags taxonomy (singular)', 'open-source-event-calendar'),
+                ],
+                'hierarchical' => false,
+                'rewrite'      => ['slug' => 'events_tags'],
+                'show_ui'      => true,
+                'show_in_rest' => true,
+                'capabilities' => [
+                    'manage_terms' => 'manage_events_categories',
+                    'edit_terms'   => 'manage_events_categories',
+                    'delete_terms' => 'manage_events_categories',
+                    'assign_terms' => 'edit_osec_events',
+                ],
+            ]
+        );
+
+        /**
+         * Taxonomy events_feeds
+         * is used to filter for Events added by a feed.
+         */
+        register_taxonomy(
+            'events_feeds',
+            [OSEC_POST_TYPE],
+            [
+                'labels'       => [
+                    'name'          => _x('Event Feeds', 'Event feeds taxonomy', 'open-source-event-calendar'),
+                    'singular_name' => _x('Event Feed', 'Event feed taxonomy (singular)', 'open-source-event-calendar'),
+                ],
+                'hierarchical' => false,
+                'rewrite'      => ['slug' => 'events_feeds'],
+                'capabilities' => [
+                    'manage_terms' => 'manage_events_categories',
+                    'edit_terms'   => 'manage_events_categories',
+                    'delete_terms' => 'manage_events_categories',
+                    'assign_terms' => 'edit_osec_events',
+                ],
+                'public'       => false,
+            ]
+        );
+
+        // ========================================
+        // = register custom post type for events =
+        // ========================================
+        register_post_type(OSEC_POST_TYPE, [
+            'labels'              => [
+                'name'               => _x('Events', 'Custom post type name', 'open-source-event-calendar'),
+                'singular_name'      => _x('Event', 'Custom post type name (singular)', 'open-source-event-calendar'),
+                'add_new'            => __('Add New', 'open-source-event-calendar'),
+                'add_new_item'       => __('Add New Event', 'open-source-event-calendar'),
+                'edit_item'          => __('Edit Event', 'open-source-event-calendar'),
+                'new_item'           => __('New Event', 'open-source-event-calendar'),
+                'view_item'          => __('View Event', 'open-source-event-calendar'),
+                'search_items'       => __('Search Events', 'open-source-event-calendar'),
+                'not_found'          => __('No Events found', 'open-source-event-calendar'),
+                'not_found_in_trash' => __('No Events found in Trash', 'open-source-event-calendar'),
+                'parent_item_colon'  => __('Parent Event', 'open-source-event-calendar'),
+                'menu_name'          => __('Events', 'open-source-event-calendar'),
+                'all_items'          => $this->get_all_items_name(),
+            ],
             'public'              => true,
             'publicly_queryable'  => true,
             'show_ui'             => true,
@@ -90,116 +145,20 @@ class EventType extends OsecBaseClass
             'hierarchical'        => false,
             'menu_position'       => 5,
             'menu_icon'           => 'dashicons-calendar-alt',
-            'supports'            => $supports,
-            'exclude_from_search' => $settings->get('exclude_from_search'),
-            'show_in_rest' => true,
-        ];
-
-        // ========================================
-        // = labels for event categories taxonomy =
-        // ========================================
-        $events_categories_labels = [
-            'name'          => _x('Categories', 'Event categories taxonomy', 'open-source-event-calendar'),
-            'singular_name' => _x('Category', 'Event categories taxonomy (singular)', 'open-source-event-calendar'),
-            'menu_name'     => _x('Organize', 'Event categories menu item', 'open-source-event-calendar'),
-        ];
-
-        // ==================================
-        // = labels for event tags taxonomy =
-        // ==================================
-        $events_tags_labels = [
-            'name'          => _x('Tags', 'Event tags taxonomy', 'open-source-event-calendar'),
-            'singular_name' => _x('Tag', 'Event tags taxonomy (singular)', 'open-source-event-calendar'),
-        ];
-
-        // ==================================
-        // = labels for event feeds taxonomy =
-        // ==================================
-        $events_feeds_labels = [
-            'name'          => _x('Event Feeds', 'Event feeds taxonomy', 'open-source-event-calendar'),
-            'singular_name' => _x('Event Feed', 'Event feed taxonomy (singular)', 'open-source-event-calendar'),
-        ];
-
-        // ======================================
-        // = args for event categories taxonomy =
-        // ======================================
-        $events_categories_args = [
-            'labels'       => $events_categories_labels,
-            'hierarchical' => true,
-            'rewrite'      => ['slug' => 'events_categories'],
-            'show_in_rest' => true,
-            'capabilities' => [
-                'manage_terms' => 'manage_events_categories',
-                'edit_terms'   => 'manage_events_categories',
-                'delete_terms' => 'manage_events_categories',
-                'assign_terms' => 'edit_osec_events',
+            'supports'            => [
+                'title',
+                'editor',
+                'comments',
+                'custom-fields',
+                'thumbnail',
+                'author',
+                // TDOD Add??
+                // https://stackoverflow.com/questions/45436051/how-to-add-excerpt-in-custom-post-type-in-wordpress
+                'excerpt',
             ],
-        ];
-
-        // ================================
-        // = args for event tags taxonomy =
-        // ================================
-        $events_tags_args = [
-            'labels'       => $events_tags_labels,
-            'hierarchical' => false,
-            'rewrite'      => ['slug' => 'events_tags'],
-            'show_ui'      => true,
+            'exclude_from_search' => $this->app->settings->get('exclude_from_search'),
             'show_in_rest' => true,
-            'capabilities' => [
-                'manage_terms' => 'manage_events_categories',
-                'edit_terms'   => 'manage_events_categories',
-                'delete_terms' => 'manage_events_categories',
-                'assign_terms' => 'edit_osec_events',
-            ],
-        ];
-
-        // ================================
-        // = args for event feeds taxonomy =
-        // ================================
-        $events_feeds_args = [
-            'labels'       => $events_feeds_labels,
-            'hierarchical' => false,
-            'rewrite'      => ['slug' => 'events_feeds'],
-            'capabilities' => [
-                'manage_terms' => 'manage_events_categories',
-                'edit_terms'   => 'manage_events_categories',
-                'delete_terms' => 'manage_events_categories',
-                'assign_terms' => 'edit_osec_events',
-            ],
-            'public'       => false,
-        ];
-
-        // ======================================
-        // = register event categories taxonomy =
-        // ======================================
-        register_taxonomy(
-            'events_categories',
-            [OSEC_POST_TYPE],
-            $events_categories_args
-        );
-
-        // ================================
-        // = register event tags taxonomy =
-        // ================================
-        register_taxonomy(
-            'events_tags',
-            [OSEC_POST_TYPE],
-            $events_tags_args
-        );
-
-        // ================================
-        // = register event tags taxonomy =
-        // ================================
-        register_taxonomy(
-            'events_feeds',
-            [OSEC_POST_TYPE],
-            $events_feeds_args
-        );
-
-        // ========================================
-        // = register custom post type for events =
-        // ========================================
-        register_post_type(OSEC_POST_TYPE, $post_type_args);
+        ]);
 
         // get event contributor if saved in the db
         $contributor = get_role('osec_event_assistant');
@@ -317,7 +276,23 @@ class EventType extends OsecBaseClass
      **/
     public function uninstall(bool $purge = false)
     {
+        $taxonomies = [
+            'events_feeds',
+            'events_tags',
+            'events_categories'
+        ];
         if ($purge) {
+            // Delete taxonomy terms.
+            foreach ($taxonomies as $taxonomy) {
+                $terms = get_terms([
+                    'taxonomy' => $taxonomy,
+                    'hide_empty' => false
+                ]);
+                foreach ($terms as $term) {
+                    wp_delete_term($term->term_id, $taxonomy);
+                }
+            }
+
             // Constants only. DB prepare is not required.
             $postType = OSEC_POST_TYPE;
             $this->app->db->query(
@@ -350,6 +325,10 @@ class EventType extends OsecBaseClass
                     $wp_roles->remove_cap($role, $cap);
                 }
             }
+        }
+        // Things to disable while leaving content.
+        foreach ($taxonomies as $taxonomy) {
+            unregister_taxonomy_for_object_type($taxonomy, OSEC_POST_TYPE);
         }
         unregister_post_type(OSEC_POST_TYPE);
     }

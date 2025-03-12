@@ -25,7 +25,6 @@ use Osec\App\Controller\Scheduler;
 use Osec\App\Model\DatabaseSchema;
 use Osec\App\Model\PostTypeEvent\EventType;
 use Osec\App\Model\Settings;
-use Osec\App\Model\TaxonomyAdapter;
 use Osec\Exception\BootstrapException;
 use Osec\Exception\DatabaseSchemaException;
 use Osec\Exception\DatabaseUpdateException;
@@ -71,12 +70,11 @@ register_deactivation_hook(
     function () {
         global $osec_app;
         $purge = (bool)OSEC_UNINSTALL_PLUGIN_DATA;
-        DatabaseSchema::factory($osec_app)->uninstall($purge);
-        TaxonomyAdapter::factory($osec_app)->uninstall($purge);
         Scheduler::factory($osec_app)->uninstall($purge);
         FrontendCssController::factory($osec_app)->uninstall($purge);
         EventType::factory($osec_app)->uninstall($purge);
         ThemeLoader::factory($osec_app)->clear_cache();
+        DatabaseSchema::factory($osec_app)->uninstall($purge);
 
         // Purges all $app->options & $app->settings
         Settings::factory($osec_app)->uninstall($purge);

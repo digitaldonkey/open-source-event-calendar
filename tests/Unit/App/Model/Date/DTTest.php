@@ -75,7 +75,6 @@ class DTTest extends TestBase
          $calculatedWeekStartReadableLocalized = $weekStart->format_i18n(DATE_RFC2822);
 
          // Soll UTC 1731283200
-        $XXX = $weekStart->format_to_gmt();
         $this->assertEquals($weekStartInUTC, (int) $weekStart->format_to_gmt());
     }
 }

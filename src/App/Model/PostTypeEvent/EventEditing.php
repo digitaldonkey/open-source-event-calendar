@@ -58,10 +58,10 @@ class EventEditing extends OsecBaseClass
         if ($update && $post_id) {
             try {
                 $event = new Event($this->app, $post_id);
+            // phpcs:ignore Generic.CodeAnalysis.EmptyStatement
             } catch (EventNotFoundException) {
                 // Post exists, but event data hasn't been saved yet.
                 // Create new event object below.
-                $XXX = false;
             }
         }
         if (! $event) {

@@ -586,7 +586,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         }
         // TODO this was in ONE timezone validator version.
         // I guess with Timezones->get_name() we want need it.
-        $XXX = preg_match('/GMT[+|-][0-9]{4}.*/', $tz);
+        preg_match('/GMT[+|-][0-9]{4}.*/', $tz);
         // return !(!$tztest || preg_match("/GMT[+|-][0-9]{4}.*/", $tz));
 
         if (false === Timezones::factory($this->app)->get_name($tz)) {
