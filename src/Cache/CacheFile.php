@@ -143,21 +143,23 @@ class CacheFile extends OsecBaseClass implements CacheInterface
     public function setWithFileInfo(string $key, mixed $value): array
     {
         $fileName = $this->_safe_file_name($key);
-
         $value  = maybe_serialize($value);
         $result = $this->put_contents(
             $this->_cache_path . $fileName,
             $value
         );
+        // Update
+        $this->setOption($key, $fileName);
 
+        // Delete old file.
         $oldFile = $this->get_file_name($key);
         if ($result !== false) {
             // Delete old file if on update.
-            if ($oldFile && file_exists($this->_cache_path . $oldFile)) {
-                wp_delete_file($this->_cache_path . $oldFile);
-            } else {
-                // Update
-                $this->setOption($key, $fileName);
+            if ($oldFile !== $this->_cache_path . $fileName
+                    && $oldFile
+                    && file_exists($oldFile)
+            ) {
+                wp_delete_file($oldFile);
             }
         } else {
             throw new CacheWriteException(
@@ -168,11 +170,10 @@ class CacheFile extends OsecBaseClass implements CacheInterface
                 ))
             );
         }
-
         return [
             'key'  => $key,
             'path' => $this->_cache_path . $fileName,
-            'url'  => $this->_cache_url ?? $this->_cache_url . $fileName,
+            'url'  => $this->_cache_url.$fileName,
             'file' => $fileName,
         ];
     }
@@ -199,8 +200,6 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         if (0 !== strncmp($file, (string)$prefix, 8)) {
             $key = $prefix . $file;
         }
-
-
         return is_string($prefix) ? $prefix . '_' . $file : $file;
     }
 
