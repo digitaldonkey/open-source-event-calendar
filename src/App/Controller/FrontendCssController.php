@@ -28,7 +28,7 @@ class FrontendCssController extends OsecBaseClass
     /**
      * If we request the "CSS file" from a non-File-cache,
      * this param will deliver CSS code.
-     * e.h: <link rel="stylesheet" id="ai1ec_style-css"
+     * e.g: <link rel="stylesheet" id="ai1ec_style-css"
      * href="//ddev-wordpress.ddev.site/?osec-css-cache=1725894108&amp;ver=2.3.1" media="all">
      */
     public const REQUEST_CSS_PARAM = 'osec-css-cache';
@@ -214,7 +214,7 @@ class FrontendCssController extends OsecBaseClass
      */
     public function get_css_url()
     {
-        // get what's saved. I t could be false, a int or a string.
+        // get what's saved. It could be false, int or string.
         // if it's false or a int, use PHP to render CSS
         $saved_par = $this->app->options->get(self::COMPILED_CSS_KEY);
         // $saved_par = Number value required to display css in Header,
@@ -324,7 +324,6 @@ class FrontendCssController extends OsecBaseClass
         $lessCtrl = LessController::factory($this->app);
         if ( ! $lessCtrl->is_compilation_needed($variables)) {
             $this->app->options->delete(self::COMPILED_CSS_KEY);
-
             return true;
         }
 

@@ -5026,7 +5026,7 @@ timely.define("domReady", [], function () {
                                     if (n !== t) {
                                         r = n.split(";");
                                         for (s = 0, o = r.length; s < o; s += 1) {
-                                            i = r[s].replace(/\s/g, "").match(/width:(([-+]?([0-9]*\.)?[0-9]+)(px|em|ex|%|in|cm|mm|pt|pc))/);
+                                            i = r[s].replace(/\s/g, "").match(/width:(([-+]?([0-9]*\.)?[0-9]+)(px|rem|em|ex|%|in|cm|mm|pt|pc))/);
                                             if (i !== null && i.length >= 1) return i[1];
                                         }
                                     }
