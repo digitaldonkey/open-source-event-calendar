@@ -16,15 +16,10 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageThemeOptions extends AdminPageAbstract
 {
-    /**
-     * @var string The nonce action
-     */
-    public const NONCE_ACTION = 'ai1ec_theme_options_save';
-
-    /**
-     * @var string The nonce name
-     */
-    public const NONCE_NAME = 'ai1ec_theme_options_nonce';
+    public static $NONCE = [
+        'action'       => 'osec_theme_options_save',
+        'nonce_name'   => 'osec_theme_options_nonce',
+    ];
 
     /**
      * @var string The id/name of the submit button.
@@ -96,25 +91,31 @@ class AdminPageThemeOptions extends AdminPageAbstract
      */
     public function display_page(): void
     {
-        $settings = $this->app->settings;
+        if (isset($_POST[self::$NONCE['nonce_name']])) {
+            $nonceOk = wp_verify_nonce(
+                $_POST[self::$NONCE['nonce_name']],
+                self::$NONCE['action']
+            );
+        }
 
         $args = [
             'title'   => __(
                 'Calendar Theme Options',
                 'open-source-event-calendar'
             ),
+            // @see base_page.twig
             'nonce'   => [
-                'action'   => self::NONCE_ACTION,
-                'name'     => self::NONCE_NAME,
+                'action'   => self::$NONCE['action'],
+                'nonce_name'     => self::$NONCE['nonce_name'],
                 'referrer' => false,
             ],
             'metabox' => [
-                'screen' => $settings->get('themes_option_page'),
+                'screen' => $this->app->settings->get('themes_option_page'),
                 'action' => 'left',
                 'object' => null,
             ],
             'action'  =>
-                '?controller=front&action=ai1ec_save_theme_options&plugin=' . OSEC_PLUGIN_NAME,
+                '?controller=front&action=' . self::$NONCE['action'] . '&plugin=' . OSEC_PLUGIN_NAME,
         ];
         ThemeLoader::factory($this->app)
                    ->get_file('theme-options/page.twig', $args, true)
@@ -213,12 +214,5 @@ class AdminPageThemeOptions extends AdminPageAbstract
         }
 
         return $bootstrap_tabs_to_add;
-    }
-
-    /**
-     * Handle post, likely to be deprecated to use commands.
-     */
-    public function handle_post()
-    {
     }
 }

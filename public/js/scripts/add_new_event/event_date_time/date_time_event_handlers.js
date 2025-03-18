@@ -58,7 +58,7 @@ timely.define(["jquery_timely", "ai1ec_config", "scripts/add_new_event/event_dat
             var T = S.getUTCDate(), N = S.getUTCMonth() + 1, C = x.getUTCHours(), k = x.getUTCMinutes();
             N = N < 10 ? "0" + N : N, T = T < 10 ? "0" + T : T, C = C < 10 ? "0" + C : C, k = k < 10 ? "0" + k : k, S = S.getUTCFullYear() + "" + N + T + "T235959Z", o += "UNTIL=" + S + ";"
         }
-        var L = {action: "osec_rrule_to_text", rrule: o};
+        var L = {action: "osec_rrule_to_text", rrule: o, nonce:  wpApiSettings.nonce};
         i.button("loading").next().addClass("ai1ec-disabled"), e.post(s, L, function (t) {
             t.error ? (i.button("reset").next().removeClass("ai1ec-disabled"), "1" === e("#osec_is_box_repeat").val() ? n.repeat_form_error("#osec_rrule", "#osec_repeat_label", t, i) : n.repeat_form_error("#osec_exrule", "#osec_exclude_label", t, i)) : "1" === e("#osec_is_box_repeat").val() ? n.repeat_form_success("#osec_rrule", "#osec_repeat_label", "#osec_repeat_text > a", o, i, t) : n.repeat_form_success("#osec_exrule", "#osec_exclude_label", "#osec_exclude_text > a", o, i, t)
         }, "json")
@@ -75,18 +75,22 @@ timely.define(["jquery_timely", "ai1ec_config", "scripts/add_new_event/event_dat
     }, h = function () {
         n.click_on_ics_rule_text("#osec_repeat_text > a", "#osec_repeat", "#osec_repeat_label", {
             action: "osec_get_repeat_box",
+            nonce: wpApiSettings.nonce,
             repeat: 1,
             post_id: e("#post_ID").val()
         }, n.init_modal_widgets), n.click_on_ics_rule_text("#osec_exclude_text > a", "#osec_exclude", "#osec_exclude_label", {
             action: "osec_get_repeat_box",
+            nonce: wpApiSettings.nonce,
             repeat: 0,
             post_id: e("#post_ID").val()
         }, n.init_modal_widgets), n.click_on_checkbox("#osec_repeat", "#osec_repeat_text > a", "#osec_repeat_label", {
             action: "osec_get_repeat_box",
+            nonce: wpApiSettings.nonce,
             repeat: 1,
             post_id: e("#post_ID").val()
         }, n.init_modal_widgets), n.click_on_checkbox("#osec_exclude", "#osec_exclude_text > a", "#osec_exclude_label", {
             action: "osec_get_repeat_box",
+nonce: wpApiSettings.nonce,
             repeat: 0,
             post_id: e("#post_ID").val()
         }, n.init_modal_widgets)

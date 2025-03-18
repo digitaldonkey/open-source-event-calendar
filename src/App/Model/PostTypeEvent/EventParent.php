@@ -68,11 +68,21 @@ class EventParent extends OsecBaseClass
      */
     public function admin_init_post(): void
     {
+        // phpcs:disable WordPress.Security.NonceVerification
+        /**
+         * When Editing instance a hidden field "osec_instance_id" is added.
+         * Gien that we will clone the parent and turn the event into
+         * its own instance, while keeping parent relation.
+         */
         if (
-            isset($_POST['osec_instance_id']) &&
-            isset($_POST['action']) &&
-            'editpost' === $_POST['action']
+            isset($_POST['osec_instance_id'])
+            && isset($_POST['action'])
+            && 'editpost' === sanitize_key($_POST['action'])
         ) {
+            // phpcs:enable
+            if (!isset($_REQUEST[EventEditing::NONCE_NAME]) || !wp_verify_nonce($_REQUEST[EventEditing::NONCE_NAME], EventEditing::NONCE_ACTION)) {
+                return;
+            }
             $old_post_id = $_POST['post_ID'];
             $instance_id = $_POST['osec_instance_id'];
             $post_id     = EventEditing::factory($this->app)->create_duplicate_post();
@@ -355,30 +365,32 @@ class EventParent extends OsecBaseClass
      *
      * @return int|bool ID of parent event or bool(false)
      */
-    public function get_parent_event($current_id)
+    public function get_parent_event(int $current_id)
     {
         static $parents = null;
         if (null === $parents) {
             $parents = CacheMemory::factory($this->app);
         }
-        $current_id = (int)$current_id;
+
         if (null === ($parent_id = $parents->get($current_id))) {
             /* @var $db DatabaseController */
             $db = $this->app->db;
-            $parent = $db->get_row($db->prepare("
+            $parent = $db->get_row(
+                $db->prepare("
                 SELECT parent.ID, parent.post_status
                 FROM {$db->get_table_name('posts')} AS child
                 INNER JOIN {$db->get_table_name('posts')} AS parent
                     ON ( parent.ID = child.post_parent )
                 WHERE child.ID = %d
-            ", $current_id));
+            ", $current_id)
+            );
             if (
                 empty($parent) ||
                 'trash' === $parent->post_status
             ) {
                 $parent_id = false;
             } else {
-                $parent_id = $parent->ID;
+                $parent_id = (int) $parent->ID;
             }
             $parents->set($current_id, $parent_id);
         }

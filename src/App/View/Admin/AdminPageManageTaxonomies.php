@@ -48,9 +48,11 @@ class AdminPageManageTaxonomies extends OsecBaseClass
 
         foreach ($taxonomies as $taxonomy => $data) {
             if (true === $data->public) {
+                // phpcs:disable WordPress.Security.NonceVerification
                 $active_taxonomy =
                     isset($_GET['taxonomy']) &&
-                    $taxonomy === $_GET['taxonomy'];
+                    $taxonomy === sanitize_key($_GET['taxonomy']);
+                // phpcs:enable
                 $edit_url        = $edit_label = '';
                 if (isset($taxonomy_metadata[$taxonomy]['url'])) {
                     $edit_url   = $taxonomy_metadata[$taxonomy]['url'];
@@ -95,10 +97,8 @@ class AdminPageManageTaxonomies extends OsecBaseClass
 
     /**
      * Generate and return tabbed header to manage taxonomies.
-     *
-     * @return string HTML markup for tabbed header
      */
-    public function render_header()
+    public function render_header(): void
     {
         $args = [
             /**
@@ -113,7 +113,6 @@ class AdminPageManageTaxonomies extends OsecBaseClass
             'taxonomies' => apply_filters('osec_custom_taxonomies', $this->taxonomies),
             'text_title' => __('Organize Events', 'open-source-event-calendar'),
         ];
-
         ThemeLoader::factory($this->app)
                           ->get_file('organize/header.twig', $args, true)
                           ->render();

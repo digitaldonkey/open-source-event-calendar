@@ -13,11 +13,10 @@
 <div id="osec-time-and-date-box"
      class="ai1ec-panel-collapse ai1ec-collapse ai1ec-in">
     <div class="ai1ec-panel-body">
-        <?php wp_nonce_field('ai1ec', OSEC_POST_TYPE); ?>
         <?php if ($instance_id) : ?>
             <input type="hidden"
                    name="osec_instance_id"
-                   id="osec_instance-id"
+                   id="osec-instance-id"
                    value="<?php echo $instance_id; ?>">
         <?php endif; ?>
         <table class="ai1ec-form">
@@ -97,10 +96,9 @@
             </tr>
             <?php
             $recurrence_attr = '';
-            if ($parent_event_id || $instance_id) :
+            if ($instance_id || $parent_event_id) {
                 $recurrence_attr = ' class="ai1ec-hide"';
-            endif;
-            ?>
+            }?>
             <tr<?php echo $recurrence_attr; ?>>
                 <td>
                     <input type="checkbox" name="osec_repeat" id="osec_repeat"

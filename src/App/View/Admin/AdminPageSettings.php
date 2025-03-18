@@ -16,15 +16,10 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageSettings extends AdminPageAbstract
 {
-    /**
-     * @var string The nonce action
-     */
-    public const NONCE_ACTION = 'osec_settings_save';
-
-    /**
-     * @var string The nonce name
-     */
-    public const NONCE_NAME = 'osec_settings_nonce';
+    public static $NONCE = [
+        'action'       => 'osec_save_settings',
+        'nonce_name'   => 'osec_settings_nonce',
+    ];
 
     public function display_page(): void
     {
@@ -34,8 +29,8 @@ class AdminPageSettings extends AdminPageAbstract
                 'open-source-event-calendar'
             ),
             'nonce'   => [
-                'action'   => self::NONCE_ACTION,
-                'name'     => self::NONCE_NAME,
+                'action'   => self::$NONCE['action'],
+                'nonce_name'     => self::$NONCE['nonce_name'],
                 'referrer' => false,
             ],
             'metabox' => [
@@ -97,10 +92,6 @@ class AdminPageSettings extends AdminPageAbstract
             'left',
             'default'
         );
-    }
-
-    public function handle_post()
-    {
     }
 
     /**

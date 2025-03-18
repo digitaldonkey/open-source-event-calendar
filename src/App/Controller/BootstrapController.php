@@ -124,8 +124,9 @@ class BootstrapController
             // ==================================
             // = Add the hook to render the css =
             // ==================================
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             if (isset($_GET[FrontendCssController::REQUEST_CSS_PARAM])) {
-                // we need to wait for the extension to be registered if the css
+                // We need to wait for the extension to be registered if the css
                 // needs to be compiled. Will find a better way when compiling css.
                 $css_controller = FrontendCssController::factory($this->app);
                 add_action('plugins_loaded', [$css_controller, 'render_css'], 2);
@@ -203,6 +204,7 @@ class BootstrapController
         add_action('init', function () use ($app) {
             RestController::factory($app)->registerApi();
         });
+
         /**
          * Add date formats on Serrings-general.php
          */
@@ -239,7 +241,7 @@ class BootstrapController
 
         // Route the request.
         if (is_admin()) {
-            add_action('init', $this->route_request(...));
+            add_action('parse_request', $this->route_request(...));
         } else {
             add_action('template_redirect', $this->route_request(...));
         }
@@ -351,7 +353,7 @@ class BootstrapController
             add_action(
                 'wp_ajax_osec_get_repeat_box',
                 function () use ($app) {
-                    AdminDateRepeatBox::factory($this->app)->get_repeat_box();
+                    AdminDateRepeatBox::factory($app)->get_repeat_box();
                 }
             );
 
@@ -363,7 +365,7 @@ class BootstrapController
             add_action(
                 'wp_ajax_osec_dismiss_notice',
                 function () use ($app) {
-                    NotificationAdmin::factory($this->app)->dismiss_notice();
+                    NotificationAdmin::factory($app)->dismiss_notice();
                 }
             );
 
@@ -376,7 +378,7 @@ class BootstrapController
             add_action(
                 'wp_ajax_osec_rrule_to_text',
                 function () use ($app) {
-                    AdminDateRepeatBox::factory($this->app)->convert_rrule_to_text();
+                    AdminDateRepeatBox::factory($app)->convert_rrule_to_text();
                 }
             );
 
@@ -437,14 +439,14 @@ class BootstrapController
             add_action(
                 'network_admin_notices',
                 function () use ($app) {
-                    NotificationAdmin::factory($this->app)->send();
+                    NotificationAdmin::factory($app)->send();
                 }
             );
 
             add_action(
                 'admin_notices',
                 function () use ($app) {
-                    NotificationAdmin::factory($this->app)->send();
+                    NotificationAdmin::factory($app)->send();
                 }
             );
 
@@ -455,14 +457,9 @@ class BootstrapController
                 }
             );
 
-            add_filter(
-                'post_row_actions',
-                function ($actions, $post) use ($app) {
+            add_filter('post_row_actions', function ($actions, $post) use ($app) {
                     return EditPostActions::factory($app)->duplicate_post_make_duplicate_link_row($actions, $post);
-                },
-                10,
-                2
-            );
+            }, 10, 2);
 
             add_action(
                 'add_meta_boxes',
@@ -515,9 +512,6 @@ class BootstrapController
                     return EventPostView::factory($this->app)->post_updated_messages($messages);
                 }
             );
-
-            // TODO Added a Timley Icon. Replaced by default Calendar Icon.
-            // add_action('admin_head', $this->admin_head(...));
 
             /**
              * Rebuild cache
@@ -613,6 +607,7 @@ class BootstrapController
             'ErrorException'
         );
         // If the user clicked the link to reactivate the plugin.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         if (isset($_GET[ExceptionHandler::DB_REACTIVATE_PLUGIN])) {
             $OsecExceptionHandler->reactivate_plugin();
         }
@@ -736,8 +731,7 @@ class BootstrapController
      **/
     protected function processRequest()
     {
-        $settings = $this->app->settings;
-        $page_id  = $settings->get('calendar_page_id');
+        $page_id  = $this->app->settings->get('calendar_page_id');
         if (
             ! is_admin()
             && $page_id
@@ -814,17 +808,17 @@ class BootstrapController
             return null;
         }
 
-        $localization_helper = WpmlHelper::factory($this->app);
+        $wpml_helper = WpmlHelper::factory($this->app);
         $page_base           = '';
         $clang               = '';
 
-        if ($localization_helper->is_wpml_active()) {
-            $trans = $localization_helper
+        if ($wpml_helper->is_wpml_active()) {
+            $trans = $wpml_helper
                 ->get_wpml_translations_of_page(
                     $cal_page,
                     true
                 );
-            $clang = $localization_helper->get_language();
+            $clang = $wpml_helper->get_language();
             if (isset($trans[$clang])) {
                 $cal_page = $trans[$clang];
             }
@@ -834,7 +828,7 @@ class BootstrapController
         }
 
         $page_link         = 'index.php?page_id=' . $cal_page;
-        $pagebase_for_href = $localization_helper->remove_language_from_url(
+        $pagebase_for_href = $wpml_helper::remove_language_from_url(
             get_page_link($cal_page),
             $clang
         );

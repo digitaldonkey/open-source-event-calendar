@@ -40,6 +40,7 @@ class EventPostView extends OsecBaseClass
             2  => __('Custom field updated.', 'open-source-event-calendar'),
             3  => __('Custom field deleted.', 'open-source-event-calendar'),
             4  => __('Event updated.', 'open-source-event-calendar'),
+            // phpcs:disable WordPress.Security.NonceVerification
             /* translators: %s: date and time of the revision */
             5  => isset($_GET['revision'])
                 ? sprintf(
@@ -48,6 +49,7 @@ class EventPostView extends OsecBaseClass
                     wp_post_revision_title((int)$_GET['revision'], false)
                 )
                 : false,
+            // phpcs:enable
             6  => sprintf(
                     /* translators: Url */
                 __('Event published. <a href="%s">View event</a>', 'open-source-event-calendar'),

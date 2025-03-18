@@ -17,7 +17,10 @@ class SaveSettings extends SaveAbstract
 {
     public function do_execute()
     {
-        $options                          = $this->app->settings->get_options();
+        // Nonce verification happens in SaveAbstract->is_this_to_execute().
+        // phpcs:disable WordPress.Security.NonceVerification.Missing
+
+        $options = $this->app->settings->get_options();
         $_POST['default_tags_categories'] = (
             isset($_POST['default_tags_categories_default_categories']) ||
             isset($_POST['default_tags_categories_default_tags'])
@@ -35,7 +38,7 @@ class SaveSettings extends SaveAbstract
          *
          * @param  array  $_POST  Maybe unvalidated variables.
          */
-        $_POST = apply_filters('osec_pre_vaidate_settings', $_POST);
+        $_POST = apply_filters('osec_pre_validate_settings', $_POST);
         foreach ($options as $name => $data) {
             $value = null;
 
@@ -54,49 +57,49 @@ class SaveSettings extends SaveAbstract
             if (isset($_POST[$name])) {
                 if (isset($data['renderer']['validator'])) {
                     throw new \Exception('Renderer->validattor is not supported anymore..');
-                } else {
-                    switch ($data['type']) {
-                        case 'bool':
-                            $value = true;
-                            break;
-                        case 'int':
-                            $value = (int)$_POST[$name];
-                            break;
-                        case 'string':
-                            $value = (string)$_POST[$name];
-                            break;
-                        case 'array':
-                        case 'mixed':
-                            $method = 'handleSaving_' . $name;
-                            $value  = null;
-                            if (method_exists($this, $method)) {
-                                $value = $this->$method();
-                            }
-                            /**
-                             * Post process saving of save handler value.
-                             *
-                             * Settings can have save handler. Like: handleSaving_$option_name()
-                             *
-                             * @since 1.0
-                             *
-                             * @param  string  $method  Save handler.
-                             * @param  array  $value  Value returned by $method or null.
-                             * @param  array  $_REQUEST  Request.
-                             */
-                            $value = apply_filters('osec' . $method, $value, $_REQUEST);
-                            break;
-                        case 'wp_option':
-                            // Save the corresponding WP option
-                            $this->app->options->set($name, $_POST[$name], true);
-                            $value = (string)$_POST[$name];
-                            break;
-                        default:
-                            throw new Exception(
-                                esc_html('No validation defined datatype ' . $data['type'])
-                            );
-                    }
+                }
+
+                switch ($data['type']) {
+                    case 'bool':
+                        $value = true;
+                        break;
+                    case 'int':
+                        $value = (int) $_POST[$name];
+                        break;
+                    case 'string':
+                        $value = (string) $_POST[$name];
+                        break;
+                    case 'array':
+                    case 'mixed':
+                        $method = 'handleSaving_' . $name;
+                        $value  = null;
+                        if (method_exists($this, $method)) {
+                            $value = $this->$method();
+                        }
+                        /**
+                         * Post process saving of save handler value.
+                         *
+                         * Settings can have save handler. Like: handleSaving_$option_name()
+                         *
+                         * @since 1.0
+                         *
+                         * @param  string  $method  Save handler.
+                         * @param  array  $value  Value returned by $method or null.
+                         */
+                        $value = apply_filters('osec' . $method, $value);
+                        break;
+                    case 'wp_option':
+                        // Save the corresponding WP option
+                        $this->app->options->set($name, $_POST[$name], true);
+                        $value = sanitize_text_field($_POST[$name]);
+                        break;
+                    default:
+                        throw new Exception(
+                            esc_html('No validation defined datatype ' . $data['type'])
+                        );
                 }
             }
+            // phpcs:enable WordPress.Security.NonceVerification.Missing
 
             // Save
             if (null !== $value) {
@@ -147,10 +150,13 @@ class SaveSettings extends SaveAbstract
      */
     protected function handleSaving_enabled_views()
     {
+        // Nonce verification happens in SaveAbstract->is_this_to_execute().
+        // phpcs:disable WordPress.Security.NonceVerification.Missing
+
         $enabled_views = $this->app->settings->get('enabled_views');
         foreach ($enabled_views as $view => &$options) {
-            $options['enabled']        = isset($_POST['view_' . $view . '_enabled']);
-            $options['default']        = isset($_POST['default_calendar_view'])
+            $options['enabled'] = isset($_POST['view_' . $view . '_enabled']);
+            $options['default'] = isset($_POST['default_calendar_view'])
                 ? $_POST['default_calendar_view'] === $view
                 : false;
             $options['enabled_mobile'] =
@@ -196,8 +202,8 @@ class SaveSettings extends SaveAbstract
                     'comment_status' => 'closed',
                 ]
             );
-        } else {
-            return (int)$calendar_page;
         }
+
+        return (int)$calendar_page;
     }
 }

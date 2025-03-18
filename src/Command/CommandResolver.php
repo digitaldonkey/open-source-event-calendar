@@ -2,6 +2,7 @@
 
 namespace Osec\Command;
 
+use Osec\App\View\Admin\AdminPageManageThemes;
 use Osec\App\View\Admin\AdminPageSettings;
 use Osec\App\View\Admin\AdminPageThemeOptions;
 use Osec\Bootstrap\App;
@@ -54,18 +55,18 @@ class CommandResolver
         );
 
         $this->add_command(
-            ChangeTheme::factory($this->app, $request)
+            ChangeTheme::factory(
+                $this->app,
+                $request,
+                AdminPageManageThemes::$NONCE
+            )
         );
 
         $this->add_command(
             SaveSettings::factory(
                 $this->app,
                 $request,
-                [
-                    'action'       => 'osec_save_settings',
-                    'nonce_action' => AdminPageSettings::NONCE_ACTION,
-                    'nonce_name'   => AdminPageSettings::NONCE_NAME,
-                ]
+                AdminPageSettings::$NONCE
             )
         );
 
@@ -73,11 +74,7 @@ class CommandResolver
             SaveThemeOptions::factory(
                 $this->app,
                 $request,
-                [
-                    'action'       => 'ai1ec_save_theme_options',
-                    'nonce_action' => AdminPageThemeOptions::NONCE_ACTION,
-                    'nonce_name'   => AdminPageThemeOptions::NONCE_NAME,
-                ]
+                AdminPageThemeOptions::$NONCE
             )
         );
 

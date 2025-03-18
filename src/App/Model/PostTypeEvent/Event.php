@@ -155,12 +155,12 @@ class Event extends OsecBaseClass
             }
         }
         if (isset($data['post'])) {
-            $this->set('post', (object)$data['post']);
+            $this->set('post', (object) $data['post']);
         } else {
             // ========================================
             // = Remaining fields are the post fields =
             // ========================================
-            $this->set('post', (object)$data);
+            $this->set('post', (object) $data);
         }
 
         return $this;
@@ -233,9 +233,10 @@ class Event extends OsecBaseClass
             is_numeric($instance) &&
             $instance > 0
         ) {
+            $this->set('instance_id', $instance);
+
             $select_sql .= ', IF( aei.start IS NOT NULL, aei.start, e.start ) as start,' .
                            '  IF( aei.start IS NOT NULL, aei.end,   e.end )   as end ';
-            $this->set('instance_id', $instance);
             $left_join = 'LEFT JOIN ' . $dbi->get_table_name(OSEC_DB__INSTANCES) .
                          ' aei ON aei.id = ' . absint($instance) . ' AND e.post_id = aei.post_id ';
         } else {

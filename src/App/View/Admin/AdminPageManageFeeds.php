@@ -99,12 +99,4 @@ class AdminPageManageFeeds extends AdminPageAbstract
                    ->get_file('box_feeds.php', $args, true)
                    ->render();
     }
-
-
-    public function handle_post(): void
-    {
-        if (isset($_POST['cron_freq'])) {
-            $this->app->settings->set('ics_cron_freq', $_REQUEST['cron_freq']);
-        }
-    }
 }

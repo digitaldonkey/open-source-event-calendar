@@ -188,6 +188,7 @@ class TrashController extends OsecBaseClass
     public function display_trash_link($allcaps, $caps, $args, WP_User $user)
     {
         if (
+            // phpcs:ignore WordPress.Security.NonceVerification
             isset($_GET['instance']) &&
             in_array('delete_published_osec_events', $caps)
         ) {

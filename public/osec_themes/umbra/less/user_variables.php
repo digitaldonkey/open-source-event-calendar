@@ -38,7 +38,7 @@ return [
         'type'        => 'font',
     ],
     'baseFontSize' => [
-        'value'       => '13px',
+        'value'       => '0.8rem',
         'description' => __('Base font size', 'open-source-event-calendar'),
         'tab'         => 'general',
         'type'        => 'size',

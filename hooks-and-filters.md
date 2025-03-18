@@ -1712,7 +1712,7 @@ do_action('osec_admin_manage_taxonomies',);
 
 ```php
 /**
- * Do something on admin taxinomy or tags management page.
+ * Do something on admin taxonomy or tags management page.
  *
  * @file src/App/View/Admin/AdminPageManageTaxonomies.php
  */
@@ -3738,13 +3738,13 @@ add_filter('osec_export_filter', $filter);
 
 @file **../src/Command/SaveSettings.php**
 
-### osec_pre_vaidate_settings <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_pre_validate_settings <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter Settings before validation.
 
 ```php
-add_filter('osec_pre_vaidate_settings', $_POST);
+add_filter('osec_pre_validate_settings', $_POST);
 ```
 
 #### Description
@@ -3774,7 +3774,7 @@ Let other plugin modify the POST variables before validations of settings.
  *
  * @file src/Command/SaveSettings.php
  */
-add_filter('osec_pre_vaidate_settings', $_POST);
+add_filter('osec_pre_validate_settings', $_POST);
 ```
 
 </details>
@@ -3786,7 +3786,7 @@ add_filter('osec_pre_vaidate_settings', $_POST);
 Post process saving of save handler value.
 
 ```php
-add_filter('osec{$method}', $method $value $_REQUEST);
+add_filter('osec{$method}', $method $value);
 ```
 
 #### Description
@@ -3799,7 +3799,6 @@ Settings can have save handler. Like: handleSaving_$option_name()
 
  - **$method** <span style="color:crimson"> </span> Save handler.
  - **$value** <span style="color:crimson"> </span> Value returned by $method or null.
- - **$_REQUEST** <span style="color:crimson"> </span> Request.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -3815,11 +3814,10 @@ Settings can have save handler. Like: handleSaving_$option_name()
  *
  * @param  string  $method  Save handler.
  * @param  array  $value  Value returned by $method or null.
- * @param  array  $_REQUEST  Request.
  *
  * @file src/Command/SaveSettings.php
  */
-add_filter('osec{$method}', $method $value $_REQUEST);
+add_filter('osec{$method}', $method $value);
 ```
 
 </details>
@@ -6072,7 +6070,7 @@ do_action('osec_admin_manage_taxonomies',);
 
 ```php
 /**
- * Do something on admin taxinomy or tags management page.
+ * Do something on admin taxonomy or tags management page.
  *
  * @file src/App/View/Admin/AdminPageManageTaxonomies.php
  */
@@ -8098,13 +8096,13 @@ add_filter('osec_export_filter', $filter);
 
 @file **../src/Command/SaveSettings.php**
 
-### osec_pre_vaidate_settings <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_pre_validate_settings <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter Settings before validation.
 
 ```php
-add_filter('osec_pre_vaidate_settings', $_POST);
+add_filter('osec_pre_validate_settings', $_POST);
 ```
 
 #### Description
@@ -8134,7 +8132,7 @@ Let other plugin modify the POST variables before validations of settings.
  *
  * @file src/Command/SaveSettings.php
  */
-add_filter('osec_pre_vaidate_settings', $_POST);
+add_filter('osec_pre_validate_settings', $_POST);
 ```
 
 </details>
@@ -8146,7 +8144,7 @@ add_filter('osec_pre_vaidate_settings', $_POST);
 Post process saving of save handler value.
 
 ```php
-add_filter('osec{$method}', $method $value $_REQUEST);
+add_filter('osec{$method}', $method $value);
 ```
 
 #### Description
@@ -8159,7 +8157,6 @@ Settings can have save handler. Like: handleSaving_$option_name()
 
  - **$method** <span style="color:crimson"> </span> Save handler.
  - **$value** <span style="color:crimson"> </span> Value returned by $method or null.
- - **$_REQUEST** <span style="color:crimson"> </span> Request.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -8175,11 +8172,10 @@ Settings can have save handler. Like: handleSaving_$option_name()
  *
  * @param  string  $method  Save handler.
  * @param  array  $value  Value returned by $method or null.
- * @param  array  $_REQUEST  Request.
  *
  * @file src/Command/SaveSettings.php
  */
-add_filter('osec{$method}', $method $value $_REQUEST);
+add_filter('osec{$method}', $method $value);
 ```
 
 </details>

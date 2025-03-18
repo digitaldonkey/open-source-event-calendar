@@ -64,9 +64,4 @@ abstract class AdminPageAbstract extends OsecBaseClass
      * Renders the page (using Twig renderer).
      */
     abstract public function display_page(): void;
-
-    /**
-     * Handle post, likely to be deprecated to use commands.
-     */
-    abstract public function handle_post();
 }

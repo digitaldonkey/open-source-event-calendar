@@ -320,18 +320,18 @@ class AdminThemeList extends WP_List_Table
                     $activate_link = admin_url(OSEC_THEME_SELECTION_BASE_URL);
                     $activate_link = add_query_arg(
                         [
-                            'ai1ec_action'     => 'activate_theme',
-                            'ai1ec_theme_dir'  => $theme_dir,
+                            'osec_action'     => AdminPageManageThemes::$NONCE['action'],
+                            'osec_theme_dir'  => $theme_dir,
                             // hardcoded for 2.2
                             'osec_theme'       => $stylesheet,
-                            'ai1ec_theme_root' => $theme_root,
+                            'osec_theme_root' => $theme_root,
                             'ai1ec_theme_url'  => $theme_root_uri . '/' . $stylesheet,
                         ],
                         $activate_link
                     );
                     $activate_link = wp_nonce_url(
                         $activate_link,
-                        'switch-ai1ec_theme_' . $template
+                        'switch-osec_theme_' . $template
                     );
 
                     $activate_text = esc_attr(

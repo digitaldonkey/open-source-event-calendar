@@ -3,7 +3,7 @@
 	<div id="poststuff">
 		<form method="post" action="{{ action }}">
 			{% autoescape false %}
-				{{ wp_nonce_field( nonce.action, nonce.name, nonce.referrer, false) }}
+				{{ wp_nonce_field( nonce.action, nonce.nonce_name, nonce.referrer, false) }}
 			{% endautoescape %}
 			<div class="metabox-holder">
 				{% block layout %}{% endblock %}

@@ -99,7 +99,8 @@ class AdminPageAllEvents extends OsecBaseClass
                         'taxonomy'        => $tax_slug,
                         'name'            => $tax_obj->name,
                         'orderby'         => 'name',
-                        'selected'        => $_GET[$tax_slug] ?? '',
+                        // phpcs:ignore WordPress.Security.NonceVerification
+                        'selected'        => isset($_GET[$tax_slug]) ? sanitize_key($_GET[$tax_slug]) : '',
                         'hierarchical'    => $tax_obj->hierarchical,
                         'show_count'      => true,
                         'hide_if_empty'   => true,
@@ -111,9 +112,11 @@ class AdminPageAllEvents extends OsecBaseClass
                 'name'            => 'author',
                 'show_option_all' => __('Show All Authors', 'open-source-event-calendar'),
             ];
+            // phpcs:disable WordPress.Security.NonceVerification
             if (isset($_GET['user'])) {
-                $args['selected'] = (int)$_GET['user'];
+                $args['selected'] = absint($_GET['user']);
             }
+            // phpcs:enable
             wp_dropdown_users($args);
         }
     }

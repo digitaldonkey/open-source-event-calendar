@@ -1925,7 +1925,7 @@ timely.define("domReady", [], function () {
                             k = x.getUTCMinutes();
                         (N = N < 10 ? "0" + N : N), (T = T < 10 ? "0" + T : T), (C = C < 10 ? "0" + C : C), (k = k < 10 ? "0" + k : k), (S = S.getUTCFullYear() + "" + N + T + "T000000Z"), (o += "UNTIL=" + S + ";");
                     }
-                    var L = {action: "osec_rrule_to_text", rrule: o};
+                    var L = {action: "osec_rrule_to_text", rrule: o, nonce:  wpApiSettings.nonce};
                     i.button("loading").next().addClass("ai1ec-disabled"),
                         e.post(
                             s,
@@ -1970,21 +1970,25 @@ timely.define("domReady", [], function () {
                 h = function () {
                     n.click_on_ics_rule_text("#osec_repeat_text > a", "#osec_repeat", "#osec_repeat_label", {
                         action: "osec_get_repeat_box",
+                        nonce: wpApiSettings.nonce,
                         repeat: 1,
                         post_id: e("#post_ID").val()
                     }, n.init_modal_widgets),
                         n.click_on_ics_rule_text("#osec_exclude_text > a", "#osec_exclude", "#osec_exclude_label", {
                             action: "osec_get_repeat_box",
+                            nonce: wpApiSettings.nonce,
                             repeat: 0,
                             post_id: e("#post_ID").val()
                         }, n.init_modal_widgets),
                         n.click_on_checkbox("#osec_repeat", "#osec_repeat_text > a", "#osec_repeat_label", {
                             action: "osec_get_repeat_box",
+                            nonce: wpApiSettings.nonce,
                             repeat: 1,
                             post_id: e("#post_ID").val()
                         }, n.init_modal_widgets),
                         n.click_on_checkbox("#osec_exclude", "#osec_exclude_text > a", "#osec_exclude_label", {
                             action: "osec_get_repeat_box",
+                            nonce: wpApiSettings.nonce,
                             repeat: 0,
                             post_id: e("#post_ID").val()
                         }, n.init_modal_widgets);

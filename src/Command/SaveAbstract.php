@@ -22,8 +22,6 @@ abstract class SaveAbstract extends CommandAbstract
 
     protected string $nonceName;
 
-    protected $nonceAction;
-
     /**
      * Public constructor, set the strategy according to the type.
      *
@@ -38,7 +36,6 @@ abstract class SaveAbstract extends CommandAbstract
             $args['action'] = [$args['action'] => true];
         }
         $this->action      = $args['action'];
-        $this->nonceAction = $args['nonce_action'];
         $this->nonceName   = $args['nonce_name'];
     }
 
@@ -54,7 +51,7 @@ abstract class SaveAbstract extends CommandAbstract
         ) {
             $pass = wp_verify_nonce(
                 $_POST[$this->nonceName],
-                $this->nonceAction
+                key($this->action)
             );
             if ( ! $pass) {
                 wp_die('Failed security check');

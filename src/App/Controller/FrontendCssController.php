@@ -85,14 +85,15 @@ class FrontendCssController extends OsecBaseClass
         header('HTTP/1.1 200 OK');
         header('Content-Type: text/css', true, 200);
         // Aggressive caching to save future requests from the same client.
-        $etag = '"' . md5(__FILE__ . $_GET[self::REQUEST_CSS_PARAM]) . '"';
+        // phpcs:ignore WordPress.Security.NonceVerification
+        $etag = '"' . md5(__FILE__ . sanitize_text_field($_GET[self::REQUEST_CSS_PARAM])) . '"';
         header('ETag: ' . $etag);
         $max_age = 31536000;
         header(
             'Expires: ' .
             gmdate(
                 'D, d M Y H:i:s',
-                UIDateFormats::factory($this->app)->current_time() + $max_age
+                UIDateFormats::factory($this->app)->current_time() . $max_age
             ) .
             ' GMT'
         );

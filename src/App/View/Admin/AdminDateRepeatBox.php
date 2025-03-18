@@ -29,6 +29,10 @@ class AdminDateRepeatBox extends OsecBaseClass
      */
     public function get_repeat_box(): void
     {
+        if (!wp_verify_nonce($_REQUEST['nonce'], 'wp_rest')) {
+            return;
+        }
+
         $repeat  = (int)$_REQUEST['repeat'];
         $repeat  = $repeat == 1 ? 1 : 0;
         $post_id = (int)$_REQUEST['post_id'];
@@ -626,6 +630,10 @@ class AdminDateRepeatBox extends OsecBaseClass
      **/
     public function convert_rrule_to_text()
     {
+        if (!wp_verify_nonce($_REQUEST['nonce'], 'wp_rest')) {
+            return;
+        }
+
         $error   = false;
         $message = '';
         // check to see if RRULE is set

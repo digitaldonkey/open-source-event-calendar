@@ -3,6 +3,7 @@
 namespace Osec\Command;
 
 use Osec\App\View\Admin\AdminPageAbstract;
+use Osec\App\View\Admin\AdminPageManageThemes;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderRedirect;
 use Osec\Theme\ThemeLoader;
@@ -15,7 +16,7 @@ use Osec\Theme\ThemeLoader;
  * @replaces Ai1ec_Command_Change_Theme
  * @author     Time.ly Network Inc.
  */
-class ChangeTheme extends CommandAbstract
+class ChangeTheme extends SaveAbstract
 {
     /**
      * Executes the command to change the active theme.
@@ -25,17 +26,19 @@ class ChangeTheme extends CommandAbstract
      */
     public function do_execute()
     {
-        // Update the active theme in the options table.
+        // Nonce verification happens in SaveAbstract->is_this_to_execute().
+        // phpcs:disable WordPress.Security.NonceVerification
+
         $stylesheet = preg_replace(
             '|[^a-z_\-]+|i',
             '',
-            $_GET['osec_theme']
+            sanitize_text_field($_GET['osec_theme'])
         );
         ThemeLoader::factory($this->app)
                    ->switch_theme(
                        [
-                           'theme_root' => realpath($_GET['ai1ec_theme_root']),
-                           'theme_dir'  => realpath($_GET['ai1ec_theme_dir']),
+                           'theme_root' => realpath(sanitize_text_field($_GET['osec_theme_root'])),
+                           'theme_dir'  => realpath(sanitize_text_field($_GET['osec_theme_dir'])),
                            'theme_url'  => $_GET['ai1ec_theme_url'],
                            'stylesheet' => $stylesheet,
                        ]
@@ -67,14 +70,14 @@ class ChangeTheme extends CommandAbstract
     public function is_this_to_execute()
     {
         if (
-            isset($_GET['ai1ec_action']) &&
-            $_GET['ai1ec_action'] === 'activate_theme' &&
+            isset($_GET['osec_action']) &&
+            $_GET['osec_action'] === AdminPageManageThemes::$NONCE['action'] &&
             current_user_can('switch_osec_themes') &&
-            is_dir($_GET['ai1ec_theme_dir']) &&
-            is_dir($_GET['ai1ec_theme_root'])
+            is_dir(sanitize_text_field($_GET['osec_theme_dir'])) &&
+            is_dir(sanitize_text_field($_GET['osec_theme_root']))
         ) {
             check_admin_referer(
-                'switch-ai1ec_theme_' . $_GET['osec_theme']
+                'switch-osec_theme_' . $_GET['osec_theme']
             );
 
             return true;

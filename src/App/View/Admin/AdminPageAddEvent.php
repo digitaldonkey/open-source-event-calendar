@@ -5,6 +5,7 @@ namespace Osec\App\View\Admin;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\Event;
+use Osec\App\Model\PostTypeEvent\EventEditing;
 use Osec\App\Model\PostTypeEvent\EventNotFoundException;
 use Osec\App\Model\PostTypeEvent\EventParent;
 use Osec\App\View\RepeatRuleToText;
@@ -57,9 +58,11 @@ class AdminPageAddEvent extends OsecBaseClass
 
         /* @var int $instance_id See DB table wp_osec_event_instances */
         $instance_id = false;
+        // phpcs:disable WordPress.Security.NonceVerification
         if (isset($_REQUEST['instance'])) {
             $instance_id = absint($_REQUEST['instance']);
         }
+        // phpcs:enable
         if ($instance_id) {
             add_filter(
                 'print_scripts_array',
@@ -242,7 +245,10 @@ class AdminPageAddEvent extends OsecBaseClass
          */
         $boxes = apply_filters('osec_admin_edit_event_input_panels_alter', $boxes, $event);
         // Display the final view of the meta box.
-        $args = ['boxes' => $boxes];
+        $args = [
+            'boxes' => $boxes,
+            'nonce' => wp_nonce_field(EventEditing::NONCE_ACTION, EventEditing::NONCE_NAME),
+        ];
         ThemeLoader::factory($this->app)
             ->get_file('add_new_event_meta_box.php', $args, true)
             ->render();

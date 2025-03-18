@@ -20,6 +20,8 @@ class SaveThemeOptions extends SaveAbstract
 {
     public function do_execute()
     {
+        // Nonce verification happens in SaveAbstract->is_this_to_execute().
+        // phpcs:disable WordPress.Security.NonceVerification.Missing
         $variables = [];
         $isReset = isset($_POST[AdminPageThemeOptions::RESET_ID]);
 
@@ -28,12 +30,12 @@ class SaveThemeOptions extends SaveAbstract
             $variables = LessController::factory($this->app)->get_saved_variables();
             foreach ($variables as $variable_name => $variable_params) {
                 if (isset($_POST[$variable_name])) {
-                    $var = wp_unslash($_POST[$variable_name]);
+                    $var = sanitize_text_field(wp_unslash($_POST[$variable_name]));
                     if (ThemeVariableFont::CUSTOM_FONT === $var) {
                         $var .= ThemeVariableFont::CUSTOM_FONT_ID_SUFFIX;
                     }
                     // update the original array
-                    $variables[$variable_name]['value'] = sanitize_text_field($var);
+                    $variables[$variable_name]['value'] = $var;
                 }
             }
         } elseif ($isReset) {
@@ -45,6 +47,7 @@ class SaveThemeOptions extends SaveAbstract
              */
             do_action('osec_reset_less_variables');
         }
+        // phpcs:enable
 
         FrontendCssController::factory($this->app)
                              ->update_variables_and_compile_css(

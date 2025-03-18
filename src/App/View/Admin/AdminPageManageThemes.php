@@ -14,10 +14,15 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageManageThemes extends AdminPageAbstract
 {
+    public static $NONCE = [
+        'action'       => 'osec_change_theme',
+        'nonce_name'   => 'osec_change_theme_nonce',
+    ];
+
     public function display_page(): void
     {
         global $ct;
-        // defaults
+        // phpcs:ignore WordPress.Security.NonceVerification
         $activated = isset($_GET['activated']) ? true : false;
         $deleted   = false;
 
@@ -33,6 +38,12 @@ class AdminPageManageThemes extends AdminPageAbstract
                 'Open Source Event Calendar: Themes',
                 'open-source-event-calendar'
             ),
+            'nonce'   => [
+                'action' => self::$NONCE['action'],
+                'nonce_name' => self::$NONCE['nonce_name'],
+                'referrer' => false,
+            ],
+
         ];
 
         add_thickbox();
@@ -55,10 +66,6 @@ class AdminPageManageThemes extends AdminPageAbstract
     }
 
     public function add_meta_box(): void
-    {
-    }
-
-    public function handle_post()
     {
     }
 }

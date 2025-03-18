@@ -85,7 +85,10 @@ composer require --dev "phpunit/phpunit:^9.6"
 composer require --dev yoast/phpunit-polyfills:"^2.0"
 
 ```
+# osec_recompile_templates
 
+Enable debug mode `define('OSEC_DEBUG', true);` and add get param  
+  yoursite.com?osec_recompile_templates=TRUE
 
 ### Install Test scripts in ddev 
 
@@ -120,7 +123,11 @@ So Finally testing:
 ```
 ddev ssh 
 cd /var/www/html/wp-content/plugins/open-source-event-calendar
- ./vendor/bin/phpunit phpcs --standard=phpcs.xml
+ ./vendor/bin/phpcs --standard=phpcs.xml --runtime-set testVersion 8.1-
+
  or 
  composer run phpcs
 ```
+runtime-set testVersion 8.1 is overriding WordPress default minimum version requiremets. Explicitly set to override WP defaults in `phpcs-wp-plugin-review.xml`.
+
+**phpcs-wp-plugin-review.xml** comes from [WordPress/plugin-check](https://api.github.com/repos/WordPress/plugin-check). The latest version you can download using `bin/get-latest-plugin-review-phpcs-rulesets.sh`.

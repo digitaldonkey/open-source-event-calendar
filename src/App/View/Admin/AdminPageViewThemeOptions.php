@@ -78,11 +78,4 @@ class AdminPageViewThemeOptions extends AdminPageAbstract
     public function add_meta_box(): void
     {
     }
-
-    /**
-     * Handle post, likely to be deprecated to use commands.
-     */
-    public function handle_post()
-    {
-    }
 }
