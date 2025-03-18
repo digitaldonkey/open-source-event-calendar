@@ -49,7 +49,7 @@ class ThemeCompiler extends OsecBaseClass
             $files = $this->get_files($twig);
             $this->compile($twig, $files);
         }
-        echo esc_html('Re-compiled in ' . (microtime(true) - $start) . "\n");
+        echo "\n" . esc_html('Re-compiled in ' . (microtime(true) - $start) . "\n");
         exit(0);
     }
 
@@ -120,7 +120,7 @@ class ThemeCompiler extends OsecBaseClass
     {
         foreach ($file_list as $file => $template) {
             $twig->load($template);
-            echo esc_html('Compiled: ', $template, ' (', $file, ')', "\n");
+            echo esc_html('Compiled: ' . "\n  " . $template . "\n  " . $file . "\n");
         }
     }
 }
