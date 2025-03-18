@@ -3,7 +3,6 @@
 namespace Osec\App\Controller;
 
 use Exception;
-use JetBrains\PhpStorm\NoReturn;
 use Osec\App\Model\PostTypeEvent\EventCreateException;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\Model\PostTypeEvent\EventType;
@@ -28,6 +27,10 @@ use Osec\Theme\ThemeLoader;
  */
 class FeedsController extends OsecBaseClass
 {
+    // Using ajax, which verifies nonces.
+    // @see $this->add_actions().
+    // phpcs:disable WordPress.Security.NonceVerification
+
     /**
      * @var string Name of cron hook.
      */
@@ -270,7 +273,7 @@ class FeedsController extends OsecBaseClass
      *
      * Imports the selected iCalendar feed
      */
-    public function update_ics_feed($feed_id = false): array
+    public function update_ics_feed(?int $feed_id): array
     {
         $ajax = false;
         $data = [];
@@ -545,10 +548,10 @@ class FeedsController extends OsecBaseClass
     /**
      * Delete feeds and events
      */
-    #[NoReturn] public function delete_feeds_and_events(): never
+    public function delete_feeds_and_events(): never
     {
-        $remove_events = $_POST['remove_events'] === 'true' ? true : false;
-        $ics_id        = isset($_POST['ics_id']) ? (int)$_REQUEST['ics_id'] : 0;
+        $remove_events = sanitize_key($_POST['remove_events']) === 'true' ? true : false;
+        $ics_id        = isset($_REQUEST['ics_id']) ? (int)$_REQUEST['ics_id'] : 0;
 
         if ($remove_events) {
             $output = $this->flush_ics_feed(true, false);
@@ -824,4 +827,5 @@ class FeedsController extends OsecBaseClass
         $url_components = wp_parse_url($url);
         return $url_components['host'];
     }
+    // phpcs:enable
 }

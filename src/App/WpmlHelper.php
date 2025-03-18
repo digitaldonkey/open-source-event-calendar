@@ -155,7 +155,7 @@ class WpmlHelper extends OsecBaseClass
             : '';
 
         // Primary ccTLD for "United Kingdom" is uk.
-        return ($region == 'gb') ? 'uk' : $region;
+        return ($region === 'gb') ? 'uk' : $region;
     }
 
     /**
@@ -193,21 +193,23 @@ class WpmlHelper extends OsecBaseClass
      */
     public function get_translatable_id()
     {
+        // phpcs:disable WordPress.Security.NonceVerification
         if (
             isset($_GET['trid']) &&
             isset($_GET['source_lang']) &&
             $this->is_wpml_active()
         ) {
             global $sitepress;
+            $source_lang = sanitize_key($_GET['source_lang']);
             $details = $sitepress->get_element_translations(
-                $_GET['trid'],
+                sanitize_key($_GET['trid']),
                 'post_' . OSEC_POST_TYPE
             );
-            if (isset($details[$_GET['source_lang']])) {
-                return $details[$_GET['source_lang']]->element_id;
+            if (isset($details[$source_lang])) {
+                return $details[$source_lang]->element_id;
             }
         }
-
+        // phpcs:enable
         return false;
     }
 
