@@ -2089,11 +2089,6 @@ msgstr ""
 msgid "<p>The event <strong>%1$s</strong> was cloned succesfully. <a href=\"%2$s\">Edit cloned event</a></p>"
 msgstr ""
 
-#. translators: Filename and file
-#: src/Command/CompileCoreCss.php:80
-msgid "Theme CSS compiled succesfully and written in %1$s. and classmap stored in %2$s."
-msgstr ""
-
 #: src/Exception/DatabaseErrorException.php:22
 msgid ""
 "Database update has failed. Please make sure, that database user, defined in <em>wp-config.php</em> \n"

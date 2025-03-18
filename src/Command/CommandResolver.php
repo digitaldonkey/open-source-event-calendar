@@ -85,10 +85,6 @@ class CommandResolver
             CommandClone::factory($this->app, $request)
         );
 
-        $this->add_command(
-            CompileCoreCss::factory($this->app, $request)
-        );
-
         $request->parse();
     }
 
