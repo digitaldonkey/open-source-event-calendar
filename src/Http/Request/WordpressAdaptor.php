@@ -55,7 +55,6 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
             $rewrite_object = $wp_rewrite;
         }
         $this->rewrite = $rewrite_object;
-
         $this->init_vars();
     }
 
@@ -64,8 +63,9 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
      */
     public function init_vars($query = null)
     {
+        // phpcs:disable WordPress.Security.NonceVerification
         foreach ($_REQUEST as $key => $value) {
-            $this->variable($key, $value);
+            $this->variable($key, sanitize_text_field($value));
         }
         if (null === $query) {
             $query = $_SERVER['REQUEST_URI'];
@@ -79,14 +79,14 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
             }
         }
         if (isset($_REQUEST['ai1ec'])) {
-            $particles = explode('|', trim((string)$_REQUEST['ai1ec'], '|'));
+            $particles = explode('|', trim(sanitize_text_field($_REQUEST['ai1ec']), '|'));
             foreach ($particles as $element) {
                 if ($this->addSerializedVariable($element)) {
                     ++$imported;
                 }
             }
         }
-
+        // phpcs:enable
         return $imported;
     }
 
@@ -141,23 +141,20 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
      *
      * @param  string  $regexp  Expression to register
      * @param  string  $landing  URL to be executed on match
-     * @param  int  $priority  Numeric rule priority - higher means sooner check
+     * @param  ?int  $priority  Numeric rule priority - higher means sooner check
      *
      * @return string Regexp rule registered with framework
      */
-    public function register_rule($regexp, $landing, $priority = null)
+    public function register_rule($regexp, $landing, $priority = 1)
     {
-        if (null === $priority) {
-            $priority = 1;
-        }
-        $priority = ($priority > 0) ? 'top' : 'bottom';
+        $priority_val = ($priority > 0) ? 'top' : 'bottom';
         $regexp   = $this->injectRouteGroups($regexp);
         $existing = $this->rewrite->wp_rewrite_rules();
         if ( ! isset($existing[$regexp])) {
             $this->rewrite->add_rule(
                 $regexp,
                 $landing,
-                $priority
+                $priority_val
             );
             $this->rewrite->flush_rules();
         }
@@ -173,7 +170,7 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
         $elements = preg_split(
             '/\$(\d+)/',
             (string)$query,
-            null,
+            -1,
             PREG_SPLIT_DELIM_CAPTURE
         );
         $result   = '';

@@ -4,7 +4,7 @@ namespace Osec\App\Controller;
 
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
-use Osec\Http\Request\QueryInterface;
+use Osec\Http\Request\WordpressAdaptor;
 
 /**
  * Routing (management) base class
@@ -22,9 +22,9 @@ class Router extends OsecBaseClass
     protected ?string $calendarBase;
 
     /**
-     * @var QueryInterface Query manager object
+     * @var WordpressAdaptor Query manager object
      */
-    protected ?QueryPermalinkController $queryManager;
+    protected ?WordpressAdaptor $queryManager;
     /**
      * @var array Rewrite structure.
      */
@@ -42,7 +42,7 @@ class Router extends OsecBaseClass
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->queryManager = new QueryPermalinkController();
+        $this->queryManager = WordpressAdaptor::factory($app);
     }
 
     /**
