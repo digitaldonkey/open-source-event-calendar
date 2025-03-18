@@ -20,8 +20,10 @@ class CompileThemes extends CommandAbstract
     public function is_this_to_execute()
     {
         return (
+            // Debug enabled and ?osec_recompile_templates is set.
             OSEC_DEBUG
-            && isset($_GET['osec_recompile_templates'])
+            // phpcs:ignore WordPress.Security.NonceVerification
+            && isset($_REQUEST['osec_recompile_templates'])
             && current_user_can('switch_osec_themes')
         );
     }
