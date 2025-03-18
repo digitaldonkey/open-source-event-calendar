@@ -288,10 +288,13 @@ class KsesHelper extends OsecBaseClass
                     'scope' => true,
                 ],
                 'thead' => [
+                    'class' => true,
                 ],
                 'tr' => [
+                    'class' => true,
                 ],
                 'tt' => [
+                    'class' => true,
                 ],
                 'ul' => [
                     'class' => true,
