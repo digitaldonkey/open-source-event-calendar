@@ -240,9 +240,7 @@ jobs:
             rm /tmp/release/$WP_ORG_PLUGIN_NAME/public/osec_themes/vortex/less/build-3rdparty-less.sh
             rm /tmp/release/$WP_ORG_PLUGIN_NAME/public/admin/less/build-css.bat
             rm /tmp/release/$WP_ORG_PLUGIN_NAME/calendar_block/.editorconfig
-            rm /tmp/release/$WP_ORG_PLUGIN_NAME/vendor/louis1021/sg-i-calendar/src/build.sh
-            rm /tmp/release/$WP_ORG_PLUGIN_NAME/vendor/louis1021/sg-i-calendar/src/tests/test.sh
-            rm /tmp/release/$WP_ORG_PLUGIN_NAME/vendor/louis1021/sg-i-calendar/src/tests/timestamp.sh
+            find /tmp/release/$WP_ORG_PLUGIN_NAME  -iname "*.sh"  -print0 | xargs -0 rm
             (cd /tmp/release/ && zip -r /tmp/$OSEC_RELEASE_FILE $WP_ORG_PLUGIN_NAME)
       - store_artifacts:
           path: /tmp/open-source-event-calendar.zip
