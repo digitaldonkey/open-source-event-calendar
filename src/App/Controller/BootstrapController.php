@@ -241,7 +241,7 @@ class BootstrapController
 
         // Route the request.
         if (is_admin()) {
-            add_action('parse_request', $this->route_request(...));
+            add_action('init', $this->route_request(...));
         } else {
             add_action('template_redirect', $this->route_request(...));
         }

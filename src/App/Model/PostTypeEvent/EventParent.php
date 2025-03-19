@@ -365,7 +365,7 @@ class EventParent extends OsecBaseClass
      *
      * @return int|bool ID of parent event or bool(false)
      */
-    public function get_parent_event(int $current_id)
+    public function get_parent_event(?int $current_id)
     {
         static $parents = null;
         if (null === $parents) {

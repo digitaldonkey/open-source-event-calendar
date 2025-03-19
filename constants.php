@@ -382,6 +382,9 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     }
 
     /**
+     * This string in query indicates serialized variables.
+     * @see \Osec\Http\Request\WordpressAdaptor.
+     *
      * @replaces Ai1ec_Uri::DIRECTION_SEPARATOR
      */
     if (! defined('OSEC_URI_DIRECTION_SEPARATOR')) {

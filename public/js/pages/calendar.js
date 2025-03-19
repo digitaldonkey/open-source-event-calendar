@@ -8961,7 +8961,7 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
         e("#ai1ec-calendar").prepend(i)
     }, E = function (t, n, r) {
         t.find(".osec-calendar-view-loading").fadeIn("fast").end().find(".osec-calendar-view").fadeTo("fast", .3, function () {
-            var i = {request_type: r, ai1ec_doing_ajax: !0};
+            var i = {request_type: r, osec_doing_ajax: !0};
             e("#osec-container > .ai1ec-alert").remove();
             var o = e.ajax({url: n, dataType: r, data: i, method: "get"});
             o.done(function (i) {

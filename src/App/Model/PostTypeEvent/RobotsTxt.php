@@ -70,6 +70,7 @@ class RobotsTxt extends OsecBaseClass
             }
             $creds = request_filesystem_credentials($url, $type, false, false, null);
 
+            // phpcs:disable WordPress.Security.NonceVerification
             if ( ! WP_Filesystem($creds)) {
                 $error_v = (
                     isset($_POST['hostname']) ||
@@ -96,7 +97,7 @@ class RobotsTxt extends OsecBaseClass
                         ResponseHelper::redirect($redirect_url);
                     }
                 }
-
+                // phpcs:enable
                 return;
             }
         }
@@ -141,8 +142,9 @@ class RobotsTxt extends OsecBaseClass
         // Update settings textarea
         $this->app->settings->set('edit_robots_txt', $custom_rules);
 
-        // we need to avoid infinity loop if FS_METHOD direct
+        // Avoid infinity loop if FS_METHOD direct
         // and robots.txt is not writable
+        // phpcs:ignore WordPress.Security.NonceVerification
         if ($redirect && ! isset($_REQUEST['noredirect'])) {
             ResponseHelper::redirect($redirect_url);
         }

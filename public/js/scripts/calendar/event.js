@@ -263,7 +263,7 @@ timely.define("external_libs/bootstrap/tab", ["jquery_timely"], function (e) {
         n.preventDefault(), e("div.ai1ec-popover").remove();
         var r = "jsonp", i = e(this).closest(".timely-calendar"), s = {
             request_type: r,
-            ai1ec_doing_ajax: !0,
+            osec_doing_ajax: !0,
             ai1ec: t.create_ai1ec_to_send(i)
         };
         e.ajax({

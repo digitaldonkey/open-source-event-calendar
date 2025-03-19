@@ -245,11 +245,11 @@ class TwigExtension extends AbstractExtension
             'wp_nonce_field'               => new TwigFunction('wp_nonce_field', [$this, 'wp_nonce_field']),
             'do_meta_boxes'                => new TwigFunction('do_meta_boxes', [$this, 'do_meta_boxes']),
             'fb'                           => new TwigFunction('fb', [$this, 'fb']),
-            'ai1ec_disable_content_output' => new TwigFunction(
-                'ai1ec_disable_content_output',
+            'osec_disable_content_output' => new TwigFunction(
+                'osec_disable_content_output',
                 [
                     $this,
-                    'ai1ec_disable_content_output',
+                    'osec_disable_content_output',
                 ]
             ),
         ];
@@ -368,7 +368,7 @@ class TwigExtension extends AbstractExtension
      */
     public function getName()
     {
-        return 'ai1ec';
+        return 'osec';
     }
 
     /**
@@ -376,7 +376,7 @@ class TwigExtension extends AbstractExtension
      *
      * @return void Method does not return.
      */
-    public function ai1ec_disable_content_output()
+    public function osec_disable_content_output()
     {
         AppendContentController::factory($this->app)->set_append_content(false);
     }

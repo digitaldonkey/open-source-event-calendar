@@ -137,7 +137,7 @@ class WeekView extends AbstractView
             'text_now_label'           => __('Now:', 'open-source-event-calendar'),
             'text_venue_separator'     => self::get_venue_separator_text(),
             'hours'                    => $hours,
-            'indent_multiplier'        => 8,
+            'indent_multiplier'        => 32,
             'indent_offset'            => 0,
             'pagination_links'         => $pagination_links,
         ];

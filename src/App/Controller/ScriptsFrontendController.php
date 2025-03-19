@@ -96,7 +96,6 @@ class ScriptsFrontendController extends OsecBaseClass
      * @var Settings
      */
     private Settings $settings;
-    private ?AccessControl $aco;
 
     /**
      * Public constructor.
@@ -107,11 +106,11 @@ class ScriptsFrontendController extends OsecBaseClass
     {
         parent::__construct($app);
         $this->settings = $this->app->settings;
-        $this->aco      = new AccessControl();
     }
 
     public static function add_actions(App $app, bool $is_admin)
     {
+        // phpcs:ignore WordPress.Security.NonceVerification
         if (isset($_GET[self::LOAD_JS_PARAMETER])) {
             // $dp->register_action('wp_loaded', ['controller.javascript', 'render_js']);
             add_action(
@@ -139,6 +138,7 @@ class ScriptsFrontendController extends OsecBaseClass
     public function render_js()
     {
         $common_js = '';
+        // phpcs:disable WordPress.Security.NonceVerification
         if (! isset($_GET[self::LOAD_JS_PARAMETER])) {
             return null;
         }
@@ -167,6 +167,7 @@ class ScriptsFrontendController extends OsecBaseClass
                 $this->areFrontendScriptsloaded = true;
             }
         }
+        // phpcs:enable
 
         // phpcs:disable
         // WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -322,9 +323,7 @@ class ScriptsFrontendController extends OsecBaseClass
         }
         $json_data = wp_json_encode($data);
         $prefix    = self::REQUIRE_NAMESPACE;
-        $script    = "$prefix.define( '$object_name', $json_data );";
-
-        return $script;
+        return "$prefix.define( '$object_name', $json_data );";
     }
 
     /**
@@ -545,8 +544,10 @@ class ScriptsFrontendController extends OsecBaseClass
     public function are_we_on_calendar_feeds_page()
     {
         $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
+        // phpcs:disable WordPress.Security.NonceVerification
         $post_type    = $_GET['post_type'] ?? false;
         $page         = $_GET['page'] ?? false;
+        // phpcs:enable
         if ($post_type === false || $page === false) {
             return false;
         }
@@ -565,6 +566,7 @@ class ScriptsFrontendController extends OsecBaseClass
     private function isPageEventategories(): bool
     {
         $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
+        // phpcs:ignore WordPress.Security.NonceVerification
         $post_type    = $_GET['post_type'] ?? '';
 
         return (
@@ -587,6 +589,7 @@ class ScriptsFrontendController extends OsecBaseClass
     private function isPageLessVariables()
     {
         $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
+        // phpcs:ignore WordPress.Security.NonceVerification
         $page         = $_GET['page'] ?? '';
 
         return $path_details['basename'] === 'edit.php' && $page === AdminPageAbstract::ADMIN_PAGE_PREFIX . 'edit-css';
@@ -600,6 +603,7 @@ class ScriptsFrontendController extends OsecBaseClass
     private function isPageNewEvent()
     {
         $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
+        // phpcs:ignore WordPress.Security.NonceVerification
         $post_type    = $_GET['post_type'] ?? '';
 
         return $path_details['basename'] === 'post-new.php' &&
@@ -614,8 +618,10 @@ class ScriptsFrontendController extends OsecBaseClass
     private function isPageEditEvent()
     {
         $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
+        // phpcs:disable WordPress.Security.NonceVerification
         $post_id      = $_GET['post'] ?? false;
         $action       = $_GET['action'] ?? false;
+        // phpcs:enable
         if ($post_id === false || $action === false) {
             return false;
         }
@@ -623,7 +629,7 @@ class ScriptsFrontendController extends OsecBaseClass
         $editing = (
             'post.php' === $path_details['basename'] &&
             'edit' === $action &&
-            $this->aco->is_our_post_type($post_id)
+            AccessControl::is_our_post_type($post_id)
         );
 
         return $editing;
@@ -637,6 +643,7 @@ class ScriptsFrontendController extends OsecBaseClass
     private function isPageOsecSettings()
     {
         $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
+        // phpcs:ignore WordPress.Security.NonceVerification
         $page         = $_GET['page'] ?? '';
 
         return $path_details['basename'] === 'edit.php' &&
@@ -748,7 +755,7 @@ class ScriptsFrontendController extends OsecBaseClass
      */
     private function isPageSingleEvent()
     {
-        return $this->aco->is_our_post_type();
+        return AccessControl::is_our_post_type();
     }
 
     /**

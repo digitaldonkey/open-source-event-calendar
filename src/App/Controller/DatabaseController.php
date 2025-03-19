@@ -13,7 +13,7 @@ use wpdb;
  *
  * Thic class wrap the access to WordPress DB class ($wpdb) and
  * allows us to abstract from the WordPress code and to expand it
- * with convenience method specific for ai1ec
+ * with convenience method specific for osec
  *
  * @since      2.0
  * @author     Time.ly Network, Inc.

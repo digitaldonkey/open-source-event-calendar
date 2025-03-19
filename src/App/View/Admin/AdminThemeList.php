@@ -368,60 +368,22 @@ class AdminThemeList extends WP_List_Table
                         );
                         ?>
                     </h3>
-                    <p class="description"><?php
-                        echo esc_html($description); ?></p>
+                    <p class="description">
+                        <?php wp_kses($description, $this->app->kses->allowed_html_frontend()); ?>
+                    </p>
                     <span class='action-links'>
                         <?php echo wp_kses(
                             $actions,
                             $this->app->kses->allowed_html_frontend()
                         ); ?>
                     </span>
-                    <?php if (current_user_can('edit_themes') && $parent_theme) { ?>
-                    <p>
-                        <?php
-                        printf(
-                        /* translators: 1: Title 2: template dir 3: Stylesheet Dir 4: Title 5: Parent theme */
-                            esc_html__(
-                                'The template files are located in <code>%2$s</code>. The stylesheet files 
-                                        are located in <code>%3$s</code>. <strong>%4$s</strong> uses templates from 
-                                        <strong>%5$s</strong>. Changes made to the templates will affect both themes.',
-                                'open-source-event-calendar'
-                            ),
-                            esc_html($title),
-                            esc_html(str_replace(WP_CONTENT_DIR, '', $template_dir)),
-                            esc_html(str_replace(WP_CONTENT_DIR, '', $stylesheet_dir)),
-                            esc_html($title),
-                            esc_html($parent_theme)
-                        );
-                        ?>
-                    </p>
-                    <?php } else { ?>
                     <p>
                         <?php printf(
-                        /* translators:
-                            1: Theme name
-                            2: Template Dir
-                            3: Stylesheet dir
-                            4: Theme name
-                            5: Parent theme
-                        */
-                            esc_html__(
-                                'The template    files are located in <code>%2$s</code>.
-                                        The stylesheet files are located in <code>%3$s</code>.
-                                        <strong>%4$s</strong> uses templates from 
-                                        <strong>%5$s</strong>.
-                                         Changes made to the templates will affect both themes.',
-                                'open-source-event-calendar'
-                            ),
-                            esc_html($title),
-                            esc_html(str_replace(WP_CONTENT_DIR, '', $template_dir)),
-                            esc_html(str_replace(WP_CONTENT_DIR, '', $stylesheet_dir)),
-                            esc_html($title),
-                            esc_html($parent_theme)
-                        );
-                        ?>
+                        /* translators: 1: template dir */
+                            esc_html__('The template files are located in %s.', 'open-source-event-calendar'),
+                            '<code>' . esc_html(str_replace(WP_CONTENT_DIR, '', $template_dir)) . '</code>',
+                        );?>
                     </p>
-                    <?php } ?>
                     <?php
                     if ($tags) : ?>
                         <p>
