@@ -242,7 +242,7 @@ jobs:
             rm /tmp/release/$WP_ORG_PLUGIN_NAME/calendar_block/.editorconfig
             rm /tmp/release/$WP_ORG_PLUGIN_NAME/vendor/louis1021/sg-i-calendar/src/build.sh
             rm /tmp/release/$WP_ORG_PLUGIN_NAME/vendor/louis1021/sg-i-calendar/src/tests/test.sh
-            rm /tmp/release/$WP_ORG_PLUGIN_NAME/vendor/louis1021/sg-i-calendar/src/tests/timestanp.sh
+            rm /tmp/release/$WP_ORG_PLUGIN_NAME/vendor/louis1021/sg-i-calendar/src/tests/timestamp.sh
             (cd /tmp/release/ && zip -r /tmp/$OSEC_RELEASE_FILE $WP_ORG_PLUGIN_NAME)
       - store_artifacts:
           path: /tmp/open-source-event-calendar.zip
