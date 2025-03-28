@@ -141,7 +141,7 @@ class ScriptsFrontendController extends OsecBaseClass
         if (! isset($_GET[self::LOAD_JS_PARAMETER])) {
             return null;
         }
-        $page_to_load = sanitize_key(wp_unslash($_GET[self::LOAD_JS_PARAMETER]));
+        $page_to_load = sanitize_text_field(wp_unslash($_GET[self::LOAD_JS_PARAMETER]));
 
         if (
             isset($_GET[self::IS_BACKEND_PARAMETER]) &&
