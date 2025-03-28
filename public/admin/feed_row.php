@@ -2,7 +2,7 @@
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 // Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
 ?>
-<div class="ai1ec-panel ai1ec-panel-default ai1ec-feed-container">
+<div class="ai1ec-panel ai1ec-panel-default ai1ec-feed-container ai1ec-cfg-feed">
     <div class="ai1ec-panel-heading">
         <a data-toggle="ai1ec-collapse"
            data-parent="#ai1ec-feeds-accordion"
@@ -10,14 +10,13 @@
             <?php echo $feed_name; ?>
         </a>
     </div>
-    <div class="ai1ec-panel-collapse ai1ec-collapse"
-         id="ai1ec-feed-<?php echo $feed_id; ?>">
+    <div class="ai1ec-panel-collapse ai1ec-collapse " id="ai1ec-feed-<?php echo $feed_id; ?>" >
         <div class="ai1ec-panel-body">
             <div class="ai1ec-feed-content">
                 <div class="ai1ec-form-group">
-                    <label><?php esc_html_e('iCalendar/.ics Feed URL:', 'open-source-event-calendar'); ?></label>
+                    <label><?php esc_html_e('iCalendar/.ics Feed URL XXXXXXXX:', 'open-source-event-calendar'); ?></label>
                     <input type="text" class="ai1ec-feed-url ai1ec-form-control"
-                           readonly="readonly" value="<?php echo $feed_url ?>">
+                           readonly="readonly" value="<?php echo $feed_url; ?>">
                 </div>
                 <input type="hidden" name="feed_id" class="ai1ec_feed_id"
                        value="<?php echo $feed_id; ?>">
@@ -140,8 +139,7 @@
                 do_action('osec_admin_ics_feeds_options_after_settings_html', $feed_id); ?>
                 <div class="ai1ec-btn-group ai1ec-pull-right ai1ec-feed-actions">
                     <button type="button"
-                            class="ai1ec-btn ai1ec-btn-sm ai1ec-btn-default ai1ec-text-primary
-                            osec_update_ics"
+                            class="ai1ec-btn ai1ec-btn-sm ai1ec-btn-default ai1ec-text-primary osec_update_ics"
                             data-loading-text="<?php echo esc_attr(
                                 '<i class="ai1ec-fa ai1ec-fa-refresh ai1ec-fa-spin ai1ec-fa-fw"></i> ' .
                                 __('Refreshing&#8230;', 'open-source-event-calendar')
@@ -157,8 +155,7 @@
                     </button>
                     <button
                         type="button"
-                        class="ai1ec-btn ai1ec-btn-sm ai1ec-btn-default ai1ec-text-danger
-                        osec_delete_ics"
+                        class="ai1ec-btn ai1ec-btn-sm ai1ec-btn-default ai1ec-text-danger osec_delete_ics"
                         data-loading-text=" <?php esc_html_e('Removing&#8230;', 'open-source-event-calendar')?>"
                     >
                         <i class="ai1ec-fa ai1ec-fa-times ai1ec-fa-fw"></i>

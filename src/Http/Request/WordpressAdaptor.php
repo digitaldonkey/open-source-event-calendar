@@ -61,14 +61,14 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
     /**
      * Initiate (populate) query variables list. Two different url structures are supported.
      */
-    public function init_vars($query = null)
+    public function init_vars(?string $query = null)
     {
         // phpcs:disable WordPress.Security.NonceVerification
         foreach ($_REQUEST as $key => $value) {
             $this->variable($key, sanitize_text_field($value));
         }
-        if (null === $query) {
-            $query = $_SERVER['REQUEST_URI'];
+        if (!$query && isset($_SERVER['REQUEST_URI'])) {
+            $query = sanitize_url(wp_unslash($_SERVER['REQUEST_URI']));
         }
 
         $particles = explode('/', trim((string)$query, '/'));
@@ -79,7 +79,7 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
             }
         }
         if (isset($_REQUEST['ai1ec'])) {
-            $particles = explode('|', trim(sanitize_text_field($_REQUEST['ai1ec']), '|'));
+            $particles = explode('|', trim(sanitize_text_field(wp_unslash($_REQUEST['ai1ec'])), '|'));
             foreach ($particles as $element) {
                 if ($this->addSerializedVariable($element)) {
                     ++$imported;

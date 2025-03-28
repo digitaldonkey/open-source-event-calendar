@@ -53,7 +53,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $cal           = Vcalendar::factory([IcalInterface::UNIQUE_ID => $unique]);
 
         if ($cal->parse($arguments['source'])) {
-            $count = 0;
             try {
                 $result = $this->add_vcalendar_events_to_db(
                     $cal,
@@ -101,8 +100,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $feed           = $args['feed'] ?? null;
         $comment_status = $args['comment_status'] ?? 'open';
         $do_show_map    = $args['do_show_map'] ?? 0;
-        // $events_in_db = $args['events_in_db'] ?? 0;
-        // $count = 0;
         $v->sort();
         // Reverse the sort order, so that RECURRENCE-IDs are listed before the
         // defining recurrence events, and therefore take precedence during
@@ -120,7 +117,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $timezone = $localTimezone = Timezones::factory($this->app)->get_default_timezone();
 
         // Fetch default timezone in case individual properties don't define it
-        /* @var $tz Vtimezone $tz */
+        /* @var $tz Vtimezone Timezone Component. */
         $tz = $v->getComponent('vtimezone');
         if (! empty($tz)) {
             $timezone = $tz->getTzid(false);
@@ -128,7 +125,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         unset($tz);
 
         /*
-        @var ?string $enforcedTz Timzone String
+         * @var ?string $enforcedTz Timzone String
          *      Might be set by X-WR-TIMEZONE or local override
          *       or of $overrideCalendarTz we use Plugins Default $localTimezone.
          */
@@ -149,14 +146,14 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $exclusions = [];
         // go over each event
         while ($e = $v->getComponent('vevent')) {
-            /* @var \Kigkonsult\Icalcreator\Vevent $e */
+            /* @var \Kigkonsult\Icalcreator\Vevent $e Vevent component. */
             /* @var array $data Data to create Event. */
             $data = [];
 
             // =====================
             // = Start & end times =
             // =====================
-            /* @var $start [params => [VALUE => STRING], value => DateTime ] */
+            /* @var array $start [params => [VALUE => STRING], value => DateTime ] */
             $startValue = $e->getDtstart(true);
 
             $endValue = $e->getDtend(true);
@@ -169,12 +166,12 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // time of day specified by the "DTSTART" property.
 
             if (empty($endValue)) {
-                // TODO ALL END STUFF SEEMS BASED ON OLD Lib returnung Array-STUFF
-
                 // #1 if duration is present, assign it to end time
                 $endValue = $e->getDuration(true, true);
                 if (empty($endValue)) {
-                    // TODO $start['value']['hour'] <-- Will crash
+                    // TODO
+                    //   It will crash with $start['value']['hour']??
+                    //  ALL END STUFF SEEMS BASED ON OLD Lib returning Array-STUFF?
 
                     // #2 if only DATE value is set for start, set duration to 1 day
                     if (! isset($start['value']['hour'])) {
@@ -258,12 +255,14 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $start = $this->createDTFromValue($startValue, $eventTimezone, $TzEnforced);
             $end   = $this->createDTFromValue($endValue, $eventTimezone, $TzEnforced);
             if (false === $start || false === $end) {
+                // phpcs:disable WordPress.PHP.DevelopmentFunctions
                 throw new ImportExportParseException(
                     esc_html(
                         'Failed to parse one or more dates given timezone "' .
                         var_export($eventTimezone, true) . '"'
                     )
                 );
+                // phpcs:enable
             }
 
             // If all-day, and start and end times are equal, then this event has
@@ -580,21 +579,16 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
 
     public function isRecognizedTz(string $tz): bool
     {
-        $tztest = @timezone_open($tz);
+        try {
+            $tztest = timezone_open($tz);
+        } catch (\DateInvalidTimeZoneException) {
+            return false;
+        }
         if (! $tztest) {
             return false;
         }
-        // TODO this was in ONE timezone validator version.
-        // I guess with Timezones->get_name() we want need it.
         preg_match('/GMT[+|-][0-9]{4}.*/', $tz);
-        // return !(!$tztest || preg_match("/GMT[+|-][0-9]{4}.*/", $tz));
-
-        if (false === Timezones::factory($this->app)->get_name($tz)) {
-            // throw new TimezoneException ('Invalid timzone: ' . (string) $tz);
-            return false;
-        }
-
-        return true;
+        return false !== Timezones::factory($this->app)->get_name($tz);
     }
 
     /**
@@ -648,17 +642,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
     protected function isTimeless(DateTime $datetime)
     {
         return $datetime->format('His') === '000000';
-        // WAS array format before
-        // $timeless = true;
-        // foreach ( ['hour', 'min', 'sec'] as $field ) {
-        // $timeless &= (
-        // isset( $datetime[$field] ) &&
-        // 0 != $datetime[$field]
-        // )
-        // ? false
-        // : true;
-        // }
-        // return $timeless;
     }
 
     /**
@@ -838,9 +821,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         }
         StrictContentFilterController::factory($this->app)
                                      ->restore_the_content_filters();
-        $str = ltrim((string)$c->createCalendar());
-
-        return $str;
+        return ltrim((string)$c->createCalendar());
     }
 
     /**
@@ -861,12 +842,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         array $params = []
     ) {
         $tz = Timezones::factory($this->app)->get_default_timezone();
-
-        // NEW
         $e = $calendar->newVevent();
-        // old was: $e   = & $calendar->newComponent( 'vevent' );
 
-        $uid = '';
+        /* @var string $uid Unique ID */
         if ($event->get('ical_uid')) {
             $uid = addcslashes((string)$event->get('ical_uid'), "\\;,\n");
         } else {

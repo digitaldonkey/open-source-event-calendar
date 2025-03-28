@@ -14,10 +14,9 @@
 	<arg value="s"/>
 
 	<!-- Plugins should be compatible with PHP 5.2 and higher. -->
-<!-- MUST BE DISABLED FOR THIS PLUGIN- Requiring 8.1-
-	<config name="testVersion" value="5.2-"/>
--->
-
+	<!-- MUST BE DISABLED FOR THIS PLUGIN- Requiring 8.1-
+        <config name="testVersion" value="5.2-"/>
+	-->
 	<exclude-pattern>*/tgm-plugin-activation/*</exclude-pattern>
 	<exclude-pattern>*/freemius/*</exclude-pattern>
 	<exclude-pattern>*/dompdf/*</exclude-pattern>
@@ -170,9 +169,10 @@
 		<severity>7</severity>
 	</rule>
 
+	<!-- TODO How to incluse this sniff? -->
 	<!-- Check for missing required function parameters. -->
-<!--	<rule ref="PluginCheck.CodeAnalysis.RequiredFunctionParameters">-->
-<!--		<severity>7</severity>-->
-<!--	</rule>-->
+	<!--	<rule ref="PluginCheck.CodeAnalysis.RequiredFunctionParameters">-->
+	<!--		<severity>7</severity>-->
+	<!--	</rule>-->
 
 </ruleset>

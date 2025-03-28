@@ -12,7 +12,7 @@ namespace Osec\Http\Response;
  */
 class RenderCsv extends RenderStrategyAbstract
 {
-    /*
+    /**
      * @see RenderStrategyAbstract::render()
      */
     public function render(array $params)

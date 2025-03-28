@@ -57,14 +57,13 @@ class CommandClone extends CommandAbstract
                         'url'        => admin_url(OSEC_ADMIN_BASE_URL),
                         'query_args' => [],
                     ];
-                } else {
-                    return [
-                        'url'        => admin_url(
-                            'post.php?action=edit&post=' . $id
-                        ),
-                        'query_args' => [],
-                    ];
                 }
+                return [
+                    'url'        => admin_url(
+                        'post.php?action=edit&post=' . $id
+                    ),
+                    'query_args' => [],
+                ];
             }
         }
 
@@ -75,7 +74,7 @@ class CommandClone extends CommandAbstract
     /**
      * Create a duplicate from a posts' instance
      */
-    public function duplicate_post_create_duplicate($post, $status = '')
+    public function duplicate_post_create_duplicate(WP_Post $post, $status = '')
     {
         $post            = get_post($post);
         $new_post_author = $this->duplicatePostGetCurrentUser();
@@ -104,25 +103,26 @@ class CommandClone extends CommandAbstract
         ];
 
         $new_post_id    = wp_insert_post($new_post);
-        $edit_event_url = esc_attr(
-            admin_url("post.php?post={$new_post_id}&action=edit")
-        );
-        $message = sprintf(
+        NotificationAdmin::factory($this->app)->store(
+            sprintf(
             /* translators: Url to cloned event */
-            __(
-                '<p>The event <strong>%1$s</strong> was cloned succesfully. <a href="%2$s">Edit cloned event</a></p>',
-                'open-source-event-calendar'
-            ),
-            $post->post_title,
-            $edit_event_url
+                __(
+                    '<p>The event %1$s was cloned succesfully. <a href="%2$s">Edit cloned event</a></p>',
+                    'open-source-event-calendar'
+                ),
+                ' <strong>' . $post->post_title . '</strong>',
+                esc_attr(
+                    admin_url("post.php?post={$new_post_id}&action=edit")
+                )
+            )
         );
-        NotificationAdmin::factory($this->app)->store($message);
         $this->copyPostTaxonomies($new_post_id, $post);
         $this->copyAttachments($new_post_id, $post);
         $this->copyMeta($new_post_id, $post);
 
         if (AccessControl::is_our_post_type($post)) {
             // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+            // TODO WHY ARE WE DOING THAT?
             try {
                 $old_event = new Event($this->app, $post->ID);
                 $old_event->set('post_id', $new_post_id);
@@ -145,8 +145,8 @@ class CommandClone extends CommandAbstract
 
         // If the copy gets immediately published, we have to set a proper slug.
         if (
-            $new_post_status == 'publish' ||
-            $new_post_status == 'future'
+            $new_post_status === 'publish' ||
+            $new_post_status === 'future'
         ) {
             $post_name = wp_unique_post_slug(
                 $post->post_name,
@@ -234,8 +234,6 @@ class CommandClone extends CommandAbstract
      */
     protected function copyAttachments($new_id, $post)
     {
-        // if (get_option('duplicate_post_copyattachments') == 0) return;
-
         // get old attachments
         $attachments = get_posts(
             [
@@ -334,15 +332,18 @@ class CommandClone extends CommandAbstract
     public function is_this_to_execute()
     {
         $current_action = Request::factory($this->app)->get_current_action();
+        // Clone multiple events.
         if (
             $current_action === 'clone'
+            && ! empty($_REQUEST['_wpnonce'])
+            && wp_verify_nonce(sanitize_key(wp_unslash($_REQUEST['_wpnonce'])), 'bulk-posts')
             && current_user_can('edit_osec_events')
             && ! empty($_REQUEST['post'])
-            && ! empty($_REQUEST['_wpnonce'])
-            && wp_verify_nonce($_REQUEST['_wpnonce'], 'bulk-posts')
+            && is_array(empty($_REQUEST['post']))
         ) {
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
             foreach ($_REQUEST['post'] as $post_id) {
-                $post = get_post($post_id);
+                $post = get_post((int)$post_id);
                 if ($post) {
                     $this->posts[] = [
                         'status' => '',
@@ -350,42 +351,33 @@ class CommandClone extends CommandAbstract
                     ];
                 }
             }
-
             return true;
         }
 
-        // other actions need the nonce to be verified
-
         // duplicate single post
-        if (
-            $current_action === 'duplicate_post_save_as_new_post' &&
-            ! empty($_REQUEST['post'])
-        ) {
-            check_admin_referer('ai1ec_clone_' . $_REQUEST['post']);
+        $post_id = !empty($_REQUEST['post']) ? (int)$_REQUEST['post'] : null;
 
+        if (!$post_id || !wp_verify_nonce(sanitize_key(wp_unslash($_REQUEST['_wpnonce'])), 'ai1ec_clone_' . $post_id)) {
+            return false;
+        }
+
+        if ($current_action === 'duplicate_post_save_as_new_post') {
             $this->posts[]    = [
                 'status' => '',
-                'post'   => get_post($_REQUEST['post']),
+                'post'   => get_post($post_id),
             ];
             $this->doRedirect = true;
-
             return true;
         }
         // duplicate single post as draft
-        if (
-            $current_action === 'duplicate_post_save_as_new_post_draft' &&
-            ! empty($_REQUEST['post'])
-        ) {
-            check_admin_referer('ai1ec_clone_' . $_REQUEST['post']);
+        if ($current_action === 'duplicate_post_save_as_new_post_draft') {
             $this->posts[]    = [
                 'status' => 'draft',
-                'post'   => get_post($_REQUEST['post']),
+                'post'   => get_post($post_id),
             ];
             $this->doRedirect = true;
-
             return true;
         }
-
         return false;
     }
 

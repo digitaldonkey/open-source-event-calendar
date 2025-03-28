@@ -194,11 +194,11 @@ class AdminEventCategoryHooks extends OsecBaseClass
         }
         $tag_color_value = '';
         if ( ! empty($_POST['tag-color-value'])) {
-            $tag_color_value = sanitize_text_field($_POST['tag-color-value']);
+            $tag_color_value = sanitize_text_field(wp_unslash($_POST['tag-color-value']));
         }
         $tag_image_value = '';
         if ( ! empty($_POST['osec_category_image_url'])) {
-            $tag_image_value = sanitize_url($_POST['osec_category_image_url']);
+            $tag_image_value = sanitize_url(wp_unslash($_POST['osec_category_image_url']));
         }
         if (isset($_POST['osec_category_image_url_remove'])) {
             $tag_image_value = null;

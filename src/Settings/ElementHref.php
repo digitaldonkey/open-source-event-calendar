@@ -176,7 +176,7 @@ class ElementHref
         // persist the `lang` parameter if present
         // phpcs:disable WordPress.Security.NonceVerification
         if (isset($_REQUEST['lang'])) {
-            $full_url = add_query_arg('lang', sanitize_text_field($_REQUEST['lang']), $full_url);
+            $full_url = add_query_arg('lang', sanitize_text_field(wp_unslash($_REQUEST['lang'])), $full_url);
         }
         // phpcs:enable
         return $full_url;

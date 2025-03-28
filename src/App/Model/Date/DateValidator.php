@@ -92,8 +92,7 @@ class DateValidator
      */
     public static function get_rest_date_pattern_by_key($key = 'def')
     {
-        // Coresponding to
-        //   @see self::get_date_patterns();
+        // Corresponding to @see get_date_patterns()
         $patterns = [
             'def' => 'dd/MM/yyyy',
             'us'  => 'MM/dd/yyyy', // js Short Date

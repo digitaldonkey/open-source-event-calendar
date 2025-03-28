@@ -600,7 +600,6 @@ class BootstrapController
         osec_initiate_constants($osec_base_dir, $osec_base_url);
 
         // Error handler.
-        /* @global $OsecExceptionHandler ExceptionHandler */
         global $OsecExceptionHandler;
         $OsecExceptionHandler = new ExceptionHandler(
             'Exception',
@@ -616,6 +615,7 @@ class BootstrapController
             $OsecExceptionHandler->show_notices($soft_disable_message);
         }
         $OsecExceptionHandler->setPrevErrorHandler(
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions
             set_error_handler($OsecExceptionHandler->handle_error(...))
         );
         $OsecExceptionHandler->setPrevExceptionHandler(

@@ -243,7 +243,6 @@ abstract class AbstractView extends OsecBaseClass
             return '';
         }
 
-        /* @uses OnedayView:get_oneday_pagination_links() */
         $method = 'get_' . $this->get_name() . '_pagination_links';
         $args   = [
             'links'     => $this->$method($args, $title, $title_short),

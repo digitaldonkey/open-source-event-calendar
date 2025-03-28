@@ -349,7 +349,7 @@ class RepeatRuleToText extends OsecBaseClass
     {
         $locale = explode('_', get_locale());
 
-        if (isset($locale[0]) && $locale[0] != 'en') {
+        if (isset($locale[0]) && $locale[0] !== 'en') {
             return $cdnl;
         }
 
@@ -410,7 +410,8 @@ class RepeatRuleToText extends OsecBaseClass
      */
     public function build_recurrence_rules_array($rule)
     {
-        // $rule = FREQ=DAILY;INTERVAL=10;COUNT=10;
+        // A $rule might be "FREQ=DAILY;INTERVAL=10;COUNT=10;"
+        // @see https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html
         $rules     = [];
         $rule_list = explode(';', $rule);
         foreach ($rule_list as $single_rule) {

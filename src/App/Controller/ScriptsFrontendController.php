@@ -112,7 +112,6 @@ class ScriptsFrontendController extends OsecBaseClass
     {
         // phpcs:ignore WordPress.Security.NonceVerification
         if (isset($_GET[self::LOAD_JS_PARAMETER])) {
-            // $dp->register_action('wp_loaded', ['controller.javascript', 'render_js']);
             add_action(
                 'wp_loaded',
                 function () use ($app) {
@@ -142,7 +141,7 @@ class ScriptsFrontendController extends OsecBaseClass
         if (! isset($_GET[self::LOAD_JS_PARAMETER])) {
             return null;
         }
-        $page_to_load = $_GET[self::LOAD_JS_PARAMETER];
+        $page_to_load = sanitize_key(wp_unslash($_GET[self::LOAD_JS_PARAMETER]));
 
         if (
             isset($_GET[self::IS_BACKEND_PARAMETER]) &&
@@ -167,12 +166,10 @@ class ScriptsFrontendController extends OsecBaseClass
                 $this->areFrontendScriptsloaded = true;
             }
         }
-        // phpcs:enable
+        // phpcs:enable WordPress.Security.NonceVerification
 
-        // phpcs:disable
-        // WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+        // phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
         // makes no sense on local files.
-
         // Create the config object for Require.js.
         $require_config = $this->create_require_js_config_object();
 
@@ -187,7 +184,7 @@ class ScriptsFrontendController extends OsecBaseClass
         if (isset($this->corePages[$page_to_load])) {
             $page_js = file_get_contents(OSEC_ADMIN_THEME_JS_PATH . 'pages/' . $page_to_load);
         }
-        // phpcs:enable
+        // phpcs:enable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
         // Load translation module.
         $translation                 = $this->get_frontend_translation_data();
@@ -334,12 +331,7 @@ class ScriptsFrontendController extends OsecBaseClass
      */
     public function get_translation_data()
     {
-        // $force_ssl_admin = force_ssl_admin();
-        // if ( $force_ssl_admin && ! is_ssl() ) {
-        // force_ssl_admin( false );
-        // }
         $ajax_url = admin_url('admin-ajax.php');
-        // force_ssl_admin( $force_ssl_admin );
         $settings      = $this->app->settings;
         $locale        = WpmlHelper::factory($this->app);
         $blog_timezone = $this->app->options->get('gmt_offset');
@@ -543,19 +535,9 @@ class ScriptsFrontendController extends OsecBaseClass
      */
     public function are_we_on_calendar_feeds_page()
     {
-        $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
-        // phpcs:disable WordPress.Security.NonceVerification
-        $post_type    = $_GET['post_type'] ?? false;
-        $page         = $_GET['page'] ?? false;
-        // phpcs:enable
-        if ($post_type === false || $page === false) {
-            return false;
-        }
-        $is_calendar_feed_page = $path_details['basename'] === 'edit.php' &&
-                                 $post_type === OSEC_POST_TYPE &&
-                                 $page === AdminPageAbstract::ADMIN_PAGE_PREFIX . 'feeds';
-
-        return $is_calendar_feed_page;
+        return $this->is_admin_page('edit.php')
+               && $this->is_post_type(OSEC_POST_TYPE)
+               && $this->is_page(AdminPageAbstract::ADMIN_PAGE_PREFIX . 'feeds');
     }
 
     /**
@@ -565,19 +547,12 @@ class ScriptsFrontendController extends OsecBaseClass
      */
     private function isPageEventategories(): bool
     {
-        $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
-        // phpcs:ignore WordPress.Security.NonceVerification
-        $post_type    = $_GET['post_type'] ?? '';
-
         return (
-            in_array(
-                $path_details['basename'],
-                [
-                    'edit-tags.php',
-                    'term.php',
-                ]
+            (
+                $this->is_admin_page('edit-tags.php')
+                || $this->is_admin_page('term.php')
             )
-            && $post_type === OSEC_POST_TYPE
+            && $this->is_post_type(OSEC_POST_TYPE)
         );
     }
 
@@ -588,11 +563,8 @@ class ScriptsFrontendController extends OsecBaseClass
      */
     private function isPageLessVariables()
     {
-        $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
-        // phpcs:ignore WordPress.Security.NonceVerification
-        $page         = $_GET['page'] ?? '';
-
-        return $path_details['basename'] === 'edit.php' && $page === AdminPageAbstract::ADMIN_PAGE_PREFIX . 'edit-css';
+        return $this->is_admin_page('edit.php')
+               && $this->is_page(AdminPageAbstract::ADMIN_PAGE_PREFIX . 'edit-css');
     }
 
     /**
@@ -602,12 +574,8 @@ class ScriptsFrontendController extends OsecBaseClass
      */
     private function isPageNewEvent()
     {
-        $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
-        // phpcs:ignore WordPress.Security.NonceVerification
-        $post_type    = $_GET['post_type'] ?? '';
-
-        return $path_details['basename'] === 'post-new.php' &&
-               $post_type === OSEC_POST_TYPE;
+        return $this->is_admin_page('post-new.php')
+               && $this->is_post_type(OSEC_POST_TYPE);
     }
 
     /**
@@ -617,17 +585,16 @@ class ScriptsFrontendController extends OsecBaseClass
      */
     private function isPageEditEvent()
     {
-        $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
-        // phpcs:disable WordPress.Security.NonceVerification
-        $post_id      = $_GET['post'] ?? false;
-        $action       = $_GET['action'] ?? false;
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
+        $post_id      = isset($_GET['post']) ? (int) $_GET['post'] : false;
+        $action       = isset($_GET['action']) ? sanitize_key(wp_unslash($_GET['action'])) : false;
         // phpcs:enable
         if ($post_id === false || $action === false) {
             return false;
         }
 
         $editing = (
-            'post.php' === $path_details['basename'] &&
+            $this->is_admin_page('post.php') &&
             'edit' === $action &&
             AccessControl::is_our_post_type($post_id)
         );
@@ -642,12 +609,8 @@ class ScriptsFrontendController extends OsecBaseClass
      */
     private function isPageOsecSettings()
     {
-        $path_details = pathinfo((string)$_SERVER['SCRIPT_NAME']);
-        // phpcs:ignore WordPress.Security.NonceVerification
-        $page         = $_GET['page'] ?? '';
-
-        return $path_details['basename'] === 'edit.php' &&
-               $page === AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings';
+        return $this->is_admin_page('edit.php')
+               && $this->is_page(AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings');
     }
 
     /**
@@ -768,5 +731,35 @@ class ScriptsFrontendController extends OsecBaseClass
     public function get_module($name)
     {
         return file_get_contents(OSEC_ADMIN_THEME_JS_PATH . $name);
+    }
+
+    private function is_page(string $page_requested): bool
+    {
+        static $page = null;
+        if (is_null($page)) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
+        }
+        return $page === $page_requested;
+    }
+
+    private function is_admin_page(string $page): bool
+    {
+        static $path_details = null;
+        if (is_null($path_details)) {
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+            $path_details = pathinfo(sanitize_text_field(wp_unslash($_SERVER['SCRIPT_NAME'])));
+        }
+        return $page === $path_details['basename'];
+    }
+
+    private function is_post_type(string $post_type_required): bool
+    {
+        static $post_type = null;
+        if (is_null($post_type)) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            $post_type = isset($_GET['post_type']) ? sanitize_key(wp_unslash($_GET['post_type'])) : '';
+        }
+        return $post_type === $post_type_required;
     }
 }

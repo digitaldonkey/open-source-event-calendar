@@ -155,7 +155,7 @@ class EventSingleView extends OsecBaseClass
             'subscribe_url_no_html'  => $subscribe_url . '&no_html=true',
             'edit_instance_url'      => null,
             'edit_instance_text'     => null,
-            'google_url'             => 'http://www.google.com/calendar/render?cid=' . urlencode($subscribe_url),
+            'google_url'             => 'http://www.google.com/calendar/render?cid=' . rawurlencode($subscribe_url),
             'show_subscribe_buttons' => ! $settings->get('turn_off_subscription_buttons'),
             'hide_featured_image'    => $settings->get('hide_featured_image'),
             'extra_buttons'          => $extra_buttons,

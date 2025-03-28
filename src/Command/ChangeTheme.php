@@ -26,20 +26,20 @@ class ChangeTheme extends SaveAbstract
      */
     public function do_execute()
     {
-        // Nonce verification happens in SaveAbstract->is_this_to_execute().
-        // phpcs:disable WordPress.Security.NonceVerification
-
+        // Nonce and Superglobals verification happens in SaveAbstract->is_this_to_execute().
+        // phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
         $stylesheet = preg_replace(
             '|[^a-z_\-]+|i',
             '',
-            sanitize_text_field($_GET['osec_theme'])
+            sanitize_text_field(wp_unslash($_GET['osec_theme']))
         );
+
         ThemeLoader::factory($this->app)
                    ->switch_theme(
                        [
-                           'theme_root' => realpath(sanitize_text_field($_GET['osec_theme_root'])),
-                           'theme_dir'  => realpath(sanitize_text_field($_GET['osec_theme_dir'])),
-                           'theme_url'  => $_GET['ai1ec_theme_url'],
+                           'theme_root' => realpath(sanitize_text_field(wp_unslash($_GET['osec_theme_root']))),
+                           'theme_dir'  => realpath(sanitize_text_field(wp_unslash($_GET['osec_theme_dir']))),
+                           'theme_url'  => sanitize_url(wp_unslash($_GET['ai1ec_theme_url'])),
                            'stylesheet' => $stylesheet,
                        ]
                    );
@@ -70,14 +70,17 @@ class ChangeTheme extends SaveAbstract
     public function is_this_to_execute()
     {
         if (
-            isset($_GET['osec_action']) &&
-            $_GET['osec_action'] === AdminPageManageThemes::$NONCE['action'] &&
-            current_user_can('switch_osec_themes') &&
-            is_dir(sanitize_text_field($_GET['osec_theme_dir'])) &&
-            is_dir(sanitize_text_field($_GET['osec_theme_root']))
+            isset($_GET['osec_action'])
+            && $_GET['osec_action'] === AdminPageManageThemes::$NONCE['action']
+            && current_user_can('switch_osec_themes')
+            && isset($_GET['osec_theme_dir'])
+            && is_dir(sanitize_text_field(wp_unslash($_GET['osec_theme_dir'])))
+            && isset($_GET['osec_theme_root'])
+            && is_dir(sanitize_text_field(wp_unslash($_GET['osec_theme_root'])))
+            && isset($_GET['osec_theme'])
         ) {
             check_admin_referer(
-                'switch-osec_theme_' . $_GET['osec_theme']
+                'switch-osec_theme_' . sanitize_key($_GET['osec_theme'])
             );
 
             return true;

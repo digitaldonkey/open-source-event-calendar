@@ -777,7 +777,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsInput',
                     'tab'   => 'advanced',
-//                    'item'  => 'advanced',
                     'label' => __('Move calendar into this DOM element', 'open-source-event-calendar'),
                     'type'  => 'normal',
                     'help'  => __(
@@ -799,7 +798,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'advanced',
-//                    'item'  => 'advanced',
                     'label' => __(
                         '<strong>Skip <tt>in_the_loop()</tt> check </strong> 
                             that protects against multiple calendar output',
@@ -833,7 +831,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'advanced',
-//                    'item'  => 'advanced',
                     'label' => __(
                         '<strong>Link CSS</strong> in <code>&lt;head&gt;</code>
                             section when file cache is unavailable.',
@@ -852,7 +849,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class'    => 'Osec\Settings\Elements\SettingsTextarea',
                     'tab'      => 'advanced',
-//                    'item'     => 'advanced',
                     'label'    => __('Current <strong>robots.txt</strong> on this site', 'open-source-event-calendar'),
                     'type'     => 'normal',
                     'rows'     => 6,
@@ -878,7 +874,6 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCache',
                     'tab'   => 'cache',
-//                    'item'  => 'cache',
                     'label' => __('Templates cache improves site performance', 'open-source-event-calendar'),
                 ],
                 'default'  => '',
@@ -932,7 +927,7 @@ class Settings extends OsecBaseInitialized
      * @param  string  $option  Name of option.
      * @param  mixed  $value  The value.
      * @param  string  $type  Option type to be used for validation.
-     * @param  string  $renderer  Name of class to render the option.
+     * @param  array  $renderer  Name of class to render the option.
      *
      * @return Settings Instance of self for chaining.
      */

@@ -303,6 +303,14 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         define('OSEC_DEBUG', false);
     }
 
+    //
+    // Do not compress and add debug maps at css compile.
+    // Do set to "FALSE" on production sites!
+    //
+    if (! defined('OSEC_DEBUG_CSS')) {
+        define('OSEC_DEBUG_CSS', false);
+    }
+
     // ================
     // = DEBUG VENDOR =
     // ================

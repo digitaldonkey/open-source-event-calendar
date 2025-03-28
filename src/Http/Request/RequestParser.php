@@ -54,8 +54,10 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
         $default_action = null
     ) {
         parent::__construct($app);
-        if (null === $argv) {
-            $argv = self::getArgsFromRequestUri($_SERVER['REQUEST_URI']);
+        if (null === $argv && isset($_SERVER['REQUEST_URI'])) {
+            $argv = self::getArgsFromRequestUri(
+                sanitize_url(wp_unslash($_SERVER['REQUEST_URI']))
+            );
         }
         $this->rules   = [];
         $this->request = $argv;
@@ -90,7 +92,13 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
         $this->add_rule('display_filters', false, 'string', 'true', false);
         $this->add_rule('display_date_navigation', false, 'string', 'true', false);
         $this->add_rule('display_view_switch', false, 'string', 'true', false);
-        $this->add_rule('display_subscribe', false, 'string', $app->settings->get('turn_off_subscription_buttons') ? 'true' : 'false', false);
+        $this->add_rule(
+            'display_subscribe',
+            false,
+            'string',
+            $app->settings->get('turn_off_subscription_buttons') ? 'true' : 'false',
+            false
+        );
         $this->add_rule('applying_filters', false, 'string', false, false);
         $this->add_rule('shortcode', false, 'string', false, false);
         $this->add_rule('events_limit', false, 'int', null, false);
@@ -241,10 +249,10 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
     {
         // phpcs:disable WordPress.Security.NonceVerification
         if (isset($_POST[$param])) {
-            return sanitize_text_field($_POST[$param]);
+            return sanitize_text_field(wp_unslash($_POST[$param]));
         }
         if (isset($_GET[$param])) {
-            return sanitize_text_field($_GET[$param]);
+            return sanitize_text_field(wp_unslash($_GET[$param]));
         }
         // phpcs:enable
         return $default;

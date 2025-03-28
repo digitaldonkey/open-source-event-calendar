@@ -245,7 +245,7 @@ class AdminPageAllEvents extends OsecBaseClass
             $wp_query->query = wp_parse_args($wp_query->query);
             $table_name      = $this->app->db->get_table_name(OSEC_DB__EVENTS);
             $posts           = $this->app->db->get_table_name('posts');
-            if (isset($wp_query->query['orderby']) && 'osec_event_date' === @$wp_query->query['orderby']) {
+            if (isset($wp_query->query['orderby']) && 'osec_event_date' === $wp_query->query['orderby']) {
                 $orderby = "(SELECT start FROM {$table_name} WHERE post_id = {$posts}.ID) " . $wp_query->get('order');
             } elseif (empty($wp_query->query['orderby']) || $wp_query->query['orderby'] === 'menu_order title') {
                 $orderby = "(SELECT start FROM {$table_name} WHERE post_id = {$posts}.ID) " . 'desc';

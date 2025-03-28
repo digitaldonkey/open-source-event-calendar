@@ -295,13 +295,14 @@ class EventSearch extends OsecBaseClass
             $filter_object = null;
             $filter_ids    = empty($filter_ids) ? [] : $filter_ids;
             try {
-                // Derive classname by convention.
-                // 'auth_ids' => 'FilterAuthIds',
-                // 'cat_ids' => 'FilterCatIds',
-                // 'instance_ids' => 'FilterInstanceIds',
-                // 'int' => 'FilterInt',
-                // 'post_ids' => 'FilterPostIds',
-                // 'tag_ids' => 'FilterTagIds',
+                // phpcs:ignore Squiz.PHP.CommentedOutCode
+                // Derive the class name by convention e.g:
+                //   'auth_ids'     => 'FilterAuthIds',
+                //   'cat_ids'      => 'FilterCatIds',
+                //   'instance_ids' => 'FilterInstanceIds',
+                //   'int'          => 'FilterInt',
+                //   'post_ids'     => 'FilterPostIds',
+                //   'tag_ids'      => 'FilterTagIds',
                 $className     = 'Osec\App\Model\Filter\Filter' . implode(
                     array_map('ucfirst', explode('_', $filter_type))
                 );
@@ -388,7 +389,7 @@ class EventSearch extends OsecBaseClass
                 'Y-m-d',
                 $event['start']
             );
-            --$limit; // $limit = $limit - 1;
+            --$limit;
             if ($limit < 0) {
                 if (true === $last_day) {
                     if ($start_day != $start_day_previous) {

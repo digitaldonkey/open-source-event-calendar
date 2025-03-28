@@ -36,7 +36,7 @@ class AgendaView extends AbstractView
         $type = $this->get_name();
 
         /* @var $view_args['time_limit'] Int, UNIX timestamp. Fixed date if 'limit by days' is set in UI. . */
-        /* @var $view_args['exact_date'] Int, UNIX timestamp. Current day  or fixed date if set in settings or Block-settings. */
+        /* @var $view_args['exact_date'] Int, UNIX timestamp. Current day or fixed date if set in (block) settings. */
         /* @var $view_args['events_limit'] Int Number of events to sisplay as set in Block UI */
 
         if (isset($view_args['exact_date']) && DT::is_timestamp($view_args['exact_date'])) {
@@ -136,7 +136,7 @@ class AgendaView extends AbstractView
 
         if ($view_args['display_date_navigation'] !== 'false') {
             $pagination_links = $this->getPaginationLinks(
-                $view_args, // array_filter($view_args, function ($k) {  return $k !== 'time_limit';  }, ARRAY_FILTER_USE_KEY),
+                $view_args,
                 $results['prev'],
                 $results['next'],
                 $results['date_first'],

@@ -34,10 +34,13 @@ class RestController extends OsecBaseClass
         if (! is_wp_error($request)) {
             return new \WP_REST_Response([
                 'dateFormat' => [
-                    'inputDateFormat' => DateValidator::get_rest_date_pattern_by_key($this->app->settings->get('input_date_format')),
+                    'inputDateFormat' => DateValidator::get_rest_date_pattern_by_key(
+                        $this->app->settings->get('input_date_format')
+                    ),
                     'input24hTime' => (bool) $this->app->settings->get('input_24h_time'),
                     'weekStart'  => (int) $this->app->settings->get('week_start_day'),
                 ],
+// phpcs:ignore  Squiz.PHP.CommentedOutCode
 //                'exactDate' => $this->app->settings->get('exact_date'),
 //                'enabledViews' => $this->app->settings->get('enabled_views'),
 //                'defaultTagsCategories' => $this->app->settings->get('default_tags_categories'),

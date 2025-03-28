@@ -13,13 +13,6 @@ class EventTest extends TestBase
 {
     public function test_event_defaults()
     {
-        global $osec_app;
-        $event  = new Event($osec_app);
-        //. This prints Event(Entity) default values.
-        // var_dump($event->prepare_store_entity());
-
-        // $this->assertEquals($XX, $event);
-
         $this->assertFalse(Event::is_geo_value(0));
         $this->assertFalse(Event::is_geo_value('0'));
     }

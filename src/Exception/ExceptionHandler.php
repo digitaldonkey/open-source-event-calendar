@@ -108,7 +108,7 @@ class ExceptionHandler
         if (defined('OSEC_DEBUG') && true === OSEC_DEBUG) {
             /** @noinspection ForgottenDebugOutputInspection */
             wp_die(
-                '<pre style="color: black; background: darkorange; font-size: smaller; width: fit-content; padding: .5em">'
+                '<pre style="color: black; background: darkorange; width: fit-content; padding: .5em">'
                 . esc_html(
                     $exception
                 )
@@ -168,7 +168,7 @@ class ExceptionHandler
         $trace     = nl2br($exception->getTraceAsString());
         $ident     = sha1($trace);
         if ( ! empty($trace)) {
-            $request_uri  = $_SERVER['REQUEST_URI'];
+            $request_uri = isset($_SERVER['REQUEST_URI']) ? sanitize_url(wp_unslash($_SERVER['REQUEST_URI'])) : '';
             $button_label = __('Toggle error details', 'open-source-event-calendar');
             $title        = __('Error Details:', 'open-source-event-calendar');
             $backtrace    = '<script type="text/javascript">
@@ -318,14 +318,13 @@ class ExceptionHandler
      *
      * @return bool|void Nothing when error is ours, false when no
      *                      other handler exists
-     * @throws ErrorException If error originates from within Ai1EC
+     * @throws ErrorException If error originates from within Osec
      */
     public function handle_error(
         $errno,
         $errstr,
         $errfile,
         $errline,
-        $errcontext = []
     ) {
         $args = func_get_args();
         // if the error is not in our plugin, let PHP handle things.
@@ -363,6 +362,7 @@ class ExceptionHandler
                 $errno
             );
             /* @noinspection ForgottenDebugOutputInspection */
+            //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             return error_log(esc_html($message), 0);
         }
         // let's get the plugin folder

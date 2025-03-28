@@ -2,8 +2,6 @@
 
 namespace Osec\App\Model\Filter;
 
-use Osec\Bootstrap\App;
-
 /**
  * Base class for taxonomies filtering.
  *
@@ -15,19 +13,6 @@ use Osec\Bootstrap\App;
  */
 abstract class FilterTaxonomy extends FilterInt
 {
-    /**
-     * Sanitize input values upon construction.
-     *
-     * @param  App  $app  Injected registry.
-     * @param  array  $filter_values  Values to sanitize.
-     *
-     * @return void
-     */
-    public function __construct(App $app, array $filter_values = [])
-    {
-        parent::__construct($app, $filter_values);
-    }
-
     /**
      * Build SQL snippet for `FROM` particle.
      *

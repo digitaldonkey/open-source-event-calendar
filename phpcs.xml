@@ -19,9 +19,21 @@
 	<arg name="colors"/>
 	<arg name="extensions" value="php"/>
 	<arg name="parallel" value="20"/><!-- Enables parallel processing when available for faster results. -->
+	<arg name="warning-severity" value="1"/>
 
-	<!-- TODO Fix them. -->
-	<arg name="warning-severity" value="0"/>
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<element value="switch_osec_themes" />
+				<element value="manage_osec_options" />
+				<element value="read_osec_events" />
+				<element value="edit_osec_events" />
+				<element value="read_private_osec_events" />
+				<element value="manage_osec_feeds" />
+				<element value="publish_osec_events" />
+			</property>
+		</properties>
+	</rule>
 
 	<!--
         #############################################################################
@@ -255,6 +267,8 @@
 	 	https://raw.githubusercontent.com/WordPress/plugin-check/refs/tags/1.4.0/phpcs-rulesets/plugin-review.xml
 
 	 -->
-	<rule ref="./phpcs-wp-plugin-review.xml" />
+	<rule ref="./phpcs-wp-plugin-review.xml">
+		<type>error</type>
+	</rule>
 
 </ruleset>

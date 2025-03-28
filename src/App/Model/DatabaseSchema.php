@@ -198,23 +198,11 @@ class DatabaseSchema extends OsecBaseClass
         if (! function_exists('dbDelta')) {
             require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         }
-        // WAS
-        // $success = false;
-        // $this->schemaDelta = [];
-        // $queries = $this->prepareDelta( $query );
-        // $result  = dbDelta( $queries );
-        // $success = $this->checkDelta();
-        // return $success;
 
-        $success           = false;
         $this->schemaDelta = [];
-        $queries           = $this->prepareDelta($query);
-        $result            = dbDelta($queries);
-        $success           = $this->checkDelta();
-        // TODO
-        // THIS IS A REAL MESS
+        $result = dbDelta($this->prepareDelta($query));
 
-        return $success;
+        return $this->checkDelta();
     }
 
     /**
