@@ -357,7 +357,10 @@ class CommandClone extends CommandAbstract
         // duplicate single post
         $post_id = !empty($_REQUEST['post']) ? (int)$_REQUEST['post'] : null;
 
-        if (!$post_id || !wp_verify_nonce(sanitize_key(wp_unslash($_REQUEST['_wpnonce'])), 'ai1ec_clone_' . $post_id)) {
+        if (
+            !$post_id
+            || !isset($_REQUEST['_wpnonce'])
+            || !wp_verify_nonce(sanitize_key(wp_unslash($_REQUEST['_wpnonce'])), 'ai1ec_clone_' . $post_id)) {
             return false;
         }
 
