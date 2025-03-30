@@ -14,7 +14,7 @@
         <div class="ai1ec-panel-body">
             <div class="ai1ec-feed-content">
                 <div class="ai1ec-form-group">
-                    <label><?php esc_html_e('iCalendar/.ics Feed URL XXXXXXXX:', 'open-source-event-calendar'); ?></label>
+                    <label><?php esc_html_e('iCalendar/.ics Feed URL:', 'open-source-event-calendar'); ?></label>
                     <input type="text" class="ai1ec-feed-url ai1ec-form-control"
                            readonly="readonly" value="<?php echo $feed_url; ?>">
                 </div>

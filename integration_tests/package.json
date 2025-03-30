@@ -1,10 +1,10 @@
 {
-    "name": "javascript-examples",
+    "name": "open-source-event-calendar-integration-tests",
     "version": "1.0.0",
     "scripts": {
         "test": "NODE_ENV=development npx mocha test/**/*.spec.js --timeout 60000"
     },
-    "author": "The Selenium project",
+    "author": "digitaldonkey",
     "license": "Apache-2.0",
     "devDependencies": {
         "assert": "2.1.0",
