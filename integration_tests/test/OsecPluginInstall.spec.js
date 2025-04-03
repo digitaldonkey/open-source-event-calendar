@@ -63,6 +63,8 @@ describe('Plugin install', function(){
         await pageObject.waitToSeeWhatHappens(700, true);
         await pageObject.getElement(By.id(mainElementID));
 
+        await pageObject.takeScreenshot(this);
+
         // Check Weekstart Day.
         const monday = await pageObject.getElement(
             By.css(`#week_start_day option[value="1"]`) // 1== Monday.
