@@ -14,7 +14,7 @@ class WpLogin extends BasePage {
         await new Promise(resolve => setTimeout(resolve, 500));
 
         const userInput = By.id(this.inputUser);
-        const passInput = By.id(this.inputPass)
+        const passInput = By.id(this.inputPass);
 
         const userInputElement = await this.driver.findElement(userInput);
         await this.driver.wait(until.elementIsVisible(userInputElement));
