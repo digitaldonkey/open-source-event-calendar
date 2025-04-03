@@ -3,7 +3,7 @@ const WpPlugin = require('../page_objects/ActivatePluginAndSettings');
 
 const {
     until,
-    By,
+    By, Select,
 } = require('selenium-webdriver');
 let pageObject = null;
 
@@ -66,11 +66,12 @@ describe('Plugin install', function(){
         await pageObject.takeScreenshot(this);
 
         // Check Weekstart Day.
-        const monday = await pageObject.getElement(
-            By.css(`#week_start_day option[value="1"]`) // 1== Monday.
+        const weekStart = await pageObject.getElement(
+            By.id('week_start_day')
         );
-
-        const isMondaySelected = await monday.isSelected();
+        const weekStartSelect = new Select(weekStart);
+        const option = await weekStartSelect.getFirstSelectedOption();
+        const isMondaySelected = option.isSelected();
         pageObject.assert.ok(isMondaySelected);
 
         // Check settings pages calendar page id is saved
