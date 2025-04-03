@@ -1,10 +1,10 @@
 module.exports = {
-    domain: 'http://open-source-event-calendar.test',
-    screenshotsDir: '/tmp/integration_test_results', // No trailing slash
-    headless: true,
+    domain: 'https://ddev-wordpress.ddev.site',
+    screenshotsDir: 'screen_shots', // No trailing slash
+    headless: false,
     screen: {
-        width: 1280,
-        height: 1280
+        width: 1260,
+        height: 2520
     },
     wpLogin: {
         admin: {
