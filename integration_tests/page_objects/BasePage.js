@@ -35,7 +35,6 @@ class BasePage {
         const theClass = this;
         return this.setupWebDriver(settings)
             .then(function(driver){
-                console.log({driver})
                 return new theClass(settings, driver);
             });
     }

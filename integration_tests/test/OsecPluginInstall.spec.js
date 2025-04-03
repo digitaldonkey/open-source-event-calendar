@@ -11,21 +11,18 @@ let pageObject = null;
 
 describe('Plugin install', function(){
     this.timeout(50000);
+
     before (async function() {
         pageObject = await WpPlugin.build();
     })
 
     beforeEach(async function(){
         //Enter actions performed before test
-        console.log('BEFORE TEST');
     });
 
     afterEach(async function(){
         //Enter actions to be performed after test
         await pageObject.driver.manage().deleteAllCookies();
-        const XXX = await
-            pageObject.driver.manage().getCookies()
-        console.log('AFTER TEST', XXX);
     });
 
     after(async () => {
@@ -67,9 +64,10 @@ describe('Plugin install', function(){
         await pageObject.getElement(By.id(mainElementID));
 
         // Check Weekstart Day.
-        const monday = await pageObject.driver.findElement(
+        const monday = await pageObject.getElement(
             By.css(`#week_start_day option[value="1"]`) // 1== Monday.
         );
+
         const isMondaySelected = await monday.isSelected();
         pageObject.assert.ok(isMondaySelected);
 
