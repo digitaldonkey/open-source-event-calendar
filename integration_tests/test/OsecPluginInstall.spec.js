@@ -45,8 +45,7 @@ describe('Plugin install', function(){
         await pageObject.go_to_url(url);
         await pageObject.doLogin();
 
-        const mainElementID = 'ai1ec-general-settings';
-        await pageObject.getElement(By.id(mainElementID))
+        await pageObject.getElement(By.id('ai1ec-general-settings'))
 
         // Set day
         await pageObject.setWeekDay(By.id('week_start_day'));
@@ -61,7 +60,7 @@ describe('Plugin install', function(){
 
         // Waiting releoad.
         await pageObject.waitToSeeWhatHappens(700, true);
-        await pageObject.getElement(By.id(mainElementID));
+        await pageObject.getElement(By.id('ai1ec-general-settings'));
 
         await pageObject.takeScreenshot(this);
 
@@ -124,6 +123,8 @@ describe('Plugin install', function(){
         // Submit/Save
         const saveOptionsButton = await pageObject.getElement(By.id( 'osec_save_themes_options'))
         await saveOptionsButton.click();
+
+        await pageObject.waitToSeeWhatHappens(700, true);
 
         // Required to wait again.
         await pageObject.getElement(By.id( 'osec-link-general'))
