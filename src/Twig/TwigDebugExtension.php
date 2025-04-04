@@ -35,7 +35,7 @@ class TwigDebugExtension extends AbstractExtension
 
         $notification->store(
             __(
-                'You need to enable xdebug or run `composer install` to use Twig debug() in twig files. <br /><br />',
+                'You need to enable xdebug or run `composer install` to use Twig debug() in twig files.',
                 'open-source-event-calendar'
             ),
             'error',
@@ -43,8 +43,6 @@ class TwigDebugExtension extends AbstractExtension
             [NotificationAdmin::RCPT_ADMIN],
             true,
         );
-
-        return;
     }
 
     /**
@@ -65,10 +63,13 @@ class TwigDebugExtension extends AbstractExtension
                     $vars[$key] = $value;
                 }
             }
-
+            /** @noinspection ForgottenDebugOutputInspection */
+            // phpcs:disable WordPress.PHP.DevelopmentFunctions
             var_dump($vars);
         } else {
+            /** @noinspection ForgottenDebugOutputInspection */
             var_dump(...$vars);
+            // phpcs: enable WordPress.PHP.DevelopmentFunctions
         }
 
         return ob_get_clean();

@@ -58,16 +58,17 @@ class SaveSettings extends SaveAbstract
                 if (isset($data['renderer']['validator'])) {
                     throw new \Exception('Renderer->validattor is not supported anymore..');
                 }
+                $post_field_value = sanitize_text_field(wp_unslash($_POST[$name]));
 
                 switch ($data['type']) {
                     case 'bool':
                         $value = true;
                         break;
                     case 'int':
-                        $value = (int) $_POST[$name];
+                        $value = (int) $post_field_value;
                         break;
                     case 'string':
-                        $value = (string) $_POST[$name];
+                        $value = $post_field_value;
                         break;
                     case 'array':
                     case 'mixed':
@@ -90,8 +91,8 @@ class SaveSettings extends SaveAbstract
                         break;
                     case 'wp_option':
                         // Save the corresponding WP option
-                        $this->app->options->set($name, $_POST[$name], true);
-                        $value = sanitize_text_field($_POST[$name]);
+                        $this->app->options->set($name, $post_field_value, true);
+                        $value = $post_field_value;
                         break;
                     default:
                         throw new Exception(
@@ -176,9 +177,17 @@ class SaveSettings extends SaveAbstract
      */
     protected function handleSaving_default_tags_categories()
     {
+        // phpcs:disable WordPress.Security.ValidatedSanitizedInput
+        $tags = isset($_POST['default_tags_categories_default_tags'])
+                    && is_array($_POST['default_tags_categories_default_tags']) ?
+                        $_POST['default_tags_categories_default_tags'] : [];
+        $categories = isset($_POST['default_tags_categories_default_categories'])
+                    && is_array($_POST['default_tags_categories_default_categories']) ?
+                        $_POST['default_tags_categories_default_categories'] : [];
+        // phpcs:enable
         return [
-            'tags'       => $_POST['default_tags_categories_default_tags'] ?? [],
-            'categories' => $_POST['default_tags_categories_default_categories'] ?? [],
+            'tags'       => $tags,
+            'categories' => $categories,
         ];
     }
 
@@ -189,7 +198,11 @@ class SaveSettings extends SaveAbstract
      */
     protected function handleSaving_calendar_page_id()
     {
-        $calendar_page = isset($_POST['calendar_page_id']) ? $_POST['calendar_page_id'] : null;
+        // Nonce verification happens in SaveAbstract->is_this_to_execute().
+        // phpcs:disable WordPress.Security.NonceVerification.Missing
+        $calendar_page = isset($_POST['calendar_page_id']) ?
+            sanitize_text_field(wp_unslash($_POST['calendar_page_id'])) : null;
+        // phpcs:enable
         if (
             ! is_numeric($calendar_page) &&
             preg_match('#^__auto_page:(.*?)$#', $calendar_page, $matches)

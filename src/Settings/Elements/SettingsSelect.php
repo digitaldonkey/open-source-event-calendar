@@ -58,15 +58,6 @@ class SettingsSelect extends SettingsAbstract
                 }
             } else {
                 $option = $this->setSelectedValue($option);
-                if (isset($option['settings'])) {
-                    throw new Exception('This case must not exists anymore.');
-                    // $fieldsets[] = $this->_render_fieldset(
-                    // $option['settings'],
-                    // $option['value'],
-                    // $this->args['id'],
-                    // isset($option['args']['selected'])
-                    // );
-                }
             }
         }
         $select_args = [];

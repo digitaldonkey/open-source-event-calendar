@@ -48,8 +48,6 @@ class EventContentView extends OsecBaseClass
         );
         echo '</div>';
         echo '</div>';
-
-        // return $ob->get_clean();
         return ob_get_clean();
     }
 
@@ -126,13 +124,14 @@ class EventContentView extends OsecBaseClass
      */
     public function get_back_to_calendar_button_html($timestamp = null)
     {
-        $iComeFromAdminPage = isset($_SERVER['HTTP_REFERER']) && str_contains($_SERVER['HTTP_REFERER'], 'wp-admin');
+        $iComeFromAdminPage = isset($_SERVER['HTTP_REFERER']) && str_contains(
+            sanitize_url(wp_unslash($_SERVER['HTTP_REFERER'])),
+            'wp-admin'
+        );
 
         // Load last calendar view from cookie.
         if (isset($_COOKIE['osec_calendar_url']) && ! $iComeFromAdminPage) {
-            $href = json_decode(
-                stripslashes((string)$_COOKIE['osec_calendar_url'])
-            );
+            $href = sanitize_url(wp_unslash($_COOKIE['osec_calendar_url']));
             setcookie('osec_calendar_url', '', ['expires' => time() - 3600]);
         } else {
             /* Override behavior if User comes from Admin page */

@@ -29,13 +29,16 @@ class AdminDateRepeatBox extends OsecBaseClass
      */
     public function get_repeat_box(): void
     {
-        if (!wp_verify_nonce($_REQUEST['nonce'], 'wp_rest')) {
+        if (
+            !isset($_REQUEST['nonce'])
+            || !wp_verify_nonce(sanitize_text_field(wp_unslash($_REQUEST['nonce'])), 'wp_rest')) {
             return;
         }
-
+        // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
         $repeat  = (int)$_REQUEST['repeat'];
         $repeat  = $repeat == 1 ? 1 : 0;
         $post_id = (int)$_REQUEST['post_id'];
+        // phpcs:enable
         $count   = 100;
         $end     = 0;
         $until   = UIDateFormats::factory($this->app)->current_time();
@@ -196,7 +199,8 @@ class AdminDateRepeatBox extends OsecBaseClass
 
         $args = [
             'visible'   => $visible,
-            'count'     => $this->create_count_input('osec_weekly_count', $count, 52) . __('week(s)', 'open-source-event-calendar'),
+            'count'     => $this->create_count_input('osec_weekly_count', $count, 52)
+                             . __('week(s)', 'open-source-event-calendar'),
             'week_days' => $this->create_list_element(
                 'osec_weekly_date_select',
                 $options,
@@ -630,7 +634,9 @@ class AdminDateRepeatBox extends OsecBaseClass
      **/
     public function convert_rrule_to_text()
     {
-        if (!wp_verify_nonce($_REQUEST['nonce'], 'wp_rest')) {
+        if (
+            !isset($_REQUEST['nonce'])
+            || !wp_verify_nonce(sanitize_text_field(wp_unslash($_REQUEST['nonce'])), 'wp_rest')) {
             return;
         }
 
@@ -644,9 +650,9 @@ class AdminDateRepeatBox extends OsecBaseClass
                 $message = __('Recurrence rule cannot be empty.', 'open-source-event-calendar');
             } else {
                 $message = ucfirst(
-                    (string)RepeatRuleToText::factory($this->app)->rrule_to_text($_REQUEST['rrule'])
+                    RepeatRuleToText::factory($this->app)
+                                ->rrule_to_text(sanitize_text_field(wp_unslash($_REQUEST['rrule'])))
                 );
-                // }
             }
         } else {
             $error   = true;

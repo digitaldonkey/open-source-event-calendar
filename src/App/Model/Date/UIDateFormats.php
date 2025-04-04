@@ -28,7 +28,11 @@ class UIDateFormats extends OsecBaseClass
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->currentTime = new DateTime("@$_SERVER[REQUEST_TIME]");
+        if (isset($_SERVER['REQUEST_TIME'])) {
+            $this->currentTime = new DateTime('@' . (string) absint($_SERVER['REQUEST_TIME']));
+        } else {
+            $this->currentTime = new DateTime();
+        }
     }
 
     /**

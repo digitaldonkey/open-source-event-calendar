@@ -8,7 +8,6 @@ use Exception;
 use Kigkonsult\Icalcreator\Util\RecurFactory;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
-use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 
 /**
@@ -21,17 +20,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class EventInstance extends OsecBaseClass
 {
-    /**
-     * Store locally instance of \Ai1ec_Dbi.
-     *
-     * @param  App  $app  Injected object
-     *  registry.
-     */
-    public function __construct(App $app)
-    {
-        parent::__construct($app);
-    }
-
     /**
      * Remove entries for given post. Optionally delete particular instance.
      *
@@ -66,11 +54,12 @@ class EventInstance extends OsecBaseClass
         $insert        = [];
 
         foreach ($instances as $instance) {
-            if ( ! isset($old_instances[$instance['start'] . ':' . $instance['end']])) {
+            $range_span = $instance['start'] . ':' . $instance['end'];
+            if ( ! isset($old_instances[$range_span])) {
                 $insert[] = $instance;
                 continue;
             }
-            unset($old_instances[$instance['start'] . ':' . $instance['end']]);
+            unset($old_instances[$range_span]);
         }
         $this->removeInstances(array_values($old_instances));
         $this->addinstances($insert);
@@ -129,11 +118,8 @@ class EventInstance extends OsecBaseClass
              * library doesn't allow us to pass it as an argument. Though no
              * lesser importance shall be given to the restore call bellow.
              */
-            /* @var DT $start_datetime */
-            $start_datetime = $event->get('start');
-
             $start_timezone = Timezones::factory($this->app)->get_name(
-                $start_datetime->get_timezone()
+                $event->get('start')->get_timezone()
             );
             $events += $this->create_instances_by_recurrence(
                 $event,
@@ -258,28 +244,6 @@ class EventInstance extends OsecBaseClass
 
         return $events;
     }
-
-    // **
-    // * Check if given date match dates in EXDATES rule.
-    // *
-    // * @param string $date Date to check.
-    // * @param string $ics_rule ICS EXDATES rule.
-    // * @param string $timezone Timezone to evaluate value in.
-    // *
-    // * @return bool True if given date is in rule.
-    // */
-    // public function date_match_exdates($date, $ics_rule, $timezone) {
-    // $ranges = $this->_get_date_ranges($ics_rule, $timezone);
-    // foreach ($ranges as $interval) {
-    // if ($date >= $interval[0] && $date <= $interval[1]) {
-    // return true;
-    // }
-    // if ($date <= $interval[0]) {
-    // break;
-    // }
-    // }
-    // return false;
-    // }
 
     /**
      * @param  array  $dates

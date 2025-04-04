@@ -425,7 +425,7 @@ class ThemeLoader extends OsecBaseClass
             if (CacheFile::OSEC_FILE_CACHE_UNAVAILABLE === $twig_cache) {
                 return null;
             }
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable, WordPress.PHP.NoSilencedErrors
             return @is_writable($twig_cache) ? $twig_cache : null;
         }
         $this->fileCache = CacheFile::createFileCacheInstance($this->app, 'twig');

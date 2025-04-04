@@ -29,9 +29,8 @@ class WpPluginActonLinks extends OsecBaseClass
         );
         array_unshift($links, $settings_link);
 
-        // TODO
-        // Maybe enable after renaming/setup.
-        //
+        // phpcs:ignore Squiz.PHP.CommentedOutCode
+        // TODO Maybe add later to reenable updates.
         // if (current_user_can('update_plugins')) {
         // $updates_link = sprintf(
         // __('<a href="%s">Check for updates</a>', 'open-source-event-calendar'),

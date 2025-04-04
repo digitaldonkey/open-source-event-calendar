@@ -92,12 +92,14 @@ class Event extends OsecBaseClass
         } elseif (is_numeric($data)) {
             $this->initialize_from_id($data, $instance);
         } else {
+            // phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_var_export
             throw new InvalidArgumentException(
                 esc_html(
                     'Argument to constructor must be integer, array or NULL' .
                     ', not ' . var_export($data, true)
                 )
             );
+            // phpcs:enable WordPress.PHP.DevelopmentFunctions.error_log_var_export
         }
 
         if ($this->is_allday()) {
@@ -182,7 +184,7 @@ class Event extends OsecBaseClass
     public function initialize_from_id($post_id, $instance = false)
     {
         $post = get_post($post_id);
-        if (! $post || $post->post_status == 'auto-draft') {
+        if (! $post || $post->post_status === 'auto-draft') {
             throw new EventNotFoundException(
                 esc_html(
                     'Post with ID \'' . $post_id .

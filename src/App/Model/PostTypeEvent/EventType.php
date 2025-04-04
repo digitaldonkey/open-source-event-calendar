@@ -50,9 +50,21 @@ class EventType extends OsecBaseClass
             [OSEC_POST_TYPE],
             [
                 'labels'       => [
-                    'name'          => _x('Categories', 'Event categories taxonomy', 'open-source-event-calendar'),
-                    'singular_name' => _x('Category', 'Event categories taxonomy (singular)', 'open-source-event-calendar'),
-                    'menu_name'     => _x('Organize', 'Event categories menu item', 'open-source-event-calendar'),
+                    'name'          => _x(
+                        'Categories',
+                        'Event categories taxonomy',
+                        'open-source-event-calendar'
+                    ),
+                    'singular_name' => _x(
+                        'Category',
+                        'Event categories taxonomy (singular)',
+                        'open-source-event-calendar'
+                    ),
+                    'menu_name'     => _x(
+                        'Organize',
+                        'Event categories menu item',
+                        'open-source-event-calendar'
+                    ),
                 ],
                 'hierarchical' => true,
                 'rewrite'      => ['slug' => 'events_categories'],
@@ -117,6 +129,7 @@ class EventType extends OsecBaseClass
         // ========================================
         // = register custom post type for events =
         // ========================================
+        // phpcs:ignore WordPress.NamingConventions.ValidPostTypeSlug.NotStringLiteral
         register_post_type(OSEC_POST_TYPE, [
             'labels'              => [
                 'name'               => _x('Events', 'Custom post type name', 'open-source-event-calendar'),

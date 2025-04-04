@@ -24,7 +24,7 @@ class EventEntity extends OsecBaseClass
     /**
      * @var object Instance of WP_Post object.
      */
-    private object $post;
+    private ?object $post;
     /**
      * @var int Post ID.
      */

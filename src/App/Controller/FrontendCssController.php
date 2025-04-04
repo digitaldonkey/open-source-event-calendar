@@ -85,8 +85,8 @@ class FrontendCssController extends OsecBaseClass
         header('HTTP/1.1 200 OK');
         header('Content-Type: text/css', true, 200);
         // Aggressive caching to save future requests from the same client.
-        // phpcs:ignore WordPress.Security.NonceVerification
-        $etag = '"' . md5(__FILE__ . sanitize_text_field($_GET[self::REQUEST_CSS_PARAM])) . '"';
+        // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
+        $etag = '"' . md5(__FILE__ . sanitize_text_field(wp_unslash($_GET[self::REQUEST_CSS_PARAM]))) . '"';
         header('ETag: ' . $etag);
         $max_age = 31536000;
         header(
@@ -99,8 +99,8 @@ class FrontendCssController extends OsecBaseClass
         );
         header('Cache-Control: public, max-age=' . $max_age);
         if (
-            empty($_SERVER['HTTP_IF_NONE_MATCH']) ||
-            $etag !== stripslashes((string)$_SERVER['HTTP_IF_NONE_MATCH'])
+            empty($_SERVER['HTTP_IF_NONE_MATCH'])
+            || $etag !== sanitize_text_field(wp_unslash($_SERVER['HTTP_IF_NONE_MATCH']))
         ) {
             // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             echo $this->get_compiled_css();
@@ -237,25 +237,20 @@ class FrontendCssController extends OsecBaseClass
         }
         // if it's numeric, just consider it a new install
         if (is_numeric($saved_par)) {
-            // if (TRUE) {
-
             // "Link CSS in <head> section
             // when file cache is unavailable."
             if ($this->app->settings->get('render_css_as_link')) {
                 $time = (int)$saved_par;
-
                 return ResponseHelper::remove_protocols(
                     add_query_arg(
                         [self::REQUEST_CSS_PARAM => $time],
                         trailingslashit(get_site_url())
                     )
                 );
-            } else {
-                // Write CSS into Style tag.
-                add_action('wp_head', $this->echo_css(...));
-
-                return '';
             }
+            // Write CSS into Style tag.
+            add_action('wp_head', $this->echo_css(...));
+            return '';
         }
 
         // otherwise return the string

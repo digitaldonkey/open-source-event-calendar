@@ -59,6 +59,7 @@ abstract class OsecBaseClass
             if ( ! is_null($arg1) || ! is_null($arg2) || ! is_null($arg3)) {
                 throw new Exception(
                     esc_html(
+                        // phpcs:ignore WordPress.PHP.DevelopmentFunctions
                         'Existing registry object is initialized with additional params. ' . print_r(
                             [
                                 'arg1' => $arg1,

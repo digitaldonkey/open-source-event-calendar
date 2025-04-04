@@ -37,11 +37,15 @@ class BlockController extends OsecBaseClass
                 'wp-block-editor',
                 'wp-data',
                 'wp-core-data',
-            ]
+            ],
+            OSEC_VERSION,
+            true
         );
         wp_register_style(
             'osec-editor-style',
             plugins_url(OSEC_PLUGIN_NAME . '/calendar_block/build/index.css', OSEC_PLUGIN_NAME),
+            [],
+            OSEC_VERSION
         );
         register_block_style(
             'open-source-event-calendar/osec-calendar-classic',
@@ -54,6 +58,8 @@ class BlockController extends OsecBaseClass
         wp_register_style(
             OSEC_PLUGIN_NAME . '-frontend',
             plugins_url(OSEC_PLUGIN_NAME . '/calendar_block/build/style-index.css', OSEC_PLUGIN_NAME),
+            [],
+            OSEC_VERSION
         );
         wp_enqueue_style(OSEC_PLUGIN_NAME . '-frontend');
 
@@ -63,7 +69,7 @@ class BlockController extends OsecBaseClass
                 $this->blockFile,
                 [
                     'editor_script' => 'osec-calendar-block-classic',
-                    'render_callback' => function (array $attributes, string $content, \WP_Block $wpBlock): string {
+                    'render_callback' => function (array $attributes, string $content): string {
                         $content .= '<div ' . get_block_wrapper_attributes() . '>';
                         $content .= $this->getContent($this->transformAttributes($attributes));
                         $content .= '</div>';

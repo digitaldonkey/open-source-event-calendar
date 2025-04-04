@@ -305,7 +305,8 @@ class WeekView extends AbstractView
                         'ticket_url'       => $evt->get('ticket_url'),
                         'start_truncated'  => $evt->get('start_truncated'),
                         'end_truncated'    => $evt->get('end_truncated'),
-                        'popup_timespan'   => EventTimeView::factory($this->app)->get_timespan_html($evt->get('orig'), 'short'),
+                        'popup_timespan'   => EventTimeView::factory($this->app)
+                                                           ->get_timespan_html($evt->get('orig'), 'short'),
                         'avatar'           => TwigExtension::avatar(
                             $evt,
                             [

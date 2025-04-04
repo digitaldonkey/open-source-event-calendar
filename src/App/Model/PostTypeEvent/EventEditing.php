@@ -36,7 +36,8 @@ class EventEditing extends OsecBaseClass
      */
     public function save_post(int $post_id, WP_Post $post, bool $update)
     {
-        if (! isset($_REQUEST[self::NONCE_NAME]) || ! wp_verify_nonce($_REQUEST[self::NONCE_NAME], self::NONCE_ACTION)) {
+        if (!isset($_REQUEST[self::NONCE_NAME])
+            || !wp_verify_nonce(sanitize_key(wp_unslash($_REQUEST[self::NONCE_NAME])), self::NONCE_ACTION)) {
             return null;
         }
 
@@ -85,11 +86,9 @@ class EventEditing extends OsecBaseClass
 
         $event->set('allday', isset($postVars['osec_all_day_event']) && (bool)$postVars['osec_all_day_event']);
 
-        /* @var DT $startTime */
         $startTime = new DT($postVars['osec_start_time'], $timezone_input);
         $event->set('start', $startTime);
 
-        /* @var string $timezone_name */
         $timezone_name = $startTime->get_timezone();
         if (null === $timezone_name) {
             $event->set('timezone_name', $startTime->get_default_format_timezone());
@@ -101,7 +100,6 @@ class EventEditing extends OsecBaseClass
         if (isset($postVars['osec_instant_event'])) {
             $event->set_no_end_time();
         } else {
-            // $endTime = $postVars['osec_end_time'] ?? '';
             $endTime = $postVars['osec_end_time'] ?? '';
             $event->set('end', new DT($endTime, $timezone_name));
             $event->set('instant_event', false);
@@ -267,7 +265,7 @@ class EventEditing extends OsecBaseClass
     public function create_duplicate_post()
     {
         // phpcs:disable WordPress.Security.NonceVerification
-        // @see EventParent->admin_init_post().
+        // For details @see EventParent->admin_init_post().
         if (! isset($_POST['post_ID'])) {
             return false;
         }
@@ -280,8 +278,8 @@ class EventEditing extends OsecBaseClass
             'post_name'        => null,
             'osec_instance_id' => null,
         ];
-        $old_post_id  = $_POST['post_ID'];
-        $instance_id  = $_POST['osec_instance_id'];
+        $old_post_id  = (int) $_POST['post_ID'];
+        $instance_id  = isset($_POST['osec_instance_id']) ? (int) $_POST['osec_instance_id'] : null;
         foreach ($clean_fields as $field => $to_value) {
             if (null === $to_value) {
                 unset($_POST[$field]);
@@ -295,7 +293,7 @@ class EventEditing extends OsecBaseClass
         EventParent::factory($this->app)
                    ->event_parent($post_id, $old_post_id, $instance_id);
         return $post_id;
-        // phpcs: enablega q
+        // phpcs: enable
     }
 
     /**

@@ -3,7 +3,6 @@
 namespace Osec\App\Model\PostTypeEvent;
 
 use Osec\App\Controller\AccessControl;
-use Osec\App\Controller\DatabaseController;
 use Osec\App\Controller\TrashController;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
@@ -29,7 +28,8 @@ class EventParent extends OsecBaseClass
     public static function add_actions(App $app, bool $is_admin)
     {
         // If editing a child instance.
-        if (basename((string)$_SERVER['SCRIPT_NAME']) === 'post.php') {
+        $script_name =  isset($_SERVER['SCRIPT_NAME']) ? sanitize_text_field(wp_unslash($_SERVER['SCRIPT_NAME'])) : '';
+        if ($script_name && basename($script_name) === 'post.php') {
             add_action(
                 // If $_POST updates. Gutenberg unsupported.
                 'admin_action_editpost',
@@ -80,11 +80,16 @@ class EventParent extends OsecBaseClass
             && 'editpost' === sanitize_key($_POST['action'])
         ) {
             // phpcs:enable
-            if (!isset($_REQUEST[EventEditing::NONCE_NAME]) || !wp_verify_nonce($_REQUEST[EventEditing::NONCE_NAME], EventEditing::NONCE_ACTION)) {
+            if (
+                !isset($_REQUEST[EventEditing::NONCE_NAME])
+                || !wp_verify_nonce(sanitize_key($_REQUEST[EventEditing::NONCE_NAME]), EventEditing::NONCE_ACTION)
+            ) {
                 return;
             }
-            $old_post_id = $_POST['post_ID'];
-            $instance_id = $_POST['osec_instance_id'];
+            // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+            $old_post_id = absint($_POST['post_ID']);
+            $instance_id = absint($_POST['osec_instance_id']);
+            // phpcs:enable
             $post_id     = EventEditing::factory($this->app)->create_duplicate_post();
             if (false !== $post_id) {
                 $this->handleInstances(
@@ -101,7 +106,7 @@ class EventParent extends OsecBaseClass
                     1,
                     get_edit_post_link($post_id, 'url')
                 );
-                wp_redirect(
+                wp_safe_redirect(
                     apply_filters(
                         'redirect_post_location',
                         $location,
@@ -313,7 +318,7 @@ class EventParent extends OsecBaseClass
                     '<a href="%s" title="%s">%s</a>',
                     wp_nonce_url($parent_link),
                     sprintf(
-                        /* translators: Event Title */
+                        /* translators: Parent event title */
                         __('Edit &#8220;%s&#8221;', 'open-source-event-calendar'),
                         apply_filters(
                             'the_title',
@@ -373,7 +378,6 @@ class EventParent extends OsecBaseClass
         }
 
         if (null === ($parent_id = $parents->get($current_id))) {
-            /* @var $db DatabaseController */
             $db = $this->app->db;
             $parent = $db->get_row(
                 $db->prepare("

@@ -25,24 +25,6 @@ class SettingsCalenderPageSelect extends SettingsAbstract
     protected $pages = [];
 
     /**
-     * Set attributes for element.
-     *
-     * Currently recognized attributes:
-     *     - 'pages'    - {@see self::$pages} for details;
-     *     - 'selected' - {@see self::$_selected} for details.
-     *
-     * @param  string  $attribute  Name of attribute to set.
-     * @param  mixed  $value  Value to set for attribute.
-     *
-     * @return self Instance of self.
-     */
-    public function set($attribute, $value): self
-    {
-        // any validation may be provided here
-        return parent::set($attribute, $value);
-    }
-
-    /**
      * Generate HTML snippet for inclusion in settings page.
      *
      * @param  string  $html

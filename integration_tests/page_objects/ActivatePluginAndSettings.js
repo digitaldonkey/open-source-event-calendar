@@ -1,5 +1,5 @@
 const WpLogin = require ('./WpLogin');
-const {Key, By, until} = require('selenium-webdriver');
+const {Key, By, Select, WebElement, until} = require('selenium-webdriver');
 
 class ActivatePluginAndSettings extends WpLogin {
 
@@ -12,8 +12,8 @@ class ActivatePluginAndSettings extends WpLogin {
         const revealed = await this.driver.findElement(By.id('activate-open-source-event-calendar'));
         await this.driver.wait(until.elementIsVisible(revealed));
         await revealed.click();
-        const isAvtivated = await this.driver.findElement(By.id('message'));
-        await this.driver.wait(until.elementIsVisible(isAvtivated));
+        const isActivated = await this.driver.findElement(By.id('message'));
+        await this.driver.wait(until.elementIsVisible(isActivated));
         const message = await this.driver.findElement(By.css('#message>p'));
         const xxx = await message.getText();
 
@@ -33,31 +33,36 @@ class ActivatePluginAndSettings extends WpLogin {
     /**
      * Set Weekday in Osec Settings Form.
      *
+     * @param findBy
      * @param weekDay ?int [0->Sun, 1->Mon ... 6->Sat].
      * @returns {Promise<void>}
      */
-    async setWeekDay(weekDay = null){
+    async setWeekDay(findBy, weekDay = null){
         if (!weekDay) {
             weekDay = this.settings.AdminPageSettings.weekDay;
         }
-        const weekStartSelect = By.id("week_start_day");
-
-         return this.selectByValue(weekStartSelect,  String(weekDay));
-        // return this.waitToSeeWhatHappens();
+        if (!findBy instanceof By) {
+            throw new Error('enterText requires instance of By as first param')
+        }
+        const weekStartSelectElement = await this.getElement(findBy)
+        const select = new Select(weekStartSelectElement)
+        return await select.selectByValue(weekDay)
     }
 
     /**
      * Set Timezone in Osec Settings Form.
      *
-     * @param weekDay ?int [0->Sun, 1->Mon ... 6->Sat].
      * @returns {Promise<void>}
+     * @param timezone
      */
-    async setTimezone(timezone = null){
+    async setTimezone(webElement, timezone = null){
         if (!timezone) {
             timezone = this.settings.AdminPageSettings.timeZone;
         }
-        const timezoneSelect = By.id("timezone_string");
-        return this.selectByValue(timezoneSelect, timezone);
+        if (!webElement instanceof WebElement) {
+            throw new Error('enterText requires instance of WebElement as first param')
+        }
+        return await this.selectByValue(webElement, timezone);
     }
 
 }

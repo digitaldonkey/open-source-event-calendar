@@ -46,14 +46,16 @@ abstract class SaveAbstract extends CommandAbstract
             return false;
         }
         if (
-            $params['controller'] === $this->controllerId &&
-            isset($this->action[$params['action']])
+            $params['controller'] === $this->controllerId
+            && isset($this->action[$params['action']])
+            && isset($_POST[$this->nonceName])
         ) {
             $pass = wp_verify_nonce(
-                $_POST[$this->nonceName],
+                sanitize_text_field(wp_unslash($_POST[$this->nonceName])),
                 key($this->action)
             );
             if ( ! $pass) {
+                /** @noinspection ForgottenDebugOutputInspection */
                 wp_die('Failed security check');
             }
 

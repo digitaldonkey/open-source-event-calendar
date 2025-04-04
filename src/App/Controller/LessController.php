@@ -48,11 +48,10 @@ class LessController extends OsecBaseClass
         // @see https://lesscss.org/usage/#less-options-lint;
         $this->lessc = new Less_Parser(
             [
-                'compress'     => ! OSEC_DEBUG,
-                'sourceMap'    => OSEC_DEBUG,
+                'compress'     => ! OSEC_DEBUG_CSS,
+                'sourceMap'    => OSEC_DEBUG_CSS,
                 'relativeUrls' => true,
                 'math'         => 'always',
-                // 'sourceMapBasepath'   =>'/var/www/html',
             ]
         );
 
@@ -504,6 +503,7 @@ class LessController extends OsecBaseClass
         foreach ($directories as $dir) {
             $font_file = $dir . DIRECTORY_SEPARATOR . $matches[2];
             if (file_exists($font_file)) {
+                // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
                 return base64_encode(file_get_contents($font_file));
             }
         }

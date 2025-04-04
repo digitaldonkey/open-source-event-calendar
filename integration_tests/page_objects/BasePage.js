@@ -1,4 +1,4 @@
-const {Builder, Browser, By, Select, until} = require('selenium-webdriver');
+const {Builder, Browser, By, Select, WebElement, until} = require('selenium-webdriver');
 const { writeFile } = require('node:fs/promises');
 const fs = require('fs');
 const chrome = require('selenium-webdriver/chrome');
@@ -53,7 +53,7 @@ class BasePage {
                     new chrome.Options()
                     .addArguments('--headless').windowSize(settings.screen)
                     .addArguments('--disable-gpu')
-                    .addArguments('ignore-certificate-errors')
+                    .addArguments('--ignore-certificate-errors')
                 )
                 .setFirefoxOptions(
                     new firefox.Options()
@@ -62,7 +62,13 @@ class BasePage {
                         .setCapability('acceptInsecureCerts', true)
                 .build();
         }
-        return new Builder().forBrowser(Browser.CHROME).build();
+        return new Builder().forBrowser(Browser.CHROME)
+        .setChromeOptions(
+            new chrome.Options()
+                .addArguments('--ignore-certificate-errors')
+                .addArguments('--incognito')
+        )
+        .build();
     }
 
     async go_to_url(url){
@@ -77,22 +83,19 @@ class BasePage {
         return this.driver.findElement(findBy).sendKeys(searchText);
     }
 
-    async selectByValue(findBy, value){
-        if (!findBy instanceof By) {
-            throw new Error('enterText requires instance of By as first param')
+    async selectByValue(webElement, value){
+        if (!webElement instanceof WebElement) {
+            throw new Error('enterText requires instance of WebElement as first param')
         }
-        const select = await this.driver.findElement(findBy);
-        const selectApi = new Select(select);
+        const selectApi = new Select(webElement);
         return selectApi.selectByValue(value);
     }
 
-    async getSelectSingleValue(findBy, textValue = false){
-        if (!findBy instanceof By) {
-            throw new Error('enterText requires instance of By as first param')
+    async getSelectSingleValue(webElement, textValue = false){
+        if (!webElement instanceof WebElement) {
+            throw new Error('enterText requires instance of WebElement as first param')
         }
-        const element = await this.driver.findElement(findBy);
-        await this.driver.wait(until.elementIsVisible(element), 6000);
-        const select = new Select(element);
+        const select = new Select(webElement);
         const option = await select.getFirstSelectedOption();
         if (textValue) {
             return option.getText()
@@ -100,14 +103,48 @@ class BasePage {
         return option.getAttribute('value')
     }
 
+
+    /**
+     *
+     * @param findBy By
+     * @returns {Promise<WebElement>}
+     */
+    async getElement(findBy) {
+        if (!findBy instanceof By) {
+            throw new Error('getElement requires instance of By as first param')
+        }
+        const element = await this.driver.findElement(findBy);
+        return this.driver.wait(until.elementIsVisible(element), 6000);
+    }
+
+    /**
+     * Takes a parent element and strips out the textContent
+     * of all child elements and returns textNode content only
+     *
+     * @return the text from the child textNodes
+     * @param className CSS classname (without leading ".")
+     */
+    async getTextByClassName(className) {
+        await className;
+        return await this.driver.executeScript(`
+        const elm = document.getElementsByClassName('${className}')[0];
+        for (const child of elm.childNodes) {    
+            if (child.nodeType === Node.TEXT_NODE) {
+                    return child.nodeValue;
+            }
+        }`);
+    }
+
+
     /**
      * If --debug flag is set, we might wait to see.
      *
      * @param timeout
+     * @param alwaysWait bool Also wait without debug.
      * @returns {Promise<void>}
      */
-    async waitToSeeWhatHappens(timeout = 2000){
-        if (process.env.npm_config_debug) {
+    async waitToSeeWhatHappens(timeout = 2000, alwaysWait = null){
+        if (process.env.npm_config_debug || alwaysWait) {
             return new Promise(resolve => setTimeout(resolve, timeout))
         }
         return Promise.resolve();

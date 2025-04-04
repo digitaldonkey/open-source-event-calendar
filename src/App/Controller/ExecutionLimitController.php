@@ -60,7 +60,7 @@ class ExecutionLimitController extends OsecBaseClass
             $query .= ' WHERE `option_name` = %s';
         }
         $success = $dbi->query(
-            $dbi->prepare($query, $name, wp_json_encode($entry), $name)
+            $dbi->prepare($query, $name, wp_json_encode($entry))
         );
         if ( ! $success) {
             $dbi->query('ROLLBACK');

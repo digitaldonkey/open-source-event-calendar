@@ -92,8 +92,8 @@ class AdminPageThemeOptions extends AdminPageAbstract
     public function display_page(): void
     {
         if (isset($_POST[self::$NONCE['nonce_name']])) {
-            $nonceOk = wp_verify_nonce(
-                $_POST[self::$NONCE['nonce_name']],
+            wp_verify_nonce(
+                sanitize_key(wp_unslash($_POST[self::$NONCE['nonce_name']])),
                 self::$NONCE['action']
             );
         }

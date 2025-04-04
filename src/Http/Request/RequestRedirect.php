@@ -28,7 +28,7 @@ class RequestRedirect extends OsecBaseClass
      */
     public function handle_categories_and_tags()
     {
-        /* @var WP $wp */
+        /* @var WP $wp WordPress environment setup class. */
         global $wp;
 
         $cats = EventTaxonomy::CATEGORIES;

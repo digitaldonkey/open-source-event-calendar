@@ -19,9 +19,6 @@ class SettingsTextarea extends SettingsAbstract
 
     public function render($html = '', $wrap = true): string
     {
-        // $type  = $this->args['renderer']['type'];
-        // $date  = $append = false;
-
         // Set attributes
         $input_args = [];
 
@@ -46,9 +43,6 @@ class SettingsTextarea extends SettingsAbstract
             'input_args' => $input_args,
             'value'      => $this->args['value'],
         ];
-        // if ( true === $append ) {
-        // $args['append'] = $this->args['renderer']['append'];
-        // }
         if (isset($this->args['renderer']['help'])) {
             $args['help'] = $this->args['renderer']['help'];
         }

@@ -25,14 +25,12 @@
     </div>
 </div>
 
-<div id="ai1ec-feeds-after"
-     class="ai1ec-feed-container ai1ec-well ai1ec-well-sm ai1ec-clearfix">
+<div id="ai1ec-feeds-after" class="ai1ec-feed-container ai1ec-well ai1ec-well-sm ai1ec-clearfix">
     <div class="ai1ec-form-group">
         <label for="osec_feed_url">
             <?php esc_html_e('iCalendar/.ics Feed URL:', 'open-source-event-calendar') ?>
         </label>
-        <input type="text" name="osec_feed_url" id="osec_feed_url"
-               class="ai1ec-form-control">
+        <input type="text" name="osec_feed_url" id="osec_feed_url"  class="ai1ec-form-control">
     </div>
     <div class="ai1ec-row">
         <div class="ai1ec-col-sm-6">
@@ -77,8 +75,7 @@
     </div>
     <div class="ai1ec-feed-import-timezone">
         <label for="osec_feed_import_timezone">
-            <input type="checkbox" name="osec_feed_import_timezones"
-                   id="osec_feed_import_timezone" value="1">
+            <input type="checkbox" name="osec_feed_import_timezones" id="osec_feed_import_timezone" value="1">
             <span class="ai1ec-tooltip-toggle" title="<?php esc_html_e(
                 'Guesses the time zone of events that have none specified; recommended for Google Calendar feeds',
                 'open-source-event-calendar'

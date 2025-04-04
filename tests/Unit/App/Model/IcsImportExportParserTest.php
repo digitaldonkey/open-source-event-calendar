@@ -725,9 +725,6 @@ SEQUENCE:0
 END:VEVENT
 END:VCALENDAR',
         ];
-        // if (!defined('WP_SITEURL')) {
-        // define('WP_SITEURL', 'https://ddev-wordpress.ddev.site');
-        // }
         $value = IcsImportExportParser::factory($osec_app)->import($DATA);
         $this->assertEquals(53, $value['count']);
     }

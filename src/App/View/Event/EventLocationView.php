@@ -154,7 +154,7 @@ class EventLocationView extends OsecBaseClass
             $location = $event->get('address');
         }
 
-        return 'https://www.google.com/maps?f=q&hl=' . urlencode((string)$lang) .
-               '&source=embed&q=' . urlencode((string)$location);
+        return 'https://www.google.com/maps?f=q&hl=' . rawurlencode((string)$lang) .
+               '&source=embed&q=' . rawurlencode((string)$location);
     }
 }

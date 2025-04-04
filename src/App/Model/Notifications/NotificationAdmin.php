@@ -229,14 +229,10 @@ class NotificationAdmin extends NotificationAbstract
         if ($importance > 1) {
             $allow_on[] = 'dashboard';
         }
-        if (is_object($screen) &&
-            isset($screen->id) &&
-            in_array($screen->id, $allow_on)
-        ) {
-            return true;
-        }
 
-        return false;
+        return is_object($screen)
+               && isset($screen->id)
+               && in_array($screen->id, $allow_on);
     }
 
     /**
@@ -244,8 +240,12 @@ class NotificationAdmin extends NotificationAbstract
      */
     public function dismiss_notice(): void
     {
+        // phpcs:ignore WordPress.Security.NonceVerification
+        if (!isset($_POST['key'])) {
+            return;
+        }
         // phpcs:ignore WordPress.Security.NonceVerification.Missing
-        $key = sanitize_text_field($_POST['key']);
+        $key = sanitize_text_field(wp_unslash($_POST['key']));
         foreach ($this->messages as $dest) {
             if (isset($this->messages[$dest][$key])) {
                 unset($this->messages[$dest][$key]);

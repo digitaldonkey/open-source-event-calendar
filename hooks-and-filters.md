@@ -377,13 +377,13 @@ do_action('osec_ics_after_import', $result);
 Do something after feed is deleted
 
 ```php
-do_action('osec_ics_feed_deleted', $ics_id);
+do_action('osec_ics_feed_deleted', $feed_id);
 ```
 
 #### Parameters
 
 
- - **$ics_id** <span style="color:crimson"> </span> Feed ID.
+ - **$feed_id** <span style="color:crimson"> </span> Feed ID.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -395,11 +395,11 @@ do_action('osec_ics_feed_deleted', $ics_id);
  *
  * @since 1.0
  *
- * @param  int  $ics_id  Feed ID.
+ * @param  int  $feed_id  Feed ID.
  *
  * @file src/App/Controller/FeedsController.php
  */
-do_action('osec_ics_feed_deleted', $ics_id);
+do_action('osec_ics_feed_deleted', $feed_id);
 ```
 
 </details>
@@ -4735,13 +4735,13 @@ do_action('osec_ics_after_import', $result);
 Do something after feed is deleted
 
 ```php
-do_action('osec_ics_feed_deleted', $ics_id);
+do_action('osec_ics_feed_deleted', $feed_id);
 ```
 
 #### Parameters
 
 
- - **$ics_id** <span style="color:crimson"> </span> Feed ID.
+ - **$feed_id** <span style="color:crimson"> </span> Feed ID.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -4753,11 +4753,11 @@ do_action('osec_ics_feed_deleted', $ics_id);
  *
  * @since 1.0
  *
- * @param  int  $ics_id  Feed ID.
+ * @param  int  $feed_id  Feed ID.
  *
  * @file src/App/Controller/FeedsController.php
  */
-do_action('osec_ics_feed_deleted', $ics_id);
+do_action('osec_ics_feed_deleted', $feed_id);
 ```
 
 </details>

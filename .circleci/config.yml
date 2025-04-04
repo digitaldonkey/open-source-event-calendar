@@ -3,7 +3,7 @@
 version: 2.1
 orbs:
   php: circleci/php@1.1.0
-  browser-tools: circleci/browser-tools@1.4.9
+  browser-tools: circleci/browser-tools@1.5.3
   node: circleci/node@6.3.0
 
 # References section
@@ -268,6 +268,7 @@ jobs:
       - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
     steps:
       - browser-tools/install-chrome
+      - browser-tools/install-chromedriver
       - checkout
       - *attach_workspace
       # @see https://circleci.com/developer/orbs/orb/circleci/browser-tools
@@ -308,6 +309,7 @@ jobs:
             echo "NODE $( node --version)"
             echo "NPM $( npm --version)"             
             google-chrome --version
+            chromedriver --version            
             echo""
             echo "CONSTANTS:"
             echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"

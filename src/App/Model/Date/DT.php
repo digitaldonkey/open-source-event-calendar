@@ -6,6 +6,7 @@ use DateTime;
 use DateTimeZone;
 use Osec\Bootstrap\App;
 use Osec\Exception\BootstrapException;
+use Osec\Exception\Exception;
 use Osec\Exception\TimezoneException;
 use Stringable;
 
@@ -142,7 +143,9 @@ class DT implements Stringable
         if ('UTC' !== date_default_timezone_get()) {
             throw new TimezoneException(
                 esc_html__(
-                    'Wordpress requires PHP default timezone to be UTC. This plugin assumes this too. Ensure date_default_timezone_get() will return `UTC`',
+                    'Wordpress requires PHP default timezone to be UTC.
+                     This plugin assumes this too.
+                     Ensure date_default_timezone_get() will return `UTC`',
                     'open-source-event-calendar'
                 )
             );
@@ -441,7 +444,6 @@ class DT implements Stringable
      */
     public function adjust(int $quantifier, string $longname): self
     {
-        // $quantifier = (int) $quantifier;
         $letter = (string)$quantifier;
         if ($quantifier > 0 && '+' !== $letter[0]) {
             $quantifier = '+' . $quantifier;
