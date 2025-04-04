@@ -3,7 +3,7 @@ Tags: calendar, events, ics, ical importer
 Requires at least: 6.6  
 Tested up to: 6.7.2  
 Requires PHP: 8.2  
-Stable Tag: 1.0.0  
+Stable Tag: 1.0.1  
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Short Description: With Osec you can create, share and aggregate and import (ical, ics) Events in WordPress Based on All-in-one-event-calendar (v2.3.4).

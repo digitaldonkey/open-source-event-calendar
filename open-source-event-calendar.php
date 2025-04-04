@@ -12,11 +12,11 @@
  * Requires at least: 6.6
  * Tested up to: 6.7.2
  * Requires PHP: 8.2
- * Stable Tag: 1.0.0
+ * Stable Tag: 1.0.1
  * License: GPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: open-source-event-calendar
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 
 use Osec\App\Controller\BootstrapController;
