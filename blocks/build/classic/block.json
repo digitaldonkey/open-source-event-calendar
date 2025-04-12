@@ -20,8 +20,6 @@
   "textdomain": "open-source-event-calendar",
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
-  "style": "file:./style.scss",
-  "viewScript": "file:./view.js",
   "attributes": {
     "view": {
       "type": "string",
