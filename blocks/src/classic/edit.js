@@ -15,12 +15,12 @@ import {store as coreDataStore} from '@wordpress/core-data';
 /**
  * @see https://www.npmjs.com/package/@wordpress/scripts#using-css
  */
-import TaxonomySelect from "./components/TaxonomySelect";
-import ViewSelect from "./components/ViewSelect";
-import BoolSwitch from "./components/BoolSwitch";
-import DateAndTime from "./components/DateAndTime/DateAndTime";
-import OsecEventsFilter from "./components/OsecEventsFilter";
-import LimitBy from "./components/LimitBy";
+import TaxonomySelect from "../components/TaxonomySelect";
+import ViewSelect from "../components/ViewSelect";
+import BoolSwitch from "../components/BoolSwitch";
+import DateAndTime from "../components/DateAndTime/DateAndTime";
+import OsecEventsFilter from "../components/OsecEventsFilter";
+import LimitBy from "../components/LimitBy";
 
 import './editor.scss';
 
@@ -76,7 +76,7 @@ export default function Edit(props) {
 				</div>
 				<p>
 					{__(
-						'Osec Calendar',
+						'Osec Calendar Classic',
 						'open source-event-calendar'
 					)}
 					{!isSelected && (

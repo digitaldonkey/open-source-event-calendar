@@ -1,9 +1,9 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "open-source-event-calendar/osec-calendar-classic",
+	"name": "open-source-event-calendar/classic",
 	"version": "0.2.0",
-	"title": "Osec Calendar",
+	"title": "Osec Calendar Classic",
 	"category": "widgets",
 	"icon": "calendar-alt",
 	"description": "Osec classic Bootstrap block.",

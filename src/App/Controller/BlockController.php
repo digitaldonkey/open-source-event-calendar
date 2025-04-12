@@ -18,7 +18,7 @@ class BlockController extends OsecBaseClass
     {
         parent::__construct($app);
         $this->blockFile = json_decode(
-            file_get_contents(OSEC_PATH . 'calendar_block/build/block.json'),
+            file_get_contents(OSEC_PATH . 'blocks/build/classic/block.json'),
             true,
             512,
             JSON_THROW_ON_ERROR
@@ -29,7 +29,7 @@ class BlockController extends OsecBaseClass
     {
         wp_register_script(
             'osec-calendar-block-classic',
-            plugins_url(OSEC_PLUGIN_NAME . '/calendar_block/build/index.js', OSEC_PLUGIN_NAME),
+            plugins_url(OSEC_PLUGIN_NAME . '/blocks/build/classic/index.js', OSEC_PLUGIN_NAME),
             [
                 // Dependencies
                 'wp-blocks',
@@ -43,12 +43,12 @@ class BlockController extends OsecBaseClass
         );
         wp_register_style(
             'osec-editor-style',
-            plugins_url(OSEC_PLUGIN_NAME . '/calendar_block/build/index.css', OSEC_PLUGIN_NAME),
+            plugins_url(OSEC_PLUGIN_NAME . '/blocks/build/classic/index.css', OSEC_PLUGIN_NAME),
             [],
             OSEC_VERSION
         );
         register_block_style(
-            'open-source-event-calendar/osec-calendar-classic',
+            'open-source-event-calendar/classic',
             [
                 'name' => 'osec-editor-style',
                 'label' => __('osec-editor-style', 'open-source-event-calendar'),
@@ -57,7 +57,7 @@ class BlockController extends OsecBaseClass
         );
         wp_register_style(
             OSEC_PLUGIN_NAME . '-frontend',
-            plugins_url(OSEC_PLUGIN_NAME . '/calendar_block/build/style-index.css', OSEC_PLUGIN_NAME),
+            plugins_url(OSEC_PLUGIN_NAME . '/blocks/build/classic/style-index.css', OSEC_PLUGIN_NAME),
             [],
             OSEC_VERSION
         );
