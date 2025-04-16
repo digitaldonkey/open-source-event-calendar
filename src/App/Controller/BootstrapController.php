@@ -112,7 +112,7 @@ class BootstrapController
         $this->app = $app;
         $exception = null;
         // Load the textdomain
-        add_action('plugins_loaded', $this->load_textdomain(...));
+        add_action('init', $this->load_textdomain(...));
 
         // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
         try {
