@@ -10,7 +10,7 @@ use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Http\Request\RequestParser;
 
-class BlockController extends OsecBaseClass
+class ClassicBlockController extends OsecBaseClass
 {
     private array $blockFile;
 
@@ -42,7 +42,7 @@ class BlockController extends OsecBaseClass
             true
         );
         wp_register_style(
-            'osec-editor-style',
+            'osec-editor-style-classic',
             plugins_url(OSEC_PLUGIN_NAME . '/blocks/build/classic/index.css', OSEC_PLUGIN_NAME),
             [],
             OSEC_VERSION
@@ -50,18 +50,11 @@ class BlockController extends OsecBaseClass
         register_block_style(
             'open-source-event-calendar/classic',
             [
-                'name' => 'osec-editor-style',
-                'label' => __('osec-editor-style', 'open-source-event-calendar'),
-                'style_handle' => 'osec-editor-style',
+                'name' => 'osec-editor-style-classic',
+                'label' => __('osec-editor-style-classic', 'open-source-event-calendar'),
+                'style_handle' => 'osec-editor-style-classic',
             ]
         );
-        wp_register_style(
-            OSEC_PLUGIN_NAME . '-frontend',
-            plugins_url(OSEC_PLUGIN_NAME . '/blocks/build/classic/style-index.css', OSEC_PLUGIN_NAME),
-            [],
-            OSEC_VERSION
-        );
-        wp_enqueue_style(OSEC_PLUGIN_NAME . '-frontend');
 
         register_block_type(
             $this->blockFile['name'],

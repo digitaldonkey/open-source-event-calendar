@@ -3,7 +3,7 @@ import {__} from "@wordpress/i18n";
 import Switch from "react-switch";
 import ViewSelect from "../ViewSelect";
 import LimitBy from "../LimitBy";
-import DateAndTime from "../DateAndTime/DateAndTime";
+import DateAndTimePicker from "../DateAndTime/DateAndTimePicker";
 import TaxonomySelect from "../TaxonomySelect";
 import OsecEventsFilter from "../OsecEventsFilter";
 import BoolSwitch from "../BoolSwitch";
@@ -53,7 +53,7 @@ export default function EditForm(props) {
 					{__('Fixed calendar date', 'open source-event-calendar')}
 				</strong>
 				<br/>
-				<DateAndTime
+				<DateAndTimePicker
 					id={'fixedDate'}
 					labelText={'Selected date for fixed calendar start time'}
 					onChange={(date) => {
