@@ -193,7 +193,8 @@ class BootstrapController
          * Register a shortcode based block.
          */
         add_action('init', function () use ($app) {
-            BlockController::factory($app)->registerCalendarBlock();
+            ClassicBlockController::factory($app)->registerCalendarBlock();
+            BigCalendarBlockController::factory($app)->registerCalendarBlock();
         });
 
         /**

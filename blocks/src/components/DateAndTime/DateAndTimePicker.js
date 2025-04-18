@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import DatePicker from "react-datepicker";
 import "./scss/datepicker.scss";
-export default function DateAndTime ({
+export default function DateAndTimePicker ({
 	defaultValue,
 	onChange,
 	labelText,

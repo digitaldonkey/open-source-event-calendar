@@ -29,7 +29,8 @@
 		"@wordpress/components": "^29.2.0",
 		"@wordpress/core-data": "^7.16.0",
 		"@wordpress/data": "^10.16.0",
-		"ajv": "^8.17.1",
+		"luxon": "^3.6.1",
+		"react-big-calendar": "^1.18.0",
 		"react-datepicker": "^8.0.0",
 		"react-select": "^5.9.0",
 		"react-switch": "^7.1.0"

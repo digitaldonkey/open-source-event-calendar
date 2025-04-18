@@ -1,0 +1,73 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "open-source-event-calendar/react-big-calendar",
+	"version": "1.0.2",
+	"title": "Osec Calendar Big Calendar",
+	"category": "widgets",
+	"icon": "calendar-alt",
+	"description": "Osec react-big-calendar block.",
+	"example": {},
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"align": [ "full" , "wide"],
+		"alignWide": true
+	},
+	"textdomain": "open-source-event-calendar",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"viewScript": "file:./view.js",
+	"attributes": {
+		"view": {
+			"type": "string",
+			"default": "agenda",
+			"enum": [
+				"month",
+				"week",
+				"oneday",
+				"agenda"
+			]
+		},
+		"fixedDate": {
+			"type": "string",
+			"default": null
+		},
+		"taxonomies": {
+			"default": [],
+			"type": "array"
+		},
+		"postIds": {
+			"default": [],
+			"type": "array"
+		},
+		"limit": {
+			"default": 10,
+			"type": "integer"
+		},
+		"limitBy": {
+			"type": "string",
+			"default": "events",
+			"enum": [
+				"events",
+				"days"
+			]
+		},
+		"displayViewSwitch": {
+			"default": true,
+			"type": "boolean"
+		},
+		"displayDateNavigation": {
+			"default": true,
+			"type": "boolean"
+		},
+		"displayFilters": {
+			"default": true,
+			"type": "boolean"
+		},
+		"displaySubscribe": {
+			"default": true,
+			"type": "boolean"
+		}
+	}
+}

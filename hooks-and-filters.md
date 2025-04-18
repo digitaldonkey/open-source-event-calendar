@@ -44,7 +44,7 @@ add_filter('osec_block_query_alter', $query $atts);
  * @param  array  $query  Return query variables for request.
  * @param  array  $atts  Input attributes (Block variables)
  *
- * @file src/App/Controller/BlockController.php
+ * @file src/App/Controller/ClassicBlockController.php
  */
 add_filter('osec_block_query_alter', $query $atts);
 ```
@@ -4478,7 +4478,7 @@ add_filter('osec_block_query_alter', $query $atts);
  * @param  array  $query  Return query variables for request.
  * @param  array  $atts  Input attributes (Block variables)
  *
- * @file src/App/Controller/BlockController.php
+ * @file src/App/Controller/ClassicBlockController.php
  */
 add_filter('osec_block_query_alter', $query $atts);
 ```
