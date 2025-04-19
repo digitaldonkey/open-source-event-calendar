@@ -694,6 +694,24 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => false,
             ],
+            'featured_image_fallback'                    => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'viewing-events',
+                    'label' => __(
+                        ' <strong>Use featured image fallbacks</strong> if no featured image is set in event',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'Select if your want to use category images as featured image fallback on event page.
+                         Fallbacks can be influenced by hook osec_avatar_valid_callbacks.
+                        ',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => true,
+            ],
             'input_date_format'                      => [
                 'type'     => 'string',
                 'renderer' => [
