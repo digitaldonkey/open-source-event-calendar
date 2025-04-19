@@ -70,6 +70,25 @@
 }
 .ai1ec-full-event th,
 .ai1ec-excerpt .ai1ec-field-label {
+	font-size: 1em;
 	background: mix( @body-bg, @text-color, 94% );
 	background: rgba(0,0,0,0.05);
+}
+
+.ai1ec-time {
+	.ai1ec-field-value {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		align-items: center;
+
+		.dt-duration {
+			margin-right: 1em;
+			font-weight: bold;
+		}
+		.ai1ec-recurrence {
+			margin-top: .5em;
+			font-size: .9rem;
+		}
+	}
 }
