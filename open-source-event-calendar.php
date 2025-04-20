@@ -38,7 +38,9 @@ if (
     // Try fixing a bug where
     ! class_exists("\Osec\App\Controller\BootstrapController")) {
     require_once __DIR__ . '/vendor/autoload.php';
-    BootstrapController::createApp(__DIR__);
+    add_action('init', function () {
+        BootstrapController::createApp(__DIR__);
+    }, -100);
 }
 
 

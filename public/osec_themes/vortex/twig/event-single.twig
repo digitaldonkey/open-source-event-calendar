@@ -56,12 +56,14 @@
 
                 <div class="ai1ec-time ai1ec-row">
                     <div class="ai1ec-field-label {{ col1 }}">{{ text_when }}</div>
-                    <div class="ai1ec-field-value {{ col2 }} dt-duration">
-                        {{ event | timespan | raw }}
-                        {% if timezone_info.show_timezone %}
-                            <abbr class="ai1ec-initialism ai1ec-tooltip-trigger"
-                                  title="{{ timezone_info.text_timezone_title | e( 'html_attr' ) }}">{{ timezone_info.event_timezone }}</abbr>
-                        {% endif %}
+                    <div class="ai1ec-field-value {{ col2 }} ">
+                        <div class="dt-duration">
+                            {{ event | timespan | raw }}
+                            {% if timezone_info.show_timezone %}
+                                <abbr class="ai1ec-initialism ai1ec-tooltip-trigger"
+                                      title="{{ timezone_info.text_timezone_title | e( 'html_attr' ) }}">{{ timezone_info.event_timezone }}</abbr>
+                            {% endif %}
+                        </div>
                         {% include 'recurrence.twig' %}
                     </div>
                     <div class="ai1ec-hidden dt-start">{{ start }}</div>

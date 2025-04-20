@@ -91,7 +91,7 @@ class BootstrapController
         $this->createWpActions();
 
         ShutdownController::factory($this->app)->register('osec_output_buffering_finalize');
-        add_action('plugins_loaded', $this->register_extensions(...), 1);
+        add_action('init', $this->register_extensions(...), 1);
         add_action('after_setup_theme', $this->register_themes(...), 1);
         add_action('init', [$this, 'verifyCache'], 1);
     }
@@ -112,7 +112,7 @@ class BootstrapController
         $this->app = $app;
         $exception = null;
         // Load the textdomain
-        add_action('plugins_loaded', $this->load_textdomain(...));
+        add_action('init', $this->load_textdomain(...));
 
         // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
         try {
@@ -129,7 +129,7 @@ class BootstrapController
                 // We need to wait for the extension to be registered if the css
                 // needs to be compiled. Will find a better way when compiling css.
                 $css_controller = FrontendCssController::factory($this->app);
-                add_action('plugins_loaded', [$css_controller, 'render_css'], 2);
+                add_action('init', [$css_controller, 'render_css'], 2);
             }
 
             // Initialize the crons
@@ -269,7 +269,7 @@ class BootstrapController
         );
 
         add_action(
-            'plugins_loaded',
+            'init',
             function () use ($app) {
                 ThemeLoader::factory($app)->clean_cache_on_upgrade();
             },

@@ -310,7 +310,7 @@ class WpmlHelper extends OsecBaseClass
         $this->language = $language;
         $this->call_set_language();
         add_action(
-            'plugins_loaded',
+            'init',
             $this->call_set_language(...),
             1
         );
