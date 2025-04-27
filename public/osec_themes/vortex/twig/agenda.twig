@@ -28,7 +28,12 @@
 								{% if expanded %}ai1ec-expanded{% endif %}"
 								data-end="{{ event.end }}">
 
+
+							{% if no_toggle %}
 								<div class="ai1ec-event-header">
+							{% else %}
+								<div class="ai1ec-event-header ai1ec-event-header--toggle">
+							{% endif %}
 									{% if not expanded %}
 									<div class="ai1ec-event-toggle">
 										<i class="ai1ec-fa ai1ec-fa-minus-circle ai1ec-fa-lg"></i>
