@@ -64,6 +64,7 @@ function osec_plugin_activate()
         BootstrapController::createApp(__DIR__);
     }
     DatabaseSchema::factory($osec_app)->verifySqlSchema();
+    flush_rewrite_rules();
 }
 
 register_activation_hook(__FILE__, 'osec_plugin_activate');
