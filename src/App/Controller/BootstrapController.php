@@ -111,8 +111,6 @@ class BootstrapController
     {
         $this->app = $app;
         $exception = null;
-        // Load the textdomain
-        add_action('init', $this->load_textdomain(...));
 
         // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
         try {
@@ -320,8 +318,7 @@ class BootstrapController
         add_shortcode(
             OSEC_SHORTCODE,
             function ($atts) use ($app) {
-                $this->request->set_current_page(get_queried_object_id());
-
+                $this->request::set_current_page(get_queried_object_id());
                 return CalendarShortcodeView::factory($app)->shortcode($atts);
             }
         );
@@ -809,7 +806,6 @@ class BootstrapController
         }
 
         $wpml_helper = WpmlHelper::factory($this->app);
-        $page_base           = '';
         $clang               = '';
 
         if ($wpml_helper->is_wpml_active()) {
@@ -848,25 +844,6 @@ class BootstrapController
         }
         $post = get_post($cal_page);
         Router::factory($this->app)->asset_base($post->post_name)->register_rewrite($page_link);
-    }
-
-    /**
-     * Load the texdomain for the plugin.
-     *
-     * @wp_hook plugins_loaded
-     *
-     * @return void
-     */
-    public function load_textdomain()
-    {
-        if (false === $this->isTextdomainLoaded) {
-            load_plugin_textdomain(
-                'open-source-event-calendar',
-                false,
-                OSEC_LANGUAGE_PATH
-            );
-            $this->isTextdomainLoaded = true;
-        }
     }
 
     //    /**

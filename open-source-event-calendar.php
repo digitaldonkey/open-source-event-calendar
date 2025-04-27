@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/digitaldonkey/open-source-event-calendar
  * Description: With Osec you can create, share and aggregate and import (ical, ics)
  * Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
- * Author: Osec rewrite by digitaldonkey, based on Time.ly Network Inc. All-in-One Event Calendar 2.3.4.
+ * Author: digitaldonkey, Time.ly Network Inc
  * Author URI: https://github.com/digitaldonkey
  * Contributors: digitaldonkey, hubrik, vtowel, yani.iliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
  * Tags: calendar, events, ics, ical importer
@@ -16,6 +16,7 @@
  * License: GPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: open-source-event-calendar
+ * Domain Path: /languages
  * Version: 1.0.1
  */
 
