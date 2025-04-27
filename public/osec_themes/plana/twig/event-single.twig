@@ -1,0 +1,138 @@
+<div class="timely plana-single-event ai1ec-single-event
+	ai1ec-event-id-{{ post_id }}
+	ai1ec-event-instance-id-{{ instance_id }}
+	{% if event.is_multiday %}ai1ec-multiday{% endif %}
+	{% if event.is_allday %}ai1ec-allday{% endif %}">
+
+    <h1>HELLO</h1>
+
+    <a id="wp--skip-link--target"></a>
+
+
+    <div class="ai1ec-actions">
+        <div class="ai1ec-btn-group-vertical ai1ec-clearfix">
+            {{ back_to_calendar | raw }}
+        </div>
+
+        <div class="ai1ec-btn-group-vertical ai1ec-clearfix">
+            {% if ticket_url is not empty %}
+                <a href="{{ ticket_url | e( 'html_attr' ) }}" target="_blank"
+                   class="ai1ec-tickets ai1ec-btn ai1ec-btn-sm ai1ec-btn-primary
+					ai1ec-tooltip-trigger"
+                   title="{{ tickets_url_label | e( 'html_attr' ) }}"
+                   data-placement="left">
+                    <i class="ai1ec-fa ai1ec-fa-ticket ai1ec-fa-fw"></i>
+                    <span class="ai1ec-hidden-xs">
+					{{ tickets_url_label }}
+				</span>
+                </a>
+            {% endif %}
+
+            {% if show_subscribe_buttons %}
+                {% include 'subscribe-buttons.twig' with {
+                    'export_url':             subscribe_url,
+                    'export_url_no_html':     subscribe_url_no_html,
+                    'subscribe_label':        text_add_calendar,
+                    'text':                   subscribe_buttons_text,
+                } %}
+            {% endif %}
+        </div>
+
+        {% if extra_buttons %}
+            {{ extra_buttons | raw }}
+        {% endif %}
+    </div>
+
+    {% if map is empty %}
+    <div class="ai1ec-event-details ai1ec-clearfix">
+        {% else %}
+        <div class="ai1ec-event-details ">
+            <div class="plana-block plana-block--map ai1ec-map">
+                {{ map | raw }}
+            </div>
+            <div class="">
+                {% endif %}
+
+                <div class="plana-block plana-block--time ai1ec-time ">
+                    <div class="ai1ec-field-label">{{ text_when }}</div>
+                    <div class="ai1ec-field-value">
+                        <div class="dt-duration">
+                            {{ event | timespan | raw }}
+                            {% if timezone_info.show_timezone %}
+                                <abbr class="ai1ec-initialism ai1ec-tooltip-trigger"
+                                      title="{{ timezone_info.text_timezone_title | e( 'html_attr' ) }}">{{ timezone_info.event_timezone }}</abbr>
+                            {% endif %}
+                        </div>
+                        {% include 'recurrence.twig' %}
+                    </div>
+                    <div class="ai1ec-hidden dt-start">{{ start }}</div>
+                    <div class="ai1ec-hidden dt-end">{{ end }}</div>
+                </div>
+
+                {% if location is not empty %}
+                    <div class="plana-block plana-block--location ai1ec-location ">
+                        <div class="ai1ec-field-label">{{ text_where }}</div>
+                        <div class="ai1ec-field-value p-location">
+                            {{ location | raw }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if cost is not empty or event.is_free %}
+                    <div class="plana-block plana-block--cost ai1ec-cost ">
+                        <div class="ai1ec-field-label ">{{ text_cost }}</div>
+                        <div class="ai1ec-field-value ">
+                            {{ event.is_free ? text_free : cost }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if contact is not empty %}
+                    <div class="plana-block plana-block--contact ai1ec-contact ">
+                        <div class="ai1ec-field-label ">{{ text_contact }}</div>
+                        <div class="ai1ec-field-value ">{{ contact | raw }}</div>
+                    </div>
+                {% endif %}
+
+                {% if categories is not empty %}
+                    <div class="plana-block plana-block--categories ai1ec-categories ">
+                        <div class="ai1ec-field-label">
+                            <i class="ai1ec-fa ai1ec-fa-folder-open ai1ec-tooltip-trigger"
+                               title="{{ text_categories | e( 'html_attr' ) }}"></i>
+                        </div>
+                        <div class="ai1ec-field-value">
+                            {{ categories | raw }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if tags is not empty %}
+                    <div class="plana-block plana-block--tags ai1ec-tags ">
+                        <div class="ai1ec-field-label">
+                            <i class="ai1ec-fa ai1ec-fa-tags ai1ec-tooltip-trigger"
+                               title="{{ text_tags | e( 'html_attr' ) }}"></i>
+                        </div>
+                        <div class="ai1ec-field-value">
+                            {{ tags | raw }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if map is empty %}
+            </div>{# /.ai1ec-event-details #}
+            {% else %}
+        </div>{# /.#}
+    </div>{# /.ai1ec-event-details. #}
+    {% endif %}
+
+    {% if not hide_featured_image %}
+        {% if content_img_url is empty %}
+            {{ event | avatar( [
+                'post_thumbnail',
+                'location_avatar',
+                'category_avatar'
+            ], 'timely alignleft', false ) | raw }}
+        {% endif %}
+    {% endif %}
+
+</div>

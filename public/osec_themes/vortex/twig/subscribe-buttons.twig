@@ -6,7 +6,7 @@
 	ai1ec-btn-default {{ button_classes | e('html_attr') }}">
 	<span role="button" class="ai1ec-dropdown-toggle ai1ec-subscribe"
 			data-toggle="ai1ec-dropdown">
-		<i class="ai1ec-fa ai1ec-icon-rss ai1ec-fa-lg ai1ec-fa-fw"></i>
+		<i class="ai1ec-fa ai1ec-icon-rss  ai1ec-fa-fw"></i>
 		<span class="ai1ec-hidden-xs">
 			{% if subscribe_label is not empty %}
 				{{ subscribe_label }}
@@ -26,7 +26,7 @@
 			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
 				data-placement="{{ alignment }}" title="{{ text.title.timely }}"
 				href="{{ url | e('html_attr') }}">
-				<i class="ai1ec-fa ai1ec-fa-lg ai1ec-fa-fw ai1ec-icon-timely"></i>
+				<i class="ai1ec-fa  ai1ec-fa-fw ai1ec-icon-timely"></i>
 				{{ text.label.timely }}
 			</a>
 		</li>
@@ -34,7 +34,7 @@
 			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
 			  data-placement="{{ alignment }}" title="{{ text.title.google }}"
 			  href="http://www.google.com/calendar/render?cid={{ url | url_encode | e('html_attr') }}">
-				<i class="ai1ec-fa ai1ec-icon-google ai1ec-fa-lg ai1ec-fa-fw"></i>
+				<i class="ai1ec-fa ai1ec-icon-google  ai1ec-fa-fw"></i>
 				{{ text.label.google }}
 			</a>
 		</li>
@@ -42,7 +42,7 @@
 			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
 			  data-placement="{{ alignment }}" title="{{ text.title.outlook }}"
 			  href="{{ ( export_url_no_html ~ url_args ) | e('html_attr') }}">
-				<i class="ai1ec-fa ai1ec-icon-windows ai1ec-fa-lg ai1ec-fa-fw"></i>
+				<i class="ai1ec-fa ai1ec-icon-windows  ai1ec-fa-fw"></i>
 				{{ text.label.outlook }}
 			</a>
 		</li>
@@ -50,7 +50,7 @@
 			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
 			  data-placement="{{ alignment }}" title="{{ text.title.apple }}"
 			  href="{{ ( export_url_no_html ~ url_args ) | e('html_attr') }}">
-				<i class="ai1ec-fa ai1ec-icon-apple ai1ec-fa-lg ai1ec-fa-fw"></i>
+				<i class="ai1ec-fa ai1ec-icon-apple  ai1ec-fa-fw"></i>
 				{{ text.label.apple }}
 			</a>
 		</li>
