@@ -96,7 +96,10 @@
 // Simplifying single page.
 .plana-block {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
+	@media (min-width: @screen-md) {
+		align-items: center;
+	}
 
 	.ai1ec-field-label {
 		margin-right: 1em;
