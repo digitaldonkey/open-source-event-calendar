@@ -217,7 +217,11 @@ class FrontendCssController extends OsecBaseClass
     {
         // get what's saved. It could be false, int or string.
         // if it's false or a int, use PHP to render CSS
-        $saved_par = $this->app->options->get(self::COMPILED_CSS_KEY);
+        if (OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST) {
+            add_action('wp_head', $this->echo_css(...));
+            return false;
+        }
+
         // $saved_par = Number value required to display css in Header,
 
         // if it's empty it's a new install probably. Return static css.

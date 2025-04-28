@@ -640,7 +640,6 @@ class BootstrapController
     {
         if (
             $this->app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY)
-            || FrontendCssController::PARSE_LESS_FILES_AT_EVERY_REQUEST
         ) {
             FrontendCssController::factory($this->app)
                                  ->invalidate_cache(null, true);

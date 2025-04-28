@@ -566,9 +566,6 @@ class ThemeLoader extends OsecBaseClass
             $theme
         );
 
-        // TODO
-        // $delete_variables seems weird. Why we wouldn't??
-
         // If requested, delete theme variables from DB.;
         if ($delete_variables) {
             $this->app->options->delete(LessController::DB_KEY_FOR_LESS_VARIABLES);
