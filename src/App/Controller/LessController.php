@@ -115,7 +115,7 @@ class LessController extends OsecBaseClass
         $variables = apply_filters('osec_less_constants', $variables);
 
         // Use these variables for hashmap purposes.
-        $this->variables = $variables;
+        $this->variables = $this->cleanUp($variables);
 
         // Load the static variables defined in the theme's variables.less file.
         $staticVars = $this->load_static_theme_variables();
@@ -143,22 +143,37 @@ class LessController extends OsecBaseClass
         $this->lessc->SetImportDirs(
             [
                 /**
-                 * Callback - Trying to map dependencies.
+                 * Callback - Mapping SASS imports as needed.
                  */
                 function ($path) use ($theme) {
+
+                    // Bootstrap is only in vortex theme.
                     if (substr($path, 0, 10) === 'bootstrap/') {
                         return [$theme['theme_root'] . '/vortex/less/' . $path, null];
                     }
 
+                    // File exists in theme.
                     if (file_exists($theme['theme_dir'] . '/less/' . $path)) {
                         return [$theme['theme_dir'] . '/less/' . $path, null];
                     }
 
+                    // File exists in base theme (vortex)
                     if (file_exists($theme['theme_root'] . '/vortex/less/' . $path)) {
                         return [$theme['theme_root'] . '/vortex/less/' . $path, null];
                     }
 
-                    return [$theme['theme_dir'] . '/less/' . $path, null];
+                    // Huston, we have a problem.
+                    throw new Exception(
+                        sprintf(
+                        /* translators: filename */
+                            esc_html__(
+                                'Could not map SASS import "%s" at theme "%s"',
+                                'open-source-event-calendar'
+                            ),
+                            esc_html($path),
+                            esc_html($theme['stylesheet'])
+                        )
+                    );
                 },
             ]
         );
