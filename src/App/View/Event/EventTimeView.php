@@ -246,7 +246,7 @@ class EventTimeView extends OsecBaseClass
              */
             $timespanSeparator = apply_filters(
                 'osec_timespan_time_separator_html',
-                _x(' — ', 'Event time separator', 'open-source-event-calendar')
+                _x('&nbsp;—&nbsp;', 'Event time separator', 'open-source-event-calendar')
             );
         }
         return $timespanSeparator;
@@ -269,7 +269,7 @@ class EventTimeView extends OsecBaseClass
              */
             $timeSeparator = apply_filters(
                 'osec_timespan_time_html_before_start_html',
-                _x(' @ ', 'Event time separator', 'open-source-event-calendar')
+                _x(' @&nbsp;', 'Event time separator', 'open-source-event-calendar')
             );
         }
         return $timeSeparator;
