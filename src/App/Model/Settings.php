@@ -896,6 +896,22 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => '',
             ],
+            'display_print_button'           => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'viewing-events',
+                    'label' => __(
+                        'Display print icon',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'You may re-add the oldschool print icon.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => false,
+            ],
             'always_use_calendar_timezone'           => [
                 'type'     => 'bool',
                 'renderer' => [
