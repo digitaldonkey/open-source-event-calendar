@@ -34,19 +34,26 @@
 							{% else %}
 								<div class="ai1ec-event-header ai1ec-event-header--toggle">
 							{% endif %}
-									{% if not expanded %}
-									<div class="ai1ec-event-toggle">
-										<i class="ai1ec-fa ai1ec-fa-minus-circle ai1ec-fa-lg"></i>
-										<i class="ai1ec-fa ai1ec-fa-plus-circle ai1ec-fa-lg"></i>
-									</div>
-									{% endif %}
+
+							{% if not expanded %}
+								<div class="ai1ec-event-toggle">
+									<i class="ai1ec-fa ai1ec-fa-minus-circle ai1ec-fa-lg"></i>
+									<i class="ai1ec-fa ai1ec-fa-plus-circle ai1ec-fa-lg"></i>
+								</div>
+							{% endif %}
+							{% if no_toggle %}
+									<a href="{{ event.permalink | e( 'html_attr' ) }}" title="{{ text_read_more }}">
+							{% endif %}
 									<span class="ai1ec-event-title">
 										{{ event.filtered_title | raw }}
-										{% if show_location_in_title and event.venue is not empty %}
-											<span class="ai1ec-event-location"
+											{% if show_location_in_title and event.venue is not empty %}
+												<span class="ai1ec-event-location"
 												>{{ text_venue_separator | format( event.venue ) }}</span>
-										{% endif %}
+											{% endif %}
 									</span>
+							{% if no_toggle %}
+								</a>
+							{% endif %}
 									{{ action_buttons | raw }}
 									{% set edit_post_link = event.edit_post_link %}
 									{% if edit_post_link is not empty %}
