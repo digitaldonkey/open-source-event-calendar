@@ -128,7 +128,7 @@ class FrontendCssController extends OsecBaseClass
             }
 
             if (! is_null($recompiledCss)) {
-                return is_null($recompiledCss);
+                return $recompiledCss;
             }
 
             return $this->cache->get(self::COMPILED_CSS_KEY);
