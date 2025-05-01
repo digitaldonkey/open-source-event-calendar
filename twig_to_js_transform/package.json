@@ -1,0 +1,16 @@
+{
+  "name": "twig_to_js_transform",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "transform": "node index.js"
+  },
+  "author": "",
+  "license": "GPL-3",
+  "description": "Transform twig templates to be useable for frontend rendering in OSEC calendar",
+  "dependencies": {
+    "npm": "^11.3.0",
+    "twig": "^0.7.2"
+  }
+}
