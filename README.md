@@ -1,9 +1,9 @@
 === Open Source Event Calendar ===
 Tags: calendar, events, ics, ical importer  
 Requires at least: 6.6  
-Tested up to: 6.7.2  
+Tested up to: 6.8.1  
 Requires PHP: 8.2  
-Stable Tag: 1.0.1  
+Stable Tag: 1.0.2
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Short Description: With Osec you can create, share and aggregate and import (ical, ics) Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
@@ -152,6 +152,24 @@ I may also provide paid support.
 8. Agenda view in mobile. All calendars are mobile friendly
 
 == Changelog ==
+
+= 1.0.2 =
+
+- Rework translation at German example (I love Loco Translate)
+- Fixed: Category image will now be used as default featured image in single event view.
+- Fixed: Function _load_textdomain_just_in_time was called incorrectly. 
+- If toggle in Agenda view is disabled link to the single Event on title click.
+- Fixed: "Click on title toggles when toggler is disabled."
+- Fixed: OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST does not work but lead to undefined variables.
+- Enabled disabling the Print icon in settings.
+- Improve (responsive) Linebreaks in date views with non-breaking spaces.
+- Simplified Plana theme to apply more WP global styles.
+- Update Twi-js tooling enables updating Twig-JS based templates for frontend-rendering
+- Simplify plana singe page template
+- Fix Category image upload UI and add option to use fallback image if no post featured image is set.
+
+= 1.0.1 =
+- Add more integration tests
 
 = 1.0.0 =
 
