@@ -838,7 +838,7 @@ class Settings extends OsecBaseInitialized
                     'label' => __('Use frontend rendering.', 'open-source-event-calendar'),
                     'help'  => __(
                         'Renders calendar views on the client rather than the server; 
-                            significantly improvees performance.',
+                            significantly improves performance.',
                         'open-source-event-calendar'
                     ),
                 ],
