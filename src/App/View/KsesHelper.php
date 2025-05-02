@@ -47,15 +47,7 @@ class KsesHelper extends OsecBaseClass
                 ],
                 'a'      => [
                     'class'               => true,
-                    'data-date'           => true,
-                    'data-date-format'    => true,
-                    'data-date-weekstart' => true,
-                    'data-href'           => true,
-                    'data-instance-id'    => true,
-                    'data-lang'           => true,
-                    'data-placement'      => true,
-                    'data-toggle'         => true,
-                    'data-type'           => true,
+                    'data-*'           => true,
                     'href'                => true,
                     'id'                  => true,
                     'style'               => true,
@@ -67,7 +59,7 @@ class KsesHelper extends OsecBaseClass
                 ],
                 'span'   => [
                     'class'       => true,
-                    'data-toggle' => true,
+                    'data-*' => true,
                     'role'        => true,
                 ],
                 'table'  => [
@@ -87,9 +79,7 @@ class KsesHelper extends OsecBaseClass
                 ],
                 'button' => [
                     'class'               => true,
-                    'data-html'           => true,
-                    'data-original-title' => true,
-                    'data-placement'      => true,
+                    'data-*'           => true,
                     'title'               => true,
                 ],
                 'td'     => [
@@ -124,8 +114,7 @@ class KsesHelper extends OsecBaseClass
             $backend = [
                 'a' => [
                     'class' => true,
-                    'data-parent' => true,
-                    'data-toggle' => true,
+                    'data-*' => true,
                     'href' => true,
                     'id' => true,
                     'onclick' => true,
@@ -148,8 +137,7 @@ class KsesHelper extends OsecBaseClass
                     'aria-expanded' => true,
                     'aria-hidden' => true,
                     'class' => true,
-                    'data-dismiss' => true,
-                    'data-loading-text' => true,
+                    'data-*' => true,
                     'id' => true,
                     'name' => true,
                     'type' => true,
@@ -198,10 +186,7 @@ class KsesHelper extends OsecBaseClass
                     'autocomplete' => true,
                     'checked' => true,
                     'class' => true,
-                    'data-ai1ec-tags' => true,
-                    'data-date-format' => true,
-                    'data-date-weekstart' => true,
-                    'data-placeholder' => true,
+                    'data-*' => true,
                     'id' => true,
                     'name' => true,
                     'onchange' => true,
@@ -237,14 +222,14 @@ class KsesHelper extends OsecBaseClass
                 ],
                 'pre' => [
                     'class' => true,
-                    'data-widget-url' => true,
+                    'data-*' => true,
                     'id' => true,
                 ],
                 'script' => [
                 ],
                 'select' => [
                     'class' => true,
-                    'data-placeholder' => true,
+                    'data-*' => true,
                     'id' => true,
                     'multiple' => true,
                     'name' => true,
@@ -255,7 +240,7 @@ class KsesHelper extends OsecBaseClass
                 'span' => [
                     'aria-hidden' => true,
                     'class' => true,
-                    'data-original-title' => true,
+                    'data-*' => true,
                     'id' => true,
                     'style' => true,
                     'title' => true,
