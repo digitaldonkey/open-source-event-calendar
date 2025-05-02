@@ -153,6 +153,9 @@ I may also provide paid support.
 
 == Changelog ==
 
+- Allow all data attributes in Ksess. Fixes persisten admin notices can not be dismissed.
+- Update checker: Notify admin of a new release tag is available.
+
 = 1.0.2 =
 
 - Rework translation at German example (I love Loco Translate)

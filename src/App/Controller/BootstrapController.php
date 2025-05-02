@@ -197,19 +197,29 @@ class BootstrapController
         });
 
         /**
-         * Register Reast Endpoint.
+         * Register Rest Endpoint.
          */
         add_action('init', function () use ($app) {
             RestController::factory($app)->registerApi();
         });
 
         /**
-         * Add date formats on Serrings-general.php
+         * Add date formats on Settings-general.php
          */
         add_action(
             'admin_init',
             function () use ($app) {
                 DateFormatsFrontend::factory($app)->initialize();
+            }
+        );
+
+      /**
+       * Check for updates
+       */
+        add_action(
+            'admin_init',
+            function () use ($app) {
+                UpdateController::factory($app)->initialize();
             }
         );
 
