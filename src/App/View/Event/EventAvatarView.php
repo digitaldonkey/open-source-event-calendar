@@ -110,7 +110,7 @@ class EventAvatarView extends OsecBaseClass
             $fallback_order = ['post_thumbnail', 'content_img', 'category_avatar', 'default_avatar'];
         }
 
-        $valid_fallbacks = $this->getValidFallbacks();
+        $valid_fallbacks = self::getValidFallbacks();
 
         foreach ($fallback_order as $fallback) {
             if ( ! isset($valid_fallbacks[$fallback])) {
@@ -145,7 +145,7 @@ class EventAvatarView extends OsecBaseClass
      *
      * @return array List of valid fallbacks.
      */
-    protected function getValidFallbacks()
+    public static function getValidFallbacks()
     {
         static $fallbacks;
         if (null === $fallbacks) {
@@ -348,10 +348,9 @@ class EventAvatarView extends OsecBaseClass
         asort($term_depths);
 
         $url   = '';
-        $model = TaxonomyAdapter::factory($this->app);
         // Starting at deepest depth, find the first category that has an avatar.
         foreach ($term_depths as $term_id => $depth) {
-            $term_image = $model->get_category_image($term_id);
+            $term_image = TaxonomyAdapter::factory($this->app)->get_category_image($term_id);
             if ($term_image) {
                 $url = $term_image;
                 break;

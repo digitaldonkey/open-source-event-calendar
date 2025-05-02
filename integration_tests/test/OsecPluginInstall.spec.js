@@ -291,7 +291,7 @@ describe('Plugin install', function(){
 
         // Wait for Ajax load.
         await pageObject.getElement(By.id('osec-calendar-view'));
-        await pageObject.waitToSeeWhatHappens(700, true);
+        await pageObject.waitToSeeWhatHappens(1200, true);
         await pageObject.takeScreenshot(this);
 
         const eventsInAgenda = await pageObject.driver.findElements(By.className('ai1ec-event-title'));
@@ -314,16 +314,22 @@ describe('Plugin install', function(){
         const weeklyDropdownLink = await pageObject.getElement(By.id('ai1ec-view-week'));
         await weeklyDropdownLink.click();
 
+        // Calendar view Month should be visible by default.
+        // Switch to next month .ai1ec-title-buttons a.ai1ec-next-month
+        const nextWeekLink = await pageObject.getElement(By.css('.ai1ec-title-buttons a.ai1ec-next-week'));
+        await nextWeekLink.click();
+
         // Wait for Ajax load.
         await pageObject.getElement(By.id('osec-calendar-view'));
-        await pageObject.waitToSeeWhatHappens(700, true);
+        await pageObject.waitToSeeWhatHappens(1200, true);
         await pageObject.takeScreenshot(this);
 
         const eventsInWeek = await pageObject.driver.findElements(By.className('ai1ec-event-title'));
         const eventCountWeek =  await eventsInWeek.length;
-        pageObject.assert.ok(
-            7 === eventCountWeek
-        )
+        pageObject.assert.equal(
+            eventCountWeek,
+            7
+        );
 
         // Switch view to daily
         viewsDropdownLink = await pageObject.getElement(By.css('a[data-toggle="ai1ec-dropdown"]'));

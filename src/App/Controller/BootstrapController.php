@@ -91,7 +91,7 @@ class BootstrapController
         $this->createWpActions();
 
         ShutdownController::factory($this->app)->register('osec_output_buffering_finalize');
-        add_action('plugins_loaded', $this->register_extensions(...), 1);
+        add_action('init', $this->register_extensions(...), 1);
         add_action('after_setup_theme', $this->register_themes(...), 1);
         add_action('init', [$this, 'verifyCache'], 1);
     }
@@ -111,8 +111,6 @@ class BootstrapController
     {
         $this->app = $app;
         $exception = null;
-        // Load the textdomain
-        add_action('init', $this->load_textdomain(...));
 
         // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
         try {
@@ -121,15 +119,12 @@ class BootstrapController
             $this->request = RequestParser::factory($this->app);
 
             // Load the css if needed
-            // ==================================
-            // = Add the hook to render the css =
-            // ==================================
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             if (isset($_GET[FrontendCssController::REQUEST_CSS_PARAM])) {
                 // We need to wait for the extension to be registered if the css
                 // needs to be compiled. Will find a better way when compiling css.
                 $css_controller = FrontendCssController::factory($this->app);
-                add_action('plugins_loaded', [$css_controller, 'render_css'], 2);
+                add_action('init', [$css_controller, 'render_css'], 2);
             }
 
             // Initialize the crons
@@ -200,19 +195,29 @@ class BootstrapController
         });
 
         /**
-         * Register Reast Endpoint.
+         * Register Rest Endpoint.
          */
         add_action('init', function () use ($app) {
             RestController::factory($app)->registerApi();
         });
 
         /**
-         * Add date formats on Serrings-general.php
+         * Add date formats on Settings-general.php
          */
         add_action(
             'admin_init',
             function () use ($app) {
                 DateFormatsFrontend::factory($app)->initialize();
+            }
+        );
+
+      /**
+       * Check for updates
+       */
+        add_action(
+            'admin_init',
+            function () use ($app) {
+                UpdateController::factory($app)->initialize();
             }
         );
 
@@ -270,7 +275,7 @@ class BootstrapController
         );
 
         add_action(
-            'plugins_loaded',
+            'init',
             function () use ($app) {
                 ThemeLoader::factory($app)->clean_cache_on_upgrade();
             },
@@ -321,8 +326,7 @@ class BootstrapController
         add_shortcode(
             OSEC_SHORTCODE,
             function ($atts) use ($app) {
-                $this->request->set_current_page(get_queried_object_id());
-
+                $this->request::set_current_page(get_queried_object_id());
                 return CalendarShortcodeView::factory($app)->shortcode($atts);
             }
         );
@@ -644,7 +648,6 @@ class BootstrapController
     {
         if (
             $this->app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY)
-            || FrontendCssController::PARSE_LESS_FILES_AT_EVERY_REQUEST
         ) {
             FrontendCssController::factory($this->app)
                                  ->invalidate_cache(null, true);
@@ -810,7 +813,6 @@ class BootstrapController
         }
 
         $wpml_helper = WpmlHelper::factory($this->app);
-        $page_base           = '';
         $clang               = '';
 
         if ($wpml_helper->is_wpml_active()) {
@@ -849,25 +851,6 @@ class BootstrapController
         }
         $post = get_post($cal_page);
         Router::factory($this->app)->asset_base($post->post_name)->register_rewrite($page_link);
-    }
-
-    /**
-     * Load the texdomain for the plugin.
-     *
-     * @wp_hook plugins_loaded
-     *
-     * @return void
-     */
-    public function load_textdomain()
-    {
-        if (false === $this->isTextdomainLoaded) {
-            load_plugin_textdomain(
-                'open-source-event-calendar',
-                false,
-                OSEC_LANGUAGE_PATH
-            );
-            $this->isTextdomainLoaded = true;
-        }
     }
 
     //    /**

@@ -169,6 +169,7 @@ class AgendaView extends AbstractView
                 'text_collapse_all' => __('Collapse All', 'open-source-event-calendar'),
                 'text_expand_all'   => __('Expand All', 'open-source-event-calendar'),
                 'no_toggle'         => $this->app->settings->get('agenda_events_expanded'),
+                'display_print_button' => $this->app->settings->get('display_print_button'),
             ];
             $nav_args['after_pagination'] = ThemeLoader::factory($this->app)
                 ->get_file('agenda-buttons.twig', $button_args, false)

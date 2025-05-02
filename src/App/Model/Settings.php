@@ -694,6 +694,24 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => false,
             ],
+            'featured_image_fallback'                    => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'viewing-events',
+                    'label' => __(
+                        ' <strong>Use featured image fallbacks</strong> if no featured image is set in event',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'Select if your want to use category images as featured image fallback on event page.
+                         Fallbacks can be influenced by hook osec_avatar_valid_callbacks.
+                        ',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => true,
+            ],
             'input_date_format'                      => [
                 'type'     => 'string',
                 'renderer' => [
@@ -820,7 +838,7 @@ class Settings extends OsecBaseInitialized
                     'label' => __('Use frontend rendering.', 'open-source-event-calendar'),
                     'help'  => __(
                         'Renders calendar views on the client rather than the server; 
-                            significantly improvees performance.',
+                            significantly improves performance.',
                         'open-source-event-calendar'
                     ),
                 ],
@@ -877,6 +895,22 @@ class Settings extends OsecBaseInitialized
                     'label' => __('Templates cache improves site performance', 'open-source-event-calendar'),
                 ],
                 'default'  => '',
+            ],
+            'display_print_button'           => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'viewing-events',
+                    'label' => __(
+                        'Display print icon',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'You may re-add the oldschool print icon.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => false,
             ],
             'always_use_calendar_timezone'           => [
                 'type'     => 'bool',

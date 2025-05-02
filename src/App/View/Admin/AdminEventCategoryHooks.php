@@ -2,7 +2,9 @@
 
 namespace Osec\App\View\Admin;
 
+use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\TaxonomyAdapter;
+use Osec\App\View\Event\EventAvatarView;
 use Osec\App\View\Event\EventTaxonomyView;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
@@ -67,6 +69,72 @@ class AdminEventCategoryHooks extends OsecBaseClass
             10,
             3
         );
+
+
+        // "Use Event fallback images as image as featured-image-fallback for Events."
+        if ($app->settings->get('featured_image_fallback')) {
+            add_filter(
+                "get_post_metadata",
+                function ($null, $post_id, $meta_key, $single, $meta_type) use ($app) {
+                    // Check Posty type?
+
+                    if (
+                        $null === null &&
+                        $meta_key === '_thumbnail_id'
+                    ) {
+                        $meta_cache = wp_cache_get($post_id, $meta_type . '_meta');
+
+                        if ( ! $meta_cache) {
+                            $meta_cache = update_meta_cache($meta_type, [$post_id]);
+                            $meta_cache = $meta_cache[$post_id] ?? null;
+                        }
+
+                        $val = null;
+
+                        if (isset($meta_cache[$meta_key])) {
+                            if ($single) {
+                                $val = maybe_unserialize($meta_cache[$meta_key][0]);
+                            } else {
+                                $val = array_map('maybe_unserialize', $meta_cache[$meta_key]);
+                            }
+                        }
+
+                        // Add fallback image.
+                        if (
+                            empty($val)
+                            && !is_admin()
+                            && OSEC_POST_TYPE === get_post_type($post_id)
+                        ) {
+                            $event = new Event($app, $post_id);
+
+                            $defaults = array_filter(
+                                array_keys(EventAvatarView::getValidFallbacks()),
+                                function ($k) {
+                                    // Prevents infinite loop.
+                                    return !in_array($k, ['post_image', 'post_thumbnail']);
+                                }
+                            );
+
+                            $fallback_url = EventAvatarView::factory($app)->get_event_avatar_url(
+                                $event,
+                                // MUST NOT USE 'post_thumbnail' here. Or you end up in infinite loop.
+                                $defaults
+                            );
+                            if ($fallback_url) {
+                                $fallbackImageId = attachment_url_to_postid($fallback_url);
+                            }
+                            if (! empty($fallbackImageId)) {
+                                return $fallbackImageId;
+                            }
+                        }
+                        return $val;
+                    }
+                    return $null;
+                },
+                99,
+                5
+            );
+        }
     }
 
     /**
@@ -208,11 +276,16 @@ class AdminEventCategoryHooks extends OsecBaseClass
         $table_name = $db->get_table_name(OSEC_DB__META);
         $term       = $db->get_row(
             $db->prepare(
-                'SELECT term_id FROM ' . $table_name .
+                'SELECT term_id, term_image FROM ' . $table_name .
                 ' WHERE term_id = %d',
                 $term_id
             )
         );
+
+        // Make sure we have the image if it is not removed.
+        if (!is_null($tag_image_value) && !empty($term->term_image)) {
+            $tag_image_value = $term->term_image;
+        }
 
         if (null === $term) { // term does not exist, create it
             $db->insert(

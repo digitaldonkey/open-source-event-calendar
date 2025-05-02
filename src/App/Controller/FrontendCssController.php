@@ -120,22 +120,24 @@ class FrontendCssController extends OsecBaseClass
      */
     public function get_compiled_css()
     {
+        static $recompiledCss = null;
         try {
             // If we want to force a recompile, we throw an exception.
-            if (self::PARSE_LESS_FILES_AT_EVERY_REQUEST) {
+            if (self::PARSE_LESS_FILES_AT_EVERY_REQUEST && is_null($recompiledCss)) {
                 throw new CacheNotSetException();
-            } else {
-                // This throws an exception if the key is not set
-                $css = $this->cache->get(self::COMPILED_CSS_KEY);
-
-                return $css;
             }
-        } catch (CacheNotSetException $e) {
-            $css = LessController::factory($this->app)->parse_less_files();
-            try {
-                $this->update_persistence_layer($css);
 
-                return $css;
+            if (! is_null($recompiledCss)) {
+                return $recompiledCss;
+            }
+
+            return $this->cache->get(self::COMPILED_CSS_KEY);
+        } catch (CacheNotSetException $e) {
+            $recompiledCss = LessController::factory($this->app)->parse_less_files();
+            try {
+                $this->update_persistence_layer($recompiledCss);
+
+                return $recompiledCss;
             } catch (CacheWriteException $e) {
                 if ( ! self::PARSE_LESS_FILES_AT_EVERY_REQUEST) {
                     NotificationAdmin::factory($this->app)->store(
@@ -157,7 +159,7 @@ class FrontendCssController extends OsecBaseClass
 
                 // If something is really broken, still return the css.
                 // This means we parse it every time. This should never happen.
-                return $css;
+                return $recompiledCss;
             }
         }
     }
@@ -217,10 +219,14 @@ class FrontendCssController extends OsecBaseClass
     {
         // get what's saved. It could be false, int or string.
         // if it's false or a int, use PHP to render CSS
-        $saved_par = $this->app->options->get(self::COMPILED_CSS_KEY);
-        // $saved_par = Number value required to display css in Header,
+        if (OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST) {
+            add_action('wp_head', $this->echo_css(...));
+            return false;
+        }
 
-        // if it's empty it's a new install probably. Return static css.
+        /* @var int|string $saved_par = Number value required to display css in Header. */
+        $saved_par = $this->app->options->get(self::COMPILED_CSS_KEY);
+        // if it's empty it's a new install, probably. Return static css.
         if (null === $saved_par) {
             $theme = $this->app->options->get('osec_current_theme');
 

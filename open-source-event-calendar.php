@@ -5,18 +5,19 @@
  * Plugin URI: https://github.com/digitaldonkey/open-source-event-calendar
  * Description: With Osec you can create, share and aggregate and import (ical, ics)
  * Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
- * Author: Osec rewrite by digitaldonkey, based on Time.ly Network Inc. All-in-One Event Calendar 2.3.4.
+ * Author: digitaldonkey, Time.ly Network Inc
  * Author URI: https://github.com/digitaldonkey
  * Contributors: digitaldonkey, hubrik, vtowel, yani.iliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
  * Tags: calendar, events, ics, ical importer
  * Requires at least: 6.6
  * Tested up to: 6.7.2
  * Requires PHP: 8.2
- * Stable Tag: 1.0.1
+ * Stable Tag: 1.0.2
  * License: GPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: open-source-event-calendar
- * Version: 1.0.1
+ * Domain Path: /languages
+ * Version: 1.0.2
  */
 
 use Osec\App\Controller\BootstrapController;
@@ -38,7 +39,9 @@ if (
     // Try fixing a bug where
     ! class_exists("\Osec\App\Controller\BootstrapController")) {
     require_once __DIR__ . '/vendor/autoload.php';
-    BootstrapController::createApp(__DIR__);
+    add_action('init', function () {
+        BootstrapController::createApp(__DIR__);
+    }, -100);
 }
 
 
@@ -61,6 +64,7 @@ function osec_plugin_activate()
         BootstrapController::createApp(__DIR__);
     }
     DatabaseSchema::factory($osec_app)->verifySqlSchema();
+    flush_rewrite_rules();
 }
 
 register_activation_hook(__FILE__, 'osec_plugin_activate');

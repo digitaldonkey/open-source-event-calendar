@@ -201,7 +201,7 @@ class ExceptionHandler
      *
      * @return string|null Add-on identifier (plugin url), or null.
      */
-    public function is_caused_by_addon(Exception $exception)
+    public function is_caused_by_addon(Throwable $exception)
     {
         $addon = null;
         if (method_exists($exception, 'plugin_to_disable')) {
