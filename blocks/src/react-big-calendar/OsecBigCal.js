@@ -1,93 +1,98 @@
-import {useEffect, useState, useMemo} from 'react';
-import { Calendar, luxonLocalizer } from 'react-big-calendar'
-import { DateTime, Settings } from 'luxon'
+import React, { useMemo } from 'react';
+import { Calendar, dayjsLocalizer } from 'react-big-calendar';
+import dayjs from "dayjs";
+import weekday from 'dayjs/plugin/weekday';
+import timezone from 'dayjs/plugin/timezone'
 import './view.scss';
 
 
+const initDayJs = (localeId) => {
+	/**
+	 * Note that the dayjsLocalizer extends Day.js with the following plugins:
+	 *  IsBetween
+	 * 	IsSameOrAfter
+	 * 	IsSameOrBefore
+	 * 	LocaleData
+	 * 	LocalizedFormat
+	 * 	MinMax
+	 * 	UTC
+	 */
+	dayjs.extend(weekday);
+	dayjs.extend(timezone);
+	if (localeId !== 'en') {
+		dayjs.locale(localeId)
+	}
+}
 
 /**
  * Maybe we won't need to do this if we have a dedicated Form later.
  * For now: Here is the place if Edit Form props and calendar props do not match.
- * @param attributes
+ * @param props
  * @returns {*}
  */
-const transformAttributes = (attributes) => {
+const transformProps = (props) => {
 	// View name "oneday" matches "day".
-	if (attributes.view) {
-		attributes.view === 'oneday' ? 'day' : attributes.view
+	if (props.view) {
+		props.view === 'oneday' ? 'day' : props.view
 	}
-	if (attributes.fixedDate) {
-		attributes.fixedDate = DateTime.fromSeconds(parseInt(attributes.fixedDate)).toJSDate();
+	if (props.fixedDate) {
+		props.fixedDate = dayjs.unix(parseInt(props.fixedDate)).valueOf();
 	}
-	return attributes;
+	return props;
 }
 
-const firstDayVisible = (date, view, firstDayOfWeek) => {
-	let dateVal = Object.prototype.toString.call(date) === '[object Date]' ? date : new Date();
-
-	const localWeekday = DateTime.fromJSDate(dateVal);
-	console.log({localWeekday, date}, 'firstDayVisible')
+const firstDayVisible = (defaultDate = null, view) => {
+	const date = Object.prototype.toString.call(defaultDate) === '[object Date]' ? dayjs(defaultDate) : dayjs();
 	switch (view) {
 		case 'month':
+			const firstInMonth = date.startOf('month').startOf('week').toDate();
+			// console.log(firstInMonth,`First day of MONTH`)
+			return firstInMonth;
 		case 'week':
-			dateVal = DateTime.fromJSDate(dateVal).startOf('week', {firstDayOfWeek: firstDayOfWeek, useLocaleWeeks: true}).toJSDate();
-			break;
+				// console.log(date.startOf('week').toDate(),`First day of WEEK`)
+				return date.startOf('week').toDate();
 		case 'agenda':
 		case 'day':
 		default:
-			dateVal = DateTime.fromJSDate(dateVal).startOf('day', {firstDayOfWeek: firstDayOfWeek, useLocaleWeeks: true}).toJSDate();
-			break;
+				return date.toDate()
 	}
-	console.log({dateVal, date, view})
-	return dateVal;
 }
 
 export default function OsecBigCal(props) {
-	// console.log(props)
-	const { fixedDate, view } = transformAttributes(props);
+	console.log(props, 'props@OsecBigCal')
 
-	const firstDayOfWeek = 7;
+	const { fixedDate, view} = transformProps(props);
+	const localeId = props.locale.name;
+	initDayJs(localeId);
+	const localizer = dayjsLocalizer(dayjs);
 
-	console.log(Settings)
-	// Settings.defaultWeekSettings = {
-	// 	firstDay: firstDayOfWeek,
-	// 	minimalDays: 4,
-	// 	weekend: [6, 7],
-	// };
+	const getDefaultDate = (fixedDate = null) => {
+		if (fixedDate) {
+			return dayjs.unix(parseInt(fixedDate)).toDate();
+		}
+		return dayjs().toDate(); // == new Date()
+	}
 
-	const firstDayInView = firstDayVisible(fixedDate, view, firstDayOfWeek);
+	const firstDayInView = firstDayVisible(fixedDate, view);
 	// fixedDate should be relative to the
 	// timespan start (e.g 1 Week Day at Day/Month views. Not on agenda).
 	// Like firstVisibleDay to query Events.
-	console.log({fixedDate, view, firstDayInView})
+	console.log({view, date: getDefaultDate(), firstDayInView})
 
-
-	const defaultTZ = DateTime.local().zoneName
-	const [timezone, setTimezone] = useState(defaultTZ);
-	const getDate = (date, DateTime) => {
-		return DateTime.fromSeconds(parseInt(date)).toJSDate()
-	}
-
-	const { defaultDate, getNow, localizer, myEvents, scrollToTime } =
+	const { defaultDate, getNow, myEvents, scrollToTime } =
 		useMemo(() => {
-			Settings.defaultZone = timezone
 			return {
-				defaultDate: getDate(fixedDate, DateTime),
-				getNow: () => DateTime.local().toJSDate(),
-				localizer: luxonLocalizer(DateTime, { firstDayOfWeek}),
+				defaultDate: getDefaultDate(fixedDate),
+				getNow: () => dayjs().toDate(),
+				localizer,
 				// myEvents: [...events],
-				scrollToTime: DateTime.local().toJSDate(),
+				// scrollToTime: DateTime.local().toJSDate(),
 			}
-		}, [timezone]);
+		});
 
-	useEffect(() => {
-		return () => {
-			Settings.defaultZone = defaultTZ // reset to browser TZ on unmount
-		}
-	}, []);
-
-
-
+	// Just to have a temporary date for now.
+	const todaysEventStart = new Date();
+	const todaysEventEnd = dayjs(todaysEventStart).add(1, 'hour').toDate();
 
 	return (
 		<>
@@ -96,8 +101,8 @@ export default function OsecBigCal(props) {
 				events={[
 					{
 						title: 'My nice Event',
-						start: new Date(1744369157 * 1000),
-						end: new Date(1744541957 * 1000),
+						start: todaysEventStart,
+						end: todaysEventEnd,
 						allDay: false,
 						resource: 'any',
 					}
