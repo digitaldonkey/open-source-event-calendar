@@ -3,12 +3,12 @@
 namespace Osec\App\Controller;
 
 use Osec\App\Model\Date\DateValidator;
-use Osec\Bootstrap\OsecBaseClass;
+use Osec\Bootstrap\OsecBaseInitialized;
 use WP_REST_Request;
 
-class RestController extends OsecBaseClass
+class RestControllerSettings extends OsecBaseInitialized
 {
-    public function registerApi()
+    public function initialize()
     {
         $app = $this->app;
 
@@ -19,9 +19,25 @@ class RestController extends OsecBaseClass
                 [
                     'methods'             => 'GET',
                     'callback'            => function (WP_REST_Request $request) use ($app) {
-                        return RestController::factory($app)->getSettings($request);
+                        return RestControllerSettings::factory($app)->getSettings($request);
                     },
                     'permission_callback' => function () {
+                        return current_user_can('read');
+                    }
+                ],
+            );
+
+            // TODO RECHECK PERMISSIONS.
+
+            register_rest_route(
+                'osec/v1',
+                '/days',
+                [
+                    'methods'             => 'GET',
+                    'callback'            => function (WP_REST_Request $request) use ($app) {
+                        return RestController::factory($app)->getRange($request);
+                    },
+                    'permission_callback' =>  function () {
                         return current_user_can('read');
                     }
                 ],
@@ -63,6 +79,24 @@ class RestController extends OsecBaseClass
 //                ]
             ]);
         }
+
+        return new \WP_Error(401, __('Not allowed', 'open-source-event-calendar'));
+    }
+
+    public function getRange(WP_REST_Request $request)
+    {
+        if (! is_wp_error($request)) {
+            return new \WP_REST_Response([
+                'dateFormat' => [
+                    'inputDateFormat' => DateValidator::get_rest_date_pattern_by_key(
+                        $this->app->settings->get('input_date_format')
+                    ),
+                    'input24hTime'    => (bool)$this->app->settings->get('input_24h_time'),
+                    'weekStart'       => (int)$this->app->settings->get('week_start_day'),
+                ],
+            ]);
+        }
+
         return new \WP_Error(401, __('Not allowed', 'open-source-event-calendar'));
     }
 }

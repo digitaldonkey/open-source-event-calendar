@@ -3,7 +3,7 @@ import { Calendar, dayjsLocalizer } from 'react-big-calendar';
 import dayjs from "dayjs";
 import weekday from 'dayjs/plugin/weekday';
 import timezone from 'dayjs/plugin/timezone'
-import './view.scss';
+import './style.scss';
 
 
 const initDayJs = (localeId) => {
