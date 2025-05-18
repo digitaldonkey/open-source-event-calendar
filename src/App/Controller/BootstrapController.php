@@ -201,7 +201,8 @@ class BootstrapController
          * Register Rest Endpoint.
          */
         add_action('init', function () use ($app) {
-            RestController::factory($app)->registerApi();
+            RestControllerSettings::factory($app);
+            RestControllerDays::factory($app);
         });
 
         /**

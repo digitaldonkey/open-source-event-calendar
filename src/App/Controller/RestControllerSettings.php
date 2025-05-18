@@ -35,7 +35,7 @@ class RestControllerSettings extends OsecBaseInitialized
                 [
                     'methods'             => 'GET',
                     'callback'            => function (WP_REST_Request $request) use ($app) {
-                        return RestController::factory($app)->getRange($request);
+                        return RestControllerSettings::factory($app)->getSettings($request);
                     },
                     'permission_callback' =>  function () {
                         return current_user_can('read');
