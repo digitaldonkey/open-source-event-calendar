@@ -43,14 +43,19 @@ class Request extends OsecBaseClass
      */
     public function is_ajax()
     {
+
         // phpcs:disable WordPress.Security.NonceVerification
-        if (defined('DOING_AJAX')) {
+        if (defined('DOING_AJAX') && DOING_AJAX) {
             return true;
         }
         if (
             isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
             'XMLHttpRequest' === $_SERVER['HTTP_X_REQUESTED_WITH']
         ) {
+            return true;
+        }
+        if (isset($_SERVER['REQUEST_URI'])
+            && str_starts_with(sanitize_url(wp_unslash($_SERVER['REQUEST_URI'])), '/wp-json/osec')) {
             return true;
         }
         if (
