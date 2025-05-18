@@ -88,9 +88,9 @@ class BigCalendarBlockController extends OsecBaseClass
         //   is imported in view.scss.
         wp_register_style(
             'osec-calendar-block-react-big-calendar-css',
-            $this->assetUrl . 'view.css',
+            $this->assetUrl . 'style-index.css',
             [],
-            filemtime(OSEC_PATH . $this->assetPath . 'view.css')
+            filemtime(OSEC_PATH . $this->assetPath . 'style-index.css')
         );
 
 

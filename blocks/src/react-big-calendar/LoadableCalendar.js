@@ -29,7 +29,7 @@ const getUserLocale = () => {
 export const LoadableCalendar = Loadable.Map({
 	loader: {
 		OsecBigCal: () => import(
-			// TODO chunck name is not applied :/
+			// TODO chunck name is not applied in js :/
 			/* webpackChunkName: "osec-big-cal.bundle.js" */
 			'./OsecBigCal'
 		),
