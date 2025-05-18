@@ -69,6 +69,10 @@
 		"displaySubscribe": {
 			"default": true,
 			"type": "boolean"
+		},
+		"agendaToggle": {
+			"default": false,
+			"type": "boolean"
 		}
 	}
 }

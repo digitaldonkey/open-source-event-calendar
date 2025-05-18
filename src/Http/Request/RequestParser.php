@@ -93,6 +93,13 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
         $this->add_rule('display_date_navigation', false, 'string', 'true', false);
         $this->add_rule('display_view_switch', false, 'string', 'true', false);
         $this->add_rule(
+            'agenda_toggle',
+            false,
+            'string',
+            $app->settings->get('agenda_events_expanded') ? 'true' : 'false',
+            false
+        );
+        $this->add_rule(
             'display_subscribe',
             false,
             'string',

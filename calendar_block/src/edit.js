@@ -251,6 +251,22 @@ export default function Edit(props) {
 							}}
 						/>
 					</p>
+					{(attributes.view === 'agenda' || attributes.displayViewSwitch) && (
+						<p>
+							<BoolSwitch
+								labelText={__(
+									' Keep all events expanded in Agenda view (disables toggler)',
+									'open source-event-calendar'
+								)}
+								value={attributes.agendaToggle}
+								onChange={(val) => {
+									setAttributes({
+										agendaToggle: val
+									})
+								}}
+							/>
+						</p>
+					)}
 				</>
 			)}
 		</div>

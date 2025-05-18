@@ -168,7 +168,7 @@ class AgendaView extends AbstractView
             $button_args                  = [
                 'text_collapse_all' => __('Collapse All', 'open-source-event-calendar'),
                 'text_expand_all'   => __('Expand All', 'open-source-event-calendar'),
-                'no_toggle'         => $this->app->settings->get('agenda_events_expanded'),
+                'no_toggle'         => $view_args['agenda_toggle'] !== 'false',
                 'display_print_button' => $this->app->settings->get('display_print_button'),
             ];
             $nav_args['after_pagination'] = ThemeLoader::factory($this->app)
@@ -190,8 +190,8 @@ class AgendaView extends AbstractView
             'dates'                     => $dates,
             'type'                      => $type,
             'show_year_in_agenda_dates' => $this->app->settings->get('show_year_in_agenda_dates'),
-            'expanded'                  => $this->app->settings->get('agenda_events_expanded'),
-            'no_toggle'                 => $this->app->settings->get('agenda_events_expanded'),
+            'expanded'                  => $view_args['agenda_toggle'] !== 'false',
+            'no_toggle'                 => $view_args['agenda_toggle'] !== 'false',
             'show_location_in_title'    => $this->app->settings->get('show_location_in_title'),
             'page_offset'               => $view_args['page_offset'],
             'navigation'                => $navigation,
@@ -441,6 +441,7 @@ class AgendaView extends AbstractView
             'time_limit',
             'display_filters',
             'display_subscribe',
+            'agenda_toggle',
             'display_view_switch',
             'display_date_navigation',
 

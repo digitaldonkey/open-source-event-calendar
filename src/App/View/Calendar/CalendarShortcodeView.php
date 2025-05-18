@@ -145,6 +145,7 @@ class CalendarShortcodeView extends OsecBaseClass
         foreach ([
             'display_filters',
             'display_subscribe',
+            'agenda_toggle',
             'display_view_switch',
             'display_date_navigation',
         ] as $query_prop) {
