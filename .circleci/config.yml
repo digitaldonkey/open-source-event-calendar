@@ -234,7 +234,7 @@ jobs:
       - run:
           name: Create Release package
           command: |
-            mkdir -p /tmp/release/$WP_ORG_PLUGIN_NAME            
+            mkdir -p /tmp/release/$WP_ORG_PLUGIN_NAME
             (cd ~/$WP_ORG_PLUGIN_NAME && cp -R $OSEC_RELEASE_WHITE_LIST /tmp/release/$WP_ORG_PLUGIN_NAME)
             (cd /tmp/release/$WP_ORG_PLUGIN_NAME && grep -e '^[^#]' ~/$WP_ORG_PLUGIN_NAME/.distignore | xargs rm -rf)
             find /tmp/release/$WP_ORG_PLUGIN_NAME -type f -name '*.sh' -o -name '*.cmd' | xargs rm
