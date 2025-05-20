@@ -167,7 +167,7 @@ class LessController extends OsecBaseClass
                         sprintf(
                         /* translators: filename */
                             esc_html__(
-                                'Could not map SASS import "%s" at theme "%s"',
+                                'Could not map SASS import "%1$s" at theme "%2$s"',
                                 'open-source-event-calendar'
                             ),
                             esc_html($path),

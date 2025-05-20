@@ -52,7 +52,7 @@ class UpdateController extends OsecBaseClass
                     /* translators: Plugin zip url of latest tag release, Plugin Uri */
                         __(
                             '<p>There is a newer release of Open source event calendar available. 
-                                <a href="%s">Download Zip</a> from <a href="%s">GitHub</a>.</p>',
+                                <a href="%1$s">Download Zip</a> from <a href="%2$s">GitHub</a>.</p>',
                             'open-source-event-calendar'
                         ),
                         esc_url($zipball_url),
