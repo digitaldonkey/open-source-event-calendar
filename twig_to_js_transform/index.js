@@ -17,7 +17,7 @@ const fs = require('node:fs').promises;
 const twigJsCompile = require('twig/lib/compile')
 
 const config = {
-    tempPath: './tmp',
+    tempPath: '../cache/twigjs_tmp2',
     sourcePath: '../public/osec_themes/vortex/twig/',
     replaceFilesPath: '../public/js/',
     templates: [
@@ -58,58 +58,65 @@ async function compileTwigJsTemplates () {
 
 async function updateTwigJsTemplates () {
     await compileTwigJsTemplates();
-    config.templates.forEach(async(template) => {
-        // Load compiled template
-        const tempFile = config.tempPath + '/' + template + '.twig.js';
-        const replacementRaw = await fs.readFile(tempFile, 'utf8');
 
-        // Load file to replace
-        const replaceInPath = config.replaceFilesPath + template + '.js';
+    // TODO
+    //  FOLLOWING IS SOMEHOW BUGGY, LEADING TO UNUSABLE JS SCRIPTS
+    //  Manually replacing works tho.
 
-        // All files to process replacements
-        const files = structuredClone(config.additionalReplaces);
-        files.push(replaceInPath);
-
-        /*
-            @var chopComment
-              must exist before and after the Twig-js template in the files for this to work!
-        */
-        const chopComment = '/*REPLACE:' + template + '.twig*/';
-        const chopCommentEscaped = escapeRegExp(chopComment)
-
-        // Prepare replacement
-        //   Remove wrapper "twig(...);\n" and add chop-comments e.g: "/*REPLACE:'agenda.twig*/"
-        let replacement = replacementRaw.replace(/^(twig\()/,"");
-        replacement = replacement.replace(/(\);\n)$/,"");
-        replacement = chopComment + replacement + chopComment;
-
-        // Prepare regex
-        const regex = new RegExp(String.raw`${chopCommentEscaped}.+?${chopCommentEscaped}`, "gsm");
-
-        // Replace in files.
-        await files.forEach(async (file) => {
-            const fileConetent = await fs.readFile(file, 'utf8');
-
-            // Replace in JS files containing twig
-            const replacedConetent = fileConetent.replace(regex, replacement);
-
-            const isWriteable = await isWritable(file);
-
-            console.log({
-                template,
-                tempFile,
-                replaceInPath,
-                chopComment,
-                regex,
-                file,
-                isWriteable,
-                // replacedConetent
-            });
-            // Update file.
-            await fs.writeFile(file, replacedConetent, 'utf8');
-        });
-
-    })
+    // config.templates.forEach(async(template) => {
+    //     // Load compiled template
+    //     const tempFile = config.tempPath + '/' + template + '.twig.js';
+    //     const replacementRaw = await fs.readFile(tempFile, 'utf8');
+    //
+    //     // Load file to replace
+    //     const replaceInPath = config.replaceFilesPath + template + '.js';
+    //
+    //     // All files to process replacements
+    //     const files = structuredClone(config.additionalReplaces);
+    //     files.push(replaceInPath);
+    //
+    //     /*
+    //         @var chopComment
+    //           must exist before and after the Twig-js template in the files for this to work!
+    //     */
+    //     const chopComment = '/*REPLACE:' + template + '.twig*/';
+    //     const chopCommentEscaped = escapeRegExp(chopComment)
+    //
+    //     // Prepare replacement
+    //     //   Remove wrapper "twig(...);\n" and add chop-comments e.g: "/*REPLACE:'agenda.twig*/"
+    //     let replacement = replacementRaw.replace(/^(twig\()/,"");
+    //     replacement = replacement.replace(/(\);\n)$/,"");
+    //     replacement = chopComment + replacement + chopComment;
+    //
+    //     // Prepare regex
+    //     const regex = new RegExp(String.raw`${chopCommentEscaped}.+?${chopCommentEscaped}`, "gsm");
+    //
+    //     // Replace in files.
+    //     await files.forEach(async (file) => {
+    //         const fileConetent = await fs.readFile(file, 'utf8');
+    //
+    //         // Replace in JS files containing twig
+    //         const replacedConetent = fileConetent.replace(regex, replacement);
+    //
+    //         console.log(replacedConetent, 'replacedConetent')
+    //
+    //         const isWriteable = await isWritable(file);
+    //
+    //         console.log({
+    //             template,
+    //             tempFile,
+    //             replaceInPath,
+    //             chopComment,
+    //             regex,
+    //             file,
+    //             isWriteable,
+    //             // replacedConetent
+    //         });
+    //         // Update file.
+    //         await fs.writeFile(file, replacedConetent, 'utf8');
+    //     });
+    //
+    // })
 }
 
 const escapeRegExp = (text) => {

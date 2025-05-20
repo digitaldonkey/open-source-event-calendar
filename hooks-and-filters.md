@@ -1880,6 +1880,48 @@ add_filter('osec_admin_theme_options_tabs_alter', $tabs);
 
 @file **../src/App/View/Calendar/AbstractView.php**
 
+### osec_title_venue_separator <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Venue separator
+
+```php
+add_filter('osec_title_venue_separator', $separator);
+```
+
+#### Description
+
+
+Added between event title and location if Display location in title is enabled. E.g. Event pages, ManageEvents table.
+
+#### Parameters
+
+
+ - **$separator** <span style="color:crimson"> </span> Translated separator inclusing spaces.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Venue separator
+ *
+ * Added between event title and location if Display location in title is enabled.
+ * E.g. Event pages, ManageEvents table.
+ *
+ * @since 1.0
+ *
+ * @param  string  $separator  Translated separator inclusing spaces.
+ *
+ * @file src/App/View/Calendar/AbstractView.php
+ */
+add_filter('osec_title_venue_separator', $separator);
+```
+
+</details>
+
+
 ### osec_calendar_view_template_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -3503,6 +3545,40 @@ Added befor dtay start date at Ui Timespan displays if they are not all-day. E.g
  * @file src/App/View/Event/EventTimeView.php
  */
 add_filter('osec_timespan_time_html_before_start_html', $separator);
+```
+
+</details>
+
+
+### osec_timespan_time_html_suffix <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Timespan suffix string follows a time.
+
+```php
+add_filter('osec_timespan_time_html_suffix', $separator);
+```
+
+#### Parameters
+
+
+ - **$separator** <span style="color:crimson"> </span> Translated separator inclusing spaces.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Timespan suffix string follows a time.
+ *             *
+ * @since 1.1
+ *
+ * @param  string  $separator  Translated separator inclusing spaces.
+ *
+ * @file src/App/View/Event/EventTimeView.php
+ */
+add_filter('osec_timespan_time_html_suffix', $separator);
 ```
 
 </details>
@@ -6238,6 +6314,48 @@ add_filter('osec_admin_theme_options_tabs_alter', $tabs);
 
 @file **../src/App/View/Calendar/AbstractView.php**
 
+### osec_title_venue_separator <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Venue separator
+
+```php
+add_filter('osec_title_venue_separator', $separator);
+```
+
+#### Description
+
+
+Added between event title and location if Display location in title is enabled. E.g. Event pages, ManageEvents table.
+
+#### Parameters
+
+
+ - **$separator** <span style="color:crimson"> </span> Translated separator inclusing spaces.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Venue separator
+ *
+ * Added between event title and location if Display location in title is enabled.
+ * E.g. Event pages, ManageEvents table.
+ *
+ * @since 1.0
+ *
+ * @param  string  $separator  Translated separator inclusing spaces.
+ *
+ * @file src/App/View/Calendar/AbstractView.php
+ */
+add_filter('osec_title_venue_separator', $separator);
+```
+
+</details>
+
+
 ### osec_calendar_view_template_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -7861,6 +7979,40 @@ Added befor dtay start date at Ui Timespan displays if they are not all-day. E.g
  * @file src/App/View/Event/EventTimeView.php
  */
 add_filter('osec_timespan_time_html_before_start_html', $separator);
+```
+
+</details>
+
+
+### osec_timespan_time_html_suffix <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Timespan suffix string follows a time.
+
+```php
+add_filter('osec_timespan_time_html_suffix', $separator);
+```
+
+#### Parameters
+
+
+ - **$separator** <span style="color:crimson"> </span> Translated separator inclusing spaces.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Timespan suffix string follows a time.
+ *             *
+ * @since 1.1
+ *
+ * @param  string  $separator  Translated separator inclusing spaces.
+ *
+ * @file src/App/View/Event/EventTimeView.php
+ */
+add_filter('osec_timespan_time_html_suffix', $separator);
 ```
 
 </details>

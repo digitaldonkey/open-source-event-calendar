@@ -285,6 +285,7 @@ class CalendarPageView extends OsecBaseClass
                 'instance_ids',
                 'display_filters',
                 'display_subscribe',
+                'agenda_toggle',
                 'display_view_switch',
                 'display_date_navigation',
             ]

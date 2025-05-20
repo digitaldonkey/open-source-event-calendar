@@ -94,6 +94,7 @@ class ClassicBlockController extends OsecBaseClass
             'post_ids' => implode(',', $atts['postIds']),
             'display_filters' => 'true',
             'display_subscribe' => 'true',
+            'agenda_toggle' => 'true',
             'display_view_switch' => 'true',
             'display_date_navigation' => 'true',
             'events_limit' => $this->app->settings->get('agenda_events_per_page'),
@@ -114,6 +115,8 @@ class ClassicBlockController extends OsecBaseClass
             'displaySubscribe' => 'display_subscribe',
             'displayViewSwitch' => 'display_view_switch',
             'displayDateNavigation' => 'display_date_navigation',
+            'agendaToggle' => 'agenda_toggle',
+
         ] as $jsProp => $query_prop) {
             if (isset($atts[$jsProp])) {
                 $query[$query_prop] = CalendarPageView::booleanStringArg($atts[$jsProp]);

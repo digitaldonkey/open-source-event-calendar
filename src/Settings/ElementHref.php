@@ -32,6 +32,7 @@ class ElementHref
         'request_format',
         'display_filters',
         'display_subscribe',
+        'agenda_toggle',
         'display_view_switch',
         'display_date_navigation',
     ];
