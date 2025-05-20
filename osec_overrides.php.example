@@ -1,0 +1,42 @@
+<?php
+
+/*
+Plugin Name: Osec Overrides example
+Plugin URI: https://github.com/digitaldonkey/open-source-event-calendar
+Description: Example how to adapt time separators.
+Version: 1.0
+Author: digitaldonkey
+Author URI: https://github.com/digitaldonkey
+License: GPL3
+*/
+
+/**
+ * @file
+ *
+ * This file shows you how you can change things between
+ * Dates and times. You may also use i18n to archive the same.
+ */
+
+add_filter(
+    'osec_timespan_time_html_before_start_html',
+    function () {
+        /* _x(' @&nbsp;', 'Event time separator', 'open-source-event-calendar') */
+        return ' um&nbsp;';
+    }
+);
+
+add_filter(
+    'osec_timespan_time_html_suffix',
+    function () {
+        /* _x('', 'Event time suffix', 'open-source-event-calendar') */
+        return '&nbsp;Uhr';
+    }
+);
+
+add_filter(
+    'osec_title_venue_separator',
+    function () {
+        /* _x(' @&nbsp;', 'Event title-location separator', 'open-source-event-calendar') */
+        return '&mdash;&nbsp;';
+    }
+);

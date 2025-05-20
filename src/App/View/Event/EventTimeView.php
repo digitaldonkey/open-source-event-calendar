@@ -98,6 +98,10 @@ class EventTimeView extends OsecBaseClass
             $date_string .= $this->format_time($end);
         }
 
+        if (! $event->is_allday()) {
+            $date_string .= $this->timeSpanSuffix();
+        }
+
         $date_string = esc_html($date_string);
 
         // Add all-day label.
@@ -234,6 +238,7 @@ class EventTimeView extends OsecBaseClass
     {
         static $timespanSeparator = null;
         if (null === $timespanSeparator) {
+            $timespanSeparator = _x(' — ', 'Event time-time separator (nbsp,mdash,nbsp)', 'open-source-event-calendar');
             /**
              * Timespan separator string/html
              *
@@ -246,7 +251,7 @@ class EventTimeView extends OsecBaseClass
              */
             $timespanSeparator = apply_filters(
                 'osec_timespan_time_separator_html',
-                _x('&nbsp;—&nbsp;', 'Event time separator', 'open-source-event-calendar')
+                $timespanSeparator
             );
         }
         return $timespanSeparator;
@@ -256,6 +261,7 @@ class EventTimeView extends OsecBaseClass
     {
         static $timeSeparator = null;
         if (null === $timeSeparator) {
+            $timeSeparator = ' ' . _x('@ ', 'Event date-time separator (nbsp)', 'open-source-event-calendar');
             /**
              * Timespan pefix string/html
              *
@@ -269,9 +275,29 @@ class EventTimeView extends OsecBaseClass
              */
             $timeSeparator = apply_filters(
                 'osec_timespan_time_html_before_start_html',
-                _x(' @&nbsp;', 'Event time separator', 'open-source-event-calendar')
+                $timeSeparator
             );
         }
         return $timeSeparator;
+    }
+
+    public static function timeSpanSuffix(): string
+    {
+        static $timespanSuffix = null;
+        if (null === $timespanSuffix) {
+            $timespanSuffix = _x(' ', 'Event time suffix (nbsp)', 'open-source-event-calendar');
+            /**
+             * Timespan suffix string follows a time.
+             *             *
+             * @since 1.1
+             *
+             * @param  string  $separator  Translated separator inclusing spaces.
+             */
+            $timespanSuffix = apply_filters(
+                'osec_timespan_time_html_suffix',
+                $timespanSuffix
+            );
+        }
+        return $timespanSuffix;
     }
 }

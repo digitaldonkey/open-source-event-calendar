@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-3.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Open Source Event Calendar 1.0.1\n"
+"Project-Id-Version: Open Source Event Calendar 1.0.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/open-source-event-calendar\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-04-27T12:18:00+02:00\n"
+"POT-Creation-Date: 2025-05-20T10:30:56+02:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: open-source-event-calendar\n"
@@ -251,7 +251,7 @@ msgid "Refresh"
 msgstr ""
 
 #: public/admin/feed_row.php:154
-#: src/App/View/Calendar/AgendaView.php:205
+#: src/App/View/Calendar/AgendaView.php:206
 msgid "Edit"
 msgstr ""
 
@@ -360,7 +360,7 @@ msgstr ""
 
 #: public/admin/themes.php:38
 #: src/App/View/Admin/AdminThemeList.php:391
-#: src/App/View/Calendar/AgendaView.php:208
+#: src/App/View/Calendar/AgendaView.php:209
 msgid "Tags:"
 msgstr ""
 
@@ -656,41 +656,46 @@ msgid "Invalid parameter"
 msgstr ""
 
 #. translators: Compile error
-#: src/App/Controller/FrontendCssController.php:144
+#: src/App/Controller/FrontendCssController.php:146
 msgid ""
 "Your CSS is being compiled on every request, \n"
 "                                    which causes your calendar to perform slowly. The following error occurred: %s"
 msgstr ""
 
 #. translators: Url
-#: src/App/Controller/FrontendCssController.php:288
+#: src/App/Controller/FrontendCssController.php:294
 msgid "Theme options were successfully reset to their default values. <a href='%s'>Visit site</a>"
 msgstr ""
 
 #. translators: Site url
-#: src/App/Controller/FrontendCssController.php:297
+#: src/App/Controller/FrontendCssController.php:303
 msgid "Theme options were updated successfully. <a href='%s'>Visit site</a>"
 msgstr ""
 
 #. translators: Minimum PHP memory required
-#: src/App/Controller/FrontendCssController.php:330
+#: src/App/Controller/FrontendCssController.php:336
 msgid ""
 "CSS compilation failed because you do not have enough free memory  \n"
 "                      (a minimum of %s is needed). Your calendar will not render or function\n"
 "                      properly without CSS. Increase your PHP memory limit."
 msgstr ""
 
-#: src/App/Controller/FrontendCssController.php:363
+#: src/App/Controller/FrontendCssController.php:369
 msgid ""
 "The LESS file compiled correctly but there was an error\n"
 "                    while saving the generated CSS to persistence."
 msgstr ""
 
 #. translators: Error message
-#: src/App/Controller/FrontendCssController.php:375
+#: src/App/Controller/FrontendCssController.php:381
 msgid ""
 "<p><strong>There was an error while compiling CSS.</strong>\n"
 "                        The message returned was: <em>%s</em></p>"
+msgstr ""
+
+#. translators: filename
+#: src/App/Controller/LessController.php:169
+msgid "Could not map SASS import \"%1$s\" at theme \"%2$s\""
 msgstr ""
 
 #: src/App/Controller/RestController.php:66
@@ -765,6 +770,13 @@ msgstr ""
 
 #: src/App/Controller/ScriptsFrontendController.php:430
 msgid "For week and day view, you must select an interval of at least 6 hours."
+msgstr ""
+
+#. translators: Plugin zip url of latest tag release, Plugin Uri
+#: src/App/Controller/UpdateController.php:53
+msgid ""
+"<p>There is a newer release of Open source event calendar available. \n"
+"                                <a href=\"%1$s\">Download Zip</a> from <a href=\"%2$s\">GitHub</a>.</p>"
 msgstr ""
 
 #: src/App/Model/Date/DateFormatsFrontend.php:64
@@ -1227,7 +1239,7 @@ msgstr ""
 #: src/App/Model/Settings.php:839
 msgid ""
 "Renders calendar views on the client rather than the server; \n"
-"                            significantly improvees performance."
+"                            significantly improves performance."
 msgstr ""
 
 #: src/App/Model/Settings.php:852
@@ -1261,10 +1273,18 @@ msgid "Templates cache improves site performance"
 msgstr ""
 
 #: src/App/Model/Settings.php:904
-msgid "Display events in <strong>calendar time zone</strong>"
+msgid "Display print icon"
 msgstr ""
 
 #: src/App/Model/Settings.php:908
+msgid "You may re-add the oldschool print icon."
+msgstr ""
+
+#: src/App/Model/Settings.php:920
+msgid "Display events in <strong>calendar time zone</strong>"
+msgstr ""
+
+#: src/App/Model/Settings.php:924
 msgid ""
 "If this box is checked events will appear in the calendar time zone with time zone \n"
 "                            information displayed on the event details page."
@@ -1627,9 +1647,9 @@ msgstr ""
 msgid "The template files are located in %s."
 msgstr ""
 
-#. translators: venue separator
-#: src/App/View/Calendar/AbstractView.php:51
-msgid "@ %s"
+#: src/App/View/Calendar/AbstractView.php:52
+msgctxt "Event title-location separator(@&nbsp;"
+msgid "@ "
 msgstr ""
 
 #: src/App/View/Calendar/AgendaView.php:169
@@ -1640,15 +1660,15 @@ msgstr ""
 msgid "Expand All"
 msgstr ""
 
-#: src/App/View/Calendar/AgendaView.php:201
+#: src/App/View/Calendar/AgendaView.php:202
 msgid "There are no upcoming events to display at this time."
 msgstr ""
 
-#: src/App/View/Calendar/AgendaView.php:206
+#: src/App/View/Calendar/AgendaView.php:207
 msgid "Read more"
 msgstr ""
 
-#: src/App/View/Calendar/AgendaView.php:207
+#: src/App/View/Calendar/AgendaView.php:208
 msgid "Categories:"
 msgstr ""
 
@@ -1665,15 +1685,15 @@ msgid ""
 "                            Please check if you have installed the latest versions of calendar add-ons."
 msgstr ""
 
-#: src/App/View/Calendar/CalendarPageView.php:508
+#: src/App/View/Calendar/CalendarPageView.php:509
 msgid "Subscribe to filtered calendar"
 msgstr ""
 
-#: src/App/View/Calendar/CalendarPageView.php:509
+#: src/App/View/Calendar/CalendarPageView.php:510
 msgid "Subscribe"
 msgstr ""
 
-#: src/App/View/Calendar/CalendarPageView.php:510
+#: src/App/View/Calendar/CalendarPageView.php:511
 #: src/App/View/Event/EventSingleView.php:165
 msgid "Get a Timely Calendar"
 msgstr ""
@@ -1917,22 +1937,27 @@ msgstr ""
 msgid "Event website"
 msgstr ""
 
-#: src/App/View/Event/EventTimeView.php:106
+#: src/App/View/Event/EventTimeView.php:110
 msgid "all-day"
 msgstr ""
 
-#: src/App/View/Event/EventTimeView.php:229
+#: src/App/View/Event/EventTimeView.php:233
 msgid ", and "
 msgstr ""
 
-#: src/App/View/Event/EventTimeView.php:249
-msgctxt "Event time separator"
+#: src/App/View/Event/EventTimeView.php:241
+msgctxt "Event time-time separator (nbsp,mdash,nbsp)"
 msgid " — "
 msgstr ""
 
-#: src/App/View/Event/EventTimeView.php:272
-msgctxt "Event time separator"
-msgid " @ "
+#: src/App/View/Event/EventTimeView.php:264
+msgctxt "Event date-time separator (nbsp)"
+msgid "@ "
+msgstr ""
+
+#: src/App/View/Event/EventTimeView.php:288
+msgctxt "Event time suffix (nbsp)"
+msgid " "
 msgstr ""
 
 #: src/App/View/RepeatRuleToText.php:85
@@ -2299,11 +2324,11 @@ msgstr ""
 msgid "Length"
 msgstr ""
 
-#: src/Settings/HtmlFactory.php:133
+#: src/Settings/HtmlFactory.php:134
 msgid "Choose a date using calendar"
 msgstr ""
 
-#: src/Settings/HtmlFactory.php:304
+#: src/Settings/HtmlFactory.php:305
 msgid "Tags (optional)"
 msgstr ""
 

@@ -47,11 +47,25 @@ abstract class AbstractView extends OsecBaseClass
 
     public static function get_venue_separator_text()
     {
-        /* translators: venue separator */
-        return __(
-            '@ %s',
-            'open-source-event-calendar'
-        );
+        static $venueSeparator = null;
+        if (null === $venueSeparator) {
+            $venueSeparator = ' ' . _x('@ ', 'Event title-location separator(@&nbsp;', 'open-source-event-calendar');
+            /**
+             * Venue separator
+             *
+             * Added between event title and location if Display location in title is enabled.
+             * E.g. Event pages, ManageEvents table.
+             *
+             * @since 1.0
+             *
+             * @param  string  $separator  Translated separator inclusing spaces.
+             */
+            $venueSeparator = apply_filters(
+                'osec_title_venue_separator',
+                $venueSeparator
+            );
+        }
+        return $venueSeparator;
     }
 
     /**
