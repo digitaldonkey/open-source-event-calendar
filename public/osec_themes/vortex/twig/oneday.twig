@@ -49,7 +49,7 @@
 									{{ event.filtered_title | raw }}
 									{% if show_location_in_title and event.venue %}
 										<span class="ai1ec-event-location"
-											>{{ text_venue_separator | format( event.venue ) }}</span>
+											>{{ text_venue_separator}}{{ event.venue }}</span>
 									{% endif %}
 								</span>
 							</div>
@@ -67,7 +67,7 @@
 									>{{ event.filtered_title | raw }}</a>
 								{% if show_location_in_title and event.venue %}
 									<span class="ai1ec-event-location"
-										>{{ text_venue_separator | format( event.venue ) }}</span>
+										>{{ text_venue_separator}}{{ event.venue }}</span>
 								{% endif %}
 								{% if is_ticket_button_enabled and event.ticket_url %}
 									<a class="ai1ec-pull-right ai1ec-btn ai1ec-btn-primary ai1ec-btn-xs
@@ -181,7 +181,7 @@
 										{{ event.filtered_title | raw }}
 										{% if show_location_in_title and event.venue %}
 											<span class="ai1ec-event-location"
-												>{{ text_venue_separator | format( event.venue ) }}</span>
+												>{{ text_venue_separator}}{{ event.venue }}</span>
 										{% endif %}
 									</span>
 								</div>
@@ -198,7 +198,7 @@
 										>{{ event.filtered_title | raw }}</a>
 									{% if show_location_in_title and event.venue %}
 										<span class="ai1ec-event-location"
-											>{{ text_venue_separator | format( event.venue ) }}</span>
+											>{{ text_venue_separator}}{{ event.venue }}</span>
 									{% endif %}
 									{% if is_ticket_button_enabled and event.ticket_url %}
 										<a class="ai1ec-pull-right ai1ec-btn ai1ec-btn-primary ai1ec-btn-xs
