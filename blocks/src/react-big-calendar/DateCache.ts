@@ -1,73 +1,98 @@
 import * as dayjs from 'dayjs'
 
-import { log } from "console";
 
-// TODO MAYybe https://github.com/liesislukas/localstorage-ttl/
+// import { log } from "console";
 
-export interface Range {
-	start: number;
-	end: number;
+// TODO Maybe https://github.com/liesislukas/localstorage-ttl/
+
+export interface DateRange {
+	start: Date;
+	end: Date;
+}
+
+export interface UnixRange {
+	start: String;
+	end: String;
 }
 
 class DateCache {
-	dayjs: dayjs.Dayjs;
+	dayjs:dayjs.Dayjs;
 	cache: object;
 	constructor(dayjs:dayjs.Dayjs) {
 		this.dayjs = dayjs;
 		this.cache = {}
 	}
 
-	getRange (startDay:Date, endDay:Date){
+	getRange (range:DateRange){
+
+		if (!range.start||!range.end) {
+			throw new Error('invalid argument type');
+		}
+
 		// @ts-expect-error
-		let start = this.dayjs(startDay).startOf('day');
-		// +1 day? to fill
-		//   -> No: the API should return Events from start to end of a day.
-		//      So there might just be a List of Events for a
-		//      Unix time + 24 hours Range.
-		//      - Will invalidate on timezone/locale change on frontend.
+		let start = this.dayjs(range.start).startOf('day');
 		// @ts-expect-error
-		let end = this.dayjs(endDay).startOf('day');
+		let end = this.dayjs(range.end).add(1, 'day').startOf('day');
 		// Ensure order.
 		if (end.isBefore(start)) {
 			[end, start] = [start, end];
 		}
+
 		// @ts-expect-error
 		let currentDate = this.dayjs(start);
-		const range = {};
-		const found = [];
+		const missing:number[] = [];
+		const temp = {};
+		let found = [];
+
 		while (currentDate.isBefore(end) || currentDate.isSame(end)) {
-			const timestamp = String(currentDate.unix());
-			if (this.cache[timestamp]) {
-				found.push(this.cache[timestamp]);
-				range[timestamp] = true
+			const timestamp = currentDate.unix();
+			// Array might be empty, but It won't requerry.
+			if (Array.isArray(this.cache[String(timestamp)])) {
+				found = found.concat(this.cache[String(timestamp)])
+				temp[String(timestamp)] = true;
+			}
+			else if(this.cache[String(timestamp)] === null) {
+				this.cache[String(timestamp)] = [];
 			}
 			else {
-				range[timestamp] = false
+				missing.push(timestamp)
+				// Save empty timestamps?
+				// Yes. We don't want to requerry on every calendar gap.
+				this.cache[String(timestamp)] = null;
+				temp[String(timestamp)] = false;
 			}
 			// Add a day.
 			currentDate = currentDate.add(1, 'day');
 		}
-		//  Alle Tage generieren?
-		//  Wie matchen?
-		//  Wie fetchen?
 
 		const data = {
-			range,
+			temp,
 			start: {
-				date: start.toDate(),
+				date: start.local().format(),
 				unix: start.unix(),
 			},
 			end: {
-				date: end.toDate(),
+				date: end.local().format(),
 				unix: end.unix(),
 			},
 			cached: found,
-			missing: this.getMissingRanges(range),
+			missing: this.getMissingRanges(missing),
 		}
 		// log(data);
 		return data;
 	}
 
+	// TODO SOMEHOW WE NEED TO ADD EMPTY DAYS OR WE WILL GET ONE REQUEST PER GAP-DAY
+	addRequest(data: {start: string }[]) {
+		// Split Events into days.
+		data.map((item)=> {
+			const dayStart =  String(dayjs(item.start).startOf('day').unix());
+			if (!Array.isArray(this.cache[dayStart])) {
+				this.cache[dayStart] = [];
+			}
+			this.cache[dayStart].push(item);
+		});
+	}
 	add (items:object):void {
 		for (let timestamp of Object.keys(items)) {
 			// @ts-expect-error
@@ -83,19 +108,19 @@ class DateCache {
 		}
 	}
 
-	getCachedRange():Range {
+	getCachedRange():UnixRange {
 		const allKeys = this.getDaysAsc();
 		return {
 			start: allKeys.at(0),
 			end: allKeys.at(-1)
 		}
 	}
-	getOldestDay():number {
+	getOldestDay():String {
 		const { end } = this.getCachedRange();
 		return end ? end : null;
 	}
 
-	getNewestDay ():number {
+	getNewestDay ():String {
 		const { start } = this.getCachedRange();
 		return start ? start : null;
 	}
@@ -103,51 +128,47 @@ class DateCache {
 	/**
 	 * Get all ordered ascending/old to new.
 	 */
-	getDaysAsc():number[] {
+	getDaysAsc():String[] {
 		const keys = Object.keys(this.cache);
 		keys.sort(function(a, b){
 			return parseInt(b) - parseInt(a)
 		});
-		return  keys.length ? keys.map(Number) : [];
+		return  keys.length ? keys.map(String) : [];
 	}
 
 	/**
 	 * Extract start/end of missing sections in range.
-	 * @param range
+	 *
+	 * @param unOrderedRange
 	 */
-	getMissingRanges(range) {
-		let isMissing:string, lastOne:string;
-		const missed:Range[] = [];
-		const timestamps = Object.keys(range);
-		const lastElement= timestamps.at(-1);
-		for (let timestamp of timestamps) {
-			if (this.cache[timestamp]) {
-				if (isMissing) {
-					missed.push({
-						start: parseInt(isMissing),
-						end: parseInt(lastOne),
-					});
-					isMissing = null;
-				} else {
-					lastOne = timestamp;
-				}
-			}
-			else {
-				if (isMissing) {
-					lastOne = timestamp;
-				}
-				else {
-					isMissing = timestamp;
-				}
-			}
-			if (isMissing && lastElement === timestamp) {
-				missed.push({
-					start: parseInt(isMissing),
-					end: parseInt(timestamp),
-				});
-			}
+	getMissingRanges (unOrderedRange:Array<number>):UnixRange[] {
+		const range = new Int32Array(unOrderedRange).sort();
+		if (!range.length) {
+			return [];
 		}
-		return missed;
+		const missingRanges:UnixRange[] = [];
+		const oneDay = 24*60*60;
+		let firstInRange = range.at(0);
+		let lastInRange:number = null;
+
+		range.forEach((timestamp) => {
+			const isNextDay:Boolean = (
+				lastInRange && (lastInRange + oneDay) === timestamp
+			);
+			if (!isNextDay && lastInRange){
+				missingRanges.push({
+					start: String(firstInRange),
+					end: String(lastInRange + oneDay),
+				});
+				firstInRange = timestamp;
+			}
+			lastInRange = timestamp;
+		});
+		missingRanges.push({
+			start: String(firstInRange),
+			end: String((range.at(-1) + oneDay)),
+		});
+		return missingRanges;
 	}
 }
 

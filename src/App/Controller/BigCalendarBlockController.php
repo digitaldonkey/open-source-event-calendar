@@ -84,6 +84,18 @@ class BigCalendarBlockController extends OsecBaseClass
             true
         );
 
+        // TODO Currently not in use.
+        //   Evaluate cleaner ways for dayjs locale loading.
+
+        wp_localize_script(
+            'osec-calendar-block-react-big-calendar-frontend',
+            'osecSettings',
+            [
+                'dayjsLocaleUri' => OSEC_URL . '/blocks/build/react-big-calendar/dayjs-locales/'
+            ]
+        );
+
+
         //   CSS - react-big-calendar/lib/css/react-big-calendar.css
         //   is imported in view.scss.
         wp_register_style(
