@@ -1,12 +1,22 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, {useMemo, useState, useEffect, useCallback} from 'react';
 import { Calendar, dayjsLocalizer } from 'react-big-calendar';
 import dayjs from "dayjs";
 import weekday from 'dayjs/plugin/weekday';
 import timezone from 'dayjs/plugin/timezone'
+import DateCache, {DateRange} from './DateCache';
 import './style.scss';
 import {Range} from './DateCache';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
+import Toolbar from "react-big-calendar/lib/Toolbar";
+
+const dateCache = new DateCache(dayjs);
+
+const doDebug = false;
+let debug = x => {};
+if( (doDebug && typeof console != 'undefined')) {
+	debug = console.log.bind(console);
+}
 
 const initDayJs = (localeId) => {
 	/**
@@ -27,6 +37,27 @@ const initDayJs = (localeId) => {
 }
 
 /**
+ * Ensure to fire onRangeChange on init.
+ *
+ * The calendar does not provide any way to receive the range of dates that
+ * are visible except when they change. This is the cleanest way I could find
+ * to extend it to provide the _initial_ range (`onView` calls `onRangeChange`).
+ * @see https://github.com/jquense/react-big-calendar/issues/1752#issuecomment-761051235
+ *
+ * @param props
+ * @returns {Element}
+ * @constructor
+ */
+const InitialRangeChangeToolbar = (props) => {
+	useEffect(() => {
+		props.onView(props.view);
+	}, []);
+	return <Toolbar {...props} />;
+}
+
+/**
+ * Preprocess props.
+ *
  * Maybe we won't need to do this if we have a dedicated Form later.
  * For now: Here is the place if Edit Form props and calendar props do not match.
  * @param props
@@ -47,6 +78,13 @@ const transformProps = (props) => {
 	return props;
 }
 
+/**
+ * TODO Delete
+ *
+ * @param defaultDate
+ * @param view
+ * @returns {{start: null, end: null}}
+ */
 const initialRange = (defaultDate = null, view) => {
 	const date = Object.prototype.toString.call(defaultDate) === '[object Date]' ? dayjs(defaultDate) : dayjs();
 	const returnVal = {start: null, end: null};
@@ -67,30 +105,16 @@ const initialRange = (defaultDate = null, view) => {
 	return returnVal;
 }
 
-const transformRange = (range, view) => {
-	console.log({range, view}, 'range (UNTRANSFORMED)');
-	switch (view) {
-		case 'week':
-			return {
-				start: range[0],
-				end: range[6],
-			}
-		case 'agenda':
-			// TODO There are options to change default agenda Range.
-			/// Agenda.range = (start, { length = Agenda.defaultProps.length })
-			return {
-				start: range.start,
-				end: null,
-			}
-		case 'day':
-			return {
-				start: range[0],
-				end: null,
-			}
-		case 'month':
-		default:
-			return range;
-	}
+const unixToJsDates = (events) => {
+	return events.map((event) => {
+		return {
+			...event,
+			...{
+				start: dayjs.unix(parseInt(event.start)).toDate(),
+				end: dayjs.unix(parseInt(event.end)).toDate(),
+			},
+		};
+	});
 }
 
 const getDefaultDate = (fixedDate = null) => {
@@ -118,33 +142,110 @@ const loadEvents = async (range, setEvents) => {
 }
 
 export default function OsecBigCal(props) {
-	// console.log(props, 'props@OsecBigCal')
+
 	const { fixedDate, defaultView } = transformProps(props);
 	const localeId = props.locale.name;
 	initDayJs(localeId);
 	const localizer = dayjsLocalizer(dayjs);
-	const [events, setEvents] = useState([{
-		"title": "Daily",
-		"start": new Date("2025-04-29T15:16:00.000Z"),
-		"end": new Date("2025-04-29T16:16:00.000Z"),
-		"allDay": false,
-		"resource": "any"
-	}]);
+	const [events, setEvents] = useState([]);
+	const [view, setView] = useState(props.defaultView);
 
-	// const [view, setView] = useState(defaultView);
+	/**
+	 * Loading Events
+	 * @type {(function(*): Promise<void>)|*}
+	 */
+	const loadEvents = useCallback(async(range)=> {
 
-	// TODO
-	//  This can be converted to a appropriate star Range
-	//   --> loadEvents should have a filter to unify the renges
-	//       Day/Week/Month/Agenda(?Pager, Initial set number or Autoload?)
-	//
-	 const loadRange = initialRange(fixedDate, defaultView);
-	// fixedDate should be relative to the
-	// timespan start (e.g 1 Week Day at Day/Month views. Not on agenda).
-	// Like firstVisibleDay to query Events.
-	// console.log({loadRange })
-	// ;
-	const { getNow} = useMemo(() => {
+		const theRange = {
+			start: dayjs(range.start * 1000).local().toDate(),
+			end: dayjs(range.end * 1000).local().endOf('day').toDate(),
+		};
+		debug({
+			...theRange,
+			range
+		}, 'range@loadEvents');
+
+		const cacheData = dateCache.getRange(theRange);
+
+		if (cacheData.cached.length) {
+			setEvents(cacheData.cached);
+			debug(cacheData.cached, 'FROM CACHE')
+		}
+
+		// TODO
+		//   - WHY ARE WE ON DAY OFF?
+		//   - unixToJsDates should only be called once on every event
+
+
+		// Fetch what is missing.
+		const url = '/osec/v1/days';
+		if (cacheData.missing.length) {
+ 			for (const currenttRange of cacheData.missing) {
+				debug({
+					start: dayjs(parseInt(currenttRange.start) * 1000).local().toString(),
+					end: dayjs(parseInt(currenttRange.end) * 1000).local().toString()
+				}, 'MISSING RANGE')
+
+				const path = addQueryArgs( url, currenttRange );
+				const fetched = await apiFetch( { path } );
+				const newEvents = unixToJsDates(fetched.events);
+				setEvents(events => [...events, ...newEvents]);
+				dateCache.addRequest(newEvents)
+				debug({newEvents, cache: dateCache}, 'FETCHED TO CACHE')
+			}
+		}
+	}, [setEvents])
+
+	/**
+	 * Load Events based on date range and view
+	 *
+	 * Handles inconsistent BigCal ranges.
+	 *
+	 * @param range
+	 * @param view
+	 * @returns {Promise<void>}
+	 */
+	const loadRange = (range, view) => {
+		let newRange = range;
+		switch (view) {
+			case 'week':
+				newRange = {
+					start: range[0],
+					end: range[6],
+				}
+				break;
+			case 'agenda':
+				// TODO There are options to change default agenda Range.
+				/// Agenda.range = (start, { length = Agenda.defaultProps.length })
+				newRange = {
+					start: range.start,
+					// TODO For now we load one month.
+					end: dayjs(range.start).endOf('month').toDate(),
+				}
+				break;
+			case 'day':
+				newRange = {
+					start: range[0],
+					end: dayjs(range[0]).endOf('day').toDate(),
+				}
+				break
+			case 'month':
+			// default:
+		}
+
+		debug({
+			start: dayjs(newRange.start).toDate() ,
+			end: dayjs(newRange.end).toDate(),
+			view
+		}, `loadRange for view: "${view}"`);
+
+		return loadEvents({
+			start: dayjs(newRange.start).unix(),
+			end: dayjs(newRange.end).unix(),
+		});
+	}
+
+	const { getNow } = useMemo(() => {
 		return {
 			defaultDate: getDefaultDate(fixedDate),
 			getNow: () => dayjs().toDate(),
@@ -203,20 +304,20 @@ export default function OsecBigCal(props) {
 			// date={  }
 			getNow={getNow}
 			endAccessor="end"
-			style={{ height: '80vh' }}
+			style={{ height: '100vh', fontSize: '.9rem' }}
 			defaultView={defaultView}
-			onRangeChange = {(newRange, currentView) => {
-				const range = transformRange(newRange, currentView)
-				console.log({range}, 'newRange (TRANSFORMED)')
+			onRangeChange = {(newRange, newView) => {
+
+				// var argArray = Array.prototype.slice.call( arguments );
+				debug({newRange, view}, 'args@onRangeChange')
+				return loadRange(newRange, newView ?? view);
 			}}
-			onNavigate ={(newDate) => {
-				// Does not seem to fire.
-				console.log({newDate}, 'newDate')
+			// onRangeChange = {loadRange}
+			onView ={ (newView) => {
+				debug(newView, 'onView');
+				setView(newView)
 			}}
-			onView ={(newView) => {
-				// setView(newView);
-				console.log({newView}, 'newView')
-			}}
+			components={{toolbar: InitialRangeChangeToolbar}}
 		/>
 	)
 }

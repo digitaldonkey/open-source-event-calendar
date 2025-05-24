@@ -1,6 +1,13 @@
 import Loadable from 'react-loadable';
 import availableLocales from './datejs-locales.json';
 
+/**
+ * Load user locale based on browser settings.
+ *
+ * BigCal displays everything (like weekdays, Date formats etc based on browser Language.
+ *
+ * @returns {*|string|boolean}
+ */
 const getUserLocale = () => {
 	const nav_langs = navigator.languages || (navigator.language ? [navigator.language] : false);
 	if(!nav_langs || !nav_langs.length) {
@@ -26,6 +33,9 @@ const getUserLocale = () => {
 	return 'en';
 }
 
+/**
+ * Using a `Loadable` to load things we need.
+ */
 export const LoadableCalendar = Loadable.Map({
 	loader: {
 		OsecBigCal: () => import(
@@ -36,7 +46,12 @@ export const LoadableCalendar = Loadable.Map({
 		// i18n: () => fetch('./i18n/bar.json').then(res => res.json()),
 		locale: ()  => {
 			const locale = getUserLocale();
-			console.info(`Loading locale ${locale}`)
+			const uri = osecSettings.dayjsLocaleUri + locale + '.js';
+
+			console.info(`Loading locale "${locale}". Want to load ${uri}`)
+			// return (
+			// 	import(/* webpackIgnore: true */ uri ) Would require CORS to be enabled :/
+			// );
 			// Why adding '.js'?
 			//  It leads to stupid xyzjs.js chunc names.
 			//  But avoids webpack errors
@@ -48,6 +63,7 @@ export const LoadableCalendar = Loadable.Map({
 			//  We may also use blocks/build/react-big-calendar/dayjs-locales
 			//  created by CopyWebpackPlugin to keep our build/ folder more tidy.
 			//  Decide later....
+			// dayjsLocalesUri
 			return import(
 				/* webpackChunkName: "[request]" */
 				`dayjs/locale/${locale}.js`

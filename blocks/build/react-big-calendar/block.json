@@ -21,6 +21,7 @@
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
   "viewScript": "file:./view.js",
+  "style": "file:./view.scss",
   "attributes": {
     "view": {
       "type": "string",

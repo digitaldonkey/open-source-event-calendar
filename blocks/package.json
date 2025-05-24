@@ -19,6 +19,7 @@
 		"start": "wp-scripts start",
 		"test:e2e": "wp-scripts test-e2e",
 		"test:unit": "wp-scripts test-unit-js",
+		"test:unit:watch": "wp-scripts test-unit-js --watch",
 		"add": "npx @wordpress/create-block --namespace open-source-event-calendar --variant dynamic --no-plugin",
 		"add-static": "npx @wordpress/create-block --namespace open-source-event-calendar --no-plugin",
 		"postinstall": "node src/scripts/postinstall.js"
@@ -35,6 +36,7 @@
 		"react-big-calendar": "^1.18.0",
 		"react-datepicker": "^8.0.0",
 		"react-loadable": "^5.5.0",
+		"react-overlays": "^5.2.1",
 		"react-select": "^5.9.0",
 		"react-switch": "^7.1.0"
 	},
