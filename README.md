@@ -1,7 +1,7 @@
 === Open Source Event Calendar ===
 Tags: calendar, events, ics, ical importer  
 Requires at least: 6.6  
-Tested up to: 6.8.1  
+Tested up to: 6.8
 Requires PHP: 8.2  
 Stable Tag: 1.0.3
 License: GPL-3.0-or-later
