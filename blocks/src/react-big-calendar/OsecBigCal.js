@@ -9,6 +9,7 @@ import {Range} from './DateCache';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import Toolbar from "react-big-calendar/lib/Toolbar";
+import EventPopup from "./EventPopup";
 
 const dateCache = new DateCache(dayjs);
 
@@ -318,6 +319,10 @@ export default function OsecBigCal(props) {
 				setView(newView)
 			}}
 			components={{toolbar: InitialRangeChangeToolbar}}
+			// TODO POpup Events?
+			onSelectEvent={EventPopup}
+			// onSelectEvent and or / tooltipAccessor
+
 		/>
 	)
 }

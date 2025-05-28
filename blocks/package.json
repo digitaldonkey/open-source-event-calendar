@@ -25,6 +25,7 @@
 		"postinstall": "node src/scripts/postinstall.js"
 	},
 	"dependencies": {
+		"@restart/ui": "^1.9.4",
 		"@wordpress/api-fetch": "^7.16.0",
 		"@wordpress/block-editor": "^14.11.0",
 		"@wordpress/blocks": "^14.12.0",
@@ -36,7 +37,6 @@
 		"react-big-calendar": "^1.18.0",
 		"react-datepicker": "^8.0.0",
 		"react-loadable": "^5.5.0",
-		"react-overlays": "^5.2.1",
 		"react-select": "^5.9.0",
 		"react-switch": "^7.1.0"
 	},
