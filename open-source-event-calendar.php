@@ -17,7 +17,7 @@
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: open-source-event-calendar
  * Domain Path: /languages
- * Version: 1.0.2
+ * Version: 1.0.3
  */
 
 use Osec\App\Controller\BootstrapController;
