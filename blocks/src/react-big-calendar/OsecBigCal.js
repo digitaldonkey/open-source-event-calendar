@@ -7,7 +7,6 @@ import DateCache, {DateRange} from './DateCache';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import Toolbar from "react-big-calendar/lib/Toolbar";
-import EventPopup from "./EventPopup";
 import EventWrapper from "./EventWrapper";
 
 const dateCache = new DateCache(dayjs);
@@ -15,7 +14,7 @@ const dateCache = new DateCache(dayjs);
 const doDebug = false;
 let debug = x => {};
 if( (doDebug && typeof console != 'undefined')) {
-	debug = console.log.bind(console);
+	debug = debuglog.bind(console);
 }
 
 const initDayJs = (localeId) => {
@@ -78,33 +77,6 @@ const transformProps = (props) => {
 	return props;
 }
 
-/**
- * TODO Delete
- *
- * @param defaultDate
- * @param view
- * @returns {{start: null, end: null}}
- */
-const initialRange = (defaultDate = null, view) => {
-	const date = Object.prototype.toString.call(defaultDate) === '[object Date]' ? dayjs(defaultDate) : dayjs();
-	const returnVal = {start: null, end: null};
-	switch (view) {
-		case 'month':
-			returnVal.start = date.startOf('month').startOf('week').unix();
-			returnVal.end = date.endOf('month').endOf('week').unix();
-			break;
-		case 'week':
-			returnVal.start = date.startOf('week').unix();
-			returnVal.end = date.endOf('week').unix();
-			break;
-		case 'agenda':
-		case 'day':
-		default:
-			returnVal.start = date.unix();
-	}
-	return returnVal;
-}
-
 const unixToJsDates = (events) => {
 	return events.map((event) => {
 		return {
@@ -158,7 +130,6 @@ export default function OsecBigCal(props) {
 		// TODO
 		//   - WHY ARE WE ON DAY OFF?
 		//   - unixToJsDates should only be called once on every event
-
 
 		// Fetch what is missing.
 		const url = '/osec/v1/days';
@@ -233,15 +204,17 @@ export default function OsecBigCal(props) {
 			defaultDate: getDefaultDate(fixedDate),
 			getNow: () => dayjs().toDate(),
 			localizer,
-			// loadRange: initialRange(fixedDate, defaultView),
 			// scrollToTime: DateTime.local().toJSDate(),
 		}
 	});
 
-	// POPUP
-	const popupHandler = (props) => {
-		console.log(props, 'popupHandler')
-	};
+	/**
+	 * Helps to keep Event Popup in Boundaries.
+	 */
+	const popoverBoundary = Element.prototype.querySelector.call(
+		document.getElementById(props.id),
+		['[class$="view"]']
+	);
 
 	return (
 		<Calendar
@@ -253,7 +226,6 @@ export default function OsecBigCal(props) {
 			style={{ height: '100vh', fontSize: '.9rem' }}
 			defaultView={defaultView}
 			onRangeChange = {(newRange, newView) => {
-
 				// var argArray = Array.prototype.slice.call( arguments );
 				debug({newRange, view}, 'args@onRangeChange')
 				return loadRange(newRange, newView ?? view);
@@ -264,19 +236,18 @@ export default function OsecBigCal(props) {
 				setView(newView)
 			}}
 			components={{
+				// Ensures onRangeChange/loadRange is called on init..
 				toolbar: InitialRangeChangeToolbar,
+				// Adds Event Popup on hover.
 				eventWrapper: (props) => {
-					props.popupHandler = popupHandler;
-					return (
-						<EventWrapper {...props}/>
-					)
+					props.popoverBoundary = popoverBoundary;
+					return (<EventWrapper {...props} />)
 				},
 			}}
-			// TODO POpup Events?
-			onSelectEvent={(props)=>{
-				console.log('onSelectEvent', props)
-				return (<EventPopup {...props} />);
-			}}
+			// TODO Popup Events on Click too?
+			// onSelectEvent={(props)=>{
+			//  ...
+			// }}
 			// onSelectEvent and or / tooltipAccessor
 
 		/>

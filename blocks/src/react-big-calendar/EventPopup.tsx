@@ -1,28 +1,17 @@
-import Overlay from '@restart/ui/Overlay';
+import * as dayjs from 'dayjs';
 
-const Popup = (props)=> {
-	console.log(props)
-	return (
-		<div>Hello</div>
-	);
-}
 
-export default function EventPopup(props) {
-	console.log(props)
+export default function EventPopup({event}) {
+
+	const endDate = event.end ? `End: ${ event.end.toLocaleDateString() } — ${ event.end.toLocaleTimeString() }`:''
 	return (
-		<Overlay
-			show={true}
-			// rootClose
-			// offset={[0, 10]}
-			// placement={placement}
-			// container={containerRef}
-			//target={}
-	    >
-			{(props, { arrowProps, popper, show }) => (
-				<div {...props} className="absolute">
-					N.A.
-				</div>
-			)}
-		</Overlay>
+		<div>
+			<h3 style={{margin: '0 0 .5em'}}>{event.title}</h3>
+			<p>
+				Start: {event.start.toLocaleDateString() } — {event.start.toLocaleTimeString() }
+				<br />
+				{endDate}
+			</p>
+		</div>
 	);
 }
