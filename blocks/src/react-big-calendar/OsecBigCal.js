@@ -3,13 +3,13 @@ import { Calendar, dayjsLocalizer } from 'react-big-calendar';
 import dayjs from "dayjs";
 import weekday from 'dayjs/plugin/weekday';
 import timezone from 'dayjs/plugin/timezone'
-import DateCache, {DateRange} from './DateCache';
+import DateCache from './DateCache';
 import './style.scss';
-import {Range} from './DateCache';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import Toolbar from "react-big-calendar/lib/Toolbar";
 import EventPopup from "./EventPopup";
+import EventWrapper from "./EventWrapper";
 
 const dateCache = new DateCache(dayjs);
 
@@ -106,7 +106,37 @@ const initialRange = (defaultDate = null, view) => {
 	return returnVal;
 }
 
+const transformRange = (range, view) => {
+	console.log({range, view}, 'range (UNTRANSFORMED)');
+	switch (view) {
+		case 'week':
+			return {
+				start: range[0],
+				end: range[6],
+			}
+		case 'agenda':
+			// TODO There are options to change default agenda Range.
+			/// Agenda.range = (start, { length = Agenda.defaultProps.length })
+			return {
+				start: range.start,
+				end: null,
+			}
+		case 'day':
+			return {
+				start: range[0],
+				end: null,
+			}
+		case 'month':
+		default:
+			return range;
+	}
+}
 const unixToJsDates = (events) => {
+
+	if (!Array.isArray(events)) {
+		return [];
+	}
+
 	return events.map((event) => {
 		return {
 			...event,
@@ -125,22 +155,22 @@ const getDefaultDate = (fixedDate = null) => {
 	return dayjs().toDate(); // == new Date()
 }
 
-/**
- *
- * @param  range Range
- * @param setEvents
- * @returns {Promise<void>}
- */
-const loadEvents = async (range, setEvents) => {
-	const url = '/osec/v1/days';
-	const path = addQueryArgs( url, range );
-	// const {events} =
-	// console.log({events} );
-	const res = await apiFetch({path});
-	const myReturn = res.events ? res.events : [];
-	console.log(myReturn, '@loadEvents');
-	return myReturn;
-}
+// /**
+//  *
+//  * @param  range Range
+//  * @param setEvents
+//  * @returns {Promise<void>}
+//  */
+// const loadEvents = async (range, setEvents) => {
+// 	const url = '/osec/v1/days';
+// 	const path = addQueryArgs( url, range );
+// 	// const {events} =
+// 	// console.log({events} );
+// 	const res = await apiFetch({path});
+// 	const myReturn = res.events ? res.events : [];
+// 	console.log(myReturn, '@loadEvents');
+// 	return myReturn;
+// }
 
 export default function OsecBigCal(props) {
 
@@ -318,9 +348,20 @@ export default function OsecBigCal(props) {
 				debug(newView, 'onView');
 				setView(newView)
 			}}
-			components={{toolbar: InitialRangeChangeToolbar}}
+			components={{
+				toolbar: InitialRangeChangeToolbar,
+				eventWrapper: (props) => {
+					props.popupHandler = popupHandler;
+					return (
+						<EventWrapper {...props}/>
+					)
+				},
+			}}
 			// TODO POpup Events?
-			onSelectEvent={EventPopup}
+			onSelectEvent={(props)=>{
+				console.log('onSelectEvent', props)
+				return (<EventPopup {...props} />);
+			}}
 			// onSelectEvent and or / tooltipAccessor
 
 		/>
