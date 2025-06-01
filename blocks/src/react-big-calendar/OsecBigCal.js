@@ -8,6 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import Toolbar from "react-big-calendar/lib/Toolbar";
 import EventPopup from "./EventPopup";
+import EventWrapper from "./EventWrapper";
 
 const dateCache = new DateCache(dayjs);
 
@@ -237,6 +238,11 @@ export default function OsecBigCal(props) {
 		}
 	});
 
+	// POPUP
+	const popupHandler = (props) => {
+		console.log(props, 'popupHandler')
+	};
+
 	return (
 		<Calendar
 			localizer={localizer}
@@ -257,9 +263,20 @@ export default function OsecBigCal(props) {
 				debug(newView, 'onView');
 				setView(newView)
 			}}
-			components={{toolbar: InitialRangeChangeToolbar}}
+			components={{
+				toolbar: InitialRangeChangeToolbar,
+				eventWrapper: (props) => {
+					props.popupHandler = popupHandler;
+					return (
+						<EventWrapper {...props}/>
+					)
+				},
+			}}
 			// TODO POpup Events?
-			onSelectEvent={EventPopup}
+			onSelectEvent={(props)=>{
+				console.log('onSelectEvent', props)
+				return (<EventPopup {...props} />);
+			}}
 			// onSelectEvent and or / tooltipAccessor
 
 		/>
