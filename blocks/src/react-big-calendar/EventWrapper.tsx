@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Popover } from 'react-tiny-popover';
 import PopupWrapper from "./PopupWrapper";
 import EventPopup from "./EventPopup";
@@ -7,9 +7,25 @@ import EventPopup from "./EventPopup";
 
 export default function EventWrapper({event, children, popoverBoundary}) {
 
+	const popupDelay = 600;
 	const [showPopup, setShowPopUp] = useState(false);
+	const [hovered, sethovered] = useState(false);
+
+	const onTimeout = () => {
+		// Do action
+		setShowPopUp(true);
+	};
+
+	useEffect(() => {
+		const timer = hovered && setTimeout(onTimeout, popupDelay);
+		return () => {
+			clearTimeout(timer);
+		};
+	}, [hovered]);
+
 
 	const RefTarget = React.forwardRef(({ children }, ref) => {
+		console.log(children, 'children@RefTarget')
 		if (typeof ref === 'function') {
 			ref(children); // Forward target to callback refs.
 		}
@@ -30,13 +46,14 @@ export default function EventWrapper({event, children, popoverBoundary}) {
 			onMouseEnter={
 				e => {
 					// console.log('hover->in', e)
-					setShowPopUp(true);
+					sethovered(true)
 					e.preventDefault();
 				}
 			}
 			onMouseLeave={
 				e => {
 					// console.log('hover->out')
+					sethovered(false)
 					setShowPopUp(false);
 					e.preventDefault();
 				}
