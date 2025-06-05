@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useEffect, useCallback} from 'react';
+import React, {useMemo, useState, useEffect, useRef, useCallback} from 'react';
 import { Calendar, dayjsLocalizer } from 'react-big-calendar';
 import dayjs from "dayjs";
 import weekday from 'dayjs/plugin/weekday';
@@ -14,7 +14,7 @@ const dateCache = new DateCache(dayjs);
 const doDebug = false;
 let debug = x => {};
 if( (doDebug && typeof console != 'undefined')) {
-	debug = debuglog.bind(console);
+	debug = console.log.bind(console);
 }
 
 const initDayJs = (localeId) => {
@@ -50,7 +50,7 @@ const initDayJs = (localeId) => {
 const InitialRangeChangeToolbar = (props) => {
 	useEffect(() => {
 		props.onView(props.view);
-	}, []);
+	}, [props.view]);
 	return <Toolbar {...props} />;
 }
 
@@ -94,12 +94,12 @@ const unixToJsDates = (events) => {
 	});
 }
 
-const getDefaultDate = (fixedDate = null) => {
-	if (fixedDate) {
-		return dayjs.unix(parseInt(fixedDate)).toDate();
-	}
-	return dayjs().toDate(); // == new Date()
-}
+// const getDefaultDate = (fixedDate = null) => {
+// 	if (fixedDate) {
+// 		return dayjs.unix(parseInt(fixedDate)).toDate();
+// 	}
+// 	return dayjs().toDate(); // == new Date()
+// }
 
 // /**
 //  *
@@ -123,7 +123,6 @@ export default function OsecBigCal(props) {
 	const { fixedDate, defaultView } = transformProps(props);
 	const localeId = props.locale.name;
 	initDayJs(localeId);
-	const localizer = dayjsLocalizer(dayjs);
 	const [events, setEvents] = useState([]);
 	const [view, setView] = useState(props.defaultView);
 
@@ -145,6 +144,10 @@ export default function OsecBigCal(props) {
 		const cacheData = dateCache.getRange(theRange);
 
 		if (cacheData.cached.length) {
+
+			// TODO
+			//   Seems we do not update the EventWrapper hover actions in cache case.
+
 			setEvents(cacheData.cached);
 			debug(cacheData.cached, 'FROM CACHE')
 		}
@@ -221,11 +224,10 @@ export default function OsecBigCal(props) {
 		});
 	}
 
-	const { getNow } = useMemo(() => {
+	const { getNow, localizer } = useMemo(() => {
 		return {
-			defaultDate: getDefaultDate(fixedDate),
 			getNow: () => dayjs().toDate(),
-			localizer,
+			localizer: dayjsLocalizer(dayjs),
 			// scrollToTime: DateTime.local().toJSDate(),
 		}
 	});
@@ -266,11 +268,51 @@ export default function OsecBigCal(props) {
 		['[class$="view"]']
 	);
 
+	const components = useMemo(() => ({
+		// Adds Event Popup on hover.
+		eventWrapper: (props) => {
+			props.popoverBoundary = popoverBoundary;
+			return (<EventWrapper {...props} />)
+		},
+		toolbar: InitialRangeChangeToolbar,
+	}), [popoverBoundary])
+
+	// HANDLE SELECT EVENTS
+	const clickRef = useRef(null)
+	useEffect(() => {
+		/**
+		 * What Is This?
+		 * This is to prevent a memory leak, in the off chance that you
+		 * teardown your interface prior to the timed method being called.
+		 */
+		return () => {
+			window.clearTimeout(clickRef?.current)
+		}
+	}, [])
+	const onSelectEvent = useCallback((calEvent) => {
+		/**
+		 * Here we are waiting 250 milliseconds (use what you want) prior to firing
+		 * our method. Why? Because both 'click' and 'doubleClick'
+		 * would fire, in the event of a 'doubleClick'. By doing
+		 * this, the 'click' handler is overridden by the 'doubleClick'
+		 * action.
+		 */
+		window.clearTimeout(clickRef?.current)
+		clickRef.current = window.setTimeout(() => {
+			console.log(calEvent, 'onSelectEvent')
+
+			// TODO
+			//   How to combine hover and select smartly?
+			//   - Disable hover on select until deselected?
+			//   - add a prop for selected event to the EventWrapper?
+
+		}, 250)
+	}, [])
+
 	return (
 		<Calendar
 			localizer={localizer}
 			events={events}
-			// date={  }
 			getNow={getNow}
 			endAccessor="end"
 			style={{ height: '100vh', fontSize: '.9rem' }}
@@ -278,28 +320,15 @@ export default function OsecBigCal(props) {
 			onRangeChange = {(newRange, newView) => {
 				// var argArray = Array.prototype.slice.call( arguments );
 				debug({newRange, view}, 'args@onRangeChange')
+				setEvents([]);
 				return loadRange(newRange, newView ?? view);
 			}}
-			// onRangeChange = {loadRange}
 			onView ={ (newView) => {
 				debug(newView, 'onView');
 				setView(newView)
 			}}
-			components={{
-				// Ensures onRangeChange/loadRange is called on init..
-				toolbar: InitialRangeChangeToolbar,
-				// Adds Event Popup on hover.
-				eventWrapper: (props) => {
-					props.popoverBoundary = popoverBoundary;
-					return (<EventWrapper {...props} />)
-				},
-			}}
-			// TODO Popup Events on Click too?
-			// onSelectEvent={(props)=>{
-			//  ...
-			// }}
-			// onSelectEvent and or / tooltipAccessor
-
+			components={components}
+			onSelectEvent={onSelectEvent}
 		/>
 	)
 }
