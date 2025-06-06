@@ -1,9 +1,9 @@
 === Open Source Event Calendar ===
 Tags: calendar, events, ics, ical importer  
 Requires at least: 6.6  
-Tested up to: 6.8.1  
+Tested up to: 6.8
 Requires PHP: 8.2  
-Stable Tag: 1.0.2
+Stable Tag: 1.0.3
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: open-source-event-calendar
@@ -139,7 +139,7 @@ If you are implementing this plugin for others you should support ongoing develo
 
 = I really need feature XYZ =
 
-Let's draft it out on github. You could donnate/pay me development time to get it contributed. Invices possible.
+Let's draft it out on github. You could donnate/pay me development time to get it contributed. Invoices possible.
 
 I may also provide paid support.
   
@@ -155,8 +155,10 @@ I may also provide paid support.
 
 == Changelog ==
 
+
+= 1.0.3 =
 - Allow all data attributes in Ksess. Fixes persisten admin notices can not be dismissed.
-- Update checker: Notify admin of a new release tag is available.
+- fix overriding time/date-separators using i18n
 
 = 1.0.2 =
 

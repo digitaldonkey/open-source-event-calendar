@@ -103,7 +103,7 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
             'display_subscribe',
             false,
             'string',
-            $app->settings->get('turn_off_subscription_buttons') ? 'true' : 'false',
+            $app->settings->get('turn_off_subscription_buttons') ? 'false' : 'true',
             false
         );
         $this->add_rule('applying_filters', false, 'string', false, false);

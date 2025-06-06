@@ -212,16 +212,6 @@ class BootstrapController
             }
         );
 
-      /**
-       * Check for updates
-       */
-        add_action(
-            'admin_init',
-            function () use ($app) {
-                UpdateController::factory($app)->initialize();
-            }
-        );
-
         add_action(
             'init',
             function () use ($app) {

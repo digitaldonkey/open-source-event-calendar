@@ -285,6 +285,8 @@ class EventTimeView extends OsecBaseClass
     {
         static $timespanSuffix = null;
         if (null === $timespanSuffix) {
+            // Allow to add a time suffix using i18n.
+            // phpcs:ignore WordPress.WP.I18n.NoEmptyStrings
             $timespanSuffix = _x(' ', 'Event time suffix (nbsp)', 'open-source-event-calendar');
             /**
              * Timespan suffix string follows a time.
