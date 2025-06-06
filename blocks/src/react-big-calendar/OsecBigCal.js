@@ -202,25 +202,30 @@ export default function OsecBigCal(props) {
 		});
 	}
 
-	const { getNow, localizer } = useMemo(() => {
+	const { getNow, localizer, popoverBoundary } = useMemo(() => {
 		return {
 			getNow: () => dayjs().toDate(),
 			localizer: dayjsLocalizer(dayjs),
 			// scrollToTime: DateTime.local().toJSDate(),
+			popoverBoundary: Element.prototype.querySelector.call(
+				document.getElementById(props.id),
+				['[class$="view"]']
+			)
 		}
 	});
 
-	/**
-	 * Helps to keep Event Popup in Boundaries.
-	 */
-	const popoverBoundary = Element.prototype.querySelector.call(
-		document.getElementById(props.id),
-		['[class$="view"]']
-	);
+	// /**
+	//  * Helps to keep Event Popup in Boundaries.
+	//  */
+	// const popoverBoundary = Element.prototype.querySelector.call(
+	// 	document.getElementById(props.id),
+	// 	['[class$="view"]']
+	// );
 
 	const components = useMemo(() => ({
 		// Adds Event Popup on hover.
 		eventWrapper: (props) => {
+			// console.log('eventWrapper', props.selected)
 			props.popoverBoundary = popoverBoundary;
 			return (<EventWrapper {...props} />)
 		},
