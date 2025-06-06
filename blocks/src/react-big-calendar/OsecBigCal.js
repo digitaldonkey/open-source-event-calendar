@@ -101,23 +101,6 @@ const unixToJsDates = (events) => {
 // 	return dayjs().toDate(); // == new Date()
 // }
 
-// /**
-//  *
-//  * @param  range Range
-//  * @param setEvents
-//  * @returns {Promise<void>}
-//  */
-// const loadEvents = async (range, setEvents) => {
-// 	const url = '/osec/v1/days';
-// 	const path = addQueryArgs( url, range );
-// 	// const {events} =
-// 	// console.log({events} );
-// 	const res = await apiFetch({path});
-// 	const myReturn = res.events ? res.events : [];
-// 	console.log(myReturn, '@loadEvents');
-// 	return myReturn;
-// }
-
 export default function OsecBigCal(props) {
 
 	const { fixedDate, defaultView } = transformProps(props);
@@ -224,53 +207,30 @@ export default function OsecBigCal(props) {
 		});
 	}
 
-	const { getNow, localizer } = useMemo(() => {
+	const { getNow, localizer, popoverBoundary } = useMemo(() => {
 		return {
 			getNow: () => dayjs().toDate(),
 			localizer: dayjsLocalizer(dayjs),
 			// scrollToTime: DateTime.local().toJSDate(),
+			popoverBoundary: Element.prototype.querySelector.call(
+				document.getElementById(props.id),
+				['[class$="view"]']
+			)
 		}
 	});
 
-	useEffect(() => {
-		async function loadPosts(loadRange) {
-			const url = '/osec/v1/days';
-			const path = addQueryArgs( url, loadRange );
-			// const {events} =
-			// console.log({events} );
-			const response = await apiFetch({path});
-
-			if(response.events) {
-				const events = response.events.map(event => {
-					// console.log(dayjs.unix(parseInt(event.start)).toDate())
-					return {
-						...event,
-						...{
-							start: dayjs.unix(parseInt(event.start)).toDate(),
-							end: dayjs.unix(parseInt(event.end)).toDate(),
-						}
-					}
-				});
-				console.log(events, '@loadEvents');
-				setEvents(events);
-			}
-		}
-		loadPosts(loadRange);
-	}, [loadRange, setEvents])
-
-
-
-	/**
-	 * Helps to keep Event Popup in Boundaries.
-	 */
-	const popoverBoundary = Element.prototype.querySelector.call(
-		document.getElementById(props.id),
-		['[class$="view"]']
-	);
+	// /**
+	//  * Helps to keep Event Popup in Boundaries.
+	//  */
+	// const popoverBoundary = Element.prototype.querySelector.call(
+	// 	document.getElementById(props.id),
+	// 	['[class$="view"]']
+	// );
 
 	const components = useMemo(() => ({
 		// Adds Event Popup on hover.
 		eventWrapper: (props) => {
+			// console.log('eventWrapper', props.selected)
 			props.popoverBoundary = popoverBoundary;
 			return (<EventWrapper {...props} />)
 		},

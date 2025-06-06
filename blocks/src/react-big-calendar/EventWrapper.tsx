@@ -5,24 +5,28 @@ import PopupWrapper from "./PopupWrapper";
 import EventPopup from "./EventPopup";
 
 
-export default function EventWrapper({event, children, popoverBoundary}) {
-
+export default function EventWrapper({event, children, popoverBoundary, selected}) {
+	console.log(selected, 'selected')
 	const popupDelay = 600;
-	const [showPopup, setShowPopUp] = useState(false);
-	const [hovered, sethovered] = useState(false);
-
-	const onTimeout = () => {
-		// Do action
-		setShowPopUp(true);
-	};
+	const [showPopup, setShowPopUp] = useState(selected);
+	const [hovered, setHovered] = useState(selected);
 
 	useEffect(() => {
-		const timer = hovered && setTimeout(onTimeout, popupDelay);
+		const timer = hovered && setTimeout( () => {
+			// Do action
+			setShowPopUp(true);
+		}, popupDelay);
 		return () => {
 			clearTimeout(timer);
 		};
 	}, [hovered]);
 
+	useEffect(() => {
+		return () => {
+			setShowPopUp(false)
+			setHovered(false)
+		};
+	}, [selected, setShowPopUp]);
 
 	const RefTarget = React.forwardRef(({ children }, ref) => {
 		console.log(children, 'children@RefTarget')
@@ -46,14 +50,17 @@ export default function EventWrapper({event, children, popoverBoundary}) {
 			onMouseEnter={
 				e => {
 					// console.log('hover->in', e)
-					sethovered(true)
+					setHovered(true)
 					e.preventDefault();
 				}
 			}
 			onMouseLeave={
 				e => {
 					// console.log('hover->out')
-					sethovered(false)
+					if (selected) {
+						return;
+					}
+					setHovered(false)
 					setShowPopUp(false);
 					e.preventDefault();
 				}
@@ -62,7 +69,7 @@ export default function EventWrapper({event, children, popoverBoundary}) {
 			<Popover
 				parentElement={ popoverBoundary } // Sets boundaries
 				boundaryInset={window.innerWidth > 400? 20 : 0 }
-				isOpen={showPopup}
+				isOpen={ showPopup || selected }
 				positions={['bottom', 'right', 'left', 'top']} // preferred positions by priority
 				reposition={true}
 				content={ ( props) => {
