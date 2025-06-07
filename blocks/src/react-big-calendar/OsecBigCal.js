@@ -108,6 +108,7 @@ export default function OsecBigCal(props) {
 	initDayJs(localeId);
 	const [events, setEvents] = useState([]);
 	const [view, setView] = useState(props.defaultView);
+	const [selected, setSelected] = useState(null);
 
 	/**
 	 * Loading Events
@@ -232,42 +233,42 @@ export default function OsecBigCal(props) {
 		eventWrapper: (props) => {
 			// console.log('eventWrapper', props.selected)
 			props.popoverBoundary = popoverBoundary;
-			return (<EventWrapper {...props} />)
+			return (<EventWrapper {...props} setSelected={setSelected} />)
 		},
 		toolbar: InitialRangeChangeToolbar,
 	}), [popoverBoundary])
 
 	// HANDLE SELECT EVENTS
-	const clickRef = useRef(null)
-	useEffect(() => {
-		/**
-		 * What Is This?
-		 * This is to prevent a memory leak, in the off chance that you
-		 * teardown your interface prior to the timed method being called.
-		 */
-		return () => {
-			window.clearTimeout(clickRef?.current)
-		}
-	}, [])
-	const onSelectEvent = useCallback((calEvent) => {
-		/**
-		 * Here we are waiting 250 milliseconds (use what you want) prior to firing
-		 * our method. Why? Because both 'click' and 'doubleClick'
-		 * would fire, in the event of a 'doubleClick'. By doing
-		 * this, the 'click' handler is overridden by the 'doubleClick'
-		 * action.
-		 */
-		window.clearTimeout(clickRef?.current)
-		clickRef.current = window.setTimeout(() => {
-			console.log(calEvent, 'onSelectEvent')
-
-			// TODO
-			//   How to combine hover and select smartly?
-			//   - Disable hover on select until deselected?
-			//   - add a prop for selected event to the EventWrapper?
-
-		}, 250)
-	}, [])
+	// const clickRef = useRef(null)
+	// useEffect(() => {
+	// 	/**
+	// 	 * What Is This?
+	// 	 * This is to prevent a memory leak, in the off chance that you
+	// 	 * teardown your interface prior to the timed method being called.
+	// 	 */
+	// 	return () => {
+	// 		window.clearTimeout(clickRef?.current)
+	// 	}
+	// }, [])
+	// const onSelectEvent = useCallback((event) => {
+	// 	/**
+	// 	 * Here we are waiting 250 milliseconds (use what you want) prior to firing
+	// 	 * our method. Why? Because both 'click' and 'doubleClick'
+	// 	 * would fire, in the event of a 'doubleClick'. By doing
+	// 	 * this, the 'click' handler is overridden by the 'doubleClick'
+	// 	 * action.
+	// 	 */
+	// 	window.clearTimeout(clickRef?.current)
+	// 	clickRef.current = window.setTimeout(() => {
+	// 		console.log(event, 'onSelectEvent')
+	// 		setSelected(event)
+	// 		// TODO
+	// 		//   How to combine hover and select smartly?
+	// 		//   - Disable hover on select until deselected?
+	// 		//   - add a prop for selected event to the EventWrapper?
+	//
+	// 	}, 250)
+	// }, [])
 
 	return (
 		<Calendar
@@ -275,7 +276,7 @@ export default function OsecBigCal(props) {
 			events={events}
 			getNow={getNow}
 			endAccessor="end"
-			style={{ height: '100vh', fontSize: '.9rem' }}
+			style={{ height: '90vh', fontSize: '.9rem' }}
 			defaultView={defaultView}
 			onRangeChange = {(newRange, newView) => {
 				// var argArray = Array.prototype.slice.call( arguments );
@@ -288,7 +289,16 @@ export default function OsecBigCal(props) {
 				setView(newView)
 			}}
 			components={components}
-			onSelectEvent={onSelectEvent}
+			onSelectEvent={setSelected}
+			selected={selected}
+			tooltip={ () => null }
+			titleAccessor = {(event) => {
+				if (view === 'month') {
+					return `${event.title} ${dayjs(event.start).local().format('LT')}`;
+				}
+				return `${event.title}`;
+			}}
+			// dayLayoutAlgorithm={'no-overlap'}
 		/>
 	)
 }

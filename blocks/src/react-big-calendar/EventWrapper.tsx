@@ -5,37 +5,43 @@ import PopupWrapper from "./PopupWrapper";
 import EventPopup from "./EventPopup";
 
 
-export default function EventWrapper({event, children, popoverBoundary, selected}) {
-	console.log(selected, 'selected')
-	const popupDelay = 600;
-	const [showPopup, setShowPopUp] = useState(selected);
-	const [hovered, setHovered] = useState(selected);
+export default function EventWrapper(props) {
+	const {event, children, popoverBoundary, selected, setSelected} = props;
+	// console.log(props, 'props@EventWrapper')
+	const hoverDelay = 250;
+	const [showHovered, setShowHovered] = useState(false);
+	const [hovered, setHovered] = useState(false);
+
+	// TODO
+	// - If selected: No hover interaction.
 
 	useEffect(() => {
-		const timer = hovered && setTimeout( () => {
+		if(!hovered) return;
+		const timer = setTimeout( () => {
 			// Do action
-			setShowPopUp(true);
-		}, popupDelay);
+			setShowHovered(true);
+		}, hoverDelay);
 		return () => {
 			clearTimeout(timer);
 		};
 	}, [hovered]);
 
-	useEffect(() => {
-		return () => {
-			setShowPopUp(false)
-			setHovered(false)
-		};
-	}, [selected, setShowPopUp]);
+	// useEffect(() => {
+	// 	if (!selected) {
+	// 		return;
+	// 	}
+	// 	return () => {
+	// 		// setShowPopUp(false)
+	// 		setHovered(false)
+	// 	};
+	// }, [selected]);
 
 	const RefTarget = React.forwardRef(({ children }, ref) => {
-		console.log(children, 'children@RefTarget')
 		if (typeof ref === 'function') {
 			ref(children); // Forward target to callback refs.
 		}
 		else {
 			ref.current = children; // Forward target to object refs.
-
 		}
 		return null; // Don't render anything.
 	});
@@ -45,6 +51,8 @@ export default function EventWrapper({event, children, popoverBoundary, selected
 			style={{
 				position:"static",
 				zIndex: 9999,
+				// fontSize: '.7em', // TODO DOES NOT ADAPT CELL HEIGHT
+				// fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif'
 			}}
 			ref={RefTarget}
 			onMouseEnter={
@@ -57,11 +65,9 @@ export default function EventWrapper({event, children, popoverBoundary, selected
 			onMouseLeave={
 				e => {
 					// console.log('hover->out')
-					if (selected) {
-						return;
-					}
 					setHovered(false)
-					setShowPopUp(false);
+					setShowHovered(false);
+					// setSelected(null)
 					e.preventDefault();
 				}
 			}
@@ -69,9 +75,10 @@ export default function EventWrapper({event, children, popoverBoundary, selected
 			<Popover
 				parentElement={ popoverBoundary } // Sets boundaries
 				boundaryInset={window.innerWidth > 400? 20 : 0 }
-				isOpen={ showPopup || selected }
-				positions={['bottom', 'right', 'left', 'top']} // preferred positions by priority
+				isOpen={ selected || showHovered }
+				positions={['right', 'left', 'top', 'bottom']} // preferred positions by priority
 				reposition={true}
+				onClickOutside={() => setSelected(null)} // handle click events outside of the popover/target here!
 				content={ ( props) => {
 					return(
 						<PopupWrapper {...props}>
