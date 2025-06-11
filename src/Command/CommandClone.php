@@ -192,7 +192,7 @@ class CommandClone extends CommandAbstract
      */
     protected function getNewPostStatus($old_status)
     {
-        if ('publish' === $old_status && ! current_user_can('publish_osec_events')) {
+        if ('publish' === $old_status && ! current_user_can('osec_publish_events')) {
             return 'pending';
         }
 
@@ -337,7 +337,7 @@ class CommandClone extends CommandAbstract
             $current_action === 'clone'
             && ! empty($_REQUEST['_wpnonce'])
             && wp_verify_nonce(sanitize_key(wp_unslash($_REQUEST['_wpnonce'])), 'bulk-posts')
-            && current_user_can('edit_osec_events')
+            && current_user_can('osec_edit_events')
             && ! empty($_REQUEST['post'])
             && is_array(empty($_REQUEST['post']))
         ) {

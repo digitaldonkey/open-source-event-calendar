@@ -50,7 +50,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
             OSEC_ADMIN_BASE_URL,
             __('Theme Options', 'open-source-event-calendar'),
             __('Theme Options', 'open-source-event-calendar'),
-            'manage_osec_options',
+            'osec_manage_options',
             self::ADMIN_PAGE_PREFIX . 'edit-css',
             $this->display_page(...)
         );
@@ -58,7 +58,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
             // Make copy of Theme Options page at its old location.
             $submenu['themes.php'][] = [
                 __('Calendar Theme Options', 'open-source-event-calendar'),
-                'manage_osec_options',
+                'osec_manage_options',
                 OSEC_THEME_OPTIONS_BASE_URL,
             ];
         }

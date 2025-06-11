@@ -31,7 +31,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
             OSEC_ADMIN_BASE_URL,
             __('Calendar Feeds', 'open-source-event-calendar'),
             __('Calendar Feeds', 'open-source-event-calendar'),
-            'manage_osec_feeds',
+            'osec_manage_feeds',
             self::ADMIN_PAGE_PREFIX . 'feeds',
             $this->display_page(...)
         );

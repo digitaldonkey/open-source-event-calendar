@@ -22,7 +22,7 @@ class RestController extends OsecBaseClass
                         return RestController::factory($app)->getSettings($request);
                     },
                     'permission_callback' => function () {
-                        return current_user_can('read_osec_events');
+                        return current_user_can('osec_read_events');
                     }
                 ],
             );

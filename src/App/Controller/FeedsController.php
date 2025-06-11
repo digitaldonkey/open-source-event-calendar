@@ -792,7 +792,7 @@ class FeedsController extends OsecBaseClass
         if (is_null($requestArgs)) {
             if (
                 !check_ajax_referer('osec_ics_feed_nonce', 'nonce')
-                || !current_user_can('manage_osec_feeds')) {
+                || !current_user_can('osec_manage_feeds')) {
                 /** @noinspection ForgottenDebugOutputInspection */
                 wp_die(esc_html__('User not allowed to manage feeds.', 'open-source-event-calendar'));
             }

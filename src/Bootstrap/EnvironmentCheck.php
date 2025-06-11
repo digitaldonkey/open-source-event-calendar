@@ -29,7 +29,7 @@ class EnvironmentCheck extends OsecBaseClass
         if (
             ! is_object($role) ||
             ! is_object($current_user) ||
-            ! $role->has_cap('manage_osec_options') ||
+            ! $role->has_cap('osec_manage_options') ||
             (
                 defined('DOING_AJAX') &&
                 DOING_AJAX
@@ -58,7 +58,7 @@ class EnvironmentCheck extends OsecBaseClass
             $plugin_page !== AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings'
             && ! empty($notifications)
         ) {
-            if ($current_user->has_cap('manage_osec_options')) {
+            if ($current_user->has_cap('osec_manage_options')) {
                 $msg = sprintf(
                 /* translators: Admin url */
                     __(

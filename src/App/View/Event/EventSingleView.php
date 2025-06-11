@@ -186,7 +186,7 @@ class EventSingleView extends OsecBaseClass
         if (
             ! empty($args['recurrence']) &&
             $event->get('instance_id') &&
-            current_user_can('edit_osec_events')
+            current_user_can('osec_edit_events')
         ) {
             $args['edit_instance_url']  = $event->get_instance_edit_link();
             $args['edit_instance_text'] = sprintf(
