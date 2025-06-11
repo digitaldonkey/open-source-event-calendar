@@ -3,7 +3,7 @@ Tags: calendar, events, ics, ical importer
 Requires at least: 6.6  
 Tested up to: 6.8
 Requires PHP: 8.2  
-Stable Tag: 1.0.3
+Stable Tag: 1.0.4
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: open-source-event-calendar
@@ -155,6 +155,12 @@ I may also provide paid support.
 
 == Changelog ==
 
+= 1.0.4 =
+- Fix: Move content display out of OSEC block
+- Fix: subscribe display settings inverted.
+- Disallow direct file access
+- Renaming capabilities consistently
+- composer upgrade
 
 = 1.0.3 =
 - Allow all data attributes in Ksess. Fixes persisten admin notices can not be dismissed.
