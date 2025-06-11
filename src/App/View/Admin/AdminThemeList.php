@@ -360,11 +360,10 @@ class AdminThemeList extends WP_List_Table
                     <h3>
                         <?php
                         printf(
-                        /* translators: 1: theme title, 2: theme version, 3: theme author */
-                            esc_html__('%1$s %2$s by %3$s', 'open-source-event-calendar'),
+                        /* translators: 1: theme title, 2: theme version */
+                            esc_html__('%1$s %2$s', 'open-source-event-calendar'),
                             esc_html($title),
                             esc_html($version),
-                            esc_html($author)
                         );
                         ?>
                     </h3>
