@@ -54,6 +54,7 @@ class SettingsEnabledViews extends SettingsAbstract
                     'checked="checked"' :
                     '') :
                 $view['default'];
+            /* $view['longname'] is a _n_noop. */
             $view['longname']       = translate_nooped_plural(
                 $view['longname'],
                 1
