@@ -448,6 +448,7 @@ class CalendarPageView extends OsecBaseClass
         $view_names      = [];
         $mode            = wp_is_mobile() ? '_mobile' : '';
         foreach ($enabled_views as $key => $val) {
+            /* $val['longname'] is a _n_noop. */
             $view_names[$key] = translate_nooped_plural(
                 $val['longname'],
                 1
@@ -462,6 +463,7 @@ class CalendarPageView extends OsecBaseClass
                 unset($options['week_offset']);
                 unset($options['oneday_offset']);
                 $options['action'] = $key;
+                /* $val['longname'] is a _n_noop. */
                 $values['desc']    = translate_nooped_plural(
                     $val['longname'],
                     1
