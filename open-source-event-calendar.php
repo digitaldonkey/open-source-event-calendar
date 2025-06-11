@@ -20,6 +20,10 @@
  * Version: 1.0.3
  */
 
+if (! defined('ABSPATH')) {
+    exit;
+}
+
 use Osec\App\Controller\BootstrapController;
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\Scheduler;
@@ -32,7 +36,6 @@ use Osec\Exception\DatabaseUpdateException;
 use Osec\Theme\ThemeLoader;
 
 // phpcs:disable PSR1.Files.SideEffects
-
 
 // PHP Composer @see package.json.
 if (
