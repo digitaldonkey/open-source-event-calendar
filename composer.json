@@ -43,7 +43,7 @@
         "phpunit/phpunit": "^9.6",
         "roave/security-advisories": "dev-latest",
         "symfony/debug-bundle": "^7.1",
-        "wp-cli/wp-cli-bundle": "^2.11",
+        "wp-cli/wp-cli-bundle": "^2.1",
         "wp-coding-standards/wpcs": "^3.1",
         "yoast/phpunit-polyfills": "^2.0",
         "phpcompatibility/php-compatibility": "^9.3"
