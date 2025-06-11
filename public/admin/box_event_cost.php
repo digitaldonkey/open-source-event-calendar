@@ -45,8 +45,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                     <td>
                         <label for="osec_ticket_url"><?php
                             echo ( ! empty($is_free))
-                                ? __('Registration URL:', 'open-source-event-calendar')
-                                : __('Buy Tickets URL:', 'open-source-event-calendar');
+                                ? esc_html__('Registration URL:', 'open-source-event-calendar')
+                                : esc_html__('Buy Tickets URL:', 'open-source-event-calendar');
                             ?></label>
                     </td>
                     <td>

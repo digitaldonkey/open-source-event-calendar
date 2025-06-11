@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             <?php printf(
                     /* translators: home_url() */
                     __('New theme activated. <a href="%s">Visit site</a>', 'open-source-event-calendar'),
-                    home_url('/')
+                    esc_url(home_url('/'))
             );?>
         </p>
     </div>
@@ -31,8 +31,15 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                  alt="<?php esc_attr_e('Current theme preview', 'open-source-event-calendar'); ?>"/>
         <?php endif; ?>
         <h4><?php
-            /* translators: 1: theme title, 2: theme version, 3: theme author */
-            printf(__('%1$s %2$s by %3$s', 'open-source-event-calendar'), $ct->title, $ct->version, $ct->author); ?></h4>
+            printf(
+            /* translators: 1: theme title, 2: theme version */
+                esc_html__('%1$s %2$s', 'open-source-event-calendar'),
+                esc_html($ct->title),
+                esc_html($ct->version),
+            );
+            ?>
+        </h4>
+
         <p class="theme-description"><?php echo $ct->description; ?></p>
         <div class="theme-options">
             <?php if ($ct->tags) : ?>
