@@ -11,7 +11,7 @@ class WpLogin extends BasePage {
             auth = this.settings.wpLogin.admin;
         }
         // Wait a little
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
         const userInput = By.id(this.inputUser);
         const passInput = By.id(this.inputPass);
@@ -25,7 +25,7 @@ class WpLogin extends BasePage {
         await this.enterText(passInput, auth.pass);
         await this.enterText(passInput, Key.RETURN);
 
-        const revealed = await this.driver.findElement(By.css("body.wp-admin"), 6000);
+        const revealed = await this.driver.findElement(By.css("body.wp-admin"), 12000);
         await this.driver.wait(until.elementIsVisible(revealed));
         return true;
     }

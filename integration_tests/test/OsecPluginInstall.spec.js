@@ -141,83 +141,6 @@ describe('Plugin install', function(){
         )
     });
 
-    it('Add ICS calendar feed', async function () {
-        const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-feeds';
-        await pageObject.go_to_url(url);
-        await pageObject.doLogin();
-
-        // Js generated link should be visible.
-        const mainElementID = 'ai1ec-feeds';
-        await pageObject.getElement(By.id( 'ai1ec-feeds'));
-
-        // Submit/Save
-        const feedUrl = 'https://ics.calendarlabs.com/641/64bc8358/FIFA_Womens_World_Cup.ics'
-        const feedUrlInput = await pageObject.getElement(By.id( 'osec_feed_url'));
-        await feedUrlInput.sendKeys(feedUrl);
-
-        // osec_ics_add_new
-        const feedUrlAddButton = await pageObject.getElement(By.id( 'osec_ics_add_new'));
-        await feedUrlAddButton.click();
-
-        // Required to call/wait again.
-        await pageObject.getElement(By.id( 'ai1ec-feeds'));
-
-        // .ai1ec-alert-success should contain "Imported 53 events"
-        const expectedText = 'Imported 53 events';
-
-        // Get text without child Elements (aka: dismiss alert X)
-        await pageObject.getElement(By.css('.ai1ec-alert'));
-        const visibleText = await pageObject.getTextByClassName('ai1ec-alert');
-
-        await pageObject.takeScreenshot(this);
-        pageObject.assert.ok(
-            expectedText === visibleText
-        )
-        // const optionsSaved = await pageObject.driver.findElement(By.xpath("//.ai1ec-alert-success[text()='" + expectedText + "']"));
-        // const visibleText = await optionsSaved.getText();
-        await pageObject.takeScreenshot(this);
-        pageObject.assert.ok(
-            expectedText === visibleText
-        )
-    });
-
-    it('Delete ICS calendar feed', async function () {
-        const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-feeds';
-        await pageObject.go_to_url(url);
-        await pageObject.doLogin();
-
-        // Js generated link should be visible.
-        await pageObject.getElement(By.id('ai1ec-feeds'));
-
-        // Open ICS panel.
-        const panelLink = await pageObject.getElement(By.css('a[data-toggle="ai1ec-collapse"]'));
-        await panelLink.click();
-
-        // osec_delete_ics
-        const deleteButton = await pageObject.getElement(By.css('.osec_delete_ics'));
-        await deleteButton.click();
-
-        // Confirm delete events dialogue
-        // osec_delete_ics
-        const deleteEventsButton = await pageObject.getElement(By.css('.ai1ec-btn.remove'));
-        await deleteEventsButton.click();
-
-        // Required to call/wait again.
-        await pageObject.getElement(By.id('ai1ec-feeds'));
-        await pageObject.getElement(By.css('.ai1ec-alert'));
-
-        // .ai1ec-alert should contain "Deleted 53 events"
-        const expectedText = 'Deleted 53 events';
-
-        // Get text without child Elements (aka: dismiss alert X)
-        const visibleText = await pageObject.getTextByClassName('ai1ec-alert');
-        //
-        await pageObject.takeScreenshot(this);
-        pageObject.assert.ok(
-            expectedText === visibleText
-        )
-    });
-
     it('Add daily repeating event', async function () {
         const url = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
         await pageObject.go_to_url(url);
@@ -386,5 +309,83 @@ describe('Plugin install', function(){
 
         await pageObject.waitToSeeWhatHappens(500, true);
     });
+
+    it('Add ICS calendar feed', async function () {
+        const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-feeds';
+        await pageObject.go_to_url(url);
+        await pageObject.doLogin();
+
+        // Js generated link should be visible.
+        const mainElementID = 'ai1ec-feeds';
+        await pageObject.getElement(By.id( 'ai1ec-feeds'));
+
+        // Submit/Save
+        const feedUrl = 'https://ics.calendarlabs.com/641/64bc8358/FIFA_Womens_World_Cup.ics'
+        const feedUrlInput = await pageObject.getElement(By.id( 'osec_feed_url'));
+        await feedUrlInput.sendKeys(feedUrl);
+
+        // osec_ics_add_new
+        const feedUrlAddButton = await pageObject.getElement(By.id( 'osec_ics_add_new'));
+        await feedUrlAddButton.click();
+
+        // Required to call/wait again.
+        await pageObject.getElement(By.id( 'ai1ec-feeds'));
+
+        // .ai1ec-alert-success should contain "Imported 53 events"
+        const expectedText = 'Imported 53 events';
+
+        // Get text without child Elements (aka: dismiss alert X)
+        await pageObject.getElement(By.css('.ai1ec-alert'));
+        const visibleText = await pageObject.getTextByClassName('ai1ec-alert');
+
+        await pageObject.takeScreenshot(this);
+        pageObject.assert.ok(
+            expectedText === visibleText
+        )
+        // const optionsSaved = await pageObject.driver.findElement(By.xpath("//.ai1ec-alert-success[text()='" + expectedText + "']"));
+        // const visibleText = await optionsSaved.getText();
+        await pageObject.takeScreenshot(this);
+        pageObject.assert.ok(
+            expectedText === visibleText
+        )
+    });
+
+    it('Delete ICS calendar feed', async function () {
+        const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-feeds';
+        await pageObject.go_to_url(url);
+        await pageObject.doLogin();
+
+        // Js generated link should be visible.
+        await pageObject.getElement(By.id('ai1ec-feeds'));
+
+        // Open ICS panel.
+        const panelLink = await pageObject.getElement(By.css('a[data-toggle="ai1ec-collapse"]'));
+        await panelLink.click();
+
+        // osec_delete_ics
+        const deleteButton = await pageObject.getElement(By.css('.osec_delete_ics'));
+        await deleteButton.click();
+
+        // Confirm delete events dialogue
+        // osec_delete_ics
+        const deleteEventsButton = await pageObject.getElement(By.css('.ai1ec-btn.remove'));
+        await deleteEventsButton.click();
+
+        // Required to call/wait again.
+        await pageObject.getElement(By.id('ai1ec-feeds'));
+        await pageObject.getElement(By.css('.ai1ec-alert'));
+
+        // .ai1ec-alert should contain "Deleted 53 events"
+        const expectedText = 'Deleted 53 events';
+
+        // Get text without child Elements (aka: dismiss alert X)
+        const visibleText = await pageObject.getTextByClassName('ai1ec-alert');
+        //
+        await pageObject.takeScreenshot(this);
+        pageObject.assert.ok(
+            expectedText === visibleText
+        )
+    });
+
 })
 
