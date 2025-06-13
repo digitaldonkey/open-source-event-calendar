@@ -31,73 +31,73 @@ describe('Plugin install', function(){
     });
 
 
-    // it('WordPress activate Osec plugin', async function () {
-    //     await pageObject.go_to_url(pageObject.settings.domain + '/wp-admin/plugins.php');
-    //     await pageObject.doLogin();
-    //     const success = await pageObject.activateOsecPlugin();
-    //     await pageObject.takeScreenshot(this);
-    //     pageObject.assert.ok(success);
-    //     await pageObject.takeScreenshot(this);
-    // });
-    //
-    // it('Update osec settings', async function () {
-    //     const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
-    //     await pageObject.go_to_url(url);
-    //     await pageObject.doLogin();
-    //
-    //     await pageObject.getElement(By.id('ai1ec-general-settings'))
-    //
-    //     // Set day
-    //     await pageObject.setWeekDay(By.id('week_start_day'));
-    //
-    //     // Set timezone to Europe/Berlin
-    //     const timezoneSelect = await pageObject.getElement(By.id('timezone_string'))
-    //     await pageObject.setTimezone(timezoneSelect);
-    //
-    //     // Submit/Save
-    //     const saveButtonElement = await pageObject.getElement(By.id('osec_save_settings'));
-    //     await saveButtonElement.click();
-    //
-    //     // Waiting releoad.
-    //     await pageObject.waitToSeeWhatHappens(700, true);
-    //     await pageObject.getElement(By.id('ai1ec-general-settings'));
-    //
-    //     await pageObject.takeScreenshot(this);
-    //
-    //     // Check Weekstart Day.
-    //     const weekStart = await pageObject.getElement(
-    //         By.id('week_start_day')
-    //     );
-    //     const weekStartSelect = new Select(weekStart);
-    //     const option = await weekStartSelect.getFirstSelectedOption();
-    //     const isMondaySelected = option.isSelected();
-    //     pageObject.assert.ok(isMondaySelected);
-    //
-    //     // Check settings pages calendar page id is saved
-    //     // By default Select is "Create new page" after saving it should be "Calendar" and a Link is visible.
-    //     // calenderPage value would be int WP Page ID.
-    //     const calenderPageSelect = await pageObject.getElement(By.id('calendar_page_id'));
-    //     const calenderPageSelectedText = await pageObject.getSelectSingleValue(calenderPageSelect, true);
-    //     pageObject.assert.ok(
-    //         calenderPageSelectedText === 'Calendar'
-    //     )
-    //
-    //     // Check timezone saved.
-    //     const timeZoneSelect = await pageObject.getElement(By.id('timezone_string'));
-    //     const timeZoneSelectedValue = await pageObject.getSelectSingleValue(timeZoneSelect);
-    //     pageObject.assert.ok(
-    //         timeZoneSelectedValue === pageObject.settings.AdminPageSettings.timeZone
-    //     );
-    //
-    //     // New view-link below select#calendar_page_id
-    //     const calendarLink = await pageObject.getElement(By.css('#calendar_page_id~p>a'));
-    //     const calendarPageLinkText = await calendarLink.getText();
-    //     pageObject.assert.ok(
-    //         calendarPageLinkText === 'View "Calendar"'
-    //     )
-    //     await pageObject.takeScreenshot(this);
-    // });
-    //
+    it('WordPress activate Osec plugin', async function () {
+        await pageObject.go_to_url(pageObject.settings.domain + '/wp-admin/plugins.php');
+        await pageObject.doLogin();
+        const success = await pageObject.activateOsecPlugin();
+        await pageObject.takeScreenshot(this);
+        pageObject.assert.ok(success);
+        await pageObject.takeScreenshot(this);
+    });
+
+    it('Update osec settings', async function () {
+        const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
+        await pageObject.go_to_url(url);
+        await pageObject.doLogin();
+
+        await pageObject.getElement(By.id('ai1ec-general-settings'))
+
+        // Set day
+        await pageObject.setWeekDay(By.id('week_start_day'));
+
+        // Set timezone to Europe/Berlin
+        const timezoneSelect = await pageObject.getElement(By.id('timezone_string'))
+        await pageObject.setTimezone(timezoneSelect);
+
+        // Submit/Save
+        const saveButtonElement = await pageObject.getElement(By.id('osec_save_settings'));
+        await saveButtonElement.click();
+
+        // Waiting releoad.
+        await pageObject.waitToSeeWhatHappens(700, true);
+        await pageObject.getElement(By.id('ai1ec-general-settings'));
+
+        await pageObject.takeScreenshot(this);
+
+        // Check Weekstart Day.
+        const weekStart = await pageObject.getElement(
+            By.id('week_start_day')
+        );
+        const weekStartSelect = new Select(weekStart);
+        const option = await weekStartSelect.getFirstSelectedOption();
+        const isMondaySelected = option.isSelected();
+        pageObject.assert.ok(isMondaySelected);
+
+        // Check settings pages calendar page id is saved
+        // By default Select is "Create new page" after saving it should be "Calendar" and a Link is visible.
+        // calenderPage value would be int WP Page ID.
+        const calenderPageSelect = await pageObject.getElement(By.id('calendar_page_id'));
+        const calenderPageSelectedText = await pageObject.getSelectSingleValue(calenderPageSelect, true);
+        pageObject.assert.ok(
+            calenderPageSelectedText === 'Calendar'
+        )
+
+        // Check timezone saved.
+        const timeZoneSelect = await pageObject.getElement(By.id('timezone_string'));
+        const timeZoneSelectedValue = await pageObject.getSelectSingleValue(timeZoneSelect);
+        pageObject.assert.ok(
+            timeZoneSelectedValue === pageObject.settings.AdminPageSettings.timeZone
+        );
+
+        // New view-link below select#calendar_page_id
+        const calendarLink = await pageObject.getElement(By.css('#calendar_page_id~p>a'));
+        const calendarPageLinkText = await calendarLink.getText();
+        pageObject.assert.ok(
+            calendarPageLinkText === 'View "Calendar"'
+        )
+        await pageObject.takeScreenshot(this);
+    });
+
     // it('View osec cache settings', async function () {
     //     const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
     //     await pageObject.go_to_url(url);
