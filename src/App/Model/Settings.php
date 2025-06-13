@@ -360,9 +360,7 @@ class Settings extends OsecBaseInitialized
                     'label'   => __('Week starts on', 'open-source-event-calendar'),
                     'options' => 'get_weekdays_settings',
                 ],
-                'default'  => $this->app->options->get(
-                    'start_of_week'
-                ),
+                'default'  => 0,
             ],
             'enabled_views'                  => [
                 'type'     => 'array',
