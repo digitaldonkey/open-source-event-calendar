@@ -114,7 +114,8 @@ class BasePage {
             throw new Error('getElement requires instance of By as first param')
         }
         const element = await this.driver.findElement(findBy);
-        return this.driver.wait(until.elementIsVisible(element), 6000);
+        await this.driver.wait(until.elementIsVisible(element), 6000);
+        return element;
     }
 
     /**
