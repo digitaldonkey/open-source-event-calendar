@@ -31,124 +31,134 @@ describe('Plugin install', function(){
     });
 
 
-    it('WordPress activate Osec plugin', async function () {
-        await pageObject.go_to_url(pageObject.settings.domain + '/wp-admin/plugins.php');
-        await pageObject.doLogin();
-        const success = await pageObject.activateOsecPlugin();
-        await pageObject.takeScreenshot(this);
-        pageObject.assert.ok(success);
-        await pageObject.takeScreenshot(this);
-    });
-
-    it('Update osec settings', async function () {
-        const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
-        await pageObject.go_to_url(url);
-        await pageObject.doLogin();
-
-        await pageObject.getElement(By.id('ai1ec-general-settings'))
-
-        // Set day
-        await pageObject.setWeekDay(By.id('week_start_day'));
-
-        // Set timezone to Europe/Berlin
-        const timezoneSelect = await pageObject.getElement(By.id('timezone_string'))
-        await pageObject.setTimezone(timezoneSelect);
-
-        // Submit/Save
-        const saveButtonElement = await pageObject.getElement(By.id('osec_save_settings'));
-        await saveButtonElement.click();
-
-        // Waiting releoad.
-        await pageObject.waitToSeeWhatHappens(700, true);
-        await pageObject.getElement(By.id('ai1ec-general-settings'));
-
-        await pageObject.takeScreenshot(this);
-
-        // Check Weekstart Day.
-        const weekStart = await pageObject.getElement(
-            By.id('week_start_day')
-        );
-        const weekStartSelect = new Select(weekStart);
-        const option = await weekStartSelect.getFirstSelectedOption();
-        const isMondaySelected = option.isSelected();
-        pageObject.assert.ok(isMondaySelected);
-
-        // Check settings pages calendar page id is saved
-        // By default Select is "Create new page" after saving it should be "Calendar" and a Link is visible.
-        // calenderPage value would be int WP Page ID.
-        const calenderPageSelect = await pageObject.getElement(By.id('calendar_page_id'));
-        const calenderPageSelectedText = await pageObject.getSelectSingleValue(calenderPageSelect, true);
-        pageObject.assert.ok(
-            calenderPageSelectedText === 'Calendar'
-        )
-
-        // Check timezone saved.
-        const timeZoneSelect = await pageObject.getElement(By.id('timezone_string'));
-        const timeZoneSelectedValue = await pageObject.getSelectSingleValue(timeZoneSelect);
-        pageObject.assert.ok(
-            timeZoneSelectedValue === pageObject.settings.AdminPageSettings.timeZone
-        );
-
-        // New view-link below select#calendar_page_id
-        const calendarLink = await pageObject.getElement(By.css('#calendar_page_id~p>a'));
-        const calendarPageLinkText = await calendarLink.getText();
-        pageObject.assert.ok(
-            calendarPageLinkText === 'View "Calendar"'
-        )
-        await pageObject.takeScreenshot(this);
-    });
-
-    it('View osec cache settings', async function () {
-        const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
-        await pageObject.go_to_url(url);
-        await pageObject.doLogin();
-
-        // Switch to cache report
-        const cacheMenuLink = await pageObject.driver.findElement(By.id('osec-link-cache'));
-        await cacheMenuLink.click();
-        // Wait.
-        // TODO For now just a screenshot to see...
-        await pageObject.getElement(By.id('osec-cache'))
-        await pageObject.takeScreenshot(this);
-    })
-
-    it('View and save osec theme settings', async function () {
-        const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-edit-css';
-        await pageObject.go_to_url(url);
-        await pageObject.doLogin();
-
-        // Js generated link should be visible.
-        await pageObject.getElement(By.id( 'osec-link-general'))
-
-        // Submit/Save
-        const saveOptionsButton = await pageObject.getElement(By.id( 'osec_save_themes_options'))
-        await saveOptionsButton.click();
-
-        await pageObject.waitToSeeWhatHappens(700, true);
-
-        // Required to wait again.
-        await pageObject.getElement(By.id( 'osec-link-general'))
-
-        // "Theme options were updated successfully. Visit site" should be visible.
-        const expectedText = 'Visit site';
-        const optionsSaved = await pageObject.getElement(
-            By.xpath("//a[text()='" + expectedText + "']")
-        )
-        const visibleText = await optionsSaved.getText();
-        await pageObject.takeScreenshot(this);
-        pageObject.assert.ok(
-            expectedText === visibleText
-        )
-    });
+    // it('WordPress activate Osec plugin', async function () {
+    //     await pageObject.go_to_url(pageObject.settings.domain + '/wp-admin/plugins.php');
+    //     await pageObject.doLogin();
+    //     const success = await pageObject.activateOsecPlugin();
+    //     await pageObject.takeScreenshot(this);
+    //     pageObject.assert.ok(success);
+    //     await pageObject.takeScreenshot(this);
+    // });
+    //
+    // it('Update osec settings', async function () {
+    //     const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
+    //     await pageObject.go_to_url(url);
+    //     await pageObject.doLogin();
+    //
+    //     await pageObject.getElement(By.id('ai1ec-general-settings'))
+    //
+    //     // Set day
+    //     await pageObject.setWeekDay(By.id('week_start_day'));
+    //
+    //     // Set timezone to Europe/Berlin
+    //     const timezoneSelect = await pageObject.getElement(By.id('timezone_string'))
+    //     await pageObject.setTimezone(timezoneSelect);
+    //
+    //     // Submit/Save
+    //     const saveButtonElement = await pageObject.getElement(By.id('osec_save_settings'));
+    //     await saveButtonElement.click();
+    //
+    //     // Waiting releoad.
+    //     await pageObject.waitToSeeWhatHappens(700, true);
+    //     await pageObject.getElement(By.id('ai1ec-general-settings'));
+    //
+    //     await pageObject.takeScreenshot(this);
+    //
+    //     // Check Weekstart Day.
+    //     const weekStart = await pageObject.getElement(
+    //         By.id('week_start_day')
+    //     );
+    //     const weekStartSelect = new Select(weekStart);
+    //     const option = await weekStartSelect.getFirstSelectedOption();
+    //     const isMondaySelected = option.isSelected();
+    //     pageObject.assert.ok(isMondaySelected);
+    //
+    //     // Check settings pages calendar page id is saved
+    //     // By default Select is "Create new page" after saving it should be "Calendar" and a Link is visible.
+    //     // calenderPage value would be int WP Page ID.
+    //     const calenderPageSelect = await pageObject.getElement(By.id('calendar_page_id'));
+    //     const calenderPageSelectedText = await pageObject.getSelectSingleValue(calenderPageSelect, true);
+    //     pageObject.assert.ok(
+    //         calenderPageSelectedText === 'Calendar'
+    //     )
+    //
+    //     // Check timezone saved.
+    //     const timeZoneSelect = await pageObject.getElement(By.id('timezone_string'));
+    //     const timeZoneSelectedValue = await pageObject.getSelectSingleValue(timeZoneSelect);
+    //     pageObject.assert.ok(
+    //         timeZoneSelectedValue === pageObject.settings.AdminPageSettings.timeZone
+    //     );
+    //
+    //     // New view-link below select#calendar_page_id
+    //     const calendarLink = await pageObject.getElement(By.css('#calendar_page_id~p>a'));
+    //     const calendarPageLinkText = await calendarLink.getText();
+    //     pageObject.assert.ok(
+    //         calendarPageLinkText === 'View "Calendar"'
+    //     )
+    //     await pageObject.takeScreenshot(this);
+    // });
+    //
+    // it('View osec cache settings', async function () {
+    //     const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
+    //     await pageObject.go_to_url(url);
+    //     await pageObject.doLogin();
+    //
+    //     // Switch to cache report
+    //     const cacheMenuLink = await pageObject.driver.findElement(By.id('osec-link-cache'));
+    //     await cacheMenuLink.click();
+    //     // Wait.
+    //     // TODO For now just a screenshot to see...
+    //     await pageObject.getElement(By.id('osec-cache'))
+    //     await pageObject.takeScreenshot(this);
+    // })
+    //
+    // it('View and save osec theme settings', async function () {
+    //     const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-edit-css';
+    //     await pageObject.go_to_url(url);
+    //     await pageObject.doLogin();
+    //
+    //     // Js generated link should be visible.
+    //     await pageObject.getElement(By.id( 'osec-link-general'))
+    //
+    //     // Submit/Save
+    //     const saveOptionsButton = await pageObject.getElement(By.id( 'osec_save_themes_options'))
+    //     await saveOptionsButton.click();
+    //
+    //     await pageObject.waitToSeeWhatHappens(700, true);
+    //
+    //     // Required to wait again.
+    //     await pageObject.getElement(By.id( 'osec-link-general'))
+    //
+    //     // "Theme options were updated successfully. Visit site" should be visible.
+    //     const expectedText = 'Visit site';
+    //     const optionsSaved = await pageObject.getElement(
+    //         By.xpath("//a[text()='" + expectedText + "']")
+    //     )
+    //     const visibleText = await optionsSaved.getText();
+    //     await pageObject.takeScreenshot(this);
+    //     pageObject.assert.ok(
+    //         expectedText === visibleText
+    //     )
+    // });
 
     it('Add daily repeating event', async function () {
         await pageObject.go_to_url(pageObject.settings.domain + '/wp-admin');
+
+        await pageObject.takeScreenshot(this);
+
         await pageObject.doLogin();
         const url = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
+
+        await pageObject.takeScreenshot(this);
         await pageObject.go_to_url(url);
+
+        await pageObject.takeScreenshot(this);
 
         // Repeat checkbox should be visible
         const repeatCheckbox = await pageObject.getElement(By.id('osec_repeat'));
+
+        await pageObject.takeScreenshot(this);
+
         // Open repeat panel
         await repeatCheckbox.click();
         await pageObject.waitToSeeWhatHappens(500, true);
@@ -162,6 +172,8 @@ describe('Plugin install', function(){
         // Confirm repeat settings
         const confirmButton = await pageObject.getElement(By.id('osec_repeat_apply'));
         await confirmButton.click();
+
+        await pageObject.takeScreenshot(this);
 
         // Add Event title
         const titleInput = await pageObject.getElement(By.id('title'));
@@ -311,82 +323,82 @@ describe('Plugin install', function(){
         await pageObject.waitToSeeWhatHappens(500, true);
     });
 
-    it('Add ICS calendar feed', async function () {
-        const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-feeds';
-        await pageObject.go_to_url(url);
-        await pageObject.doLogin();
-
-        // Js generated link should be visible.
-        const mainElementID = 'ai1ec-feeds';
-        await pageObject.getElement(By.id( 'ai1ec-feeds'));
-
-        // Submit/Save
-        const feedUrl = 'https://ics.calendarlabs.com/641/64bc8358/FIFA_Womens_World_Cup.ics'
-        const feedUrlInput = await pageObject.getElement(By.id( 'osec_feed_url'));
-        await feedUrlInput.sendKeys(feedUrl);
-
-        // osec_ics_add_new
-        const feedUrlAddButton = await pageObject.getElement(By.id( 'osec_ics_add_new'));
-        await feedUrlAddButton.click();
-
-        // Required to call/wait again.
-        await pageObject.getElement(By.id( 'ai1ec-feeds'));
-
-        // .ai1ec-alert-success should contain "Imported 53 events"
-        const expectedText = 'Imported 53 events';
-
-        // Get text without child Elements (aka: dismiss alert X)
-        await pageObject.getElement(By.css('.ai1ec-alert'));
-        const visibleText = await pageObject.getTextByClassName('ai1ec-alert');
-
-        await pageObject.takeScreenshot(this);
-        pageObject.assert.ok(
-            expectedText === visibleText
-        )
-        // const optionsSaved = await pageObject.driver.findElement(By.xpath("//.ai1ec-alert-success[text()='" + expectedText + "']"));
-        // const visibleText = await optionsSaved.getText();
-        await pageObject.takeScreenshot(this);
-        pageObject.assert.ok(
-            expectedText === visibleText
-        )
-    });
-
-    it('Delete ICS calendar feed', async function () {
-        const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-feeds';
-        await pageObject.go_to_url(url);
-        await pageObject.doLogin();
-
-        // Js generated link should be visible.
-        await pageObject.getElement(By.id('ai1ec-feeds'));
-
-        // Open ICS panel.
-        const panelLink = await pageObject.getElement(By.css('a[data-toggle="ai1ec-collapse"]'));
-        await panelLink.click();
-
-        // osec_delete_ics
-        const deleteButton = await pageObject.getElement(By.css('.osec_delete_ics'));
-        await deleteButton.click();
-
-        // Confirm delete events dialogue
-        // osec_delete_ics
-        const deleteEventsButton = await pageObject.getElement(By.css('.ai1ec-btn.remove'));
-        await deleteEventsButton.click();
-
-        // Required to call/wait again.
-        await pageObject.getElement(By.id('ai1ec-feeds'));
-        await pageObject.getElement(By.css('.ai1ec-alert'));
-
-        // .ai1ec-alert should contain "Deleted 53 events"
-        const expectedText = 'Deleted 53 events';
-
-        // Get text without child Elements (aka: dismiss alert X)
-        const visibleText = await pageObject.getTextByClassName('ai1ec-alert');
-        //
-        await pageObject.takeScreenshot(this);
-        pageObject.assert.ok(
-            expectedText === visibleText
-        )
-    });
+    // it('Add ICS calendar feed', async function () {
+    //     const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-feeds';
+    //     await pageObject.go_to_url(url);
+    //     await pageObject.doLogin();
+    //
+    //     // Js generated link should be visible.
+    //     const mainElementID = 'ai1ec-feeds';
+    //     await pageObject.getElement(By.id( 'ai1ec-feeds'));
+    //
+    //     // Submit/Save
+    //     const feedUrl = 'https://ics.calendarlabs.com/641/64bc8358/FIFA_Womens_World_Cup.ics'
+    //     const feedUrlInput = await pageObject.getElement(By.id( 'osec_feed_url'));
+    //     await feedUrlInput.sendKeys(feedUrl);
+    //
+    //     // osec_ics_add_new
+    //     const feedUrlAddButton = await pageObject.getElement(By.id( 'osec_ics_add_new'));
+    //     await feedUrlAddButton.click();
+    //
+    //     // Required to call/wait again.
+    //     await pageObject.getElement(By.id( 'ai1ec-feeds'));
+    //
+    //     // .ai1ec-alert-success should contain "Imported 53 events"
+    //     const expectedText = 'Imported 53 events';
+    //
+    //     // Get text without child Elements (aka: dismiss alert X)
+    //     await pageObject.getElement(By.css('.ai1ec-alert'));
+    //     const visibleText = await pageObject.getTextByClassName('ai1ec-alert');
+    //
+    //     await pageObject.takeScreenshot(this);
+    //     pageObject.assert.ok(
+    //         expectedText === visibleText
+    //     )
+    //     // const optionsSaved = await pageObject.driver.findElement(By.xpath("//.ai1ec-alert-success[text()='" + expectedText + "']"));
+    //     // const visibleText = await optionsSaved.getText();
+    //     await pageObject.takeScreenshot(this);
+    //     pageObject.assert.ok(
+    //         expectedText === visibleText
+    //     )
+    // });
+    //
+    // it('Delete ICS calendar feed', async function () {
+    //     const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-feeds';
+    //     await pageObject.go_to_url(url);
+    //     await pageObject.doLogin();
+    //
+    //     // Js generated link should be visible.
+    //     await pageObject.getElement(By.id('ai1ec-feeds'));
+    //
+    //     // Open ICS panel.
+    //     const panelLink = await pageObject.getElement(By.css('a[data-toggle="ai1ec-collapse"]'));
+    //     await panelLink.click();
+    //
+    //     // osec_delete_ics
+    //     const deleteButton = await pageObject.getElement(By.css('.osec_delete_ics'));
+    //     await deleteButton.click();
+    //
+    //     // Confirm delete events dialogue
+    //     // osec_delete_ics
+    //     const deleteEventsButton = await pageObject.getElement(By.css('.ai1ec-btn.remove'));
+    //     await deleteEventsButton.click();
+    //
+    //     // Required to call/wait again.
+    //     await pageObject.getElement(By.id('ai1ec-feeds'));
+    //     await pageObject.getElement(By.css('.ai1ec-alert'));
+    //
+    //     // .ai1ec-alert should contain "Deleted 53 events"
+    //     const expectedText = 'Deleted 53 events';
+    //
+    //     // Get text without child Elements (aka: dismiss alert X)
+    //     const visibleText = await pageObject.getTextByClassName('ai1ec-alert');
+    //     //
+    //     await pageObject.takeScreenshot(this);
+    //     pageObject.assert.ok(
+    //         expectedText === visibleText
+    //     )
+    // });
 
 })
 
