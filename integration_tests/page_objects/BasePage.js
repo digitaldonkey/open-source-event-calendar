@@ -73,7 +73,13 @@ class BasePage {
 
     async go_to_url(url){
         console.log('      get: ' + url);
-        return this.driver.get(url);
+        await this.driver.get(url)
+        const driver = this.driver;
+        return driver.wait(function() {
+            return driver.executeScript('return document.readyState').then(function(readyState) {
+                return readyState === 'complete';
+            });
+        });
     }
 
     async enterText(findBy, searchText){

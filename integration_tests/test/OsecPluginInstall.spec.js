@@ -143,9 +143,6 @@ describe('Plugin install', function(){
 
     it('Add daily repeating event', async function () {
         await pageObject.go_to_url(pageObject.settings.domain + '/wp-admin');
-
-        await pageObject.takeScreenshot(this);
-
         await pageObject.doLogin();
         const url = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
 
