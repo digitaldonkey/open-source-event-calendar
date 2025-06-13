@@ -26,8 +26,7 @@ class WpLogin extends BasePage {
         await this.enterText(passInput, Key.RETURN);
 
         const revealed = await this.driver.findElement(By.css("body.wp-admin"), 12000);
-        await this.driver.wait(until.elementIsVisible(revealed));
-        return true;
+        return this.driver.wait(until.elementIsVisible(revealed));
     }
 
 }
