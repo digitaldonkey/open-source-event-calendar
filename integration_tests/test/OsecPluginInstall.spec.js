@@ -142,17 +142,15 @@ describe('Plugin install', function(){
     // });
 
     it('Add daily repeating event', async function () {
-        await pageObject.go_to_url(pageObject.settings.domain + '/wp-admin');
-        await pageObject.doLogin();
         const url = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
-
-        await pageObject.takeScreenshot(this);
         await pageObject.go_to_url(url);
-
+        await pageObject.takeScreenshot(this);
+        await pageObject.doLogin();
         await pageObject.takeScreenshot(this);
 
         // Repeat checkbox should be visible
         const repeatCheckbox = await pageObject.getElement(By.id('osec_repeat'));
+        await pageObject.takeScreenshot(this);
 
         await pageObject.takeScreenshot(this);
 
