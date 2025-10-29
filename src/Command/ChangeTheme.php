@@ -72,7 +72,7 @@ class ChangeTheme extends SaveAbstract
         if (
             isset($_GET['osec_action'])
             && $_GET['osec_action'] === AdminPageManageThemes::$NONCE['action']
-            && current_user_can('osec_switch_themes')
+            && current_user_can('switch_osec_themes')
             && isset($_GET['osec_theme_dir'])
             && is_dir(sanitize_text_field(wp_unslash($_GET['osec_theme_dir'])))
             && isset($_GET['osec_theme_root'])

@@ -24,7 +24,7 @@ class CompileThemes extends CommandAbstract
             OSEC_DEBUG
             // phpcs:ignore WordPress.Security.NonceVerification
             && isset($_REQUEST['osec_recompile_templates'])
-            && current_user_can('osec_switch_themes')
+            && current_user_can('switch_osec_themes')
         );
     }
 

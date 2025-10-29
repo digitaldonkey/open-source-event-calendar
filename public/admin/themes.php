@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
     <?php
     if (
         ! current_user_can('switch_themes') &&
-        ! current_user_can('osec_switch_themes')
+        ! current_user_can('switch_osec_themes')
     ) {
         echo '</div>';
         return false;

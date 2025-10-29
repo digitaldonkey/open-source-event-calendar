@@ -30,8 +30,8 @@ class CompileCoreCss extends CommandAbstract
         if (
             isset($_GET['osec_compile_css'])
             && isset($_GET['theme'])
-            && current_user_can('osec_switch_themes')
-            && current_user_can('osec_manage_options')
+            && current_user_can('switch_osec_themes')
+            && current_user_can('manage_osec_options')
             && OSEC_DEBUG // Or everybody can use it.
         ) {
             return true;

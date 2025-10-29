@@ -28,7 +28,7 @@ class AdminPageViewThemeOptions extends AdminPageAbstract
             OSEC_ADMIN_BASE_URL,
             __('Options lookup', 'open-source-event-calendar'),
             __('Options lookup', 'open-source-event-calendar'),
-            'osec_manage_options',
+            'manage_osec_options',
             self::ADMIN_PAGE_PREFIX . 'view-all-variables',
             $this->display_page(...)
         );

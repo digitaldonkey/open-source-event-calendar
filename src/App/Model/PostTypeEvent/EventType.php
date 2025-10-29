@@ -73,7 +73,7 @@ class EventType extends OsecBaseClass
                     'manage_terms' => 'manage_events_categories',
                     'edit_terms'   => 'manage_events_categories',
                     'delete_terms' => 'manage_events_categories',
-                    'assign_terms' => 'osec_edit_events',
+                    'assign_terms' => 'edit_osec_events',
                 ],
             ]
         );
@@ -97,7 +97,7 @@ class EventType extends OsecBaseClass
                     'manage_terms' => 'manage_events_categories',
                     'edit_terms'   => 'manage_events_categories',
                     'delete_terms' => 'manage_events_categories',
-                    'assign_terms' => 'osec_edit_events',
+                    'assign_terms' => 'edit_osec_events',
                 ],
             ]
         );
@@ -120,7 +120,7 @@ class EventType extends OsecBaseClass
                     'manage_terms' => 'manage_events_categories',
                     'edit_terms'   => 'manage_events_categories',
                     'delete_terms' => 'manage_events_categories',
-                    'assign_terms' => 'osec_edit_events',
+                    'assign_terms' => 'edit_osec_events',
                 ],
                 'public'       => false,
             ]
@@ -179,7 +179,7 @@ class EventType extends OsecBaseClass
         if (
             $contributor instanceof WP_Role &&
             (
-                $contributor->has_cap('osec_publish_events') ||
+                $contributor->has_cap('publish_osec_events') ||
                 ! $contributor->has_cap('edit_published_osec_events') ||
                 ! $contributor->has_cap('delete_published_osec_events')
             )
@@ -193,8 +193,8 @@ class EventType extends OsecBaseClass
         if ( ! $contributor) {
             $caps = get_role('subscriber')->capabilities;
             $role = add_role('osec_event_assistant', 'Event Contributor', $caps);
-            $role->add_cap('osec_edit_events');
-            $role->add_cap('osec_read_events');
+            $role->add_cap('edit_osec_events');
+            $role->add_cap('read_osec_events');
             $role->add_cap('delete_osec_events');
             $role->add_cap('edit_published_osec_events');
             $role->add_cap('delete_published_osec_events');
@@ -203,10 +203,10 @@ class EventType extends OsecBaseClass
         }
 
         // Add event managing capabilities to administrator, editor, author.
-        // The last created capability is "osec_manage_feeds", so check for
+        // The last created capability is "manage_osec_feeds", so check for
         // that one.
         $role = get_role('administrator');
-        if (is_object($role) && ! $role->has_cap('osec_manage_feeds')) {
+        if (is_object($role) && ! $role->has_cap('manage_osec_feeds')) {
             $role_list = ['administrator', 'editor', 'author'];
             foreach ($role_list as $role_name) {
                 $role = get_role($role_name);
@@ -214,9 +214,9 @@ class EventType extends OsecBaseClass
                     continue;
                 }
                 // Read events.
-                $role->add_cap('osec_read_events');
+                $role->add_cap('read_osec_events');
                 // Edit events.
-                $role->add_cap('osec_edit_events');
+                $role->add_cap('edit_osec_events');
                 $role->add_cap('edit_others_osec_events');
                 $role->add_cap('edit_private_osec_events');
                 $role->add_cap('edit_published_osec_events');
@@ -226,17 +226,17 @@ class EventType extends OsecBaseClass
                 $role->add_cap('delete_published_osec_events');
                 $role->add_cap('delete_private_osec_events');
                 // Publish events.
-                $role->add_cap('osec_publish_events');
+                $role->add_cap('publish_osec_events');
                 // Read private events.
-                $role->add_cap('osec_read_private_events');
+                $role->add_cap('read_private_osec_events');
                 // Manage categories & tags.
                 $role->add_cap('manage_events_categories');
                 // Manage calendar feeds.
-                $role->add_cap('osec_manage_feeds');
+                $role->add_cap('manage_osec_feeds');
                 if ('administrator' === $role_name) {
                     // Change calendar themes & manage calendar options.
-                    $role->add_cap('osec_switch_themes');
-                    $role->add_cap('osec_manage_options');
+                    $role->add_cap('switch_osec_themes');
+                    $role->add_cap('manage_osec_options');
                 }
             }
         }
@@ -254,7 +254,7 @@ class EventType extends OsecBaseClass
     public function get_all_items_name()
     {
         // if current user can publish events
-        if (current_user_can('osec_publish_events')) {
+        if (current_user_can('publish_osec_events')) {
             // get all pending events
             $query = [
                 'post_type'      => OSEC_POST_TYPE,
@@ -323,15 +323,15 @@ class EventType extends OsecBaseClass
             // Remove Capavilities
             global $wp_roles;
             $delete_caps = [
-                'osec_edit_events',
-                'osec_read_events',
-                'osec_publish_events',
+                'edit_osec_events',
+                'read_osec_events',
+                'publish_osec_events',
                 'edit_published_osec_events',
                 'delete_osec_events',
                 'delete_published_osec_events',
-                'osec_switch_themes',
-                'osec_manage_options',
-                'osec_manage_feeds',
+                'switch_osec_themes',
+                'manage_osec_options',
+                'manage_osec_feeds',
             ];
             foreach ($delete_caps as $cap) {
                 foreach (array_keys($wp_roles->roles) as $role) {
