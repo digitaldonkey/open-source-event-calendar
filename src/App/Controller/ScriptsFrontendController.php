@@ -2,7 +2,6 @@
 
 namespace Osec\App\Controller;
 
-use HTTP_ConditionalGet;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\Settings;
 use Osec\App\View\Admin\AdminPageAbstract;
@@ -10,6 +9,7 @@ use Osec\App\WpmlHelper;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
+use Osec\Http\Request\HttpConditionalGet;
 use Osec\Http\Request\HttpEncoder;
 use Osec\Http\Response\ResponseHelper;
 
@@ -457,7 +457,7 @@ class ScriptsFrontendController extends OsecBaseClass
      */
     private function printJavascript($javascript)
     {
-        $conditional_get = new HTTP_ConditionalGet(
+        $conditional_get = new HttpConditionalGet(
             ['contentHash' => md5($javascript)]
         );
         $conditional_get->sendHeaders();

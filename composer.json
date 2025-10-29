@@ -8,9 +8,8 @@
         "ext-json": "*",
         "kigkonsult/icalcreator": "~2.40.0",
         "louis1021/sg-i-calendar": "dev-master",
-        "mrclay/minify": "^4.0",
         "php": ">=8.1",
-        "twig/twig": "^3.10",
+        "twig/twig": "^3.20",
         "wikimedia/less.php": "^5.0"
     },
     "license": "GPL-3.0-or-later",
@@ -39,12 +38,12 @@
     },
     "require-dev": {
         "phpcompatibility/phpcompatibility-wp": "*",
-        "phpro/grumphp": "^2.9",
+        "phpro/grumphp": "^2.17",
         "phpunit/phpunit": "^9.6",
         "roave/security-advisories": "dev-latest",
-        "symfony/debug-bundle": "^7.1",
-        "wp-cli/wp-cli-bundle": "^2.11",
-        "wp-coding-standards/wpcs": "^3.1",
+        "symfony/debug-bundle": "^7.3",
+        "wp-cli/wp-cli-bundle": "^2.12",
+        "wp-coding-standards/wpcs": "^3.2",
         "yoast/phpunit-polyfills": "^2.0",
         "phpcompatibility/php-compatibility": "^9.3"
     },
@@ -59,9 +58,6 @@
         "patches": {
             "louis1021/sg-i-calendar": {
                 "PHP 8.1.x compatibility fixes": "composer-patches/louis1021--sg-i-calendar.patch"
-            },
-            "wikimedia/less.php": {
-                "Fix source map paths": "composer-patches/wikimedia-sourcemaps.patch"
             },
             "kigkonsult/icalcreator": {
                 "Fix ctype_digit() deprecation notices": "composer-patches/kigkonsult_icalcreator_2.40.0.patch"
