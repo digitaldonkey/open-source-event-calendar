@@ -21,6 +21,7 @@ use Osec\App\View\Admin\AdminPageManageTaxonomies;
 use Osec\App\View\Admin\AdminPageManageThemes;
 use Osec\App\View\Admin\AdminPageSettings;
 use Osec\App\View\Admin\AdminPageThemeOptions;
+use Osec\App\View\Admin\AdminPageViewCapabilities;
 use Osec\App\View\Admin\AdminPageViewThemeOptions;
 use Osec\App\View\Calendar\CalendarShortcodeView;
 use Osec\App\View\Event\EventContentView;
@@ -420,6 +421,7 @@ class BootstrapController
                     'admin_menu',
                     function () use ($app) {
                         AdminPageViewThemeOptions::factory($app)->add_page();
+                        AdminPageViewCapabilities::factory($app)->add_page();
                     }
                 );
             }
