@@ -124,7 +124,7 @@ class ExceptionHandler
                 ? $exception->get_html_message()
                 : $exception->getMessage();
             $message       = '<p>' . $message . '</p>';
-            if ($exception->display_backtrace()) {
+            if (method_exists($exception, 'display_backtrace') && $exception->display_backtrace()) {
                 $message .= $backtrace;
             }
             if (null !== $disable_addon) {
