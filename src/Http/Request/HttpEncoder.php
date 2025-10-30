@@ -21,7 +21,7 @@ class HttpEncoder extends HttpEncoderBase
      */
     public function sendHeaders()
     {
-        unset($this->_headers['Content-Length']);
+        unset($this->headers['Content-Length']);
         parent::sendHeaders();
     }
 }
