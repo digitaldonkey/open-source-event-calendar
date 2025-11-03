@@ -376,15 +376,15 @@ class FrontendCssController extends OsecBaseClass
             return false;
         } catch (Exception $e) {
             // An error from lessphp.
-            $message = sprintf(
+            $message = '<p>' . sprintf(
             /* translators: Error message */
                 __(
-                    '<p><strong>There was an error while compiling CSS.</strong>
-                        The message returned was: <em>%s</em></p>',
+                    '<strong>There was an error while compiling CSS.</strong>
+                        The message returned was: <em>%s</em>',
                     'open-source-event-calendar'
                 ),
                 $e->getMessage()
-            );
+            ) . '</p>';
             $notification->store($message, 'error', 1);
 
             return false;
