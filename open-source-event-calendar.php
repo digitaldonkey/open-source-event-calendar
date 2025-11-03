@@ -67,7 +67,7 @@ function osec_plugin_activate()
         BootstrapController::createApp(__DIR__);
     }
     DatabaseSchema::factory($osec_app)->verifySqlSchema();
-    flush_rewrite_rules();
+    $osec_app->options->set('osec_force_flush_rewrite_rules', true);
 }
 
 register_activation_hook(__FILE__, 'osec_plugin_activate');

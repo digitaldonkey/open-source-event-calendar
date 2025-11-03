@@ -2,8 +2,6 @@
 
 namespace Osec\Http\Request;
 
-use HTTP_Encoder;
-
 /**
  * @file:
  * Calendar Http_Encoder wrapper.
@@ -13,7 +11,7 @@ use HTTP_Encoder;
  * @replaces Ai1ec_HTTP_Encoder
  * @author     Time.ly Network Inc.
  */
-class HttpEncoder extends HTTP_Encoder
+class HttpEncoder extends HttpEncoderBase
 {
     /**
      * Overrides parent function and removed Content-Length header to avoid
@@ -23,7 +21,7 @@ class HttpEncoder extends HTTP_Encoder
      */
     public function sendHeaders()
     {
-        unset($this->_headers['Content-Length']);
+        unset($this->headers['Content-Length']);
         parent::sendHeaders();
     }
 }

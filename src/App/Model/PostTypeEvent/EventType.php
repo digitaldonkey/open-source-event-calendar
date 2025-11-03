@@ -70,9 +70,9 @@ class EventType extends OsecBaseClass
                 'rewrite'      => ['slug' => 'events_categories'],
                 'show_in_rest' => true,
                 'capabilities' => [
-                    'manage_terms' => 'manage_events_categories',
-                    'edit_terms'   => 'manage_events_categories',
-                    'delete_terms' => 'manage_events_categories',
+                    'manage_terms' => 'manage_osec_events_categories',
+                    'edit_terms'   => 'manage_osec_events_categories',
+                    'delete_terms' => 'manage_osec_events_categories',
                     'assign_terms' => 'edit_osec_events',
                 ],
             ]
@@ -94,9 +94,9 @@ class EventType extends OsecBaseClass
                 'show_ui'      => true,
                 'show_in_rest' => true,
                 'capabilities' => [
-                    'manage_terms' => 'manage_events_categories',
-                    'edit_terms'   => 'manage_events_categories',
-                    'delete_terms' => 'manage_events_categories',
+                    'manage_terms' => 'manage_osec_events_categories',
+                    'edit_terms'   => 'manage_osec_events_categories',
+                    'delete_terms' => 'manage_osec_events_categories',
                     'assign_terms' => 'edit_osec_events',
                 ],
             ]
@@ -117,9 +117,9 @@ class EventType extends OsecBaseClass
                 'hierarchical' => false,
                 'rewrite'      => ['slug' => 'events_feeds'],
                 'capabilities' => [
-                    'manage_terms' => 'manage_events_categories',
-                    'edit_terms'   => 'manage_events_categories',
-                    'delete_terms' => 'manage_events_categories',
+                    'manage_terms' => 'manage_osec_events_categories',
+                    'edit_terms'   => 'manage_osec_events_categories',
+                    'delete_terms' => 'manage_osec_events_categories',
                     'assign_terms' => 'edit_osec_events',
                 ],
                 'public'       => false,
@@ -153,7 +153,10 @@ class EventType extends OsecBaseClass
             'query_var'           => true,
             'rewrite'             => $rewrite,
             'map_meta_cap'        => true,
-            'capability_type'     => 'osec_event',
+            'capability_type'     => [
+                OSEC_POST_TYPE,
+                OSEC_POST_TYPE . 's',
+            ],
             'has_archive'         => $has_archive,
             'hierarchical'        => false,
             'menu_position'       => 5,
@@ -194,7 +197,7 @@ class EventType extends OsecBaseClass
             $caps = get_role('subscriber')->capabilities;
             $role = add_role('osec_event_assistant', 'Event Contributor', $caps);
             $role->add_cap('edit_osec_events');
-            $role->add_cap('read_osec_events');
+            $role->add_cap('read_osec_event');
             $role->add_cap('delete_osec_events');
             $role->add_cap('edit_published_osec_events');
             $role->add_cap('delete_published_osec_events');
@@ -214,7 +217,7 @@ class EventType extends OsecBaseClass
                     continue;
                 }
                 // Read events.
-                $role->add_cap('read_osec_events');
+                $role->add_cap('read_osec_event');
                 // Edit events.
                 $role->add_cap('edit_osec_events');
                 $role->add_cap('edit_others_osec_events');
@@ -230,7 +233,7 @@ class EventType extends OsecBaseClass
                 // Read private events.
                 $role->add_cap('read_private_osec_events');
                 // Manage categories & tags.
-                $role->add_cap('manage_events_categories');
+                $role->add_cap('manage_osec_events_categories');
                 // Manage calendar feeds.
                 $role->add_cap('manage_osec_feeds');
                 if ('administrator' === $role_name) {
@@ -324,7 +327,7 @@ class EventType extends OsecBaseClass
             global $wp_roles;
             $delete_caps = [
                 'edit_osec_events',
-                'read_osec_events',
+                'read_osec_event',
                 'publish_osec_events',
                 'edit_published_osec_events',
                 'delete_osec_events',

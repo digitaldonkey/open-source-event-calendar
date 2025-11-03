@@ -24,13 +24,24 @@
 	<rule ref="WordPress.WP.Capabilities">
 		<properties>
 			<property name="custom_capabilities" type="array">
+				<element value="edit_osec_event" />
+				<element value="read_osec_event" />
+				<element value="delete_osec_event" />
+				<element value="edit_osec_events" />
+				<element value="edit_others_osec_events" />
+				<element value="delete_osec_events" />
+				<element value="publish_osec_events" />
+				<element value="read_private_osec_events" />
+				<element value="delete_private_osec_events" />
+				<element value="delete_published_osec_events" />
+				<element value="delete_others_osec_events" />
+				<element value="edit_private_osec_events" />
+				<element value="edit_published_osec_events" />
+				<element value="edit_osec_events" />
+				<element value="manage_osec_events_categories" />
+				<element value="manage_osec_feeds" />
 				<element value="switch_osec_themes" />
 				<element value="manage_osec_options" />
-				<element value="read_osec_events" />
-				<element value="edit_osec_events" />
-				<element value="read_private_osec_events" />
-				<element value="manage_osec_feeds" />
-				<element value="publish_osec_events" />
 			</property>
 		</properties>
 	</rule>
