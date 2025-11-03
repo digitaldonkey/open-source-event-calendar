@@ -104,17 +104,19 @@ class CommandClone extends CommandAbstract
 
         $new_post_id    = wp_insert_post($new_post);
         NotificationAdmin::factory($this->app)->store(
-            sprintf(
-            /* translators: Url to cloned event */
-                __(
-                    '<p>The event %1$s was cloned succesfully. <a href="%2$s">Edit cloned event</a></p>',
-                    'open-source-event-calendar'
-                ),
-                ' <strong>' . $post->post_title . '</strong>',
-                esc_attr(
-                    admin_url("post.php?post={$new_post_id}&action=edit")
+            '<p>' .
+                sprintf(
+                /* translators: Url to cloned event */
+                    __(
+                        'The event %1$s was cloned succesfully. <a href="%2$s">Edit cloned event</a>',
+                        'open-source-event-calendar'
+                    ),
+                    ' <strong>' . $post->post_title . '</strong>',
+                    esc_attr(
+                        admin_url("post.php?post={$new_post_id}&action=edit")
+                    )
                 )
-            )
+                . '</p>'
         );
         $this->copyPostTaxonomies($new_post_id, $post);
         $this->copyAttachments($new_post_id, $post);
