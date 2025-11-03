@@ -50,6 +50,7 @@ class Settings extends OsecBaseInitialized
     {
         global $wpdb;
         if ($purge) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->query(
                 $wpdb->prepare("DELETE FROM {$wpdb->options} WHERE `option_name` LIKE %s", 'osec_%')
             );
