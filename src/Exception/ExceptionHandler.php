@@ -425,21 +425,14 @@ class ExceptionHandler
     /**
      * Get message to be displayed to admin if any
      *
-     * @return string|bool Error message or false if plugin is not disabled
+     *  Displays disabled error message,
+     *  if soft_deactivate_plugin() submitted one.
      */
-    public function get_disabled_message()
+    public function display_disabled_message(): void
     {
-        global $wpdb;
-        $row = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1",
-                self::DB_DEACTIVATE_MESSAGE
-            )
-        );
-        if (is_object($row)) {
-            return $row->option_value;
-        } else { // option does not exist, so we must cache its non-existence
-            return false;
+        $soft_disable_message = get_option(self::DB_DEACTIVATE_MESSAGE, false);
+        if ($soft_disable_message !== false) {
+            $this->show_notices($soft_disable_message);
         }
     }
 

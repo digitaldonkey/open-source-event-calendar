@@ -609,10 +609,10 @@ class BootstrapController
         if (isset($_GET[ExceptionHandler::DB_REACTIVATE_PLUGIN])) {
             $OsecExceptionHandler->reactivate_plugin();
         }
-        $soft_disable_message = $OsecExceptionHandler->get_disabled_message();
-        if ($soft_disable_message !== false) {
-            $OsecExceptionHandler->show_notices($soft_disable_message);
-        }
+
+        // Displays message if soft_deactivate_plugin() added one.
+        $OsecExceptionHandler->display_disabled_message();
+
         $OsecExceptionHandler->setPrevErrorHandler(
             // phpcs:ignore WordPress.PHP.DevelopmentFunctions
             set_error_handler($OsecExceptionHandler->handle_error(...))
