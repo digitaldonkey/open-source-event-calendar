@@ -1,16 +1,17 @@
 === Open Source Event Calendar ===
 Tags: calendar, events, ics, ical importer  
-Requires at least: 6.6  
-Tested up to: 6.8
+Requires at least: 6.6
 Requires PHP: 8.2  
-Stable Tag: 1.0.4
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: open-source-event-calendar
 Domain Path: /languages
-Short Description: With Osec you can create, share and aggregate and import (ical, ics) Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
 Contributors: digitaldonkey, hubrik, vtowel, yani.iliev nicolapeluchetti, jbutkus, lpawlik, bangelov  
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
+Tested up to: 6.8
+Stable Tag: 1.0.4
+
+With Osec you can create, share and aggregate and import (ical, ics) Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
 
 == Description ==
 
