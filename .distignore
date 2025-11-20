@@ -1,0 +1,8 @@
+# Make sure to check OSEC_RELEASE_WHITE_LIST too.
+# These are additional non distributables.
+# You can add files and dirs. They will be removed before packaging.
+public/admin/less/build-css.sh
+public/osec_themes/vortex/less/build-3rdparty-less.sh
+public/admin/less/build-css.bat
+calendar_block/.editorconfig
+vendor/wikimedia/less.php/bin/

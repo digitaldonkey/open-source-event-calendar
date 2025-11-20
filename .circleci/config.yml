@@ -234,13 +234,10 @@ jobs:
       - run:
           name: Create Release package
           command: |
-            mkdir -p /tmp/release/$WP_ORG_PLUGIN_NAME
+            mkdir -p /tmp/release/$WP_ORG_PLUGIN_NAME            
             (cd ~/$WP_ORG_PLUGIN_NAME && cp -R $OSEC_RELEASE_WHITE_LIST /tmp/release/$WP_ORG_PLUGIN_NAME)
-            rm /tmp/release/$WP_ORG_PLUGIN_NAME/public/admin/less/build-css.sh
-            rm /tmp/release/$WP_ORG_PLUGIN_NAME/public/osec_themes/vortex/less/build-3rdparty-less.sh
-            rm /tmp/release/$WP_ORG_PLUGIN_NAME/public/admin/less/build-css.bat
-            rm /tmp/release/$WP_ORG_PLUGIN_NAME/calendar_block/.editorconfig
-            find /tmp/release/$WP_ORG_PLUGIN_NAME -type f -name '*.sh' | xargs rm
+            (cd /tmp/release/$WP_ORG_PLUGIN_NAME && grep -e '^[^#]' ~/$WP_ORG_PLUGIN_NAME/.distignore | xargs rm -rf)
+            find /tmp/release/$WP_ORG_PLUGIN_NAME -type f -name '*.sh' -o -name '*.cmd' | xargs rm
             (cd /tmp/release/ && zip -r /tmp/$OSEC_RELEASE_FILE $WP_ORG_PLUGIN_NAME)
       - store_artifacts:
           path: /tmp/open-source-event-calendar.zip
