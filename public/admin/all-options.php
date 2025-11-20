@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
             echo '<details style="background: lightgray; padding: .1em .5em">';
             echo '<summary>' . $optionKey . '</summary>';
             echo '<pre style="width: inherit; overflow: scroll; background: #fcfcfc; padding: .1em .3em; min-height: 2.5em">';
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
             echo esc_html(print_r($option, true), ENT_HTML5);
             echo '</pre>';
             echo '</details>';

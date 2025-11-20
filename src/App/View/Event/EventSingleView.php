@@ -141,6 +141,7 @@ class EventSingleView extends OsecBaseClass
         $args = [
             'event'                  => $event,
             'recurrence'             => $rrule->rrule_to_text($event->get('recurrence_rules', '')),
+            // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
             'exclude'                => $timeView->get_exclude_html($event, $rrule),
             'categories'             => $taxonomyView->get_categories_html($event),
             'tags'                   => $taxonomyView->get_tags_html($event),
