@@ -207,8 +207,16 @@
 		<type>error</type>
 	</rule>
 
-	<!-- Verify that everything in the global namespace is prefixed. -->
-	<rule ref="WordPress.NamingConventions.PrefixAllGlobals"/>
+	<!-- For help in understanding this text_domain property:
+		https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki/Customizable-sniff-properties#internationalization-setting-your-text-domain -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="osec"/>
+			</property>
+		</properties>
+	</rule>
+
 
 	<!-- Validates post type slugs for valid characters, length and reserved keywords. -->
 	<rule ref="WordPress.NamingConventions.ValidPostTypeSlug"/>
