@@ -245,12 +245,19 @@ class AdminPageAddEvent extends OsecBaseClass
          */
         $boxes = apply_filters('osec_admin_edit_event_input_panels_alter', $boxes, $event);
         // Display the final view of the meta box.
+        $box_classes = 'ai1ec-panel ai1ec-panel-default';
         $args = [
-            'boxes' => $boxes,
+            'boxes' => [],
             'nonce' => wp_nonce_field(EventEditing::NONCE_ACTION, EventEditing::NONCE_NAME),
         ];
+        foreach ($boxes as $i => $box) {
+            $args['boxes'][] = [
+                'classes' => $i === 0 ? $box_classes . ' ai1ec-overflow-visible' : $box_classes,
+                'content' => $box,
+            ];
+        }
         ThemeLoader::factory($this->app)
-            ->get_file('add_new_event_meta_box.php', $args, true)
+            ->get_file('add_new_event_meta_box.twig', $args, true)
             ->render();
     }
 
