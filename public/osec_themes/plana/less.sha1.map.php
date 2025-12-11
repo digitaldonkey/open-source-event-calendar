@@ -1,4 +1,6 @@
-<?php return array (
+<?php
+
+return array (
   'variables' =>
   array (
     'agendaDateBackground' => '#f2f2f2',

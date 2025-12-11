@@ -7,7 +7,6 @@
 	<exclude-pattern>/vendor/</exclude-pattern>
     <exclude-pattern>/calendar_block/</exclude-pattern>
 	<exclude-pattern>/hookster_markdown/</exclude-pattern>
-	<exclude-pattern>/public/</exclude-pattern>
 	<exclude-pattern>/cache/</exclude-pattern>
 	<exclude-pattern>/node_modules/</exclude-pattern>
 

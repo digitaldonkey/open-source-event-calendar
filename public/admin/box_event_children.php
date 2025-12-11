@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined('ABSPATH') ) {
+    exit;
+}
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 // Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
 
@@ -30,7 +32,7 @@ global $osec_app;
             <?php esc_html_e('Edit parent:', 'open-source-event-calendar'); ?>
             <a href="<?php echo get_edit_post_link($parent->get('post_id')); ?>"><?php
                 echo apply_filters('the_title', $parent->get('post')->post_title, $parent->get('post_id'));
-                ?></a>
+            ?></a>
         <?php else : /* children */ ?>
             <h4><?php esc_html_e('Modified Events', 'open-source-event-calendar'); ?></h4>
             <ul>
@@ -39,7 +41,7 @@ global $osec_app;
                         <?php esc_html_e('Edit:', 'open-source-event-calendar'); ?>
                         <a href="<?php echo get_edit_post_link($child->get('post_id')); ?>"><?php
                             echo $child->get('post')->post_title;
-                            ?></a>, <?php echo EventTimeView::factory($osec_app)->get_timespan_html($child, 'long'); ?>
+                        ?></a>, <?php echo EventTimeView::factory($osec_app)->get_timespan_html($child, 'long'); ?>
                     </li>
                 <?php endforeach; ?>
             </ul>

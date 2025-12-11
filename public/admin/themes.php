@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined('ABSPATH') ) {
+    exit;
+}
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 // Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
 ?>
@@ -8,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <p>
             <?php printf(
                     /* translators: home_url() */
-                    __('New theme activated. <a href="%s">Visit site</a>', 'open-source-event-calendar'),
-                    esc_url(home_url('/'))
+                __('New theme activated. <a href="%s">Visit site</a>', 'open-source-event-calendar'),
+                esc_url(home_url('/'))
             );?>
         </p>
     </div>
