@@ -34,7 +34,7 @@ class ThemeLoader extends OsecBaseClass
     /**
      * @const string Prefix for theme arguments filter name.
      */
-    public const ARGS_FILTER_PREFIX = 'ai1ec_theme_args_';
+    public const ARGS_FILTER_PREFIX = 'osecc_theme_args_';
 
     /**
      * @var array contains the admin and theme paths.
@@ -191,6 +191,7 @@ class ThemeLoader extends OsecBaseClass
     public function apply_filters_to_args(array $args, string $filename, bool $is_admin): array
     {
         return apply_filters(
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
             self::ARGS_FILTER_PREFIX . $filename,
             $args,
             $is_admin
@@ -292,6 +293,7 @@ class ThemeLoader extends OsecBaseClass
 
             case 'php':
                 $args = apply_filters(
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
                     self::ARGS_FILTER_PREFIX . $filename,
                     $args,
                     $is_admin
@@ -304,7 +306,12 @@ class ThemeLoader extends OsecBaseClass
                 break;
 
             case 'twig':
-                $args = apply_filters(self::ARGS_FILTER_PREFIX . $filename, $args, $is_admin);
+                $args = apply_filters(
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
+                    self::ARGS_FILTER_PREFIX . $filename,
+                    $args,
+                    $is_admin
+                );
 
                 if (null === $paths) {
                     $paths = $is_admin ? $this->paths['admin'] : $this->paths['theme'];

@@ -286,6 +286,7 @@ abstract class AbstractView extends OsecBaseClass
         $event->set_runtime(
             'filtered_title',
             apply_filters(
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                 'the_title',
                 $event->get('post')->post_title,
                 $event->get('post_id'),
@@ -299,6 +300,7 @@ abstract class AbstractView extends OsecBaseClass
             apply_filters(
                 'osec_the_content',
                 apply_filters(
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                     'the_content',
                     $event->get('post')->post_content
                 )

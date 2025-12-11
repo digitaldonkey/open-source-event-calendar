@@ -63,7 +63,7 @@ class AdminThemeList extends WP_List_Table
      **/
     public function prepare_items()
     {
-        global $ct;
+        global $osec_current_theme;
 
         // setting wp_themes to null in case
         // other plugins have changed its value
@@ -71,10 +71,10 @@ class AdminThemeList extends WP_List_Table
 
         // get available themes
         $themes = ThemeFinder::factory($this->app)->filter_themes();
-        $ct     = $this->current_theme_info();
+        $osec_current_theme     = $this->current_theme_info();
 
-        if (isset($ct->name) && isset($themes[$ct->name])) {
-            unset($themes[$ct->name]);
+        if (isset($osec_current_theme->name) && isset($themes[$osec_current_theme->name])) {
+            unset($themes[$osec_current_theme->name]);
         }
 
         // sort themes using strnatcasecmp function
@@ -347,6 +347,7 @@ class AdminThemeList extends WP_List_Table
                                      __('Activate', 'open-source-event-calendar') . '</a>';
 
                     $actions = apply_filters(
+                        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                         'theme_action_links',
                         $actions,
                         $themes[$theme_name]

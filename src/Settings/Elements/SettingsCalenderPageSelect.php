@@ -106,6 +106,7 @@ class SettingsCalenderPageSelect extends SettingsAbstract
             'view'  => __('View', 'open-source-event-calendar'),
             'link'  => get_permalink($post->ID),
             'title' => apply_filters(
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                 'the_title',
                 $post->post_title,
                 $post->ID

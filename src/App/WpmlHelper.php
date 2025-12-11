@@ -391,6 +391,7 @@ class WpmlHelper extends OsecBaseClass
             isset($q_config) &&
             is_array($q_config)
         ) {
+            // phpcs:ignore  WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
             $q_config['language'] = $this->language;
         }
     }

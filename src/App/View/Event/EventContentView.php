@@ -99,6 +99,7 @@ class EventContentView extends OsecBaseClass
                 apply_filters(
                     'osec_the_content',
                     apply_filters(
+                        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                         'the_content',
                         $event->get('post')->post_content
                     )

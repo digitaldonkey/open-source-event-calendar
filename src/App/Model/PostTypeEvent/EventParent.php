@@ -108,6 +108,7 @@ class EventParent extends OsecBaseClass
                 );
                 wp_safe_redirect(
                     apply_filters(
+                        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                         'redirect_post_location',
                         $location,
                         $post_id
@@ -321,6 +322,7 @@ class EventParent extends OsecBaseClass
                         /* translators: Parent event title */
                         __('Edit &#8220;%s&#8221;', 'open-source-event-calendar'),
                         apply_filters(
+                            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                             'the_title',
                             $parent_post->post_title,
                             $parent_post->ID
