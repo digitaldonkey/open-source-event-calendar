@@ -8,6 +8,7 @@ use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventEditing;
 use Osec\App\Model\PostTypeEvent\EventNotFoundException;
 use Osec\App\Model\PostTypeEvent\EventParent;
+use Osec\App\View\Event\EventTimeView;
 use Osec\App\View\RepeatRuleToText;
 use Osec\App\WpmlHelper;
 use Osec\Bootstrap\OsecBaseClass;
@@ -220,14 +221,58 @@ class AdminPageAddEvent extends OsecBaseClass
                     $parent = null;
                 }
             }
-            if ($parent) {
-                $children    = EventParent::factory($this->app)
-                                          ->get_child_event_objects($event->get('post_id'));
-                $args        = compact('parent', 'children');
+            /**
+             * "Reoccurrence Panel" is visible only in:
+             *  - "editied reoccurring events"
+             *     Base recurrence event -> displaying link reference to parent
+             *  - "base events with modified children"
+             *      Modified recurrence events -> Link reference to modified events
+             */
+            $children = EventParent::factory($this->app)->get_child_event_objects($event->get('post_id'));
+
+            if (!empty($parent) || !empty($children)) {
+                $panel_title = $parent ? esc_html__('Base recurrence event', 'open-source-event-calendar') : esc_html__(
+                    'Modified recurrence events',
+                    'open-source-event-calendar'
+                );
+
+                $args = [
+                    'children' => $children,
+                    'panel_title' => $panel_title,
+                    'action' => esc_html__('Edit', 'open-source-event-calendar')
+                ];
+                if ($parent) {
+                    $args['parent'] = [
+                        'view_url' => get_post_permalink($parent->get('post_id')),
+                        'edit_url'       => get_edit_post_link($parent->get('post_id')),
+                        'time' => EventTimeView::factory($this->app)->get_timespan_html($parent, 'long'),
+                        'title'     => apply_filters(
+                            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                            'the_title',
+                            $parent->get('post')->post_title,
+                            $parent->get('post_id')
+                        ),
+                    ];
+                }
+                if ($children) {
+                    $args['children'] = [
+                        'pre_text' => esc_html__('Modified Events', 'open-source-event-calendar'),
+                    ];
+                    foreach ($children as $child) {
+                        $args['children']['items'][] = [
+                            'view_url' => get_post_permalink($child->get('post_id')),
+                            'edit_url' => get_edit_post_link($child->get('post_id')),
+                            'title'    => $child->get('post')->post_title,
+                            'time' => EventTimeView::factory($this->app)->get_timespan_html($child, 'long'),
+                        ];
+                    }
+                }
+
+
                 $args['app'] = $this->app;
 
                 $boxes[] = ThemeLoader::factory($this->app)->get_file(
-                    'box_event_children.php',
+                    'box_event_children.twig',
                     $args,
                     true
                 )->get_content();
