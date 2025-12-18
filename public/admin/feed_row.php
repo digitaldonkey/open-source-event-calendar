@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * Template feed row.
+ */
+
 if ( ! defined('ABSPATH') ) {
     exit;
 }
@@ -116,7 +121,7 @@ if ( ! defined('ABSPATH') ) {
                 <div class="ai1ec-feed-import-timezone"
                      data-state="<?php echo esc_attr($feed_import_timezone ? 1 : 0); ?>">
                     <span class="ai1ec-tooltip-toggle" title="<?php esc_html_e(
-                        'Guesses the time zone of events that have none specified; recommended for Google Calendar feeds',
+                        'Guess the time zone of events that have none specified; recommended for Google Calendar feeds',
                         'open-source-event-calendar'
                     ); ?>">
                         <?php esc_html_e('Assign default time zone to events in UTC', 'open-source-event-calendar');

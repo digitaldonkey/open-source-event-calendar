@@ -45,7 +45,12 @@ if ( ! defined('ABSPATH') ) {
         <p class="theme-description"><?php echo $ct->description; ?></p>
         <div class="theme-options">
             <?php if ($ct->tags) : ?>
-                <p><?php esc_html_e('Tags:', 'open-source-event-calendar'); ?><?php echo implode(', ', $ct->tags); ?></p>
+                <p>
+                    <?php
+                        esc_html_e('Tags:', 'open-source-event-calendar');
+                        echo implode(', ', $ct->tags);
+                    ?>
+                </p>
             <?php endif; ?>
         </div>
         <?php theme_update_available($ct); ?>

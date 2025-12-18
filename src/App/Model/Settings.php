@@ -341,10 +341,6 @@ class Settings extends OsecBaseInitialized
                 'type'    => 'array',
                 'default' => [],
             ],
-            'show_tracking_popup'            => [
-                'type'    => 'deprecated',
-                'default' => true,
-            ],
             'calendar_page_id'               => [
                 'type'     => 'mixed',
                 'renderer' => [
@@ -776,11 +772,6 @@ class Settings extends OsecBaseInitialized
                         'open-source-event-calendar'
                     ),
                 ],
-                'default'  => false,
-            ],
-            'show_publish_button'                    => [
-                'type'     => 'deprecated',
-                'renderer' => null,
                 'default'  => false,
             ],
             'shortcodes'                             => [
