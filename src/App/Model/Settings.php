@@ -63,11 +63,13 @@ class Settings extends OsecBaseInitialized
     public function getOptionsList()
     {
         $allSettings = [];
-        foreach ($this->options as $name => $option) {
-            $allSettings[$name] = array_merge(['key' => $name], $this->defaultOptions[$name], $option);
+        foreach ($this->defaultOptions as $name => $option) {
+            $allSettings[$name] = $option;
+            if (isset($this->options[$name])) {
+                $allSettings[$name]['current_value'] = $this->options[$name]['value'];
+            }
         }
         ksort($allSettings);
-
         return $allSettings;
     }
 

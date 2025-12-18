@@ -1,0 +1,49 @@
+<div class="wrap">
+    <h2>Changeable and hidden options</h2>
+    <p>The options and descriptions are ´distributed´ into DB among multiple wp_options rows.</p>
+    <h3>Options can be edited in some tab of the settings page.</h3>
+    {% for key, value in user_options %}
+        <strong>{{ key }}</strong><br />
+        <div style="padding-left: 1em; margin-bottom: 1em">
+            {% for key,value in value %}
+                {% if value is iterable %}
+                    {{ key }}
+                    <div style="padding-left: 1em">
+                    {% for key,value in value %}
+                        {{ key }} => <span style="white-space: pre;">{{ value|default("false")}}</span><br />{% endfor %}
+                    </div>
+                {% else %}
+                    {{ key }} => <span style="white-space: pre;">{{ value|default("false")}}</span><br />
+                {% endif %}
+            {% endfor %}
+        </div>
+
+    {% endfor %}
+
+    <h2>"Hidden" settings</h2>
+    {% for setting in other_settings  %}
+        <strong>{{ setting.name }}</strong><br />
+        <div style="padding-left: 1em; margin-bottom: 1em">
+            {% if setting.options is iterable %}
+                <div style="padding-left: 1em">
+                    {% for key,value in setting.options %}
+                        {% if value is iterable %}
+                            {{ key }}
+                            <div style="padding-left: 1em">
+                                {% for key,value in value %}
+                                    {{ key }} => <span style="white-space: pre;">{{ value|default("false")}}</span><br />
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            value => <span style="white-space: pre;">{{ value|default("false")}}</span><br />
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                value => <span style="white-space: pre;">{{ setting.options }}</span><br /><br />
+            {% endif %}
+
+        </div>
+    {% endfor %}
+    <br class="clear"/>
+</div>
