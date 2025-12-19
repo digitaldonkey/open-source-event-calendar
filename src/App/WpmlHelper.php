@@ -114,18 +114,13 @@ class WpmlHelper extends OsecBaseClass
         $page_id      = (int)$page_id;
         $translations = (array)$sitepress->get_element_translations($page_id);
         if (empty($translations)) {
-            $parent_id = $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT trid FROM {$wpdb->prefix}icl_translations
-                     WHERE element_type = 'post_page'
-                     AND element_id = %d",
-                    $page_id
-                )
-            );
-            if ($parent_id) {
-                $translations += (array)$sitepress->get_element_translations(
-                    $parent_id
-                );
+            // TODO
+            //   This is untested. Please remove comment when you can it verify working.
+            //
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+            $trid = apply_filters('wpml_element_trid', null, $page_id, 'post_' . OSEC_POST_TYPE);
+            if ($trid) {
+                $translations += (array)$sitepress->get_element_translations($trid);
             }
         }
         $output = [];
