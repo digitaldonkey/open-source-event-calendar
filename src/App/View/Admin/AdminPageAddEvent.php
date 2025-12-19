@@ -111,29 +111,55 @@ class AdminPageAddEvent extends OsecBaseClass
         // ===============================
         // = Display event time and date =
         // ===============================
+        $parent_event_id = EventParent::factory($this->app)->event_parent($event->get('post_id')) ?? null;
+        $is_repeating_event = !empty($event->get('recurrence_rules'));
+        $has_excluded_events = !empty($event->get('exception_rules'));
         $args = [
-            'all_day_event'   => $event->is_allday() ? 'checked' : '',
-            'instant_event'   => $event->is_instant() ? 'checked' : '',
-            'start'           => $event->get('start'),
-            'end'             => $event->get('end'),
-            'repeating_event' => !empty($event->get('recurrence_rules')),
-            'rrule'           => $event->get('recurrence_rules'),
-            'rrule_text'      => $rrule_text,
-            'exclude_event'   => !empty($event->get('exception_rules')),
-            'exrule'          => $event->get('exception_rules'),
-            'exrule_text'     => $exrule_text,
-            'timezone'        => $timezone,
-            // Currently selected TZ for option value.
-            'timezone_string' => $timezone_string,
-            'timezone_name'   => $event->get('timezone_name'),
-            'exdate'          => $event->get('exception_dates'),
-            'parent_event_id' => EventParent::factory($this->app)->event_parent($event->get('post_id')) ?? null,
+            'pane_title' => esc_html__('Event date and time', 'open-source-event-calendar'),
             'instance_id'     => $instance_id,
             'timezones_list'  => Timezones::factory($this->app)->get_timezones(true),
+            'all_day_event' => [
+                'checked' => $event->is_allday() ? 'checked' : '',
+                'label' => esc_html__('All-day event', 'open-source-event-calendar')
+            ],
+            'instant_event' => [
+                'checked' => $event->is_instant() ? 'checked' : '',
+                'label' => esc_html__('No end time', 'open-source-event-calendar')
+            ],
+            'start_date' => [
+                'label' => esc_html__('Start date / time', 'open-source-event-calendar'),
+                'input_value' => $event->get('start')->format_to_javascript(true),
+            ],
+            'end_date' => [
+                'label' => esc_html__('End date / time', 'open-source-event-calendar'),
+                'input_value' => $event->get('end')->format_to_javascript(true),
+            ],
+            'timezone' => [
+                'label' => esc_html__('Time zone', 'open-source-event-calendar'),
+                'empty_text' => esc_html__('Choose your time zone', 'open-source-event-calendar'),
+                'timezones_list'  => Timezones::factory($this->app)->get_timezones(true),
+                'current_timezone' => $event->get('timezone_name'),
+            ],
+            'show_recurrence_and_excludes' => !($instance_id || $parent_event_id),
+            'recurrence' => [
+                'checked' => !empty($event->get('recurrence_rules')) ? 'checked' : '',
+                'rrule_value' => esc_attr($event->get('recurrence_rules')),
+                'label' => esc_html__('Repeat', 'open-source-event-calendar') . ($is_repeating_event ? ':' : ' ... '),
+                'rrule_text' => esc_html($rrule_text),
+            ],
+            'excludes' => [
+                'checked' => !empty($event->get('exception_rules')) ? 'checked="checked"' : '',
+                'disabled' => $is_repeating_event ? '' : ' disabled="disabled"',
+                'exrule_value' => $event->get('exception_rules'),
+                'label' => esc_html__('Exclude', 'open-source-event-calendar') . ($has_excluded_events ? ':' : '...' ),
+                'exrule_text' => esc_html($exrule_text),
+                'exrule_infotext' => esc_html__('Choose a rule for exclusion', 'open-source-event-calendar')
+            ]
         ];
 
+
         $boxes[] = ThemeLoader::factory($this->app)
-            ->get_file('box_time_and_date.php', $args, true)
+            ->get_file('box_time_and_date.twig', $args, true)
             ->get_content();
 
         // =================================================
