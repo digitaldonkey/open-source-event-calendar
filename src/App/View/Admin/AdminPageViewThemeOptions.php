@@ -39,32 +39,50 @@ class AdminPageViewThemeOptions extends AdminPageAbstract
      */
     public function display_page(): void
     {
-        $settings = $this->app->settings->getOptionsList();
         $args     = [
-            'all_options' => [
+            'user_options' => $this->app->settings->getOptionsList(),
+            'other_settings' => [
                 [
-                    'title'   => 'ai1ec_settings (registry->settings))',
-                    'options' => $settings,
-                    'count'   => count($settings),
-                ],
-                [
-                    'title'   => 'osec_scheduler_hooks (_registry->options->get(\'osec_scheduler_hooks\'))',
+                    'name'   => 'osec_scheduler_hooks',
                     'options' => $this->app->options->get('osec_scheduler_hooks'),
                 ],
                 [
-                    'title'   => 'osec_current_theme (registry->_registry->options->get(\'osec_current_theme\'))',
+                    'name'   => 'osec_current_theme',
                     'options' => $this->app->options->get('osec_current_theme'),
                 ],
                 [
-                    'title'   => 'osec_robots_txt (_registry->options->get(\'osec_robots_txt\'))',
+                    'name'   => 'osec_robots_txt',
                     'options' => $this->app->options->get('osec_robots_txt'),
                 ],
-
+                [
+                    'name'   => 'osec_invalidate_css_cache',
+                    'options' => $this->app->options->get('osec_invalidate_css_cache'),
+                ],
+                [
+                    'name'   => 'calendar_base_page',
+                    'options' => $this->app->options->get('calendar_base_page'),
+                ],
+                [
+                    'name'   => 'permalink_structure',
+                    'options' => $this->app->options->get('permalink_structure'),
+                ],
+                [
+                    'name'   => 'permalinks_enabled',
+                    'options' => $this->app->options->get('permalinks_enabled'),
+                ],
+                [
+                    'name'   => 'osec_force_flush_rewrite_rules',
+                    'options' => $this->app->options->get('osec_force_flush_rewrite_rules'),
+                ],
+                [
+                    'name'   => 'osec_admin_notifications',
+                    'options' => $this->app->options->get('osec_admin_notifications'),
+                ],
             ],
         ];
 
         ThemeLoader::factory($this->app)
-                   ->get_file('all-options.php', $args, true)
+                   ->get_file('all-options.twig', $args, true)
                    ->render();
     }
 

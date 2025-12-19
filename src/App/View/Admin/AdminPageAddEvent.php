@@ -8,6 +8,7 @@ use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventEditing;
 use Osec\App\Model\PostTypeEvent\EventNotFoundException;
 use Osec\App\Model\PostTypeEvent\EventParent;
+use Osec\App\View\Event\EventTimeView;
 use Osec\App\View\RepeatRuleToText;
 use Osec\App\WpmlHelper;
 use Osec\Bootstrap\OsecBaseClass;
@@ -110,29 +111,55 @@ class AdminPageAddEvent extends OsecBaseClass
         // ===============================
         // = Display event time and date =
         // ===============================
+        $parent_event_id = EventParent::factory($this->app)->event_parent($event->get('post_id')) ?? null;
+        $is_repeating_event = !empty($event->get('recurrence_rules'));
+        $has_excluded_events = !empty($event->get('exception_rules'));
         $args = [
-            'all_day_event'   => $event->is_allday() ? 'checked' : '',
-            'instant_event'   => $event->is_instant() ? 'checked' : '',
-            'start'           => $event->get('start'),
-            'end'             => $event->get('end'),
-            'repeating_event' => !empty($event->get('recurrence_rules')),
-            'rrule'           => $event->get('recurrence_rules'),
-            'rrule_text'      => $rrule_text,
-            'exclude_event'   => !empty($event->get('exception_rules')),
-            'exrule'          => $event->get('exception_rules'),
-            'exrule_text'     => $exrule_text,
-            'timezone'        => $timezone,
-            // Currently selected TZ for option value.
-            'timezone_string' => $timezone_string,
-            'timezone_name'   => $event->get('timezone_name'),
-            'exdate'          => $event->get('exception_dates'),
-            'parent_event_id' => EventParent::factory($this->app)->event_parent($event->get('post_id')) ?? null,
+            'pane_title' => esc_html__('Event date and time', 'open-source-event-calendar'),
             'instance_id'     => $instance_id,
             'timezones_list'  => Timezones::factory($this->app)->get_timezones(true),
+            'all_day_event' => [
+                'checked' => $event->is_allday() ? 'checked' : '',
+                'label' => esc_html__('All-day event', 'open-source-event-calendar')
+            ],
+            'instant_event' => [
+                'checked' => $event->is_instant() ? 'checked' : '',
+                'label' => esc_html__('No end time', 'open-source-event-calendar')
+            ],
+            'start_date' => [
+                'label' => esc_html__('Start date / time', 'open-source-event-calendar'),
+                'input_value' => $event->get('start')->format_to_javascript(true),
+            ],
+            'end_date' => [
+                'label' => esc_html__('End date / time', 'open-source-event-calendar'),
+                'input_value' => $event->get('end')->format_to_javascript(true),
+            ],
+            'timezone' => [
+                'label' => esc_html__('Time zone', 'open-source-event-calendar'),
+                'empty_text' => esc_html__('Choose your time zone', 'open-source-event-calendar'),
+                'timezones_list'  => Timezones::factory($this->app)->get_timezones(true),
+                'current_timezone' => $event->get('timezone_name'),
+            ],
+            'show_recurrence_and_excludes' => !($instance_id || $parent_event_id),
+            'recurrence' => [
+                'checked' => !empty($event->get('recurrence_rules')) ? 'checked' : '',
+                'rrule_value' => esc_attr($event->get('recurrence_rules')),
+                'label' => esc_html__('Repeat', 'open-source-event-calendar') . ($is_repeating_event ? ':' : ' ... '),
+                'rrule_text' => esc_html($rrule_text),
+            ],
+            'excludes' => [
+                'checked' => !empty($event->get('exception_rules')) ? 'checked="checked"' : '',
+                'disabled' => $is_repeating_event ? '' : ' disabled="disabled"',
+                'exrule_value' => $event->get('exception_rules'),
+                'label' => esc_html__('Exclude', 'open-source-event-calendar') . ($has_excluded_events ? ':' : '...' ),
+                'exrule_text' => esc_html($exrule_text),
+                'exrule_infotext' => esc_html__('Choose a rule for exclusion', 'open-source-event-calendar')
+            ]
         ];
 
+
         $boxes[] = ThemeLoader::factory($this->app)
-            ->get_file('box_time_and_date.php', $args, true)
+            ->get_file('box_time_and_date.twig', $args, true)
             ->get_content();
 
         // =================================================
@@ -220,14 +247,58 @@ class AdminPageAddEvent extends OsecBaseClass
                     $parent = null;
                 }
             }
-            if ($parent) {
-                $children    = EventParent::factory($this->app)
-                                          ->get_child_event_objects($event->get('post_id'));
-                $args        = compact('parent', 'children');
+            /**
+             * "Reoccurrence Panel" is visible only in:
+             *  - "editied reoccurring events"
+             *     Base recurrence event -> displaying link reference to parent
+             *  - "base events with modified children"
+             *      Modified recurrence events -> Link reference to modified events
+             */
+            $children = EventParent::factory($this->app)->get_child_event_objects($event->get('post_id'));
+
+            if (!empty($parent) || !empty($children)) {
+                $panel_title = $parent ? esc_html__('Base recurrence event', 'open-source-event-calendar') : esc_html__(
+                    'Modified recurrence events',
+                    'open-source-event-calendar'
+                );
+
+                $args = [
+                    'children' => $children,
+                    'panel_title' => $panel_title,
+                    'action' => esc_html__('Edit', 'open-source-event-calendar')
+                ];
+                if ($parent) {
+                    $args['parent'] = [
+                        'view_url' => get_post_permalink($parent->get('post_id')),
+                        'edit_url'       => get_edit_post_link($parent->get('post_id')),
+                        'time' => EventTimeView::factory($this->app)->get_timespan_html($parent, 'long'),
+                        'title'     => apply_filters(
+                            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                            'the_title',
+                            $parent->get('post')->post_title,
+                            $parent->get('post_id')
+                        ),
+                    ];
+                }
+                if ($children) {
+                    $args['children'] = [
+                        'pre_text' => esc_html__('Modified Events', 'open-source-event-calendar'),
+                    ];
+                    foreach ($children as $child) {
+                        $args['children']['items'][] = [
+                            'view_url' => get_post_permalink($child->get('post_id')),
+                            'edit_url' => get_edit_post_link($child->get('post_id')),
+                            'title'    => $child->get('post')->post_title,
+                            'time' => EventTimeView::factory($this->app)->get_timespan_html($child, 'long'),
+                        ];
+                    }
+                }
+
+
                 $args['app'] = $this->app;
 
                 $boxes[] = ThemeLoader::factory($this->app)->get_file(
-                    'box_event_children.php',
+                    'box_event_children.twig',
                     $args,
                     true
                 )->get_content();
@@ -245,12 +316,19 @@ class AdminPageAddEvent extends OsecBaseClass
          */
         $boxes = apply_filters('osec_admin_edit_event_input_panels_alter', $boxes, $event);
         // Display the final view of the meta box.
+        $box_classes = 'ai1ec-panel ai1ec-panel-default';
         $args = [
-            'boxes' => $boxes,
+            'boxes' => [],
             'nonce' => wp_nonce_field(EventEditing::NONCE_ACTION, EventEditing::NONCE_NAME),
         ];
+        foreach ($boxes as $i => $box) {
+            $args['boxes'][] = [
+                'classes' => $i === 0 ? $box_classes . ' ai1ec-overflow-visible' : $box_classes,
+                'content' => $box,
+            ];
+        }
         ThemeLoader::factory($this->app)
-            ->get_file('add_new_event_meta_box.php', $args, true)
+            ->get_file('add_new_event_meta_box.twig', $args, true)
             ->render();
     }
 

@@ -125,6 +125,7 @@ class ThemeFinder extends OsecBaseClass
             // phpcs:ignore PHPCompatibility.Variables.ForbiddenGlobalVariableVariable.NonBareVariableFound
             global ${$key};
             $variables_map[$key] = ${$key};
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
             ${$key}              = $current_value;
         }
         search_theme_directories(true);

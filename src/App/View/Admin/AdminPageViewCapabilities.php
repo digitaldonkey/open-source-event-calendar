@@ -49,7 +49,10 @@ class AdminPageViewCapabilities extends AdminPageAbstract
             <h4>Capabilities map</h4>
             <table>
                 <?php foreach ($eventType->cap as $cap => $value) {
-                    echo esc_xml('<tr><td>' . $cap . '</td><td><strong>' . $value . '</strong></td></tr>');
+                    echo wp_kses(
+                        '<tr><td>' . $cap . '</td><td><strong>' . $value . '</strong></td></tr>',
+                        $this->app->kses->allowed_html_backend()
+                    );
                 }?>
             </table>
             <h2>Terms and tags</h2>

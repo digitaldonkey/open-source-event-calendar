@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined('ABSPATH') ) {
+    exit;
+}
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 // Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
 ?>
@@ -61,7 +63,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <label for="osec_add_tag_categories">
             <input type="checkbox" name="osec_add_tag_categories"
                    id="osec_add_tag_categories" value="1">
-            <?php esc_html_e('Import any tags/categories provided by feed, in addition those selected above', 'open-source-event-calendar'); ?>
+            <?php esc_html_e(
+                'Import any tags/categories provided by feed, in addition those selected above',
+                'open-source-event-calendar'
+            ); ?>
         </label>
     </div>
     <?php
@@ -71,7 +76,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <label for="osec_keep_old_events">
             <input type="checkbox" name="osec_keep_old_events"
                    id="osec_keep_old_events" value="1">
-            <?php esc_html_e('On refresh, preserve previously imported events that are missing from the feed', 'open-source-event-calendar'); ?>
+            <?php esc_html_e(
+                'On refresh, preserve previously imported events that are missing from the feed',
+                'open-source-event-calendar'
+            ); ?>
         </label>
     </div>
     <div class="ai1ec-feed-import-timezone">

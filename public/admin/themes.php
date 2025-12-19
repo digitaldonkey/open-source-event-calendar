@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined('ABSPATH') ) {
+    exit;
+}
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 // Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
 ?>
@@ -8,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <p>
             <?php printf(
                     /* translators: home_url() */
-                    __('New theme activated. <a href="%s">Visit site</a>', 'open-source-event-calendar'),
-                    esc_url(home_url('/'))
+                __('New theme activated. <a href="%s">Visit site</a>', 'open-source-event-calendar'),
+                esc_url(home_url('/'))
             );?>
         </p>
     </div>
@@ -43,7 +45,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
         <p class="theme-description"><?php echo $ct->description; ?></p>
         <div class="theme-options">
             <?php if ($ct->tags) : ?>
-                <p><?php esc_html_e('Tags:', 'open-source-event-calendar'); ?><?php echo implode(', ', $ct->tags); ?></p>
+                <p>
+                    <?php
+                        esc_html_e('Tags:', 'open-source-event-calendar');
+                        echo implode(', ', $ct->tags);
+                    ?>
+                </p>
             <?php endif; ?>
         </div>
         <?php theme_update_available($ct); ?>

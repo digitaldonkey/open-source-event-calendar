@@ -101,6 +101,7 @@ class EventPostView extends OsecBaseClass
 
         $text =  wp_strip_all_tags(
             apply_filters(
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                 'the_excerpt',
                 $raw_excerpt
             )
@@ -109,8 +110,16 @@ class EventPostView extends OsecBaseClass
         $text = str_replace(']]>', ']]&gt;', $text);
         $text = wp_strip_all_tags($text);
 
-        $excerpt_length = apply_filters('excerpt_length', $length);
-        $excerpt_more   = apply_filters('excerpt_more', $more);
+        $excerpt_length = apply_filters(
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+            'excerpt_length',
+            $length
+        );
+        $excerpt_more   = apply_filters(
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+            'excerpt_more',
+            $more
+        );
         $words          = preg_split(
             '/\s+/',
             $text,
@@ -124,6 +133,11 @@ class EventPostView extends OsecBaseClass
         } else {
             $text = implode(' ', $words);
         }
-        return apply_filters('wp_trim_excerpt', $text, $raw_excerpt);
+        return apply_filters(
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+            'wp_trim_excerpt',
+            $text,
+            $raw_excerpt
+        );
     }
 }

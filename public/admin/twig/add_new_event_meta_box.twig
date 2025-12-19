@@ -1,0 +1,8 @@
+<div class="timely ai1ec-panel-group ai1ec-form-inline" id="osec-add-new-event-accordion">
+    {{ nonce|raw }}
+    {% for box in boxes %}
+        <div class="{{ box.classes }}">
+            {{ box.content|raw }}
+        </div>
+    {% endfor %}
+</div>

@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined('ABSPATH') ) {
+    exit;
+}
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 // Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
 ?>
@@ -27,10 +29,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                                name="osec_cost"
                                class="ai1ec-form-control"
                                id="osec_cost" <?php
-                               if ( ! empty($is_free)) {
-                                   echo 'class="ai1ec-hidden" ';
-                               }
-                               ?>value="<?php echo esc_attr($cost); ?>">
+                                if ( ! empty($is_free)) {
+                                    echo 'class="ai1ec-hidden" ';
+                                }
+                                ?>value="<?php echo esc_attr($cost); ?>">
                         <label for="osec_is_free_event">
                             <input class="checkbox"
                                    type="checkbox"
@@ -47,7 +49,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                             echo ( ! empty($is_free))
                                 ? esc_html__('Registration URL:', 'open-source-event-calendar')
                                 : esc_html__('Buy Tickets URL:', 'open-source-event-calendar');
-                            ?></label>
+                        ?></label>
                     </td>
                     <td>
                         <input type="text" name="osec_ticket_url" id="osec_ticket_url"

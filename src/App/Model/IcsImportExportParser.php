@@ -861,7 +861,11 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $e->setSummary(
             $this->sanitizeValue(
                 html_entity_decode(
-                    apply_filters('the_title', $event->get('post')->post_title),
+                    apply_filters(
+                        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                        'the_title',
+                        $event->get('post')->post_title
+                    ),
                     ENT_QUOTES,
                     'UTF-8'
                 )
@@ -871,6 +875,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $content = apply_filters(
             'osec_the_content',
             apply_filters(
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                 'the_content',
                 $event->get('post')->post_content
             )

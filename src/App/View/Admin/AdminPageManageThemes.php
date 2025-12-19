@@ -21,7 +21,7 @@ class AdminPageManageThemes extends AdminPageAbstract
 
     public function display_page(): void
     {
-        global $ct;
+        global $osec_current_theme;
         // phpcs:ignore WordPress.Security.NonceVerification
         $activated = isset($_GET['activated']) ? true : false;
         $deleted   = false;
@@ -32,7 +32,7 @@ class AdminPageManageThemes extends AdminPageAbstract
         $args = [
             'activated'     => $activated,
             'deleted'       => $deleted,
-            'ct'            => $ct,
+            'ct'            => $osec_current_theme,
             'wp_list_table' => $_list_table,
             'page_title'    => __(
                 'Open Source Event Calendar: Themes',

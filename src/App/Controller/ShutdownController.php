@@ -69,6 +69,7 @@ class ShutdownController extends OsecBaseClass
                 if (isset($GLOBALS[$name])) {
                     $restore[$name] = $GLOBALS[$name];
                 }
+                // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
                 $GLOBALS[$name] = $this->restorables[$name];
             }
         }

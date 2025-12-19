@@ -224,10 +224,21 @@ class EventSingleView extends OsecBaseClass
          */
         $theContent = apply_filters(
             'osec_the_content',
-            wpautop(apply_filters('the_content', $event->get('post')->post_content))
+            wpautop(
+                apply_filters(
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                    'the_content',
+                    $event->get('post')->post_content
+                )
+            )
         );
         $args       = [
-            'title'         => apply_filters('the_title', $event->get('post')->post_title, $event->get('post_id')),
+            'title'         => apply_filters(
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                'the_title',
+                $event->get('post')->post_title,
+                $event->get('post_id')
+            ),
             'event_details' => $this->get_content($event),
             'content'       => $theContent,
             'footer'        => $footer,

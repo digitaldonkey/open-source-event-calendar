@@ -63,11 +63,13 @@ class Settings extends OsecBaseInitialized
     public function getOptionsList()
     {
         $allSettings = [];
-        foreach ($this->options as $name => $option) {
-            $allSettings[$name] = array_merge(['key' => $name], $this->defaultOptions[$name], $option);
+        foreach ($this->defaultOptions as $name => $option) {
+            $allSettings[$name] = $option;
+            if (isset($this->options[$name])) {
+                $allSettings[$name]['current_value'] = $this->options[$name]['value'];
+            }
         }
         ksort($allSettings);
-
         return $allSettings;
     }
 
@@ -338,10 +340,6 @@ class Settings extends OsecBaseInitialized
             'plugins_options'                => [
                 'type'    => 'array',
                 'default' => [],
-            ],
-            'show_tracking_popup'            => [
-                'type'    => 'deprecated',
-                'default' => true,
             ],
             'calendar_page_id'               => [
                 'type'     => 'mixed',
@@ -774,11 +772,6 @@ class Settings extends OsecBaseInitialized
                         'open-source-event-calendar'
                     ),
                 ],
-                'default'  => false,
-            ],
-            'show_publish_button'                    => [
-                'type'     => 'deprecated',
-                'renderer' => null,
                 'default'  => false,
             ],
             'shortcodes'                             => [

@@ -97,6 +97,7 @@ class EditPostActions extends OsecBaseClass
         }
 
         return apply_filters(
+             // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
             'duplicate_post_get_clone_post_link',
             wp_nonce_url(
                 admin_url('admin.php' . $action),

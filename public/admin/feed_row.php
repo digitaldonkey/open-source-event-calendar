@@ -1,5 +1,12 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+
+/**
+ * Template feed row.
+ */
+
+if ( ! defined('ABSPATH') ) {
+    exit;
+}
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 // Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
 ?>
@@ -56,35 +63,35 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                          data-state="<?php echo esc_attr($comments_enabled ? 1 : 0); ?>">
                         <?php esc_html_e('Allow comments', 'open-source-event-calendar'); ?>:
                         <strong><?php
-                            if ($comments_enabled) {
-                                esc_html_e('Yes', 'open-source-event-calendar');
-                            } else {
-                                esc_html_e('No', 'open-source-event-calendar');
-                            }
-                            ?></strong>
+                        if ($comments_enabled) {
+                            esc_html_e('Yes', 'open-source-event-calendar');
+                        } else {
+                            esc_html_e('No', 'open-source-event-calendar');
+                        }
+                        ?></strong>
                     </div>
                     <div class="ai1ec-feed-map-display-enabled"
                          data-state="<?php echo esc_attr($map_display_enabled ? 1 : 0); ?>">
                         <?php esc_html_e('Show map', 'open-source-event-calendar'); ?>:
                         <strong><?php
-                            if ($map_display_enabled) {
-                                esc_html_e('Yes', 'open-source-event-calendar');
-                            } else {
-                                esc_html_e('No', 'open-source-event-calendar');
-                            }
-                            ?></strong>
+                        if ($map_display_enabled) {
+                            esc_html_e('Yes', 'open-source-event-calendar');
+                        } else {
+                            esc_html_e('No', 'open-source-event-calendar');
+                        }
+                        ?></strong>
                     </div>
                 </div>
                 <div class="ai1ec-feed-keep-tags-categories"
                      data-state="<?php echo esc_attr($keep_tags_categories ? 1 : 0); ?>">
                     <?php esc_html_e('Keep original events categories and tags', 'open-source-event-calendar'); ?>:
                     <strong><?php
-                        if ($keep_tags_categories) {
-                            esc_html_e('Yes', 'open-source-event-calendar');
-                        } else {
-                            esc_html_e('No', 'open-source-event-calendar');
-                        }
-                        ?></strong>
+                    if ($keep_tags_categories) {
+                        esc_html_e('Yes', 'open-source-event-calendar');
+                    } else {
+                        esc_html_e('No', 'open-source-event-calendar');
+                    }
+                    ?></strong>
                 </div>
                 <?php
                 /**
@@ -104,27 +111,27 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                         'open-source-event-calendar'
                     ); ?>:
                     <strong><?php
-                        if ($keep_old_events) {
-                            esc_html_e('Yes', 'open-source-event-calendar');
-                        } else {
-                            esc_html_e('No', 'open-source-event-calendar');
-                        }
-                        ?></strong>
+                    if ($keep_old_events) {
+                        esc_html_e('Yes', 'open-source-event-calendar');
+                    } else {
+                        esc_html_e('No', 'open-source-event-calendar');
+                    }
+                    ?></strong>
                 </div>
                 <div class="ai1ec-feed-import-timezone"
                      data-state="<?php echo esc_attr($feed_import_timezone ? 1 : 0); ?>">
                     <span class="ai1ec-tooltip-toggle" title="<?php esc_html_e(
-                        'Guesses the time zone of events that have none specified; recommended for Google Calendar feeds',
+                        'Guess the time zone of events that have none specified; recommended for Google Calendar feeds',
                         'open-source-event-calendar'
                     ); ?>">
                         <?php esc_html_e('Assign default time zone to events in UTC', 'open-source-event-calendar');
                         ?>:</span>
                     <strong><?php
-                        if ($feed_import_timezone) {
-                            esc_html_e('Yes', 'open-source-event-calendar');
-                        } else {
-                            esc_html_e('No', 'open-source-event-calendar');
-                        } ?>
+                    if ($feed_import_timezone) {
+                        esc_html_e('Yes', 'open-source-event-calendar');
+                    } else {
+                        esc_html_e('No', 'open-source-event-calendar');
+                    } ?>
                     </strong>
                 </div>
                 <?php

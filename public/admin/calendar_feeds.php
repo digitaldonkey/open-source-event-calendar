@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined('ABSPATH') ) {
+    exit;
+}
 // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 // Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
 ?>
@@ -28,10 +30,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
                     ?>
                 </div>
                 <div class="post-box-container column-2-ai1ec right-side timely"><?php do_meta_boxes(
-                        $settings_page,
-                        'right',
-                        null
-                    ); ?></div>
+                    $settings_page,
+                    'right',
+                    null
+                ); ?></div>
             </div>
         </form>
 
