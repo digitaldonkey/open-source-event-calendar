@@ -151,6 +151,12 @@ export default function OsecBigCal(props) {
 
 				const path = addQueryArgs( url, currenttRange );
 				const fetched = await apiFetch( { path } );
+
+				debug({
+					path,
+					fetched
+				}, 'AFTER FETCH MISSING RANGE')
+
 				const newEvents = unixToJsDates(fetched.events);
 				setEvents(events => [...events, ...newEvents]);
 				dateCache.addRequest(newEvents)

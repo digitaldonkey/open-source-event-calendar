@@ -26,22 +26,6 @@ class RestControllerSettings extends OsecBaseInitialized
                     }
                 ],
             );
-
-            // TODO RECHECK PERMISSIONS.
-
-            register_rest_route(
-                'osec/v1',
-                '/days',
-                [
-                    'methods'             => 'GET',
-                    'callback'            => function (WP_REST_Request $request) use ($app) {
-                        return RestControllerSettings::factory($app)->getSettings($request);
-                    },
-                    'permission_callback' =>  function () {
-                        return current_user_can('read');
-                    }
-                ],
-            );
         });
     }
 
