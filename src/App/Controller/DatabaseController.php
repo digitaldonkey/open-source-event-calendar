@@ -70,7 +70,7 @@ class DatabaseController extends OsecBaseClass
         $this->queryProfile($sql_query);
         // All queries are all prepared using $this->prepare.
         // Exception: if build with constants.
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $result = $this->wpdb->query($sql_query);
         $this->queryProfile($result);
 
@@ -168,7 +168,7 @@ class DatabaseController extends OsecBaseClass
         $this->queryProfile($query);
         // All queries are all prepared using $this->prepare.
         // Exception: if build with constants.
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $result = $this->wpdb->get_col($query, $col);
         $this->queryProfile(count($result));
 
@@ -251,7 +251,7 @@ class DatabaseController extends OsecBaseClass
         $this->queryProfile($query);
         // All queries are all prepared using $this->prepare.
         // Exception: if build with constants.
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $result = $this->wpdb->get_var($query, $col, $row);
         $this->queryProfile(null !== $result);
         return $result;
@@ -276,7 +276,7 @@ class DatabaseController extends OsecBaseClass
         $this->queryProfile($query);
         // Queries are all prepared using $this->prepare.
         // Some are ensured to be plain by other means.
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $result = $this->wpdb->get_row($query, $output, $row);
         $this->queryProfile(null !== $result);
         return $result;
@@ -422,7 +422,7 @@ class DatabaseController extends OsecBaseClass
         $this->queryProfile($query);
         // Queries are all prepared using $this->prepare.
         // Some are ensured to be plain by other means or consist of static variables.
-        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $result = $this->wpdb->get_results($query, $output);
         $this->queryProfile(count($result));
 
