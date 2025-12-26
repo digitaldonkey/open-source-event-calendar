@@ -6,3 +6,4 @@ public/osec_themes/vortex/less/build-3rdparty-less.sh
 public/admin/less/build-css.bat
 calendar_block/.editorconfig
 vendor/wikimedia/less.php/bin/
+vendor/bin/
