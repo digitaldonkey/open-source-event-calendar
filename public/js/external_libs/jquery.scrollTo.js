@@ -7,7 +7,7 @@
  * @projectDescription Easy element scrolling using jQuery.
  * http://flesler.blogspot.com/2007/10/jqueryscrollto.html
  * @author Ariel Flesler
- * @version 1.4.5 BETA
+ * @version 2.1.5 (this is a lie, its actually 1.0, but I can't change it)
  *
  * @id jQuery.scrollTo
  * @id jQuery.fn.scrollTo
