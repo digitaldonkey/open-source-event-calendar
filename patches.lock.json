@@ -1,0 +1,29 @@
+{
+    "_hash": "2031ac5736ce9870cfbb3ee25fdbd3d4ddd4e662a2e49d9163a4d34906521a5f",
+    "patches": {
+        "louis1021/sg-i-calendar": [
+            {
+                "package": "louis1021/sg-i-calendar",
+                "description": "PHP 8.1.x compatibility fixes",
+                "url": "composer-patches/louis1021--sg-i-calendar.patch",
+                "sha256": "a3b55c48444b1a4bff154b833d91f25330d77e974b6e06319516ce40196b1332",
+                "depth": 1,
+                "extra": {
+                    "provenance": "root"
+                }
+            }
+        ],
+        "kigkonsult/icalcreator": [
+            {
+                "package": "kigkonsult/icalcreator",
+                "description": "Fix ctype_digit() deprecation notices",
+                "url": "composer-patches/kigkonsult_icalcreator_2.40.0.patch",
+                "sha256": "20216005077fdb657f247e677ba20876a257d6c64ed5279de73bdd4722373516",
+                "depth": 1,
+                "extra": {
+                    "provenance": "root"
+                }
+            }
+        ]
+    }
+}

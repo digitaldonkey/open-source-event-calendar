@@ -39,7 +39,7 @@
     },
     "require-dev": {
         "phpcompatibility/phpcompatibility-wp": "*",
-        "phpro/grumphp": "^2.17",
+        "phpro/grumphp": "^2.1.8",
         "phpunit/phpunit": "^9.6",
         "roave/security-advisories": "dev-latest",
         "symfony/debug-bundle": "^7.3",
