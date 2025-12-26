@@ -36,10 +36,39 @@ class EventAvatarView extends OsecBaseClass
      */
     public function get_event_avatar(
         Event $event,
-        $fallback_order = null,
-        $classes = '',
-        $wrap_permalink = true
-    ) {
+        ?array $fallback_order = null,
+        string $classes = '',
+        bool $wrap_permalink = true
+    ): string {
+        $data = $this->get_event_avatar_data($event, $fallback_order);
+
+        if (empty($data['url'])) {
+            return '';
+        }
+
+        $classes .= ' ai1ec-' . $data['image_source'];
+
+        if (isset($data['size'])) {
+            $classes .= ' ai1ec-' . $data['ratio'];
+        }
+        $link = $wrap_permalink ? $data['post_link'] : null;
+        $args = [
+            'classes' => $classes,
+            'link'    => $link,
+            'src' => $data['url'],
+            'alt' => $data['alt'],
+        ];
+        if (isset($data['size'])) {
+            $args['width'] = $data['size']['width'];
+            $args['height'] = $data['size']['height'];
+        }
+        return ThemeLoader::factory($this->app)
+                   ->get_file('event-avatar.twig', $args)
+                   ->get_content();
+    }
+
+    public function get_event_avatar_data(Event $event, $fallback_order = null): ?array
+    {
         $source = $size = null;
         $url    = $this->get_event_avatar_url(
             $event,
@@ -49,41 +78,32 @@ class EventAvatarView extends OsecBaseClass
         );
 
         if (empty($url)) {
-            return '';
+            return null;
         }
-
-        $url     = esc_attr($url);
-        $classes = esc_attr($classes);
-
         // Set the alt tag (helpful for SEO).
         $alt      = $event->get('post')->post_title;
         $location = EventLocationView::factory($this->app)->get_short_location($event);
         if ( ! empty($location)) {
             $alt .= ' @ ' . $location;
         }
-
-        $alt       = esc_attr($alt);
-        $size_attr = isset($size[0]) ? "width=\"$size[0]\" height=\"$size[1]\"" : '';
-        $html      = '<img src="' . $url . '" alt="' . $alt . '" ' .
-                     $size_attr . ' />';
-
-        if ($wrap_permalink) {
-            $permalink = add_query_arg(
-                'instance_id',
-                $event->get('instance_id'),
-                get_permalink($event->get('post_id'))
-            );
-            $html      = '<a href="' . $permalink . '">' . $html . '</a>';
+        $permalink = add_query_arg(
+            'instance_id',
+            $event->get('instance_id'),
+            get_permalink($event->get('post_id'))
+        );
+        $ratio = null;
+        if ($size && isset($size[0]) && isset($size[1])) {
+            $size = ['width' => $size[0], 'height' => $size[1]];
+            $ratio = ($size['width'] > $size['height']) ? 'landscape' : 'portrait';
         }
-
-        $classes .= ' ai1ec-' . $source;
-        $classes .= ($size[0] > $size[1])
-            ? ' ai1ec-landscape'
-            : ' ai1ec-portrait';
-        $html    = '<div class="ai1ec-event-avatar timely ' . $classes . '">' .
-                   $html . '</div>';
-
-        return $html;
+        return [
+            'url'     => esc_attr($url),
+            'alt'     => esc_attr($alt),
+            'size'      => $size,
+            'post_link' => $permalink,
+            'image_source' => $source,
+            'ratio' => $ratio,
+        ];
     }
 
     /**
@@ -151,7 +171,7 @@ class EventAvatarView extends OsecBaseClass
         if (null === $fallbacks) {
             $default_fallbacks = [
                 'post_image'      => 'get_post_image_url',
-                'post_thumbnail'  => 'get_post_thumbnail_url',
+                'post_thumbnail'  => 'get_post_thumbnail_url', // actually "featured image".
                 'content_img'     => 'get_content_img_url',
                 'category_avatar' => 'get_category_avatar_url',
                 'default_avatar'  => 'get_default_avatar_url',

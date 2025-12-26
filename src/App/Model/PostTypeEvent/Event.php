@@ -368,6 +368,19 @@ class Event extends OsecBaseClass
     }
 
     /**
+     * Retrieving avatar data
+     *
+     * @return string Avatar markup
+     */
+    public function get_avatar_data($wrap_permalink = true)
+    {
+        return EventAvatarView::factory($this->app)->get_event_avatar_data(
+            $this,
+            AvatarFallbackModel::factory($this->app)->get_all(),
+        );
+    }
+
+    /**
      * Returns whether Event has geo information.
      *
      * @return bool True or false.
@@ -489,7 +502,7 @@ class Event extends OsecBaseClass
      * Set properties generated at runtime
      *
      * @param  string  $property
-     * @param  string  $value
+     * @param  mixed  $value
      */
     public function set_runtime($property, $value)
     {
