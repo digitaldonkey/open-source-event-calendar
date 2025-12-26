@@ -3,7 +3,7 @@
     "type": "wordpress-plugin",
     "description": "Open Source Event Calendar WordPress Plugin",
     "require": {
-        "cweagans/composer-patches": "~1.0",
+        "cweagans/composer-patches": "~2.0.0",
         "ext-curl": "*",
         "ext-json": "*",
         "kigkonsult/icalcreator": "~2.40.0",
