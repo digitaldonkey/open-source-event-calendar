@@ -27,10 +27,12 @@ class EventColorView extends OsecBaseClass
     protected function getColor(Event $event, $type)
     {
         static $categories_cache = [
+            'hex'  => [],
             'rgba'  => [],
             'faded' => [],
         ];
         $methods    = [
+            'hex' => 'get_event_category_hex_color',
             'rgba'  => 'get_event_category_rgba_color',
             'faded' => 'get_event_category_faded_color',
         ];
@@ -112,6 +114,24 @@ class EventColorView extends OsecBaseClass
             return "rgba($p1, $p2, $p3, %s)";
         }
 
+        return '';
+    }
+
+    /**
+     * Returns the rgba() format of the event's category color, with '%s' in place
+     * of the opacity (to be substituted by sprintf).
+     *
+     * @param  int  $term_id  The Event Category's term ID
+     *
+     * @return string
+     */
+    public function get_event_category_hex_color($term_id)
+    {
+        $taxonomy = TaxonomyAdapter::factory($this->app);
+        $color    = $taxonomy->get_category_color($term_id);
+        if ( ! is_null($color) && ! empty($color)) {
+            return $color;
+        }
         return '';
     }
 }

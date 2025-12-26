@@ -29,7 +29,7 @@ class EventLocationView extends OsecBaseClass
     {
         $location_items = [];
         foreach (['venue', 'city', 'province', 'country'] as $field) {
-            if ($event->get($field) !== '') {
+            if ($event->get($field) && is_string($event->get($field))) {
                 $location_items[] = $event->get($field);
             }
         }

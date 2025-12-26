@@ -34,6 +34,11 @@ class EventTaxonomyView extends OsecBaseClass
      */
     protected array $colorSquaresMap = [];
 
+    /**
+     * @var array Caches the category data for each event.
+     */
+    protected array $data = [];
+
     public function __construct(App $app)
     {
         parent::__construct($app);
@@ -139,6 +144,49 @@ class EventTaxonomyView extends OsecBaseClass
         }
 
         return $this->colorSquaresMap[$post_id];
+    }
+
+    /**
+     * Returns REST data of categories including colors for this event.
+     *
+     * @param  Event  $event  Event object.
+     *
+     * @return array  of the event's categories and colors.
+     */
+    public function get_category_data(Event $event)
+    {
+        $post_id = $event->get('post_id');
+
+        if ( ! isset($this->data[$post_id])) {
+            $categories = $this->taxonomyModel->get_post_categories($post_id);
+
+            if (false !== $categories) {
+                foreach ($categories as $i => $category) {
+                    $categories[$i] = array_merge(
+                        (array) $category,
+                        [
+                            'color' => $this->taxonomyModel->get_category_color($category->term_id),
+                            // TODO: Maybe we need to provide alternatives to default image?
+                            'image' => $this->taxonomyModel->get_category_image($category->term_id),
+                        ],
+                    );
+                }
+            }
+
+            /**
+             * Allow add-ons to modify/add to category data, category image/image size  for REST API..
+             *
+             * @since 1.0.5
+             *
+             * @param  Event  $event  event being processed
+             *
+             * @param  array  $categories  Event category data
+             */
+            $categories                         = apply_filters('osec_event_rest_categories', $categories, $event);
+            $this->data[$post_id] = $categories;
+        }
+
+        return $this->data[$post_id];
     }
 
     /**

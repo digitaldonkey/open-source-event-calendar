@@ -62,6 +62,10 @@ trait ViewRuntimePropsTrait
         $color = EventColorView::factory($app);
         $event->set_runtime('faded_color', $color->get_faded_color($event));
         $event->set_runtime('rgba_color', $color->get_rgba_color($event));
+        $event->set_runtime('color', $taxonomyView->get_color_for_event($event));
+        $event->set_runtime('categories', $taxonomyView->get_category_data($event));
+
+
         $event->set_runtime(
             'short_start_time',
             EventTimeView::factory($app)->format_time($event->get('start'))
