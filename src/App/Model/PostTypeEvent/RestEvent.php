@@ -48,6 +48,12 @@ class RestEvent extends OsecBaseClass
             'end' => $event->get('end')->format_to_gmt(),
             'allDay' => $event->is_allday(),
             'resource' => 'any',
+            'color' => $event->get_runtime('color'),
+            // Categories incl. their color and image.
+            'categories' => $event->get_runtime('categories'),
+            'image' => $event->get_avatar_data(),
+            'id' => $event->get('post_id'),
+            'instance' => $event->get('instance_id'),
         ];
     }
 }

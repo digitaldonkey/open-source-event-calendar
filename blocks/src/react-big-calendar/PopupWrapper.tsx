@@ -3,14 +3,13 @@ import * as React from "react";
 import './popover.scss'
 
 export default function PopupWrapper({ position, childRect, popoverRect, children }):React.ReactElement {
-	const backgroundColor = 'white';
+	const backgroundColor = 'rgba(255,255,255,.95)';
 	const arrowColor = backgroundColor;
-	const arrowBorderColor = '#C1C1C1'
+	const arrowBorderColor = 'rgb(144,144,144)'
 	const arrowSize = 8
 
 	const popupStyle = {
 		backgroundColor,
-		opacity: .9,
 		padding: '.5em',
 		border: `1px solid ${arrowBorderColor}`,
 		borderRadius: '5px',

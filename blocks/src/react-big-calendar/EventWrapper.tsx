@@ -6,7 +6,7 @@ import EventPopup from "./EventPopup";
 
 
 export default function EventWrapper(props) {
-	const {event, children, popoverBoundary, selected, setSelected} = props;
+	const {event, children, boundaryElement, selected, setSelected} = props;
 	// console.log(props, 'props@EventWrapper')
 	const hoverDelay = 250;
 	const [showHovered, setShowHovered] = useState(false);
@@ -73,7 +73,7 @@ export default function EventWrapper(props) {
 			}
 		>
 			<Popover
-				parentElement={ popoverBoundary } // Sets boundaries
+				parentElement={ boundaryElement } // Sets boundaries
 				boundaryInset={window.innerWidth > 400? 20 : 0 }
 				isOpen={ selected || showHovered }
 				positions={['right', 'left', 'top', 'bottom']} // preferred positions by priority

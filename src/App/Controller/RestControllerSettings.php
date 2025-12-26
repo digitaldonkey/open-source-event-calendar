@@ -22,7 +22,7 @@ class RestControllerSettings extends OsecBaseInitialized
                         return RestControllerSettings::factory($app)->getSettings($request);
                     },
                     'permission_callback' => function () {
-                        return current_user_can('read');
+                        return true;
                     }
                 ],
             );

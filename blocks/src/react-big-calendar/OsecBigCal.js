@@ -64,6 +64,10 @@ const InitialRangeChangeToolbar = (props) => {
  */
 const transformProps = (props) => {
 	// View name "oneday" matches "day".
+
+	debug(props, '@transformProps')
+
+
 	if (props.view && props.view === 'oneday') {
 		props.view = 'day';
 	}
@@ -214,35 +218,25 @@ export default function OsecBigCal(props) {
 		});
 	}
 
-	const { getNow, localizer, popoverBoundary } = useMemo(() => {
+	const { getNow, localizer, boundaryElement } = useMemo(() => {
 		return {
 			getNow: () => dayjs().toDate(),
 			localizer: dayjsLocalizer(dayjs),
 			// scrollToTime: DateTime.local().toJSDate(),
-			popoverBoundary: Element.prototype.querySelector.call(
-				document.getElementById(props.id),
-				['[class$="view"]']
-			)
+			// Popover should be inside this element.
+			boundaryElement: document.getElementById(props.id).closest('.osec-react-big-calendar')
 		}
 	});
-
-	// /**
-	//  * Helps to keep Event Popup in Boundaries.
-	//  */
-	// const popoverBoundary = Element.prototype.querySelector.call(
-	// 	document.getElementById(props.id),
-	// 	['[class$="view"]']
-	// );
 
 	const components = useMemo(() => ({
 		// Adds Event Popup on hover.
 		eventWrapper: (props) => {
 			// console.log('eventWrapper', props.selected)
-			props.popoverBoundary = popoverBoundary;
+			props.boundaryElement = boundaryElement;
 			return (<EventWrapper {...props} setSelected={setSelected} />)
 		},
 		toolbar: InitialRangeChangeToolbar,
-	}), [popoverBoundary])
+	}), [boundaryElement])
 
 	// HANDLE SELECT EVENTS
 	// const clickRef = useRef(null)

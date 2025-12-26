@@ -26,7 +26,7 @@ class RestControllerDays extends OsecBaseInitialized
                     },
                     'args'                => $this->getRestArgs(),
                     'permission_callback' => function () {
-                        return current_user_can('read');
+                        return true;
                     }
                 ],
             );

@@ -1,2 +1,8 @@
 // Frontend and backend.
 @use '../../node_modules/react-big-calendar/lib/sass/styles.scss';
+
+.rbc-toolbar .rbc-toolbar-label {
+	padding: .25em;
+	font-weight: bold;
+	font-size: small;
+}
