@@ -86,12 +86,12 @@ class BootstrapController
             'theme_url'  => OSEC_THEMES_URL . '/' . OSEC_DEFAULT_THEME_NAME,
             'stylesheet' => OSEC_DEFAULT_THEME_NAME,
         ];
-        osec_output_buffering_start();
+        ob_start();
 
         $this->doBootstrap($app);
         $this->createWpActions();
 
-        ShutdownController::factory($this->app)->register('osec_output_buffering_finalize');
+        ShutdownController::factory($this->app)->register('ob_get_clean');
         add_action('init', $this->register_extensions(...), 1);
         add_action('after_setup_theme', $this->register_themes(...), 1);
         add_action('init', [$this, 'verifyCache'], 1);
@@ -622,9 +622,6 @@ class BootstrapController
                 $OsecExceptionHandler->handleException(...)
             )
         );
-
-        // Regular startup sequence starts here
-        require_once $osec_base_dir . '/global-functions.php'; // Sadly 2 are left.
 
         // Instantiate registry.
         /* @global $osec_app App Osec object Registry */
