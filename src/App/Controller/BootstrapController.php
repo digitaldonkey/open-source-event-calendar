@@ -34,7 +34,6 @@ use Osec\Cache\CacheMemory;
 use Osec\Command\CommandResolver;
 use Osec\Exception\ConstantsNotSetException;
 use Osec\Exception\Exception;
-use Osec\Exception\ExceptionHandler;
 use Osec\Exception\ScheduleException;
 use Osec\Exception\TimezoneException;
 use Osec\Http\Request\Request;
@@ -597,31 +596,6 @@ class BootstrapController
             osec_initiate_constants_local($osec_base_dir, $osec_base_url);
         }
         osec_initiate_constants($osec_base_dir, $osec_base_url);
-
-        // Error handler.
-        global $OsecExceptionHandler;
-        $OsecExceptionHandler = new ExceptionHandler(
-            'Exception',
-            'ErrorException'
-        );
-        // If the user clicked the link to reactivate the plugin.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        if (isset($_GET[ExceptionHandler::DB_REACTIVATE_PLUGIN])) {
-            $OsecExceptionHandler->reactivate_plugin();
-        }
-
-        // Displays message if soft_deactivate_plugin() added one.
-        $OsecExceptionHandler->display_disabled_message();
-
-        $OsecExceptionHandler->setPrevErrorHandler(
-            // phpcs:ignore WordPress.PHP.DevelopmentFunctions
-            set_error_handler($OsecExceptionHandler->handle_error(...))
-        );
-        $OsecExceptionHandler->setPrevExceptionHandler(
-            set_exception_handler(
-                $OsecExceptionHandler->handleException(...)
-            )
-        );
 
         // Instantiate registry.
         /* @global $osec_app App Osec object Registry */
