@@ -22,7 +22,6 @@ class EditPostActions extends OsecBaseClass
     public function add_bulk_action_duplicate_event($current_screen)
     {
         if ($current_screen->post_type === OSEC_POST_TYPE && current_user_can('edit_osec_events')) {
-            $app = $this->app;
             add_filter('bulk_actions-edit-' . OSEC_POST_TYPE, function ($bulk_actions) {
                 $bulk_actions['clone'] = __('Clone', 'open-source-event-calendar');
                 return $bulk_actions;
