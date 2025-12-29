@@ -447,13 +447,10 @@ class BootstrapController
                     NotificationAdmin::factory($app)->send();
                 }
             );
+            add_action('current_screen', function ($current_screen) use ($app) {
+                EditPostActions::factory($app)->add_bulk_action_duplicate_event($current_screen);
+            });
 
-            add_action(
-                'admin_footer-edit.php',
-                function () use ($app) {
-                    EditPostActions::factory($app)->duplicate_custom_bulk_admin_footer();
-                }
-            );
 
             add_filter('post_row_actions', function ($actions, $post) use ($app) {
                     return EditPostActions::factory($app)->duplicate_post_make_duplicate_link_row($actions, $post);
