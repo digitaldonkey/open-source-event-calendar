@@ -340,8 +340,8 @@ class CommandClone extends CommandAbstract
             && ! empty($_REQUEST['_wpnonce'])
             && wp_verify_nonce(sanitize_key(wp_unslash($_REQUEST['_wpnonce'])), 'bulk-posts')
             && current_user_can('edit_osec_events')
-            && ! empty($_REQUEST['post'])
-            && is_array(empty($_REQUEST['post']))
+            && isset($_REQUEST['post']) && ! empty($_REQUEST['post'])
+            && is_array($_REQUEST['post'])
         ) {
             // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
             foreach ($_REQUEST['post'] as $post_id) {
