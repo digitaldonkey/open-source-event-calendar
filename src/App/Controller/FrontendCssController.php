@@ -267,10 +267,10 @@ class FrontendCssController extends OsecBaseClass
 
     public function echo_css()
     {
-        echo '<style id="aliec">';
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        echo $this->get_compiled_css();
-        echo '</style>';
+        $handle = 'osec-frontend-css';
+        wp_register_style($handle, false, [], OSEC_VERSION);
+        wp_add_inline_style($handle, $this->get_compiled_css());
+        wp_enqueue_style($handle);
     }
 
     /**
