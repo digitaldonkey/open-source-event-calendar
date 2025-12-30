@@ -92,7 +92,6 @@ class EventLocationView extends OsecBaseClass
      **/
     public function get_map_view(Event $event): string
     {
-        $settings = $this->app->settings;
         if ( ! $event->get('show_map')) {
             return '';
         }
@@ -105,7 +104,7 @@ class EventLocationView extends OsecBaseClass
         $args = [
             'address'                 => $location,
             'gmap_url_link'           => $this->get_gmap_url($event),
-            'hide_maps_until_clicked' => $settings->get('hide_maps_until_clicked'),
+            'hide_maps_until_clicked' => $this->app->settings->get('hide_maps_until_clicked'),
             'text_view_map'           => __('Click to view map', 'open-source-event-calendar'),
             'text_full_map'           => __('View Full-Size Map', 'open-source-event-calendar'),
         ];

@@ -628,18 +628,6 @@ timely.define("domReady", [], function () {
         e("#ai1ec-facebook-filter option[value=exportable]:selected").length > 0 && e("table.wp-list-table tr.no-items").length === 0 && n.facebook_logged_in === "1" && (e("<option>").val("export-facebook").text("Export to facebook").appendTo("select[name='action']"), e("<option>").val("export-facebook").text("Export to facebook").appendTo("select[name='action2']"))
     }, s = function () {
         // disabled.
-    }, o = function () {
-        e("#ai1ec-video").length && (e.ajax({
-            cache: !0,
-            async: !0,
-            dataType: "script",
-            url: "//www.youtube.com/iframe_api"
-        }), window.onYouTubeIframeAPIReady = function () {
-            var t = new YT.Player("ai1ec-video", {height: "368", width: "600", videoId: window.ai1ecVideo.youtubeId});
-            e("#ai1ec-video").css("display", "block"), e("#ai1ec-video-modal").on("hide", function () {
-                t.stopVideo()
-            })
-        })
     }, u = function () {
         e(document).on("click", ".ai1ec-facebook-cron-dismiss-notification", r.dismiss_plugins_messages_handler).on("click", ".ai1ec-dismiss-notification", r.dismiss_notification_handler).on("click", ".ai1ec-dismiss-intro-video", r.dismiss_intro_video_handler).on("click", ".ai1ec-dismiss-license-warning", r.dismiss_license_warning_handler).on("click", ".ai1ec-limit-by-cat, .ai1ec-limit-by-tag, .ai1ec-limit-by-event", r.handle_multiselect_containers_widget_page).on("click", ".ai1ec-dismissable", function () {
             var t = {action: "osec_dismiss_notice", key: e(this).data("key")}, n = this;
@@ -654,7 +642,7 @@ timely.define("domReady", [], function () {
         t.length && (e("form#edittag").length || n.removeClass("ai1ec-hide").appendTo(".wrap > h2:first"), e(".wrap").prepend(t.removeClass("ai1ec-hide")), t.find("li.ai1ec-active").length || (r = e("[data-ai1ec_active_tab]").data("ai1ec_active_tab"), r && e(r).addClass("ai1ec-active")), e('#menu-posts-osec_event a[href="edit-tags.php?taxonomy=events_categories&post_type=ai1ec_event"]').closest("li").addClass("current"))
     }, l = function () {
         t(function () {
-            i(), f(), o(), u(), s(), a()
+            i(), f(), u(), s(), a()
         })
     };
     return {start: l}
