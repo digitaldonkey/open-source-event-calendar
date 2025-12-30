@@ -327,8 +327,8 @@ class LessController extends OsecBaseClass
     private function abs_path_to_url($path = '')
     {
         $url = str_replace(
-            wp_normalize_path(untrailingslashit(ABSPATH)),
-            site_url(),
+            wp_normalize_path(untrailingslashit(OSEC_PATH)),
+            OSEC_URL,
             wp_normalize_path($path)
         );
 
