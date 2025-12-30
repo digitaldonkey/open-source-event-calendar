@@ -20,7 +20,7 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class KsesHelper extends OsecBaseClass
 {
-    public function allowed_html_inline(): string
+    public function allowed_html_inline(): array
     {
         /**
          * Alter allowed HTML tags and properties on inlined rendering.
