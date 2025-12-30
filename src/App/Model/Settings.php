@@ -591,7 +591,7 @@ class Settings extends OsecBaseInitialized
                         'open-source-event-calendar'
                     ),
                 ],
-                'default'  => false,
+                'default'  => true,
             ],
 
             'affix_filter_menu'                      => [

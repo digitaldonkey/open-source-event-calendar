@@ -154,6 +154,11 @@ I may also provide paid support.
 7. Cache settings
 8. Agenda view in mobile. All calendars are mobile friendly
 
+== External services ==
+
+This plugin connects may connect to Google maps API render event locations.
+(Terms of Service)[https://cloud.google.com/maps-platform/terms] (Privacy statements)[https://policies.google.com/privacy].
+
 == Changelog ==
 
 = 1.0.4 =
