@@ -226,20 +226,23 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         }
         // Throw a mean message.
 
+        $uploads = wp_upload_dir();
+        $upload_path = trailingslashit($uploads['basedir']);
+
         //  if ($notification->are_notices_available(2)) {}
         $msg = sprintf(
-        /* translators: 1: Filename 2: ABSPATH 3: OSEC_FILE_CACHE_WP_UPLOAD_DIR 4: OSEC_FILE_CACHE_DEFAULT_PATH */
+        /* translators: 1: Filename 2: wp_upload_dir() 3: OSEC_FILE_CACHE_WP_UPLOAD_DIR 4: OSEC_FILE_CACHE_DEFAULT_PATH */
             __(
                 'Can not use WP_Filesystem() method to write to file: %1$s
                         <br /><br />
                         You may set OSEC_ENABLE_CACHE_FILE false to use other cache methods like APCU or DB and ignore this message.
                         <br /><br /><strong>BUT: If we can not write files Twig cache is disabled.</strong>
-                        <br /><br /><strong>Ensure that</strong><br /><code>%2$swp-content/uploads/%3$s
-                        </code><br />or<br /><code>%4$</code><br /> are writable by php.',
+                        <br /><br /><strong>Ensure that</strong><br /><code>%2$s%3$s
+                        </code><br />or<br /><code>%4$s (OSEC_FILE_CACHE_DEFAULT_PATH)</code><br /> are writable by php.',
                 'open-source-event-calendar'
             ),
             $file,
-            ABSPATH,
+            $upload_path,
             OSEC_FILE_CACHE_WP_UPLOAD_DIR,
             OSEC_FILE_CACHE_DEFAULT_PATH
         );
