@@ -51,6 +51,15 @@ if ( ! defined('ABSPATH') ) {
                         echo implode(', ', $ct->tags);
                     ?>
                 </p>
+                <p>
+                    <?php
+                    printf(
+                    /* translators: 1: template dir */
+                        esc_html__('The template files are located in %s.', 'open-source-event-calendar'),
+                        '<code>' . $ct->template_dir . '</code>',
+                    );
+                    ?>
+                </p>
             <?php endif; ?>
         </div>
         <?php theme_update_available($ct); ?>
