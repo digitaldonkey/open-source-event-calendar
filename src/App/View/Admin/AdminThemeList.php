@@ -124,7 +124,6 @@ class AdminThemeList extends WP_List_Table
             'name'           => $current_theme,
             'title'          => $themes[$current_theme]['Title'],
             'version'        => $themes[$current_theme]['Version'],
-            'parent_theme'   => $themes[$current_theme]['Parent Theme'],
             'template_dir'   => $themes[$current_theme]['Template Dir'],
             'stylesheet_dir' => $themes[$current_theme]['Stylesheet Dir'],
             'template'       => $themes[$current_theme]['Template'],
@@ -310,12 +309,10 @@ class AdminThemeList extends WP_List_Table
                     $screenshot = $themes[$theme_name]['Screenshot'];
                     $stylesheet_dir = $themes[$theme_name]['Stylesheet Dir'];
                     $template_dir = $themes[$theme_name]['Template Dir'];
-                    $parent_theme = $themes[$theme_name]['Parent Theme'];
                     $theme_root = $themes[$theme_name]['Theme Root'];
                     $theme_dir = $themes[$theme_name]->get_stylesheet_directory();
                     $theme_root_uri = esc_url($themes[$theme_name]['Theme Root URI']);
                     $tags = $themes[$theme_name]['Tags'];
-
                     // Generate theme activation link.
                     $activate_link = admin_url(OSEC_THEME_SELECTION_BASE_URL);
                     $activate_link = add_query_arg(
@@ -381,8 +378,8 @@ class AdminThemeList extends WP_List_Table
                         <?php printf(
                         /* translators: 1: template dir */
                             esc_html__('The template files are located in %s.', 'open-source-event-calendar'),
-                            '<code>' . esc_html(str_replace(WP_CONTENT_DIR, '', $template_dir)) . '</code>',
-                        );?>
+                            '<code>' . esc_attr($theme_dir) . '</code>'
+                        ); ?>
                     </p>
                     <?php
                     if ($tags) : ?>
