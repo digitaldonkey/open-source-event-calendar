@@ -141,12 +141,12 @@ class ThemeFinder extends OsecBaseClass
     public function get_theme_dirs(): array
     {
         $theme_dirs = [
-            WP_CONTENT_DIR . '/' . OSEC_THEME_FOLDER,
+            get_theme_root() . '/' . OSEC_THEME_FOLDER,
             OSEC_DEFAULT_THEME_ROOT,
         ];
 
         /**
-         * Alter theme paths.
+         * Add or alter theme paths.
          *
          * @since 1.0
          *
