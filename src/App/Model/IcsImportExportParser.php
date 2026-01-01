@@ -48,7 +48,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      */
     public function import(array $arguments): array
     {
-        $unique_prefix = defined('WP_SITEURL') ? WP_SITEURL : ABSPATH;
+        $unique_prefix = site_url();
         $unique        = md5($unique_prefix . $arguments['feed']->feed_url);
         $cal           = Vcalendar::factory([IcalInterface::UNIQUE_ID => $unique]);
 
