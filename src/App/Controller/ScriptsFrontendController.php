@@ -137,7 +137,7 @@ class ScriptsFrontendController extends OsecBaseClass
     public function render_js()
     {
         $common_js = '';
-        // phpcs:disable WordPress.Security.NonceVerification
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         if (! isset($_GET[self::LOAD_JS_PARAMETER])) {
             return null;
         }
@@ -166,7 +166,7 @@ class ScriptsFrontendController extends OsecBaseClass
                 $this->areFrontendScriptsloaded = true;
             }
         }
-        // phpcs:enable WordPress.Security.NonceVerification
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
         // phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
         // makes no sense on local files.
