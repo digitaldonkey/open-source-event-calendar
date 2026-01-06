@@ -27,14 +27,12 @@ use Osec\Theme\ThemeLoader;
  */
 class FeedsController extends OsecBaseClass
 {
-    // Using ajax, which verifies nonces.
-    // @see $this->add_actions().
-    // phpcs:disable WordPress.Security.NonceVerification
-
     /**
      * @var string Name of cron hook.
      */
     public const CRON_HOOK_NAME = 'osec_cron';
+
+    public const NONCE_NAME = 'calendar_feeds_nonce';
 
     /**
      * @var array
@@ -522,6 +520,13 @@ class FeedsController extends OsecBaseClass
      */
     public function delete_ics(): never
     {
+        if (
+             (isset($_REQUEST['action']) && $_REQUEST['action'] === 'osec_delete_ics')
+            || !isset($_REQUEST['nonce'])
+            || !wp_verify_nonce(sanitize_key($_REQUEST['nonce']), self::NONCE_NAME)
+        ) {
+            exit('invalid nonce');
+        }
 
         $feed_id = $this->get_request_params('feed_id');
         if ($this->get_request_params('remove_events')) {
@@ -548,6 +553,8 @@ class FeedsController extends OsecBaseClass
     public function flush_ics_feed($ajax = true, $feed_url = false): array
     {
         $feed_id = 0;
+        // Nonce checked before.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         if (isset($_REQUEST['feed_id'])) {
             $feed_id = $this->get_request_params('feed_id');
         }
@@ -791,7 +798,7 @@ class FeedsController extends OsecBaseClass
         static $requestArgs = null;
         if (is_null($requestArgs)) {
             if (
-                !check_ajax_referer('osec_ics_feed_nonce', 'nonce')
+                !check_ajax_referer(self::NONCE_NAME, 'nonce')
                 || !current_user_can('manage_osec_feeds')) {
                 /** @noinspection ForgottenDebugOutputInspection */
                 wp_die(esc_html__('User not allowed to manage feeds.', 'open-source-event-calendar'));
