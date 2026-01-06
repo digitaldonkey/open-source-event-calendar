@@ -43,7 +43,7 @@ class Request extends OsecBaseClass
      */
     public function is_ajax()
     {
-        // phpcs:disable WordPress.Security.NonceVerification
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         if (defined('DOING_AJAX')) {
             return true;
         }
@@ -126,7 +126,7 @@ class Request extends OsecBaseClass
      */
     public function get_current_action()
     {
-        // phpcs:disable WordPress.Security.NonceVerification
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         if (isset($_REQUEST['action']) && -1 != $_REQUEST['action']) {
             return sanitize_key($_REQUEST['action']);
         }

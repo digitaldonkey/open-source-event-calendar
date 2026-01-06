@@ -50,6 +50,8 @@ abstract class SaveAbstract extends CommandAbstract
             && isset($this->action[$params['action']])
             && isset($_POST[$this->nonceName])
         ) {
+            // Note:
+            // Nonce verification here is not detectable by Wp Coding standard tests.
             $pass = wp_verify_nonce(
                 sanitize_text_field(wp_unslash($_POST[$this->nonceName])),
                 key($this->action)

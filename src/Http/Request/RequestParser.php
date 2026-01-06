@@ -254,12 +254,9 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
      **/
     public static function get_param($param, mixed $default = '')
     {
-        // phpcs:disable WordPress.Security.NonceVerification
-        if (isset($_POST[$param])) {
-            return sanitize_text_field(wp_unslash($_POST[$param]));
-        }
-        if (isset($_GET[$param])) {
-            return sanitize_text_field(wp_unslash($_GET[$param]));
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
+        if (isset($_REQUEST[$param])) {
+            return sanitize_text_field(wp_unslash($_REQUEST[$param]));
         }
         // phpcs:enable
         return $default;
