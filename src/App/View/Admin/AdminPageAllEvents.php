@@ -112,7 +112,7 @@ class AdminPageAllEvents extends OsecBaseClass
                 'name'            => 'author',
                 'show_option_all' => __('Show All Authors', 'open-source-event-calendar'),
             ];
-            // phpcs:disable WordPress.Security.NonceVerification
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended
             if (isset($_GET['user'])) {
                 $args['selected'] = absint($_GET['user']);
             }

@@ -87,10 +87,8 @@ class CachePath
         if ( ! $path) {
             return null;
         }
-        // phpcs:disable WordPress.Security.ValidatedSanitizedInput
         $url = str_starts_with($path, $_SERVER['DOCUMENT_ROOT']) ?
             get_bloginfo('wpurl') . substr($path, strlen(untrailingslashit($_SERVER['DOCUMENT_ROOT']))) : null;
-        // phpcs:enable WordPress.Security.ValidatedSanitizedInput
         return [
             'path' => $path,
             'url'  => $url,
