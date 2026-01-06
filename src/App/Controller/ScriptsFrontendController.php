@@ -137,7 +137,7 @@ class ScriptsFrontendController extends OsecBaseClass
     public function render_js()
     {
         $common_js = '';
-        // phpcs:disable WordPress.Security.NonceVerification
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         if (! isset($_GET[self::LOAD_JS_PARAMETER])) {
             return null;
         }
@@ -166,7 +166,7 @@ class ScriptsFrontendController extends OsecBaseClass
                 $this->areFrontendScriptsloaded = true;
             }
         }
-        // phpcs:enable WordPress.Security.NonceVerification
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
         // phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
         // makes no sense on local files.
@@ -337,7 +337,7 @@ class ScriptsFrontendController extends OsecBaseClass
         $blog_timezone = $this->app->options->get('gmt_offset');
 
         $data = [
-            'calendar_feeds_nonce'           => wp_create_nonce('osec_ics_feed_nonce'),
+            'calendar_feeds_nonce'           => wp_create_nonce(FeedsController::NONCE_NAME),
             // ICS feed error messages
             'duplicate_feed_message'         => esc_html(
                 __('This feed is already being imported.', 'open-source-event-calendar')
