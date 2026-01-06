@@ -188,7 +188,7 @@ class WpmlHelper extends OsecBaseClass
      */
     public function get_translatable_id()
     {
-        // phpcs:disable WordPress.Security.NonceVerification
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         if (
             isset($_GET['trid']) &&
             isset($_GET['source_lang']) &&

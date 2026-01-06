@@ -59,7 +59,7 @@ class AdminPageAddEvent extends OsecBaseClass
 
         /* @var int $instance_id See DB table wp_osec_event_instances */
         $instance_id = false;
-        // phpcs:disable WordPress.Security.NonceVerification
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         if (isset($_REQUEST['instance'])) {
             $instance_id = absint($_REQUEST['instance']);
         }

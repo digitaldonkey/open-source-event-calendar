@@ -48,7 +48,7 @@ class AdminPageManageTaxonomies extends OsecBaseClass
 
         foreach ($taxonomies as $taxonomy => $data) {
             if (true === $data->public) {
-                // phpcs:disable WordPress.Security.NonceVerification
+                // phpcs:disable WordPress.Security.NonceVerification.Recommended
                 $active_taxonomy =
                     isset($_GET['taxonomy']) &&
                     $taxonomy === sanitize_key($_GET['taxonomy']);
