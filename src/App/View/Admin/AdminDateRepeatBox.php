@@ -34,9 +34,10 @@ class AdminDateRepeatBox extends OsecBaseClass
             || !wp_verify_nonce(sanitize_text_field(wp_unslash($_REQUEST['nonce'])), 'wp_rest')) {
             return;
         }
-        // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
         $repeat  = (int)$_REQUEST['repeat'];
         $repeat  = $repeat == 1 ? 1 : 0;
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
         $post_id = (int)$_REQUEST['post_id'];
         // phpcs:enable
         $count   = 100;
