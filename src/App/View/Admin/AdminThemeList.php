@@ -328,7 +328,8 @@ class AdminThemeList extends WP_List_Table
                     );
                     $activate_link = wp_nonce_url(
                         $activate_link,
-                        'switch-osec_theme_' . $template
+                        AdminPageManageThemes::$NONCE['action'],
+                        AdminPageManageThemes::$NONCE['nonce_name']
                     );
 
                     $activate_text = esc_attr(

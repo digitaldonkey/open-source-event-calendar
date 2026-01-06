@@ -38,12 +38,6 @@ class AdminPageManageThemes extends AdminPageAbstract
                 'Open Source Event Calendar: Themes',
                 'open-source-event-calendar'
             ),
-            'nonce'   => [
-                'action' => self::$NONCE['action'],
-                'nonce_name' => self::$NONCE['nonce_name'],
-                'referrer' => false,
-            ],
-
         ];
 
         add_thickbox();
