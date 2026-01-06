@@ -175,7 +175,7 @@ class ElementHref
 
         $full_url = $this->calendar_page . $href;
         // persist the `lang` parameter if present
-        // phpcs:disable WordPress.Security.NonceVerification
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         if (isset($_REQUEST['lang'])) {
             $full_url = add_query_arg('lang', sanitize_text_field(wp_unslash($_REQUEST['lang'])), $full_url);
         }
