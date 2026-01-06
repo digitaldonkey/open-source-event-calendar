@@ -70,14 +70,15 @@ class RobotsTxt extends OsecBaseClass
             }
             $creds = request_filesystem_credentials($url, $type, false, false, null);
 
-            // phpcs:disable WordPress.Security.NonceVerification
             if ( ! WP_Filesystem($creds)) {
+                // phpcs:disable WordPress.Security.NonceVerification.Recommended
                 $error_v = (
-                    isset($_POST['hostname']) ||
-                    isset($_POST['username']) ||
-                    isset($_POST['password']) ||
-                    isset($_POST['connection_type'])
+                    isset($_REQUEST['hostname']) ||
+                    isset($_REQUEST['username']) ||
+                    isset($_REQUEST['password']) ||
+                    isset($_REQUEST['connection_type'])
                 );
+
                 if ($error_v) {
                     // if credentials are given and we don't have access to
                     // wp filesystem show notice to user
@@ -96,8 +97,8 @@ class RobotsTxt extends OsecBaseClass
                     if ( ! isset($_REQUEST['noredirect'])) {
                         ResponseHelper::redirect($redirect_url);
                     }
+                    // phpcs:enable
                 }
-                // phpcs:enable
                 return;
             }
         }
