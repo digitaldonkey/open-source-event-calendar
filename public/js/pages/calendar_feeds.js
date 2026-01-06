@@ -1341,7 +1341,8 @@ timely.define("domReady", [], function () {
                 h = $("#osec_map_display_enabled").is(":checked") ? 1 : 0,
                 p = $("#osec_add_tag_categories").is(":checked") ? 1 : 0,
                 d = $("#osec_keep_old_events").is(":checked") ? 1 : 0,
-                v = $("#osec_feed_import_timezone").is(":checked") ? 1 : 0, m = {
+                v = $("#osec_feed_import_timezone").is(":checked") ? 1 : 0,
+                m = {
                     action: "osec_add_ics",
                     nonce: r.calendar_feeds_nonce,
                     feed_url: u,

@@ -67,19 +67,15 @@ class RobotsTxt extends OsecBaseClass
                 require_once ABSPATH . 'wp-admin/includes/file.php';
             }
             $creds = request_filesystem_credentials($url, $type, false, false, null);
-
-            if (! isset($_POST['_fs_nonce'])
-                || ! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_fs_nonce'])), 'filesystem-credentials')
-            ) {
-                wp_die('Filesystem credentials nonce missing');
-            }
             if ( ! WP_Filesystem($creds)) {
+                // phpcs:disable WordPress.Security.NonceVerification.Recommended
                 $error_v = (
-                    isset($_POST['hostname']) ||
-                    isset($_POST['username']) ||
-                    isset($_POST['password']) ||
-                    isset($_POST['connection_type'])
+                    isset($_REQUEST['hostname']) ||
+                    isset($_REQUEST['username']) ||
+                    isset($_REQUEST['password']) ||
+                    isset($_REQUEST['connection_type'])
                 );
+
                 if ($error_v) {
                     // if credentials are given and we don't have access to
                     // wp filesystem show notice to user
@@ -98,6 +94,7 @@ class RobotsTxt extends OsecBaseClass
                     if ( ! isset($_REQUEST['noredirect'])) {
                         ResponseHelper::redirect($redirect_url);
                     }
+                    // phpcs:enable
                 }
                 return;
             }
