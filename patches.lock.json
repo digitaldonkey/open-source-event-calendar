@@ -1,12 +1,22 @@
 {
-    "_hash": "2031ac5736ce9870cfbb3ee25fdbd3d4ddd4e662a2e49d9163a4d34906521a5f",
+    "_hash": "736d0f6f8d09b598defed5b5cdbd603363ee56c4f3d2272a952ec1647517e20c",
     "patches": {
         "louis1021/sg-i-calendar": [
             {
                 "package": "louis1021/sg-i-calendar",
                 "description": "PHP 8.1.x compatibility fixes",
-                "url": "composer-patches/louis1021--sg-i-calendar.patch",
+                "url": "composer-patches/louis1021--sg-i-calendar-8.1.patch",
                 "sha256": "a3b55c48444b1a4bff154b833d91f25330d77e974b6e06319516ce40196b1332",
+                "depth": 1,
+                "extra": {
+                    "provenance": "root"
+                }
+            },
+            {
+                "package": "louis1021/sg-i-calendar",
+                "description": "PHP 8.2.x compatibility fixes",
+                "url": "composer-patches/louis1021--sg-i-calendar-8.2.patch",
+                "sha256": "32246ae22f9cb8dbc0cba557d89865602b896e04087a7ec490cb8313d3cf77f1",
                 "depth": 1,
                 "extra": {
                     "provenance": "root"
