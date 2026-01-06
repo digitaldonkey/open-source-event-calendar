@@ -58,8 +58,7 @@
     "extra": {
         "patches": {
             "louis1021/sg-i-calendar": {
-                "PHP 8.1.x compatibility fixes": "composer-patches/louis1021--sg-i-calendar-8.1.patch",
-                "PHP 8.2.x compatibility fixes": "composer-patches/louis1021--sg-i-calendar-8.2.patch"
+                "PHP 8.1.x compatibility fixes": "composer-patches/louis1021--sg-i-calendar.patch"
             },
             "kigkonsult/icalcreator": {
                 "Fix ctype_digit() deprecation notices": "composer-patches/kigkonsult_icalcreator_2.40.0.patch"
