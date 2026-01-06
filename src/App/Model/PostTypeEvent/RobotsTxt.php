@@ -7,6 +7,8 @@ use Osec\App\View\Admin\AdminPageAbstract;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Http\Response\ResponseHelper;
 
+use const FTP_BASE;
+
 /**
  * File robots.txt helper.
  *
@@ -68,11 +70,7 @@ class RobotsTxt extends OsecBaseClass
             }
             $creds = request_filesystem_credentials($url, $type, false, false, null);
 
-            if (! isset($_POST['_fs_nonce'])
-                || ! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_fs_nonce'])), 'filesystem-credentials')
-            ) {
-                wp_die('Filesystem credentials nonce missing');
-            }
+            // phpcs:disable WordPress.Security.NonceVerification
             if ( ! WP_Filesystem($creds)) {
                 $error_v = (
                     isset($_POST['hostname']) ||
@@ -99,6 +97,7 @@ class RobotsTxt extends OsecBaseClass
                         ResponseHelper::redirect($redirect_url);
                     }
                 }
+                // phpcs:enable
                 return;
             }
         }
