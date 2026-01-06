@@ -264,7 +264,13 @@ class EventEditing extends OsecBaseClass
      */
     public function create_duplicate_post()
     {
-        // phpcs:disable WordPress.Security.NonceVerification
+        if (
+            !isset($_REQUEST[EventEditing::NONCE_NAME])
+            || !wp_verify_nonce(sanitize_key($_REQUEST[EventEditing::NONCE_NAME]), EventEditing::NONCE_ACTION)
+        ) {
+            return false;
+        }
+
         // For details @see EventParent->admin_init_post().
         if (! isset($_POST['post_ID'])) {
             return false;
@@ -293,7 +299,6 @@ class EventEditing extends OsecBaseClass
         EventParent::factory($this->app)
                    ->event_parent($post_id, $old_post_id, $instance_id);
         return $post_id;
-        // phpcs: enable
     }
 
     /**
