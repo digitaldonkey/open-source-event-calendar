@@ -63,7 +63,7 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
      */
     public function init_vars(?string $query = null)
     {
-        // phpcs:disable WordPress.Security.NonceVerification
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         foreach ($_REQUEST as $key => $value) {
             $this->variable($key, sanitize_text_field($value));
         }
