@@ -337,7 +337,7 @@ class ScriptsFrontendController extends OsecBaseClass
         $blog_timezone = $this->app->options->get('gmt_offset');
 
         $data = [
-            'calendar_feeds_nonce'           => wp_create_nonce('osec_ics_feed_nonce'),
+            'calendar_feeds_nonce'           => wp_create_nonce(FeedsController::NONCE_NAME),
             // ICS feed error messages
             'duplicate_feed_message'         => esc_html(
                 __('This feed is already being imported.', 'open-source-event-calendar')
