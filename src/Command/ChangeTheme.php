@@ -26,31 +26,42 @@ class ChangeTheme extends SaveAbstract
      */
     public function do_execute()
     {
-        // Nonce and Superglobals verification happens in SaveAbstract->is_this_to_execute().
-        // phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-        $stylesheet = preg_replace(
-            '|[^a-z_\-]+|i',
-            '',
-            sanitize_text_field(wp_unslash($_GET['osec_theme']))
-        );
+        if (
+            isset($_REQUEST[AdminPageManageThemes::$NONCE['nonce_name']])
+            && wp_verify_nonce(
+                sanitize_key($_REQUEST[AdminPageManageThemes::$NONCE['nonce_name']],),
+                AdminPageManageThemes::$NONCE['action']
+            )
+            && isset($_GET['osec_theme'])
+            && isset($_GET['osec_theme_root'])
+            && isset($_GET['osec_theme_dir'])
+            && isset($_GET['ai1ec_theme_url'])
+        ) {
+            $stylesheet = preg_replace(
+                '|[^a-z_\-]+|i',
+                '',
+                sanitize_text_field(wp_unslash($_GET['osec_theme']))
+            );
 
-        ThemeLoader::factory($this->app)
-                   ->switch_theme(
-                       [
-                           'theme_root' => realpath(sanitize_text_field(wp_unslash($_GET['osec_theme_root']))),
-                           'theme_dir'  => realpath(sanitize_text_field(wp_unslash($_GET['osec_theme_dir']))),
-                           'theme_url'  => sanitize_url(wp_unslash($_GET['ai1ec_theme_url'])),
-                           'stylesheet' => $stylesheet,
-                       ]
-                   );
+            ThemeLoader::factory($this->app)
+                       ->switch_theme(
+                           [
+                               'theme_root' => realpath(sanitize_text_field(wp_unslash($_GET['osec_theme_root']))),
+                               'theme_dir'  => realpath(sanitize_text_field(wp_unslash($_GET['osec_theme_dir']))),
+                               'theme_url'  => sanitize_url(wp_unslash($_GET['ai1ec_theme_url'])),
+                               'stylesheet' => $stylesheet,
+                           ]
+                       );
 
-        // Return user to themes list page with success message.
-        return [
-            'url'        => admin_url(
-                OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'themes'
-            ),
-            'query_args' => ['activated' => 1],
-        ];
+            // Return user to themes list page with success message.
+            return [
+                'url'        => admin_url(
+                    OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'themes'
+                ),
+                'query_args' => ['activated' => 1],
+            ];
+        }
+        die('Invalid nonce');
     }
 
     /*
@@ -69,23 +80,17 @@ class ChangeTheme extends SaveAbstract
 
     public function is_this_to_execute()
     {
-        if (
-            isset($_GET['osec_action'])
-            && $_GET['osec_action'] === AdminPageManageThemes::$NONCE['action']
-            && current_user_can('switch_osec_themes')
-            && isset($_GET['osec_theme_dir'])
-            && is_dir(sanitize_text_field(wp_unslash($_GET['osec_theme_dir'])))
-            && isset($_GET['osec_theme_root'])
-            && is_dir(sanitize_text_field(wp_unslash($_GET['osec_theme_root'])))
-            && isset($_GET['osec_theme'])
-        ) {
-            check_admin_referer(
-                'switch-osec_theme_' . sanitize_key($_GET['osec_theme'])
-            );
-
-            return true;
-        }
-
-        return false;
+        return isset($_GET['osec_action'])
+                && $_GET['osec_action'] === AdminPageManageThemes::$NONCE['action']
+                && current_user_can('switch_osec_themes')
+                && isset($_GET['osec_theme_dir'])
+                && is_dir(sanitize_text_field(wp_unslash($_GET['osec_theme_dir'])))
+                && isset($_GET['osec_theme_root'])
+                && is_dir(sanitize_text_field(wp_unslash($_GET['osec_theme_root'])))
+                && isset($_GET['osec_theme'])
+                && check_admin_referer(
+                    AdminPageManageThemes::$NONCE['action'],
+                    AdminPageManageThemes::$NONCE['nonce_name'],
+                );
     }
 }
