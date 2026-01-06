@@ -68,10 +68,16 @@ class EventParent extends OsecBaseClass
      */
     public function admin_init_post(): void
     {
-        // phpcs:disable WordPress.Security.NonceVerification
+        if (
+            !isset($_REQUEST[EventEditing::NONCE_NAME])
+            || !wp_verify_nonce(sanitize_key($_REQUEST[EventEditing::NONCE_NAME]), EventEditing::NONCE_ACTION)
+        ) {
+            return;
+        }
+
         /**
          * When Editing instance a hidden field "osec_instance_id" is added.
-         * Gien that we will clone the parent and turn the event into
+         * Given that we will clone the parent and turn the event into
          * its own instance, while keeping parent relation.
          */
         if (
@@ -79,19 +85,11 @@ class EventParent extends OsecBaseClass
             && isset($_POST['action'])
             && 'editpost' === sanitize_key($_POST['action'])
         ) {
-            // phpcs:enable
-            if (
-                !isset($_REQUEST[EventEditing::NONCE_NAME])
-                || !wp_verify_nonce(sanitize_key($_REQUEST[EventEditing::NONCE_NAME]), EventEditing::NONCE_ACTION)
-            ) {
-                return;
-            }
-            // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-            $old_post_id = absint($_POST['post_ID']);
+            $old_post_id = isset($_POST['post_ID']) ? absint($_POST['post_ID']) : null;
             $instance_id = absint($_POST['osec_instance_id']);
             // phpcs:enable
             $post_id     = EventEditing::factory($this->app)->create_duplicate_post();
-            if (false !== $post_id) {
+            if (!is_null($old_post_id) && false !== $post_id) {
                 $this->handleInstances(
                     new Event($this->app, $post_id),
                     new Event($this->app, $old_post_id),
