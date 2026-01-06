@@ -20,8 +20,14 @@ class SaveThemeOptions extends SaveAbstract
 {
     public function do_execute()
     {
-        // Nonce verification happens in SaveAbstract->is_this_to_execute().
-        // phpcs:disable WordPress.Security.NonceVerification.Missing
+        if (!isset($_POST[$this->nonceName])
+            || ! wp_verify_nonce(
+                sanitize_text_field(wp_unslash($_POST[$this->nonceName])),
+                key($this->action)
+            )
+        ) {
+            wp_die('Invalid nonce');
+        }
         $variables = [];
         $isReset = isset($_POST[AdminPageThemeOptions::RESET_ID]);
 
