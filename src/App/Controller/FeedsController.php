@@ -12,6 +12,7 @@ use Osec\Exception\BootstrapException;
 use Osec\Exception\EngineNotSetException;
 use Osec\Exception\ImportExportParseException;
 use Osec\Exception\InvalidArgumentException;
+use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderJson;
 use Osec\Settings\Elements\ModalQuestion;
 use Osec\Settings\HtmlFactory;
@@ -805,34 +806,18 @@ class FeedsController extends OsecBaseClass
             }
 
             if (!empty($_REQUEST['feed_url'])) {
-                $url = wp_http_validate_url(sanitize_url(wp_unslash($_REQUEST['feed_url'])));
+                $url = wp_http_validate_url(RequestParser::get_param('feed_url'));
             }
 
-            // phpcs:disable WordPress.Security.ValidatedSanitizedInput
-            $feedId = (!empty($_REQUEST['feed_id'])
-                       && ctype_digit((string) $_REQUEST['feed_id'])) ? (int)$_REQUEST['feed_id'] : null;
-            // phpcs:enable
-
+            $feedId = RequestParser::get_param('feed_id', null);
+            if ($feedId) {
+                $feedId = (int) $feedId;
+            }
             $feed_categories = '';
             // Different from tags they are submitted as [](int).
             if (isset($_REQUEST['feed_category']) && is_array($_REQUEST['feed_category'])) {
-                $f_cats = [];
-                // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-                foreach ($_REQUEST['feed_category'] as $feedCategory) {
-                    $f_cats[] = (int) $feedCategory;
-                }
+                $f_cats = array_map('intval', $_REQUEST['feed_category']);
                 $feed_categories = implode(',', $f_cats);
-            }
-
-            $feed_tags = '';
-            // Submitted as string of integers.
-            if (!empty($_REQUEST['feed_tags'])) {
-                $feed_tags = sanitize_text_field(wp_unslash($_REQUEST['feed_tags']));
-            }
-
-            $remove_events = false;
-            if (isset($_REQUEST['remove_events'])) {
-                $remove_events = sanitize_key(wp_unslash($_REQUEST['remove_events'])) === 'true' ? true : false;
             }
 
             $requestArgs = [
@@ -841,16 +826,14 @@ class FeedsController extends OsecBaseClass
                 // Update integer or New null.
                 'feed_id'              => $feedId,
                 'feed_category'        => $feed_categories,
-                'feed_tags'            => $feed_tags,
-                // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                // Booleans are integers in DB. Valiadted by typecasting.
-                'comments_enabled'     => (int)(bool)(int) $_REQUEST['comments_enabled'],
-                'map_display_enabled'  => (int)(bool)(int) $_REQUEST['map_display_enabled'],
-                'keep_tags_categories' => (int)(bool)(int) $_REQUEST['keep_tags_categories'],
-                'keep_old_events'      => (int)(bool)(int) $_REQUEST['keep_old_events'],
-                'import_timezone'      => (int)(bool)(int) $_REQUEST['feed_import_timezone'],
-                // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                'remove_events'        => $remove_events,
+                'feed_tags'            => RequestParser::get_param('feed_tags'),
+                // Booleans are integers in DB.
+                'comments_enabled'     => (int) RequestParser::get_param('comments_enabled', 0),
+                'map_display_enabled'  => (int) RequestParser::get_param('map_display_enabled', 0),
+                'keep_tags_categories' => (int) RequestParser::get_param('keep_tags_categories', 0),
+                'keep_old_events'      => (int) RequestParser::get_param('keep_old_events', 0),
+                'import_timezone'      => (int) RequestParser::get_param('feed_import_timezone', 0),
+                'remove_events'        => RequestParser::get_param('remove_events', false),
             ];
         }
 
@@ -884,5 +867,4 @@ class FeedsController extends OsecBaseClass
         $url_components = wp_parse_url($url);
         return $url_components['host'];
     }
-    // phpcs:enable
 }

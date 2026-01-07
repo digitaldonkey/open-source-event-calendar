@@ -293,9 +293,9 @@ class EventEditing extends OsecBaseClass
                 $_POST[$field] = $to_value;
             }
         }
-        $_POST                = _wp_translate_postdata(false, $_POST);
-        $_POST['post_parent'] = $old_post_id;
-        $post_id              = wp_insert_post($_POST);
+        $data = _wp_translate_postdata(false, $_POST);
+        $data['post_parent'] = $old_post_id;
+        $post_id  = wp_insert_post($data);
         EventParent::factory($this->app)
                    ->event_parent($post_id, $old_post_id, $instance_id);
         return $post_id;
