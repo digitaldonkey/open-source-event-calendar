@@ -190,21 +190,27 @@ class AdminPageAddEvent extends OsecBaseClass
              * @param  string  $html  Html sting to display after venue.
              */
             'post_venue_html'  => apply_filters('osec_post_form_after_venue_html', ''),
-            'venue'            => $event->get('venue'),
-            'country'          => $event->get('country'),
-            'address'          => $event->get('address'),
-            'city'             => $event->get('city'),
-            'province'         => $event->get('province'),
-            'postal_code'      => $event->get('postal_code'),
-            'show_map'         => $event->get('show_map'),
-            'show_map_checkbox' => $event->get('show_map') ? 'checked="checked"' : '',
+            'show_coordinates_checkbox' => (bool) $show_coordinates,
+            'pane_title'       => esc_html__('Event location details', 'open-source-event-calendar'),
+            'venue_label'      => esc_html__('Venue name:', 'open-source-event-calendar'),
+            'venue'            => esc_attr($event->get('venue')),
+            'address_label'    => esc_html__('Address:', 'open-source-event-calendar'),
+            'address'          => esc_attr($event->get('address')),
             'show_coordinates' => $show_coordinates,
-            'show_coordinates_checkbox' => $show_coordinates ? 'checked="checked"' : '',
-            'longitude'        => $show_coordinates ? $event->get('longitude', 0) : '',
+            'coordinates_label' => esc_html__('Input Coordinates', 'open-source-event-calendar'),
+            'latitude_label'   => esc_html__('Latitude:', 'open-source-event-calendar'),
             'latitude'         => $show_coordinates ? (float)$event->get('latitude', 0) : '',
+            'longitude_label'   => esc_html__('Longitude:', 'open-source-event-calendar'),
+            'longitude'        => $show_coordinates ? $event->get('longitude', 0) : '',
+            'show_map'         => $event->get('show_map'),
+            'show_map_label'   => esc_html__('Show Map', 'open-source-event-calendar'),
+            'city'             => esc_html($event->get('city', '')),
+            'province'         => esc_html($event->get('province', '')),
+            'postal_code'      => esc_attr($event->get('postal_code', '')),
+            'country'          => esc_html($event->get('country', '')),
         ];
         $boxes[] = ThemeLoader::factory($this->app)
-            ->get_file('box_event_location.php', $args, true)
+            ->get_file('box_event_location.twig', $args, true)
             ->get_content();
 
         // ======================

@@ -262,7 +262,7 @@ class EventEditing extends OsecBaseClass
      * @return int|bool New post ID or false on failure
      * @throws BootstrapException
      */
-    public function create_duplicate_post()
+    public function create_duplicate_post(): ?int
     {
         if (
             !isset($_REQUEST[EventEditing::NONCE_NAME])
