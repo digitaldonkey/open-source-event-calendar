@@ -202,15 +202,18 @@ class AdminDateRepeatBox extends OsecBaseClass
             'visible'   => $visible,
             'count'     => $this->create_count_input('osec_weekly_count', $count, 52)
                              . __('week(s)', 'open-source-event-calendar'),
+            'count_label' => esc_html__('Every', 'open-source-event-calendar'),
+            'on_days_label' => _x('On', 'Recurrence editor - weekly tab', 'open-source-event-calendar'),
             'week_days' => $this->create_list_element(
                 'osec_weekly_date_select',
                 $options,
                 $selected
             ),
+
         ];
 
         return ThemeLoader::factory($this->app)
-                          ->get_file('row_weekly.php', $args, true)
+                          ->get_file('row_weekly.twig', $args, true)
                           ->get_content();
     }
 
@@ -252,6 +255,10 @@ class AdminDateRepeatBox extends OsecBaseClass
 
     /**
      * Creates a grid of weekday, day, or month selection buttons.
+     *
+     * @param string $name Label
+     * @param array $options Options
+     * @param array $selected Selected
      *
      * @return string
      */
