@@ -115,6 +115,13 @@ class FeedsController extends OsecBaseClass
                 FeedsController::factory($app)->cron();
             }
         );
+
+        add_action(
+            'wp_ajax_osec_feeds_page_post',
+            function () use ($app) {
+                FeedsController::factory($app)->handle_ajax_chron_change();
+            }
+        );
     }
 
     /**
@@ -677,6 +684,32 @@ class FeedsController extends OsecBaseClass
         return $output;
     }
 
+    public static function cron_options(): array
+    {
+        return [
+            'hourly' => esc_html__('Hourly', 'open-source-event-calendar'),
+            'twicedaily' => esc_html__('Twice Daily', 'open-source-event-calendar'),
+            'daily' => esc_html__('Daily', 'open-source-event-calendar')
+        ];
+    }
+
+    /**
+     * @return void
+     * handle_feeds_page_post
+     */
+    public function handle_ajax_chron_change()
+    {
+        if (
+            !check_ajax_referer(self::NONCE_NAME, 'nonce')
+            || !current_user_can('manage_osec_feeds')) {
+            /** @noinspection ForgottenDebugOutputInspection */
+            wp_die(esc_html__('Invalid nonce or permission', 'open-source-event-calendar'));
+        }
+        $val = RequestParser::get_param('cron_freq');
+        if (in_array($val, array_keys(self::cron_options()))) {
+            $this->app->settings->set('ics_cron_freq', $val);
+        }
+    }
     /**
      * Cron callback.
      *
@@ -773,13 +806,14 @@ class FeedsController extends OsecBaseClass
         );
 
         $cron_freq = ThemeLoader::factory($this->app)
-                                ->get_file(
-                                    'cron_freq.php',
-                                    [
-                                        'cron_freq' => $this->app->settings->get('ics_cron_freq'),
-                                    ],
-                                    true
-                                );
+            ->get_file(
+                'feed_cron_freq.twig',
+                [
+                    'options' => self::cron_options(),
+                    'cron_freq' => $this->app->settings->get('ics_cron_freq'),
+                ],
+                true
+            );
 
         $args = self::merge_commom_vars([
             'cron_freq'        => $cron_freq->get_content(),
