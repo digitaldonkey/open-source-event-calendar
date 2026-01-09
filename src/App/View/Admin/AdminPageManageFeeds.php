@@ -96,7 +96,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
             'tab_content' => $feed->get_tab_content(),
         ];
         ThemeLoader::factory($this->app)
-                   ->get_file('box_feeds.php', $args, true)
+                   ->get_file('feed_box.twig', $args, true)
                    ->render();
     }
 }
