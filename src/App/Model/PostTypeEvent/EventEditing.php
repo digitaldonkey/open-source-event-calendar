@@ -135,7 +135,11 @@ class EventEditing extends OsecBaseClass
             $event->set('cost', sanitize_text_field($postVars['osec_cost']));
         }
 
-        $event->set('is_free', isset($postVars['osec_is_free_event']) && (bool)$postVars['osec_is_free_event']);
+        if (isset($postVars['osec_is_free_event'])
+            && (bool)$postVars['osec_is_free_event']) {
+            $event->set('is_free', true);
+            $event->set('cost', '');
+        }
 
         if (! empty($postVars['osec_ticket_url'])) {
             // Clickable links.

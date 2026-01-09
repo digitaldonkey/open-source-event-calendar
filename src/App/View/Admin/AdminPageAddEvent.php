@@ -217,13 +217,19 @@ class AdminPageAddEvent extends OsecBaseClass
         // = Display event cost =
         // ======================
         $args    = [
-            'cost'       => $event->get('cost'),
-            'is_free'    => $event->is_free(),
-            'ticket_url' => $event->get('ticket_url'),
+            'pane_title' => esc_html__('Event cost and Tickets', 'open-source-event-calendar'),
+            'cost_label' => esc_html__('Cost', 'open-source-event-calendar'),
+            'cost' => esc_attr($event->get('cost')),
+            'is_free_event_label' => esc_html__('Free event', 'open-source-event-calendar'),
+            'is_free' => $event->is_free(),
+            'ticket_url_label' => (!$event->is_free()) ?
+                    esc_html__('Buy Tickets URL:', 'open-source-event-calendar')
+                    : esc_html__('Registration URL:', 'open-source-event-calendar'),
+            'ticket_url' => esc_attr($event->get('ticket_url')),
             'event'      => $event,
         ];
         $boxes[] = ThemeLoader::factory($this->app)
-            ->get_file('box_event_cost.php', $args, true)
+            ->get_file('box_event_cost.twig', $args, true)
             ->get_content();
 
         // =========================================

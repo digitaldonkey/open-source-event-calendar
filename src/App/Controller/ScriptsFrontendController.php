@@ -431,6 +431,8 @@ class ScriptsFrontendController extends OsecBaseClass
                 'For week and day view, you must select an interval of at least 6 hours.',
                 'open-source-event-calendar'
             ),
+            'label_a_rsvp_url' => __('Registration URL:', 'open-source-event-calendar'),
+            'label_a_buy_tickets_url' => __('Buy Tickets URL:', 'open-source-event-calendar'),
         ];
 
         /**
