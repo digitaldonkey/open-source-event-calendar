@@ -1,4 +1,4 @@
-<select name="cron_freq">
+<select name="cron_freq" id="cron_freq">
     {% for key, option in options %}
         <option value="{{ key }}"{% if key == cron_freq %} selected="selected"{% endif %}>
             {{ option }}

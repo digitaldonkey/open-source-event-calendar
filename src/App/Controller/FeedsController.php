@@ -146,10 +146,6 @@ class FeedsController extends OsecBaseClass
                 'cron_freq_label'  => esc_html__('Check for new events', 'open-source-event-calendar'),
                 'allow_comments_label' => esc_html__('Allow comments on imported events', 'open-source-event-calendar'),
                 'enable_maps_label' => esc_html__('Show map on imported events', 'open-source-event-calendar'),
-                'keep_old_events_label' => esc_html__(
-                    'On refresh, preserve previously imported events that are missing from the feed',
-                    'open-source-event-calendar'
-                ),
                 'feed_import_timezone_label' => esc_html__(
                     'Assign default time zone to events in UTC',
                     'open-source-event-calendar'
@@ -173,7 +169,7 @@ class FeedsController extends OsecBaseClass
                     'Keep original events categories and tags',
                     'open-source-event-calendar'
                 ),
-                'keep_events_on_refresh_label' => esc_html__(
+                'keep_old_events_label' => esc_html__(
                     'On refresh, preserve previously imported events that are missing from the feed',
                     'open-source-event-calendar'
                 ),
@@ -751,20 +747,15 @@ class FeedsController extends OsecBaseClass
      */
     public function get_tab_header(): string
     {
-        // Use the standard view helper
-        $args = [
-            'title' => $this->get_tab_title(),
-            'id'    => $this->variables['id'],
-        ];
-
         return ThemeLoader::factory($this->app)
-                          ->get_file('plugins/tab_header.php', $args, true)
-                          ->get_content();
-    }
-
-    public function get_tab_title()
-    {
-        return __('ICS', 'open-source-event-calendar');
+          ->get_file(
+              'feed_tab_header.twig',
+              [
+                  'title' => esc_html__('ICS', 'open-source-event-calendar'),
+                  'id'    => esc_attr($this->variables['id']),
+              ],
+              true
+          )->get_content();
     }
 
     public function get_tab_content(): string
@@ -933,7 +924,7 @@ class FeedsController extends OsecBaseClass
             if ($feedId) {
                 $feedId = (int) $feedId;
             }
-            $feed_categories = null;
+            $feed_categories = '';
             // Different from tags they are submitted as [](int).
             if (isset($_REQUEST['feed_category']) && is_array($_REQUEST['feed_category'])) {
                 $f_cats = array_map('intval', $_REQUEST['feed_category']);
@@ -946,7 +937,7 @@ class FeedsController extends OsecBaseClass
                 // Update integer or New null.
                 'feed_id'              => $feedId,
                 'feed_category'        => $feed_categories,
-                'feed_tags'            => RequestParser::get_param('feed_tags', null),
+                'feed_tags'            => RequestParser::get_param('feed_tags', ''),
                 // Booleans are integers in DB.
                 'comments_enabled'     => (int) RequestParser::get_param('comments_enabled', 0),
                 'map_display_enabled'  => (int) RequestParser::get_param('map_display_enabled', 0),
