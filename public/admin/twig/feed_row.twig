@@ -1,0 +1,106 @@
+<div class="ai1ec-panel ai1ec-panel-default ai1ec-feed-container ai1ec-cfg-feed">
+    <div class="ai1ec-panel-heading">
+        <a data-toggle="ai1ec-collapse"
+           data-parent="#ai1ec-feeds-accordion"
+           href="#ai1ec-feed-{{ feed_id }}">
+            {{ feed_name }}
+        </a>
+    </div>
+    <div class="ai1ec-panel-collapse ai1ec-collapse " id="ai1ec-feed-{{ feed_id }}" >
+        <div class="ai1ec-panel-body">
+            <div class="ai1ec-feed-content">
+                <div class="ai1ec-form-group">
+                    <label>{{ feed_url_label }}</label>
+                    <input
+                        type="text"
+                        class="ai1ec-feed-url ai1ec-form-control"
+                        readonly="readonly"
+                        value="{{ feed_url }}"
+                    >
+                </div>
+                <input type="hidden" name="feed_id" class="ai1ec_feed_id" value="{{ feed_id }}">
+                <div class="ai1ec-clearfix">
+                    {% if event_category %}
+                        <div class="ai1ec-feed-category"
+                             data-ids="{{ event_categories_ids }}">
+                            {{ categories_label }}:
+                            <strong>{{ event_category }}</strong>
+                        </div>
+                    {% endif %}
+                    {% if tags %}
+                        <div class="ai1ec-feed-tags ai1ec-pull-left"
+                             data-ids="{{ tags_ids }}">
+                            {{ tags_label}}:
+                            <strong>{{ tags }}</strong>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {{ feeds_options_header_html|raw }}
+
+                <div class="ai1ec-clearfix">
+                    <div class="ai1ec-feed-comments-enabled"
+                         data-state="{{ comments_enabled }}">
+                        {{ comments_label }}:
+                        <strong>
+                            {% if comments_enabled %} {{ yes }} {% else %}{{ no }}{% endif %}
+                       </strong>
+                    </div>
+                    <div class="ai1ec-feed-map-display-enabled"
+                         data-state="{{ map_display_enabled }}">
+                        {{ show_map_label }}:
+                        <strong>
+                            {% if map_display_enabled %} {{ yes }} {% else %}{{ no }}{% endif %}
+                        </strong>
+                    </div>
+                </div>
+                <div class="ai1ec-feed-keep-tags-categories"
+                     data-state="{{ keep_tags_categories }}">
+                        {{ keep_taxonomy_label }}:
+                    <strong>
+                        {% if keep_tags_categories %} {{ yes }} {% else %}{{ no }}{% endif %}
+                    </strong>
+                </div>
+               {{ feeds_options_after_settings_html|raw }}
+                <div class="ai1ec-feed-keep-old-events"
+                     data-state="keep_old_events">
+                    {{ keep_events_on_refresh_label }}:
+                    <strong>
+                        {% if keep_events_on_refresh_label %} {{ yes }} {% else %}{{ no }}{% endif %}
+                    </strong>
+                </div>
+                <div class="ai1ec-feed-import-timezone"
+                     data-state="{{ feed_import_timezone }}">
+                    <span class="ai1ec-tooltip-toggle" title="{{ feed_import_timezone_info }}">{{ feed_import_timezone_label }}:</span>
+                    <strong>
+                        {% if feed_import_timezone %} {{ yes }} {% else %}{{ no }}{% endif %}
+                    </strong>
+                </div>
+               {{ after_settings_html }}
+                <div class="ai1ec-btn-group ai1ec-pull-right ai1ec-feed-actions">
+                    <button type="button"
+                            class="ai1ec-btn ai1ec-btn-sm ai1ec-btn-default ai1ec-text-primary osec_update_ics"
+                            data-loading-text="&lt;i class='ai1ec-fa ai1ec-fa-refresh ai1ec-fa-spin ai1ec-fa-fw'&gt;&lt;i&gt;{{ reloading_button_loading_text }}"
+                    >
+                        <i class="ai1ec-fa ai1ec-fa-refresh ai1ec-fa-fw"></i>
+                        {{ reloading_button_text }}
+                    </button>
+                    <button type="button"
+                            class="ai1ec-btn ai1ec-btn-sm ai1ec-btn-default ai1ec-text-warning
+                            ai1ec_edit_ics">
+                        <i class="ai1ec-fa ai1ec-fa-edit ai1ec-fa-fw"></i>
+                        {{ edit_button_text }}
+                    </button>
+                    <button
+                        type="button"
+                        class="ai1ec-btn ai1ec-btn-sm ai1ec-btn-default ai1ec-text-danger osec_delete_ics"
+                        data-loading-text="{{ remove_button_loading_text }}"
+                    >
+                        <i class="ai1ec-fa ai1ec-fa-times ai1ec-fa-fw"></i>
+                        {{ remove_button_text }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

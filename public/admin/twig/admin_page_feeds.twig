@@ -1,0 +1,96 @@
+<p>
+    {{ description }}
+</p>
+<div id="ics-alerts"></div>
+<div class="ai1ec-form-horizontal">
+    <div class="ai1ec-form-group">
+        <div class="ai1ec-col-md-12">
+            <label class="ai1ec-control-label ai1ec-pull-left" for="cron_freq">
+                {{ cron_freq_label }}:
+            </label>
+            <div class="ai1ec-col-sm-6">
+                {{ cron_freq|raw }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="ai1ec-feeds-after" class="ai1ec-feed-container ai1ec-well ai1ec-well-sm ai1ec-clearfix">
+    <div class="ai1ec-form-group">
+        <label for="osec_feed_url">
+            {{ feed_url_label }}
+        </label>
+        <input type="text" name="osec_feed_url" id="osec_feed_url"  class="ai1ec-form-control">
+    </div>
+    <div class="ai1ec-row">
+        <div class="ai1ec-col-sm-6">
+            {{ event_categories|raw }}
+        </div>
+        <div class="ai1ec-col-sm-6">
+            {{ event_tags|raw }}
+        </div>
+    </div>
+    {% if ics_feeds_header_header_html %}
+        {{ ics_feeds_header_header_html }}
+    {% endif %}
+    <div class="ai1ec-feed-comments-enabled">
+        <label for="osec_comments_enabled">
+            <input type="checkbox" name="osec_comments_enabled" id="osec_comments_enabled" value="1">
+            {{ allow_comments_label }}
+        </label>
+    </div>
+    <div class="ai1ec-feed-map-display-enabled">
+        <label for="osec_map_display_enabled">
+            <input type="checkbox" name="osec_map_display_enabled" id="osec_map_display_enabled" value="1">
+            {{ enable_maps_label }}
+        </label>
+    </div>
+    <div class="ai1ec-feed-add-tags-categories">
+        <label for="osec_add_tag_categories">
+            <input type="checkbox" name="osec_add_tag_categories" id="osec_add_tag_categories" value="1">
+            {{ add_tag_categories_label }}
+        </label>
+    </div>
+    <?php
+    /* For doc see feed_row.php */
+    do_action('osec_admin_ics_feeds_options_before_keep_original_html', null); ?>
+    <div class="ai1ec-feed-keep-old-events">
+        <label for="osec_keep_old_events">
+            <input type="checkbox" name="osec_keep_old_events" id="osec_keep_old_events" value="1">
+            {{ keep_old_events_label }}
+        </label>
+    </div>
+    <div class="ai1ec-feed-import-timezone">
+        <label for="osec_feed_import_timezone">
+            <input type="checkbox" name="osec_feed_import_timezones" id="osec_feed_import_timezone" value="1">
+            <span class="ai1ec-tooltip-toggle" title="{{ feed_import_timezone_info }}">
+                {{ feed_import_timezone_label }}
+            </span>
+        </label>
+    </div>
+    {% if after_settings_html %}
+        {{ after_settings_html }}
+    {% endif %}
+    <div class="ai1ec-pull-right">
+        <button
+            id="osec_cancel_ics"
+            type="button"
+            class="ai1ec-btn ai1ec-btn-primary ai1ec-btn-sm"
+        >
+            <i class="ai1ec-fa ai1ec-fa-cancel"></i>
+            {{ cancel_button_text }}
+        </button>
+        <button id="osec_add_new_ics"
+                type="button"
+                class="ai1ec-btn ai1ec-btn-primary ai1ec-btn-sm"
+                data-loading-text='&lt;i class="ai1ec-fa ai1ec-fa-spinner ai1ec-fa-spin ai1ec-fa-fw"&gt;&lt;/i&gt; {{ data_loading_button_text }}'>
+            <i class="ai1ec-fa ai1ec-fa-plus"></i>
+            <span id="osec_ics_add_new">{{ add_subscription_button_text}}</span>
+            <span id="osec_ics_update" class="ai1ec-hidden">{{ update_subscription_button_text }}</span>
+        </button>
+    </div>
+</div>
+<div class="timely ai1ec-form-inline ai1ec-panel-group" id="ai1ec-feeds-accordion">
+    {{ feed_rows|raw }}
+</div>
+{{ modal|raw }}

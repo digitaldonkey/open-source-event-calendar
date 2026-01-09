@@ -118,6 +118,73 @@ class FeedsController extends OsecBaseClass
     }
 
     /**
+     * Merges common params.
+     *
+     * @param  array  $data Variable data
+     *
+     * @return array Static data merged with variable data.
+     */
+    private static function merge_commom_vars(array $data): array
+    {
+        static $common_data = null;
+        if (is_null($common_data)) {
+            $common_data = [
+                'description'      => esc_html__(
+                    'Configure which other calendars your own calendar subscribes to.
+                        You can add any calendar that provides an iCalendar (.ics) feed.
+                        Enter the feed URL(s) below and the events from those feeds will be
+                        imported periodically.',
+                    'open-source-event-calendar'
+                ),
+                'cron_freq_label'  => esc_html__('Check for new events', 'open-source-event-calendar'),
+                'allow_comments_label' => esc_html__('Allow comments on imported events', 'open-source-event-calendar'),
+                'enable_maps_label' => esc_html__('Show map on imported events', 'open-source-event-calendar'),
+                'keep_old_events_label' => esc_html__(
+                    'On refresh, preserve previously imported events that are missing from the feed',
+                    'open-source-event-calendar'
+                ),
+                'feed_import_timezone_label' => esc_html__(
+                    'Assign default time zone to events in UTC',
+                    'open-source-event-calendar'
+                ),
+                'feed_import_timezone_info' => esc_html__(
+                    'Guesses the time zone of events that have none specified; recommended for Google Calendar feeds',
+                    'open-source-event-calendar'
+                ),
+                'add_tag_categories_label' => esc_html__(
+                    'Import any tags/categories provided by feed, in addition those selected above',
+                    'open-source-event-calendar'
+                ),
+                'feed_url_label'    => esc_html__('iCalendar/.ics Feed URL:', 'open-source-event-calendar'),
+                'categories_label'  => esc_html__('Event categories', 'open-source-event-calendar'),
+                'tags_label'        => esc_html__('Tag with', 'open-source-event-calendar'),
+                'comments_label'    => esc_html__('Allow comments', 'open-source-event-calendar'),
+                'yes'               => esc_html__('Yes', 'open-source-event-calendar'),
+                'no'                => esc_html__('No', 'open-source-event-calendar'),
+                'show_map_label'    => esc_html__('Show map', 'open-source-event-calendar'),
+                'keep_taxonomy_label' => esc_html__(
+                    'Keep original events categories and tags',
+                    'open-source-event-calendar'
+                ),
+                'keep_events_on_refresh_label' => esc_html__(
+                    'On refresh, preserve previously imported events that are missing from the feed',
+                    'open-source-event-calendar'
+                ),
+                'cancel_button_text' => esc_html__('Cancel', 'open-source-event-calendar'),
+                'data_loading_button_text' =>  __('Please wait&#8230;', 'open-source-event-calendar'),
+                'add_subscription_button_text' => esc_html__('Add new subscription', 'open-source-event-calendar'),
+                'update_subscription_button_text' => esc_html__('Update subscription', 'open-source-event-calendar'),
+                'reloading_button_loading_text' => esc_html__('Refreshing&#8230', 'open-source-event-calendar'),
+                'reloading_button_text' => esc_html__('Refresh', 'open-source-event-calendar'),
+                'edit_button_text' => esc_html__('Edit', 'open-source-event-calendar'),
+                'remove_button_loading_text' => esc_html__('Removing&#8230;', 'open-source-event-calendar'),
+                'remove_button_text' => esc_html__('Remove', 'open-source-event-calendar'),
+            ];
+        }
+        return array_merge($common_data, $data);
+    }
+
+    /**
      * add_ics_feed function
      *
      * Adds submitted ics feed to the database
@@ -210,24 +277,48 @@ class FeedsController extends OsecBaseClass
             }
         }
 
-        $args = [
-            'feed_url'             => $entry['feed_url'],
+        $args = self::merge_commom_vars([
             'feed_name'            => $feed_name,
+            'feed_url'             => $entry['feed_url'],
             'event_category'       => implode(', ', $categories),
-            'categories_ids'       => $entry['feed_category'],
+            'event_categories_ids'       => $entry['feed_category'],
             'tags'                 => str_replace(',', ', ', $entry['feed_tags']),
             'tags_ids'             => $entry['feed_tags'],
             'feed_id'              => $feedId,
-            'comments_enabled'     => (bool) $entry['comments_enabled'],
-            'map_display_enabled'  => (bool) $entry['map_display_enabled'],
+            'comments_enabled'     => (int) $entry['comments_enabled'],
+            'map_display_enabled'  => (int) $entry['map_display_enabled'],
             'events'               => 0,
-            'keep_tags_categories' => (bool) $entry['keep_tags_categories'],
-            'keep_old_events'      => (bool) $entry['keep_old_events'],
-            'feed_import_timezone' => (bool) $entry['import_timezone'],
-        ];
+            'keep_tags_categories' => (int) $entry['keep_tags_categories'],
+            'keep_old_events'      => (int) $entry['keep_old_events'],
+            'feed_import_timezone' => (int) $entry['import_timezone'],
+            /**
+             * Add Html content above feeds options
+             *
+             * On Feeds admin page you can return any Html sting.
+             *
+             * @since 1.0
+             *
+             * @param ?int  $feedId  Feed ID. If not set it is printed above all feeds.
+             */
+            'feeds_options_header_html' => apply_filters('osec_admin_ics_feeds_options_header_html', '', $feedId),
+            /**
+             * Add Html content below feeds options
+             *
+             * On Feeds admin page you can echo/print any Html sting.
+             *
+             * @since 1.0
+             *
+             * @param ?int  $feedId  DB id of the feed or null for empty form.
+             */
+            'feeds_options_after_settings_html' => apply_filters(
+                'osec_admin_ics_feeds_options_after_settings_html',
+                '',
+                $feedId
+            ),
+        ]);
 
         // Display added feed row.
-        $file   = ThemeLoader::factory($this->app)->get_file('feed_row.php', $args, true);
+        $file   = ThemeLoader::factory($this->app)->get_file('feed_row.twig', $args, true);
         $output = $file->get_content();
         $output = [
             'error'   => false,
@@ -504,18 +595,6 @@ class FeedsController extends OsecBaseClass
         }
     }
 
-    // **
-    // * Renders the opening div of the tab and set the active status if this tab
-    // * is the active one
-    // *
-    // * @param string $active_feed the tab that should be active.
-    // */
-    // protected function render_opening_div_of_tab() : string {
-    // $args = ['id' => $this->variables['id']];
-    // $file = ThemeLoader::factory($this->app)->get_file('plugins/render_opening_div.php', $args, TRUE);
-    // return $file->get_content();
-    // }
-
     /**
      * Delete feeds and events
      */
@@ -702,16 +781,24 @@ class FeedsController extends OsecBaseClass
                                     true
                                 );
 
-        $args = [
+        $args = self::merge_commom_vars([
             'cron_freq'        => $cron_freq->get_content(),
-            'event_categories' => $select2_cats,
-            'event_tags'       => $select2_tags,
+            'event_categories' => $select2_cats->get_content(),
+            'event_tags'       => $select2_tags->get_content(),
+            'feeds_options_header_html' => apply_filters(
+                'osec_admin_ics_feeds_options_header_html',
+                null
+            ),
+            'feeds_options_after_settings_html' => apply_filters(
+                'osec_admin_ics_feeds_options_after_settings_html',
+                null
+            ),
             'feed_rows'        => $this->getRows(),
             'modal'            => $modal->render(),
-        ];
+        ]);
 
         $html .= ThemeLoader::factory($this->app)
-                            ->get_file('plugins/ics/display_feeds.php', $args, true)
+                            ->get_file('admin_page_feeds.twig', $args, true)
                             ->get_content();
         $html .= '</div>';
 
@@ -760,24 +847,23 @@ class FeedsController extends OsecBaseClass
                 }
             }
             unset($feed_categories);
-
-            $args = [
-                'feed_url'             => esc_attr($row->feed_url),
-                'feed_name'            => esc_attr(! empty($row->feed_name) ? $row->feed_name : $row->feed_url),
-                'event_category'       => implode(', ', $categories),
-                'categories_ids'       => esc_attr($row->feed_category),
-                'tags'                 => stripslashes(
+            $args = self::merge_commom_vars([
+                'feed_name' => esc_attr(! empty($row->feed_name) ? $row->feed_name : $row->feed_url),
+                'feed_url' => esc_attr($row->feed_url),
+                'event_category' => implode(', ', $categories),
+                'event_categories_ids' => esc_attr($row->feed_category),
+                'tags' => stripslashes(
                     str_replace(',', ', ', esc_attr($row->feed_tags))
                 ),
                 'tags_ids'             => esc_attr($row->feed_tags),
                 'feed_id'              => $row->feed_id,
-                'comments_enabled'     => (bool)(int)$row->comments_enabled,
-                'map_display_enabled'  => (bool)(int)$row->map_display_enabled,
-                'keep_tags_categories' => (bool)(int)$row->keep_tags_categories,
-                'keep_old_events'      => (bool)(int)$row->keep_old_events,
-                'feed_import_timezone' => (bool)(int)$row->import_timezone,
-            ];
-            $html .= ThemeLoader::factory($this->app)->get_file('feed_row.php', $args, true)
+                'comments_enabled'     => (int) $row->comments_enabled,
+                'map_display_enabled'  => (int) $row->map_display_enabled,
+                'keep_tags_categories' => (int) $row->keep_tags_categories,
+                'keep_old_events'      => (int) $row->keep_old_events,
+                'feed_import_timezone' => (int) $row->import_timezone,
+            ]);
+            $html .= ThemeLoader::factory($this->app)->get_file('feed_row.twig', $args, true)
                                 ->get_content();
         }
 
@@ -813,7 +899,7 @@ class FeedsController extends OsecBaseClass
             if ($feedId) {
                 $feedId = (int) $feedId;
             }
-            $feed_categories = '';
+            $feed_categories = null;
             // Different from tags they are submitted as [](int).
             if (isset($_REQUEST['feed_category']) && is_array($_REQUEST['feed_category'])) {
                 $f_cats = array_map('intval', $_REQUEST['feed_category']);
@@ -826,7 +912,7 @@ class FeedsController extends OsecBaseClass
                 // Update integer or New null.
                 'feed_id'              => $feedId,
                 'feed_category'        => $feed_categories,
-                'feed_tags'            => RequestParser::get_param('feed_tags'),
+                'feed_tags'            => RequestParser::get_param('feed_tags', null),
                 // Booleans are integers in DB.
                 'comments_enabled'     => (int) RequestParser::get_param('comments_enabled', 0),
                 'map_display_enabled'  => (int) RequestParser::get_param('map_display_enabled', 0),

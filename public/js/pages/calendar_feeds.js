@@ -1330,7 +1330,7 @@ timely.define("domReady", [], function () {
     }(e)
 }), timely.define("scripts/calendar_feeds/ics/ics_event_handlers", ["jquery_timely", "scripts/calendar_feeds/ics/ics_ajax_handlers", "libs/utils", "ai1ec_config", "external_libs/select2"], function ($, t, n, r) {
     var i = n.get_ajax_url(), s = function () {
-        var s = $(this), o = $("#osec_feed_url"), u = o.val().replace("webcal://", "http://"),
+        var s = $(this), o = $("#osec_feed_url"), u = o.val().trim().replace("webcal://", "http://"),
             a = $("#osec_feed_id").val(), f = !1, l;
         $(".ai1ec-feed-url, #osec_feed_url").css("border-color", "#DFDFDF"), $("#ai1ec-feed-error").remove(), a || $(".ai1ec-feed-url").each(function () {
             this.value === u && ($(this).css("border-color", "#FF0000"), f = !0, l = r.duplicate_feed_message)
