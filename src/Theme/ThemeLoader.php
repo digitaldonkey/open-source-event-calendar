@@ -32,11 +32,6 @@ class ThemeLoader extends OsecBaseClass
     public const OPTION_FORCE_CLEAN = 'osec_clean_twig_cache';
 
     /**
-     * @const string Prefix for theme arguments filter name.
-     */
-    public const ARGS_FILTER_PREFIX = 'osecc_theme_args_';
-
-    /**
      * @var array contains the admin and theme paths.
      */
     protected array $paths = [
@@ -191,8 +186,7 @@ class ThemeLoader extends OsecBaseClass
     public function apply_filters_to_args(array $args, string $filename, bool $is_admin): array
     {
         return apply_filters(
-            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
-            self::ARGS_FILTER_PREFIX . $filename,
+            'osecc_theme_args_' . $filename,
             $args,
             $is_admin
         );
@@ -276,6 +270,7 @@ class ThemeLoader extends OsecBaseClass
         $throw_exception = true,
         array $paths = null
     ): FileAbstract {
+
         $fileExt      = pathinfo($filename, PATHINFO_EXTENSION);
         $fileBasename = pathinfo($filename, PATHINFO_FILENAME);
         switch ($fileExt) {
@@ -292,9 +287,17 @@ class ThemeLoader extends OsecBaseClass
                 break;
 
             case 'php':
+                /**
+                 * Alter arguments before template file is processed.
+                 *
+                 * @since 1.0
+                 *
+                 * @param string $filename  Filename, prefixed with osecc_theme_args_.
+                 * @param array $args Variables to change.
+                 * @param bool $is_admin Admin template or not.
+                 */
                 $args = apply_filters(
-                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
-                    self::ARGS_FILTER_PREFIX . $filename,
+                    'osecc_theme_args_' . $filename,
                     $args,
                     $is_admin
                 );
@@ -306,9 +309,9 @@ class ThemeLoader extends OsecBaseClass
                 break;
 
             case 'twig':
+                // Hook doc see above.
                 $args = apply_filters(
-                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
-                    self::ARGS_FILTER_PREFIX . $filename,
+                    'osecc_theme_args_' . $filename,
                     $args,
                     $is_admin
                 );

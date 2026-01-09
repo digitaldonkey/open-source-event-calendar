@@ -1,17 +1,10 @@
-<?php
-if ( ! defined('ABSPATH') ) {
-    exit;
-}
-// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
-// Output in osec/public is escaped by the file loader Theme/FileAbstract:render().
-?>
 <div class="ai1ec-panel-heading">
     <a data-toggle="ai1ec-collapse"
        id="osec-event-contact-link"
        data-parent="#osec-add-new-event-accordion"
        href="#osec-event-contact-box">
         <i class="ai1ec-fa ai1ec-fa-phone ai1ec-fa-fw"></i>
-        <?php esc_html_e('Organizer contact info', 'open-source-event-calendar'); ?>
+        {{ pane_title }}
         <i class="ai1ec-fa ai1ec-fa-warning ai1ec-fa-fw ai1ec-hidden"></i>
     </a>
 </div>
@@ -22,54 +15,54 @@ if ( ! defined('ABSPATH') ) {
             <tr>
                 <td class="ai1ec-first">
                     <label for="osec_contact_name">
-                        <?php esc_html_e('Contact name:', 'open-source-event-calendar'); ?>
+                        {{ contact_name_label }}
                     </label>
                 </td>
                 <td>
                     <input type="text" name="osec_contact_name"
                            id="osec_contact_name"
                            class="ai1ec-form-control"
-                           value="<?php echo esc_attr($contact_name); ?>">
+                           value="{{ contact_name }}">
                 </td>
             </tr>
             <tr>
                 <td>
                     <label for="osec_contact_phone">
-                        <?php esc_html_e('Phone:', 'open-source-event-calendar'); ?>
+                        {{ contact_phone_label }}
                     </label>
                 </td>
                 <td>
                     <input type="text" name="osec_contact_phone"
                            id="osec_contact_phone"
                            class="ai1ec-form-control"
-                           value="<?php echo esc_attr($contact_phone); ?>">
+                           value="{{ contact_phone }}">
                 </td>
             </tr>
             <tr>
                 <td>
                     <label for="osec_contact_email">
-                        <?php esc_html_e('E-mail:', 'open-source-event-calendar'); ?>
+                        {{ contact_email_label }}
                     </label>
                 </td>
                 <td>
                     <input name="osec_contact_email"
-                           type="text"
+                           type="email"
                            id="osec_contact_email"
                            class="ai1ec-form-control"
-                           value="<?php echo esc_attr($contact_email); ?>">
+                           value="{{ contact_email }}">
                 </td>
             </tr>
             <tr>
                 <td>
                     <label for="osec_contact_url">
-                        <?php esc_html_e('Website URL:', 'open-source-event-calendar'); ?>
+                        {{ contact_url_label }}
                     </label>
                 </td>
                 <td>
                     <input type="text" name="osec_contact_url"
                            id="osec_contact_url"
                            class="ai1ec-form-control"
-                           value="<?php echo esc_attr($contact_url); ?>">
+                           value="{{ contact_url }}">
                 </td>
             </tr>
             </tbody>

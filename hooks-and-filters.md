@@ -289,6 +289,88 @@ do_action('osec_ics_feed_added', $feedId $entry);
 </details>
 
 
+### osec_admin_ics_feeds_options_header_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Add Html content above feeds options
+
+```php
+add_filter('osec_admin_ics_feeds_options_header_html', $feedId);
+```
+
+#### Description
+
+
+On Feeds admin page you can return any Html sting.
+
+#### Parameters
+
+
+ - **$feedId** <span style="color:crimson"> </span> Feed ID. If not set it is printed above all feeds.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Add Html content above feeds options
+ *
+ * On Feeds admin page you can return any Html sting.
+ *
+ * @since 1.0
+ *
+ * @param ?int  $feedId  Feed ID. If not set it is printed above all feeds.
+ *
+ * @file src/App/Controller/FeedsController.php
+ */
+add_filter('osec_admin_ics_feeds_options_header_html', $feedId);
+```
+
+</details>
+
+
+### osec_admin_ics_feeds_options_after_settings_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Add Html content below feeds options
+
+```php
+add_filter('osec_admin_ics_feeds_options_after_settings_html', $feedId);
+```
+
+#### Description
+
+
+On Feeds admin page you can echo/print any Html sting.
+
+#### Parameters
+
+
+ - **$feedId** <span style="color:crimson"> </span> DB id of the feed or null for empty form.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Add Html content below feeds options
+ *
+ * On Feeds admin page you can echo/print any Html sting.
+ *
+ * @since 1.0
+ *
+ * @param ?int  $feedId  DB id of the feed or null for empty form.
+ *
+ * @file src/App/Controller/FeedsController.php
+ */
+add_filter('osec_admin_ics_feeds_options_after_settings_html', $feedId);
+```
+
+</details>
+
+
 ### osec_ics_before_import <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
@@ -3210,6 +3292,43 @@ add_filter('osec_event_color_squares', $event $squares);
 </details>
 
 
+### osec_event_rest_categories <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Allow add-ons to modify/add to category data, category image/image size for REST API..
+
+```php
+add_filter('osec_event_rest_categories', $event $categories);
+```
+
+#### Parameters
+
+
+ - **$event** <span style="color:crimson"> </span> event being processed
+ - **$categories** <span style="color:crimson"> </span> Event category data
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Allow add-ons to modify/add to category data, category image/image size  for REST API..
+ *
+ * @since 1.0.5
+ *
+ * @param  Event  $event  event being processed
+ *
+ * @param  array  $categories  Event category data
+ *
+ * @file src/App/View/Event/EventTaxonomyView.php
+ */
+add_filter('osec_event_rest_categories', $event $categories);
+```
+
+</details>
+
+
 ---
 
 
@@ -3820,7 +3939,7 @@ add_filter('osec_export_filter', $filter);
 Alter Settings before validation.
 
 ```php
-add_filter('osec_pre_validate_settings', $_POST);
+add_filter('osec_pre_validate_settings', $_REQUEST);
 ```
 
 #### Description
@@ -3831,7 +3950,7 @@ Let other plugin modify the POST variables before validations of settings.
 #### Parameters
 
 
- - **$_POST** <span style="color:crimson"> </span> Maybe unvalidated variables.
+ - **$_REQUEST** <span style="color:crimson"> </span> Maybe unvalidated variables.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -3846,11 +3965,11 @@ Let other plugin modify the POST variables before validations of settings.
  *
  * @since 1.0
  *
- * @param  array  $_POST  Maybe unvalidated variables.
+ * @param  array  $_REQUEST  Maybe unvalidated variables.
  *
  * @file src/Command/SaveSettings.php
  */
-add_filter('osec_pre_validate_settings', $_POST);
+add_filter('osec_pre_validate_settings', $_REQUEST);
 ```
 
 </details>
@@ -3905,7 +4024,7 @@ add_filter('osec{$method}', $method $value);
 Alter Settings before save.
 
 ```php
-add_filter('osec_pre_save_settings', $_POST);
+add_filter('osec_pre_save_settings', $value);
 ```
 
 #### Description
@@ -3916,7 +4035,7 @@ Let other plugin modify the POST variables before saving settings.
 #### Parameters
 
 
- - **$_POST** <span style="color:crimson"> </span> Maybe unvalidated variables.
+ - **$value** <span style="color:crimson"> </span> Maybe unvalidated variables.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -3931,11 +4050,11 @@ Let other plugin modify the POST variables before saving settings.
  *
  * @since 1.0
  *
- * @param  array  $_POST  Maybe unvalidated variables.
+ * @param  array  $value  Maybe unvalidated variables.
  *
  * @file src/Command/SaveSettings.php
  */
-add_filter('osec_pre_save_settings', $_POST);
+add_filter('osec_pre_save_settings', $value);
 ```
 
 </details>
@@ -4332,7 +4451,7 @@ add_filter('osec_date_picker_href_args', $href_args $args);
 ### osec_register_theme <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter theme paths.
+Add or alter theme paths.
 
 ```php
 add_filter('osec_register_theme', $theme_dirs);
@@ -4349,7 +4468,7 @@ add_filter('osec_register_theme', $theme_dirs);
 
 ```php
 /**
- * Alter theme paths.
+ * Add or alter theme paths.
  *
  * @since 1.0
  *
@@ -4399,6 +4518,44 @@ add_filter('osec_theme_loader_path_alter', $path_data $target $is_extension);
  * @file src/Theme/ThemeLoader.php
  */
 add_filter('osec_theme_loader_path_alter', $path_data $target $is_extension);
+```
+
+</details>
+
+
+### osecc_theme_args_{$filename} <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter arguments before template file is processed.
+
+```php
+add_filter('osecc_theme_args_{$filename}', $filename $args $is_admin);
+```
+
+#### Parameters
+
+
+ - **$filename** <span style="color:crimson"> string</span> Filename, prefixed with osecc_theme_args_.
+ - **$args** <span style="color:crimson"> array</span> Variables to change.
+ - **$is_admin** <span style="color:crimson"> bool</span> Admin template or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter arguments before template file is processed.
+ *
+ * @since 1.0
+ *
+ * @param string $filename  Filename, prefixed with osecc_theme_args_.
+ * @param array $args Variables to change.
+ * @param bool $is_admin Admin template or not.
+ *
+ * @file src/Theme/ThemeLoader.php
+ */
+add_filter('osecc_theme_args_{$filename}', $filename $args $is_admin);
 ```
 
 </details>
@@ -4723,6 +4880,88 @@ do_action('osec_ics_feed_added', $feedId $entry);
 </details>
 
 
+### osec_admin_ics_feeds_options_header_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Add Html content above feeds options
+
+```php
+add_filter('osec_admin_ics_feeds_options_header_html', $feedId);
+```
+
+#### Description
+
+
+On Feeds admin page you can return any Html sting.
+
+#### Parameters
+
+
+ - **$feedId** <span style="color:crimson"> </span> Feed ID. If not set it is printed above all feeds.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Add Html content above feeds options
+ *
+ * On Feeds admin page you can return any Html sting.
+ *
+ * @since 1.0
+ *
+ * @param ?int  $feedId  Feed ID. If not set it is printed above all feeds.
+ *
+ * @file src/App/Controller/FeedsController.php
+ */
+add_filter('osec_admin_ics_feeds_options_header_html', $feedId);
+```
+
+</details>
+
+
+### osec_admin_ics_feeds_options_after_settings_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Add Html content below feeds options
+
+```php
+add_filter('osec_admin_ics_feeds_options_after_settings_html', $feedId);
+```
+
+#### Description
+
+
+On Feeds admin page you can echo/print any Html sting.
+
+#### Parameters
+
+
+ - **$feedId** <span style="color:crimson"> </span> DB id of the feed or null for empty form.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Add Html content below feeds options
+ *
+ * On Feeds admin page you can echo/print any Html sting.
+ *
+ * @since 1.0
+ *
+ * @param ?int  $feedId  DB id of the feed or null for empty form.
+ *
+ * @file src/App/Controller/FeedsController.php
+ */
+add_filter('osec_admin_ics_feeds_options_after_settings_html', $feedId);
+```
+
+</details>
+
+
 ### osec_ics_before_import <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
@@ -7644,6 +7883,43 @@ add_filter('osec_event_color_squares', $event $squares);
 </details>
 
 
+### osec_event_rest_categories <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Allow add-ons to modify/add to category data, category image/image size for REST API..
+
+```php
+add_filter('osec_event_rest_categories', $event $categories);
+```
+
+#### Parameters
+
+
+ - **$event** <span style="color:crimson"> </span> event being processed
+ - **$categories** <span style="color:crimson"> </span> Event category data
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Allow add-ons to modify/add to category data, category image/image size  for REST API..
+ *
+ * @since 1.0.5
+ *
+ * @param  Event  $event  event being processed
+ *
+ * @param  array  $categories  Event category data
+ *
+ * @file src/App/View/Event/EventTaxonomyView.php
+ */
+add_filter('osec_event_rest_categories', $event $categories);
+```
+
+</details>
+
+
 ---
 
 
@@ -8254,7 +8530,7 @@ add_filter('osec_export_filter', $filter);
 Alter Settings before validation.
 
 ```php
-add_filter('osec_pre_validate_settings', $_POST);
+add_filter('osec_pre_validate_settings', $_REQUEST);
 ```
 
 #### Description
@@ -8265,7 +8541,7 @@ Let other plugin modify the POST variables before validations of settings.
 #### Parameters
 
 
- - **$_POST** <span style="color:crimson"> </span> Maybe unvalidated variables.
+ - **$_REQUEST** <span style="color:crimson"> </span> Maybe unvalidated variables.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -8280,11 +8556,11 @@ Let other plugin modify the POST variables before validations of settings.
  *
  * @since 1.0
  *
- * @param  array  $_POST  Maybe unvalidated variables.
+ * @param  array  $_REQUEST  Maybe unvalidated variables.
  *
  * @file src/Command/SaveSettings.php
  */
-add_filter('osec_pre_validate_settings', $_POST);
+add_filter('osec_pre_validate_settings', $_REQUEST);
 ```
 
 </details>
@@ -8339,7 +8615,7 @@ add_filter('osec{$method}', $method $value);
 Alter Settings before save.
 
 ```php
-add_filter('osec_pre_save_settings', $_POST);
+add_filter('osec_pre_save_settings', $value);
 ```
 
 #### Description
@@ -8350,7 +8626,7 @@ Let other plugin modify the POST variables before saving settings.
 #### Parameters
 
 
- - **$_POST** <span style="color:crimson"> </span> Maybe unvalidated variables.
+ - **$value** <span style="color:crimson"> </span> Maybe unvalidated variables.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -8365,11 +8641,11 @@ Let other plugin modify the POST variables before saving settings.
  *
  * @since 1.0
  *
- * @param  array  $_POST  Maybe unvalidated variables.
+ * @param  array  $value  Maybe unvalidated variables.
  *
  * @file src/Command/SaveSettings.php
  */
-add_filter('osec_pre_save_settings', $_POST);
+add_filter('osec_pre_save_settings', $value);
 ```
 
 </details>
@@ -8766,7 +9042,7 @@ add_filter('osec_date_picker_href_args', $href_args $args);
 ### osec_register_theme <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter theme paths.
+Add or alter theme paths.
 
 ```php
 add_filter('osec_register_theme', $theme_dirs);
@@ -8783,7 +9059,7 @@ add_filter('osec_register_theme', $theme_dirs);
 
 ```php
 /**
- * Alter theme paths.
+ * Add or alter theme paths.
  *
  * @since 1.0
  *
@@ -8838,6 +9114,44 @@ add_filter('osec_theme_loader_path_alter', $path_data $target $is_extension);
 </details>
 
 
+### osecc_theme_args_{$filename} <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter arguments before template file is processed.
+
+```php
+add_filter('osecc_theme_args_{$filename}', $filename $args $is_admin);
+```
+
+#### Parameters
+
+
+ - **$filename** <span style="color:crimson"> string</span> Filename, prefixed with osecc_theme_args_.
+ - **$args** <span style="color:crimson"> array</span> Variables to change.
+ - **$is_admin** <span style="color:crimson"> bool</span> Admin template or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter arguments before template file is processed.
+ *
+ * @since 1.0
+ *
+ * @param string $filename  Filename, prefixed with osecc_theme_args_.
+ * @param array $args Variables to change.
+ * @param bool $is_admin Admin template or not.
+ *
+ * @file src/Theme/ThemeLoader.php
+ */
+add_filter('osecc_theme_args_{$filename}', $filename $args $is_admin);
+```
+
+</details>
+
+
 ### osec_twig_environment_settings_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -8875,134 +9189,6 @@ Alter variables beforeinitalisation of Twig\Environment($twigLoader, $environmen
  * @file src/Theme/ThemeLoader.php
  */
 add_filter('osec_twig_environment_settings_alter', $environment);
-```
-
-</details>
-
-
----
-
-
-@file **../public/admin/feed_row.php**
-
-### osec_admin_ics_feeds_options_header_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Add Html content above feeds options
-
-```php
-do_action('osec_admin_ics_feeds_options_header_html', $feed_id);
-```
-
-#### Description
-
-
-On Feeds admin page you can echo/print any Html sting.
-
-#### Parameters
-
-
- - **$feed_id** <span style="color:crimson"> </span> DB id of the feed.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Add Html content above feeds options
- *
- * On Feeds admin page you can echo/print any Html sting.
- *
- * @since 1.0
- *
- * @param ?int  $feed_id  DB id of the feed.
- *
- * @file public/admin/feed_row.php
- */
-do_action('osec_admin_ics_feeds_options_header_html', $feed_id);
-```
-
-</details>
-
-
-### osec_admin_ics_feeds_options_before_keep_original_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Add Html content above keep-options
-
-```php
-do_action('osec_admin_ics_feeds_options_before_keep_original_html', $feed_id);
-```
-
-#### Description
-
-
-On Feeds admin page you can echo/print any Html sting.
-
-#### Parameters
-
-
- - **$feed_id** <span style="color:crimson"> </span> DB id of the feed if in feed context.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Add Html content above keep-options
- *
- * On Feeds admin page you can echo/print any Html sting.
- *
- * @since 1.0
- *
- * @param ?int  $feed_id  DB id of the feed if in feed context.
- *
- * @file public/admin/feed_row.php
- */
-do_action('osec_admin_ics_feeds_options_before_keep_original_html', $feed_id);
-```
-
-</details>
-
-
-### osec_admin_ics_feeds_options_after_settings_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Add Html content below feeds options
-
-```php
-do_action('osec_admin_ics_feeds_options_after_settings_html', $feed_id);
-```
-
-#### Description
-
-
-On Feeds admin page you can echo/print any Html sting.
-
-#### Parameters
-
-
- - **$feed_id** <span style="color:crimson"> </span> DB id of the feed.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Add Html content below feeds options
- *
- * On Feeds admin page you can echo/print any Html sting.
- *
- * @since 1.0
- *
- * @param ?int  $feed_id  DB id of the feed.
- *
- * @file public/admin/feed_row.php
- */
-do_action('osec_admin_ics_feeds_options_after_settings_html', $feed_id);
 ```
 
 </details>

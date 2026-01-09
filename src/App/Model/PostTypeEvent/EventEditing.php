@@ -156,10 +156,7 @@ class EventEditing extends OsecBaseClass
         }
 
         if (! empty($postVars['osec_contact_email'])) {
-            // TODO  This should be sanitize_email().
-            //  Current Frontend Input validation does not support email fields.
-            //  @see public/admin/box_event_contact.php
-            $event->set('contact_email', sanitize_text_field($postVars['osec_contact_email']));
+            $event->set('contact_email', sanitize_email($postVars['osec_contact_email']));
         }
 
         $showCoordinates = isset($postVars['osec_input_coordinates']) && (bool)$postVars['osec_input_coordinates'];

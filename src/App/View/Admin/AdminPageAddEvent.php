@@ -230,14 +230,19 @@ class AdminPageAddEvent extends OsecBaseClass
         // = Display organizer contact information =
         // =========================================
         $args    = [
-            'contact_name'  => $event->get('contact_name'),
-            'contact_phone' => $event->get('contact_phone'),
-            'contact_email' => $event->get('contact_email'),
-            'contact_url'   => $event->get('contact_url'),
+            'pane_title' => esc_html__('Organizer contact info', 'open-source-event-calendar'),
+            'contact_name_label' => esc_html__('Contact name:', 'open-source-event-calendar'),
+            'contact_name'  => esc_attr($event->get('contact_name')),
+            'contact_phone_label' => esc_html__('Phone:', 'open-source-event-calendar'),
+            'contact_phone' => esc_attr($event->get('contact_phone')),
+            'contact_email_label' => esc_html__('E-mail:', 'open-source-event-calendar'),
+            'contact_email' => esc_attr($event->get('contact_email')),
+            'contact_url_label' => esc_html__('Website URL:', 'open-source-event-calendar'),
+            'contact_url'   => esc_attr($event->get('contact_url')),
             'event'         => $event,
         ];
         $boxes[] = ThemeLoader::factory($this->app)
-            ->get_file('box_event_contact.php', $args, true)
+            ->get_file('box_event_contact.twig', $args, true)
             ->get_content();
 
         // ==========================
