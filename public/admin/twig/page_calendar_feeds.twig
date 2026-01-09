@@ -1,0 +1,18 @@
+<div class="wrap">
+    <h2>{{ title }}</h2>
+    <div id="poststuff">
+        <form method="post" action="" enctype="multipart/form-data">
+            {% for nonce in nonces %}
+                {{ nonce|raw }}
+            {% endfor %}
+            <div class="metabox-holder">
+                <div class="post-box-container column-1-ai1ec left-side timely">
+                    {{ page_left|raw }}
+                </div>
+                <div class="post-box-container column-2-ai1ec right-side timely">
+                    {{ page_right|raw }}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

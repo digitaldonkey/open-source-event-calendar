@@ -3,6 +3,7 @@
 namespace Osec\App\View\Admin;
 
 use Osec\App\Controller\FeedsController;
+use Osec\Helper\MetaBoxHelper;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -66,13 +67,26 @@ class AdminPageManageFeeds extends AdminPageAbstract
      */
     public function display_page(): void
     {
+        $settings_page = $this->app->settings->get('feeds_page');
         $args = [
             'title'             => __('OSEC: Calendar Feeds', 'open-source-event-calendar'),
-            'settings_page'     => $this->app->settings->get('feeds_page'),
-            'calendar_settings' => false,
+            'page_left' => MetaBoxHelper::get_meta_box(
+                $settings_page,
+                'left',
+                null
+            ),
+            'page_right' => MetaBoxHelper::get_meta_box(
+                $settings_page,
+                'right',
+                null
+            ),
+            'nonces' => [
+                wp_nonce_field('closedpostboxes', 'closedpostboxesnonce', false),
+                wp_nonce_field('meta-box-order', 'meta-box-order-nonce', false),
+            ]
         ];
         ThemeLoader::factory($this->app)
-                   ->get_file('calendar_feeds.php', $args, true)
+                   ->get_file('page_calendar_feeds.twig', $args, true)
                    ->render();
     }
 
