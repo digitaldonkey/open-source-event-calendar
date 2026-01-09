@@ -169,6 +169,13 @@ class AdminThemeList extends WP_List_Table
         $this->tablenav('bottom');
     }
 
+    public function get_display(): string
+    {
+        ob_start();
+        $this->display();
+        return ob_get_clean();
+    }
+
     /**
      * tablenav function
      *
@@ -356,7 +363,7 @@ class AdminThemeList extends WP_List_Table
                     <?php if ($screenshot) : ?>
                     <img src="<?php echo esc_url($theme_root_uri . '/' . $stylesheet . '/' . $screenshot); ?>" alt=""/>
                     <?php endif; ?>
-                    <h3>
+                    <h4>
                         <?php
                         printf(
                         /* translators: 1: theme title, 2: theme version */
@@ -365,7 +372,7 @@ class AdminThemeList extends WP_List_Table
                             esc_html($version),
                         );
                         ?>
-                    </h3>
+                    </h4>
                     <p class="description">
                         <?php wp_kses($description, $this->app->kses->allowed_html_frontend()); ?>
                     </p>

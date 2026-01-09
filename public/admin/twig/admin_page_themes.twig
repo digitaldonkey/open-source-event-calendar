@@ -1,0 +1,33 @@
+{% if activated %}
+    <div id="message2" class="updated">
+        <p>{{ activated_message|raw }}</p>
+    </div>
+{% endif %}
+{% if deleted %}
+    <div id="message3" class="updated">
+        <p> {{deleted_message }}</p>
+    </div>
+{% endif %}
+<div class="wrap">
+    <h2>{{ page_title }}</h2>
+    <h3>{{ current_theme_label }}</h3>
+    <div id="current-theme" {% if current_theme.has_screenshot %}class="has-screenshot"{% endif %}>
+        {% if current_theme.has_screenshot %}
+            <img src="{{ current_theme.screenshot_uri }}" alt="{{ current_theme.screenshot_alt }}"/>
+        {% endif %}
+        <h4>{{ current_theme.title }}</h4>
+        <p class="theme-description">{{ current_theme.description|raw }}</p>
+        <div class="theme-options">
+            {% if current_theme.has_tags %}
+                <p>{{ current_theme.tags }}</p>
+            {% endif %}
+            <p>{{ current_theme.template_path|raw }}</p>
+        </div>
+    </div>
+    <br class="clear"/>
+    {% if display_theme_list %}
+        <h3>{{ available_themes_label }}</h3>
+        {{ available_themes|raw }}
+        <br class="clear"/>
+    {% endif %}
+</div>
