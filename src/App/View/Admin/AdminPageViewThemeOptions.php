@@ -82,7 +82,7 @@ class AdminPageViewThemeOptions extends AdminPageAbstract
         ];
 
         ThemeLoader::factory($this->app)
-                   ->get_file('all-options.twig', $args, true)
+                   ->get_file('admin_page_all_options.twig', $args, true)
                    ->render();
     }
 

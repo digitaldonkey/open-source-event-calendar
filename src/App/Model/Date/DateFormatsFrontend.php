@@ -121,7 +121,7 @@ class DateFormatsFrontend extends OsecBaseClass
             'current_format_example'     => date_i18n($current_format),
         ];
         ThemeLoader::factory($this->app)
-                   ->get_file('settings-date-format.twig', $args, true)
+                   ->get_file('settings_date_format.twig', $args, true)
                    ->render();
     }
 
@@ -175,7 +175,7 @@ class DateFormatsFrontend extends OsecBaseClass
 
         ];
         ThemeLoader::factory($this->app)
-                   ->get_file('settings-date-format.twig', $args, true)
+                   ->get_file('settings_date_format.twig', $args, true)
                    ->render();
     }
 

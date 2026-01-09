@@ -119,7 +119,7 @@ class AdminDateRepeatBox extends OsecBaseClass
         RenderJson::factory($this->app)->render(['data' => [
             'error'   => false,
             'message' => ThemeLoader::factory($this->app)
-                            ->get_file('repeat-rules-form.twig', $args, true)
+                            ->get_file('date_repeat_box/repeat_rules_form.twig', $args, true)
                             ->get_content(),
             'repeat'  => $repeat,
         ]]);
@@ -213,7 +213,7 @@ class AdminDateRepeatBox extends OsecBaseClass
         ];
 
         return ThemeLoader::factory($this->app)
-                          ->get_file('row_weekly.twig', $args, true)
+                          ->get_file('date_repeat_box/row_weekly.twig', $args, true)
                           ->get_content();
     }
 
