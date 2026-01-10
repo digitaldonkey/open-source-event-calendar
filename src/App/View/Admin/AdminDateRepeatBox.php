@@ -35,7 +35,7 @@ class AdminDateRepeatBox extends OsecBaseClass
             return;
         }
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-        $repeat  = (int)$_REQUEST['repeat'];
+        $repeat  = (int) $_REQUEST['repeat'];
         $repeat  = $repeat == 1 ? 1 : 0;
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
         $post_id = (int)$_REQUEST['post_id'];
@@ -73,22 +73,24 @@ class AdminDateRepeatBox extends OsecBaseClass
             );
         }
 
+        $freq = strtolower($rc->getFreq());
+
         $args = [
             'title'             => esc_html__('Select recurrence pattern:', 'open-source-event-calendar'),
             'label_daily'       => esc_html__('Daily', 'open-source-event-calendar'),
             'row_daily'         => $this->row_daily(
-                false,
+                $freq === 'daily',
                 $rc->getInterval() ?: 1
             ),
             'label_weekly'      => esc_html__('Weekly', 'open-source-event-calendar'),
             'row_weekly'        => $this->row_weekly(
-                false,
+                $freq === 'weekly',
                 $rc->getInterval() ?: 1,
                 is_array($rc->getByDay()) ? $rc->getByDay() : []
             ),
             'label_monthly'     => esc_html__('Monthly', 'open-source-event-calendar'),
             'row_monthly'       => $this->row_monthly(
-                false,
+                $freq === 'monthly',
                 $rc->getInterval() ?: 1,
                 ! $this->isMonthdayEmpty($rc),
                 $rc->getByMonthDay() ?: [],
@@ -96,7 +98,7 @@ class AdminDateRepeatBox extends OsecBaseClass
             ),
             'label_yearly'      => esc_html__('Yearly', 'open-source-event-calendar'),
             'row_yearly'        => $this->row_yearly(
-                false,
+                $freq === 'yearly',
                 $rc->getInterval() ?: 1,
                 is_array($rc->getByMonth()) ? $rc->getByMonth() : []
             ),
@@ -133,16 +135,16 @@ class AdminDateRepeatBox extends OsecBaseClass
     protected function row_daily($visible = false, $selected = 1): string
     {
         $args = [
-            'visible' => $visible,
+            'label' => esc_html__('Every', 'open-source-event-calendar'),
             'count'   => $this->create_count_input(
                 'osec_daily_count',
                 $selected,
                 365
             ) . __('day(s)', 'open-source-event-calendar'),
         ];
-
-        return ThemeLoader::factory($this->app)->get_file('row_daily.php', $args, true)
-                          ->get_content();
+        return ThemeLoader::factory($this->app)
+              ->get_file('date_repeat_box/row_daily.twig', $args, true)
+              ->get_content();
     }
 
     /**
@@ -199,7 +201,6 @@ class AdminDateRepeatBox extends OsecBaseClass
         }
 
         $args = [
-            'visible'   => $visible,
             'count'     => $this->create_count_input('osec_weekly_count', $count, 52)
                              . __('week(s)', 'open-source-event-calendar'),
             'count_label' => esc_html__('Every', 'open-source-event-calendar'),
@@ -327,39 +328,34 @@ class AdminDateRepeatBox extends OsecBaseClass
         }
         $options_dn['-1'] = __('last', 'open-source-event-calendar');
 
-        $byday_checked       = $bymonthday ? '' : 'checked';
-        $byday_expanded      = $bymonthday ? 'ai1ec-collapse' : 'ai1ec-in';
-        $bymonthday_checked  = $bymonthday ? 'checked' : '';
-        $bymonthday_expanded = $bymonthday ? 'ai1ec-in' : 'ai1ec-collapse';
-
         $args = [
-            'visible'             => $visible,
+            'label_every' => esc_html__('Every', 'open-source-event-calendar'),
             'count'               => $this->create_count_input(
                 'osec_monthly_count',
                 $count,
                 12
             ) . __('month(s)', 'open-source-event-calendar'),
-            'month'               => $this->create_monthly_date_select(
+            'bymonthday' => (bool) $bymonthday,
+            'on_day_label' => esc_html__('On day of the month', 'open-source-event-calendar'),
+            'on_weekday_label' => esc_html__('On day of the week', 'open-source-event-calendar'),
+            'month' => $this->create_monthly_date_select(
                 $month
             ),
-            'day_nums'            => $this->create_select_element(
+            'day_nums' => $this->create_select_element(
                 'osec_monthly_byday_num',
                 $options_dn,
                 $this->getDayNumberFromDayArray($day)
             ),
-            'week_days'           => $this->create_select_element(
+            'week_days' => $this->create_select_element(
                 'osec_monthly_byday_weekday',
                 $options_wd,
                 $this->getDayShortnameFromDayArray($day)
             ),
-            'bymonthday_checked'  => $bymonthday_checked,
-            'byday_checked'       => $byday_checked,
-            'bymonthday_expanded' => $bymonthday_expanded,
-            'byday_expanded'      => $byday_expanded,
         ];
 
-        return ThemeLoader::factory($this->app)->get_file('row_monthly.php', $args, true)
-                          ->get_content();
+        return ThemeLoader::factory($this->app)
+              ->get_file('date_repeat_box/row_monthly.twig', $args, true)
+              ->get_content();
     }
 
     /**
@@ -465,21 +461,17 @@ class AdminDateRepeatBox extends OsecBaseClass
     protected function row_yearly($visible = false, $count = 1, $year = [], $first = false, $second = false): string
     {
         $args = [
-            'visible'       => $visible,
-            'count'         => $this->create_count_input(
+            'label' => esc_html__('Every', 'open-source-event-calendar'),
+            'count_input' => $this->create_count_input(
                 'osec_yearly_count',
                 $count,
                 10
             ) . __('year(s)', 'open-source-event-calendar'),
-            'year'          => $this->create_yearly_date_select($year),
-            'on_the_select' => $this->create_on_the_select(
-                $first,
-                $second
-            ),
+            'yearly_date_select_label' => _x('In', 'Recurrence editor - yearly tab', 'open-source-event-calendar'),
+            'year' => $this->create_yearly_date_select($year),
         ];
-
         return ThemeLoader::factory($this->app)
-                          ->get_file('row_yearly.php', $args, true)
+                          ->get_file('date_repeat_box/row_yearly.twig', $args, true)
                           ->get_content();
     }
 
@@ -559,11 +551,13 @@ class AdminDateRepeatBox extends OsecBaseClass
     protected function row_custom($visible = false, $dates = []): string
     {
         $args = [
-            'visible'        => $visible,
-            'selected_dates' => implode(',', $dates),
+            'label' => esc_html__('Custom dates:', 'open-source-event-calendar'),
+            'selected_dates' => esc_attr(implode(',', $dates)),
         ];
 
-        return ThemeLoader::factory($this->app)->get_file('row_custom.php', $args, true)->get_content();
+        return ThemeLoader::factory($this->app)
+              ->get_file('date_repeat_box/row_custom.twig', $args, true)
+              ->get_content();
     }
 
     /**

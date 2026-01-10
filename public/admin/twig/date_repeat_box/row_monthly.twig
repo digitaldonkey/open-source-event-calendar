@@ -1,0 +1,54 @@
+<div class="ai1ec-form-group">
+    <label for="osec_monthly_count" class="ai1ec-control-label ai1ec-col-sm-3">
+        {{ label_every }}:
+    </label>
+    <div class="ai1ec-col-sm-9">
+        {{ count|raw }}
+    </div>
+</div>
+
+<div class="ai1ec-form-group">
+    <div class="ai1ec-col-sm-offset-3 ai1ec-col-sm-9">
+        <div class="radio">
+            <label for="osec_monthly_type_bymonthday">
+                <input
+                    id="osec_monthly_type_bymonthday"
+                    type="radio"
+                    name="osec_monthly_type"
+                    value="bymonthday"
+                    {% if bymonthday %}checked="checked"{% endif %}
+                />
+                {{ on_day_label }}
+            </label>
+        </div>
+        <div class="radio">
+            <label for="osec_monthly_type_byday">
+                <input
+                    id="osec_monthly_type_byday"
+                    type="radio" name="osec_monthly_type"
+                    value="byday"
+                    {% if not bymonthday %}checked="checked"{% endif %}
+                />
+                {{ on_weekday_label }}
+            </label>
+        </div>
+    </div>
+</div>
+
+<div class="ai1ec-form-group">
+    <div id="osec_repeat_monthly_bymonthday" class="ai1ec-collapse ai1ec-in">
+        <div class="ai1ec-col-sm-offset-3 ai1ec-col-sm-9">
+            {{ month|raw }}
+        </div>
+    </div>
+
+    <div id="osec_repeat_monthly_byday" class="ai1ec-collapse">
+        <label for="osec_monthly_type_byday" class="ai1ec-control-label ai1ec-col-sm-3">
+            {{ label_every }}:
+        </label>
+        <div class="ai1ec-col-sm-9">
+            {{ day_nums|raw }}
+            {{ week_days|raw }}
+        </div>
+    </div>
+</div>
