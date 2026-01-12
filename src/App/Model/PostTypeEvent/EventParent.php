@@ -88,7 +88,7 @@ class EventParent extends OsecBaseClass
             $old_post_id = isset($_POST['post_ID']) ? absint($_POST['post_ID']) : null;
             $instance_id = absint($_POST['osec_instance_id']);
             // phpcs:enable
-            $post_id     = EventEditing::factory($this->app)->create_duplicate_post();
+            $post_id = EventEditing::factory($this->app)->create_duplicate_post();
             if (!is_null($old_post_id) && false !== $post_id) {
                 $this->handleInstances(
                     new Event($this->app, $post_id),
@@ -413,6 +413,11 @@ class EventParent extends OsecBaseClass
         $parent_id,
         $include_trash = false
     ) {
+        $objects   = [];
+        // Avoid getting all.
+        if (!$parent_id) {
+            return $objects;
+        }
         $db        = $this->app->db;
         $parent_id = (int)$parent_id;
         $children  = (array)$db->get_col(
@@ -421,7 +426,7 @@ class EventParent extends OsecBaseClass
                 $parent_id
             )
         );
-        $objects   = [];
+
         foreach ($children as $child_id) {
             // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
             try {
