@@ -2,6 +2,8 @@
     "name": "digitaldonkey/open-source-event-calendar",
     "type": "wordpress-plugin",
     "description": "Open Source Event Calendar WordPress Plugin",
+    "minimum-stability": "dev",
+    "prefer-stable" : true,
     "require": {
         "cweagans/composer-patches": "~2.0.0",
         "ext-curl": "*",
@@ -31,30 +33,46 @@
     ],
     "scripts": {
         "grumphp": "grumphp",
-        "phpcs": "phpcs --standard=phpcs.xml --runtime-set testVersion 8.1-",
-        "phpcbf": "phpcbf --standard=phpcs.xml --runtime-set testVersion 8.1-",
-        "phpcs-warnings": "phpcs --warning-severity=1 --runtime-set testVersion 8.1- --standard=phpcs.xml",
-        "post-install-cmd": "[ $COMPOSER_DEV_MODE -eq 0 ] || \"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility,vendor/phpcompatibility/phpcompatibility-wp,vendor/phpcompatibility/phpcompatibility-paragonie,vendor/wp-coding-standards/wpcs,vendor/phpcsstandards/phpcsextra",
-        "post-update-cmd" : "[ $COMPOSER_DEV_MODE -eq 0 ] || \"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility,vendor/phpcompatibility/phpcompatibility-wp,vendor/phpcompatibility/phpcompatibility-paragonie,vendor/wp-coding-standards/wpcs,vendor/phpcsstandards/phpcsextra"
+        "phpcs": "phpcs --standard=phpcs.xml --runtime-set testVersion 8.2-",
+        "phpcs-config-show": "phpcs --standard=phpcs.xml --config-show",
+        "phpcbf": "phpcbf --standard=phpcs.xml --runtime-set testVersion 8.2-",
+        "phpcs-warnings": "phpcs --warning-severity=1 --runtime-set testVersion 8.2- --standard=phpcs.xml",
+        "post-install-cmd": "[ $COMPOSER_DEV_MODE -eq 0 ] || \"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility,vendor/phpcsstandards/phpcsextra,vendor/phpcsstandards/phpcsutils,vendor/wp-coding-standards/wpcs/WordPress,vendor/wp-coding-standards/wpcs/WordPress-Core,vendor/wp-coding-standards/wpcs/WordPress-Docs,vendor/wp-coding-standards/wpcs/WordPress-Extra,vendor/phpcsstandards/phpcsextra,vendor/phpcompatibility/php-compatibility,vendor/phpcompatibility/phpcompatibility-wp,vendor/phpcompatibility/phpcompatibility-paragonie,vendor/phpcsstandards/phpcsextra,vendor/plugin-check/vendor/plugin-check/phpcs-sniffs/PluginCheck",
+        "post-update-cmd" : "[ $COMPOSER_DEV_MODE -eq 0 ] || \"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility,vendor/phpcsstandards/phpcsextra,vendor/phpcsstandards/phpcsutils,vendor/wp-coding-standards/wpcs/WordPress,vendor/wp-coding-standards/wpcs/WordPress-Core,vendor/wp-coding-standards/wpcs/WordPress-Docs,vendor/wp-coding-standards/wpcs/WordPress-Extra,vendor/phpcsstandards/phpcsextra,vendor/phpcompatibility/php-compatibility,vendor/phpcompatibility/phpcompatibility-wp,vendor/phpcompatibility/phpcompatibility-paragonie,vendor/phpcsstandards/phpcsextra,vendor/plugin-check/vendor/plugin-check/phpcs-sniffs/PluginCheck"
     },
     "require-dev": {
-        "phpcompatibility/phpcompatibility-wp": "*",
-        "phpro/grumphp": "^2.1.8",
+        "phpcompatibility/phpcompatibility-wp": "^3.0.0@dev",
+        "phpro/grumphp": "^2.18",
         "phpunit/phpunit": "^9.6",
         "roave/security-advisories": "dev-latest",
         "symfony/debug-bundle": "^7.3",
         "wp-cli/wp-cli-bundle": "^2.12",
-        "wp-coding-standards/wpcs": "^3.2",
-        "yoast/phpunit-polyfills": "^2.0",
-        "phpcompatibility/php-compatibility": "^9.3"
+        "yoast/phpunit-polyfills": "^4.0.0",
+        "phpcompatibility/php-compatibility": "*",
+        "phpcsstandards/phpcsextra": "*",
+        "phpcsstandards/phpcsutils": "*",
+        "wpackagist-plugin/plugin-check": "^1.8",
+        "wp-coding-standards/wpcs": "^3.3"
     },
     "config": {
         "allow-plugins": {
             "cweagans/composer-patches": true,
             "phpro/grumphp": true,
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "composer/installers": true
         }
     },
+    "repositories":[
+        {
+            "name": "wpackagist",
+            "type": "composer",
+            "url": "https://wpackagist.org",
+            "only": [
+                "wpackagist-plugin/*",
+                "wpackagist-theme/*"
+            ]
+        }
+    ],
     "extra": {
         "patches": {
             "louis1021/sg-i-calendar": {
@@ -64,6 +82,12 @@
             "kigkonsult/icalcreator": {
                 "Fix ctype_digit() deprecation notices": "composer-patches/kigkonsult_icalcreator_2.40.0.patch"
             }
+        },
+        "installer-paths": {
+            "vendor/{$name}": [
+                "type:wordpress-plugin"
+            ]
         }
+
     }
 }

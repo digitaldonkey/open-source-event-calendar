@@ -123,11 +123,11 @@ So Finally testing:
 ```
 ddev ssh 
 cd /var/www/html/wp-content/plugins/open-source-event-calendar
- ./vendor/bin/phpcs --standard=phpcs.xml --runtime-set testVersion 8.1-
+ ./vendor/bin/phpcs --standard=phpcs.xml --runtime-set testVersion 8.2-
 
  or 
  composer run phpcs
 ```
-runtime-set testVersion 8.1 is overriding WordPress default minimum version requiremets. Explicitly set to override WP defaults in `phpcs-wp-plugin-review.xml`.
+runtime-set testVersion 8.2 is overriding WordPress default minimum version requiremets. Explicitly set to override WP defaults in `plugin-check.ruleset.xml`.
 
-**phpcs-wp-plugin-review.xml** comes from [WordPress/plugin-check](https://api.github.com/repos/WordPress/plugin-check). The latest version you can download using `bin/get-latest-plugin-review-phpcs-rulesets.sh`.
+** plugin-check.ruleset.xml** comes from [WordPress/plugin-check](https://api.github.com/repos/WordPress/plugin-check). The latest version you can download using `bin/get-latest-plugin-review-phpcs-rulesets.sh`.

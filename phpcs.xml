@@ -53,7 +53,7 @@
 
 	<!-- Rules: Check PHP version compatibility -->
 	<!-- https://github.com/PHPCompatibility/PHPCompatibility#sniffing-your-code-for-compatibility-with-specific-php-versions -->
-	<config name="testVersion" value="8.1-"/>
+	<config name="testVersion" value="8.2-"/>
 
 	<!-- https://github.com/PHPCompatibility/PHPCompatibilityWP -->
 	<rule ref="PHPCompatibilityWP"/>
@@ -277,17 +277,19 @@
 	<!-- Detect use of double negative `!!`. -->
 	<rule ref="Universal.CodeAnalysis.NoDoubleNegative"/>
 
-
 	<!-- Include everything of WP-Plugin-Check
 
-		https://github.com/WordPress/plugin-check/blob/1.4.0/phpcs-rulesets/plugin-review.xml
+		https://github.com/WordPress/plugin-check/blob/1.8.0/phpcs-rulesets/plugin-check.ruleset.xml
 
 		The file phpunit-wp-plugin-review.xml should always contain
-		the latest tag release. By time of writing it was:
-	 	https://raw.githubusercontent.com/WordPress/plugin-check/refs/tags/1.4.0/phpcs-rulesets/plugin-review.xml
+		the latest tag release. By time of writing it was
+	 	https://raw.githubusercontent.com/WordPress/plugin-check/refs/tags/1.8.0/phpcs-rulesets/plugin-check.ruleset.xml
+
+	 	This should be updated regularly.
+	 	@see bin/get-latest-plugin-review-phpcs-rulesets.sh
 
 	 -->
-	<rule ref="./phpcs-wp-plugin-review.xml">
+	<rule ref="./plugin-check.ruleset.xml">
 		<type>error</type>
 	</rule>
 
