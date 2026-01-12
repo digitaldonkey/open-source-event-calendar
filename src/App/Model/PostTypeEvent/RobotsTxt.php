@@ -33,7 +33,7 @@ class RobotsTxt extends OsecBaseClass
         if (
             isset($robots['page_id'])
             && is_int($robots['page_id'])
-            && $robots['page_id'] == $this->app->settings->get('calendar_page_id')
+            && $robots['page_id'] === (int) $this->app->settings->get('calendar_page_id')
         ) {
             return;
         }
@@ -151,12 +151,12 @@ class RobotsTxt extends OsecBaseClass
     /**
      * Get default robots rules for the calendar
      *
+     * @param  string  $is_public  Public flag
      * @param  string  $output  Current robots rules
-     * @param  string  $public  Public flag
      *
      * @return string
      */
-    public function rules(string $public, string $output = ''): string
+    public function rules(string $output, bool $is_public): string
     {
         // Current rules
         $current_rules = array_map(
@@ -173,12 +173,10 @@ class RobotsTxt extends OsecBaseClass
         if ($page_base) {
             $custom_rules += [
                 'User-agent: *',
-                "Disallow: /$page_base/action~posterboard/",
                 "Disallow: /$page_base/action~agenda/",
                 "Disallow: /$page_base/action~oneday/",
                 "Disallow: /$page_base/action~month/",
                 "Disallow: /$page_base/action~week/",
-                "Disallow: /$page_base/action~stream/",
             ];
         }
 
