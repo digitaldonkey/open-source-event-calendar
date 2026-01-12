@@ -268,7 +268,7 @@ class ThemeLoader extends OsecBaseClass
         $args = [],
         $is_admin = false,
         $throw_exception = true,
-        array $paths = null
+        ?array $paths = null
     ): FileAbstract {
 
         $fileExt      = pathinfo($filename, PATHINFO_EXTENSION);

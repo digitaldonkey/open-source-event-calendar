@@ -359,7 +359,7 @@ class DT implements Stringable
      *
      * @return int Number of seconds between two dates.
      */
-    public function diff_sec(DT $comparable, bool $timezone = null): int
+    public function diff_sec(DT $comparable, ?bool $timezone = null): int
     {
         // NOTICE: `$this->isEmpty` is not touched here intentionally
         // because there is no meaningful difference to `empty` value.

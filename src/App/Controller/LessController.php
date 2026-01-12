@@ -86,6 +86,7 @@ class LessController extends OsecBaseClass
     /**
      * Parse all the Less files resolving the dependencies.
      *
+     * @param ?array $variables
      * @param  bool  $compile_core  If set to true, it forces compilation of core
      *  CSS only, suitable for shipping.
      *
@@ -93,7 +94,7 @@ class LessController extends OsecBaseClass
      * @throws Exception
      * @throws FileNotFoundException|Exception
      */
-    public function parse_less_files(array $variables = null, $compile_core = true): string
+    public function parse_less_files(?array $variables = null, $compile_core = true): string
     {
         // If no variables are passed, initialize from DB, config file, and
         // extension injections in one call.
