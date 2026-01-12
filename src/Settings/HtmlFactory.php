@@ -181,7 +181,7 @@ class HtmlFactory extends OsecBaseClass
      * @staticvar $cached_flips    Maps of taxonomy identifiers.
      * @staticvar $checkable_types Map of types and taxonomy identifiers.
      */
-    public function create_select2_multiselect(array $args, array $options, array $view_args = null)
+    public function create_select2_multiselect(array $args, array $options, ?array $view_args = null)
     {
         // if no data is present and we are in the frontend, return a blank
         // element.

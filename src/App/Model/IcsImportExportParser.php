@@ -581,7 +581,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
     {
         try {
             $tztest = timezone_open($tz);
-        } catch (\DateInvalidTimeZoneException) {
+        } catch (\Exception) {
+            // Catching \DateInvalidTimeZoneException available in PHP 8.3.
             return false;
         }
         if (! $tztest) {
