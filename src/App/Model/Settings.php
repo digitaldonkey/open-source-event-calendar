@@ -191,9 +191,9 @@ class Settings extends OsecBaseInitialized
         }
         if ('array' === $this->options[$option]['type']) {
             if (
-                ! is_array($this->options[$option]['value']) ||
-                ! is_array($value) ||
-                $value != $this->options[$option]['value']
+                ! is_array($this->options[$option]['value'])
+                || ! is_array($value)
+                || $value !== $this->options[$option]['value']
             ) {
                 $this->options[$option]['value'] = $value;
                 $this->changeUpdateStatus(true);
@@ -255,11 +255,11 @@ class Settings extends OsecBaseInitialized
      *
      * @return mixed Value or $default if none is found.
      */
-    public function get($option, mixed $default = null)
+    public function get($option, mixed $defaultVal = null)
     {
         // notice, that `null` is not treated as a value
         if (! isset($this->options[$option])) {
-            return $default;
+            return $defaultVal;
         }
 
         return $this->options[$option]['value'];
@@ -860,7 +860,7 @@ class Settings extends OsecBaseInitialized
                 'renderer' => [
                     'class'    => 'Osec\Settings\Elements\SettingsTextarea',
                     'tab'      => 'advanced',
-                    'label'    => __('Current <strong>robots.txt</strong> on this site', 'open-source-event-calendar'),
+                    'label'    => __('What Osec adds to your robots.txt file', 'open-source-event-calendar'),
                     'type'     => 'normal',
                     'rows'     => 6,
                     'readonly' => 'readonly',
@@ -868,13 +868,14 @@ class Settings extends OsecBaseInitialized
                         'The Robot Exclusion Standard, also known as the Robots Exclusion Protocol or
 						<code><a href="https://en.wikipedia.org/wiki/Robots.txt" target="_blank">robots.txt</a></code>
 						protocol, is a convention for cooperating web crawlers and other web robots
-						about accessing all or part of a website that is otherwise publicly viewable.
-						You can change it manually by editing <code>robots.txt</code> 
-						in your root WordPress directory.',
+						about accessing all or part of a website that is otherwise publicly viewable.<br />
+						The file is dynamically created using <a href="/?robots=1" target="_blank">/?robots=1</a> 
+						and should map to <a href="/robots.txt" target="_blank">/robots.txt</a>
+						If you maintain a static robots.txt you should copy over above directives.',
                         'open-source-event-calendar'
                     ),
                 ],
-                'default'  => '',
+                'default'  => __('Save settings and reload page to generate.', 'open-source-event-calendar'),
             ],
             'ics_cron_freq'                          => [
                 'type'    => 'string',
