@@ -85,7 +85,7 @@ class CachePath
     {
         static $webroot = null;
         if (is_null($webroot)) {
-            $webroot = !empty($_SERVER['DOCUMENT_ROOT']) ? sanitize_file_name(wp_unslash($_SERVER['DOCUMENT_ROOT'])) : false;
+            $webroot = !empty($_SERVER['DOCUMENT_ROOT']) ? sanitize_text_field(wp_unslash($_SERVER['DOCUMENT_ROOT'])) : false;
         }
         $path = $this->getCachePath($subDirectory);
         if ( ! $path) {
