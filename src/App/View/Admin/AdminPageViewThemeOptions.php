@@ -39,7 +39,7 @@ class AdminPageViewThemeOptions extends AdminPageAbstract
      */
     public function display_page(): void
     {
-        $args     = [
+        $args = [
             'user_options' => $this->app->settings->getOptionsList(),
             'other_settings' => [
                 [

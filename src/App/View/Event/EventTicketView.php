@@ -84,7 +84,7 @@ class EventTicketView extends OsecBaseClass
         }
         $contact_url = $event->get('contact_url');
         if ($contact_url) {
-            $contact      .=
+            $contact .=
                 '<div class="ai1ec-contact-url">' .
                 '<a class="u-url" target="_blank" href="' .
                 esc_attr($contact_url) .

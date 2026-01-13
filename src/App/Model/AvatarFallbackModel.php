@@ -22,7 +22,7 @@ class AvatarFallbackModel extends OsecBaseClass
     protected array $fallbacks = [
         'post_thumbnail',
         'content_img',
-        'category_avatar'
+        'category_avatar',
     ];
 
     /**

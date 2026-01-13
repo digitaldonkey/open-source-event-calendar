@@ -40,7 +40,7 @@ use Osec\Theme\ThemeLoader;
 // PHP Composer @see package.json.
 if (
     // Try fixing a bug where
-    ! class_exists("\Osec\App\Controller\BootstrapController")) {
+    ! class_exists('\Osec\App\Controller\BootstrapController')) {
     require_once __DIR__ . '/vendor/autoload.php';
     add_action('init', function () {
         BootstrapController::createApp(__DIR__);
@@ -95,7 +95,8 @@ register_deactivation_hook(
 add_action(
     'admin_enqueue_scripts',
     function () {
-        if (OSEC_POST_TYPE == get_post_type()) {
+        $type = get_post_type();
+        if ($type && $type === OSEC_POST_TYPE) {
             wp_dequeue_script('autosave');
         }
     }

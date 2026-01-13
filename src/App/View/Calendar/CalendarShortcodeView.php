@@ -41,7 +41,9 @@ class CalendarShortcodeView extends OsecBaseClass
         }
 
         $view               = $default_view;
-        $_events_categories = $_events_tags = $post_ids = [];
+        $_events_categories = [];
+        $_events_tags = [];
+        $post_ids = [];
 
         if (isset($atts['view'])) {
             // Comes with some 'ly's attached.
@@ -94,7 +96,7 @@ class CalendarShortcodeView extends OsecBaseClass
             $raw_values = explode(',', (string)$atts[$att_name]);
             foreach ($raw_values as $argument) {
                 if ('post_id' === $att_name) {
-                    if (($argument = (int)$argument) > 0) {
+                    if (is_numeric($argument) && $argument > 0) {
                         $post_ids[] = $argument;
                     }
                 } else {
@@ -117,7 +119,7 @@ class CalendarShortcodeView extends OsecBaseClass
                             continue;
                         }
                         $argument = (int)$argument->term_id;
-                    } elseif (($argument = (int)$argument) <= 0) {
+                    } elseif ((int) $argument <= 0) {
                         continue;
                     }
                     ${'_' . $type}[] = $argument;

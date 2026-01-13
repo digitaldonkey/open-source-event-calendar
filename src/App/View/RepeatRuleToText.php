@@ -55,7 +55,8 @@ class RepeatRuleToText extends OsecBaseClass
                     isset($processed[1]) &&
                     in_array(
                         strtoupper($processed[0]),
-                        ['RDATE', 'EXDATE']
+                        ['RDATE', 'EXDATE'],
+                        true
                     )
                 ) {
                     $txt = $this->exdate_to_text($processed[1]);
@@ -79,9 +80,9 @@ class RepeatRuleToText extends OsecBaseClass
         switch ($freq) {
             case 'daily':
                 // check if interval is set
-                if (! $interval || $interval == 1) {
+                if (! $interval || (int) $interval === 1) {
                     $txt = __('Daily', 'open-source-event-calendar');
-                } elseif ($interval == 2) {
+                } elseif ((int) $interval === 2) {
                     $txt = __('Every other day', 'open-source-event-calendar');
                 } else {
                     $txt = sprintf(
@@ -93,9 +94,9 @@ class RepeatRuleToText extends OsecBaseClass
                 break;
             case 'weekly':
                 // check if interval is set
-                if (! $interval || $interval == 1) {
+                if (! $interval || (int) $interval === 1) {
                     $txt = __('Weekly', 'open-source-event-calendar');
-                } elseif ($interval == 2) {
+                } elseif ((int) $interval === 2) {
                     $txt = __('Every other week', 'open-source-event-calendar');
                 } else {
                     $txt = sprintf(
@@ -107,9 +108,9 @@ class RepeatRuleToText extends OsecBaseClass
                 break;
             case 'monthly':
                 // check if interval is set
-                if (! $interval || $interval == 1) {
+                if (! $interval || (int) $interval === 1) {
                     $txt = __('Monthly', 'open-source-event-calendar');
-                } elseif ($interval == 2) {
+                } elseif ((int) $interval === 2) {
                     $txt = __('Every other month', 'open-source-event-calendar');
                 } else {
                     $txt = sprintf(
@@ -121,9 +122,9 @@ class RepeatRuleToText extends OsecBaseClass
                 break;
             case 'yearly':
                 // check if interval is set
-                if (! $interval || $interval == 1) {
+                if (! $interval || (int) $interval === 1) {
                     $txt = __('Yearly', 'open-source-event-calendar');
-                } elseif ($interval == 2) {
+                } elseif ((int) $interval === 2) {
                     $txt = __('Every other year', 'open-source-event-calendar');
                 } else {
                     $txt = sprintf(
@@ -146,7 +147,10 @@ class RepeatRuleToText extends OsecBaseClass
      */
     protected function finalSentence(&$txt, &$rc)
     {
-        if ($until = $rc->getUntil()) {
+        $until = $rc->getUntil();
+        $count = $rc->getCount();
+
+        if ($until) {
             if (! is_int($until)) {
                 $until = strtotime((string)$until);
             }
@@ -155,7 +159,7 @@ class RepeatRuleToText extends OsecBaseClass
                 __('until %s', 'open-source-event-calendar'),
                 (new DT($until))->format_i18n($this->app->options->get('date_format'))
             );
-        } elseif ($count = $rc->getCount()) {
+        } elseif ($count) {
             $txt .= ' ' . sprintf(
                 /* translators: number of occurrences */
                 __('for %d occurrences', 'open-source-event-calendar'),
@@ -494,9 +498,11 @@ class RepeatRuleToText extends OsecBaseClass
      */
     public function merge_exrule($exrule, $rrule)
     {
-        $list_exrule = explode(';', $exrule);
         $list_rrule  = explode(';', $rrule);
-        $map_exrule  = $map_rrule = [];
+        $map_rrule = [];
+        $list_exrule = explode(';', $exrule);
+        $map_exrule = [];
+
         foreach ($list_rrule as $entry) {
             if (empty($entry)) {
                 continue;

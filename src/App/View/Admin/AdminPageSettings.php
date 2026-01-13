@@ -97,7 +97,7 @@ class AdminPageSettings extends AdminPageAbstract
     /**
      * Displays the meta box for the settings page.
      */
-    public function display_meta_box(mixed $object, mixed $box)
+    public function display_meta_box(mixed $obj, mixed $box)
     {
         $tabs = [
             'viewing-events' => ['name' => __('Viewing Events', 'open-source-event-calendar')],

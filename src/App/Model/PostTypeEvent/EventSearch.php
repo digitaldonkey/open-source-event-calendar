@@ -133,7 +133,7 @@ class EventSearch extends OsecBaseClass
             : 'i.start < %d ';
         $order_direction    = ($page_offset >= 0) ? 'ASC' : 'DESC';
         if (false !== $last_day) {
-            if (0 == $last_day) {
+            if (0 === $last_day) {
                 $last_day = $time;
             }
             $filter_date_clause = ' i.end ';
@@ -192,7 +192,8 @@ class EventSearch extends OsecBaseClass
             $events = array_reverse($events);
         }
 
-        $date_first = $date_last = null;
+        $date_first = null;
+        $date_last = null;
 
         foreach ($events as &$event) {
             $event['allday'] = $this->isAllDay($event);
@@ -289,7 +290,8 @@ class EventSearch extends OsecBaseClass
      */
     protected function getFilterSql($filter)
     {
-        $filter_join = $filter_where = [];
+        $filter_join = [];
+        $filter_where = [];
 
         foreach ($filter as $filter_type => $filter_ids) {
             $filter_object = null;
@@ -392,7 +394,7 @@ class EventSearch extends OsecBaseClass
             --$limit;
             if ($limit < 0) {
                 if (true === $last_day) {
-                    if ($start_day != $start_day_previous) {
+                    if ($start_day !== $start_day_previous) {
                         break;
                     }
                 } else {

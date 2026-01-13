@@ -125,7 +125,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
     /**
      * Displays the meta box for the settings page.
      */
-    public function display_meta_box(mixed $object, mixed $box): void
+    public function display_meta_box(mixed $obj, mixed $box): void
     {
         $tabs = [
             'general'  => [

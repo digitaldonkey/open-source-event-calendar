@@ -175,7 +175,7 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
         );
         $result   = '';
         foreach ($elements as $key => $value) {
-            if ($key % 2 == 1) {
+            if ($key % 2 === 1) {
                 $value = $this->rewrite->preg_index($value);
             }
             $result .= $value;

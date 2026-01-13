@@ -35,7 +35,7 @@ class SettingsCache extends SettingsAbstract
      */
     public function get_twig_cache_args()
     {
-        $cachePath        = (new CachePath())->getCacheData();
+        $cachePath = (new CachePath())->getCacheData();
         if ($cachePath) {
             $cachePathTxt = '<div style="max-width: 100%; overflow-x: scroll;">'
                                 . $cachePath['path']
@@ -93,8 +93,8 @@ class SettingsCache extends SettingsAbstract
         return $args;
     }
 
-    protected function niceBoolean($bool): string
+    protected function niceBoolean($boolVar): string
     {
-        return (string)(bool)$bool;
+        return (string)(bool)$boolVar;
     }
 }

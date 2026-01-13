@@ -35,7 +35,7 @@ class EventSingleView extends OsecBaseClass
                 str_replace('http://', 'webcal://', $event->get('ical_feed_url') ?: '')
             )
         );
-        $args               = [
+        $args = [
             'event'              => $event,
             'text_calendar_feed' => $text_calendar_feed,
             'text_view_post'     => __('View original', 'open-source-event-calendar'),
@@ -232,7 +232,7 @@ class EventSingleView extends OsecBaseClass
                 )
             )
         );
-        $args       = [
+        $args = [
             'title'         => apply_filters(
                 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                 'the_title',

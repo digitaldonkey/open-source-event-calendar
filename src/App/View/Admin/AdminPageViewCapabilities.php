@@ -43,9 +43,11 @@ class AdminPageViewCapabilities extends AdminPageAbstract
             <h1>Capabilities overview</h1>
             <h2><?php echo esc_html(OSEC_POST_TYPE); ?></h2>
             <p>capability_type: [<?php echo esc_html(OSEC_POST_TYPE); ?>, <?php echo esc_html(OSEC_POST_TYPE); ?>s]</p>
-            <p>map_meta_cap <?php
+            <p>map_meta_cap
+                <?php
                 // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-                print_r($eventType->map_meta_cap); ?></p>
+                print_r($eventType->map_meta_cap); ?>
+            </p>
             <h4>Capabilities map</h4>
             <table>
                 <?php foreach ($eventType->cap as $cap => $value) {

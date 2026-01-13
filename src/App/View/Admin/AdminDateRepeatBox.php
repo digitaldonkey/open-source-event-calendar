@@ -36,7 +36,7 @@ class AdminDateRepeatBox extends OsecBaseClass
         }
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
         $repeat  = (int) $_REQUEST['repeat'];
-        $repeat  = $repeat == 1 ? 1 : 0;
+        $repeat  = (int) $repeat === 1 ? 1 : 0;
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
         $post_id = (int)$_REQUEST['post_id'];
         // phpcs:enable
@@ -59,10 +59,12 @@ class AdminDateRepeatBox extends OsecBaseClass
             $rc = new SG_iCal_Recurrence(
                 new SG_iCal_Line('RRULE:' . $rule)
             );
-            if ($until = $rc->getUntil()) {
+            $until = $rc->getUntil();
+            $count = $rc->getCount();
+            if ($until) {
                 $until = (is_numeric($until)) ? $until : strtotime((string)$until);
                 $end   = 2;
-            } elseif ($count = $rc->getCount()) {
+            } elseif ($count) {
                 $count = (is_numeric($count)) ? $count : 100;
                 $end   = 1;
             }
@@ -118,13 +120,15 @@ class AdminDateRepeatBox extends OsecBaseClass
             'label_submit'      => esc_html__('Apply', 'open-source-event-calendar'),
             'label_cancel'      => esc_html__('Cancel', 'open-source-event-calendar'),
         ];
-        RenderJson::factory($this->app)->render(['data' => [
-            'error'   => false,
-            'message' => ThemeLoader::factory($this->app)
-                            ->get_file('date_repeat_box/repeat_rules_form.twig', $args, true)
-                            ->get_content(),
-            'repeat'  => $repeat,
-        ]]);
+        RenderJson::factory($this->app)->render([
+            'data' => [
+                'error' => false,
+                'message' => ThemeLoader::factory($this->app)
+                                ->get_file('date_repeat_box/repeat_rules_form.twig', $args, true)
+                                ->get_content(),
+                'repeat' => $repeat,
+            ],
+        ]);
     }
 
     /**
@@ -242,7 +246,7 @@ class AdminDateRepeatBox extends OsecBaseClass
 
         if ($by_value) {
             while ($_name = current($week_days)) {
-                if ($_name == $day_id) {
+                if ($_name === $day_id) {
                     return key($week_days);
                 }
                 next($week_days);
@@ -271,7 +275,7 @@ class AdminDateRepeatBox extends OsecBaseClass
             <?php foreach ($options as $key => $val) : ?>
                 <div class="ai1ec-pull-left">
                     <a class="ai1ec-btn ai1ec-btn-default ai1ec-btn-block
-                <?php echo in_array($key, $selected) ? 'ai1ec-active' : ''; ?>">
+                <?php echo in_array($key, $selected, true) ? 'ai1ec-active' : ''; ?>">
                         <?php echo esc_html($val); ?>
                     </a>
                     <input type="hidden" name="<?php echo esc_attr($name . '_' . $key); ?>"
@@ -401,7 +405,7 @@ class AdminDateRepeatBox extends OsecBaseClass
             <?php foreach ($options as $key => $val) : ?>
                 <option value="<?php echo esc_attr($key); ?>"
                     <?php echo $key === $selected ? 'selected="selected"' : ''; ?>
-                    <?php echo in_array($key, $disabled_keys) ? 'disabled' : ''; ?>>
+                    <?php echo in_array($key, $disabled_keys, true) ? 'disabled' : ''; ?>>
                     <?php echo esc_attr($val); ?>
                 </option>
             <?php endforeach ?>

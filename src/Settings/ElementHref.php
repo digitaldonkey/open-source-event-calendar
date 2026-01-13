@@ -202,7 +202,7 @@ class ElementHref
         if (isset($this->args[$array_key])) {
             $copy = (array)$this->args[$array_key];
         }
-        $key = array_search($this->term_id, $copy);
+        $key = array_search($this->term_id, $copy, true);
         // Let's check if we are already filtering for tags / categorys
         if (isset($to_implode[$array_key])) {
             if ($key !== false) {

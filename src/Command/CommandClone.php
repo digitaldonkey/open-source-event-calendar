@@ -102,7 +102,7 @@ class CommandClone extends CommandAbstract
             'to_ping'        => $post->to_ping,
         ];
 
-        $new_post_id    = wp_insert_post($new_post);
+        $new_post_id = wp_insert_post($new_post);
         NotificationAdmin::factory($this->app)->store(
             '<p>' .
                 sprintf(
@@ -176,7 +176,7 @@ class CommandClone extends CommandAbstract
     {
         global $wpdb;
         if (!function_exists('wp_get_current_user')) {
-            include(ABSPATH . "wp-includes/pluggable.php");
+            include ABSPATH . 'wp-includes/pluggable.php';
         }
         return wp_get_current_user();
     }

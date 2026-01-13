@@ -174,7 +174,7 @@ class FeedsController extends OsecBaseClass
                     'open-source-event-calendar'
                 ),
                 'cancel_button_text' => esc_html__('Cancel', 'open-source-event-calendar'),
-                'data_loading_button_text' =>  __('Please wait&#8230;', 'open-source-event-calendar'),
+                'data_loading_button_text' => __('Please wait&#8230;', 'open-source-event-calendar'),
                 'add_subscription_button_text' => esc_html__('Add new subscription', 'open-source-event-calendar'),
                 'update_subscription_button_text' => esc_html__('Update subscription', 'open-source-event-calendar'),
                 'reloading_button_loading_text' => esc_html__('Refreshing&#8230', 'open-source-event-calendar'),
@@ -200,16 +200,16 @@ class FeedsController extends OsecBaseClass
         $feedId = $this->get_request_params('feed_id');
 
         $entry = $this->get_request_params([
-                'feed_url',
-                'feed_name',
-                'feed_category',
-                'feed_tags',
-                'comments_enabled',
-                'map_display_enabled',
-                'keep_tags_categories',
-                'keep_old_events',
-                'import_timezone',
-            ]);
+            'feed_url',
+            'feed_name',
+            'feed_category',
+            'feed_tags',
+            'comments_enabled',
+            'map_display_enabled',
+            'keep_tags_categories',
+            'keep_old_events',
+            'import_timezone',
+        ]);
 
         /**
          * Alter feed item data before feed saved in database.
@@ -423,7 +423,7 @@ class FeedsController extends OsecBaseClass
                 ! is_wp_error($response) &&
                 isset($response['response']) &&
                 isset($response['response']['code']) &&
-                $response['response']['code'] == 200 &&
+                (int) $response['response']['code'] === 200 &&
                 isset($response['body']) &&
                 ! empty($response['body'])
             ) {
@@ -486,7 +486,7 @@ class FeedsController extends OsecBaseClass
                     $count     = $result['count'];
                     $feed_name = ! empty($result['name'][1]) ? $result['name'][1] : $feed->feed_url;
                     // we must flip again the array to iterate over it
-                    if (0 == $feed->keep_old_events) {
+                    if (0 === $feed->keep_old_events) {
                         $events_to_delete = array_flip($result['events_to_delete']);
                         foreach ($events_to_delete as $event_id) {
                             wp_delete_post($event_id, true);
@@ -646,9 +646,9 @@ class FeedsController extends OsecBaseClass
         }
         // Delete Events
         if ($feed_url) {
-            $eventsTable = $this->app->db->get_table_name(OSEC_DB__EVENTS);
+            $events_table = $this->app->db->get_table_name(OSEC_DB__EVENTS);
             $sql = $this->app->db->prepare(
-                "SELECT `post_id` FROM {$eventsTable} WHERE `ical_feed_url` = %s",
+                "SELECT `post_id` FROM {$events_table} WHERE `ical_feed_url` = %s",
                 $feed_url
             );
             $events      = $this->app->db->get_col($sql);
@@ -685,7 +685,7 @@ class FeedsController extends OsecBaseClass
         return [
             'hourly' => esc_html__('Hourly', 'open-source-event-calendar'),
             'twicedaily' => esc_html__('Twice Daily', 'open-source-event-calendar'),
-            'daily' => esc_html__('Daily', 'open-source-event-calendar')
+            'daily' => esc_html__('Daily', 'open-source-event-calendar'),
         ];
     }
 
@@ -702,7 +702,7 @@ class FeedsController extends OsecBaseClass
             wp_die(esc_html__('Invalid nonce or permission', 'open-source-event-calendar'));
         }
         $val = RequestParser::get_param('cron_freq');
-        if (in_array($val, array_keys(self::cron_options()))) {
+        if (in_array($val, array_keys(self::cron_options()), true)) {
             $this->app->settings->set('ics_cron_freq', $val);
         }
     }
@@ -747,15 +747,14 @@ class FeedsController extends OsecBaseClass
      */
     public function get_tab_header(): string
     {
-        return ThemeLoader::factory($this->app)
-          ->get_file(
-              'feed_tab_header.twig',
-              [
-                  'title' => esc_html__('ICS', 'open-source-event-calendar'),
-                  'id'    => esc_attr($this->variables['id']),
-              ],
-              true
-          )->get_content();
+        return ThemeLoader::factory($this->app)->get_file(
+            'feed_tab_header.twig',
+            [
+                'title' => esc_html__('ICS', 'open-source-event-calendar'),
+                'id'    => esc_attr($this->variables['id']),
+            ],
+            true
+        )->get_content();
     }
 
     public function get_tab_content(): string
@@ -775,7 +774,7 @@ class FeedsController extends OsecBaseClass
             ],
             get_terms([
                 'taxonomy' => 'events_categories',
-                'hide_empty' => false
+                'hide_empty' => false,
             ])
         );
         $select2_tags = $factory->create_select2_input(
@@ -953,7 +952,7 @@ class FeedsController extends OsecBaseClass
             if (is_array($param)) {
                 // TODO missing non existent check.
                 return array_filter($requestArgs, function ($key) use ($param) {
-                    return in_array($key, $param);
+                    return in_array($key, $param, true);
                 }, ARRAY_FILTER_USE_KEY);
             }
             // Case $param a string.

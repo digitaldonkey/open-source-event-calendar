@@ -32,7 +32,7 @@ return [
         'type'        => 'color',
     ],
     'baseFontFamily' => [
-        'value'       => "\"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        'value'       => '"Helvetica Neue", Helvetica, Arial, sans-serif',
         'description' => __('Base font', 'open-source-event-calendar'),
         'tab'         => 'general',
         'type'        => 'font',

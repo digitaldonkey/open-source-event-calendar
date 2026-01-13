@@ -127,10 +127,10 @@ class Request extends OsecBaseClass
     public function get_current_action()
     {
         // phpcs:disable WordPress.Security.NonceVerification.Recommended
-        if (isset($_REQUEST['action']) && -1 != $_REQUEST['action']) {
+        if (isset($_REQUEST['action']) && (int) $_REQUEST['action'] !== -1) {
             return sanitize_key($_REQUEST['action']);
         }
-        if (isset($_REQUEST['action2']) && -1 != $_REQUEST['action2']) {
+        if (isset($_REQUEST['action2']) && (int)$_REQUEST['action2'] !== -1) {
             return sanitize_key($_REQUEST['action2']);
         }
         // phpcs: enable

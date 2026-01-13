@@ -23,7 +23,7 @@ class ModalQuestion extends SettingsAbstract
     public function render($html = '', $wrap = true): string
     {
         $args = [
-            'id' =>  $this->render_id_if_present(),
+            'id' => $this->render_id_if_present(),
             'header' => $this->render_header_if_present(),
             'body' => $this->args['body_text'],
             'remove_event_button' => $this->render_remove_button_if_present(),

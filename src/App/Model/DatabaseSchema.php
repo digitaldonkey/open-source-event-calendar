@@ -52,7 +52,8 @@ class DatabaseSchema extends OsecBaseClass
         $schema_sql = $this->get_current_db_schema();
         $version    = sha1($schema_sql);
 
-        if ($this->app->options->get('osec_db_version') != $version) {
+        if ($this->app->options->get('osec_db_version') !== $version) {
+            $do_schema_update = true;
             if (
                 /**
                  * Define if Database schema upgrade should be executed
@@ -64,7 +65,7 @@ class DatabaseSchema extends OsecBaseClass
                  *
                  * @param $do_schema_update
                  */
-                apply_filters('osec_perform_scheme_update', $do_schema_update = true)
+                apply_filters('osec_perform_scheme_update', $do_schema_update)
                 && $this->apply_delta($schema_sql)
             ) {
                 $this->app->options->set('osec_db_version', $version, true);
@@ -295,7 +296,8 @@ class DatabaseSchema extends OsecBaseClass
                 $line = $line_new;
                 unset($line_new);
                 $type = 'indexes';
-                if (false === ($record = $this->parseIndex($line))) {
+                $record = $this->parseIndex($line);
+                if ($record === false) {
                     $type   = 'columns';
                     $record = $this->parseColumn($line);
                 }
@@ -418,8 +420,7 @@ class DatabaseSchema extends OsecBaseClass
                 )
             ) {
                 throw new DatabaseErrorException(
-                    esc_html('Invalid index (columns) description ' . $description .
-                             ' as per \'' . $column . '\'')
+                    esc_html('Invalid index (columns) description ' . $description . ' as per \'' . $column . '\'')
                 );
             }
             $matches[1]           = trim($matches[1]);
@@ -492,14 +493,7 @@ class DatabaseSchema extends OsecBaseClass
         );
         $column['create']          = $column['name'] . ' ' . $column['content']['type'];
         if (isset($matches[3])) {
-            $column['create'] .= ' ' .
-                                 implode(
-                                     ' ',
-                                     array_map(
-                                         'trim',
-                                         array_slice($matches, 3)
-                                     )
-                                 );
+            $column['create'] .= ' ' . implode(' ', array_map('trim', array_slice($matches, 3)));
         }
 
         return $column;
@@ -556,12 +550,13 @@ class DatabaseSchema extends OsecBaseClass
                 $type_db                         = $column->Type;
                 $collation                       = '';
                 if ($column->Collation) {
-                    $collation = ' CHARACTER SET ' .
-                                 substr(
-                                     $column->Collation,
-                                     0,
-                                     strpos($column->Collation, '_')
-                                 ) . ' COLLATE ' . $column->Collation;
+                    $collation = ' CHARACTER SET '
+                                    . substr(
+                                        $column->Collation,
+                                        0,
+                                        strpos($column->Collation, '_')
+                                    )
+                                    . ' COLLATE ' . $column->Collation;
                 }
                 $type_req = $description['columns'][$column->Field]
                 ['content']['type'];
@@ -572,7 +567,7 @@ class DatabaseSchema extends OsecBaseClass
                     )
                 ) {
                     // suspend collation checking
-                    // $type_db .= $collation;
+                    $type_db .= $collation;
                     $type_req = preg_replace(
                         '#^
 							(.+)
@@ -619,12 +614,11 @@ class DatabaseSchema extends OsecBaseClass
                     );
                 }
             }
-            if (
-                $missing = array_diff(
-                    array_keys($description['columns']),
-                    $db_column_names
-                )
-            ) {
+            $missing = array_diff(
+                array_keys($description['columns']),
+                $db_column_names
+            );
+            if ($missing) {
                 throw new DatabaseErrorException(
                     esc_html(
                         'In table `' . $table . '` fields are missing: '
@@ -643,12 +637,11 @@ class DatabaseSchema extends OsecBaseClass
                     // '` is defined for table `' . $table . '`'
                     // );
                 }
-                if (
-                    $missed = array_diff_assoc(
-                        $description['indexes'][$name]['content'],
-                        $definition['columns']
-                    )
-                ) {
+                $missed = array_diff_assoc(
+                    $description['indexes'][$name]['content'],
+                    $definition['columns']
+                );
+                if ($missed) {
                     throw new DatabaseErrorException(
                         esc_html(
                             'Index `' . $name
@@ -658,13 +651,11 @@ class DatabaseSchema extends OsecBaseClass
                     );
                 }
             }
-
-            if (
-                $missing = array_diff(
-                    array_keys($description['indexes']),
-                    array_keys($indexes)
-                )
-            ) {
+            $missing = array_diff(
+                array_keys($description['indexes']),
+                array_keys($indexes)
+            );
+            if ($missing) {
                 throw new DatabaseErrorException(
                     esc_html(
                         'In table `' . $table . '` indexes are missing: '
@@ -725,7 +716,7 @@ class DatabaseSchema extends OsecBaseClass
             // View
             $debug_view_name = $event_instances . '_readable_date';
             $dbi->query($dbi->prepare(
-                "DROP VIEW IF EXISTS %s;",
+                'DROP VIEW IF EXISTS %s;',
                 $debug_view_name
             ));
         }

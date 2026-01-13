@@ -143,7 +143,7 @@ class DT implements Stringable
         if ('UTC' !== date_default_timezone_get()) {
             throw new TimezoneException(
                 esc_html__(
-                    'Wordpress requires PHP default timezone to be UTC.
+                    'WordPress requires PHP default timezone to be UTC.
                      This plugin assumes this too.
                      Ensure date_default_timezone_get() will return `UTC`',
                     'open-source-event-calendar'

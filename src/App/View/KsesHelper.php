@@ -179,7 +179,7 @@ class KsesHelper extends OsecBaseClass
                     'draggable' => true,
                     'src' => true,
                     'style' => true,
-                    'id' => true
+                    'id' => true,
                 ],
                 'input' => [
                     1 => true,

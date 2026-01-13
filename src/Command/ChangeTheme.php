@@ -43,15 +43,14 @@ class ChangeTheme extends SaveAbstract
                 sanitize_text_field(wp_unslash($_GET['osec_theme']))
             );
 
-            ThemeLoader::factory($this->app)
-                       ->switch_theme(
-                           [
-                               'theme_root' => realpath(sanitize_text_field(wp_unslash($_GET['osec_theme_root']))),
-                               'theme_dir'  => realpath(sanitize_text_field(wp_unslash($_GET['osec_theme_dir']))),
-                               'theme_url'  => sanitize_url(wp_unslash($_GET['ai1ec_theme_url'])),
-                               'stylesheet' => $stylesheet,
-                           ]
-                       );
+            ThemeLoader::factory($this->app)->switch_theme(
+                [
+                    'theme_root' => realpath(sanitize_text_field(wp_unslash($_GET['osec_theme_root']))),
+                    'theme_dir'  => realpath(sanitize_text_field(wp_unslash($_GET['osec_theme_dir']))),
+                    'theme_url'  => sanitize_url(wp_unslash($_GET['ai1ec_theme_url'])),
+                    'stylesheet' => $stylesheet,
+                ]
+            );
 
             // Return user to themes list page with success message.
             return [

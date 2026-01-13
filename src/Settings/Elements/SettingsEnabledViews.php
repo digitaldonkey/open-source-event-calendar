@@ -55,7 +55,7 @@ class SettingsEnabledViews extends SettingsAbstract
                     '') :
                 $view['default'];
             /* $view['longname'] is a _n_noop. */
-            $view['longname']       = translate_nooped_plural(
+            $view['longname'] = translate_nooped_plural(
                 $view['longname'],
                 1
             );

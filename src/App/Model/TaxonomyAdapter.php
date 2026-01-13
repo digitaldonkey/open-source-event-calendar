@@ -44,7 +44,7 @@ class TaxonomyAdapter extends OsecBaseClass
             $categories[] = $taxonomy;
         }
         foreach ($post_ids as $post_id) {
-            $post_id                                          = (int)$post_id;
+            $post_id = (int)$post_id;
             $this->taxonomyMap['events_categories'][$post_id] = [];
             $this->taxonomyMap['events_tags'][$post_id]       = [];
         }
@@ -76,7 +76,7 @@ class TaxonomyAdapter extends OsecBaseClass
     public function update_meta(array $post_ids)
     {
         foreach ($post_ids as $post_id) {
-            $post_id                                          = (int)$post_id;
+            $post_id = (int)$post_id;
             $this->taxonomyMap['events_categories'][$post_id] = [];
             $this->taxonomyMap['events_tags'][$post_id]       = [];
         }
@@ -180,7 +180,8 @@ class TaxonomyAdapter extends OsecBaseClass
         $category_map = [];
         $records      = (array)$this->app->db->select(OSEC_DB__META, ['term_id', 'term_image', 'term_color']);
         foreach ($records as $row) {
-            $image = $color = null;
+            $image = null;
+            $color = null;
             if ($row->term_image) {
                 $image = $row->term_image;
             }

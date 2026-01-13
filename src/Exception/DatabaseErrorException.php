@@ -24,11 +24,11 @@ class DatabaseErrorException extends Exception
                 has permissions, to make changes (<strong>ALTER TABLE</strong>) to the database.',
             'open-source-event-calendar'
         ) . '</p>'
-                   . '<p>' . sprintf(
-                   /* translators: Database exception error message */
-                       __('Error encountered: %s', 'open-source-event-calendar'),
-                       $this->getMessage()
-                   ) . '</p>';
+        . '<p>' . sprintf(
+            /* translators: Database exception error message */
+            __('Error encountered: %s', 'open-source-event-calendar'),
+            $this->getMessage()
+        ) . '</p>';
 
         return $message;
     }

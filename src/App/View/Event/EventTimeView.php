@@ -44,7 +44,7 @@ class EventTimeView extends OsecBaseClass
          * @var boolean $displayEndDate Display end time only as date would double.
          *                              If end is set (´not-instant´) and not multiday.
          */
-        $displayEndTime  = !$displayEndDate && !$event->is_allday() && !$event->is_instant();
+        $displayEndTime = !$displayEndDate && !$event->is_allday() && !$event->is_instant();
 
         // Makes no sense to hide start date for all-day events, so fix argument
         if ('hidden' === $start_date_display && $event->is_allday()) {

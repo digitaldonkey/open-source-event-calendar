@@ -333,10 +333,11 @@ class EventTaxonomyView extends OsecBaseClass
             $href  = HtmlFactory::factory($this->app)
                                 ->create_href_helper_instance(['cat_ids' => $category->term_id])
                                 ->generate_href();
-            $class = $data_type = $title = '';
+            $class = '';
+            $data_type = '';
+            $title = '';
             if ($category->description) {
-                $title = 'title="' .
-                         esc_attr($category->description) . '" ';
+                $title = 'title="' . esc_attr($category->description) . '" ';
             }
 
             $html        = '';

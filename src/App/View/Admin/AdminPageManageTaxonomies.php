@@ -53,7 +53,8 @@ class AdminPageManageTaxonomies extends OsecBaseClass
                     isset($_GET['taxonomy']) &&
                     $taxonomy === sanitize_key($_GET['taxonomy']);
                 // phpcs:enable
-                $edit_url        = $edit_label = '';
+                $edit_url = '';
+                $edit_label = '';
                 if (isset($taxonomy_metadata[$taxonomy]['url'])) {
                     $edit_url   = $taxonomy_metadata[$taxonomy]['url'];
                     $edit_label = $taxonomy_metadata[$taxonomy]['edit_label'];

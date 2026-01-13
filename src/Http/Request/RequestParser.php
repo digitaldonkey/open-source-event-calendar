@@ -130,11 +130,13 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
         $argv  = [];
         $uri_0 = explode('?', (string)$requestUri);
         $uri   = trim(urldecode($uri_0[0]), '/');
-        if (($arg_start = strpos($uri, '/')) > 0) {
+        $arg_start = strpos($uri, '/');
+        if ($arg_start > 0) {
             $uri = substr($uri, $arg_start + 1);
         }
         foreach (explode('/', $uri) as $arg) {
-            if (($colon = strpos($arg, OSEC_URI_DIRECTION_SEPARATOR)) > 0) {
+            $colon = strpos($arg, OSEC_URI_DIRECTION_SEPARATOR);
+            if ($colon > 0) {
                 $argv[substr($arg, 0, $colon)] = substr($arg, $colon + 1);
             }
         }
@@ -302,7 +304,8 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
         }
         foreach ($this->rules as $field => $options) {
             $value = $options['default'];
-            if (($ext_var = $this->getVariable($field))) {
+            $ext_var = $this->getVariable($field);
+            if ($ext_var) {
                 $value = $this->sanitizeValue(
                     $ext_var,
                     $options
@@ -395,7 +398,7 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
     protected function typeCast(mixed $value, array $options)
     {
         if ('enum' === $options['type']) {
-            if (in_array($value, $options['list_sep'])) {
+            if (in_array($value, $options['list_sep'], true)) {
                 return $value;
             }
 

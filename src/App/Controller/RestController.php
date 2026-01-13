@@ -12,21 +12,24 @@ class RestController extends OsecBaseClass
     {
         $app = $this->app;
 
-        add_action('rest_api_init', function () use ($app) {
-            register_rest_route(
-                'osec/v1',
-                '/settings',
-                [
-                    'methods'             => 'GET',
-                    'callback'            => function (WP_REST_Request $request) use ($app) {
-                        return RestController::factory($app)->getSettings($request);
-                    },
-                    'permission_callback' => function () {
-                        return current_user_can('read');
-                    }
-                ],
-            );
-        });
+        add_action(
+            'rest_api_init',
+            function () use ($app) {
+                register_rest_route(
+                    'osec/v1',
+                    '/settings',
+                    [
+                        'methods' => 'GET',
+                        'callback' => function (WP_REST_Request $request) use ($app) {
+                            return RestController::factory($app)->getSettings($request);
+                        },
+                        'permission_callback' => function () {
+                            return current_user_can('read');
+                        },
+                    ],
+                );
+            }
+        );
     }
 
     public function getSettings(WP_REST_Request $request)

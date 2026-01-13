@@ -82,7 +82,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
             'nonces' => [
                 wp_nonce_field('closedpostboxes', 'closedpostboxesnonce', false),
                 wp_nonce_field('meta-box-order', 'meta-box-order-nonce', false),
-            ]
+            ],
         ];
         ThemeLoader::factory($this->app)
                    ->get_file('page_calendar_feeds.twig', $args, true)
@@ -94,7 +94,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
      *
      * @return void
      */
-    public function display_meta_box($object, $box)
+    public function display_meta_box($obj, $box)
     {
         /**
          * Alter FeedsController.

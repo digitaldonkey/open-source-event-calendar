@@ -616,7 +616,8 @@ class Timezones extends OsecBaseClass
             strtr($meta_name, ' ', '_'),
             strtr($meta_name, '_', ' '),
         ];
-        if (false !== ($parenthesis_pos = strpos($meta_name, '('))) {
+        $parenthesis_pos = strpos($meta_name, '(');
+        if ($parenthesis_pos !== false) {
             foreach ($name_variants as $name) {
                 $name_variants[] = substr($name, 0, $parenthesis_pos - 1);
             }
@@ -630,18 +631,19 @@ class Timezones extends OsecBaseClass
             }
         }
         if (
-            isset($meta_name[0]) &&
-            '(' === $meta_name[0] &&
-            $closing_pos = strpos($meta_name, ')')
+            isset($meta_name[0])
+            && '(' === $meta_name[0]
+            && strpos($meta_name, ')')
         ) {
-            $meta_name = trim(substr($meta_name, $closing_pos + 1));
+            $meta_name = trim(substr($meta_name, strpos($meta_name, ')') + 1));
 
             return $this->guess_zone($meta_name);
         }
         if (
-            ! str_contains($meta_name, ' Standard ') &&
-            false !== ($time_pos = strpos($meta_name, ' Time'))
+            ! str_contains($meta_name, ' Standard ')
+            && false !== strpos($meta_name, ' Time')
         ) {
+            $time_pos = strpos($meta_name, ' Time');
             $meta_name = substr($meta_name, 0, $time_pos) .
                          ' Standard' . substr($meta_name, $time_pos);
 

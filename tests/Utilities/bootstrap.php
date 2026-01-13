@@ -69,7 +69,7 @@ function osec_manually_load_plugin()
     WP_Filesystem();
     $wp_upload = wp_upload_dir();
     if ($wp_upload['error']) {
-        throw new Exception("Error WP upload Error");
+        throw new Exception('Error WP upload Error');
     }
     CachePath::clean_and_check_dir($wp_upload['basedir'] . OSEC_FILE_CACHE_WP_UPLOAD_DIR);
 }

@@ -93,9 +93,9 @@ class TwigExtension extends AbstractExtension
      *
      * @return bool True if it is a string, false otherwise.
      */
-    public static function is_string(mixed $var)
+    public static function is_string(mixed $variable)
     {
-        return is_string($var);
+        return is_string($variable);
     }
 
     /**
@@ -194,25 +194,21 @@ class TwigExtension extends AbstractExtension
      *
      * @return string
      */
-    public static function truncate(
-        $string,
-        $length = 35,
-        $read_more = '...',
-        $html_entities = true
-    ) {
+    public static function truncate($str, $length = 35, $read_more = '...', $html_entities = true): string
+    {
         // Truncate multibyte encodings differently, if supported.
         // First decode entities if requested.
         if ($html_entities) {
-            $string = html_entity_decode((string)$string, ENT_QUOTES, 'UTF-8');
+            $str = html_entity_decode((string)$str, ENT_QUOTES, 'UTF-8');
         }
         // Truncate string.
-        $string = mb_strimwidth((string)$string, 0, $length, $read_more, 'UTF-8');
+        $str = mb_strimwidth((string)$str, 0, $length, $read_more, 'UTF-8');
         // Reencode entities if requested.
         if ($html_entities) {
-            $string = htmlentities($string, ENT_QUOTES, 'UTF-8');
+            $str = htmlentities($str, ENT_QUOTES, 'UTF-8');
         }
 
-        return $string;
+        return $str;
     }
 
     /**
@@ -289,11 +285,11 @@ class TwigExtension extends AbstractExtension
     /**
      * Debug function to be used in twig templates with Firebug/FirePHP
      */
-    public function fb(mixed $object): void
+    public function fb(mixed $obj): void
     {
         if (function_exists('fb')) {
             /** @noinspection PhpUndefinedFunctionInspection */
-            fb($object);
+            fb($obj);
         }
     }
 
@@ -323,9 +319,9 @@ class TwigExtension extends AbstractExtension
      *
      * @return void number of meta_boxes
      */
-    public function do_meta_boxes($screen, $context, mixed $object): void
+    public function do_meta_boxes($screen, $context, mixed $obj): void
     {
-        do_meta_boxes($screen, $context, $object);
+        do_meta_boxes($screen, $context, $obj);
     }
 
     /**
@@ -357,7 +353,7 @@ class TwigExtension extends AbstractExtension
      * @return string Nonce field.
      * @package WordPress
      */
-    public function wp_nonce_field($action = -1, $name = '_wpnonce', $referer = true, $echo = false)
+    public function wp_nonce_field($action = -1, $name = '_wpnonce', $referer = true)
     {
         return wp_nonce_field($action, $name, $referer, false);
     }

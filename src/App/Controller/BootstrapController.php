@@ -291,21 +291,13 @@ class BootstrapController
             2
         );
 
-        add_filter(
-            'robots_txt',
-            function (string $public, string $output = '') use ($app) {
-                return RobotsTxt::factory($app)->rules($public, $output);
-            },
-            10,
-            2
-        );
+        add_filter('robots_txt', function (string $output, bool $is_public) use ($app) {
+             return RobotsTxt::factory($app)->rules($output, $is_public);
+        }, 10, 2);
 
-        add_filter(
-            'osec_dbi_debug',
-            function ($do_debug) use ($app) {
-                return Request::factory($app)->debug_filter($do_debug);
-            }
-        );
+        add_filter('osec_dbi_debug', function ($do_debug) use ($app) {
+            return Request::factory($app)->debug_filter($do_debug);
+        });
 
         // Child events are instances of a repeating Event.
         // They may be edited per instance, but are only
@@ -697,7 +689,7 @@ class BootstrapController
      **/
     protected function processRequest()
     {
-        $page_id  = $this->app->settings->get('calendar_page_id');
+        $page_id = $this->app->settings->get('calendar_page_id');
         if (
             ! is_admin()
             && $page_id

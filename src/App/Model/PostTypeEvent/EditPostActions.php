@@ -66,7 +66,8 @@ class EditPostActions extends OsecBaseClass
      */
     private function duplicate_post_get_clone_post_link($id = 0, $context = 'display', $draft = true)
     {
-        if ( ! $post = get_post($id)) {
+        $post = get_post($id);
+        if ( ! $post) {
             return;
         }
 
@@ -76,7 +77,7 @@ class EditPostActions extends OsecBaseClass
             $action_name = 'duplicate_post_save_as_new_post';
         }
 
-        if ('display' == $context) {
+        if ('display' === $context) {
             $action = '?action=' . $action_name . '&amp;post=' . $post->ID;
         } else {
             $action = '?action=' . $action_name . '&post=' . $post->ID;

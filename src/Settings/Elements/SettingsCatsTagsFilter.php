@@ -71,7 +71,7 @@ class SettingsCatsTagsFilter extends SettingsAbstract
                 'text'  => $term->name,
             ];
             if (isset($this->args['value'][$type])) {
-                if (in_array($term->term_id, $this->args['value'][$type])) {
+                if (in_array($term->term_id, $this->args['value'][$type], true)) {
                     $option['args'] = ['selected' => 'selected'];
                 }
             }

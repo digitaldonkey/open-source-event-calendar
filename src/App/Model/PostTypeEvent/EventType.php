@@ -295,14 +295,14 @@ class EventType extends OsecBaseClass
         $taxonomies = [
             'events_feeds',
             'events_tags',
-            'events_categories'
+            'events_categories',
         ];
         if ($purge) {
             // Delete taxonomy terms.
             foreach ($taxonomies as $taxonomy) {
                 $terms = get_terms([
                     'taxonomy' => $taxonomy,
-                    'hide_empty' => false
+                    'hide_empty' => false,
                 ]);
                 foreach ($terms as $term) {
                     wp_delete_term($term->term_id, $taxonomy);
@@ -310,14 +310,14 @@ class EventType extends OsecBaseClass
             }
 
             // Constants only. DB prepare is not required.
-            $postType = OSEC_POST_TYPE;
+            $post_type = OSEC_POST_TYPE;
             $this->app->db->query(
                 "DELETE a,b,c FROM wp_posts a
                     LEFT JOIN wp_term_relationships b
                         ON (a.ID = b.object_id)
                     LEFT JOIN wp_postmeta c
                         ON (a.ID = c.post_id)
-                    WHERE a.post_type = '$postType';"
+                    WHERE a.post_type = '$post_type';"
             );
 
             // Remove role

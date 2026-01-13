@@ -190,10 +190,11 @@ class AdminThemeList extends WP_List_Table
         <div class="tablenav themes <?php echo esc_attr($which); ?>">
             <?php
             $this->pagination($which); ?>
-            <img src="<?php
-            echo esc_url(admin_url('images/wpspin_light.gif')); ?>"
+            <img
+                src="<?php echo esc_url(admin_url('images/wpspin_light.gif')); ?>"
                  class="ajax-loading list-ajax-loading"
-                 alt=""/>
+                 alt=""
+            />
             <br class="clear"/>
         </div>
         <?php
@@ -393,8 +394,9 @@ class AdminThemeList extends WP_List_Table
                     if ($tags) : ?>
                         <p>
                             <?php
-                            echo esc_html__('Tags:', 'open-source-event-calendar'); ?><?php
-                            echo esc_html(implode(', ', $tags)); ?>
+                                echo esc_html__('Tags:', 'open-source-event-calendar');
+                                echo esc_html(implode(', ', $tags));
+                            ?>
                         </p>
                     <?php endif; ?>
                 <?php endif; // end if not empty theme_name ?>

@@ -145,7 +145,7 @@ class WpmlHelper extends OsecBaseClass
     public function get_region()
     {
         $locale = explode('_', get_locale());
-        $region = (isset($locale[1]) && $locale[1] != '')
+        $region = (isset($locale[1]) && $locale[1] !== '')
             ? strtolower($locale[1])
             : '';
 
@@ -403,7 +403,7 @@ class WpmlHelper extends OsecBaseClass
     {
         $locale = explode('_', get_locale());
 
-        return (isset($locale[0]) && $locale[0] != '') ? $locale[0] : 'en';
+        return (isset($locale[0]) && $locale[0] !== '') ? $locale[0] : 'en';
     }
 
     /**

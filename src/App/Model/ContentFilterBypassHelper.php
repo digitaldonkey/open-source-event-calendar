@@ -64,12 +64,15 @@ class ContentFilterBypassHelper extends OsecBaseClass
          *
          * @param  array  $entry  Debug or not.
          */
-        $filters = apply_filters('osec_event_the_content_strict_filters', [
-            'wptexturize',
-            'convert_smilies',
-            'convert_chars',
-            'wpautop',
-        ]);
+        $filters = apply_filters(
+            'osec_event_the_content_strict_filters',
+            [
+                'wptexturize',
+                'convert_smilies',
+                'convert_chars',
+                'wpautop',
+            ]
+        );
         foreach ($filters as $filter) {
             add_filter('the_content', $filter);
         }

@@ -48,23 +48,6 @@ namespace Osec\Http\Request;
  */
 class HttpEncoderBase
 {
-    /**
-     * Should the encoder allow HTTP encoding to IE6?
-     *
-     * If you have many IE6 users and the bandwidth savings is worth troubling
-     * some of them, set this to true.
-     *
-     * By default, encoding is only offered to IE7+. When this is true,
-     * getAcceptedEncoding() will return an encoding for IE6 if its user agent
-     * string contains "SV1". This has been documented in many places as "safe",
-     * but there seem to be remaining, intermittent encoding bugs in patched
-     * IE6 on the wild web.
-     *
-     * @var bool
-     */
-    public static $encodeToIe6 = true;
-
-
     protected $content = '';
     protected $headers = array();
     protected $encodeMethod = array('', '');
@@ -100,7 +83,7 @@ class HttpEncoderBase
             $this->headers['Content-Type'] = $spec['type'];
         }
         if (isset($spec['method'])
-            && in_array($spec['method'], array('gzip', 'deflate', 'compress', ''))) {
+            && in_array($spec['method'], array('gzip', 'deflate', 'compress', ''), true)) {
             $this->encodeMethod = array($spec['method'], $spec['method']);
         } else {
             $this->encodeMethod = self::getAcceptedEncoding();
@@ -195,9 +178,7 @@ class HttpEncoderBase
         $allowDeflate = true
     ) {
         // @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
-
-        if (! isset($_SERVER['HTTP_ACCEPT_ENCODING'])
-            || self::isBuggyIe()) {
+        if (! isset($_SERVER['HTTP_ACCEPT_ENCODING'])) {
             return array('', '');
         }
         $ae = sanitize_text_field(wp_unslash($_SERVER['HTTP_ACCEPT_ENCODING']));
@@ -259,14 +240,12 @@ class HttpEncoderBase
      */
     public function encode($compressionLevel = null)
     {
-        if (! self::isBuggyIe()) {
-            $this->headers['Vary'] = 'Accept-Encoding';
-        }
+        $this->headers['Vary'] = 'Accept-Encoding';
         if (null === $compressionLevel) {
             $compressionLevel = self::$compressionLevel;
         }
         if ('' === $this->encodeMethod[0]
-            || ($compressionLevel == 0)
+            || ($compressionLevel === 0)
             || !extension_loaded('zlib')) {
             return false;
         }
@@ -309,29 +288,5 @@ class HttpEncoderBase
         $he->sendAll();
 
         return $ret;
-    }
-
-    /**
-     * Is the browser an IE version earlier than 6 SP2?
-     *
-     * @return bool
-     */
-    public static function isBuggyIe()
-    {
-        if (empty($_SERVER['HTTP_USER_AGENT'])) {
-            return false;
-        }
-        $ua = sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT']));
-        // quick escape for non-IEs
-        if (! str_starts_with($ua, 'Mozilla/4.0 (compatible; MSIE ')
-            || str_contains($ua, 'Opera')) {
-            return false;
-        }
-        // no regex = faaast
-        $version = (float)substr($ua, 30);
-
-        return self::$encodeToIe6
-            ? ($version < 6 || ($version == 6 && ! str_contains($ua, 'SV1')))
-            : ($version < 7);
     }
 }

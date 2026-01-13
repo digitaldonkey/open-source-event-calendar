@@ -75,7 +75,7 @@ class CompileCoreCss extends CommandAbstract
                         'css' . DIRECTORY_SEPARATOR . 'ai1ec_parsed_css.css';
         $hashmap_file = $theme['theme_dir'] . '/less.sha1.map.php';
 
-        $css_written     = file_put_contents($filename, $css);
+        $css_written = file_put_contents($filename, $css);
         if (! $css_written) {
             throw new Exception(
                 sprintf(
@@ -119,7 +119,7 @@ class CompileCoreCss extends CommandAbstract
     {
         $themes = ['plana', 'vortex', 'umbra', 'gamma'];
 
-        if ( ! in_array($stylesheet, $themes)) {
+        if ( ! in_array($stylesheet, $themes, true)) {
             throw new InvalidArgumentException(
                 esc_html(
                     'Theme ' . $stylesheet . ' compilation is not supported.'

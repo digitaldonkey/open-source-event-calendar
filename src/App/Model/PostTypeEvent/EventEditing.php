@@ -266,8 +266,8 @@ class EventEditing extends OsecBaseClass
     public function create_duplicate_post(): ?int
     {
         if (
-            !isset($_REQUEST[EventEditing::NONCE_NAME])
-            || !wp_verify_nonce(sanitize_key($_REQUEST[EventEditing::NONCE_NAME]), EventEditing::NONCE_ACTION)
+            !isset($_REQUEST[self::NONCE_NAME])
+            || !wp_verify_nonce(sanitize_key($_REQUEST[self::NONCE_NAME]), self::NONCE_ACTION)
         ) {
             return false;
         }

@@ -39,10 +39,8 @@ class RenderCalendar extends CommandAbstract
             return false;
         }
 
-        $page_ids_to_match = [$calendar_page_id] +
-                             WpmlHelper::factory($this->app)->get_translations_of_page(
-                                 $calendar_page_id
-                             );
+        $page_ids_to_match = [$calendar_page_id]
+                             + WpmlHelper::factory($this->app)->get_translations_of_page($calendar_page_id);
         foreach ($page_ids_to_match as $page_id) {
             if (is_page($page_id)) {
                 $this->request->set_current_page($page_id);
@@ -93,7 +91,7 @@ class RenderCalendar extends CommandAbstract
 
     public function do_execute()
     {
-        FrontendCssController::factory($this->app) ->add_link_to_html_for_frontend();
+        FrontendCssController::factory($this->app)->add_link_to_html_for_frontend();
         ScriptsFrontendController::factory($this->app)->load_frontend_js(true);
         return [
             'data'     => CalendarPageView::factory($this->app)->get_content($this->request),

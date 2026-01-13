@@ -28,7 +28,7 @@ class EventParent extends OsecBaseClass
     public static function add_actions(App $app, bool $is_admin)
     {
         // If editing a child instance.
-        $script_name =  isset($_SERVER['SCRIPT_NAME']) ? sanitize_text_field(wp_unslash($_SERVER['SCRIPT_NAME'])) : '';
+        $script_name = isset($_SERVER['SCRIPT_NAME']) ? sanitize_text_field(wp_unslash($_SERVER['SCRIPT_NAME'])) : '';
         if ($script_name && basename($script_name) === 'post.php') {
             add_action(
                 // If $_POST updates. Gutenberg unsupported.
@@ -303,11 +303,10 @@ class EventParent extends OsecBaseClass
     {
         if (AccessControl::is_our_post_type($post)) {
             $parent_post_id = $this->event_parent($post->ID);
-            if (
-                $parent_post_id &&
-                null !== ($parent_post = get_post($parent_post_id)) &&
-                isset($parent_post->post_status) &&
-                'trash' !== $parent_post->post_status
+            $parent_post = $parent_post_id && !is_null(get_post($parent_post_id)) ? get_post($parent_post_id) : null;
+            if ($parent_post
+                && isset($parent_post->post_status)
+                && 'trash' !== $parent_post->post_status
             ) {
                 $parent_link             = get_edit_post_link(
                     $parent_post_id,
@@ -376,17 +375,20 @@ class EventParent extends OsecBaseClass
         if (null === $parents) {
             $parents = CacheMemory::factory($this->app);
         }
-
-        if (null === ($parent_id = $parents->get($current_id))) {
+        $parent_id = $parents->get($current_id);
+        if (is_null($parent_id)) {
             $db = $this->app->db;
             $parent = $db->get_row(
-                $db->prepare("
-                SELECT parent.ID, parent.post_status
-                FROM {$db->get_table_name('posts')} AS child
-                INNER JOIN {$db->get_table_name('posts')} AS parent
-                    ON ( parent.ID = child.post_parent )
-                WHERE child.ID = %d
-            ", $current_id)
+                $db->prepare(
+                    "
+                            SELECT parent.ID, parent.post_status
+                            FROM {$db->get_table_name('posts')} AS child
+                            INNER JOIN {$db->get_table_name('posts')} AS parent
+                                ON ( parent.ID = child.post_parent )
+                            WHERE child.ID = %d
+                        ",
+                    $current_id
+                )
             );
             if (
                 empty($parent) ||
@@ -413,7 +415,7 @@ class EventParent extends OsecBaseClass
         $parent_id,
         $include_trash = false
     ) {
-        $objects   = [];
+        $objects = [];
         // Avoid getting all.
         if (!$parent_id) {
             return $objects;

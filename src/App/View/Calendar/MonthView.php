@@ -332,13 +332,13 @@ class MonthView extends AbstractView
                 'date'      => $i,
                 'date_link' => $this->create_link_for_day_view($exact_date),
                 'today'     =>
-                    $timestamp->format('Y') == $today->format('Y') &&
-                    $timestamp->format('m') == $today->format('m') &&
-                    $i == $today->format('j'),
+                    $timestamp->format('Y') === $today->format('Y') &&
+                    $timestamp->format('m') === $today->format('m') &&
+                    (string) $i === $today->format('j'),
                 'events'    => $events,
             ];
             // If reached the end of the week, increment week
-            if (count($weeks[$week]) == 7) {
+            if (count($weeks[$week]) === 7) {
                 ++$week;
             }
         }

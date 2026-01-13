@@ -114,9 +114,10 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $overrideCalendarTz = (bool)$feed->import_timezone;
 
         /* @var string $timezone Calendar-Feed default Timezone */
-        $timezone = $localTimezone = Timezones::factory($this->app)->get_default_timezone();
+        $timezone = Timezones::factory($this->app)->get_default_timezone();
+        $localTimezone = $timezone;
 
-        // Fetch default timezone in case individual properties don't define it
+            // Fetch default timezone in case individual properties don't define it
         /* @var $tz Vtimezone Timezone Component. */
         $tz = $v->getComponent('vtimezone');
         if (! empty($tz)) {
@@ -246,7 +247,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                       $this->isTimeless($endValue['value']);
             // Also check the proprietary MS all-day field.
             $ms_allday = $e->getXprop('X-MICROSOFT-CDO-ALLDAYEVENT');
-            if (! empty($ms_allday) && $ms_allday[1] == 'TRUE') {
+            if (! empty($ms_allday) && $ms_allday[1] === 'TRUE') {
                 $allday = true;
             }
 
@@ -278,17 +279,18 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // =======================================
             // = Recurrence rules & recurrence dates =
             // =======================================
-            if ($rrule = $e->createRrule()) {
+            $rrule = $e->createRrule();
+            if ($rrule) {
                 $rrule = explode(':', (string)$rrule);
                 $rrule = trim(end($rrule));
             }
-
-            if ($exrule = $e->createExrule()) {
+            $exrule = $e->createExrule();
+            if ($exrule) {
                 $exrule = explode(':', (string)$exrule);
                 $exrule = trim(end($exrule));
             }
-
-            if ($rdate = $e->createRdate()) {
+            $rdate = $e->createRdate();
+            if ($rdate) {
                 $rdate = explode(':', (string)$rdate);
                 $rdate = trim(end($rdate));
             }
@@ -297,7 +299,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // = Exception dates =
             // ===================
             $exdate = '';
-            if ($exdates = $e->createExdate()) {
+            $exdates = $e->createExdate();
+            if ($exdates) {
                 // We may have two formats:
                 // one exdate with many dates ot more EXDATE rules
                 $exdates      = explode('EXDATE', (string)$exdates);
@@ -347,7 +350,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // ========================
             // = Latitude & longitude =
             // ========================
-            $latitude = $longitude = null;
+            $latitude = null;
+            $longitude = null;
             $geo_tag  = $e->getXprop('geo');
             if (is_array($geo_tag)) {
                 if (
@@ -373,7 +377,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // ===================
             // = Venue & address =
             // ===================
-            $address  = $venue = '';
+            $address  = '';
+            $venue = '';
             $location = $e->getXprop('location');
             $matches  = [];
             // This regexp matches a venue / address in the format
@@ -757,7 +762,14 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         ) {
             return $exclusions;
         }
-        $year = $month = $day = $hour = $min = $sec = null;
+
+        $year = null;
+        $month = null;
+        $day = null;
+        $hour = null;
+        $min = null;
+        $sec = null;
+        // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
         extract($recurrence_id, EXTR_IF_EXISTS);
         $timezone = '';
         $exdate   = sprintf('%04d%02d%02d', $year, $month, $day);
@@ -766,7 +778,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             null === $min ||
             null === $sec
         ) {
-            $hour     = $min = $sec = '00';
+            $hour = '00';
+            $min  = '00';
+            $sec  = '00';
             $timezone = 'Z';
         }
         $exdate                            .= sprintf(
@@ -890,7 +904,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $matches    = $avatarView->get_image_from_content($content);
         // if no img is already present - add thumbnail
         if (empty($matches)) {
-            if ($img_url = $avatarView->get_post_thumbnail_url($event, $size)) {
+            $img_url = $avatarView->get_post_thumbnail_url($event, $size);
+            if ($img_url) {
                 $content = '<div class="ai1ec-event-avatar alignleft timely"><img src="' .
                            esc_attr($img_url) . '" width="' . $size[0] . '" height="' .
                            $size[1] . '" /></div>' . $content;
@@ -927,13 +942,16 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // =====================
         // = Start & end times =
         // =====================
-        $dtstartstring = '';
-        $dtstart       = $dtend = [];
+        $dtstart = [];
+        $dtend = [];
+
         if ($event->is_allday()) {
-            $dtstart['VALUE'] = $dtend['VALUE'] = 'DATE';
+            $dtstart['VALUE'] = 'DATE';
+            $dtend['VALUE'] = 'DATE';
             // For exporting all day events, don't set a timezone
             if ($tz && ! $export) {
-                $dtstart['TZID'] = $dtend['TZID'] = $tz;
+                $dtstart['TZID'] = $tz;
+                $dtend['TZID'] = $tz;
             }
 
             // For exportin' all day events, only set the date not the time
@@ -966,7 +984,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             }
         } else {
             if ($tz) {
-                $dtstart['TZID'] = $dtend['TZID'] = $tz;
+                $dtstart['TZID'] = $tz;
+                $dtend['TZID']   = $tz;
             }
             // This is used later.
             $dtstartstring = $event->get('start')->format('Ymd\THis');
@@ -1102,7 +1121,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     default => $v,
                 };
                 // iCalcreator requires a more complex array structure for BYDAY...
-                if ($k == 'BYDAY') {
+                if ($k === 'BYDAY') {
                     $v = [];
                     foreach ($exploded as $day) {
                         $v[] = ['DAY' => $day];
@@ -1147,7 +1166,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     default => $v,
                 };
                 // iCalcreator requires a more complex array structure for BYDAY...
-                if ($k == 'BYDAY') {
+                if ($k === 'BYDAY') {
                     $v = [];
                     foreach ($exploded as $day) {
                         $v[] = ['DAY' => $day];

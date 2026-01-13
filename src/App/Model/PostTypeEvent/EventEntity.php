@@ -228,7 +228,7 @@ class EventEntity extends OsecBaseClass
                 return !in_array($k, [
                     // Ignored props.
                     'app',
-                ]);
+                ], true);
             }, ARRAY_FILTER_USE_KEY);
         }
         return array_keys($known);

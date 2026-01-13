@@ -71,18 +71,18 @@ class App
      * Allow to set previously created globally accessible class instance.
      *
      * @param  string  $name  Class name to be used.
-     * @param  object  $object  Actual instance of class above.
+     * @param  object  $obj  Actual instance of class above.
      *
      * @return void
      */
-    public function inject_object($name, $object)
+    public function inject_object($name, $obj)
     {
-        if ( ! is_object($object) || ! ($object instanceof $name)) {
+        if (! is_object($obj) || ! ($obj instanceof $name)) {
             throw new BootstrapException(
                 'Attempt to inject not an object / invalid object.'
             );
         }
-        $this->globalObjects[$name] = $object;
+        $this->globalObjects[$name] = $obj;
     }
 
     /**

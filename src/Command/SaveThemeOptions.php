@@ -55,11 +55,7 @@ class SaveThemeOptions extends SaveAbstract
         }
         // phpcs:enable
 
-        FrontendCssController::factory($this->app)
-                             ->update_variables_and_compile_css(
-                                 $variables,
-                                 $isReset
-                             );
+        FrontendCssController::factory($this->app)->update_variables_and_compile_css($variables, $isReset);
 
         return [
             'url' => admin_url(

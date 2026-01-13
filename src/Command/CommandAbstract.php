@@ -43,10 +43,9 @@ abstract class CommandAbstract extends OsecBaseClass
      */
     public function get_parameters()
     {
-        $plugin     = $controller = $action = null;
-        $plugin     = $this->request->get_param('plugin', $plugin);
-        $controller = $this->request->get_param('controller', $controller);
-        $action     = $this->request->get_param('action', $action);
+        $plugin     = $this->request->get_param('plugin', null);
+        $controller = $this->request->get_param('controller', null);
+        $action     = $this->request->get_param('action', null);
 
         if (
             is_scalar($plugin)

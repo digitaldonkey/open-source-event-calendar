@@ -157,7 +157,7 @@ class AdminPageAllEvents extends OsecBaseClass
         if ($typenow === OSEC_POST_TYPE) {
             if (
                 ! array_key_exists('orderby', $query->query_vars)
-                || $query->query_vars['orderby'] == ''
+                || $query->query_vars['orderby'] === ''
             ) {
                 $query->query_vars['orderby'] = 'osec_event_date';
                 $query->query_vars['order']   = 'desc';

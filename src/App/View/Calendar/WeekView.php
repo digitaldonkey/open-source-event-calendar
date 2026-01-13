@@ -353,9 +353,9 @@ class WeekView extends AbstractView
 
             $days[$day_date] = [
                 'today'     =>
-                    $day_date_ob->format('Y') == $now->format('Y')
-                    && $day_date_ob->format('m') == $now->format('m')
-                    && $day_date_ob->format('j') == $now->format('j'),
+                    $day_date_ob->format('Y') === $now->format('Y')
+                    && $day_date_ob->format('m') === $now->format('m')
+                    && $day_date_ob->format('j') === $now->format('j'),
                 'allday'    => $all_events[$day_date]['allday'],
                 'notallday' => $all_events[$day_date]['notallday'],
                 'href'      => $href_for_date,
@@ -384,14 +384,13 @@ class WeekView extends AbstractView
      *
      * @return array List of start and and timestamps, 0-indexed array.
      */
-    protected function getDayStartAndEnd(
-        int $day,
-        DT $week_start
-    ) {
-        if (null === ($entry = $this->daysCache->get($day))) {
+    protected function getDayStartAndEnd(int $day, DT $week_start)
+    {
+        $entry = $this->daysCache->get($day);
+        if (is_null($entry)) {
             $day_start = (new DT($week_start))
                 ->adjust_day($day);
-            $entry     = [
+            $entry = [
                 $day_start->format(),
                 (new DT($day_start))->set_time(23, 59, 59)->format(),
                 $day_start,

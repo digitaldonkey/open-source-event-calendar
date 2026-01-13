@@ -120,11 +120,11 @@ class AdminPageAddEvent extends OsecBaseClass
             'timezones_list'  => Timezones::factory($this->app)->get_timezones(true),
             'all_day_event' => [
                 'checked' => $event->is_allday() ? 'checked' : '',
-                'label' => esc_html__('All-day event', 'open-source-event-calendar')
+                'label' => esc_html__('All-day event', 'open-source-event-calendar'),
             ],
             'instant_event' => [
                 'checked' => $event->is_instant() ? 'checked' : '',
-                'label' => esc_html__('No end time', 'open-source-event-calendar')
+                'label' => esc_html__('No end time', 'open-source-event-calendar'),
             ],
             'start_date' => [
                 'label' => esc_html__('Start date / time', 'open-source-event-calendar'),
@@ -153,8 +153,8 @@ class AdminPageAddEvent extends OsecBaseClass
                 'exrule_value' => $event->get('exception_rules'),
                 'label' => esc_html__('Exclude', 'open-source-event-calendar') . ($has_excluded_events ? ':' : '...' ),
                 'exrule_text' => esc_html($exrule_text),
-                'exrule_infotext' => esc_html__('Choose a rule for exclusion', 'open-source-event-calendar')
-            ]
+                'exrule_infotext' => esc_html__('Choose a rule for exclusion', 'open-source-event-calendar'),
+            ],
         ];
 
 
@@ -282,7 +282,7 @@ class AdminPageAddEvent extends OsecBaseClass
                 $args = [
                     'children' => $children,
                     'panel_title' => $panel_title,
-                    'action' => esc_html__('Edit', 'open-source-event-calendar')
+                    'action' => esc_html__('Edit', 'open-source-event-calendar'),
                 ];
                 if ($parent) {
                     $args['parent'] = [
@@ -361,7 +361,7 @@ class AdminPageAddEvent extends OsecBaseClass
     public function disable_autosave(array $input)
     {
         wp_deregister_script('autosave');
-        $autosave_key = array_search('autosave', $input);
+        $autosave_key = array_search('autosave', $input, true);
         if (false === $autosave_key || ! is_scalar($autosave_key)) {
             unset($input[$autosave_key]);
         }
@@ -378,7 +378,7 @@ class AdminPageAddEvent extends OsecBaseClass
      */
     public function event_inline_alert(WP_Post $post)
     {
-        if ( ! isset($post->post_type) || OSEC_POST_TYPE != $post->post_type) {
+        if ( ! isset($post->post_type) || OSEC_POST_TYPE !== $post->post_type) {
             return;
         }
         ThemeLoader::factory($this->app)

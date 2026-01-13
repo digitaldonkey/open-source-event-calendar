@@ -202,10 +202,10 @@ class EventInstance extends OsecBaseClass
         }
 
         $exclude_dates = [];
-        if ($exception_dates = $event->get('exception_dates')) {
+        if ($event->get('exception_dates')) {
             $this->createRecurringDates(
                 $exclude_dates,
-                $exception_dates,
+                $event->get('exception_dates'),
                 $origEventTime,
                 $timezone
             );
@@ -294,7 +294,7 @@ class EventInstance extends OsecBaseClass
         $rulesArray = array_filter(
             RecurFactory::parseRexrule($rrule),
             function ($k) use ($ignoreKeys) {
-                return ! in_array($k, $ignoreKeys);
+                return ! in_array($k, $ignoreKeys, true);
             },
             ARRAY_FILTER_USE_KEY
         );
@@ -393,7 +393,7 @@ class EventInstance extends OsecBaseClass
 
     private function saveInsertIdValues(array $values)
     {
-        $ids   = array_filter(array_map('intval', $values));
+        $ids = array_filter(array_map('intval', $values));
         return '(' . implode(',', array_values($ids)) . ')';
     }
 }

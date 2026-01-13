@@ -181,7 +181,6 @@ class SaveSettings extends SaveAbstract
      */
     protected function handleSaving_default_tags_categories($req_data)
     {
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         $tags = isset($req_data['default_tags_categories_default_tags'])
                     && is_array($req_data['default_tags_categories_default_tags']) ?
                         array_map('absint', $req_data['default_tags_categories_default_tags']) : [];

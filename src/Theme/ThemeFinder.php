@@ -35,7 +35,7 @@ class ThemeFinder extends OsecBaseClass
         string $stylesheet_or_template
     ) {
         $core_themes = explode(',', OSEC_CORE_THEMES);
-        if (in_array($stylesheet_or_template, $core_themes)) {
+        if (in_array($stylesheet_or_template, $core_themes, true)) {
             return OSEC_URL . '/public/' . OSEC_THEME_FOLDER;
         }
 
@@ -126,7 +126,7 @@ class ThemeFinder extends OsecBaseClass
             global ${$key};
             $variables_map[$key] = ${$key};
             // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-            ${$key}              = $current_value;
+            ${$key} = $current_value;
         }
         search_theme_directories(true);
 
@@ -203,7 +203,7 @@ class ThemeFinder extends OsecBaseClass
         if (count($search) > 0) {
             foreach ($search as $word) {
                 // In a tag?
-                if ( ! in_array($word, $tags)) {
+                if ( ! in_array($word, $tags, true)) {
                     return false;
                 }
 
@@ -220,7 +220,7 @@ class ThemeFinder extends OsecBaseClass
         if (count($features) > 0) {
             foreach ($features as $word) {
                 // In a tag?
-                if ( ! in_array($word, $tags)) {
+                if ( ! in_array($word, $tags, true)) {
                     return false;
                 }
             }

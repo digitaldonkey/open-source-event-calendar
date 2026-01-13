@@ -48,8 +48,8 @@ class CalendarTaxonomyView extends OsecBaseClass
             $type_for_view_args = 'tags';
         }
         $terms = get_terms([
-            'taxonomy'   => $taxonomy_name,
-            'orderby' => 'name'
+            'taxonomy' => $taxonomy_name,
+            'orderby'  => 'name',
         ]);
         if (empty($terms)) {
             return '';

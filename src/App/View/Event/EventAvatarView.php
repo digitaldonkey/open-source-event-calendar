@@ -69,7 +69,8 @@ class EventAvatarView extends OsecBaseClass
 
     public function get_event_avatar_data(Event $event, $fallback_order = null): ?array
     {
-        $source = $size = null;
+        $source = null;
+        $size = null;
         $url    = $this->get_event_avatar_url(
             $event,
             $fallback_order,
@@ -93,7 +94,10 @@ class EventAvatarView extends OsecBaseClass
         );
         $ratio = null;
         if ($size && isset($size[0]) && isset($size[1])) {
-            $size = ['width' => $size[0], 'height' => $size[1]];
+            $size = [
+                'width' => $size[0],
+                'height' => $size[1],
+            ];
             $ratio = ($size['width'] > $size['height']) ? 'landscape' : 'portrait';
         }
         return [
@@ -367,7 +371,7 @@ class EventAvatarView extends OsecBaseClass
         // Order term IDs by depth.
         asort($term_depths);
 
-        $url   = '';
+        $url = '';
         // Starting at deepest depth, find the first category that has an avatar.
         foreach ($term_depths as $term_id => $depth) {
             $term_image = TaxonomyAdapter::factory($this->app)->get_category_image($term_id);

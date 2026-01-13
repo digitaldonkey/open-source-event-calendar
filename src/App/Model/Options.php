@@ -94,15 +94,15 @@ class Options extends OsecBaseClass
      * Get a value from storage.
      *
      * @param  string  $name  Key to retrieve.
-     * @param  mixed  $default  Value to return if key was not set previously.
+     * @param  mixed  $defaultValue  Value to return if key was not set previously.
      *
      * @return mixed Value from storage or {$default}.
      */
-    public function get($name, mixed $default = null)
+    public function get($name, mixed $defaultValue = null)
     {
-        $value = $this->cache->get($name, $default);
-        if ($default === $value) {
-            $value = get_option($name, $default);
+        $value = $this->cache->get($name, $defaultValue);
+        if ($defaultValue === $value) {
+            $value = get_option($name, $defaultValue);
             $this->cache->set($name, $value);
         }
 

@@ -36,7 +36,7 @@ class AdminPageManageThemes extends AdminPageAbstract
                 esc_url(get_permalink($this->app->settings->get('calendar_page_id')))
             ),
             'deleted'       => $deleted,
-            'deleted_message' =>  esc_html__('Theme deleted.', 'open-source-event-calendar'),
+            'deleted_message' => esc_html__('Theme deleted.', 'open-source-event-calendar'),
             'page_title' => esc_html__(
                 'Open Source Event Calendar: Themes',
                 'open-source-event-calendar'

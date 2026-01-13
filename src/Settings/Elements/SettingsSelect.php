@@ -44,7 +44,7 @@ class SettingsSelect extends SettingsAbstract
          *
          * @param  array  $options  Select options
          */
-        $options   = apply_filters('osec_settings_select_options', $options, $this->args['id']);
+        $options = apply_filters('osec_settings_select_options', $options, $this->args['id']);
 
         $hasFieldsets = isset($this->args['renderer']['fieldsets'])
                             && is_array($this->args['renderer']['fieldsets']);

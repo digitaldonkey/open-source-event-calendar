@@ -73,7 +73,7 @@ class ThemeLoader extends OsecBaseClass
         $theme = $this->app->options->get('osec_current_theme');
         // Find out if this is a core theme.
         $core_themes     = explode(',', OSEC_CORE_THEMES);
-        $this->coreTheme = in_array($theme['stylesheet'], $core_themes);
+        $this->coreTheme = in_array($theme['stylesheet'], $core_themes, true);
 
         // Default theme's path is always the last in the list of paths to check,
         // so add it first (path list is a stack).

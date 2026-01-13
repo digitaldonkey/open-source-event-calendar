@@ -57,6 +57,7 @@ class FilePhp extends FileAbstract
                     $this->content = require $file;
                 } else {
                     ob_start();
+                    // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
                     extract($this->args);
                     require $file;
                     $this->content = ob_get_clean();
