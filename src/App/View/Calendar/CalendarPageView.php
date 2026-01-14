@@ -82,13 +82,13 @@ class CalendarPageView extends OsecBaseClass
                                   ->get_configured($view_args['action']);
         } catch (SettingsException $exception) {
             // short-circuit and return error message
-            return '<div id="osec-container"><div class="timely"><p>'
-                . __(
-                    'There was an error loading calendar. 
-                        Please contact site administrator and inform him to configure calendar views.',
-                    'open-source-event-calendar'
-                )
-               . '</p></div></div>';
+            return '<div id="osec-container"><div class="timely"><p>' .
+                   __(
+                       'There was an error loading calendar. 
+                            Please contact site administrator and inform him to configure calendar views.',
+                       'open-source-event-calendar'
+                   ) .
+                   '</p></div></div>';
         }
         $type = $request->get('request_type');
 
@@ -192,7 +192,7 @@ class CalendarPageView extends OsecBaseClass
              *
              * @param  array  $filter_args  Twig arguments for filter-menu.twig.
              */
-            $filter_args = apply_filters('osec_calendar_page_filter_args', $filter_args);
+            $filter_args = apply_filters('osec_calendar_page_filter args', $filter_args);
             // hide filters in the SW
             $filter_menu = '';
             if ('true' === $request->get('display_filters')) {
@@ -332,7 +332,8 @@ class CalendarPageView extends OsecBaseClass
          */
         $view_args = apply_filters('osec_calendar_view_args_alter', $view_args);
 
-        // In case of an INVALID Date (NULL) we redirect.
+        // TODO
+        //   What is this Case about???
         if (null === $exact_date) {
             $href = HtmlFactory::factory($this->app)
                                ->create_href_helper_instance($view_args)
@@ -369,37 +370,32 @@ class CalendarPageView extends OsecBaseClass
     {
         // Preprocess exact_date.
         // Check to see if a date has been specified.
-        $request_date = $request->get('exact_date');
-
-        if ($request_date) {
-            // check the cache.
-            $cached_date = $this->datesCache->get($request_date);
-            if ($cached_date) {
-                return $cached_date;
-            }
-            // Verify date
-            if (! DateValidator::is_valid_time_stamp($request_date)) {
-                try {
-                    $verified_date = (int) $this->return_gmtime_from_exact_date($request_date);
-                } catch (\Exception) {
-                    $verified_date = false;
-                }
-                if ($verified_date) {
-                    $this->datesCache->set($request_date, $verified_date);
-                    return $verified_date;
-                } else {
-                    return null;
+        $exact_date = $request->get('exact_date');
+        $use_key    = $exact_date;
+        if (null === ($exact_date = $this->datesCache->get($use_key))) {
+            $exact_date = $use_key;
+            // Let's check if we have a date
+            if (false !== $exact_date) {
+                // If it's not a timestamp
+                if (! DateValidator::is_valid_time_stamp($exact_date)) {
+                    // Try to parse it
+                    $exact_date = $this->return_gmtime_from_exact_date($exact_date);
+                    if (false === $exact_date) {
+                        return null;
+                    }
                 }
             }
-
             // Last try, let's see if an exact date is set in settings.
-            $default_date = $this->app->settings->get('exact_date', false);
-            if ($default_date) {
-                $gmt_date = $this->return_gmtime_from_exact_date($default_date);
-                return (int) $gmt_date;
+            $date = $this->app->settings->get('exact_date');
+            if (false === $exact_date && $date !== '') {
+                $exact_date = $this->return_gmtime_from_exact_date(
+                    $date
+                );
             }
+            $this->datesCache->set($use_key, $exact_date);
         }
-        return false;
+
+        return $exact_date;
     }
 
     /**
@@ -468,7 +464,7 @@ class CalendarPageView extends OsecBaseClass
                 unset($options['oneday_offset']);
                 $options['action'] = $key;
                 /* $val['longname'] is a _n_noop. */
-                $values['desc'] = translate_nooped_plural(
+                $values['desc']    = translate_nooped_plural(
                     $val['longname'],
                     1
                 );
@@ -545,8 +541,10 @@ class CalendarPageView extends OsecBaseClass
          * @param  array  $view_args  View arguments
          */
         $args = apply_filters('osec_subscribe_buttons_arguments', $args, $view_args);
-        $use_lang = WpmlHelper::factory($this->app)->get_language();
-        if (!is_null($use_lang)) {
+        if (
+            null !== ($use_lang = WpmlHelper::factory($this->app)
+                                            ->get_language())
+        ) {
             $args['url_args'] .= '&lang=' . $use_lang;
         }
 
