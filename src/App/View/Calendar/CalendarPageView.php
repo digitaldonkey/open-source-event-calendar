@@ -82,13 +82,13 @@ class CalendarPageView extends OsecBaseClass
                                   ->get_configured($view_args['action']);
         } catch (SettingsException $exception) {
             // short-circuit and return error message
-            return '<div id="osec-container"><div class="timely"><p>' .
-                   __(
-                       'There was an error loading calendar. 
-                            Please contact site administrator and inform him to configure calendar views.',
-                       'open-source-event-calendar'
-                   ) .
-                   '</p></div></div>';
+            return '<div id="osec-container"><div class="timely"><p>'
+                . __(
+                    'There was an error loading calendar. 
+                        Please contact site administrator and inform him to configure calendar views.',
+                    'open-source-event-calendar'
+                )
+               . '</p></div></div>';
         }
         $type = $request->get('request_type');
 
@@ -192,7 +192,7 @@ class CalendarPageView extends OsecBaseClass
              *
              * @param  array  $filter_args  Twig arguments for filter-menu.twig.
              */
-            $filter_args = apply_filters('osec_calendar_page_filter args', $filter_args);
+            $filter_args = apply_filters('osec_calendar_page_filter_args', $filter_args);
             // hide filters in the SW
             $filter_menu = '';
             if ('true' === $request->get('display_filters')) {
@@ -332,8 +332,7 @@ class CalendarPageView extends OsecBaseClass
          */
         $view_args = apply_filters('osec_calendar_view_args_alter', $view_args);
 
-        // TODO
-        //   What is this Case about???
+        // In case of an INVALID Date (NULL) we redirect.
         if (null === $exact_date) {
             $href = HtmlFactory::factory($this->app)
                                ->create_href_helper_instance($view_args)
@@ -464,7 +463,7 @@ class CalendarPageView extends OsecBaseClass
                 unset($options['oneday_offset']);
                 $options['action'] = $key;
                 /* $val['longname'] is a _n_noop. */
-                $values['desc']    = translate_nooped_plural(
+                $values['desc'] = translate_nooped_plural(
                     $val['longname'],
                     1
                 );
@@ -541,10 +540,8 @@ class CalendarPageView extends OsecBaseClass
          * @param  array  $view_args  View arguments
          */
         $args = apply_filters('osec_subscribe_buttons_arguments', $args, $view_args);
-        if (
-            null !== ($use_lang = WpmlHelper::factory($this->app)
-                                            ->get_language())
-        ) {
+        $use_lang = WpmlHelper::factory($this->app)->get_language();
+        if (!is_null($use_lang)) {
             $args['url_args'] .= '&lang=' . $use_lang;
         }
 

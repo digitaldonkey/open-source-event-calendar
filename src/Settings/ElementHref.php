@@ -167,7 +167,7 @@ class ElementHref
 
         if ($this->pretty_permalinks_enabled) {
             $href .= implode('/', $to_implode);
-            $href = empty($href) ? $href : $href . '/';
+            $href = empty($href) ? '/' : $href;
         } else {
             $href .= static::get_param_delimiter_char($this->calendar_page);
             $href .= 'ai1ec=' . implode('|', $to_implode);
