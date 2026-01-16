@@ -12,11 +12,15 @@ use Osec\Tests\Utilities\TestBase;
  */
 class CalenderPageViewTest extends TestBase
 {
+    public function test_validate_system_timezone() {
+        $this->assertEquals('UTF-8', date_default_timezone_get());
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
         global $osec_app;
-        $osec_app->settings->set('timezone_string', 'Europe/Berlin');
+        $osec_app->options->set('timezone_string', 'Europe/Berlin');
 
         // Cache clear is required as we use the same instance in both tests.
         CacheMemory::factory($osec_app)->clear_cache();
@@ -110,7 +114,7 @@ class CalenderPageViewTest extends TestBase
         string $default_date
     ) {
         global $osec_app;
-        $osec_app->settings->set('exact_date', $default_date);
+        $osec_app->options->set('exact_date', $default_date);
 
         $this->run_get_exact_date($request, $expected);
     }
@@ -129,7 +133,7 @@ class CalenderPageViewTest extends TestBase
     ) {
         global $osec_app;
 
-        $osec_app->settings->set('exact_date', $default_date);
+        $osec_app->options->set('exact_date', $default_date);
         $this->run_get_exact_date($request, $expected);
     }
 }
