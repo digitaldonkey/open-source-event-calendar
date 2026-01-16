@@ -23,20 +23,24 @@ class CalenderPageViewTest extends TestBase
 
         // Cache clear is required as we use the same instance in both tests.
         CacheMemory::factory($osec_app)->clear_cache();
+
+        // Sets WP-Settings Timezone.
         $osec_app->options->set('timezone_string', 'Europe/Berlin');
+        // Sets APP timezone
+        $osec_app->settings->set('timezone_string', 'Europe/Berlin');
     }
     private static function get_values(bool|int $expect_fail)
     {
         return [
-            ['18-6-2026', 1781733600],
-            ['13-4-2026', 1776031200],
-            ['1785621600', 1785621600],
-            ['5-1-2026', 1767567600],
+            ['18-6-2026', 1781733600], // Donnerstag, 18. Juni 2026 00:00:00 Europe/Berlin GMT+02:00
+            ['13-4-2026', 1776031200], // Montag, 13. April 2026 00:00:00 Europe/Berlin GMT+02:00
+            ['1785621600', 1785621600], // GMT Saturday, 1. August 2026 22:00:00
+            ['5-1-1984', 442105200], // // Relative To calendar TZ
             ['0001785621600', $expect_fail], // invalid timestamp
             ['17803512', 17803512], // GMT: Sunday, 26. July 1970 01:25:12 can be short,
             [-2177452800, $expect_fail], // Invalid
             [-1, $expect_fail], // Invalid
-            [0, 0], // 1.1.1970
+            [0, 0], // GMT Thursday, 1. January 1970 00:00:00
         ];
     }
     public static function requestProviderWithFixedDate(): array
