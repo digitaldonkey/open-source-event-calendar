@@ -13,7 +13,7 @@ use Osec\Tests\Utilities\TestBase;
 class CalenderPageViewTest extends TestBase
 {
     public function test_validate_system_timezone() {
-        $this->assertEquals('UTF-8', date_default_timezone_get());
+        $this->assertEquals('UTC', date_default_timezone_get());
     }
 
     protected function setUp(): void
