@@ -429,7 +429,8 @@ class CalendarPageView extends OsecBaseClass
         if (false === $date) {
             $exact_date = false;
         } else {
-            $exact_date = (new DT($date, 'sys.default'))->format_to_gmt();
+            $tz = (new Dt())->getSiteTimezone();
+            $exact_date = (new DT($date, $tz))->format_to_gmt();
             if ($exact_date < 0) {
                 return false;
             }
