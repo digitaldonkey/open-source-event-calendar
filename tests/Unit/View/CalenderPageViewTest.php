@@ -26,14 +26,6 @@ class CalenderPageViewTest extends TestBase
         $osec_app->settings->set('timezone_string', 'Europe/Berlin');
     }
 
-    public function test_validate_system_timezone() {
-        $this->assertEquals('UTC', date_default_timezone_get());
-    }
-
-    public function test_validate_wordpress_timezone() {
-        $this->assertEquals('Europe/Berlin', wp_timezone_string());
-    }
-
     private static function get_values(bool|int $expect_fail)
     {
         return [
@@ -48,6 +40,16 @@ class CalenderPageViewTest extends TestBase
             [0, 0], // GMT Thursday, 1. January 1970 00:00:00
         ];
     }
+
+    public function test_validate_system_timezone() {
+        $this->assertEquals('UTC', date_default_timezone_get());
+    }
+
+    public function test_validate_wordpress_timezone() {
+        $this->assertEquals('Europe/Berlin', wp_timezone_string());
+    }
+
+
     public static function requestProviderWithFixedDate(): array
     {
         global $osec_app;

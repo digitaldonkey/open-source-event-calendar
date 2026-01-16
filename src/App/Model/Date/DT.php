@@ -548,7 +548,7 @@ class DT implements Stringable
     public function getSiteTimezone(): string
     {
         // Try get wp Timezone if set.
-        return $this->app->options->get('timezone_string', date_default_timezone_get());
+        return $this->app->options->get('timezone_string', ini_get('date.timezone'));
     }
 
     public function utcOffsetInSeconds(string $time_zone)
