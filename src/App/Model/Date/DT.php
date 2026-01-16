@@ -545,10 +545,27 @@ class DT implements Stringable
         return $mapper[$dayInt];
     }
 
+    /**
+     * Get timezone_string
+     *
+     * Ensures wp-timezone "timezone_string" is set.
+     *
+     * @return string
+     */
     public function getSiteTimezone(): string
     {
-        // Try get wp Timezone if set.
-        return $this->app->options->get('timezone_string', ini_get('date.timezone'));
+        $wp_tz = $this->app->options->get('timezone_string');
+        if (empty($wp_tz)) {
+            // Defaults.
+            $php_tz = ini_get('date.timezone');
+            if (!empty($php_tz)) {
+                $wp_tz = $php_tz;
+            } else {
+                $wp_tz = date_default_timezone_get();
+            }
+            $this->app->options->set('timezone_string', $php_tz);
+        }
+        return $wp_tz;
     }
 
     public function utcOffsetInSeconds(string $time_zone)
