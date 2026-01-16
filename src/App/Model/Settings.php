@@ -432,7 +432,7 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => get_option(
                     'timezone_string',
-                    'Europe/Berlin'
+                    date_default_timezone_get()
                 ),
             ],
             'default_tags_categories'        => [

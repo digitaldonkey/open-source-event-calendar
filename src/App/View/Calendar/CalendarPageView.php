@@ -390,7 +390,7 @@ class CalendarPageView extends OsecBaseClass
 
             // Last try, let's see if an exact date is set in settings.
             if (!$valid_date) {
-                $default_date = $this->app->options->get('exact_date');
+                $default_date = $this->app->settings->get('exact_date');
                 if (!empty($default_date)) {
                     $valid_date = (int) $this->return_gmtime_from_exact_date(
                         $default_date

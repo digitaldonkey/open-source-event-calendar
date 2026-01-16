@@ -118,7 +118,7 @@ class CalenderPageViewTest extends TestBase
         string $default_date
     ) {
         global $osec_app;
-        $osec_app->options->set('exact_date', $default_date);
+        $osec_app->settings->set('exact_date', $default_date);
 
         $this->run_get_exact_date($request, $expected);
     }
@@ -137,7 +137,7 @@ class CalenderPageViewTest extends TestBase
     ) {
         global $osec_app;
 
-        $osec_app->options->set('exact_date', $default_date);
+        $osec_app->settings->set('exact_date', $default_date);
         $this->run_get_exact_date($request, $expected);
     }
 }

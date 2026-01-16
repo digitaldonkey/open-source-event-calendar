@@ -36,7 +36,8 @@ require_once "{$osec_tests_dir}/includes/functions.php";
 function osec_manually_load_plugin()
 {
     // Let's set a timezone in WP-settings. We need it at least for the Week start calculation.
-    update_option('timezone_string', ini_get('date.timezone'));
+    // update_option('timezone_string', ini_get('date.timezone'));
+    // TODO Shoule be unecessary. Remove?
 
     // Emmulate DOCUMENT_ROOT.
     // ABSPATH is defined as sys_get_temp_dir()./wordpress/
