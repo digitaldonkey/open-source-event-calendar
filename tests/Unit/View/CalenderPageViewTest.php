@@ -12,10 +12,6 @@ use Osec\Tests\Utilities\TestBase;
  */
 class CalenderPageViewTest extends TestBase
 {
-    public function test_validate_system_timezone() {
-        $this->assertEquals('UTC', date_default_timezone_get());
-    }
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -29,6 +25,15 @@ class CalenderPageViewTest extends TestBase
         // Sets APP timezone
         $osec_app->settings->set('timezone_string', 'Europe/Berlin');
     }
+
+    public function test_validate_system_timezone() {
+        $this->assertEquals('UTC', date_default_timezone_get());
+    }
+
+    public function test_validate_wordpress_timezone() {
+        $this->assertEquals('Europe/Berlin', wp_timezone_string());
+    }
+
     private static function get_values(bool|int $expect_fail)
     {
         return [
