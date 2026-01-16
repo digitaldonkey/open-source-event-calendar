@@ -380,7 +380,6 @@ class AgendaView extends AbstractView
     ) {
         $links = [];
 
-        // TODO this param should be required.
         $date_first = is_null($date_first) ? new DT() : $date_first;
 
         if ($this->app->settings->get('osec_use_frontend_rendering')) {

@@ -369,32 +369,42 @@ class CalendarPageView extends OsecBaseClass
     {
         // Preprocess exact_date.
         // Check to see if a date has been specified.
-        $exact_date = $request->get('exact_date');
-        $use_key    = $exact_date;
-        if (null === ($exact_date = $this->datesCache->get($use_key))) {
-            $exact_date = $use_key;
-            // Let's check if we have a date
-            if (false !== $exact_date) {
-                // If it's not a timestamp
-                if (! DateValidator::is_valid_time_stamp($exact_date)) {
-                    // Try to parse it
-                    $exact_date = $this->return_gmtime_from_exact_date($exact_date);
-                    if (false === $exact_date) {
-                        return null;
-                    }
+        $cache_key = $request->get('exact_date');
+        $valid_date = false;
+
+        if ($cache_key) {
+            // Return from cache.
+            if (!is_null($this->datesCache->get($cache_key, null))) {
+                return $this->datesCache->get($cache_key);
+            }
+
+
+            // Some requests may not be timestamps.
+            if (DateValidator::is_valid_time_stamp($cache_key)) {
+                $valid_date = (int) $cache_key;
+            } else {
+                // Try to parse it
+                $parsed_date = $this->return_gmtime_from_exact_date($cache_key);
+                $valid_date = $parsed_date ? (int) $parsed_date : false;
+            }
+
+            // Last try, let's see if an exact date is set in settings.
+            if (!$valid_date) {
+                $default_date = $this->app->settings->get('exact_date');
+                if (!empty($default_date)) {
+                    $valid_date = (int) $this->return_gmtime_from_exact_date(
+                        $default_date
+                    );
                 }
             }
-            // Last try, let's see if an exact date is set in settings.
-            $date = $this->app->settings->get('exact_date');
-            if (false === $exact_date && $date !== '') {
-                $exact_date = $this->return_gmtime_from_exact_date(
-                    $date
-                );
+            // Save memory cache.
+            // Including wrong->default params.
+            if ($valid_date) {
+                $this->datesCache->set($cache_key, $valid_date);
             }
-            $this->datesCache->set($use_key, $exact_date);
+            return $valid_date;
         }
-
-        return $exact_date;
+        return false;
     }
 
     /**

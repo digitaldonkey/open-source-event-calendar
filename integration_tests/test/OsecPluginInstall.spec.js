@@ -314,8 +314,8 @@ describe('Plugin install', function(){
         const weeklyDropdownLink = await pageObject.getElement(By.id('ai1ec-view-week'));
         await weeklyDropdownLink.click();
 
-        // Calendar view Month should be visible by default.
-        // Switch to next month .ai1ec-title-buttons a.ai1ec-next-month
+        // Calendar view Week should be visible by default.
+        // Switch to next week .ai1ec-title-buttons a.ai1ec-next-week
         const nextWeekLink = await pageObject.getElement(By.css('.ai1ec-title-buttons a.ai1ec-next-week'));
         await nextWeekLink.click();
 
@@ -387,4 +387,3 @@ describe('Plugin install', function(){
         await pageObject.waitToSeeWhatHappens(500, true);
     });
 })
-

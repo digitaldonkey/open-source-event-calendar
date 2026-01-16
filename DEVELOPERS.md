@@ -20,9 +20,12 @@ and will show up in `wp_osec_event_instances` table as event insatnces which onl
 
 (See also [3.8.5.3. Recurrence Rule](https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html))
 
-They may turn into child-events when "Edit this instance" (link is on Single page) is used: this will create a derivate Post/Event set to stay on its own.  
+They may turn into child-events when "Edit this instance" (link is on Single page) is used: this will create a derivate Post/Event. @see "Base recurrence event" and "Modified recurrence events" Editor Tabs.  
 
-To debug event-instances I recommend a SQL view like the following
+event instances 
+- Are references to the base (reoccouring) event.
+- Are stored wp_osec_event_instances table using Unix datestamps
+- To debug event-instances its helpful to use a SQL view
 
 ```sql
 CREATE VIEW wp_osec_event_instances_readable_date AS
@@ -30,14 +33,14 @@ SELECT id, post_id, `start`, DATE_FORMAT(FROM_UNIXTIME(`start`), '%Y-%m-%d %H:%i
        `end`, DATE_FORMAT(FROM_UNIXTIME(`end`), '%Y-%m-%d %H:%i') AS 'end_formatted' FROM wp_osec_event_instances;
 ```
 
-
 ## Ensure coding standards before commit. 
 
 We have a PHP (require_dev) based toolset.
 Project has been set up using ddev. All scripts should be running stable in ddev using provided config.
 
-You might require a `composer install` to load dev dependencies.
-
+### Test & Release pipline 
+@.circleci/config.yml
+https://app.circleci.com/pipelines/github/digitaldonkey/open-source-event-calendar
 
 ```
 # Codesniffer 
@@ -67,11 +70,17 @@ Requires reinit `ddev exec grumphp git:init` which will reconfigure the git pre-
 
 @see [configuring-grumphp-ddev](https://www.patrickvanefferen.nl/blog/configuring-grumphp-ddev)
 
+# osec_recompile_templates
+
+Enable debug mode `define('OSEC_DEBUG', true);` and add get param  
+yoursite.com?osec_recompile_templates=TRUE
+
+
 ## Testing 
 
 @see [wordpress.org/.../plugin-unit-tests](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/)
 
-### PHPunit 
+### PHPunit updates version challenge
 
 According to [supported-version-chart](https://make.wordpress.org/core/handbook/references/phpunit-compatibility-and-wordpress-versions/#supported-version-chart)
 
@@ -85,49 +94,91 @@ composer require --dev "phpunit/phpunit:^9.6"
 composer require --dev yoast/phpunit-polyfills:"^2.0"
 
 ```
-# osec_recompile_templates
 
-Enable debug mode `define('OSEC_DEBUG', true);` and add get param  
-  yoursite.com?osec_recompile_templates=TRUE
+Current requirements are in git and ready after `composer install`.  
 
-### Install Test scripts in ddev 
 
-Ensure you have subversion available 
+## Set up development  
 
-WordPress Test scripts require subversion access. 
+You will need the development version of the plugin.
+```
+cd wp-content/plugins/
+git clone git@github.com:digitaldonkey/open-source-event-calendar.git
+cd open-source-event-calendar
+ddev composer install
+```
+
+#### Ensure you have subversion available 
+
+The Setup for WordPress Test scripts require subversion client (svn).
 
 ```
+ # Add svn in ddev docker image
  @file .ddev/config.yaml
  webimage_extra_packages: [subversion]
-```
-
-Alternatively... 
-
-```
-apt update && install subversion 
+ # localy will work too.
+ brew install svn
+ apt install svn
 ```
 
 #### Initialize once
 
 ```
+# in docker
 ddev ssh 
-
 PHP_TMP=$($(command -v php) -r 'echo  sys_get_temp_dir();') \
 && cd /var/www/html/wp-content/plugins/open-source-event-calendar \
-&& bin/install-wp-tests.sh phpunit root root db:3306 6.7
+&& bin/install-wp-tests.sh phpunit root root db:3306
+
+# localy
+cd wp-content/plugins/open-source-event-calenda
+bin/install-wp-tests.sh phpunit root root 127.0.0.1:32805
+# Port number you could get 
+ddev status
 ```
 
-
-So Finally testing: 
-
+## phpcs testing 
 ```
 ddev ssh 
 cd /var/www/html/wp-content/plugins/open-source-event-calendar
  ./vendor/bin/phpcs --standard=phpcs.xml --runtime-set testVersion 8.2-
 
- or 
+ # alternatively  
+ 
  composer run phpcs
+ 
+ # locally 
+ ddev run-script phpcs
 ```
 runtime-set testVersion 8.2 is overriding WordPress default minimum version requiremets. Explicitly set to override WP defaults in `plugin-check.ruleset.xml`.
 
 ** plugin-check.ruleset.xml** comes from [WordPress/plugin-check](https://api.github.com/repos/WordPress/plugin-check). The latest version you can download using `bin/get-latest-plugin-review-phpcs-rulesets.sh`.
+
+## Running phpunit
+
+After "--> Initialize once" above:
+
+```
+ddev phpunit
+
+# run single test
+ddev phpunit --filter test_get_cache_object  ./tests/Unit/Cache/CachePathTest.php
+```
+
+```
+# In the Docker container
+ddev ssh 
+cd wp-content/plugins/open-source-event-calendar
+vendor/bin/phpunit
+```
+
+## integration Testing with mocha
+@see integration_tests/package.json
+
+```
+cd open-source-event-calendar/integration_tests
+nvm install
+npm install
+npm run test
+```
+For for this tests the plugin must be initially disabled and all tables clean (use OSEC_UNINSTALL_PLUGIN_DATA)
