@@ -23,7 +23,7 @@ class CalenderPageViewTest extends TestBase
 
         // Cache clear is required as we use the same instance in both tests.
         CacheMemory::factory($osec_app)->clear_cache();
-        $osec_app->settings->set('timezone_string', 'Europe/Berlin');
+        $osec_app->options->set('timezone_string', 'Europe/Berlin');
     }
     private static function get_values(bool|int $expect_fail)
     {
