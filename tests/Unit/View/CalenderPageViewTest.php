@@ -23,7 +23,7 @@ class CalenderPageViewTest extends TestBase
 
         // Cache clear is required as we use the same instance in both tests.
         CacheMemory::factory($osec_app)->clear_cache();
-        $osec_app->options->set('timezone_string', 'Europe/Berlin');
+        $osec_app->settings->set('timezone_string', 'Europe/Berlin');
     }
     private static function get_values(bool|int $expect_fail)
     {
@@ -45,7 +45,7 @@ class CalenderPageViewTest extends TestBase
 
         $app_default_date = [
             'settings' => '1/1/2025',
-            'timestamp' => 1735686000,
+            'timestamp' => 1735686000, // in Berlin TZ!
         ];
 
         // TODO Verify how calendar default date is handled in Blocks and shortcode.
@@ -114,7 +114,7 @@ class CalenderPageViewTest extends TestBase
         string $default_date
     ) {
         global $osec_app;
-        $osec_app->settings->set('exact_date', $default_date);
+        $osec_app->options->set('exact_date', $default_date);
 
         $this->run_get_exact_date($request, $expected);
     }
@@ -133,7 +133,7 @@ class CalenderPageViewTest extends TestBase
     ) {
         global $osec_app;
 
-        $osec_app->settings->set('exact_date', $default_date);
+        $osec_app->options->set('exact_date', $default_date);
         $this->run_get_exact_date($request, $expected);
     }
 }
