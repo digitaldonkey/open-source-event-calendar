@@ -4,7 +4,6 @@ namespace Osec\App\Model;
 
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\ShutdownController;
-use Osec\App\Model\Date\Timezones;
 use Osec\Bootstrap\OsecBaseInitialized;
 use Osec\Exception\Exception;
 use Osec\Exception\SettingsException;
@@ -278,17 +277,6 @@ class Settings extends OsecBaseInitialized
 
         $this->setDefaults();
         $values = $this->app->options->get(self::WP_OPTION_KEY, []);
-
-        // Ensure we have up to date wp-option values.
-        if (is_array(is_array($values))) {
-            foreach ($values as $key => $val) {
-                if (isset($val['type']) && $val['type'] === 'wp_option') {
-                    $default      = $this->defaultOptions[$key]['default'];
-                    $val['value'] = get_option($key, $default);
-                }
-            }
-        }
-
         $this->changeUpdateStatus(false);
         $test_version = false;
         if (is_array($values)) { // always assign existing values, if any
@@ -442,7 +430,10 @@ class Settings extends OsecBaseInitialized
                         'open-source-event-calendar'
                     ),
                 ],
-                'default'  => Timezones::factory($this->app)->get_default_timezone(),
+                'default'  => get_option(
+                    'timezone_string',
+                    date_default_timezone_get()
+                ),
             ],
             'default_tags_categories'        => [
                 'type'     => 'array',

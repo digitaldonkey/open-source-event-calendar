@@ -410,56 +410,30 @@ class Timezones extends OsecBaseClass
      *
      * @return string Olson timezone string identifier.
      */
-    public function get_default_timezone(): string
+    public function get_default_timezone()
     {
         static $default_timezone = null;
-        if (is_null($default_timezone)) {
-            $candidates = [
-                // User Timezone
-                MetaAdapterUser::factory($this->app)
-                               ->get_current('osec_timezone', null),
-                // WP Timezone.
-                $this->app->options->get('timezone_string', null),
-            ];
+        if (null === $default_timezone) {
+            $candidates   = [];
+            $candidates[] = (string)MetaAdapterUser::factory($this->app)
+                                                   ->get_current('osec_timezone');
+            $candidates[] = (string)$this->app->options
+                ->get('timezone_string');
+            $candidates[] = (string)$this->app->options
+                ->get('gmt_offset');
+            $candidates   = array_filter($candidates, 'strlen');
             foreach ($candidates as $timezone) {
-                if ($timezone) {
-                    $timezone_verified = $this->get_name($timezone);
-                    if (false !== $timezone_verified) {
-                        $default_timezone = $timezone_verified;
-                        break;
-                    }
+                $timezone = $this->get_name($timezone);
+                if (false !== $timezone) {
+                    $default_timezone = $timezone;
+                    break;
                 }
             }
-
-            // Fallback on PHP Timezone.
-            if ($default_timezone === 'UTC' || !is_string($default_timezone)) {
-                $php_tz = ini_get('date.timezone');
-                if (!empty($php_tz)) {
-                    $default_timezone = $php_tz;
-                    // Sets WP-Settings Timezone.
-                    $this->app->options->set('timezone_string', $php_tz);
-
-                    // TODO only displayed when on Osec pages :/
-                    NotificationAdmin::factory($this->app)->store(
-                        sprintf(
-                            /* translators: Link options-general timezone settings */
-                            __(
-                                'OSEC fixed your site’s timezone for you.  
-                                 Please verify in %s <em>Timezone</em> dropdown menu.',
-                                'open-source-event-calendar'
-                            ),
-                            '<a href="' . admin_url('options-general.php') .
-                            '">' . __('Settings', 'open-source-event-calendar') . '</a>'
-                        ),
-                        'error'
-                    );
-                }
-            }
-            if (!is_string($default_timezone)) {
+            if (null === $default_timezone) {
                 $default_timezone = 'UTC';
                 NotificationAdmin::factory($this->app)->store(
                     sprintf(
-                    /* translators: Link options-general timezone settings */
+                        /* translators: Link options-general timezone settings */
                         __(
                             'Please select site timezone in %s <em>Timezone</em> dropdown menu.',
                             'open-source-event-calendar'
@@ -473,18 +447,6 @@ class Timezones extends OsecBaseClass
         }
 
         return $default_timezone;
-    }
-
-    /**
-     * Get default timezone Object
-     *
-     * @see get_default_timezone()
-     *
-     * @return DateTimeZone PHP DateTimeZone Object.
-     */
-    public function get_default_timezone_object(): DateTimeZone
-    {
-        return new DateTimeZone((string) $this->get_default_timezone());
     }
 
     /**
@@ -539,7 +501,7 @@ class Timezones extends OsecBaseClass
             return $zone;
         }
 
-        if (is_null($zone) || (int) $zone === 0) {
+        if (is_null($zone)) {
             return 'UTC';
         }
 
@@ -587,11 +549,11 @@ class Timezones extends OsecBaseClass
     /**
      * Attempt to decode GMT offset to some Olson timezone.
      *
-     * @param  int  $zone  GMT offset.
+     * @param  float  $zone  GMT offset.
      *
      * @return string Valid Olson timezone name (UTC is last resort).
      */
-    public function decode_gmt_timezone(int $zone)
+    public function decode_gmt_timezone($zone)
     {
         $auto_zone = timezone_name_from_abbr('', $zone * 3600, true);
         if (false !== $auto_zone) {

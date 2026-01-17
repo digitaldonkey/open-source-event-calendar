@@ -503,7 +503,7 @@ class DT implements Stringable
         $tmp_day->modify('today');
 
         // Deliver week start in requested or sites timezone.
-        $timezone = $timezone ?: Timezones::factory($this->app)->get_default_timezone_object();
+        $timezone = $timezone ?: new DateTimeZone($this->getSiteTimezone());
         $weekStartDateAndTime = new DT((int) $tmp_day->format('U'), $timezone->getName());
         $weekStartDateAndTime->set_preferred_timezone($timezone);
 
@@ -543,6 +543,29 @@ class DT implements Stringable
         }
 
         return $mapper[$dayInt];
+    }
+
+    /**
+     * Get timezone_string
+     *
+     * Ensures wp-timezone "timezone_string" is set.
+     *
+     * @return string
+     */
+    public function getSiteTimezone(): string
+    {
+        $wp_tz = $this->app->options->get('timezone_string');
+        if (empty($wp_tz)) {
+            // Defaults.
+            $php_tz = ini_get('date.timezone');
+            if (!empty($php_tz)) {
+                $wp_tz = $php_tz;
+            } else {
+                $wp_tz = date_default_timezone_get();
+            }
+            $this->app->options->set('timezone_string', $php_tz);
+        }
+        return $wp_tz;
     }
 
     public function utcOffsetInSeconds(string $time_zone)
