@@ -5,6 +5,7 @@ namespace Osec\App\View\Calendar;
 use Osec\App\Controller\Router;
 use Osec\App\Model\Date\DateValidator;
 use Osec\App\Model\Date\DT;
+use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\Model\SettingsView;
 use Osec\App\WpmlHelper;
@@ -429,7 +430,7 @@ class CalendarPageView extends OsecBaseClass
         if (false === $date) {
             $exact_date = false;
         } else {
-            $tz = (new Dt())->getSiteTimezone();
+            $tz = Timezones::factory($this->app)->get_default_timezone();
             $exact_date = (new DT($date, $tz))->format_to_gmt();
             if ($exact_date < 0) {
                 return false;
