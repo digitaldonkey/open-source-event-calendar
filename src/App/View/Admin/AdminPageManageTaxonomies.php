@@ -27,7 +27,7 @@ class AdminPageManageTaxonomies extends OsecBaseClass
     {
         $taxonomies        = get_object_taxonomies(OSEC_POST_TYPE, 'object');
         $taxonomy_metadata = [
-            'events_categories' => ['icon' => 'ai1ec-fa ai1ec-fa-folder-open'],
+            'osec_events_categories' => ['icon' => 'ai1ec-fa ai1ec-fa-folder-open'],
             'events_tags'       => ['icon' => 'ai1ec-fa ai1ec-fa-tags'],
         ];
         /**

@@ -263,7 +263,7 @@ class Event extends OsecBaseClass
 				LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttc
 					ON (
 						tr.term_taxonomy_id = ttc.term_taxonomy_id AND
-						ttc.taxonomy = \'events_categories\'
+						ttc.taxonomy = \'osec_events_categories\'
 					)
 				LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttt
 					ON (

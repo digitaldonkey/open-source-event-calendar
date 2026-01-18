@@ -14,6 +14,6 @@ class FilterCatIds extends FilterTaxonomy
 {
     public function get_taxonomy()
     {
-        return 'events_categories';
+        return 'osec_events_categories';
     }
 }

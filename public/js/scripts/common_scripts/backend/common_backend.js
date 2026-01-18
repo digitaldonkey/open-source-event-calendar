@@ -32,7 +32,7 @@ timely.define(["jquery_timely", "domReady", "ai1ec_config", "scripts/common_scri
         e("#ai1ec-support .ai1ec-download a[title]").popover({placement: "left"}), e(".ai1ec-tooltip-toggle").tooltip({container: "body"})
     }, f = function () {
         var t = e(".ai1ec-taxonomy-header"), n = e(".ai1ec-taxonomy-edit-link"), r;
-        t.length && (e("form#edittag").length || n.removeClass("ai1ec-hide").appendTo(".wrap > h2:first"), e(".wrap").prepend(t.removeClass("ai1ec-hide")), t.find("li.ai1ec-active").length || (r = e("[data-ai1ec_active_tab]").data("ai1ec_active_tab"), r && e(r).addClass("ai1ec-active")), e('#menu-posts-osec_event a[href="edit-tags.php?taxonomy=events_categories&post_type=ai1ec_event"]').closest("li").addClass("current"))
+        t.length && (e("form#edittag").length || n.removeClass("ai1ec-hide").appendTo(".wrap > h2:first"), e(".wrap").prepend(t.removeClass("ai1ec-hide")), t.find("li.ai1ec-active").length || (r = e("[data-ai1ec_active_tab]").data("ai1ec_active_tab"), r && e(r).addClass("ai1ec-active")), e('#menu-posts-osec_event a[href="edit-tags.php?taxonomy=osec_events_categories&post_type=ai1ec_event"]').closest("li").addClass("current"))
     }, l = function () {
         t(function () {
             i(), f(), u(), s(), a()

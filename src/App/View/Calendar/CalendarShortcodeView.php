@@ -58,9 +58,9 @@ class CalendarShortcodeView extends OsecBaseClass
         }
 
         $mappings          = [
-            'cat_name'     => 'events_categories',
-            'events_categories' => 'events_categories',
-            'cat_id'       => 'events_categories',
+            'cat_name'     => 'osec_events_categories',
+            'osec_events_categories' => 'osec_events_categories',
+            'cat_id'       => 'osec_events_categories',
             'events_tags'     => 'events_tags',
             'tag_name'     => 'events_tags',
             'tag_id'       => 'events_tags',

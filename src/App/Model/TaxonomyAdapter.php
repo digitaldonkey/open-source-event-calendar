@@ -17,13 +17,13 @@ class TaxonomyAdapter extends OsecBaseClass
      * @var array Map of taxonomy values.
      */
     protected $taxonomyMap = [
-        'events_categories' => [],
+        'osec_events_categories' => [],
         'events_tags'       => [],
     ];
 
     /**
      * Callback to pre-populate taxonomies before exporting ics.
-     * All taxonomies which are not tags are exported as events_categories
+     * All taxonomies which are not tags are exported as osec_events_categories
      *
      * @param  array  $post_ids  List of Post IDs to inspect.
      *
@@ -45,7 +45,7 @@ class TaxonomyAdapter extends OsecBaseClass
         }
         foreach ($post_ids as $post_id) {
             $post_id = (int)$post_id;
-            $this->taxonomyMap['events_categories'][$post_id] = [];
+            $this->taxonomyMap['osec_events_categories'][$post_id] = [];
             $this->taxonomyMap['events_tags'][$post_id]       = [];
         }
         $tags = wp_get_object_terms(
@@ -62,7 +62,7 @@ class TaxonomyAdapter extends OsecBaseClass
             ['fields' => 'all_with_object_id']
         );
         foreach ($category_terms as $term) {
-            $this->taxonomyMap['events_categories'][$term->object_id][] = $term;
+            $this->taxonomyMap['osec_events_categories'][$term->object_id][] = $term;
         }
     }
 
@@ -77,12 +77,12 @@ class TaxonomyAdapter extends OsecBaseClass
     {
         foreach ($post_ids as $post_id) {
             $post_id = (int)$post_id;
-            $this->taxonomyMap['events_categories'][$post_id] = [];
+            $this->taxonomyMap['osec_events_categories'][$post_id] = [];
             $this->taxonomyMap['events_tags'][$post_id]       = [];
         }
         $terms = wp_get_object_terms(
             $post_ids,
-            ['events_categories', 'events_tags'],
+            ['osec_events_categories', 'events_tags'],
             ['fields' => 'all_with_object_id']
         );
         foreach ($terms as $term) {
@@ -99,7 +99,7 @@ class TaxonomyAdapter extends OsecBaseClass
      */
     public function get_post_categories($post_id)
     {
-        return $this->get_post_taxonomy($post_id, 'events_categories');
+        return $this->get_post_taxonomy($post_id, 'osec_events_categories');
     }
 
     /**

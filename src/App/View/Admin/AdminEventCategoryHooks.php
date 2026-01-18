@@ -27,42 +27,42 @@ class AdminEventCategoryHooks extends OsecBaseClass
         $categoryHooks = self::factory($app);
 
         add_action(
-            'events_categories_add_form_fields',
+            'osec_events_categories_add_form_fields',
             function () use ($categoryHooks) {
                 $categoryHooks->events_categories_add_form_fields();
             }
         );
 
         add_action(
-            'events_categories_edit_form_fields',
+            'osec_events_categories_edit_form_fields',
             function ($term) use ($categoryHooks) {
                 $categoryHooks->events_categories_edit_form_fields($term);
             }
         );
 
         add_action(
-            'created_events_categories',
+            'created_osec_events_categories',
             function ($term_id) use ($categoryHooks) {
                 $categoryHooks->created_events_categories($term_id);
             }
         );
 
         add_action(
-            'edited_events_categories',
+            'edited_osec_events_categories',
             function ($term_id) use ($categoryHooks) {
                 $categoryHooks->edited_events_categories($term_id);
             }
         );
 
         add_action(
-            'manage_edit-events_categories_columns',
+            'manage_edit-osec_events_categories_columns',
             function ($columns) use ($categoryHooks) {
                 return $categoryHooks->manage_events_categories_columns($columns);
             }
         );
 
         add_action(
-            'manage_events_categories_custom_column',
+            'manage_osec_events_categories_custom_column',
             function (string $str, string $column_name, int $term_id) use ($categoryHooks) {
                 return $categoryHooks->manage_events_categories_custom_column($str, $column_name, $term_id);
             },
@@ -244,7 +244,7 @@ class AdminEventCategoryHooks extends OsecBaseClass
     }
 
     /**
-     * A callback method, triggered when `events_categories' are being edited.
+     * A callback method, triggered when `osec_events_categories' are being edited.
      *
      * @param  int  $term_id  ID of term (category) being edited.
      *

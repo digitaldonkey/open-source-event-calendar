@@ -275,7 +275,7 @@ class FeedsController extends OsecBaseClass
         $categories = [];
         if (!empty($entry['feed_category'])) {
             foreach (explode(',', $entry['feed_category']) as $cat_id) {
-                $fcat = get_term($cat_id, 'events_categories');
+                $fcat = get_term($cat_id, 'osec_events_categories');
                 $categories[]  = $fcat->name;
             }
         }
@@ -773,7 +773,7 @@ class FeedsController extends OsecBaseClass
                 'placeholder' => __('Categories (optional)', 'open-source-event-calendar'),
             ],
             get_terms([
-                'taxonomy' => 'events_categories',
+                'taxonomy' => 'osec_events_categories',
                 'hide_empty' => false,
             ])
         );
@@ -864,7 +864,7 @@ class FeedsController extends OsecBaseClass
             foreach ($feed_categories as $cat_id) {
                 $feed_category = get_term(
                     $cat_id,
-                    'events_categories'
+                    'osec_events_categories'
                 );
                 if ($feed_category && ! is_wp_error($feed_category)) {
                     $categories[] = $feed_category->name;

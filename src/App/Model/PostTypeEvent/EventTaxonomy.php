@@ -19,7 +19,7 @@ class EventTaxonomy extends OsecBaseClass
     /**
      * @var string Name of categories taxonomy.
      */
-    public const CATEGORIES = 'events_categories';
+    public const CATEGORIES = 'osec_events_categories';
 
     /**
      * @var string Name of tags taxonomy.
