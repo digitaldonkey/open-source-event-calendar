@@ -96,36 +96,32 @@
                     </td>
                 </tr>
                 <tr {{ show_recurrence_and_excludes ?: 'class="ai1ec-hide"' }}>
-                    <td>
-                        <input
-                            type="checkbox"
-                            name="osec_repeat"
-                            id="osec_repeat"
-                            value="1"
-                            {{ recurrence.checked }}
-                        >
-                        <input type="hidden" name="osec_rrule" id="osec_rrule" value="{{ recurrence.rrule_value  }}">
+                    <td colspan="2">
                         <label for="osec_repeat" id="osec_repeat_label">
+                            <input
+                                type="checkbox"
+                                name="osec_repeat"
+                                id="osec_repeat"
+                                value="1"
+                                {{ recurrence.checked }}
+                            >
+                            <input type="hidden" name="osec_rrule" id="osec_rrule" value="{{ recurrence.rrule_value  }}">
                             {{ recurrence.label }}
                         </label>
-                    </td>
-                    <td>
                         <div id="osec_repeat_text" class="osec_rule_text">
                             <a href="#osec_repeat_box">{{ recurrence.rrule_text }}</a>
                         </div>
                     </td>
                 </tr>
                 <tr {{ show_recurrence_and_excludes ?: 'class="ai1ec-hide"' }}>
-                    <td>
-                        <input type="checkbox" name="osec_exclude" id="osec_exclude" value="1"
-                               {{ excludes.checked }}
-                               {{ excludes.disabled }} >
-                        <input type="hidden" name="osec_exrule" id="osec_exrule" value="{{ excludes.exrule_value }}">
+                    <td colspan="2">
                         <label for="osec_exclude" id="osec_exclude_label">
-                            {{ excludes.label }}
+                            <input type="checkbox" name="osec_exclude" id="osec_exclude" value="1"
+                                   {{- excludes.checked -}}
+                                   {{- excludes.disabled -}} />
+                            <input type="hidden" name="osec_exrule" id="osec_exrule" value="{{ excludes.exrule_value }}" />
+                            {{- excludes.label -}}
                         </label>
-                    </td>
-                    <td>
                         <div id="osec_exclude_text" class="osec_rule_text">
                             <a href="#osec_exclude_box">{{ excludes.exrule_text }}</a>
                         </div>
