@@ -2,6 +2,7 @@
 
 namespace Osec\Tests\Unit\View;
 
+use Osec\App\Model\Date\Timezones;
 use Osec\App\View\Calendar\CalendarPageView;
 use Osec\Cache\CacheMemory;
 use Osec\Http\Request\RequestParser;
@@ -21,9 +22,15 @@ class CalenderPageViewTest extends TestBase
         CacheMemory::factory($osec_app)->clear_cache();
 
         // Sets WP-Settings Timezone.
+        // TODO Should be default.
         $osec_app->options->set('timezone_string', 'Europe/Berlin');
-        // Sets APP timezone
-        $osec_app->settings->set('timezone_string', 'Europe/Berlin');
+        // Sets APP timezoneb (TODO should not be necessary)
+        $osec_app->settings->set('input_date_format', 'def');
+        // TODO We actually would need to test all of them.
+        //  'def' => d/m/yyyy Default
+        //  'us'  => 'MM/dd/yyyy', // js Short Date
+        //  'iso' => 'yyyy-MM-dd',
+        //  'dot' => 'dd.MM.yyyy',
     }
 
     private static function get_values(bool|int $expect_fail)
@@ -48,7 +55,10 @@ class CalenderPageViewTest extends TestBase
     public function test_validate_wordpress_timezone() {
         $this->assertEquals('Europe/Berlin', wp_timezone_string());
     }
-
+    public function test_validate_automatic_osec_timezone() {
+        global $osec_app;
+        $this->assertEquals('Europe/Berlin', Timezones::factory($osec_app)->get_default_timezone());
+    }
 
     public static function requestProviderWithFixedDate(): array
     {

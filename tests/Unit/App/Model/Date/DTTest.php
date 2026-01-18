@@ -3,6 +3,7 @@
 namespace Osec\Tests\Unit\App\Model;
 
 use Osec\App\Model\Date\DT;
+use Osec\App\Model\Date\Timezones;
 use Osec\Tests\Utilities\TestBase;
 
 /**
@@ -67,7 +68,9 @@ class DTTest extends TestBase
         $randomDateObject = new DT($ranomDateInThisWeek);
         $weekStart        = $randomDateObject->getWeekStart();
 
-        $siteTimezone = $randomDateObject->getSiteTimezone();
+        $siteTimezone = Timezones::factory($osec_app)->get_default_timezone();
+        $this->assertEquals('Europe/Berlin', $siteTimezone);
+
         $offset       = $weekStart->utcOffsetInSeconds($siteTimezone);
 
          $weekStartReadable = date(DATE_RFC2822, $weekStartInUTC);
