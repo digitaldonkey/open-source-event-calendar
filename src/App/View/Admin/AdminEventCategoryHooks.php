@@ -244,7 +244,7 @@ class AdminEventCategoryHooks extends OsecBaseClass
     }
 
     /**
-     * A callback method, triggered when `event_categories' are being edited.
+     * A callback method, triggered when `events_categories' are being edited.
      *
      * @param  int  $term_id  ID of term (category) being edited.
      *

@@ -273,9 +273,6 @@ class Settings extends OsecBaseInitialized
      */
     protected function initialize()
     {
-        // TODO
-        // Add doc when and how this call is cached and how to disable caching.
-
         $this->setDefaults();
         $values = $this->app->options->get(self::WP_OPTION_KEY, []);
 

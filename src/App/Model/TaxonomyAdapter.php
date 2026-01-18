@@ -23,7 +23,7 @@ class TaxonomyAdapter extends OsecBaseClass
 
     /**
      * Callback to pre-populate taxonomies before exporting ics.
-     * All taxonomies which are not tags are exported as event_categories
+     * All taxonomies which are not tags are exported as events_categories
      *
      * @param  array  $post_ids  List of Post IDs to inspect.
      *

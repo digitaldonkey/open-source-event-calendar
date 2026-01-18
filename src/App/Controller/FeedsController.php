@@ -284,7 +284,7 @@ class FeedsController extends OsecBaseClass
             'feed_name'            => $feed_name,
             'feed_url'             => $entry['feed_url'],
             'event_category'       => implode(', ', $categories),
-            'event_categories_ids'       => $entry['feed_category'],
+            'events_categories_ids'       => $entry['feed_category'],
             'tags'                 => str_replace(',', ', ', $entry['feed_tags']),
             'tags_ids'             => $entry['feed_tags'],
             'feed_id'              => $feedId,
@@ -807,7 +807,7 @@ class FeedsController extends OsecBaseClass
 
         $args = self::merge_commom_vars([
             'cron_freq'        => $cron_freq->get_content(),
-            'event_categories' => $select2_cats->get_content(),
+            'events_categories' => $select2_cats->get_content(),
             'event_tags'       => $select2_tags->get_content(),
             'feeds_options_header_html' => apply_filters(
                 'osec_admin_ics_feeds_options_header_html',
@@ -875,7 +875,7 @@ class FeedsController extends OsecBaseClass
                 'feed_name' => esc_attr(! empty($row->feed_name) ? $row->feed_name : $row->feed_url),
                 'feed_url' => esc_attr($row->feed_url),
                 'event_category' => implode(', ', $categories),
-                'event_categories_ids' => esc_attr($row->feed_category),
+                'events_categories_ids' => esc_attr($row->feed_category),
                 'tags' => stripslashes(
                     str_replace(',', ', ', esc_attr($row->feed_tags))
                 ),
