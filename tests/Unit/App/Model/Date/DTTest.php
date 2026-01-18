@@ -71,7 +71,7 @@ class DTTest extends TestBase
         $siteTimezone = Timezones::factory($osec_app)->get_default_timezone();
         $this->assertEquals('Europe/Berlin', $siteTimezone);
 
-        $offset       = $weekStart->utcOffsetInSeconds($siteTimezone);
+        $offset = $weekStart->utcOffsetInSeconds($siteTimezone);
 
          $weekStartReadable = date(DATE_RFC2822, $weekStartInUTC);
          $calculatedWeekStartReadable = date(DATE_RFC2822, $weekStart->format_to_gmt());

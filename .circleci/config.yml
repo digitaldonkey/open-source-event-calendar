@@ -52,10 +52,10 @@ references:
   # Default DB Docker image environement
   ENV_PHP_IMAGE: &ENV_PHP_IMAGE
     environment:
-      TZ: "Europe/Berlin"
-      MYSQL_DATABASE: wp_ci
-      MYSQL_USER: wp_ci
-      MYSQL_PASSWORD: wp_ci
+      - TZ: "Europe/Berlin"
+      - MYSQL_DATABASE: wp_ci
+      - MYSQL_USER: wp_ci
+      - MYSQL_PASSWORD: wp_ci
 
   # Default container configuration
   container_config: &container_config
