@@ -29,7 +29,7 @@ class EventTaxonomy extends OsecBaseClass
     /**
      * @var string Name of feeds taxonomy.
      */
-    public const FEEDS = 'events_feeds';
+    public const FEEDS = 'osec_events_feeds';
 
     /**
      * @var int ID of related post object

@@ -565,8 +565,8 @@ class FeedsController extends OsecBaseClass
         $feedName = self::get_term_name_from_uri(
             $this->get_feed_uri_by_id($feed_id)
         );
-        $term = get_term_by('name', $feedName, 'events_feeds');
-        wp_delete_term($term->term_id, 'events_feeds');
+        $term = get_term_by('name', $feedName, 'osec_events_feeds');
+        wp_delete_term($term->term_id, 'osec_events_feeds');
 
         // Delete Table Entry.
         $this->app->db->query(

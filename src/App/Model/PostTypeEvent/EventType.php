@@ -103,11 +103,11 @@ class EventType extends OsecBaseClass
         );
 
         /**
-         * Taxonomy events_feeds
+         * Taxonomy osec_events_feeds
          * is used to filter for Events added by a feed.
          */
         register_taxonomy(
-            'events_feeds',
+            'osec_events_feeds',
             [OSEC_POST_TYPE],
             [
                 'labels'       => [
@@ -293,7 +293,7 @@ class EventType extends OsecBaseClass
     public function uninstall(bool $purge = false)
     {
         $taxonomies = [
-            'events_feeds',
+            'osec_events_feeds',
             'osec_events_tags',
             'osec_events_categories',
         ];

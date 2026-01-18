@@ -35,7 +35,7 @@ class TaxonomyAdapter extends OsecBaseClass
         $categories          = [];
         $excluded_categories = [
             'osec_events_tags'  => true,
-            'events_feeds' => true,
+            'osec_events_feeds' => true,
         ];
         foreach ($taxonomies as $taxonomy) {
             if (isset($excluded_categories[$taxonomy])) {
