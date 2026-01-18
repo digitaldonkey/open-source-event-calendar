@@ -64,6 +64,7 @@ references:
         <<: *ENV_PHP_IMAGE
     working_directory: ~/open-source-event-calendar
     environment:
+      - TZ: "Europe/Berlin"
       - WP_CORE_DIR: *WP_CORE_DIR
       - WP_HOST: *WP_HOST
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
@@ -455,4 +456,3 @@ workflows:
               only: /master/
             tags:
               only: /^\d+\.\d+\.\d+$/
-
