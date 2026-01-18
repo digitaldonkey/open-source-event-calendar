@@ -97,7 +97,7 @@ class BlockController extends OsecBaseClass
             'action' => SettingsView::factory($this->app)->get_configured($atts['view']),
             'request_type' => $this->app->settings->get('osec_use_frontend_rendering') ? 'json' : 'jsonp',
             'cat_ids' => isset($taxonomies['osec_events_categories']) ? $taxonomies['osec_events_categories'] : [],
-            'tag_ids' => isset($taxonomies['events_tags']) ? $taxonomies['events_tags'] : [],
+            'tag_ids' => isset($taxonomies['osec_events_tags']) ? $taxonomies['osec_events_tags'] : [],
             'post_ids' => implode(',', $atts['postIds']),
             'display_filters' => 'true',
             'display_subscribe' => 'true',
@@ -111,7 +111,7 @@ class BlockController extends OsecBaseClass
         //      Custom taxonomies are rendered in Block Editor but not yet here
         //      For now you might need to implement using osec_block_query_alter.
         //     foreach ($taxonomies as $taxonomy => $terms) {
-        //          if (! in_array($taxonomy, ['osec_events_categories', 'events_tags'])) {
+        //          if (! in_array($taxonomy, ['osec_events_categories', 'osec_events_tags'])) {
         //             // $query add custom Taxo???
         //          }
         //     }

@@ -617,7 +617,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $is_tag,
         $use_name
     ) {
-        $taxonomy       = $is_tag ? 'events_tags' : 'osec_events_categories';
+        $taxonomy       = $is_tag ? 'osec_events_tags' : 'osec_events_categories';
         $categories     = explode(',', $terms);
         $event_taxonomy = EventTaxonomy::factory($this->app);
 

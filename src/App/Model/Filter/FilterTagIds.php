@@ -14,6 +14,6 @@ class FilterTagIds extends FilterTaxonomy
 {
     public function get_taxonomy()
     {
-        return 'events_tags';
+        return 'osec_events_tags';
     }
 }

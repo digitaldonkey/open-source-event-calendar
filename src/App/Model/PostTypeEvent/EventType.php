@@ -82,7 +82,7 @@ class EventType extends OsecBaseClass
         // = register event tags taxonomy =
         // ================================
         register_taxonomy(
-            'events_tags',
+            'osec_events_tags',
             [OSEC_POST_TYPE],
             [
                 'labels'       => [
@@ -294,7 +294,7 @@ class EventType extends OsecBaseClass
     {
         $taxonomies = [
             'events_feeds',
-            'events_tags',
+            'osec_events_tags',
             'osec_events_categories',
         ];
         if ($purge) {

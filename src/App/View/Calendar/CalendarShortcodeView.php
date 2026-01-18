@@ -61,9 +61,9 @@ class CalendarShortcodeView extends OsecBaseClass
             'cat_name'     => 'osec_events_categories',
             'osec_events_categories' => 'osec_events_categories',
             'cat_id'       => 'osec_events_categories',
-            'events_tags'     => 'events_tags',
-            'tag_name'     => 'events_tags',
-            'tag_id'       => 'events_tags',
+            'osec_events_tags'     => 'osec_events_tags',
+            'tag_name'     => 'osec_events_tags',
+            'tag_id'       => 'osec_events_tags',
             'post_id'      => 'post_ids',
             'events_limit' => 'events_limit',
         ];

@@ -42,7 +42,7 @@ class CalendarTaxonomyView extends OsecBaseClass
         $type_for_filter    = 'cat_ids';
         $type_for_view_args = 'categories';
         if (true === $tag) {
-            $taxonomy_name      = 'events_tags';
+            $taxonomy_name      = 'osec_events_tags';
             $type               = 'tag';
             $type_for_filter    = 'tag_ids';
             $type_for_view_args = 'tags';

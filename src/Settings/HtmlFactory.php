@@ -289,7 +289,7 @@ class HtmlFactory extends OsecBaseClass
         }
         // Get tags.
         $tags = get_terms([
-            'taxonomy'   => 'events_tags',
+            'taxonomy'   => 'osec_events_tags',
             'orderby'    => 'name',
             'hide_empty' => false,
         ]);

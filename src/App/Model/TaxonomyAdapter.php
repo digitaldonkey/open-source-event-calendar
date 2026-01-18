@@ -18,7 +18,7 @@ class TaxonomyAdapter extends OsecBaseClass
      */
     protected $taxonomyMap = [
         'osec_events_categories' => [],
-        'events_tags'       => [],
+        'osec_events_tags'       => [],
     ];
 
     /**
@@ -34,7 +34,7 @@ class TaxonomyAdapter extends OsecBaseClass
         $taxonomies          = get_object_taxonomies(OSEC_POST_TYPE);
         $categories          = [];
         $excluded_categories = [
-            'events_tags'  => true,
+            'osec_events_tags'  => true,
             'events_feeds' => true,
         ];
         foreach ($taxonomies as $taxonomy) {
@@ -46,11 +46,11 @@ class TaxonomyAdapter extends OsecBaseClass
         foreach ($post_ids as $post_id) {
             $post_id = (int)$post_id;
             $this->taxonomyMap['osec_events_categories'][$post_id] = [];
-            $this->taxonomyMap['events_tags'][$post_id]       = [];
+            $this->taxonomyMap['osec_events_tags'][$post_id]       = [];
         }
         $tags = wp_get_object_terms(
             $post_ids,
-            ['events_tags'],
+            ['osec_events_tags'],
             ['fields' => 'all_with_object_id']
         );
         foreach ($tags as $term) {
@@ -78,11 +78,11 @@ class TaxonomyAdapter extends OsecBaseClass
         foreach ($post_ids as $post_id) {
             $post_id = (int)$post_id;
             $this->taxonomyMap['osec_events_categories'][$post_id] = [];
-            $this->taxonomyMap['events_tags'][$post_id]       = [];
+            $this->taxonomyMap['osec_events_tags'][$post_id]       = [];
         }
         $terms = wp_get_object_terms(
             $post_ids,
-            ['osec_events_categories', 'events_tags'],
+            ['osec_events_categories', 'osec_events_tags'],
             ['fields' => 'all_with_object_id']
         );
         foreach ($terms as $term) {
@@ -133,7 +133,7 @@ class TaxonomyAdapter extends OsecBaseClass
      */
     public function get_post_tags($post_id)
     {
-        return $this->get_post_taxonomy($post_id, 'events_tags');
+        return $this->get_post_taxonomy($post_id, 'osec_events_tags');
     }
 
     /**
