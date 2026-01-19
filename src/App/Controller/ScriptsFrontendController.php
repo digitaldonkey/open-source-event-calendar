@@ -11,6 +11,7 @@ use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
 use Osec\Http\Request\HttpConditionalGet;
 use Osec\Http\Request\HttpEncoder;
+use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\ResponseHelper;
 
 /**
@@ -587,11 +588,10 @@ class ScriptsFrontendController extends OsecBaseClass
      */
     private function isPageEditEvent()
     {
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended
-        $post_id      = isset($_GET['post']) ? (int) $_GET['post'] : false;
-        $action       = isset($_GET['action']) ? sanitize_key(wp_unslash($_GET['action'])) : false;
-        // phpcs:enable
-        if ($post_id === false || $action === false) {
+        $post_id = RequestParser::get_param('post', false);
+        $action = RequestParser::get_param('action', false);
+
+        if (!is_int($post_id) && $action !== 'edit') {
             return false;
         }
 

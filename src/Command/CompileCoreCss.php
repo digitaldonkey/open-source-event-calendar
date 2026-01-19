@@ -57,17 +57,22 @@ class CompileCoreCss extends CommandAbstract
     protected function processFiles()
     {
         // Only available in DEBUG mode.
-        // phpcs:disable WordPress.Security
         $less   = LessController::factory($this->app);
-        $theme  = $this->getTheme(sanitize_key($_GET['theme']));
+        $theme  = RequestParser::get_param('theme', false);
 
-        if (isset($_GET['switch'])) {
+        // Switch theme.
+        if ($theme && RequestParser::get_param('switch', false)) {
             $this->app->options->delete(LessController::DB_KEY_FOR_LESS_VARIABLES);
             $this->app->options->set('osec_current_theme', $theme);
 
             return 'Theme switched to "' . $theme['stylesheet'] . '".';
         }
 
+        if (empty($theme)) {
+            return 'Param theme is required';
+        }
+
+        // Rebuild theme.
         $css          = $less->parse_less_files(null, true);
         $hashmap      = $less->get_less_hashmap();
         $hashmap      = $this->getHashmapPhp($hashmap);

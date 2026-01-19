@@ -603,10 +603,10 @@ class FeedsController extends OsecBaseClass
      */
     public function delete_ics(): never
     {
-        if (
-             !(isset($_REQUEST['action']) && $_REQUEST['action'] === 'osec_delete_ics')
-            || !isset($_REQUEST['nonce'])
-            || !wp_verify_nonce(sanitize_key($_REQUEST['nonce']), self::NONCE_NAME)
+        $action = RequestParser::get_param('action', null);
+        $nonce = RequestParser::get_param('nonce', null);
+        if (!$action || $action !== 'osec_delete_ics'
+            || !$nonce || wp_verify_nonce($nonce, self::NONCE_NAME) !== 1
         ) {
             exit('invalid nonce');
         }
