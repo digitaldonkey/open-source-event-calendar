@@ -38,7 +38,12 @@ class SaveThemeOptions extends SaveAbstract
                 if (isset($_POST[$variable_name])) {
                     $var = sanitize_text_field(wp_unslash($_POST[$variable_name]));
                     if (ThemeVariableFont::CUSTOM_FONT === $var) {
-                        $var .= ThemeVariableFont::CUSTOM_FONT_ID_SUFFIX;
+                        $variable_custom = $variable_name . ThemeVariableFont::CUSTOM_FONT_ID_SUFFIX;
+                        if (isset($_POST[$variable_custom])) {
+                            $var = sanitize_text_field(
+                                wp_unslash($_POST[$variable_custom])
+                            );
+                        }
                     }
                     // update the original array
                     $variables[$variable_name]['value'] = $var;
