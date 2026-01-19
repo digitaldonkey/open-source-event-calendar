@@ -63,10 +63,15 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
      */
     public function init_vars(?string $query = null)
     {
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended
-        foreach ($_REQUEST as $key => $value) {
-            $this->variable($key, sanitize_text_field($value));
+        /* WordPress variables */
+        $wp_vars = [
+            'page_id',
+            'request_type',
+        ];
+        foreach ($wp_vars as $var) {
+            $this->variable($var, RequestParser::get_param($var, null));
         }
+
         if (!$query && isset($_SERVER['REQUEST_URI'])) {
             $query = sanitize_url(wp_unslash($_SERVER['REQUEST_URI']));
         }
@@ -78,15 +83,15 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
                 ++$imported;
             }
         }
-        if (isset($_REQUEST['ai1ec'])) {
-            $particles = explode('|', trim(sanitize_text_field(wp_unslash($_REQUEST['ai1ec'])), '|'));
+        $ai1ec = RequestParser::get_param('ai1ec', null);
+        if ($ai1ec) {
+            $particles = explode('|', trim($ai1ec, '|'));
             foreach ($particles as $element) {
                 if ($this->addSerializedVariable($element)) {
                     ++$imported;
                 }
             }
         }
-        // phpcs:enable
         return $imported;
     }
 
