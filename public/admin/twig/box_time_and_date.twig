@@ -118,8 +118,8 @@
                 <tr {{ show_recurrence_and_excludes ?: 'class="ai1ec-hide"' }}>
                     <td>
                         <input type="checkbox" name="osec_exclude" id="osec_exclude" value="1"
-                               {{- excludes.checked -}}
-                               {{- excludes.disabled -}} >
+                               {{ excludes.checked -}}
+                               {{ excludes.disabled }}/>
                         <input type="hidden" name="osec_exrule" id="osec_exrule" value="{{ excludes.exrule_value }}">
                         <label for="osec_exclude" id="osec_exclude_label">
                             {{- excludes.label -}}

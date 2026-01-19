@@ -8,6 +8,7 @@ use Osec\App\Model\Date\Timezones;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
+use Osec\Http\Request\RequestParser;
 use WP_Post;
 
 /**
@@ -23,6 +24,7 @@ class EventEditing extends OsecBaseClass
     public const NONCE_NAME = 'osec_edit_event_nonce';
 
     public const NONCE_ACTION = 'osec_edit_event_nonce';
+
     /**
      * Saves meta post data.
      *
@@ -36,8 +38,9 @@ class EventEditing extends OsecBaseClass
      */
     public function save_post(int $post_id, WP_Post $post, bool $update)
     {
-        if (!isset($_REQUEST[self::NONCE_NAME])
-            || !wp_verify_nonce(sanitize_key(wp_unslash($_REQUEST[self::NONCE_NAME])), self::NONCE_ACTION)) {
+        $nonce = RequestParser::get_param(self::NONCE_NAME, null);
+        $action = RequestParser::get_param('action', null);
+        if (!$nonce || wp_verify_nonce($nonce, self::NONCE_ACTION) !== 1) {
             return null;
         }
 
@@ -46,7 +49,7 @@ class EventEditing extends OsecBaseClass
         }
 
         // verify if this is not inline-editing
-        if (isset($_REQUEST['action']) && 'inline-save' === $_REQUEST['action']) {
+        if ($action && 'inline-save' === $action) {
             return null;
         }
 
@@ -60,7 +63,7 @@ class EventEditing extends OsecBaseClass
         if ($update && $post_id) {
             try {
                 $event = new Event($this->app, $post_id);
-            // phpcs:ignore Generic.CodeAnalysis.EmptyStatement
+                // phpcs:ignore Generic.CodeAnalysis.EmptyStatement
             } catch (EventNotFoundException) {
                 // Post exists, but event data hasn't been saved yet.
                 // Create new event object below.
@@ -72,21 +75,13 @@ class EventEditing extends OsecBaseClass
             $event->set('post_id', $post_id);
         }
 
-        /**
-         * WordPress magic quotes are removed and restored below with add_magic_quotes()…
-         */
-        $postVars = stripslashes_deep($_POST);
-
-        /* @var ?string $timezone_input User submitted TZ value */
-        $timezone_input = null;
-        if (! empty($postVars['osec_timezone_name'])) {
-            $timezone_input = Timezones::factory($this->app)
-                                       ->get_name(sanitize_text_field($postVars['osec_timezone_name']));
+        $timezone_input = RequestParser::get_param('osec_timezone_name', null);
+        if ($timezone_input) {
+            $timezone_input = Timezones::factory($this->app)->get_name($timezone_input);
         }
+        $event->set('allday', (bool)RequestParser::get_param('osec_all_day_event', false));
 
-        $event->set('allday', isset($postVars['osec_all_day_event']) && (bool)$postVars['osec_all_day_event']);
-
-        $startTime = new DT($postVars['osec_start_time'], $timezone_input);
+        $startTime = new DT(RequestParser::get_param('osec_start_time', null), $timezone_input);
         $event->set('start', $startTime);
 
         $timezone_name = $startTime->get_timezone();
@@ -97,106 +92,113 @@ class EventEditing extends OsecBaseClass
         }
 
         /* End time and `instant event` */
-        if (isset($postVars['osec_instant_event'])) {
+        if (RequestParser::get_param('osec_instant_event', false)) {
             $event->set_no_end_time();
         } else {
-            $endTime = $postVars['osec_end_time'] ?? '';
+            $endTime = RequestParser::get_param('osec_end_time', '');
             $event->set('end', new DT($endTime, $timezone_name));
             $event->set('instant_event', false);
         }
 
-        if (! empty($postVars['osec_venue'])) {
-            $event->set('venue', sanitize_text_field($postVars['osec_venue']));
+        $osec_venue = RequestParser::get_param('osec_venue', false);
+        if ($osec_venue) {
+            $event->set('venue', $osec_venue);
         }
 
-        if (! empty($postVars['osec_address'])) {
-            $event->set('address', sanitize_text_field($postVars['osec_address']));
+        $osec_address = RequestParser::get_param('osec_address', false);
+        if ($osec_address) {
+            $event->set('address', $osec_address);
+        }
+        $osec_city = RequestParser::get_param('osec_city', false);
+        if ($osec_city) {
+            $event->set('city', $osec_city);
         }
 
-        if (! empty($postVars['osec_city'])) {
-            $event->set('city', sanitize_text_field($postVars['osec_city']));
+        $osec_province = RequestParser::get_param('osec_province', false);
+        if ($osec_province) {
+            $event->set('province', $osec_province);
+        }
+        $osec_postal_code = RequestParser::get_param('osec_postal_code', false);
+        if ($osec_postal_code) {
+            $event->set('postal_code', $osec_postal_code);
+        }
+        $osec_country = RequestParser::get_param('osec_country', false);
+        if ($osec_country) {
+            $event->set('country', $osec_country);
         }
 
-        if ($postVars['osec_province']) {
-            $event->set('province', sanitize_text_field($postVars['osec_province']));
+        $show_map = (bool)RequestParser::get_param('osec_google_map', false);
+        $event->set('show_map', $show_map);
+
+        $osec_cost = RequestParser::get_param('osec_cost', false);
+        if ($osec_cost) {
+            $event->set('cost', $osec_cost);
         }
 
-        if (! empty($postVars['osec_postal_code'])) {
-            $event->set('postal_code', sanitize_text_field($postVars['osec_postal_code']));
-        }
-
-        if (! empty($postVars['osec_country'])) {
-            $event->set('country', sanitize_text_field($postVars['osec_country']));
-        }
-
-        $event->set('show_map', isset($postVars['osec_google_map']) && (bool)$postVars['osec_google_map']);
-
-        if (! empty($postVars['osec_cost'])) {
-            $event->set('cost', sanitize_text_field($postVars['osec_cost']));
-        }
-
-        if (isset($postVars['osec_is_free_event'])
-            && (bool)$postVars['osec_is_free_event']) {
+        $osec_is_free_event = (bool)RequestParser::get_param('osec_is_free_event', false);
+        if ($osec_is_free_event) {
             $event->set('is_free', true);
             $event->set('cost', '');
         }
 
-        if (! empty($postVars['osec_ticket_url'])) {
+        $osec_ticket_url = RequestParser::get_param('osec_ticket_url', '');
+        if ($osec_ticket_url) {
             // Clickable links.
-            $event->set('ticket_url', sanitize_url($postVars['osec_ticket_url'], ['http', 'https']));
+            $event->set('ticket_url', sanitize_url($osec_ticket_url, ['http', 'https']));
         }
-
-        if (! empty($postVars['osec_contact_url'])) {
+        $osec_contact_url = RequestParser::get_param('osec_contact_url', '');
+        if ($osec_contact_url) {
             // Allow any of @see wp_allowed_protocols().
-            $event->set('contact_url', sanitize_url($postVars['osec_contact_url']));
+            $event->set('contact_url', sanitize_url($osec_contact_url));
+        }
+        $osec_contact_name = RequestParser::get_param('osec_contact_name', false);
+        if ($osec_contact_name) {
+            $event->set('contact_name', $osec_contact_name);
         }
 
-        if (! empty($postVars['osec_contact_name'])) {
-            $event->set('contact_name', sanitize_text_field($postVars['osec_contact_name']));
+        $osec_contact_phone = RequestParser::get_param('osec_contact_phone', false);
+        if ($osec_contact_phone) {
+            $event->set('contact_phone', $osec_contact_phone);
         }
 
-        if (! empty($postVars['osec_contact_phone'])) {
-            $event->set('contact_phone', sanitize_text_field($postVars['osec_contact_phone']));
+        $osec_contact_email = RequestParser::get_param('osec_contact_email', false);
+        if ($osec_contact_email) {
+            $event->set('contact_email', sanitize_email($osec_contact_email));
         }
 
-        if (! empty($postVars['osec_contact_email'])) {
-            $event->set('contact_email', sanitize_email($postVars['osec_contact_email']));
-        }
-
-        $showCoordinates = isset($postVars['osec_input_coordinates']) && (bool)$postVars['osec_input_coordinates'];
+        $showCoordinates = (bool)RequestParser::get_param('show_coordinates', false);
         $event->set('show_coordinates', $showCoordinates);
 
-        if (isset($postVars['osec_latitude'])) {
-            $lat = (float) sanitize_text_field($postVars['osec_latitude']);
-            $lat = Event::is_geo_value($lat) ? $lat : null;
-            $event->set('latitude', $lat);
+        $osec_latitude = RequestParser::get_param('osec_latitude', null);
+        if ($osec_latitude && Event::is_geo_value((float)$osec_latitude)) {
+            $event->set('latitude', (float)$osec_latitude);
         }
-
-        if (isset($postVars['osec_longitude'])) {
-            $long = (float) sanitize_text_field($postVars['osec_longitude']);
-            $long = Event::is_geo_value($long) ? $long : null;
-            $event->set('longitude', $long);
+        $osec_longitude = RequestParser::get_param('osec_longitude', null);
+        if ($osec_longitude && Event::is_geo_value((float)$osec_longitude)) {
+            $event->set('longitude', (float)$osec_longitude);
         }
 
         /* Repeats */
-        $rdate  = null;
-        $rrule  = null;
-        if (isset($postVars['osec_repeat']) && !empty($postVars['osec_rrule'])) {
-            $repRuleString = sanitize_text_field((string) $postVars['osec_rrule']);
-            /*
-             *  Repeat "custom" (array of dates)
-             */
-            if (str_starts_with($repRuleString, 'RDATE')) {
-                // Remove 'RDATE=' prefix.
-                $rdate = substr($repRuleString, 6);
+        $rdate         = null;
+        $rrule         = null;
+        $repRuleString = '';
+        if (RequestParser::get_param('osec_repeat', false)) {
+            $repRuleString = (string)RequestParser::get_param('osec_rrule', '');
+            if ($repRuleString) {
+                /*
+                 *  Repeat "custom" (array of dates)
+                 */
+                if (str_starts_with($repRuleString, 'RDATE')) {
+                    // Remove 'RDATE=' prefix.
+                    $rdate = substr($repRuleString, 6);
+                }
+                /*
+                 *  Repeat FREQ Rules
+                 */
+                if (str_starts_with($repRuleString, 'FREQ')) {
+                    $rrule = $repRuleString;
+                }
             }
-            /*
-             *  Repeat FREQ Rules
-             */
-            if (str_starts_with($repRuleString, 'FREQ')) {
-                $rrule = $repRuleString;
-            }
-            unset($repRuleString);
         }
         $event->set('recurrence_rules', $rrule);
         $event->set('recurrence_dates', $rdate);
@@ -204,26 +206,27 @@ class EventEditing extends OsecBaseClass
         /* Excludes */
         $exrule = null;
         $exdate = null;
-        if (isset($postVars['osec_exclude']) && !empty($postVars['osec_exrule'])) {
-            $exRuleString = sanitize_text_field((string)$postVars['osec_exrule']);
-            /*
-             *  Exclude "custom" (array of dates)
-             */
-            if (str_starts_with($exRuleString, 'EXDATE')) {
-                // Remove 'EXDATE=' prefix */
-                $exdate = substr($exRuleString, 7);
+        if (RequestParser::get_param('osec_exclude', false)) {
+            $exRuleString = (string)RequestParser::get_param('osec_exrule', '');
+            if ($exRuleString) {
+                /*
+                 *  Exclude "custom" (array of dates)
+                 */
+                if (str_starts_with($exRuleString, 'EXDATE')) {
+                    // Remove 'EXDATE=' prefix */
+                    $exdate = substr($exRuleString, 7);
+                }
+                if (str_starts_with($repRuleString, 'FREQ')) {
+                    $exrule = $exRuleString;
+                }
+                // No need to exclude, if repetition is not set.
+                if ((null !== $rrule || null !== $rdate)) {
+                    $exrule = RepeatRuleToText::factory($this->app)->merge_exrule(
+                        $exRuleString,
+                        $rrule
+                    );
+                }
             }
-            if (str_starts_with($postVars['osec_rrule'], 'FREQ')) {
-                $exrule = $exRuleString;
-            }
-            // No need to exclude, if repetition is not set.
-            if ((null !== $rrule || null !== $rdate)) {
-                $exrule = RepeatRuleToText::factory($this->app)->merge_exrule(
-                    $exRuleString,
-                    $rrule
-                );
-            }
-            unset($exRuleString);
         }
         $event->set('exception_rules', $exrule);
         $event->set('exception_dates', $exdate);
@@ -254,28 +257,25 @@ class EventEditing extends OsecBaseClass
      * Create copy of event by calling {@uses wp_insert_post} function.
      * Using 'post_parent' to add hierarchy.
      *
-     * TODO
-     *   This does not work if Gutenberg is enabled,
-     *   bevause the clone is based on $_POST data,
-     *   which is not available with Gutenberg enabled.
- *       @see filtered by 'use_block_editor_for_post_type'.
-     *
      * @return int|bool New post ID or false on failure
      * @throws BootstrapException
+     * @see filtered by 'use_block_editor_for_post_type'.
      */
     public function create_duplicate_post(): ?int
     {
         if (
-            !isset($_REQUEST[self::NONCE_NAME])
-            || !wp_verify_nonce(sanitize_key($_REQUEST[self::NONCE_NAME]), self::NONCE_ACTION)
+            ! isset($_REQUEST[self::NONCE_NAME])
+            || ! wp_verify_nonce(sanitize_key($_REQUEST[self::NONCE_NAME]), self::NONCE_ACTION)
         ) {
             return false;
         }
 
         // For details @see EventParent->admin_init_post().
-        if (! isset($_POST['post_ID'])) {
+        $post_ID = RequestParser::get_param('post_ID', null);
+        if (is_null($post_ID)) {
             return false;
         }
+        $old_post_id = (int) $post_ID;
         $clean_fields = [
             'osec_repeat'      => null,
             'osec_rrule'       => '',
@@ -285,21 +285,21 @@ class EventEditing extends OsecBaseClass
             'post_name'        => null,
             'osec_instance_id' => null,
         ];
-        $old_post_id  = (int) $_POST['post_ID'];
-        $instance_id  = isset($_POST['osec_instance_id']) ? (int) $_POST['osec_instance_id'] : null;
+        $instance_id = RequestParser::get_param('osec_instance_id', null);
+
         foreach ($clean_fields as $field => $to_value) {
             if (null === $to_value) {
-                unset($_POST[$field]);
+                unset($_REQUEST[$field]);
             } else {
-                $_POST[$field] = $to_value;
+                $_REQUEST[$field] = $to_value;
             }
         }
-        $data = _wp_translate_postdata(false, $_POST);
+        $data                = _wp_translate_postdata(false);
         $data['post_parent'] = $old_post_id;
-        $post_id  = wp_insert_post($data);
+        $new_post_id             = wp_insert_post($data);
         EventParent::factory($this->app)
-                   ->event_parent($post_id, $old_post_id, $instance_id);
-        return $post_id;
+                   ->event_parent($new_post_id, $old_post_id, $instance_id);
+        return $new_post_id;
     }
 
     /**
