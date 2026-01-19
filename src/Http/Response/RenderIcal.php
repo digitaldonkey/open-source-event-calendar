@@ -14,11 +14,9 @@ class RenderIcal extends RenderStrategyAbstract
 {
     public function render(array $params)
     {
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         $this->cleanOutputBuffers();
         header('Content-type: text/calendar; charset=utf-8');
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        echo $params['data'];
+        echo esc_html($params['data']);
         ResponseHelper::stop();
     }
 }

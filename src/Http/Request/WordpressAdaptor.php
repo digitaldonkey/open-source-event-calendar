@@ -67,6 +67,7 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
         $wp_vars = [
             'page_id',
             'request_type',
+            'display_filters',
         ];
         foreach ($wp_vars as $var) {
             $this->variable($var, RequestParser::get_param($var, null));
