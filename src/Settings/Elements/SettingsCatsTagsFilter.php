@@ -16,16 +16,17 @@ class SettingsCatsTagsFilter extends SettingsAbstract
 {
     public function render($html = '', $wrap = true): string
     {
-        $tags       = [];
-        $categories = [];
-        foreach (['tags', 'categories'] as $type) {
-            ${$type} = get_categories(
-                [
-                    'taxonomy'     => 'events_' . $type,
-                    'hierarchical' => true,
-                ]
-            );
-        }
+        $tags = get_categories([
+            'taxonomy'     => 'osec_events_tags',
+            'hierarchical' => true,
+        ]);
+
+        $categories = get_categories([
+            'taxonomy'     => 'osec_events_categories',
+            'hierarchical' => true,
+        ]);
+
+        // Only if Events in DB using the tags/cats.
         if (empty($tags) && empty($categories)) {
             return '';
         }
