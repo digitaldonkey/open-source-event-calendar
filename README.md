@@ -162,6 +162,19 @@ This plugin connects may connect to Google maps API render event locations.
 
 == Changelog ==
 
+= 1.0.7 =
+- Fix additional redirect happening due to trailing slash in Link
+- Fix custom font. Closes #8
+More WP plugin check work.
+- Renaming capabilities with prefix
+- Rename Taxonomies: events_categories, events_tags, events_feeds to osec_events_categories,  osec_events_...
+- Fix some default value issues, timezone default
+- clean up translations, nonces, prefixes 
+- migrate php templates to twig
+- Rework/fix: robots.txt generation, exact_date, get_exact_date, variable variants,
+- Updates: WP phpcs config, tools (npm) and composer updates
+
+
 = 1.0.4 =
 - Fix: Move content display out of OSEC block
 - Fix: subscribe display settings inverted.
