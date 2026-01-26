@@ -120,7 +120,7 @@ Installation as usual
 * Make sure to verify the PHP version requirements.
 * After installing you need to save the plugin settings page once. Set Timezone, UI Date formats, WeekStart Day.
 * Make sure to also check settings-general.php to review output date formats.
-* You may add a constants-local.php file by copying constants-local.php.example. 
+* You may add a constants-local.php file by copying [constants-local.php](https://raw.githubusercontent.com/digitaldonkey/open-source-event-calendar/refs/heads/master/constants-local.php.example) and overwrite whatever you find in open-source-event-calendar/constants.php 
 * To purge all content on plugin uninstall set OSEC_UNINSTALL_PLUGIN_DATA to TRUE.
 
 

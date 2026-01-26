@@ -7,3 +7,4 @@ public/admin/less/build-css.bat
 calendar_block/.editorconfig
 vendor/wikimedia/less.php/bin/
 vendor/bin/
+vendor/kigkonsult/icalcreator/releaseNotes

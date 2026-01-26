@@ -34,7 +34,6 @@ references:
         composer.lock
         open-source-event-calendar.php
         constants.php
-        constants-local.php.example                    
         README.md
         LICENSE
         DEVELOPERS.md                             
