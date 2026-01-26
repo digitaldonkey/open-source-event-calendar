@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bd90e90c3428d7bdd6ef11e58bcc3c52",
+    "content-hash": "f237ba1c00a3f0e80a2d2c267cba57e1",
     "packages": [
         {
             "name": "cweagans/composer-configurable-plugin",
@@ -131,29 +131,35 @@
         },
         {
             "name": "kigkonsult/icalcreator",
-            "version": "v2.40.10",
+            "version": "v2.41.92",
             "source": {
                 "type": "git",
                 "url": "https://github.com/iCalcreator/iCalcreator.git",
-                "reference": "789d1a6e9181fd0753e394e17227ee3a3d1e35fd"
+                "reference": "a4d35d7a58c08b816dc8a7778db19f461c1429bd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/iCalcreator/iCalcreator/zipball/789d1a6e9181fd0753e394e17227ee3a3d1e35fd",
-                "reference": "789d1a6e9181fd0753e394e17227ee3a3d1e35fd",
+                "url": "https://api.github.com/repos/iCalcreator/iCalcreator/zipball/a4d35d7a58c08b816dc8a7778db19f461c1429bd",
+                "reference": "a4d35d7a58c08b816dc8a7778db19f461c1429bd",
                 "shasum": ""
             },
             "require": {
+                "ext-intl": "*",
+                "ext-mbstring": "*",
                 "ext-openssl": "*",
                 "ext-simplexml": "*",
                 "ext-zlib": "*",
                 "php": ">=8.0"
             },
             "require-dev": {
+                "degraciamathieu/php-arguments-detector": ">=0.5.0",
+                "ext-xdebug": "*",
                 "phpcompatibility/php-compatibility": ">=9.3.5",
+                "phpmd/phpmd": ">=2.13.0",
                 "phpstan/phpstan": ">=0.9.3",
                 "phpunit/phpunit": ">=6.5.13",
-                "squizlabs/php_codesniffer": ">=3.5.5"
+                "squizlabs/php_codesniffer": ">=3.5.5",
+                "vimeo/psalm": "*"
             },
             "type": "library",
             "autoload": {
@@ -162,11 +168,12 @@
                 ],
                 "psr-4": {
                     "Kigkonsult\\Icalcreator\\": [
-                        "src/",
-                        "src/Util/",
-                        "src/Traits/"
+                        "src/"
                     ]
-                }
+                },
+                "classmap": [
+                    "src/"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -178,17 +185,30 @@
                     "email": "ical@kigkonsult.se"
                 }
             ],
-            "description": "iCalcreator is the PHP implementation of rfc2445/rfc5545, management of calendar information",
+            "description": "iCalcreator is the PHP implementation of rfc2445/rfc5545 and rfc updates, management of calendar information",
             "keywords": [
                 "alarm",
+                "availability",
                 "calendar",
                 "daylight",
                 "event",
+                "ical",
+                "json",
+                "location",
                 "management",
+                "participant",
+                "resource",
                 "rfc2445",
                 "rfc5545",
+                "rfc5870",
                 "rfc6321",
+                "rfc6868",
+                "rfc7529",
+                "rfc7808",
+                "rfc7953",
                 "rfc7986",
+                "rfc9073",
+                "rfc9074",
                 "standard",
                 "todo",
                 "vCalendar",
@@ -197,19 +217,24 @@
                 "vfreebusy",
                 "vjournal",
                 "vtimezone",
-                "vtodo"
+                "vtodo",
+                "xml"
             ],
             "support": {
                 "issues": "https://github.com/iCalcreator/iCalcreator/issues",
-                "source": "https://github.com/iCalcreator/iCalcreator/tree/v2.40.10"
+                "source": "https://github.com/iCalcreator/iCalcreator/tree/v2.41.92"
             },
             "funding": [
                 {
                     "url": "https://paypal.me/kigkonsult",
                     "type": "other"
+                },
+                {
+                    "url": "https://www.buymeacoffee.com/kigkonsult",
+                    "type": "other"
                 }
             ],
-            "time": "2021-12-03T14:37:59+00:00"
+            "time": "2025-01-17T10:06:29+00:00"
         },
         {
             "name": "louis1021/sg-i-calendar",
@@ -250,6 +275,55 @@
                 "source": "https://github.com/louislee1021/SG-iCalendar/tree/master"
             },
             "time": "2020-03-11T17:41:34+00:00"
+        },
+        {
+            "name": "rlanvin/php-rrule",
+            "version": "v2.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rlanvin/php-rrule.git",
+                "reference": "2a389a9fa67dda58bc5a569a3264555152db3c49"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rlanvin/php-rrule/zipball/2a389a9fa67dda58bc5a569a3264555152db3c49",
+                "reference": "2a389a9fa67dda58bc5a569a3264555152db3c49",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "phpmd/phpmd": "@stable",
+                "phpunit/phpunit": "^5.7|^6.5|^8.0"
+            },
+            "suggest": {
+                "ext-intl": "Intl extension is needed for humanReadable()"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "RRule\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Lightweight and fast recurrence rules for PHP (RFC 5545)",
+            "homepage": "https://github.com/rlanvin/php-rrule",
+            "keywords": [
+                "date",
+                "ical",
+                "recurrence",
+                "recurring",
+                "rrule"
+            ],
+            "support": {
+                "issues": "https://github.com/rlanvin/php-rrule/issues",
+                "source": "https://github.com/rlanvin/php-rrule/tree/v2.6.0"
+            },
+            "time": "2025-04-25T07:40:09+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",

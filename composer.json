@@ -8,11 +8,12 @@
         "cweagans/composer-patches": "~2.0.0",
         "ext-curl": "*",
         "ext-json": "*",
-        "kigkonsult/icalcreator": "~2.40.0",
+        "kigkonsult/icalcreator": "^2.4",
         "louis1021/sg-i-calendar": "dev-master",
         "php": ">=8.1",
         "twig/twig": "^3.22",
-        "wikimedia/less.php": "^5.5"
+        "wikimedia/less.php": "^5.5",
+        "rlanvin/php-rrule": "^2.6"
     },
     "license": "GPL-3.0-or-later",
     "autoload": {
@@ -78,9 +79,6 @@
             "louis1021/sg-i-calendar": {
                 "PHP 8.1.x compatibility fixes": "composer-patches/louis1021--sg-i-calendar-8.1.patch",
                 "PHP 8.2.x compatibility fixes": "composer-patches/louis1021--sg-i-calendar-8.2.patch"
-            },
-            "kigkonsult/icalcreator": {
-                "Fix ctype_digit() deprecation notices": "composer-patches/kigkonsult_icalcreator_2.40.0.patch"
             }
         },
         "installer-paths": {
