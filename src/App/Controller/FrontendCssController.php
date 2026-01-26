@@ -238,7 +238,7 @@ class FrontendCssController extends OsecBaseClass
              *
              * @param  string  $parsed_css  Css file path
              */
-                apply_filters('osec_frontend_standard_css_url', $theme['theme_url'] . '/css/ai1ec_parsed_css.css')
+                apply_filters('osec_frontend_standard_css_url', $theme['theme_url'] . '/css/osec_parsed.css')
             );
         }
         // if it's numeric, just consider it a new install

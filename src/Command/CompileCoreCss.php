@@ -77,7 +77,7 @@ class CompileCoreCss extends CommandAbstract
         $hashmap      = $less->get_less_hashmap();
         $hashmap      = $this->getHashmapPhp($hashmap);
         $filename     = $theme['theme_dir'] . DIRECTORY_SEPARATOR .
-                        'css' . DIRECTORY_SEPARATOR . 'ai1ec_parsed_css.css';
+                        'css' . DIRECTORY_SEPARATOR . 'osec_parsed.css';
         $hashmap_file = $theme['theme_dir'] . '/less.sha1.map.php';
 
         $css_written = file_put_contents($filename, $css);

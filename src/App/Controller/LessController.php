@@ -329,7 +329,7 @@ class LessController extends OsecBaseClass
     {
         $url = str_replace(
             wp_normalize_path(untrailingslashit(OSEC_PATH)),
-            OSEC_URL,
+            wp_make_link_relative(OSEC_URL),
             wp_normalize_path($path)
         );
 
