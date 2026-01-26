@@ -269,8 +269,11 @@ class FrontendCssController extends OsecBaseClass
     {
         $handle = 'osec-frontend-css';
         wp_register_style($handle, false, [], OSEC_VERSION);
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        wp_add_inline_style($handle, $this->get_compiled_css());
+        $compiled = $this->get_compiled_css();
+        if ($compiled !== wp_strip_all_tags($compiled)) {
+            throw new Exception(esc_html__('Unexpected CSS content', 'open-source-event-calendar'));
+        }
+        wp_add_inline_style($handle, wp_strip_all_tags($compiled));
         wp_enqueue_style($handle);
     }
 
