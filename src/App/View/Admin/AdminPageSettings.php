@@ -67,7 +67,7 @@ class AdminPageSettings extends AdminPageAbstract
             __('Settings', 'open-source-event-calendar'),
             __('Settings', 'open-source-event-calendar'),
             'manage_osec_options',
-            'osec-admin-settings',
+            self::ADMIN_PAGE_PREFIX . 'settings',
             $this->display_page(...)
         );
         $this->app->settings
