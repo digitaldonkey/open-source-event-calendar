@@ -3,6 +3,7 @@
 namespace Osec\Bootstrap;
 
 use Osec\App\Model\Notifications\NotificationAdmin;
+use Osec\App\View\Admin\AdminPageAbstract;
 
 /**
  * Checks configurations and notifies admin.
@@ -54,7 +55,7 @@ class EnvironmentCheck extends OsecBaseClass
             $notifications[] = $msg;
         }
         if (
-            $plugin_page !== 'osec-admin-settings'
+            $plugin_page !== AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings'
             && ! empty($notifications)
         ) {
             if ($current_user->has_cap('manage_osec_options')) {

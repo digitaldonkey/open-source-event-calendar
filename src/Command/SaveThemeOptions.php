@@ -4,6 +4,7 @@ namespace Osec\Command;
 
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\LessController;
+use Osec\App\View\Admin\AdminPageAbstract;
 use Osec\App\View\Admin\AdminPageThemeOptions;
 use Osec\Settings\Elements\ThemeVariableFont;
 
@@ -63,7 +64,7 @@ class SaveThemeOptions extends SaveAbstract
 
         return [
             'url' => admin_url(
-                OSEC_ADMIN_BASE_URL . '&page=osec-admin-edit-css'
+                OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'edit-css'
             ),
             'query_args' => [],
         ];

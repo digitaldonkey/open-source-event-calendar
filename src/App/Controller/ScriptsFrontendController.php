@@ -4,6 +4,7 @@ namespace Osec\App\Controller;
 
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\Settings;
+use Osec\App\View\Admin\AdminPageAbstract;
 use Osec\App\WpmlHelper;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
@@ -539,7 +540,7 @@ class ScriptsFrontendController extends OsecBaseClass
     {
         return $this->is_admin_page('edit.php')
                && $this->is_post_type(OSEC_POST_TYPE)
-               && $this->is_page('osec-admin-feeds');
+               && $this->is_page(AdminPageAbstract::ADMIN_PAGE_PREFIX . 'feeds');
     }
 
     /**
@@ -566,7 +567,7 @@ class ScriptsFrontendController extends OsecBaseClass
     private function isPageLessVariables()
     {
         return $this->is_admin_page('edit.php')
-               && $this->is_page('osec-admin-edit-css');
+               && $this->is_page(AdminPageAbstract::ADMIN_PAGE_PREFIX . 'edit-css');
     }
 
     /**
@@ -611,7 +612,7 @@ class ScriptsFrontendController extends OsecBaseClass
     private function isPageOsecSettings()
     {
         return $this->is_admin_page('edit.php')
-               && $this->is_page('osec-admin-settings');
+               && $this->is_page(AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings');
     }
 
     /**

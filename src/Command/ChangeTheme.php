@@ -2,6 +2,7 @@
 
 namespace Osec\Command;
 
+use Osec\App\View\Admin\AdminPageAbstract;
 use Osec\App\View\Admin\AdminPageManageThemes;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderRedirect;
@@ -54,7 +55,7 @@ class ChangeTheme extends SaveAbstract
             // Return user to themes list page with success message.
             return [
                 'url'        => admin_url(
-                    OSEC_ADMIN_BASE_URL . '&page=osec-admin-themes'
+                    OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'themes'
                 ),
                 'query_args' => ['activated' => 1],
             ];

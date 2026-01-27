@@ -27,7 +27,7 @@ class AdminPageViewCapabilities extends AdminPageAbstract
             __('Capabilities reference', 'open-source-event-calendar'),
             __('Capabilities reference', 'open-source-event-calendar'),
             'manage_options',
-            'osec-admin-view-all-capabilities',
+            self::ADMIN_PAGE_PREFIX . 'view-all-capabilities',
             $this->display_page(...)
         );
     }
