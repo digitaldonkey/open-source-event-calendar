@@ -460,10 +460,7 @@ class CalendarPageView extends OsecBaseClass
         $mode            = wp_is_mobile() ? '_mobile' : '';
         foreach ($enabled_views as $key => $val) {
             /* $val['longname'] is a _n_noop. */
-            $view_names[$key] = translate_nooped_plural(
-                $val['longname'],
-                1
-            );
+            $view_names[$key] = translate_nooped_plural($val['longname'], 1, 'open-source-event-calendar');
             // Find out if view is enabled in requested mode (mobile or desktop). If
             // no mode-specific setting is available, fall back to desktop setting.
             $view_enabled = $enabled_views[$key]['enabled' . $mode] ?? $enabled_views[$key]['enabled'];
@@ -475,10 +472,7 @@ class CalendarPageView extends OsecBaseClass
                 unset($options['oneday_offset']);
                 $options['action'] = $key;
                 /* $val['longname'] is a _n_noop. */
-                $values['desc'] = translate_nooped_plural(
-                    $val['longname'],
-                    1
-                );
+                $values['desc'] = translate_nooped_plural($val['longname'], 1, 'open-source-event-calendar');
                 if ($this->app->settings->get('osec_use_frontend_rendering')) {
                     $options['request_format'] = 'json';
                 }

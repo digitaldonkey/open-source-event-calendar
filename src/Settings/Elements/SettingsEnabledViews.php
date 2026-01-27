@@ -55,10 +55,7 @@ class SettingsEnabledViews extends SettingsAbstract
                     '') :
                 $view['default'];
             /* $view['longname'] is a _n_noop. */
-            $view['longname'] = translate_nooped_plural(
-                $view['longname'],
-                1
-            );
+            $view['longname'] = translate_nooped_plural($view['longname'], 1, 'open-source-event-calendar');
         }
     }
 }
