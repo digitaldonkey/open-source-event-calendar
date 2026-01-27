@@ -36,8 +36,6 @@ references:
         constants.php
         README.md
         LICENSE
-        DEVELOPERS.md                             
-        hooks-and-filters.md
   workspace_root: &workspace_root /tmp
 
   # Default DB Docker image environement
