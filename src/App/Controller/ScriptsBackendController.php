@@ -2,7 +2,6 @@
 
 namespace Osec\App\Controller;
 
-use Osec\App\View\Admin\AdminPageAbstract;
 use Osec\Bootstrap\OsecBaseClass;
 
 /**
@@ -46,7 +45,7 @@ class ScriptsBackendController extends OsecBaseClass
             // autogenerate the Urls and remove the DB saving stuff.
             // Meabe this was mainly made to conceal additional paes widget we don't have.
             //
-            OSEC_POST_TYPE . '_page_' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'widget-creator' => [
+            OSEC_POST_TYPE . '_page_osec-admin-widget-creator' => [
                 ['script', 'common'],
                 ['script', 'wp-lists'],
                 ['script', 'postbox'],

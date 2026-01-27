@@ -85,7 +85,7 @@ class AdminPageManageThemes extends AdminPageAbstract
             __('Calendar Themes', 'open-source-event-calendar'),
             __('Calendar Themes', 'open-source-event-calendar'),
             'switch_osec_themes',
-            self::ADMIN_PAGE_PREFIX . 'themes',
+            'osec-admin-themes',
             $this->display_page(...)
         );
     }

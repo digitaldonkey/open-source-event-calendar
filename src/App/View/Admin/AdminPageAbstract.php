@@ -15,8 +15,6 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 abstract class AdminPageAbstract extends OsecBaseClass
 {
-    public const ADMIN_PAGE_PREFIX = 'osec-admin-';
-
     /**
      * @var string
      */
