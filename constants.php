@@ -1,6 +1,5 @@
 <?php
 
-use Osec\App\View\Admin\AdminPageAbstract;
 use Osec\Command\ExportEvents;
 
 /**
@@ -187,7 +186,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if (! defined('OSEC_THEME_OPTIONS_BASE_URL')) {
         define(
             'OSEC_THEME_OPTIONS_BASE_URL',
-            OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'edit-css'
+            OSEC_ADMIN_BASE_URL . '&page=osec-admin-edit-css'
         );
     }
 
@@ -197,7 +196,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if (! defined('OSEC_THEME_SELECTION_BASE_URL')) {
         define(
             'OSEC_THEME_SELECTION_BASE_URL',
-            OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'themes'
+            OSEC_ADMIN_BASE_URL . '&page=osec-admin-themes'
         );
     }
 
@@ -207,7 +206,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if (! defined('OSEC_FEED_SETTINGS_BASE_URL')) {
         define(
             'OSEC_FEED_SETTINGS_BASE_URL',
-            OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'feeds'
+            OSEC_ADMIN_BASE_URL . '&page=osec-admin-feeds'
         );
     }
 
@@ -217,7 +216,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if (! defined('OSEC_SETTINGS_BASE_URL')) {
         define(
             'OSEC_SETTINGS_BASE_URL',
-            OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings'
+            OSEC_ADMIN_BASE_URL . '&page=osec-admin-settings'
         );
     }
 

@@ -51,7 +51,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
             __('Theme Options', 'open-source-event-calendar'),
             __('Theme Options', 'open-source-event-calendar'),
             'manage_osec_options',
-            self::ADMIN_PAGE_PREFIX . 'edit-css',
+            'osec-admin-edit-css',
             $this->display_page(...)
         );
         if (false !== $this->app->settings->get('less_variables_page')) {

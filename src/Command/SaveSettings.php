@@ -2,7 +2,6 @@
 
 namespace Osec\Command;
 
-use Osec\App\View\Admin\AdminPageAbstract;
 use Osec\Exception\Exception;
 use Osec\Http\Request\RequestParser;
 
@@ -129,7 +128,7 @@ class SaveSettings extends SaveAbstract
         $this->app->settings->persist();
 
         return [
-            'url' => admin_url(OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings'),
+            'url' => admin_url(OSEC_ADMIN_BASE_URL . '&page=osec-admin-settings'),
             'query_args' => ['updated' => 1],
         ];
     }
