@@ -60,11 +60,8 @@ class AdminPageManageThemes extends AdminPageAbstract
                 'has_tags' => (bool) $osec_current_theme->tags,
                 'tags' => esc_html__('Tags:', 'open-source-event-calendar')
                         . implode(', ', $osec_current_theme->tags),
-                'template_path' => sprintf(
-                    /* translators: 1: template dir */
-                    __('The template files are located in %s.', 'open-source-event-calendar'),
-                    '<code>' . $osec_current_theme->template_dir . '</code>',
-                ),
+                'template_dir_text' => esc_html__('The template files are located in', 'open-source-event-calendar'),
+                'template_dir' => esc_attr($osec_current_theme->template_dir),
             ],
             'display_theme_list' => (current_user_can('switch_themes') || current_user_can('switch_osec_themes')),
             'available_themes_label' => esc_html__('Available Calendar Themes', 'open-source-event-calendar'),

@@ -9,25 +9,37 @@
     </div>
 {% endif %}
 <div class="wrap">
-    <h2>{{ page_title }}</h2>
-    <h3>{{ current_theme_label }}</h3>
-    <div id="current-theme" {% if current_theme.has_screenshot %}class="has-screenshot"{% endif %}>
-        {% if current_theme.has_screenshot %}
-            <img src="{{ current_theme.screenshot_uri }}" alt="{{ current_theme.screenshot_alt }}"/>
-        {% endif %}
-        <h4>{{ current_theme.title }}</h4>
-        <p class="theme-description">{{ current_theme.description|raw }}</p>
-        <div class="theme-options">
-            {% if current_theme.has_tags %}
-                <p>{{ current_theme.tags }}</p>
+    <h1 class="wp-heading-inline">{{ page_title }}</h1>
+    <h3 class="">{{ current_theme_label }}</h3>
+    <div class="theme-browser wp-clearfix">
+        <div id="current-theme"  class="theme {% if current_theme.has_screenshot %} has-screenshot{% endif %}">
+            {% if current_theme.has_screenshot %}
+                <div class="theme-screenshot">
+                    <img src="{{ current_theme.screenshot_uri }}" alt="{{ current_theme.screenshot_alt }}"/>
+                </div>
             {% endif %}
-            <p>{{ current_theme.template_path|raw }}</p>
+            <h2 class="theme-name">{{ current_theme.title }}</h2>
+            <div class="theme-info">
+                <p class="theme-description">{{ current_theme.description|raw }}</p>
+                <div class="theme-options">
+                    {% if current_theme.has_tags %}
+                        <p>{{ current_theme.tags }}</p>
+                    {% endif %}
+                    <p>
+                        <small>{{ current_theme.template_dir_text }}:</small>
+                        <br />
+                        <code><small>{{ current_theme.template_dir }}</small></code>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
-    <br class="clear"/>
+    <hr class="wp-clearfix"/>
     {% if display_theme_list %}
         <h3>{{ available_themes_label }}</h3>
-        {{ available_themes|raw }}
-        <br class="clear"/>
+        <div class="theme-browser ">
+            {{ available_themes|raw }}
+        </div>
+        <hr class="wp-clearfix"/>
     {% endif %}
 </div>

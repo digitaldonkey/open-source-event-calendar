@@ -160,6 +160,10 @@ class KsesHelper extends OsecBaseClass
                     'enctype' => true,
                     'method' => true,
                 ],
+                'h1' => [
+                    'class' => true,
+                    'id' => true,
+                ],
                 'h2' => [
                     'class' => true,
                     'id' => true,
