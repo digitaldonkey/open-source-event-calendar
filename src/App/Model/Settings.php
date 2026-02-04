@@ -800,9 +800,7 @@ class Settings extends OsecBaseInitialized
                         'Optional. Use this JavaScript-based shortcut to place the
                             calendar a DOM element other than the usual page content container
                             if you are unable to create an appropriate page template
-                             for the calendar page. To use, enter a
-                            <a target="_blank" href="https://api.jquery.com/category/selectors/">
-                            jQuery selector</a> that evaluates to a single DOM element.
+                            for the calendar page. To use, enter a CSS selcctor that evaluates to a single DOM element.
                             Any existing markup found within the target will be replaced by the 
                             calendar. Will only work if selector is <strong>outside</strong> the page content loop.',
                         'open-source-event-calendar'
