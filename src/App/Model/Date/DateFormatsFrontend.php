@@ -195,9 +195,9 @@ class DateFormatsFrontend extends OsecBaseClass
         }
         $key = $format . '_custom';
         // phpcs:ignore WordPress.Security.NonceVerification
-        if ($value === 'custom' && isset($_POST[$key])) {
+        if ($value === 'custom' && isset($_REQUEST[$key])) {
             // phpcs:ignore WordPress.Security.NonceVerification
-            $customVal = sanitize_key($_POST[$key]);
+            $customVal = sanitize_text_field(wp_unslash($_REQUEST[$key]));
             // Check if it works.
             if ($customVal && (bool) strtotime(date_format(date_create(), $customVal))) {
                 return $customVal;
