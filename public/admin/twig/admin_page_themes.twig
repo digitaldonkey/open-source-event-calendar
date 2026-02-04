@@ -20,16 +20,16 @@
             {% endif %}
             <h2 class="theme-name">{{ current_theme.title }}</h2>
             <div class="theme-info">
-                <p class="theme-description">{{ current_theme.description|raw }}</p>
-                <div class="theme-options">
-                    {% if current_theme.has_tags %}
-                        <p>{{ current_theme.tags }}</p>
-                    {% endif %}
-                    <p>
-                        <small>{{ current_theme.template_dir_text }}:</small>
-                        <br />
-                        <code><small>{{ current_theme.template_dir }}</small></code>
-                    </p>
+                <div class="theme-description">{{ current_theme.description }}</div>
+                {% if current_theme.has_tags %}
+                    <div class="theme-tags">
+                        {{ current_theme.tags }}
+                    </div>
+                {% endif %}
+                <div class="theme-templates">
+                    {{ current_theme.template_dir_text }}:
+                    <br />
+                    <code>{{ current_theme.template_dir }}</code>
                 </div>
             </div>
         </div>

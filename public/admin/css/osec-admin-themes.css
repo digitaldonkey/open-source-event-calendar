@@ -1,0 +1,28 @@
+.theme-info {
+    padding: 1em .75em 0;
+}
+.theme-info,
+.theme-screenshot {
+    cursor: auto;
+}
+
+.theme-info > div {
+    margin-bottom: 1em;
+}
+
+.theme-tags {
+    font-size: x-small;
+}
+
+.theme-templates {
+    font-size: x-small;
+}
+
+.theme-templates > code{
+    display: block;
+    max-width: 100%;
+    overflow-x: scroll;
+    white-space: pre;
+    direction:rtl;
+    font-size: x-small;
+}

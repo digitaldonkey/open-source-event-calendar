@@ -73,6 +73,9 @@ class ScriptsBackendController extends OsecBaseClass
                 ['style', 'bootstrap.min.css'],
                 ['style', 'bootstrap_colorpicker.css'],
             ],
+            'osec_event_page_osec-admin-themes' => [
+                ['style', 'osec-admin-themes.css'],
+            ],
         ];
 
         if (isset($enqueuables[$hook_suffix])) {
