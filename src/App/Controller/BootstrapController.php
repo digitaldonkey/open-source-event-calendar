@@ -311,7 +311,10 @@ class BootstrapController
             OSEC_SHORTCODE,
             function ($atts) use ($app) {
                 $this->request::set_current_page(get_queried_object_id());
-                return CalendarShortcodeView::factory($app)->shortcode($atts);
+                return wp_kses(
+                    CalendarShortcodeView::factory($app)->shortcode($atts),
+                    $this->app->kses->allowed_html_frontend()
+                );
             }
         );
 
