@@ -9,8 +9,8 @@ Text Domain: open-source-event-calendar
 Domain Path: /languages
 Contributors: digitaldonkey, hubrik, vtowel, yani.iliev nicolapeluchetti, jbutkus, lpawlik, bangelov  
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
-Tested up to: 6.9.1
-Stable Tag: 1.0.9
+Tested up to: 6.9
+Stable Tag: 1.0.8
 
 With Osec you can create, share and aggregate and import (ical, ics) Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
 
