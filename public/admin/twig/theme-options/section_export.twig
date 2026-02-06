@@ -1,0 +1,10 @@
+<p>{{ text_1 }}</p>
+<textarea readonly class="widefat">
+{% for section in sections %}
+{{~ section.section.name }}
+{% for id,variable in section.variables %}
+    '{{ variable.description }}':'{{ variable.value }}'
+    {%~ endfor ~%}
+{% endfor %}
+</textarea>
+<p>{{ text_2 }}</p>

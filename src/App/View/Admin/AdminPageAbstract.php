@@ -4,6 +4,7 @@ namespace Osec\App\View\Admin;
 
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Exception\Exception;
 
 /**
  * Abstract class for admin pages.
@@ -20,6 +21,12 @@ abstract class AdminPageAbstract extends OsecBaseClass
      */
     protected $pageSuffix;
 
+    public const MENU_SLUG = null;
+
+    public static function get_menu_slug() {
+        return static::MENU_SLUG;
+    }
+
     /**
      * Standard constructor
      *
@@ -30,6 +37,10 @@ abstract class AdminPageAbstract extends OsecBaseClass
         parent::__construct($app);
         $exploded_class   = explode('_', static::class);
         $this->pageSuffix = strtolower(end($exploded_class));
+
+        if (empty(self::get_menu_slug())) {
+            throw new Exception('Classes based on AdminPageAbstract require a valid MENU_SLUG constant.');
+        }
     }
 
     /**

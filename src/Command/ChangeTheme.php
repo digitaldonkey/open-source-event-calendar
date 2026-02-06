@@ -54,7 +54,7 @@ class ChangeTheme extends SaveAbstract
             // Return user to themes list page with success message.
             return [
                 'url'        => admin_url(
-                    OSEC_ADMIN_BASE_URL . '&page=osec-admin-themes'
+                    OSEC_ADMIN_BASE_URL . '&page=' . AdminPageManageThemes::MENU_SLUG
                 ),
                 'query_args' => ['activated' => 1],
             ];

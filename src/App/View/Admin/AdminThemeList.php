@@ -331,7 +331,7 @@ class AdminThemeList extends WP_List_Table
                             'ai1ec_theme_url' => rawurlencode(esc_url($theme_root_uri . '/' . $theme_name)),
                             AdminPageManageThemes::$NONCE['nonce_name'] => $nonce,
                     ],
-                    admin_url(OSEC_THEME_SELECTION_BASE_URL)
+                    admin_url(OSEC_ADMIN_BASE_URL . '&page=' . AdminPageManageThemes::MENU_SLUG)
                 ),
                 'screenshot_uri' => esc_url($theme_root_uri . '/' . $theme['Stylesheet'] . '/' . $theme['Screenshot']),
             ];
