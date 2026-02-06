@@ -2,7 +2,7 @@
 
 namespace Osec\App\Model\Date;
 
-use Osec\Bootstrap\OsecBaseClass;
+use Osec\Bootstrap\OsecBaseInitialized;
 use Osec\Exception\Exception;
 use Osec\Theme\ThemeLoader;
 
@@ -16,7 +16,7 @@ use Osec\Theme\ThemeLoader;
  * @package Date
  * @replaces Ai1ec_Date_System
  */
-class DateFormatsFrontend extends OsecBaseClass
+class DateFormatsFrontend extends OsecBaseInitialized
 {
     private const SECTION_ID = 'osec_date_format_section';
     public const FORMAT_SHORT = 'osec_date_format_short';

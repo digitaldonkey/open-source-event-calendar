@@ -16,6 +16,8 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageSettings extends AdminPageAbstract
 {
+    public const MENU_SLUG = 'osec-admin-settings';
+
     public static $NONCE = [
         'action'       => 'osec_save_settings',
         'nonce_name'   => 'osec_settings_nonce',
@@ -67,7 +69,7 @@ class AdminPageSettings extends AdminPageAbstract
             __('Settings', 'open-source-event-calendar'),
             __('Settings', 'open-source-event-calendar'),
             'manage_osec_options',
-            'osec-admin-settings',
+            self::MENU_SLUG,
             $this->display_page(...)
         );
         $this->app->settings

@@ -7,8 +7,7 @@
 		name="{{ name }}"
 		value="{{ value }}"
 		id="{{ id }}"
-		class="{% if type not in [ 'radio', 'checkbox' ] %}ai1ec-form-control{% endif %}
-			{{ attributes.class }}"
+		class="{% if type not in [ 'radio', 'checkbox' ] %}ai1ec-form-control{% endif %}{{ attributes.class }}"
 		{% for attribute, value in attributes %}
 			{% if attribute != 'class' %}
 				{{ attribute }}="{{ value }}"
