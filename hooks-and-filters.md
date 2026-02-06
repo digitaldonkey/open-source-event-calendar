@@ -2437,13 +2437,13 @@ add_filter('osec_additional_buttons', $html $view_args);
 </details>
 
 
-### osec_calendar_page_filter_args <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_calendar_page_filterargs <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter or add arguments to calendar page filters
 
 ```php
-add_filter('osec_calendar_page_filter_args', $filter_args);
+add_filter('osec_calendar_page_filterargs', $filter_args);
 ```
 
 #### Parameters
@@ -2465,7 +2465,7 @@ add_filter('osec_calendar_page_filter_args', $filter_args);
  *
  * @file src/App/View/Calendar/CalendarPageView.php
  */
-add_filter('osec_calendar_page_filter_args', $filter_args);
+add_filter('osec_calendar_page_filterargs', $filter_args);
 ```
 
 </details>
@@ -3742,13 +3742,13 @@ add_filter('osec_kses_allowed_html_inline', $frontend);
 </details>
 
 
-### osec_kses_allowed_html_frontend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_ksess_allowed_html_frontend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter allowed HTML tags and properties on frontend rendering.
 
 ```php
-add_filter('osec_kses_allowed_html_frontend', $frontend);
+add_filter('osec_ksess_allowed_html_frontend', $frontend);
 ```
 
 #### Parameters
@@ -3770,7 +3770,7 @@ add_filter('osec_kses_allowed_html_frontend', $frontend);
  *
  * @file src/App/View/KsesHelper.php
  */
-add_filter('osec_kses_allowed_html_frontend', $frontend);
+add_filter('osec_ksess_allowed_html_frontend', $frontend);
 ```
 
 </details>
@@ -3932,6 +3932,48 @@ add_filter('osec_export_filter', $filter);
 
 
 @file **../src/Command/SaveSettings.php**
+
+### osec_pre_validate_settings <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Settings before validation.
+
+```php
+add_filter('osec_pre_validate_settings', $_REQUEST);
+```
+
+#### Description
+
+
+Let other plugin modify the POST variables before validations of settings.
+
+#### Parameters
+
+
+ - **$_REQUEST** <span style="color:crimson"> </span> Maybe unvalidated variables.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Settings before validation.
+ *
+ * Let other plugin modify the POST variables
+ * before validations of settings.
+ *
+ * @since 1.0
+ *
+ * @param  array  $_REQUEST  Maybe unvalidated variables.
+ *
+ * @file src/Command/SaveSettings.php
+ */
+add_filter('osec_pre_validate_settings', $_REQUEST);
+```
+
+</details>
+
 
 ### osec{$method} <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
@@ -6986,13 +7028,13 @@ add_filter('osec_additional_buttons', $html $view_args);
 </details>
 
 
-### osec_calendar_page_filter_args <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_calendar_page_filterargs <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter or add arguments to calendar page filters
 
 ```php
-add_filter('osec_calendar_page_filter_args', $filter_args);
+add_filter('osec_calendar_page_filterargs', $filter_args);
 ```
 
 #### Parameters
@@ -7014,7 +7056,7 @@ add_filter('osec_calendar_page_filter_args', $filter_args);
  *
  * @file src/App/View/Calendar/CalendarPageView.php
  */
-add_filter('osec_calendar_page_filter_args', $filter_args);
+add_filter('osec_calendar_page_filterargs', $filter_args);
 ```
 
 </details>
@@ -8291,13 +8333,13 @@ add_filter('osec_kses_allowed_html_inline', $frontend);
 </details>
 
 
-### osec_kses_allowed_html_frontend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_ksess_allowed_html_frontend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter allowed HTML tags and properties on frontend rendering.
 
 ```php
-add_filter('osec_kses_allowed_html_frontend', $frontend);
+add_filter('osec_ksess_allowed_html_frontend', $frontend);
 ```
 
 #### Parameters
@@ -8319,7 +8361,7 @@ add_filter('osec_kses_allowed_html_frontend', $frontend);
  *
  * @file src/App/View/KsesHelper.php
  */
-add_filter('osec_kses_allowed_html_frontend', $frontend);
+add_filter('osec_ksess_allowed_html_frontend', $frontend);
 ```
 
 </details>
@@ -8481,6 +8523,48 @@ add_filter('osec_export_filter', $filter);
 
 
 @file **../src/Command/SaveSettings.php**
+
+### osec_pre_validate_settings <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Settings before validation.
+
+```php
+add_filter('osec_pre_validate_settings', $_REQUEST);
+```
+
+#### Description
+
+
+Let other plugin modify the POST variables before validations of settings.
+
+#### Parameters
+
+
+ - **$_REQUEST** <span style="color:crimson"> </span> Maybe unvalidated variables.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Settings before validation.
+ *
+ * Let other plugin modify the POST variables
+ * before validations of settings.
+ *
+ * @since 1.0
+ *
+ * @param  array  $_REQUEST  Maybe unvalidated variables.
+ *
+ * @file src/Command/SaveSettings.php
+ */
+add_filter('osec_pre_validate_settings', $_REQUEST);
+```
+
+</details>
+
 
 ### osec{$method} <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 

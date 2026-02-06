@@ -14,8 +14,6 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageManageThemes extends AdminPageAbstract
 {
-    public const MENU_SLUG = 'osec-admin-themes';
-
     public static $NONCE = [
         'action'       => 'osec_change_theme',
         'nonce_name'   => 'osec_change_theme_nonce',
@@ -84,7 +82,7 @@ class AdminPageManageThemes extends AdminPageAbstract
             __('Calendar Themes', 'open-source-event-calendar'),
             __('Calendar Themes', 'open-source-event-calendar'),
             'switch_osec_themes',
-            self::MENU_SLUG,
+            'osec-admin-themes',
             $this->display_page(...)
         );
     }

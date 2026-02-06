@@ -15,8 +15,6 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageManageFeeds extends AdminPageAbstract
 {
-    public const MENU_SLUG = 'osec-admin-feeds';
-
     /**
      * Adds page to the menu.
      *
@@ -34,7 +32,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
             __('Calendar Feeds', 'open-source-event-calendar'),
             __('Calendar Feeds', 'open-source-event-calendar'),
             'manage_osec_feeds',
-            self::MENU_SLUG,
+            'osec-admin-feeds',
             $this->display_page(...)
         );
         $this->app->settings

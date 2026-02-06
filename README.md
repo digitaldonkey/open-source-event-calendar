@@ -183,7 +183,7 @@ More WP plugin check work.
 - composer upgrade
 
 = 1.0.3 =
-- Allow all data attributes in Kses. Fixes persisten admin notices can not be dismissed.
+- Allow all data attributes in Ksess. Fixes persisten admin notices can not be dismissed.
 - fix overriding time/date-separators using i18n
 
 = 1.0.2 =

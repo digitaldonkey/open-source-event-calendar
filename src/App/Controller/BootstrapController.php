@@ -16,13 +16,13 @@ use Osec\App\View\Admin\AdminDateRepeatBox;
 use Osec\App\View\Admin\AdminEventCategoryHooks;
 use Osec\App\View\Admin\AdminPageAddEvent;
 use Osec\App\View\Admin\AdminPageAllEvents;
-use Osec\App\View\Admin\AdminPageDebugCapabilities;
-use Osec\App\View\Admin\AdminPageDebugOptions;
 use Osec\App\View\Admin\AdminPageManageFeeds;
 use Osec\App\View\Admin\AdminPageManageTaxonomies;
 use Osec\App\View\Admin\AdminPageManageThemes;
 use Osec\App\View\Admin\AdminPageSettings;
 use Osec\App\View\Admin\AdminPageThemeOptions;
+use Osec\App\View\Admin\AdminPageViewCapabilities;
+use Osec\App\View\Admin\AdminPageViewThemeOptions;
 use Osec\App\View\Calendar\CalendarShortcodeView;
 use Osec\App\View\Event\EventContentView;
 use Osec\App\View\Event\EventPostView;
@@ -206,16 +206,21 @@ class BootstrapController
         /**
          * Add date formats on Settings-general.php
          */
-        add_action('admin_init', function () use ($app) {
-            EnvironmentCheck::factory($app);
-            // Add taxonomies.
-            AdminPageManageTaxonomies::factory($app)->add_taxonomy_actions();
-        });
+        add_action(
+            'admin_init',
+            function () use ($app) {
+                DateFormatsFrontend::factory($app)->initialize();
+            }
+        );
 
-        add_action('init', function () use ($app) {
+        add_action(
+            'init',
+            function () use ($app) {
                 EventType::factory($app)->register();
-        }, 10, 1);
-
+            },
+            10,
+            1
+        );
         add_filter(
             'use_block_editor_for_post_type',
             function ($current_status, $post_type) {
@@ -251,6 +256,14 @@ class BootstrapController
             },
             10,
             3
+        );
+
+        add_action(
+            'admin_init',
+            function () use ($app) {
+                AdminPageManageTaxonomies::factory($app)->add_taxonomy_actions();
+            },
+            1000
         );
 
         add_action(
@@ -361,40 +374,60 @@ class BootstrapController
                 }
             );
 
-            add_action('current_screen', function (\WP_Screen $current_screen) use ($app) {
-                // Menu page Meta boxes.
-                if (str_starts_with($current_screen->id, 'osec_event_page_')) {
-                    $menu_slug = substr($current_screen->id, 16);
-                    if (AdminPageThemeOptions::MENU_SLUG === $menu_slug) {
-                        AdminPageThemeOptions::factory($app)->add_meta_box();
-                    }
-                    if (AdminPageManageFeeds::MENU_SLUG === $menu_slug) {
-                        AdminPageManageFeeds::factory($app)->add_meta_box();
-                    }
-                    if (AdminPageSettings::MENU_SLUG === $menu_slug) {
-                        AdminPageSettings::factory($app)->add_meta_box();
-                    }
+            add_action(
+                'admin_menu',
+                function () use ($app) {
+                    AdminPageManageFeeds::factory($app)->add_page();
                 }
-                if ($current_screen->id === 'options-general') {
-                    // Add date formats on Settings-general.php.
-                    DateFormatsFrontend::factory($app);
-                }
-                if ($current_screen->id === 'edit-osec_event') {
-                    EditPostActions::factory($app)->add_bulk_action_duplicate_event($current_screen);
-                }
-            });
+            );
 
-            add_action('admin_menu', function () use ($app) {
-                AdminPageManageFeeds::factory($app)->add_page();
-                AdminPageManageThemes::factory($app)->add_page();
-                AdminPageThemeOptions::factory($app)->add_page();
-                AdminPageSettings::factory($app)->add_page();
-
-                if (OSEC_DEBUG) {
-                    AdminPageDebugOptions::factory($app)->add_page();
-                    AdminPageDebugCapabilities::factory($app)->add_page();
+            add_action(
+                'current_screen',
+                function () use ($app) {
+                    AdminPageManageFeeds::factory($app)->add_meta_box();
                 }
-            });
+            );
+
+            add_action(
+                'admin_menu',
+                function () use ($app) {
+                    AdminPageManageThemes::factory($app)->add_page();
+                }
+            );
+
+            add_action(
+                'admin_menu',
+                function () use ($app) {
+                    AdminPageThemeOptions::factory($app)->add_page();
+                }
+            );
+
+            add_action(
+                'current_screen',
+                function () use ($app) {
+                    AdminPageThemeOptions::factory($app)->add_meta_box();
+                }
+            );
+
+            // Adding a Page to visualize DB saved options for devs.
+            if (is_admin() && OSEC_DEBUG) {
+                add_action(
+                    'admin_menu',
+                    function () use ($app) {
+                        AdminPageViewThemeOptions::factory($app)->add_page();
+                        AdminPageViewCapabilities::factory($app)->add_page();
+                    }
+                );
+            }
+
+            add_action(
+                'admin_menu',
+                function () use ($app) {
+                    $settingsPage = AdminPageSettings::factory($app);
+                    $settingsPage->add_page();
+                    $settingsPage->add_meta_box();
+                }
+            );
 
             add_action(
                 'network_admin_notices',
@@ -409,15 +442,26 @@ class BootstrapController
                     NotificationAdmin::factory($app)->send();
                 }
             );
-
-            add_filter('post_row_actions', function ($actions, $post) use ($app) {
-                return EditPostActions::factory($app)->duplicate_post_make_duplicate_link_row($actions, $post);
-            }, 10, 2);
-
-            add_action('add_meta_boxes', function () use ($app) {
-                AdminPageAddEvent::factory($app)->event_meta_box_container();
+            add_action('current_screen', function ($current_screen) use ($app) {
+                EditPostActions::factory($app)->add_bulk_action_duplicate_event($current_screen);
             });
 
+
+            add_filter('post_row_actions', function ($actions, $post) use ($app) {
+                    return EditPostActions::factory($app)->duplicate_post_make_duplicate_link_row($actions, $post);
+            }, 10, 2);
+
+            add_action(
+                'add_meta_boxes',
+                function () use ($app) {
+                    AdminPageAddEvent::factory($app)->event_meta_box_container();
+                }
+            );
+
+            //
+            // add_action('quick_edit_custom_box', function () use ($app) {
+            // echo '<pre>Hello world</pre>';
+            // AdminPageAddEvent::factory($app)->meta_box_view();
             // TODO
             // Quickedit
             // Populate Values via Js:
@@ -469,6 +513,13 @@ class BootstrapController
                 'wp_ajax_osec_rescan_cache',
                 function () use ($app) {
                     ThemeLoader::factory($this->app)->ajax_clear_cache();
+                }
+            );
+
+            add_action(
+                'admin_init',
+                function ($arg) use ($app) {
+                    EnvironmentCheck::factory($app)->run_checks($arg);
                 }
             );
 

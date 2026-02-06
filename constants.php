@@ -180,6 +180,46 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         define('OSEC_ADMIN_BASE_URL', 'edit.php?post_type=' . OSEC_POST_TYPE);
     }
 
+    // =====================================================
+    // = THEME OPTIONS PAGE BASE URL (wrap in admin_url()) =
+    // =====================================================
+    if (! defined('OSEC_THEME_OPTIONS_BASE_URL')) {
+        define(
+            'OSEC_THEME_OPTIONS_BASE_URL',
+            OSEC_ADMIN_BASE_URL . '&page=osec-admin-edit-css'
+        );
+    }
+
+    // =======================================================
+    // = THEME SELECTION PAGE BASE URL (wrap in admin_url()) =
+    // =======================================================
+    if (! defined('OSEC_THEME_SELECTION_BASE_URL')) {
+        define(
+            'OSEC_THEME_SELECTION_BASE_URL',
+            OSEC_ADMIN_BASE_URL . '&page=osec-admin-themes'
+        );
+    }
+
+    // =====================================================
+    // = FEED SETTINGS PAGE BASE URL (wrap in admin_url()) =
+    // =====================================================
+    if (! defined('OSEC_FEED_SETTINGS_BASE_URL')) {
+        define(
+            'OSEC_FEED_SETTINGS_BASE_URL',
+            OSEC_ADMIN_BASE_URL . '&page=osec-admin-feeds'
+        );
+    }
+
+    // ================================================
+    // = SETTINGS PAGE BASE URL (wrap in admin_url()) =
+    // ================================================
+    if (! defined('OSEC_SETTINGS_BASE_URL')) {
+        define(
+            'OSEC_SETTINGS_BASE_URL',
+            OSEC_ADMIN_BASE_URL . '&page=osec-admin-settings'
+        );
+    }
+
     // ==============
     // = EXPORT URL =
     // ==============
@@ -253,9 +293,9 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = DEBUG MODE  =
     // ===============
     //
-    // Enable debug mode, Including TWIG debug
-    // which means, that extra output may appear at places
-    // and you can use {{ dump() }} in twig files.
+    // Enable debug mode,
+    // which means, that extra output may appear at places.
+    //
     // Do set to "FALSE" on production sites!
     //
     if (! defined('OSEC_DEBUG')) {

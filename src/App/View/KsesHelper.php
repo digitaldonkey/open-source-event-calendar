@@ -104,7 +104,7 @@ class KsesHelper extends OsecBaseClass
          *
          * @param  array  $frontend
          */
-        return apply_filters('osec_kses_allowed_html_frontend', $frontend);
+        return apply_filters('osec_ksess_allowed_html_frontend', $frontend);
     }
 
     public function allowed_html_backend(): array
@@ -122,10 +122,6 @@ class KsesHelper extends OsecBaseClass
                     'style' => true,
                     'tabindex' => true,
                     'target' => true,
-                ],
-                'hr' => [
-                    'class' => true,
-                    'style' => true,
                 ],
                 'abbr' => [
                     'class' => true,
@@ -151,7 +147,7 @@ class KsesHelper extends OsecBaseClass
                 ],
                 'div' => [
                     'class' => true,
-                    'data-*' => true,
+                    'data-*'      => true,
                     'id' => true,
                     'style' => true,
                 ],

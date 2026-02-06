@@ -10,10 +10,8 @@ namespace Osec\App\View\Admin;
  * @package AdminView
  * @replaces Ai1ec_View_Theme_All_Options
  */
-class AdminPageDebugCapabilities extends AdminPageAbstract
+class AdminPageViewCapabilities extends AdminPageAbstract
 {
-    public const MENU_SLUG = 'osec-admin-debug-capabilities';
-
     /**
      * @var string
      */
@@ -29,7 +27,7 @@ class AdminPageDebugCapabilities extends AdminPageAbstract
             __('Capabilities reference', 'open-source-event-calendar'),
             __('Capabilities reference', 'open-source-event-calendar'),
             'manage_options',
-            self::MENU_SLUG,
+            'osec-admin-view-all-capabilities',
             $this->display_page(...)
         );
     }

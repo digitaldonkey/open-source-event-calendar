@@ -12,10 +12,8 @@ use Osec\Theme\ThemeLoader;
  * @package AdminView
  * @replaces Ai1ec_View_Theme_All_Options
  */
-class AdminPageDebugOptions extends AdminPageAbstract
+class AdminPageViewThemeOptions extends AdminPageAbstract
 {
-    public const MENU_SLUG = 'osec-admin-debug-variables';
-
     /**
      * @var string
      */
@@ -26,12 +24,12 @@ class AdminPageDebugOptions extends AdminPageAbstract
      */
     public function add_page(): void
     {
-        add_submenu_page(
+        $theme_options_page = add_submenu_page(
             OSEC_ADMIN_BASE_URL,
             __('Options lookup', 'open-source-event-calendar'),
             __('Options lookup', 'open-source-event-calendar'),
             'manage_osec_options',
-            self::MENU_SLUG,
+            'osec-admin-view-all-variables',
             $this->display_page(...)
         );
     }

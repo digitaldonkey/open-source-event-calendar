@@ -63,7 +63,7 @@ class SaveThemeOptions extends SaveAbstract
 
         return [
             'url' => admin_url(
-                OSEC_ADMIN_BASE_URL . '&page=' . AdminPageThemeOptions::MENU_SLUG
+                OSEC_ADMIN_BASE_URL . '&page=osec-admin-edit-css'
             ),
             'query_args' => [],
         ];
