@@ -117,8 +117,7 @@ describe('Plugin install', function(){
         await pageObject.go_to_url(url);
         await pageObject.doLogin();
 
-        // Js generated link should be visible.
-        await pageObject.getElement(By.id( 'osec-link-general'))
+        await pageObject.getElement(By.id( 'agendaTodayBackground'))
 
         // Submit/Save
         const saveOptionsButton = await pageObject.getElement(By.id( 'osec_save_themes_options'))
@@ -127,7 +126,7 @@ describe('Plugin install', function(){
         await pageObject.waitToSeeWhatHappens(700, true);
 
         // Required to wait again.
-        await pageObject.getElement(By.id( 'osec-link-general'))
+        await pageObject.getElement(By.id( 'agendaTodayBackground'))
 
         // "Theme options were updated successfully. Visit site" should be visible.
         const expectedText = 'Visit site';
