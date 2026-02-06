@@ -407,6 +407,18 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         );
     }
 
+    //
+    // Allow your users to keep te old calendar feed uri
+    //
+    // e.g. ?plugin=all-in-one-event-calendar&controller=ai1ec_exporter_controller&action=export_events&no_html=true
+    //
+    if (! defined('OSEC_LEGACY_FEED_URIS')) {
+        define(
+            'OSEC_LEGACY_FEED_URIS',
+            false
+        );
+    }
+
     // Defines if backward (<= 2.1.5) theme compatibility is enabled or not.
     if (defined('AI1EC_THEME_COMPATIBILITY_FER')) {
         throw new Exception('Backward compatibility to ali1ec (<= 2.1.5) is not supported.');

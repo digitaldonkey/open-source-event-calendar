@@ -49,7 +49,10 @@ abstract class CommandAbstract extends OsecBaseClass
 
         if (
             is_scalar($plugin)
-            && OSEC_PLUGIN_NAME === (string)$plugin
+            && (
+                OSEC_PLUGIN_NAME === (string) $plugin
+                || (OSEC_LEGACY_FEED_URIS && 'all-in-one-event-calendar' === (string) $plugin)
+                )
             && $controller !== null
             && $action !== null
         ) {

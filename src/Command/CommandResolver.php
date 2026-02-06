@@ -50,6 +50,12 @@ class CommandResolver
             ExportEvents::factory($this->app, $request)
         );
 
+        if (OSEC_LEGACY_FEED_URIS) {
+            $this->add_command(
+                ExportEventsLegacy::factory($this->app, $request)
+            );
+        }
+
         $this->add_command(
             RenderEvent::factory($this->app, $request)
         );
