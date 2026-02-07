@@ -385,7 +385,7 @@ jobs:
 
   publish-github-release_job:
     docker:
-      - image: cibuilds/github:0.10
+      - image: cibuilds/github:0.13
     working_directory: ~/open-source-event-calendar
     steps:
       - checkout
@@ -393,7 +393,7 @@ jobs:
       - run:
           name: "Publish Release on GitHub"
           command: |
-            VERSION=$(git describe --tags)            
+            git describe --tags --exact-match > /dev/null 2>&1 && VERSION=$(git describe --tags) || VERSION="dev"            
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
 
 
