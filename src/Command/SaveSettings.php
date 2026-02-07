@@ -52,7 +52,7 @@ class SaveSettings extends SaveAbstract
             }
 
             $post_field_value = RequestParser::get_param($name, null);
-            if ($post_field_value) {
+            if (!is_null($post_field_value)) {
                 switch ($data['type']) {
                     case 'bool':
                         $value = true;
