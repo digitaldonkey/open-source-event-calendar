@@ -65,13 +65,14 @@ You can even send events from a specific category or tag (or combination of cate
 
 You can embed the calendar by adding a **OSEC Calendar Block** to any page or post. Alternatively there is a schortcode available.
 
-Please note that by this time (most likely) only one Calendar per page/post-List will work
+> [!WARNING] 
+> At this time, only **one calendar per page or post** is supported.
 
 On the long run its planed to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice old Bootstrap 3 stuff.
 
-## Shortcodes
+### Shortcodes
 
-### Calendar Views
+#### Calendar Views
 
 ```text
 [osec]                       // Default view per settings
@@ -105,6 +106,8 @@ On the long run its planed to have a Rest API to allow the calendar being render
 [osec post_id="1,2"]
 ```
 
+---
+
 ### Requirements
 
 - WordPress: 6.6 or newer
@@ -132,6 +135,45 @@ Copy ![constants-local.php.example](https://raw.githubusercontent.com/digitaldon
 
 OSEC supports multiple languages
 
+### This Is a Fork
+
+OSEC This is a fork of the GPL licensed plugin All-in-on-Event-Calendar by Timely. At it's time a great plugin with a solid but unmaintainable codebase (not all required developer tools where opensourced).
+
+In later releases of the original softeware was deprived of core feature: Importing iCal feeds in favor of a service provided by Timely.
+
+If you love truly open source software and don't mind to get your hands dirty you should join here. Free people need free software to manage and share events in a selfhosted manner.
+
+### Upgrade Notes
+Database structure is not fully compatible with All-in-One Event Calendar v2.3.4
+
+Migration may be possible with manual effort
+
+A standardized upgrade path may be developed if there is demand and contributions
+
+See this [wiki](https://github.com/digitaldonkey/open-source-event-calendar/wiki/migration-from-all%E2%80%90in%E2%80%90one%E2%80%90event%E2%80%90calendar) for currently known information on migrating.
+
+### Development & Support
+
+The principle behind this plugin is to be Open Source. Get in touch here on GitHub to report issues, propose feature enhancements, and get general guidance for contributing.
+
+Writing this fork was [a huge effort](https://github.com/wp-plugins/all-in-one-event-calendar/compare/master...digitaldonkey:open-source-event-calendar:master).
+
+Digitaldonkey believes everybody should be able to set up and manage public calendars. 
+
+If you are implementing this plugin for others you should support ongoing development with a [donnation](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6) or [contribution](https://github.com/digitaldonkey/open-source-event-calendar/issues). 
+
+[Be a maker](https://dri.es/solving-the-maker-taker-problem)😀
+
+Note there is a [public CircleCI build pipeline](https://app.circleci.com/pipelines/github/digitaldonkey/open-source-event-calendar?filter=all)
+
+##### I really need feature XYZ
+
+Let's draft it out on github. You could donnate/pay me development time to get it contributed. Invoices possible. Or feel free to implement the requested feature yourself and create a Pull Request for it.
+
+### Future plans (order irrelavent, features not guarenteed)
+- Remove broken Google Maps integration and replace with OpenStreetMaps [(#5)](https://github.com/digitaldonkey/open-source-event-calendar/issues/5)
+- Create modern looking theme to replace outdated default [(#2)](https://github.com/digitaldonkey/open-source-event-calendar/issues/2)
+
 ### Screenshots
 ![Month view](assets/screenshot-1.png)
 Month View
@@ -156,43 +198,3 @@ Cache Settings
 
 ![Mobile Agenda View](assets/screenshot-8.png)
 Mobile Agenda View
-
-### This Is a Fork
-
-OSEC is a fork of the GPL-licensed All-in-One Event Calendar by Timely.
-- Original plugin had a solid feature set but an increasingly unmaintainable codebase
-- Later versions removed iCal import in favor of proprietary services
-- OSEC restores:
-  - Open standards
-  - Self-hosting
-  - Community-driven development
-
-### Upgrade Notes
-Database structure is not fully compatible with All-in-One Event Calendar v2.3.4
-
-Migration may be possible with manual effort
-
-A standardized upgrade path may be developed if there is demand and contributions
-
-See this ![wiki](https://github.com/digitaldonkey/open-source-event-calendar/wiki/migration-from-all%E2%80%90in%E2%80%90one%E2%80%90event%E2%80%90calendar) for currently known information on migrating.
-
-### Development & Support
-
-The principle behind this plugin is to be Open Source.
-So you might get in touch on github accelerate development.
-
-Writing this fork was [a huge effort](https://github.com/wp-plugins/all-in-one-event-calendar/compare/master...digitaldonkey:open-source-event-calendar:master).
-
-Digitaldonkey believes everybody should be able to set up and manage public calendars. 
-
-If you are implementing this plugin for others you should support ongoing development with a [donnation](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6) or [contribution](https://github.com/digitaldonkey/open-source-event-calendar/issues). 
-
-[Be a maker](https://dri.es/solving-the-maker-taker-problem)😀
-
-##### I really need feature XYZ
-
-Let's draft it out on github. You could donnate/pay me development time to get it contributed. Invoices possible. Or feel free to implement the requested feature yourself and create a Pull Request for it.
-
-### Future plans (order irrelavent, feautres not guarenteed)
-- Remove broken Google Maps integration and replace with OpenStreetMaps (#5)
-- Create modern looking theme to replace outdated default (#2)
