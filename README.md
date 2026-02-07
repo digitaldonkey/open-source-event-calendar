@@ -9,7 +9,7 @@
 **Open Source Event Calendar (OSEC)** is a WordPress plugin for creating, managing, sharing, and aggregating events in a self-hosted and fully open-source manner.  
 It is based on **All-in-One Event Calendar v2.3.4 by Timely**, but restores removed core features and removes all proprietary service dependencies.
 
-This Plugin is open source software in traditional sense. I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features.
+This Plugin is open source software in the traditional sense. I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features.
 
 💖 **Donate:** https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 
@@ -22,10 +22,10 @@ This Plugin is open source software in traditional sense. I pledge this plugin w
 - [Blocks & Shortcodes](#blocks)
 - [Requirements](#requirements)
 - [Installation](#installation)
-- [Languages](#languages)
-- [This Is a Fork](#this-is-a-fork)
+- [Fork Notice](#this-is-a-fork)
 - [Upgrade Notes](#upgrade-notes)
 - [Development & Support](#development--support)
+- [Future Plans](#future-plans)
 - [Screenshots](#screenshots)
 
 ---
@@ -125,11 +125,14 @@ On the long run its planed to have a Rest API to allow the calendar being render
   - Timezone
   - UI date formats
   - Week start day
+
 3. Review `WordPress → Settings → General` for output date formats.
 4. (Optional) Override constants file:
 Copy ![constants-local.php.example](https://raw.githubusercontent.com/digitaldonkey/open-source-event-calendar/refs/heads/master/constants-local.php.example) and save as `constants-local.php`
 
-    To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA', true);`
+To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA', true);`
+
+---
 
 ### Languages
 
@@ -152,6 +155,8 @@ A standardized upgrade path may be developed if there is demand and contribution
 
 See this [wiki](https://github.com/digitaldonkey/open-source-event-calendar/wiki/migration-from-all%E2%80%90in%E2%80%90one%E2%80%90event%E2%80%90calendar) for currently known information on migrating.
 
+---
+
 ### Development & Support
 
 The principle behind this plugin is to be Open Source. Get in touch here on GitHub to report issues, propose feature enhancements, and get general guidance for contributing.
@@ -166,14 +171,16 @@ If you are implementing this plugin for others you should support ongoing develo
 
 Note there is a [public CircleCI build pipeline](https://app.circleci.com/pipelines/github/digitaldonkey/open-source-event-calendar?filter=all)
 
-##### I really need feature XYZ
+#### "I really need feature XYZ"
 
 Let's draft it out on github. You could donnate/pay me development time to get it contributed. Invoices possible. Or feel free to implement the requested feature yourself and create a Pull Request for it.
 I may also provide paid support.
 
-### Future plans (order irrelavent, features not guarenteed)
+### Future plans (order irrelavent, features not guaranteed)
 - Remove broken Google Maps integration and replace with OpenStreetMaps [(#5)](https://github.com/digitaldonkey/open-source-event-calendar/issues/5)
 - Create modern looking theme to replace outdated default [(#2)](https://github.com/digitaldonkey/open-source-event-calendar/issues/2)
+
+---
 
 ### Screenshots
 ![Month view](assets/screenshot-1.png)
