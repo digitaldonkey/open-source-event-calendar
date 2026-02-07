@@ -8,6 +8,7 @@
 
 **Open Source Event Calendar (OSEC)** is a WordPress plugin for creating, managing, sharing, and aggregating events in a self-hosted and fully open-source manner.  
 It is based on **All-in-One Event Calendar v2.3.4 by Timely**, but restores removed core features and removes all proprietary service dependencies.
+This Plugin is open source software in traditional sense. I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features.
 
 💖 **Donate:** https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 
@@ -30,63 +31,59 @@ It is based on **All-in-One Event Calendar v2.3.4 by Timely**, but restores remo
 ---
 
 ## Features
-
-- **Full iCal / ICS import & export** — no paid add-ons
+All features are provided in their entirety. No features are locked behind any add-ons.
+- **Full iCal / ICS import & export**
   - Automatically import external calendars
   - Categorize and tag imported feeds
-- **Recurring events**, including complex recurrence rules (RFC 5545)
+- **Recurring events**, including complex recurrence rules !(RFC 5545)[https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html]
 - **Filtering** by category and tag
-- **Calendar sharing** with Google Calendar, Apple iCal, Outlook, and other ICS clients
+- **Calendar sharing** with Google Calendar, Apple iCal, Outlook, and any other system that accepts iCalendar (.ics) feeds
 - **Month, week, day, and agenda views**
 - **Upcoming Events** Gutenberg block
+- Direct links to **filtered calendar views**
 - **Color-coded events** by category
 - **Featured event images** and category images
 - **SEO-optimized** event pages
 - **Mobile-friendly** and responsive layouts
 - ~~Embedded **Google Maps** for~~ event locations (Broken, plans to implement OpenStreetMap embedding)
-- Theme customization (Bootstrap 3–based)
-- Embed calendars without modifying theme templates
+- **Theme options** to customize your calendar appearence (based on bootstrap 3)
+- Your calendar can be embedded into a WordPress page without needing to create template files or modify the theme.
 
 ---
 
 ## Import & Export (iCal / ICS)
 
-Native iCalendar support is one of OSEC’s core strengths.
+Osec offers **full ics/ical support**. You can import events from other calendars and offer users the ability to subscribe to your calendar.
 
-- Import calendars from Google, Apple, Outlook, or any ICS feed
-- Export your calendar so others can subscribe
-- Filter exported feeds by:
-  - Category
-  - Tag
-  - Combinations of categories and tags
+Importing and exporting iCalendar (.ics) feeds is one of the strongest features of the Event Calendar system. This allows you to manage your websites calendar by providing a public calendar from your Google, Apple or other calendar management software.
 
-This allows you to manage events using external tools while keeping WordPress as the public source of truth.
+You can even send events from a specific category or tag (or combination of categories and tags).
 
 ---
 
-## Blocks & Shortcodes
+## Blocks
 
-### Gutenberg Block
+You can embed the calendar by adding a **OSEC Calendar Block** to any page or post. Alternatively there is a schortcode available.
 
-Use the **OSEC Calendar** block to embed a calendar in any post or page.
-> [!WARNING] 
-> At this time, only **one calendar per page or post** is supported.
+Please note that by this time (most likely) only one Calendar per page/post-List will work
 
-### Shortcodes
+On the long run its planed to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice old Bootstrap 3 stuff.
 
-#### Calendar Views
+## Shortcodes
+
+### Calendar Views
 
 ```text
-[osec]                       // Default view (from settings)
+[osec]                       // Default view per settings
 [osec view="monthly"]
 [osec view="weekly"]
 [osec view="agenda"]
-[osec view="daily"]          // Posterboard / daily view
+[osec view="daily"]
 ```
 
-##### Filtering
+#### Filtering
 
-By category
+**By category**
 ```text
 [osec cat_name="Holidays"]
 [osec cat_name="Lunar Cycles,zodia-date-ranges"]
@@ -94,18 +91,20 @@ By category
 [osec cat_id="1,2"]
 ```
 
-By tag
+**By tag**
 ```text
 [osec tag_name="tips-and-tricks"]
 [osec tag_name="creative writing,performing arts"]
 [osec tag_id="1"]
 [osec tag_id="1,2"]
 ```
-By post ID
+
+**By post ID**
 ```text
 [osec post_id="1"]
 [osec post_id="1,2"]
 ```
+
 ### Requirements
 
 - WordPress: 6.6 or newer
@@ -123,15 +122,15 @@ By post ID
   - Timezone
   - UI date formats
   - Week start day
-3. Review WordPress → Settings → General for output date formats.
+3. Review `WordPress → Settings → General` for output date formats.
 4. (Optional) Override constants file:
-Copy `https://raw.githubusercontent.com/digitaldonkey/open-source-event-calendar/refs/heads/master/constants-local.php.example` and save as `constants-local.php`
+Copy ![constants-local.php.example](https://raw.githubusercontent.com/digitaldonkey/open-source-event-calendar/refs/heads/master/constants-local.php.example) and save as `constants-local.php`
 
     To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA', true);`
 
 ### Languages
 
-OSEC supports multiple languages and follows current WordPress translation standards.
+OSEC supports multiple languages
 
 ### Screenshots
 ![Month view](assets/screenshot-1.png)
