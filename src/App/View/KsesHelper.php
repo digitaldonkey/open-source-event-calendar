@@ -41,6 +41,7 @@ class KsesHelper extends OsecBaseClass
         if (null === $frontend) {
             $frontend = [
                 'div'    => [
+                    'id'          => true,
                     'class'       => true,
                     'data-*'      => true,
                     'style'       => true,
