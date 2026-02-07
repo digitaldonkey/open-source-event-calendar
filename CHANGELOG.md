@@ -1,5 +1,11 @@
 
 
+= 1.0.10 =
+- Beautified Admin Theme page
+- Fixed shortcode escaping
+- Sanitization for settings
+- Adjusted information text on settings page
+
 = 1.0.7 =
 - Fix additional redirect happening due to trailing slash in Link
 - Fix custom font. Closes #8
