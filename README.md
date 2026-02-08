@@ -10,7 +10,7 @@ Domain Path: /languages
 Contributors: digitaldonkey, hubrik, vtowel, yaniiliev nicolapeluchetti, jbutkus, lpawlik, bangelov  
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 Tested up to: 6.9
-Stable Tag: 1.0.10
+Stable Tag: 1.0.11
 
 With Osec you can create, share and aggregate and import (ical, ics) Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
 
@@ -161,6 +161,19 @@ This plugin connects may connect to Google maps API render event locations.
 (Terms of Service)[https://cloud.google.com/maps-platform/terms] (Privacy statements)[https://policies.google.com/privacy].
 
 == Changelog ==
+
+= 1.0.11 =
+- Beautified Theme options admin page
+- Adjusted information text on settings page
+- Back button url is not stored in cookie die to missing div#id. Fixes #16
+- Fixing Can not selext Sunday in admin page settings fixes #14
+- Add legacy Uri support for Ical feeds. Maybe Fixes: #12
+- Cleanup Metaboxes, fix Metabox-Editing, remove unnecessary constants.
+
+= 1.0.10 =
+- Beautified Admin Theme admin page
+- Twigify Admin Theme theme-row.
+- Add more plugin-check fixes, escape shortcodes, 
 
 = 1.0.7 =
 - Fix additional redirect happening due to trailing slash in Link
