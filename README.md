@@ -7,7 +7,7 @@ License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: open-source-event-calendar
 Domain Path: /languages
-Contributors: digitaldonkey, hubrik, vtowel, yani.iliev nicolapeluchetti, jbutkus, lpawlik, bangelov  
+Contributors: digitaldonkey, hubrik, vtowel, yaniiliev nicolapeluchetti, jbutkus, lpawlik, bangelov  
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 Tested up to: 6.9
 Stable Tag: 1.0.10
