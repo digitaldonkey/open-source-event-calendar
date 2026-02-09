@@ -1,23 +1,15 @@
-<div class="ai1ec-panel-heading">
-    <a data-toggle="ai1ec-collapse"
-       data-parent="#osec-add-new-event-accordion"
-       href="#osec-time-and-date-box">
-        <i class="ai1ec-fa ai1ec-fa-clock-o ai1ec-fa-fw"></i>
-        {{ pane_title }}
-    </a>
-</div>
-<div id="osec-time-and-date-box"
-     class="ai1ec-panel-collapse ai1ec-collapse ai1ec-in">
-    <div class="ai1ec-panel-body">
-        {% if instance_id %}
-            <input type="hidden"
-                   name="osec_instance_id"
-                   id="osec-instance-id"
-                   value="{{ instance_id }}">
-        {% endif %}
 
-        <table class="ai1ec-form">
-            <tbody>
+    <div id="osec-time-and-date-box" class="timely">
+        <div class="ai1ec-panel-body">
+            {% if instance_id %}
+                <input type="hidden"
+                       name="osec_instance_id"
+                       id="osec-instance-id"
+                       value="{{ instance_id }}">
+            {% endif %}
+
+            <table class="ai1ec-form">
+                <tbody>
                 <tr>
                     <td colspan="2">
                         <label for="osec_all_day_event">
@@ -85,8 +77,8 @@
                                 <optgroup label="{{ key }}">
                                     {% for zone in timezones %}
                                         <option
-                                            value="{{ zone.value }}"
-                                            {% if zone.value == timezone.current_timezone %}selected="selected"{% endif %}
+                                                value="{{ zone.value }}"
+                                                {% if zone.value == timezone.current_timezone %}selected="selected"{% endif %}
                                         >{{ zone.text ?: 'UTC' }}
                                         </option>
                                     {% endfor %}
@@ -98,11 +90,11 @@
                 <tr {{ show_recurrence_and_excludes ?: 'class="ai1ec-hide"' }}>
                     <td>
                         <input
-                            type="checkbox"
-                            name="osec_repeat"
-                            id="osec_repeat"
-                            value="1"
-                            {{ recurrence.checked }}
+                                type="checkbox"
+                                name="osec_repeat"
+                                id="osec_repeat"
+                                value="1"
+                                {{ recurrence.checked }}
                         >
                         <input type="hidden" name="osec_rrule" id="osec_rrule" value="{{ recurrence.rrule_value  }}">
                         <label for="osec_repeat" id="osec_repeat_label">
@@ -118,8 +110,8 @@
                 <tr {{ show_recurrence_and_excludes ?: 'class="ai1ec-hide"' }}>
                     <td>
                         <input type="checkbox" name="osec_exclude" id="osec_exclude" value="1"
-                               {{ excludes.checked -}}
-                               {{ excludes.disabled }}/>
+                                {{ excludes.checked -}}
+                                {{ excludes.disabled }}/>
                         <input type="hidden" name="osec_exrule" id="osec_exrule" value="{{ excludes.exrule_value }}">
                         <label for="osec_exclude" id="osec_exclude_label">
                             {{- excludes.label -}}
@@ -132,17 +124,17 @@
                         <span class="ai1ec-info-text">({{ excludes.exrule_infotext }})</span>
                     </td>
                 </tr>
-            </tbody>
-        </table>
-        {# Recurrence modal skeleton #}
-        <div id="osec_repeat_box" class="ai1ec-modal ai1ec-fade">
-            <div class="ai1ec-modal-dialog">
-                <div class="ai1ec-loading ai1ec-modal-content">
-                    <div class="ai1ec-modal-body ai1ec-text-center">
-                        <i class="ai1ec-fa ai1ec-fa-spinner ai1ec-fa-spin ai1ec-fa-3x"></i>
+                </tbody>
+            </table>
+            {# Recurrence modal skeleton #}
+            <div id="osec_repeat_box" class="ai1ec-modal ai1ec-fade">
+                <div class="ai1ec-modal-dialog">
+                    <div class="ai1ec-loading ai1ec-modal-content">
+                        <div class="ai1ec-modal-body ai1ec-text-center">
+                            <i class="ai1ec-fa ai1ec-fa-spinner ai1ec-fa-spin ai1ec-fa-3x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>

@@ -1,12 +1,4 @@
-<div class="ai1ec-panel-heading">
-    <a data-toggle="ai1ec-collapse"
-       data-parent="#osec-add-new-event-accordion"
-       href="#osec-event-children-box">
-        <i class="ai1ec-fa ai1ec-fa-retweet"></i> {{ panel_title }}
-    </a>
-</div>
-<div id="osec-event-children-box" class="ai1ec-panel-collapse ai1ec-collapse">
-    <div class="ai1ec-panel-body">
+<div id="osec-event-children-box" class="timely">
         {% if parent %}
             <a href="{{ parent.view_url }}">{{ parent.title }}</a>
             ({{ parent.time }})
@@ -14,7 +6,6 @@
         {% endif %}
 
         {% if children %}
-            <h4>{{ children.pre_text }}</h4>
             <ul>
                 {% for item in children.items %}
                     <li>
@@ -25,5 +16,4 @@
                 {% endfor %}
             </ul>
         {% endif %}
-    </div>
 </div>
