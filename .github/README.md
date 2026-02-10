@@ -35,7 +35,7 @@ All features are provided in their entirety. No features are locked behind any a
 - **Full iCal / ICS import & export**
   - Automatically import external calendars
   - Categorize and tag imported feeds
-- **Recurring events**, including complex recurrence rules !(RFC 5545)[https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html]
+- **Recurring events**, including complex recurrence rules [RFC 5545](https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html)
 - **Filtering** by category and tag
 - **Calendar sharing** with Google Calendar, Apple iCal, Outlook, and any other system that accepts iCalendar (.ics) feeds
 - **Month, week, day, and agenda views**
@@ -128,7 +128,7 @@ On the long run its planed to have a Rest API to allow the calendar being render
 
 3. Review `WordPress → Settings → General` for output date formats.
 4. (Optional) Override constants file:
-Copy ![constants-local.php.example](https://raw.githubusercontent.com/digitaldonkey/open-source-event-calendar/refs/heads/master/constants-local.php.example) and save as `constants-local.php`
+Copy [constants-local.php.example](https://raw.githubusercontent.com/digitaldonkey/open-source-event-calendar/refs/heads/master/constants-local.php.example) and save as `constants-local.php`
 
 To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA', true);`
 
