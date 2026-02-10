@@ -1,10 +1,17 @@
 
 
-= 1.0.10 =
-- Beautified Admin Theme page
-- Fixed shortcode escaping
-- Sanitization for settings
+= 1.0.11 =
+- Beautified Theme options admin page
 - Adjusted information text on settings page
+- Back button url is not stored in cookie die to missing div#id. Fixes #16
+- Fixing Can not selext Sunday in admin page settings fixes #14
+- Add legacy Uri support for Ical feeds. Maybe Fixes: #12
+- Cleanup Metaboxes, fix Metabox-Editing, remove unnecessary constants.
+
+= 1.0.10 =
+- Beautified Admin Theme admin page
+- Twigify Admin Theme theme-row.
+- Add more plugin-check fixes, escape shortcodes, 
 
 = 1.0.7 =
 - Fix additional redirect happening due to trailing slash in Link
