@@ -1,19 +1,19 @@
-<div id="osec-event-children-box" class="timely">
-        {% if parent %}
-            <a href="{{ parent.view_url }}">{{ parent.title }}</a>
-            ({{ parent.time }})
-            <a href="{{ parent.edit_url }}">{{ action }}</a>
-        {% endif %}
+<div id="osec-event-children-box">
+    {% if parent %}
+        <a href="{{ parent.view_url }}">{{ parent.title }}</a>
+        ({{ parent.time }})
+        <a href="{{ parent.edit_url }}">{{ action }}</a>
+    {% endif %}
 
-        {% if children %}
-            <ul>
-                {% for item in children.items %}
-                    <li>
-                        <a href="{{ item.view_url }}">{{ item.title }}</a>
-                        ({{ item.time }})
-                        <a href="{{ item.edit_url }}">{{ action }}</a>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+    {% if children %}
+        <ul>
+            {% for item in children.items %}
+                <li>
+                    <a href="{{ item.view_url }}">{{ item.title }}</a>
+                    ({{ item.time }})
+                    <a href="{{ item.edit_url }}">{{ action }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 </div>

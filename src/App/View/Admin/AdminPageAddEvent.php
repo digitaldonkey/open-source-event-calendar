@@ -58,7 +58,7 @@ class AdminPageAddEvent extends OsecBaseClass
             ],
             'meta_box_location' => [
                 OSEC_POST_TYPE . 'meta_box_location',
-                esc_html__('Event location details', 'open-source-event-calendar'),
+                esc_html__('Event location', 'open-source-event-calendar'),
                 $this->meta_box_location(...),
                 OSEC_POST_TYPE,
                 'normal',
@@ -74,7 +74,7 @@ class AdminPageAddEvent extends OsecBaseClass
             ],
             'meta_box_organizer' => [
                 OSEC_POST_TYPE . 'meta_box_organizer',
-                esc_html__('Event cost and Tickets', 'open-source-event-calendar'),
+                esc_html__('Organizer contact', 'open-source-event-calendar'),
                 $this->meta_box_organizer(...),
                 OSEC_POST_TYPE,
                 'normal',
@@ -329,7 +329,7 @@ class AdminPageAddEvent extends OsecBaseClass
         ];
         wp_nonce_field(EventEditing::NONCE_ACTION, EventEditing::NONCE_NAME);
         ThemeLoader::factory($this->app)
-                   ->get_file('box_time_and_date.twig', $args, true)
+                   ->get_file('box_event_time_and_date.twig', $args, true)
                    ->render();
     }
 
@@ -370,7 +370,8 @@ class AdminPageAddEvent extends OsecBaseClass
             'address_label'    => esc_html__('Address:', 'open-source-event-calendar'),
             'address'          => esc_attr($event->get('address')),
             'show_coordinates' => $show_coordinates,
-            'coordinates_label' => esc_html__('Input Coordinates', 'open-source-event-calendar'),
+            'coordinates_title'   => esc_html__('Coordinates', 'open-source-event-calendar'),
+            'coordinates_label' => esc_html__('Use coordinates', 'open-source-event-calendar'),
             'latitude_label'   => esc_html__('Latitude:', 'open-source-event-calendar'),
             'latitude'         => $show_coordinates ? (float)$event->get('latitude', 0) : '',
             'longitude_label'   => esc_html__('Longitude:', 'open-source-event-calendar'),
@@ -416,7 +417,6 @@ class AdminPageAddEvent extends OsecBaseClass
     {
         $event = $this->get_event();
         $args    = [
-            'pane_title' => esc_html__('Organizer contact info', 'open-source-event-calendar'),
             'contact_name_label' => esc_html__('Contact name:', 'open-source-event-calendar'),
             'contact_name'  => esc_attr($event->get('contact_name')),
             'contact_phone_label' => esc_html__('Phone:', 'open-source-event-calendar'),

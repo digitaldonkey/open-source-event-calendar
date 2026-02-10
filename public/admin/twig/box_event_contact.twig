@@ -1,61 +1,59 @@
-<div id="osec-event-contact-box" class="timely">
-    <div class="ai1ec-panel-body">
-        <table class="ai1ec-form">
-            <tbody>
-            <tr>
-                <td class="ai1ec-first">
-                    <label for="osec_contact_name">
-                        {{ contact_name_label }}
-                    </label>
-                </td>
-                <td>
-                    <input type="text" name="osec_contact_name"
-                           id="osec_contact_name"
-                           class="ai1ec-form-control"
-                           value="{{ contact_name }}">
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="osec_contact_phone">
-                        {{ contact_phone_label }}
-                    </label>
-                </td>
-                <td>
-                    <input type="text" name="osec_contact_phone"
-                           id="osec_contact_phone"
-                           class="ai1ec-form-control"
-                           value="{{ contact_phone }}">
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="osec_contact_email">
-                        {{ contact_email_label }}
-                    </label>
-                </td>
-                <td>
-                    <input name="osec_contact_email"
-                           type="email"
-                           id="osec_contact_email"
-                           class="ai1ec-form-control"
-                           value="{{ contact_email }}">
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="osec_contact_url">
-                        {{ contact_url_label }}
-                    </label>
-                </td>
-                <td>
-                    <input type="text" name="osec_contact_url"
-                           id="osec_contact_url"
-                           class="ai1ec-form-control"
-                           value="{{ contact_url }}">
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+<div id="osec-event-contact-box">
+    <table class="form-table">
+        <tbody>
+        <tr>
+            <th scope="row">
+                <label for="osec_contact_name">
+                    {{ contact_name_label }}
+                </label>
+            </th>
+            <td>
+                <input type="text" name="osec_contact_name"
+                       id="osec_contact_name"
+                       class="ai1ec-form-control"
+                       value="{{ contact_name }}">
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <label for="osec_contact_phone">
+                    {{ contact_phone_label }}
+                </label>
+            </th>
+            <td>
+                <input type="text" name="osec_contact_phone"
+                       id="osec_contact_phone"
+                       class="ai1ec-form-control"
+                       value="{{ contact_phone }}">
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <label for="osec_contact_email">
+                    {{ contact_email_label }}
+                </label>
+            </th>
+            <td>
+                <input name="osec_contact_email"
+                       type="email"
+                       id="osec_contact_email"
+                       class="ai1ec-form-control"
+                       value="{{ contact_email }}">
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <label for="osec_contact_url">
+                    {{ contact_url_label }}
+                </label>
+            </th>
+            <td>
+                <input type="text" name="osec_contact_url"
+                       id="osec_contact_url"
+                       class="ai1ec-form-control"
+                       value="{{ contact_url }}">
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </div>

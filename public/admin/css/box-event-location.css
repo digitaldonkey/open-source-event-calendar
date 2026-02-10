@@ -1,0 +1,10 @@
+#osec-event-location-box .inline-checkbox {
+    line-height: 1.8;
+}
+#osec-event-location-box .inline-checkbox input {
+    vertical-align: middle;
+}
+#osec-event-location-box .ai1ec-map-preview {
+    margin-top: .5em;
+    max-width: 36vw;
+}

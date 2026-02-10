@@ -1,88 +1,89 @@
-<div id="osec-event-location-box" class="timely">
-    <div class="ai1ec-panel-body">
-        <div class="ai1ec-row">
-            <div class="ai1ec-col-md-8 ai1ec-col-lg-6">
-                <table class="ai1ec-form ai1ec-location-form">
-                    <tbody>
-                    {% if post_venue_html %}
-                        {{ post_venue_html }}
-                    {% endif %}
-                    <tr>
-                        <td class="ai1ec-first">
-                            <label for="osec_venue">
-                                {{ venue_label }}
-                            </label>
-                        </td>
-                        <td>
-                            <input
-                                    id="osec_venue"
-                                    type="text"
-                                    name="osec_venue"
-                                    class="ai1ec-form-control"
-                                    value="{{ venue }}"
-                            />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="osec_address">
-                                {{ address_label }}
-                            </label>
-                        </td>
-                        <td>
-                            <input type="text" name="osec_address" id="osec_address"
-                                   class="ai1ec-form-control"
-                                   value="{{ address }}">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <label for="osec_input_coordinates">
-                                <input
-                                        id="osec_input_coordinates"
-                                        type="checkbox"
-                                        value="1"
-                                        name="osec_input_coordinates"
-                                        {% if show_coordinates_checkbox %}checked="checked"{% endif %}
-                                >
-                                {{ coordinates_label }}
-                            </label>
-                        </td>
-                    </tr>
-                    {% if post_venue_html %}{{ post_venue_html }}{% endif %}
-                    </tbody>
-                </table>
-                <table id="osec_table_coordinates" class="ai1ec-form ai1ec-location-form">
+<div id="osec-event-location-box">
+    <table class="form-table ai1ec-location-form">
+        <tbody>
+        {% if post_venue_html %}
+            {{ post_venue_html }}
+        {% endif %}
+        <tr>
+            <th scope="row">
+                <label for="osec_venue">
+                    {{ venue_label }}
+                </label>
+            </th>
+            <td>
+                <input
+                        id="osec_venue"
+                        type="text"
+                        name="osec_venue"
+                        class=""
+                        value="{{ venue }}"
+                />
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <label for="osec_address">
+                    {{ address_label }}
+                </label>
+            </th>
+            <td>
+                <input type="text" name="osec_address" id="osec_address"
+                       class=""
+                       value="{{ address }}">
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                {{ coordinates_title }}
+            </th>
+            <td>
+                <div class="inline-checkbox">
+                    <input
+                            id="osec_input_coordinates"
+                            type="checkbox"
+                            value="1"
+                            name="osec_input_coordinates"
+                            {% if show_coordinates_checkbox %}checked="checked"{% endif %}
+                    >
+                    <label for="osec_input_coordinates">
+                        {{ coordinates_label }}
+                    </label>
+                </div>
+                <table id="osec_table_coordinates">
                     <tbody>
                     <tr>
-                        <td class="ai1ec-first">
+                        <th>
                             <label for="osec_latitude">
                                 {{ latitude_label }}
                             </label>
-                        </td>
+                        </th>
                         <td>
-                            <input type="text" name="osec_latitude" id="osec_latitude"
-                                   class="ai1ec-coordinates ai1ec-form-control"
-                                   value="{{ latitude }}">
+                            <input
+                                    name="osec_latitude"
+                                    id="osec_latitude"
+                                    type="number"
+                                    step="0.000001"
+                                    value="{{ latitude }}">
                         </td>
                     </tr>
                     <tr>
-                        <td>
+                        <th>
                             <label for="osec_longitude">
                                 {{ longitude_label }}
                             </label>
-                        </td>
+                        </th>
                         <td>
-                            <input type="text" name="osec_longitude" id="osec_longitude"
-                                   class="ai1ec-coordinates ai1ec-form-control"
+                            <input type="text"
+                                   name="osec_longitude"
+                                   id="osec_longitude"
+                                   type="number"
+                                   step="0.000001"
                                    value="{{ longitude }}">
                         </td>
                     </tr>
                     </tbody>
                 </table>
-            </div>
-            <div class="ai1ec-col-md-4 ai1ec-col-lg-6">
-                <label for="osec_google_map">
+                <div class="inline-checkbox">
                     <input
                             id="osec_google_map"
                             type="checkbox"
@@ -90,17 +91,21 @@
                             name="osec_google_map"
                             {% if show_map %}checked="checked"{% endif %}
                     >
-                    {{ show_map_label }}
-                </label>
+                    <label for="osec_google_map">
+                        {{ show_map_label }}
+                    </label>
+                </div>
                 <div class="ai1ec-map-preview {% if show_map %}ai1ec-map-visible{% endif %}">
                     <div id="osec_map_canvas"></div>
                 </div>
-            </div>
-        </div>
-        <input type="hidden" name="osec_city" id="osec_city" value="{{ city }}">
-        <input type="hidden" name="osec_province" id="osec_province" value="{{ province }}">
-        <input type="hidden" name="osec_postal_code" id="osec_postal_code" value="{{ postal_code }}">
-        <input type="hidden" name="osec_country" id="osec_country" value="{{ country }}">
-        <input type="hidden" name="osec_country_short" id="osec_country_short" value="">
-    </div>
+            </td>
+        </tr>
+        {% if post_venue_html %}{{ post_venue_html }}{% endif %}
+        </tbody>
+    </table>
+    <input type="hidden" name="osec_city" id="osec_city" value="{{ city }}">
+    <input type="hidden" name="osec_province" id="osec_province" value="{{ province }}">
+    <input type="hidden" name="osec_postal_code" id="osec_postal_code" value="{{ postal_code }}">
+    <input type="hidden" name="osec_country" id="osec_country" value="{{ country }}">
+    <input type="hidden" name="osec_country_short" id="osec_country_short" value="">
 </div>

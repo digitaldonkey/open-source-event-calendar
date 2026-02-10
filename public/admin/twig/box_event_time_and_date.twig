@@ -1,0 +1,136 @@
+<div id="osec-time-and-date-box">
+    {% if instance_id %}
+        <input type="hidden"
+               name="osec_instance_id"
+               id="osec-instance-id"
+               value="{{ instance_id }}">
+    {% endif %}
+
+    <table class="form-table">
+        <tbody>
+        <tr>
+            <th scope="row">
+                <label for="osec_start-date-input">
+                    {{ start_date.label }}:
+                </label>
+            </th>
+            <td class="">
+                <div class="date-modifyer">
+                    <input type="checkbox"
+                           name="osec_all_day_event"
+                           id="osec_all_day_event"
+                           value="1" {{ all_day_event.checked }}>
+                    <label for="osec_all_day_event">
+                        {{ all_day_event.label }}
+                    </label>
+                </div>
+                <div class="date-modifyer">
+                    <input type="checkbox"
+                           name="osec_instant_event"
+                           id="osec_instant_event"
+                           value="1" {{ instant_event.checked }}>
+                    <label for="osec_instant_event">
+                        {{ instant_event.label }}
+                    </label>
+                </div>
+                <div class="timely">
+                    <input type="text" class="ai1ec-date-input ai1ec-form-control" id="osec_start-date-input">
+                    <input type="text" class="ai1ec-time-input ai1ec-form-control" id="osec_start-time-input">
+                    <input type="hidden"
+                           name="osec_start_time"
+                           id="osec_start-time"
+                           value="{{ start_date.input_value }}">
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <label for="osec_end-date-input">
+                    {{ end_date.label }}:
+                </label>
+            </th>
+            <td class="timely">
+                <input type="text" class="ai1ec-date-input ai1ec-form-control" id="osec_end-date-input">
+                <input type="text" class="ai1ec-time-input ai1ec-form-control" id="osec_end-time-input">
+                <input type="hidden"
+                       name="osec_end_time"
+                       id="osec_end-time"
+                       value="{{ end_date.input_value }}">
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <label for="osec_end-date-input">
+                    {{ timezone.label }}:
+                </label>
+            </th>
+            <td>
+                <select name="osec_timezone_name" id="timezone-select">
+                    <option value="">
+                        {{ timezone.empty_text }}
+                    </option>
+                    {% for key, timezones in timezone.timezones_list %}
+                        <optgroup label="{{ key }}">
+                            {% for zone in timezones %}
+                                <option
+                                        value="{{ zone.value }}"
+                                        {% if zone.value == timezone.current_timezone %}selected="selected"{% endif %}
+                                >{{ zone.text ?: 'UTC' }}
+                                </option>
+                            {% endfor %}
+                        </optgroup>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr {{ show_recurrence_and_excludes ?: 'class="ai1ec-hide"' }}>
+            <th scope="row">
+                <input type="hidden" name="osec_rrule" id="osec_rrule" value="{{ recurrence.rrule_value }}">
+                <label for="osec_repeat" id="osec_repeat_label">
+                    {{ recurrence.label }}
+                </label>
+            </th>
+            <td>
+                <input
+                        type="checkbox"
+                        name="osec_repeat"
+                        id="osec_repeat"
+                        value="1"
+                        {{ recurrence.checked }}
+                >
+                <span id="osec_repeat_text" class="osec_rule_text">
+                            <a href="#osec_repeat_box">{{ recurrence.rrule_text }}</a>
+                        </span>
+            </td>
+        </tr>
+        <tr {{ show_recurrence_and_excludes ?: 'class="ai1ec-hide"' }}>
+            <th scope="row">
+                <label for="osec_exclude" id="osec_exclude_label">
+                    {{- excludes.label -}}
+                </label>
+            </th>
+            <td>
+                <input type="checkbox" name="osec_exclude" id="osec_exclude" value="1"
+                        {{ excludes.checked -}}
+                        {{ excludes.disabled }}/>
+                <input type="hidden" name="osec_exrule" id="osec_exrule" value="{{ excludes.exrule_value }}">
+                <span class="">({{ excludes.exrule_infotext }})</span>
+
+                <span id="osec_exclude_text" class="osec_rule_text">
+                            <a href="#osec_exclude_box">{{ excludes.exrule_text }}</a>
+                        </span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    {# Recurrence modal skeleton #}
+    <div id="osec_repeat_box" class="ai1ec-modal ai1ec-fade timely">
+        <div class="ai1ec-modal-dialog">
+            <div class="ai1ec-loading ai1ec-modal-content">
+                <div class="ai1ec-modal-body ai1ec-text-center">
+                    <i class="ai1ec-fa ai1ec-fa-spinner ai1ec-fa-spin ai1ec-fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
