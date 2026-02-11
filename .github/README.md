@@ -1,10 +1,10 @@
 # Open Source Event Calendar (OSEC)
 
+> A fully open-source WordPress event calendar with native iCal / ICS import and export.
+
 ![WordPress](https://img.shields.io/badge/WordPress-6.6%2B-blue)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-8892BF)
 ![License](https://img.shields.io/badge/License-GPL--3.0--or--later-green)
-
-> A fully open-source WordPress event calendar with native iCal / ICS import and export.
 
 **Open Source Event Calendar (OSEC)** is a WordPress plugin for creating, managing, sharing, and aggregating events in a self-hosted and fully open-source manner.  
 It is based on **All-in-One Event Calendar v2.3.4 by Timely**, but restores removed core features and removes all proprietary service dependencies.
@@ -108,18 +108,18 @@ On the long run its planed to have a Rest API to allow the calendar being render
 
 ---
 
-### Requirements
+## Requirements
 
 - WordPress: 6.6 or newer
 - PHP:
   - PHP 8.2+ required for development
   - PHP 8.1 may work for production builds when installed with `composer install --no-dev`
 
-### Installation
+## Installation
 1. Download .zip from release tab on right
 2. Upload .zip to WordPress Plugins tab
 
-#### Setup:
+### Setup:
 1.Open the plugin settings page and save once
 2.Configure:
   - Timezone
@@ -134,11 +134,11 @@ To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA
 
 ---
 
-### Languages
+## Languages
 
 OSEC supports multiple languages
 
-### This Is a Fork
+## This Is a Fork
 
 OSEC This is a fork of the GPL licensed plugin All-in-on-Event-Calendar by Timely. At it's time a great plugin with a solid but unmaintainable codebase (not all required developer tools where opensourced).
 
@@ -146,7 +146,7 @@ In later releases of the original softeware was deprived of core feature: Import
 
 If you love truly open source software and don't mind to get your hands dirty you should join here. Free people need free software to manage and share events in a selfhosted manner.
 
-### Upgrade Notes
+## Upgrade Notes
 Database structure is not fully compatible with All-in-One Event Calendar v2.3.4
 
 Migration may be possible with manual effort
@@ -157,7 +157,7 @@ See this [wiki](https://github.com/digitaldonkey/open-source-event-calendar/wiki
 
 ---
 
-### Development & Support
+## Development & Support
 
 The principle behind this plugin is to be Open Source. Get in touch here on GitHub to report issues, propose feature enhancements, and get general guidance for contributing.
 
@@ -176,13 +176,13 @@ Note there is a [public CircleCI build pipeline](https://app.circleci.com/pipeli
 Let's draft it out on github. You could donnate/pay me development time to get it contributed. Invoices possible. Or feel free to implement the requested feature yourself and create a Pull Request for it.
 I may also provide paid support.
 
-### Future plans (order irrelavent, features not guaranteed)
+## Future plans (order irrelavent, features not guaranteed)
 - Remove broken Google Maps integration and replace with OpenStreetMaps [(#5)](https://github.com/digitaldonkey/open-source-event-calendar/issues/5)
 - Create modern looking theme to replace outdated default [(#2)](https://github.com/digitaldonkey/open-source-event-calendar/issues/2)
 
 ---
 
-### Screenshots
+## Screenshots
 ![Month view](assets/screenshot-1.png)
 Month View
 
