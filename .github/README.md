@@ -6,12 +6,12 @@
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-8892BF)
 ![License](https://img.shields.io/badge/License-GPL--3.0--or--later-green)
 
-**Open Source Event Calendar (OSEC)** is a WordPress plugin for creating, managing, sharing, and aggregating events in a self-hosted and fully open-source manner.  
-It is based on **All-in-One Event Calendar v2.3.4 by Timely**, but restores removed core features and removes all proprietary service dependencies.
+**Open Source Event Calendar (OSEC)** is a WordPress plugin for creating, managing, sharing, and aggregating events in a self-hosted and fully open-source manner.
+It is based on **All-in-One Event Calendar v2.3.4 by Timely**, but reintroduces removed core features and does not depend on proprietary services.
 
-This Plugin is open source software in the traditional sense. I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features.
+This Plugin is open source software in the traditional sense. I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features. All source code is available on [GitHub](https://github.com/digitaldonkey/open-source-event-calendar).
 
-💖 **Donate:** https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
+💖 **Donate:** [PayPal](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6)
 
 ---
 
@@ -23,8 +23,9 @@ This Plugin is open source software in the traditional sense. I pledge this plug
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Fork Notice](#this-is-a-fork)
-- [Upgrade Notes](#upgrade-notes)
+- [Migration Notes](#migration-notes)
 - [Development & Support](#development--support)
+- [FAQ](#frequently-asked-questions)
 - [Future Plans](#future-plans)
 - [Screenshots](#screenshots)
 
@@ -35,7 +36,7 @@ All features are provided in their entirety. No features are locked behind any a
 - **Full iCal / ICS import & export**
   - Automatically import external calendars
   - Categorize and tag imported feeds
-- **Recurring events**, including complex recurrence rules [RFC 5545](https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html)
+- **Recurring events**, including complex recurrence rules [(RFC 5545)](https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html)
 - **Filtering** by category and tag
 - **Calendar sharing** with Google Calendar, Apple iCal, Outlook, and any other system that accepts iCalendar (.ics) feeds
 - **Month, week, day, and agenda views**
@@ -68,43 +69,35 @@ You can embed the calendar by adding a **OSEC Calendar Block** to any page or po
 > [!WARNING] 
 > At this time, only **one calendar per page or post** is supported.
 
-On the long run its planed to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice old Bootstrap 3 stuff.
+On the long run it's planed to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice old Bootstrap 3 stuff.
 
 ### Shortcodes
 
 #### Calendar Views
 
-```text
-[osec]                       // Default view per settings
-[osec view="monthly"]
-[osec view="weekly"]
-[osec view="agenda"]
-[osec view="daily"]
-```
+    [osec]                       // Default view per settings
+    [osec view="monthly"]
+    [osec view="weekly"]
+    [osec view="agenda"]
+    [osec view="daily"]
 
 #### Filtering
 
 **By category**
-```text
-[osec cat_name="Holidays"]
-[osec cat_name="Lunar Cycles,zodia-date-ranges"]
-[osec cat_id="1"]
-[osec cat_id="1,2"]
-```
+    [osec cat_name="Holidays"]
+    [osec cat_name="Lunar Cycles,zodia-date-ranges"]
+    [osec cat_id="1"]
+    [osec cat_id="1,2"]
 
 **By tag**
-```text
-[osec tag_name="tips-and-tricks"]
-[osec tag_name="creative writing,performing arts"]
-[osec tag_id="1"]
-[osec tag_id="1,2"]
-```
+    [osec tag_name="tips-and-tricks"]
+    [osec tag_name="creative writing,performing arts"]
+    [osec tag_id="1"]
+    [osec tag_id="1,2"]
 
 **By post ID**
-```text
-[osec post_id="1"]
-[osec post_id="1,2"]
-```
+    [osec post_id="1"]
+    [osec post_id="1,2"]
 
 ---
 
@@ -140,13 +133,13 @@ OSEC supports multiple languages
 
 ## This Is a Fork
 
-OSEC This is a fork of the GPL licensed plugin All-in-on-Event-Calendar by Timely. At it's time a great plugin with a solid but unmaintainable codebase (not all required developer tools where opensourced).
+OSEC is a fork of the GPL licensed plugin All-in-one-Event-Calendar by Timely. At it's time a great plugin with a solid but unmaintainable codebase (not all required developer tools where opensourced).
 
 In later releases of the original softeware was deprived of core feature: Importing iCal feeds in favor of a service provided by Timely.
 
 If you love truly open source software and don't mind to get your hands dirty you should join here. Free people need free software to manage and share events in a selfhosted manner.
 
-## Upgrade Notes
+## Migration Notes
 Database structure is not fully compatible with All-in-One Event Calendar v2.3.4
 
 Migration may be possible with manual effort
@@ -159,21 +152,24 @@ See this [wiki](https://github.com/digitaldonkey/open-source-event-calendar/wiki
 
 ## Development & Support
 
-The principle behind this plugin is to be Open Source. Get in touch here on GitHub to report issues, propose feature enhancements, and get general guidance for contributing.
+The principle behind this plugin is to be Open Source. Get in touch on [GitHub](https://github.com/digitaldonkey/open-source-event-calendar) to report issues, propose feature enhancements, and get general guidance for contributing.
 
 Writing this fork was [a huge effort](https://github.com/wp-plugins/all-in-one-event-calendar/compare/master...digitaldonkey:open-source-event-calendar:master).
 
 Digitaldonkey believes everybody should be able to set up and manage public calendars. 
 
-If you are implementing this plugin for others you should support ongoing development with a [donnation](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6) or [contribution](https://github.com/digitaldonkey/open-source-event-calendar/issues). 
+If you are implementing this plugin for others you should support ongoing development with a [donation](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6) or [contribution](https://github.com/digitaldonkey/open-source-event-calendar/issues). 
 
 [Be a maker](https://dri.es/solving-the-maker-taker-problem)😀
 
 Note there is a [public CircleCI build pipeline](https://app.circleci.com/pipelines/github/digitaldonkey/open-source-event-calendar?filter=all)
 
-#### "I really need feature XYZ"
 
-Let's draft it out on github. You could donnate/pay me development time to get it contributed. Invoices possible. Or feel free to implement the requested feature yourself and create a Pull Request for it.
+## Frequently Asked Questions
+
+### "I really need feature XYZ"
+
+Let's draft it out on [GitHub](https://github.com/digitaldonkey/open-source-event-calendar). You could donnate/pay me development time to get it contributed. Invoices possible. Or feel free to implement the requested feature yourself and create a Pull Request for it.
 I may also provide paid support.
 
 ## Future plans (order irrelavent, features not guaranteed)
