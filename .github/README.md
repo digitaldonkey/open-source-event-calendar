@@ -112,6 +112,7 @@ On the long run it's planed to have a Rest API to allow the calendar being rende
   - PHP 8.1 may work for production builds when installed with `composer install --no-dev`
 
 ## Installation
+Install as any other plugin, or from GitHub with the following steps:
 1. Download .zip from release tab on right
 2. Upload .zip to WordPress Plugins tab
 
