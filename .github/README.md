@@ -84,18 +84,21 @@ On the long run it's planed to have a Rest API to allow the calendar being rende
 #### Filtering
 
 **By category**
+
     [osec cat_name="Holidays"]
     [osec cat_name="Lunar Cycles,zodia-date-ranges"]
     [osec cat_id="1"]
     [osec cat_id="1,2"]
 
 **By tag**
+
     [osec tag_name="tips-and-tricks"]
     [osec tag_name="creative writing,performing arts"]
     [osec tag_id="1"]
     [osec tag_id="1,2"]
 
 **By post ID**
+
     [osec post_id="1"]
     [osec post_id="1,2"]
 
@@ -113,8 +116,8 @@ On the long run it's planed to have a Rest API to allow the calendar being rende
 2. Upload .zip to WordPress Plugins tab
 
 ### Setup:
-1.Open the plugin settings page and save once
-2.Configure:
+1. Open the plugin settings page and save once
+2. Configure:
   - Timezone
   - UI date formats
   - Week start day
@@ -179,28 +182,28 @@ I may also provide paid support.
 ---
 
 ## Screenshots
-![Month view](assets/screenshot-1.png)
+![Month view](../assets/screenshot-1.png)
 Month View
 
-![Week view](assets/screenshot-2.png)
+![Week view](../assets/screenshot-2.png)
 Week View
 
-![Agenda view](assets/screenshot-3.png)
+![Agenda view](../assets/screenshot-3.png)
 Agenda View
 
-![Calendar Block UI](assets/screenshot-4.png)
+![Calendar Block UI](../assets/screenshot-4.png)
 Calendar Block UI
 
-![Manage iCal Feeds](assets/screenshot-5.png)
+![Manage iCal Feeds](../assets/screenshot-5.png)
 Manage iCal Feeds
 
-![Recurring Events](assets/screenshot-6.png)
+![Recurring Events](../assets/screenshot-6.png)
 Recurring Events
 
-![Cache Settings](assets/screenshot-7.png)
+![Cache Settings](../assets/screenshot-7.png)
 Cache Settings
 
-![Mobile Agenda View](assets/screenshot-8.png)
+![Mobile Agenda View](../assets/screenshot-8.png)
 Mobile Agenda View
 
 ## Contributors
