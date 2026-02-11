@@ -64,7 +64,7 @@ You can even send events from a specific category or tag (or combination of cate
 
 ## Blocks
 
-You can embed the calendar by adding a **OSEC Calendar Block** to any page or post. Alternatively there is a schortcode available.
+You can embed the calendar by adding a **OSEC Calendar Block** to any page or post. Alternatively there is a shortcode available.
 
 > [!WARNING] 
 > At this time, only **one calendar per page or post** is supported.
@@ -162,7 +162,7 @@ If you are implementing this plugin for others you should support ongoing develo
 
 [Be a maker](https://dri.es/solving-the-maker-taker-problem)😀
 
-Note there is a [public CircleCI build pipeline](https://app.circleci.com/pipelines/github/digitaldonkey/open-source-event-calendar?filter=all)
+Those wishing to contribute to the development of this project, please see the [Development Guide](https://github.com/digitaldonkey/open-source-event-calendar/blob/master/DEVELOPERS.md) for more information.
 
 
 ## Frequently Asked Questions
@@ -202,3 +202,14 @@ Cache Settings
 
 ![Mobile Agenda View](assets/screenshot-8.png)
 Mobile Agenda View
+
+## Contributors
+### WordPress:
+digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
+
+### GitHub:
+<a href="https://github.com/digitaldonkey/open-source-event-calendar/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=digitaldonkey/open-source-event-calendar" />
+</a>
+
+> Contributor list made with [contrib.rocks](https://contrib.rocks).
