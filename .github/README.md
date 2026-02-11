@@ -166,7 +166,7 @@ If you are implementing this plugin for others you should support ongoing develo
 
 [Be a maker](https://dri.es/solving-the-maker-taker-problem)😀
 
-Those wishing to contribute to the development of this project, please see the [Development Guide](https://github.com/digitaldonkey/open-source-event-calendar/blob/master/DEVELOPERS.md) for more information.
+Those wishing to contribute to the development of this project, please see the [Development Guide](https://github.com/digitaldonkey/open-source-event-calendar/blob/master/.github/CONTRIBUTORS.md) for more information.
 
 
 ## Frequently Asked Questions
