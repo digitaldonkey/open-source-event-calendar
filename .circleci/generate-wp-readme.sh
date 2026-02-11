@@ -36,23 +36,21 @@ EOF
 # Add README.md content
 awk '
 NR < 9 { next } # Skip until content at line 9
-/^## Screenshots/ { exit } # Stop at the screenshots section
+/^## Screenshots/ { print; exit } # Stop at the screenshots section
 { print }
 ' "$src" >> "$dest"
 
-# Add WordPress screenshots
-cat >> "$dest" << 'EOF'
-== Screenshots ==
+# Generate WordPress screenshots
+awk '
+/^## Screenshots/ { insection=1; next }
+insection && /^## / { exit }
 
-1. Month view with catergory colors set
-2. Week view
-3. Agenda view
-4. Calendar block UI
-5. Manage Ical feeds
-6. Reoccurring events UI (based on [iCalendar-RFC-5545](https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html))
-7. Cache settings
-8. Agenda view in mobile. All calendars are mobile friendly
-
-EOF
+insection && /!\[.*\]\(.*screenshot-[0-9]+\.png\)/ {
+    match($0, /screenshot-([0-9]+)\.png/, arr)
+    num = arr[1]
+    getline caption
+    print num ". " caption
+}
+' "$src" >> "$dest"
 
 echo "WordPress README.txt generated"
