@@ -4,29 +4,38 @@ set -euo pipefail
 
 src=".github/README.md"
 dest="README.txt"
+phpfile="open-source-event-calendar.php"
 
 echo "Generating WordPress README.txt from GitHub README.md"
 
-# WordPress Header
+# Begin header
 cat > "$dest" << 'EOF'
 === Open Source Event Calendar ===
 
-Tags: calendar, events, ics, ical importer
-Requires at least: 6.6
-Requires PHP: 8.2
-License: GPL-3.0-or-later
-License URI: https://www.gnu.org/licenses/gpl-3.0.html
-Text Domain: open-source-event-calendar
-Domain Path: /languages
-Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov  
+EOF
+
+# WordPress Header from PHP header
+awk '
+/^\/\*\*/ { inblock=1; next }
+/^\s*\*\// { exit }
+
+inblock {
+    sub(/^[[:space:]]*\* ?/, "")   # remove leading " * "
+    if ($0 ~ /^(Contributors:|Tags:|Requires at least:|Tested up to:|Requires PHP:|Stable Tag:|License:|License URI:|Text Domain:|Domain Path:)/)
+        print
+}
+' "$phpfile" >> "$dest"
+
+# End of header
+cat >> "$dest" << 'EOF'
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
-Tested up to: 6.9
-Stable Tag: 1.0.11
+A fully open-source WordPress event calendar with native iCal / ICS import and export.
+
 EOF
 
 # Add README.md content
 awk '
-NR == 1 { next } # Skip first line
+NR < 9 { next } # Skip until content at line 9
 /^## Screenshots/ { exit } # Stop at the screenshots section
 { print }
 ' "$src" >> "$dest"
