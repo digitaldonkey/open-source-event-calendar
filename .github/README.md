@@ -9,7 +9,7 @@
 **Open Source Event Calendar (OSEC)** is a WordPress plugin for creating, managing, sharing, and aggregating events in a self-hosted and fully open-source manner.
 It is based on **All-in-One Event Calendar v2.3.4 by Timely**, but reintroduces removed core features and does not depend on proprietary services.
 
-This Plugin is open source software in the traditional sense. I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features. All source code is available on [GitHub](https://github.com/digitaldonkey/open-source-event-calendar).
+This plugin is open source software in the traditional sense. I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features. All source code is available on [GitHub](https://github.com/digitaldonkey/open-source-event-calendar).
 
 💖 **Donate:** [PayPal](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6)
 
