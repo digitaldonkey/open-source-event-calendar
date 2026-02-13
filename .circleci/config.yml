@@ -237,7 +237,7 @@ jobs:
       - run:
           name: Verify readme.txt was generated
           command: |
-            test -f readme.txt
+            test -f README.txt
             echo "readme.txt generated"
 
   create_release_job:
