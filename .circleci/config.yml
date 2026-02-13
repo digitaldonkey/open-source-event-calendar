@@ -224,8 +224,7 @@ jobs:
   # mclay/minify && Grumphp and others require PHP > 8.1.
 
   generate_wp_readme:
-    docker:
-      - image: cimg/base:stable
+    <<: *container_config
     steps:
       - checkout
 
