@@ -46,8 +46,8 @@ awk '
 insection && /^## / { exit }
 
 insection && /!\[.*\]\(.*screenshot-[0-9]+\.png\)/ {
-    match($0, /screenshot-([0-9]+)\.png/, arr)
-    num = arr[1]
+    match($0, /screenshot-[0-9]+\.png/)
+    num = substr($0, RSTART + 11, RLENGTH - 15)
     getline caption
     print num ". " caption
 }
