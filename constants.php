@@ -188,7 +188,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         // = Convert http:// to webcal:// in OSEC_SCRIPT_URL =
         // =  (webcal:// protocol does not support https://)  =
         // ====================================================
-        $webcal_url = str_replace('http://', 'webcal://', OSEC_SCRIPT_URL);
+        $webcal_url = str_replace(['http://', 'https://'], 'webcal://', OSEC_SCRIPT_URL);
         define(
             'OSEC_EXPORT_URL',
             $webcal_url . '&controller=' . ExportEvents::EXPORT_CONTROLLER . '&action=export_events'
