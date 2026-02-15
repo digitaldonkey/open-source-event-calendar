@@ -7,6 +7,7 @@
  * Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
  * Author: digitaldonkey, Time.ly Network Inc
  * Author URI: https://github.com/digitaldonkey
+ * Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
  * Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
  * Tags: calendar, events, ics, ical importer
  * Requires at least: 6.6
@@ -90,6 +91,12 @@ register_deactivation_hook(
         $GLOBALS['wp_rewrite']->flush_rules();
     }
 );
+
+if (defined('WP_CLI') && WP_CLI) {
+    require_once __DIR__ . '/src/WpCli/MakeReadme.php';
+    WP_CLI::add_command('osec', '\Osec\WpCli\MakeReadme');
+}
+
 
 // Helpers
 add_action(
