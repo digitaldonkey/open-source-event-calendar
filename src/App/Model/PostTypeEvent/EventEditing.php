@@ -166,7 +166,7 @@ class EventEditing extends OsecBaseClass
             $event->set('contact_email', sanitize_email($osec_contact_email));
         }
 
-        $showCoordinates = (bool)RequestParser::get_param('show_coordinates', false);
+        $showCoordinates = (bool)RequestParser::get_param('osec_input_coordinates', false);
         $event->set('show_coordinates', $showCoordinates);
 
         $osec_latitude = RequestParser::get_param('osec_latitude', null);
