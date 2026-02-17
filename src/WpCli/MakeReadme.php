@@ -140,21 +140,19 @@ class MakeReadme
     protected function get_value_long_description(): string
     {
         // TODO
-        //   We need some fancy parsing out relevant sections here.
         //   Please remove bin/generate-wp-readme.sh . I left for reference.
         $sections = $this->parse_description_sections(OSEC_PATH . '.github/README.md');
 
+        # Sections to not include in WordPress readme
         $except_sections = [
+            "Header",  # Everything from start of file to first ## Section
             "Table of Contents",
-            "Header",
             "Screenshots",
             "Contributors"
         ];
-        \WP_CLI::success('Section' . implode(", ", array_keys($sections)));
 
         return implode(
             "\n\n",
-            // $sections
             array_diff_key($sections, array_flip($except_sections))
         );
     }
