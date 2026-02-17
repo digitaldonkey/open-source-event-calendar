@@ -106,19 +106,63 @@ class MakeReadme
         }
     }
 
+    protected function parse_description_sections(string $mdFilePath): array
+    {
+        $lines = file($mdFilePath, FILE_IGNORE_NEW_LINES);
+
+        $sections = [];
+        $currentTitle = 'Header';   // default section name
+        $currentContent = [];
+
+        foreach ($lines as $line)
+        {
+            # New section every time we come across a ## Header
+            if (preg_match('/^##(?!#)\s+(.*)$/', $line, $match))
+            {
+                # Save section
+                $sections[$currentTitle] = trim(implode("\n", $currentContent));
+
+                $currentTitle = trim($match[1]);
+                $currentContent = [$line];
+            }
+            else
+            {
+                $currentContent[] = $line;
+            }
+        }
+
+        // Save final section
+        $sections[$currentTitle] = trim(implode("\n", $currentContent));
+
+        return $sections;
+    }
+
     protected function get_value_long_description(): string
     {
         // TODO
         //   We need some fancy parsing out relevant sections here.
         //   Please remove bin/generate-wp-readme.sh . I left for reference.
-        return file_get_contents(OSEC_PATH . '/.github/README.md')
-            . "### TODO We need some fancy parsing out relevant sections here.";
+        $sections = $this->parse_description_sections(OSEC_PATH . '.github/README.md');
+
+        $except_sections = [
+            "Table of Contents",
+            "Header",
+            "Screenshots",
+            "Contributors"
+        ];
+        \WP_CLI::success('Section' . implode(", ", array_keys($sections)));
+
+        return implode(
+            "\n\n",
+            // $sections
+            array_diff_key($sections, array_flip($except_sections))
+        );
     }
 
     protected function get_value_changelog(): string
     {
-        return '== Changelog =='
-            . file_get_contents(OSEC_PATH . '/.github/CHANGELOG.md');
+        return '## Changelog'
+            . file_get_contents(OSEC_PATH . '/CHANGELOG.md');
     }
 
     protected function get_value_wp_screenshots(): string
@@ -126,7 +170,7 @@ class MakeReadme
         // TODO
         //   Extract these lines from readme.md
         $lines = [
-            "== Screenshots ==\n",
+            "\n\n## Screenshots\n",
             '1. Month view with catergory colors set',
             '2. Week view',
             '3. Agenda view',
