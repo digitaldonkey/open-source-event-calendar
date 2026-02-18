@@ -780,15 +780,6 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => false,
             ],
-            'shortcodes'                             => [
-                'type'     => 'html',
-                'renderer' => [
-                    'class' => 'Osec\Settings\Elements\SettingsShortcodesText',
-                    'tab'   => 'advanced',
-                    'item'  => 'shortcodes',
-                ],
-                'default'  => null,
-            ],
             'calendar_css_selector'                  => [
                 'type'     => 'string',
                 'renderer' => [
@@ -884,15 +875,6 @@ class Settings extends OsecBaseInitialized
             'ics_cron_freq'                          => [
                 'type'    => 'string',
                 'default' => 'hourly',
-            ],
-            'twig_cache'                             => [
-                'type'     => 'string',
-                'renderer' => [
-                    'class' => 'Osec\Settings\Elements\SettingsCache',
-                    'tab'   => 'cache',
-                    'label' => __('Templates cache improves site performance', 'open-source-event-calendar'),
-                ],
-                'default'  => '',
             ],
             'display_print_button'           => [
                 'type'     => 'bool',

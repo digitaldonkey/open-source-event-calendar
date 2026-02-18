@@ -302,7 +302,7 @@ class HtmlFactory extends OsecBaseClass
         $tags_json    = wp_json_encode($tags_json);
         $tags_json    = _wp_specialchars($tags_json, 'single', 'UTF-8');
         $select2_args = [
-            'data-placeholder' => __('Tags (optional)', 'open-source-event-calendar'),
+            'placeholder' => __('Tags (optional)', 'open-source-event-calendar'),
             'class'            => 'ai1ec-tags-selector span12',
             'data-ai1ec-tags'  => $tags_json,
         ];

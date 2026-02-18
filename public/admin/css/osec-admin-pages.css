@@ -79,26 +79,21 @@
 .ai1ec-form-group > div:only-child {
   width: 100%;
 }
-.ai1ec-form-group > div {
-  flex-grow: 1;
-}
 @media screen and (min-width: 783px) {
   .osec-two-col {
     display: flex;
+    justify-content: space-between;
   }
   .osec-two-col > div {
-    width: calc(50% - 9px);
+    width: calc(50% - 26px);
   }
-  .osec-two-col > div:first-child {
-    margin-right: 9px;
-  }
-}
-.ai1ec-feed-container > div {
-  margin: 0.5em 1em;
 }
 /* TODO DEBUG ONLY */
 *[class^='ai1ec-col-'] {
   outline: 1px dashed deeppink;
+}
+.osec-text-center {
+  text-align: center;
 }
 /*.ai1ec-tab-content > .ai1ec-tab-pane.ai1ec-active ~ .ai1ec-tab-pane-not-loaded {*/
 /*    display: none;*/
@@ -178,11 +173,15 @@
 /*    margin: 40px 15px 0px 15px;*/
 /*}*/
 /* TODO Mähhh*/
-.ai1ec-feed-url {
-  width: calc(100% - 1em);
-}
 @media screen and (min-width: 783px) {
-  .ai1ec-feed-url {
-    /*width: inherit;*/
+  .ai1ec-feed-url-group > div {
+    flex-grow: 1;
+    display: flex;
   }
+}
+.ai1ec-feed-url-group .ai1ec-feed-url {
+  width: 100%;
+}
+.ai1ec-feed-container > div {
+  margin: 0.5em 1em;
 }

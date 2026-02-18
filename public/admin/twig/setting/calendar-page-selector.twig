@@ -1,4 +1,12 @@
-<p><a target="_blank" href="{{ link }}">
-  {{ view }} "{{ title|raw }}"
-  <i class="ai1ec-fa ai1ec-fa-arrow-right"></i>
-</a></p>
+<label class="ai1ec-control-label" for="{{ id }}">
+  {{ label }}
+</label>
+<div>
+  {{ page_selector|raw }}
+  <p>
+    <a target="_blank" href="{{ link }}">
+      {{ view_label }} "{{ title|raw }}"
+      <i class="ai1ec-fa ai1ec-fa-arrow-right"></i>
+    </a>
+  </p>
+</div>

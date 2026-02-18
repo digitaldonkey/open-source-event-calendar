@@ -2,6 +2,7 @@
 
 namespace Osec\Settings\Elements;
 
+use Osec\Bootstrap\OsecBaseClass;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -12,17 +13,13 @@ use Osec\Theme\ThemeLoader;
  * @package Settings
  * @replaces Ai1ec_Html_Setting_Html
  */
-class SettingsShortcodesText extends SettingsAbstract
+class SettingsShortcodesText extends OsecBaseClass
 {
-    public function render($html = '', $wrap = true): string
+    public function render($html = '', $wrap = true): void
     {
-        $file = ThemeLoader::factory($this->app)->get_file(
-            'setting/shortcodes.twig',
-            $this->getShortcodesArgs(),
-            true
-        );
-
-        return $this->warp_in_form_group($file->get_content());
+        ThemeLoader::factory($this->app)
+               ->get_file('setting/shortcodes.twig', $this->getShortcodesArgs(), true)
+               ->render();
     }
 
     /*

@@ -3,6 +3,8 @@
 namespace Osec\App\View\Admin;
 
 use Osec\App\Model\PostTypeEvent\RobotsTxt;
+use Osec\Settings\Elements\SettingsCache;
+use Osec\Settings\Elements\SettingsShortcodesText;
 use Osec\Settings\SettingsRenderer;
 use Osec\Theme\ThemeLoader;
 
@@ -35,21 +37,27 @@ class AdminPageSettings extends AdminPageAbstract
                 'nonce_name'     => self::$NONCE['nonce_name'],
                 'referrer' => false,
             ],
-            'metabox' => [
+            'metabox_side' => [
                 'screen' => $this->app->settings->get('settings_page'),
-                'action' => 'left',
+                'action' => 'normal',
                 'object' => null,
             ],
-            'support' => [
+            'metabox_normal' => [
                 'screen' => $this->app->settings->get('settings_page'),
-                'action' => 'right',
+                'action' => 'side',
+                'object' => null,
+            ],
+            'metabox_advanced' => [
+                'screen' => $this->app->settings->get('settings_page'),
+                'action' => 'advanced',
                 'object' => null,
             ],
             'action'  => admin_url('?controller=front&action=osec_save_settings&plugin=' . OSEC_PLUGIN_NAME),
         ];
         ThemeLoader::factory($this->app)
-                   ->get_file('setting/page.twig', $args, true)
+                   ->get_file('page_two_col.twig', $args, true)
                    ->render();
+
         /**
          * Prevent installing robots.txt.
          *
@@ -85,57 +93,175 @@ class AdminPageSettings extends AdminPageAbstract
      */
     public function add_meta_box(): void
     {
-        // Add the 'General Settings' meta box.
+        $screen_id = $this->app->settings->get('settings_page');
+
         add_meta_box(
-            'ai1ec-general-settings',
-            _x('General Settings', 'meta box', 'open-source-event-calendar'),
-            $this->display_meta_box(...),
-            $this->app->settings->get('settings_page'),
-            'left',
+            OSEC_POST_TYPE . 'general_settings',
+            __('Viewing Events', 'open-source-event-calendar'),
+            $this->display_meta_box_general_settings(...),
+            $screen_id,
+            'normal',
+            'high'
+        );
+        add_meta_box(
+            OSEC_POST_TYPE . 'editing_settings',
+            __('Adding/Editing Events', 'open-source-event-calendar'),
+            $this->display_meta_editing_settings(...),
+            $screen_id,
+            'normal',
             'default'
         );
+        add_meta_box(
+            OSEC_POST_TYPE . 'maps_settings',
+            _x('Location maps', 'meta box', 'open-source-event-calendar'),
+            $this->display_meta_box_maps_settings(...),
+            $screen_id,
+            'normal',
+            'default'
+        );
+        add_meta_box(
+            OSEC_POST_TYPE . 'advanced_settings',
+            __('Advanced Settings', 'open-source-event-calendar'),
+            $this->display_meta_box_advanced_settings(...),
+            $screen_id,
+            'normal',
+            'default'
+        );
+
+        add_meta_box(
+            OSEC_POST_TYPE . 'cache_settings',
+            __('Cache Report', 'open-source-event-calendar'),
+            $this->display_meta_box_cache_settings(...),
+            $screen_id,
+            'normal',
+            'default'
+        );
+        add_meta_box(
+            OSEC_POST_TYPE . 'shortcode_info',
+            __('Shortcodes', 'open-source-event-calendar'),
+            $this->display_meta_box_shortcode_info(...),
+            $screen_id,
+            'normal',
+            'default'
+        );
+        add_meta_box(
+            OSEC_POST_TYPE . 'save_settings',
+            _x('Publish', 'meta box', 'open-source-event-calendar'),
+            $this->display_meta_box_save_settings(...),
+            $screen_id,
+            'side',
+            'default'
+        );
+    }
+
+
+
+    /**
+     * Displays the Editing settings on meta box settings page.
+     */
+    public function display_meta_editing_settings(mixed $obj, mixed $box)
+    {
+        ThemeLoader::factory($this->app)->get_file(
+            'setting/metabox_plain.twig',
+            $this->getSection('editing-events'),
+            true
+        )->render();
+    }
+
+    /**
+     * Displays the advanced settings on meta box settings page.
+     */
+    public function display_meta_box_advanced_settings(mixed $obj, mixed $box)
+    {
+        ThemeLoader::factory($this->app)
+            ->get_file(
+                'setting/metabox_plain.twig',
+                $this->getSection('advanced'),
+                true
+            )
+            ->render();
+    }
+
+    /**
+     * Displays the save/publish meta box settings page.
+     */
+    public function display_meta_box_shortcode_info(mixed $obj, mixed $box)
+    {
+        SettingsShortcodesText::factory($this->app)->render();
+    }
+
+    /**
+     * Displays the chache info on meta box settings page.
+     */
+    public function display_meta_box_cache_settings(mixed $obj, mixed $box)
+    {
+        SettingsCache::factory($this->app)->render();
+    }
+
+    /**
+     * Displays the save/publish meta box settings page.
+     */
+    public function display_meta_box_save_settings(mixed $obj, mixed $box)
+    {
+        submit_button(
+            __('Save Settings', 'open-source-event-calendar'),
+            'primary',
+            'submit',
+            false
+        );
+    }
+
+    /**
+     * Displays the maps meta box settings page.
+     */
+    public function display_meta_box_maps_settings(mixed $obj, mixed $box)
+    {
+        echo 'Advanced maps ';
     }
 
     /**
      * Displays the meta box for the settings page.
      */
-    public function display_meta_box(mixed $obj, mixed $box)
+    public function display_meta_box_general_settings(mixed $obj, mixed $box)
     {
-        $tabs = [
-            'viewing-events' => ['name' => __('Viewing Events', 'open-source-event-calendar')],
-            'editing-events' => ['name' => __('Adding/Editing Events', 'open-source-event-calendar')],
-            'shortcodes'     => ['name' => __('Shortcodes', 'open-source-event-calendar')],
-            'advanced'       => ['name' => __('Advanced Settings', 'open-source-event-calendar')],
-            'cache'          => ['name' => __('Cache Report', 'open-source-event-calendar')],
-        ];
+        ThemeLoader::factory($this->app)->get_file(
+            'setting/metabox_plain.twig',
+            $this->getSection('viewing-events'),
+            true
+        )
+        ->render();
+    }
 
-        /**
-         * Alter or add tabs on AdminPageSettings
-         *
-         * @since 1.00
-         *
-         * @param  array  $tabs  Current tabs
-         */
-        $tabs            = apply_filters('osec_admin_setting_tabs_alter', $tabs);
-        $plugin_settings = $this->app->settings->get_options();
-
-        $tabs = $this->getVisibleTabs($plugin_settings, $tabs);
-        $args = [
-            'tabs'            => $tabs,
-            'content_class'   => 'ai1ec-form-horizontal',
-            'submit'          => [
-                'id'    => 'osec_save_settings',
-                'value' => '<i class="ai1ec-fa ai1ec-fa-save ai1ec-fa-fw"></i> ' .
-                           __('Save Settings', 'open-source-event-calendar'),
-                'args'  => ['class' => 'ai1ec-btn ai1ec-btn-primary ai1ec-btn-lg'],
-            ],
-            'pre_tabs_markup' => '<div class="ai1ec-gzip-causes-js-failure">' .
-                                 __('loading ...', 'open-source-event-calendar') . '</div>',
-        ];
-
-        ThemeLoader::factory($this->app)
-                   ->get_file('setting/bootstrap_tabs.twig', $args, true)
-                   ->render();
+    /**
+     * Wrapp legacy getVisibleTabs() function
+     *
+     * @param $section_name
+     *
+     * @return array
+     */
+    protected function getSection($section_name): array
+    {
+        static $sections = null;
+        if (is_null($sections)) {
+            $tabs = [
+                'viewing-events' => [],
+                'editing-events' => [],
+                'advanced'       => [],
+            ];
+            $sections = $this->getVisibleTabs(
+                $this->app->settings->get_options(),
+                $tabs
+            );
+            /**
+             * Alter or add tabs on AdminPageSettings
+             *
+             * @since 1.00
+             *
+             * @param  array  $tabs  Current tabs
+             */
+            $sections = apply_filters('osec_admin_setting_sections_alter', $sections);
+        }
+        return $sections[$section_name] ?? [];
     }
 
     /**

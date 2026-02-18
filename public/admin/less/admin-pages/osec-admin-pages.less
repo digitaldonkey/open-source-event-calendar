@@ -98,35 +98,32 @@
     & > div:only-child {
         width: 100%;
     }
-
-    & > div {
-        flex-grow: 1;
-    }
-
 }
 
 .osec-two-col {
     @media screen and (min-width: 783px) {
         & {
             display: flex;
+            justify-content: space-between;
             > div {
-                width: calc(50% - 9px);
+                width: calc(50% - 26px);
             }
             > div:first-child {
-                margin-right: 9px;
+                //margin-right: 9px;
             }
         }
     }
 }
 
-.ai1ec-feed-container > div{
-    margin: .5em 1em;
-}
+
 /* TODO DEBUG ONLY */
 *[class^='ai1ec-col-'] {
     outline: 1px dashed deeppink;
 }
 
+.osec-text-center {
+    text-align: center;
+}
 
 
 
@@ -235,12 +232,19 @@
 /*}*/
 
 /* TODO Mähhh*/
-.ai1ec-feed-url {
-    width: calc(100% - 1em);
+.ai1ec-feed-url-group {
+    @media screen and (min-width: 783px) {
+        & > div{
+            flex-grow: 1;
+            display: flex;
+        }
+    }
+
+    .ai1ec-feed-url {
+        width: 100%;
+    }
 }
 
-@media screen and (min-width: 783px) {
-    .ai1ec-feed-url {
-        /*width: inherit;*/
-    }
+.ai1ec-feed-container > div{
+    margin: .5em 1em;
 }

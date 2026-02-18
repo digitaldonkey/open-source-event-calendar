@@ -34,12 +34,9 @@ class SettingsCalenderPageSelect extends SettingsAbstract
      */
     public function render($html = '', $wrap = true): string
     {
-        $output = '<label class="ai1ec-control-label ai1ec-col-sm-3" for="' .
-                  self::ELEMENT_ID . '">' . __('Calendar page', 'open-source-event-calendar') . '</label>'
-                  . '<div class="ai1ec-col-sm-6">' .
-                  $this->getPageSelector() . $this->getPageViewLink() . '</div>';
-
-        return $this->warp_in_form_group($output);
+        return $this->warp_in_form_group(
+            $this->getPageViewLink()
+        );
     }
 
     /**
@@ -103,7 +100,10 @@ class SettingsCalenderPageSelect extends SettingsAbstract
             return '';
         }
         $args = [
-            'view'  => __('View', 'open-source-event-calendar'),
+            'id' => self::ELEMENT_ID,
+            'label' => __('Calendar page', 'open-source-event-calendar'),
+            'page_selector' => $this->getPageSelector(),
+            'view_label' => __('View', 'open-source-event-calendar'),
             'link'  => get_permalink($post->ID),
             'title' => apply_filters(
                 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound

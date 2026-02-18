@@ -1,8 +1,8 @@
-<label class="ai1ec-control-label {% if not stacked %}ai1ec-col-sm-3{% endif %}"
+<label class="ai1ec-control-label"
        for="{{ id }}">
     {{ label | raw }}
 </label>
-<div class="ai1ec-col-sm-6 {% if not stacked %}ai1ec-col-sm-6"{% endif %}>
+<div>
     {% from 'form-elements/select.twig' import select %}
     {{ select( id, name, attributes, options ) }}
 </div>
