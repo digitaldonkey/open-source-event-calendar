@@ -49,7 +49,7 @@ class ScriptsBackendController extends OsecBaseClass
                 ['script', 'common'],
                 ['script', 'wp-lists'],
                 ['script', 'postbox'],
-                ['style', 'settings.css'],
+                ['style', 'osec-admin-pages.css'],
                 ['style', 'bootstrap.min.css'],
                 ['script', 'post'],
             ],
@@ -57,13 +57,13 @@ class ScriptsBackendController extends OsecBaseClass
                 ['script', 'common'],
                 ['script', 'wp-lists'],
                 ['script', 'postbox'],
-                ['style', 'settings.css'],
+                ['style', 'osec-admin-pages.css'],
                 ['style', 'bootstrap.min.css'],
                 ['style', 'plugins/plugins-common.css'],
                 ['script', 'post'],
             ],
             $settings->get('less_variables_page')                                               => [
-                ['style', 'settings.css'],
+                ['style', 'osec-admin-pages.css'],
                 ['style', 'bootstrap.min.css'],
                 ['style', 'bootstrap_colorpicker.css'],
                 ['script', 'common'],
@@ -73,6 +73,7 @@ class ScriptsBackendController extends OsecBaseClass
             ],
             'osec_event_page_osec-admin-themes' => [
                 ['style', 'osec-admin-themes.css'],
+                ['style', 'osec-admin-pages.css'],
             ],
         ];
 
