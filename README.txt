@@ -169,15 +169,14 @@ I may also provide paid support.
 ---
 
 ## Screenshots
-
-1. Month view with catergory colors set
+1. Month view
 2. Week view
 3. Agenda view
-4. Calendar block UI
-5. Manage Ical feeds
-6. Reoccurring events UI (based on [iCalendar-RFC-5545](https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html))
-7. Cache settings
-8. Agenda view in mobile. All calendars are mobile friendly
+4. Calendar Block UI
+5. Manage iCal Feeds
+6. Recurring Events
+7. Cache Settings
+8. Mobile Agenda View
 
 ## Changelog
 

@@ -147,39 +147,39 @@ class MakeReadme
         $except_sections = [
             "Header",  # Everything from start of file to first ## Section
             "Table of Contents",
-            "Screenshots",
+            "Screenshots",  # Replacing with WordPress syntax section
             "Contributors"
         ];
 
         return implode(
             "\n\n",
             array_diff_key($sections, array_flip($except_sections))
-        );
+        ) . $this->format_screenshots_for_wp($sections["Screenshots"]);
     }
 
     protected function get_value_changelog(): string
     {
-        return '## Changelog'
+        return "\n## Changelog"
             . file_get_contents(OSEC_PATH . '/CHANGELOG.md');
     }
 
-    protected function get_value_wp_screenshots(): string
+    //** Takes the markdown formatted screenshots section and reformats it for use on WordPress */
+    protected function format_screenshots_for_wp(string $screenshotsSectionText): string
     {
-        // TODO
-        //   Extract these lines from readme.md
-        $lines = [
-            "\n\n## Screenshots\n",
-            '1. Month view with catergory colors set',
-            '2. Week view',
-            '3. Agenda view',
-            '4. Calendar block UI',
-            '5. Manage Ical feeds',
-            // phpcs:ignore Generic.Files.LineLength.TooLong
-            '6. Reoccurring events UI (based on [iCalendar-RFC-5545](https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html))',
-            '7. Cache settings',
-            "8. Agenda view in mobile. All calendars are mobile friendly\n",
-        ];
-        return implode("\n", $lines) . "\n";
+        $screenshots = [];
+        foreach (explode("\n", $screenshotsSectionText) as $line)
+        {
+            # Match the text format of "[CAPTION](screenshot-NUMBER)"
+            if (preg_match('/!\[(.*?)\]\(.*screenshot-(\d+).*\)/', $line, $matches))
+            {
+                $caption = $matches[1];
+                $number = $matches[2];
+
+                $screenshots[] = $number . ". " . $caption;
+            }
+        }
+
+        return "\n\n## Screenshots\n" . implode("\n", $screenshots) . "\n";
     }
 
     protected function get_value_version(): string
