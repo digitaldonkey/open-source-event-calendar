@@ -16,7 +16,7 @@ Text Domain: open-source-event-calendar
 Stable Tag: 1.0.11
 Version: 1.0.11
 
-With Osec you can create, share and aggregate and import (ical, ics)
+An event calendar with native iCal / ICS import and export
 
 ## Features
 All features are provided in their entirety. No features are locked behind any add-ons.
@@ -56,7 +56,7 @@ You can embed the calendar by adding a **OSEC Calendar Block** to any page or po
 > [!WARNING] 
 > At this time, only **one calendar per page or post** is supported.
 
-On the long run it's planed to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice old Bootstrap 3 stuff.
+On the long run it's planned to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice old Bootstrap 3 stuff.
 
 ### Shortcodes
 

@@ -3,8 +3,7 @@
 /**
  * Plugin Name: Open Source Event Calendar
  * Plugin URI: https://github.com/digitaldonkey/open-source-event-calendar
- * Description: With Osec you can create, share and aggregate and import (ical, ics)
- * Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
+ * Description: An event calendar with native iCal / ICS import and export
  * Author: digitaldonkey, Time.ly Network Inc
  * Author URI: https://github.com/digitaldonkey
  * Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6

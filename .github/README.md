@@ -69,7 +69,7 @@ You can embed the calendar by adding a **OSEC Calendar Block** to any page or po
 > [!WARNING] 
 > At this time, only **one calendar per page or post** is supported.
 
-On the long run it's planed to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice old Bootstrap 3 stuff.
+On the long run it's planned to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice old Bootstrap 3 stuff.
 
 ### Shortcodes
 
