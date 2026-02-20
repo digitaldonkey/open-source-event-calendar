@@ -21,7 +21,7 @@ class MakeReadme
      *
      * @when after_wp_load
      */
-    public function udateReadme()
+    public function updateReadme()
     {
         try {
             require_once self::PLUGIN_DIR . '/constants.php';
@@ -39,10 +39,9 @@ class MakeReadme
              *   - any function output
              * You may use:
              *   - true to create a sandard value (e.g: 'Tested up to' => "Tested up to: 6.9\n",)
-             *   - a string containing ##VALUE## to reformat a entry
+             *   - a string containing ##VALUE## to reformat a entry (e.g: 'The value is ##VALUE##.' => 'The value is 6.9')
              *   - a callable to output anything else.
-             *     You are responsible to provide line-endlings as the sections needs.
-             *
+             *     You are responsible to provide line-endings as the sections needs.
              */
             $readmefile = array (
                 'Plugin Name'       => "=== ##VALUE## ===\n\n",
@@ -63,28 +62,25 @@ class MakeReadme
                 'Version'           => array($this, 'get_value_version'),
                 'Description'       => "\n##VALUE##\n\n",
                 'Long Description' => array($this, 'get_value_long_description'),
-                'Screenshots' => array($this, 'get_value_wp_screenshots'),
+                'Screenshots' => array($this, 'format_screenshots_for_wp'),
                 'ChangeLog' => array($this, 'get_value_changelog'),
             );
 
             foreach ($readmefile as $key => $display) {
                 if (is_callable($display)) {
                     $this->addLines(call_user_func($display));
-                } else {
-                    if (is_bool($display)) {
-                        $value = $this->get_plugin_header_value($key);
-                        $this->addLines($key . ': ' . $value . "\n");
-                    }
-                    if (is_string($display) && str_contains($display, '##VALUE##')) {
-                        $value = $this->get_plugin_header_value($key);
-                        $this->addLines(
-                            str_replace(
-                                '##VALUE##',
-                                $value,
-                                $display
-                            )
-                        );
-                    }
+                } elseif (is_bool($display)) {
+                    $value = $this->get_plugin_header_value($key);
+                    $this->addLines($key . ': ' . $value . "\n");
+                } elseif (is_string($display) && str_contains($display, '##VALUE##')) {
+                    $value = $this->get_plugin_header_value($key);
+                    $this->addLines(
+                        str_replace(
+                            '##VALUE##',
+                            $value,
+                            $display
+                        )
+                    );
                 }
             }
 
@@ -106,8 +102,9 @@ class MakeReadme
         }
     }
 
-    protected function parse_description_sections(string $mdFilePath): array
+    protected function parse_description_sections(): array
     {
+        $mdFilePath = OSEC_PATH . '.github/README.md';
         $lines = file($mdFilePath, FILE_IGNORE_NEW_LINES);
 
         $sections = [];
@@ -139,22 +136,20 @@ class MakeReadme
 
     protected function get_value_long_description(): string
     {
-        // TODO
-        //   Please remove bin/generate-wp-readme.sh . I left for reference.
-        $sections = $this->parse_description_sections(OSEC_PATH . '.github/README.md');
+        $sections = $this->parse_description_sections();
 
         # Sections to not include in WordPress readme
         $except_sections = [
             "Header",  # Everything from start of file to first ## Section
             "Table of Contents",
-            "Screenshots",  # Replacing with WordPress syntax section
+            "Screenshots",  # Formated as a different section
             "Contributors"
         ];
 
         return implode(
             "\n\n",
             array_diff_key($sections, array_flip($except_sections))
-        ) . $this->format_screenshots_for_wp($sections["Screenshots"]);
+        );
     }
 
     protected function get_value_changelog(): string
@@ -164,8 +159,11 @@ class MakeReadme
     }
 
     //** Takes the markdown formatted screenshots section and reformats it for use on WordPress */
-    protected function format_screenshots_for_wp(string $screenshotsSectionText): string
+    protected function format_screenshots_for_wp(): string
     {
+        // TODO: Not cool running this a second time, reading and parsing the entire file again
+        $screenshotsSectionText = $this->parse_description_sections()["Screenshots"];
+
         $screenshots = [];
         foreach (explode("\n", $screenshotsSectionText) as $line)
         {

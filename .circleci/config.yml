@@ -223,23 +223,6 @@ jobs:
   #        <<: *ENV_DB_IMAGE
   # mclay/minify && Grumphp and others require PHP > 8.1.
 
-  generate_wp_readme:
-    <<: *container_config
-    steps:
-      - checkout
-
-      - run:
-          name: Generate WordPress readme.txt
-          command: |
-            chmod +x ./.circleci/generate-wp-readme.sh
-            ./.circleci/generate-wp-readme.sh
-
-      - run:
-          name: Verify readme.txt was generated
-          command: |
-            test -f README.txt
-            echo "readme.txt generated"
-
   create_release_job:
     <<: *container_config
     steps:
@@ -457,12 +440,8 @@ workflows:
           filters:
             branches:
               only: /master/            -
-      - generate_wp_readme:
-          requires:
-            - build
       - create_release_job:
           requires:
-            - generate_wp_readme
             - db_job
             - static_job
       - release_test_job:
