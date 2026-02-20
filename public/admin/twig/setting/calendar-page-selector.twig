@@ -3,10 +3,12 @@
 </label>
 <div>
   {{ page_selector|raw }}
+  {% if link and title %}
   <p>
     <a target="_blank" href="{{ link }}">
       {{ view_label }} "{{ title|raw }}"
-      <i class="ai1ec-fa ai1ec-fa-arrow-right"></i>
+      <span class="dashicons dashicons-arrow-right-alt"></span>
     </a>
   </p>
+  {% endif %}
 </div>

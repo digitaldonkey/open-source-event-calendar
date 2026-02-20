@@ -39,12 +39,12 @@ class AdminPageSettings extends AdminPageAbstract
             ],
             'metabox_side' => [
                 'screen' => $this->app->settings->get('settings_page'),
-                'action' => 'normal',
+                'action' => 'side',
                 'object' => null,
             ],
             'metabox_normal' => [
                 'screen' => $this->app->settings->get('settings_page'),
-                'action' => 'side',
+                'action' => 'normal',
                 'object' => null,
             ],
             'metabox_advanced' => [

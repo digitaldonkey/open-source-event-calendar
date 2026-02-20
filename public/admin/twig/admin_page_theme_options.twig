@@ -1,0 +1,26 @@
+{% extends "base_page.twig" %}
+{% block layout %}
+    <div id="post-body" class="metabox-holder columns-2">
+
+        <div class="description">
+            {{ description }}
+        </div>
+
+        {% for section in sections %}
+            <h3>{{ section.name }}</h3>
+            <hr />
+            {{ section.html|raw }}
+        {% endfor %}
+       <p>
+           <input type="submit" name="{{ submit.id }}" id="{{ submit.id }}" class="button button-primary " value="{{ submit.value }}" />
+           <input type="submit" name="{{ reset.id }}" id="{{ reset.id }}" class="button" value="{{ reset.value }}" />
+       </p>
+        <details>
+            <summary>
+                {{ export_text_1 }}
+            </summary>
+            {{ export_text_2 }}
+            {{ export|raw }}
+        </details>
+    </div>
+{% endblock %}

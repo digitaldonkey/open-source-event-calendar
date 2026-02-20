@@ -1,0 +1,130 @@
+//
+// @file Source of osec-admin-page-manage-themes.css
+//       Manual compilation process is required.
+//
+
+@background-color: #f6f7f7;
+
+
+.ai1ec-feed-url-group {
+  @media screen and (min-width: 783px) {
+    & > div{
+      flex-grow: 1;
+    }
+  }
+
+  .ai1ec-feed-url {
+    width: 100%;
+  }
+}
+
+#ai1ec-feeds-after > div{
+  margin: .5em 1em;
+}
+
+.wp-core-ui .button.button-danger {
+  color: #c61313;
+  border-color: #c61313;
+  background: rgba(198, 19, 19, 0.1);
+}
+
+.osec-feed-panel {
+  border-bottom: 4px solid @background-color;
+  border-left: 4px solid @background-color;
+  border-right: 4px solid @background-color;
+  margin-bottom: 2px;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid @background-color;
+  }
+
+  summary {
+    text-decoration: underline;
+    padding: 3px 10px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    line-height: 40px;
+    min-height: 40px;
+    background: @background-color;
+  }
+}
+
+.osec-well {
+  background: @background-color;
+  min-height: 20px;
+  padding: 3px 5px;
+  margin-bottom: 20px;
+}
+
+
+/*!* ICS Feeds *!*/
+
+#osec_feed_tags,
+#osec_feed_category {
+  // Reduces flicker on loading select2.
+  max-height: 36px;
+  overflow-y: scroll;
+  width: 100%;
+}
+
+#osec_cancel_ics {
+    display: none;
+}
+
+#ics .ai1ec-feed-actions {
+  margin-top: 15px;
+}
+
+.select2-choices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.wp-core-ui .button {
+  display: inline-flex;
+  align-items: center;
+  .dashicons {
+    margin-right: 7px;
+  }
+
+  @-webkit-keyframes dashicons-update-spin /* Safari and Chrome */ {
+    from {
+      -webkit-transform: rotate(0deg);
+      -o-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    to {
+      -webkit-transform: rotate(360deg);
+      -o-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes dashicons-update-spin-rotating {
+    from {
+      -ms-transform: rotate(0deg);
+      -moz-transform: rotate(0deg);
+      -webkit-transform: rotate(0deg);
+      -o-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    to {
+      -ms-transform: rotate(360deg);
+      -moz-transform: rotate(360deg);
+      -webkit-transform: rotate(360deg);
+      -o-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+  }
+  .dashicons-update-spin {
+    -webkit-animation: dashicons-update-spin-rotating 0.75s linear infinite;
+    -moz-animation: dashicons-update-spin-rotating 0.75s linear infinite;
+    -ms-animation: dashicons-update-spin-rotating 0.75s linear infinite;
+    -o-animation: dashicons-update-spin-rotating 0.75s linear infinite;
+    animation: dashicons-update-spin-rotating 0.75s linear infinite;
+  }
+}

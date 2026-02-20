@@ -5,7 +5,11 @@
 .theme-screenshot {
     cursor: auto;
 }
-
+.theme-screenshot > img {
+    height: auto;
+    width: 100%;
+    max-width: 100%;
+}
 .theme-info > div {
     margin-bottom: 1em;
 }

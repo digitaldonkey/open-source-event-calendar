@@ -9,17 +9,17 @@ timely.define(["jquery_timely", "libs/utils"], function (e, t) {
         } else {
             s(), e("#ai1ec-feeds-after").addClass("ai1ec-well ai1ec-well-sm").insertAfter("#ics .ai1ec-form-horizontal");
             var a = n.update.data.feed_id, f = e(n.message),
-                l = e('.ai1ec_feed_id[value="' + a + '"] ').closest(".ai1ec-feed-container");
+                l = e('.ai1ec_feed_id[value="' + a + '"] ').closest(".osec-feed-container");
             f.find(".ai1ec-collapse").removeClass("ai1ec-collapse");
-            var l = e('.ai1ec_feed_id[value="' + a + '"] ').closest(".ai1ec-feed-container");
+            var l = e('.ai1ec_feed_id[value="' + a + '"] ').closest(".osec-feed-container");
             l.length ? l.replaceWith(f) : e("#ai1ec-feeds-after").after(f), n.update && n.update.data && !n.update.data.error && i(n.update.data)
         }
     }, r = function (n) {
-        var r = e("input[value=" + n.feed_id + "]").closest(".ai1ec-feed-container"), i = n.error ? "error" : "success",
+        var r = e("input[value=" + n.feed_id + "]").closest(".osec-feed-container"), i = n.error ? "error" : "success",
             s = t.make_alert(n.message, i);
         n.error ? e(".osec_update_ics", r).button("reset") : r.remove(), e("#ics-alerts").append(s)
     }, i = function (n) {
-        var r = e("input[value=" + n.feed_id + "]").closest(".ai1ec-feed-container"), i = n.error ? "error" : "success",
+        var r = e("input[value=" + n.feed_id + "]").closest(".osec-feed-container"), i = n.error ? "error" : "success",
             s = t.make_alert(n.message, i);
         e(".osec_update_ics", r).button("reset"), e("#ics-alerts").append(s)
     }, s = function () {

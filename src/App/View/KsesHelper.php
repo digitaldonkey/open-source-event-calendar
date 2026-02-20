@@ -206,6 +206,7 @@ class KsesHelper extends OsecBaseClass
                     'tabindex' => true,
                     'type' => true,
                     'value' => true,
+                    'readonly' => true,
                 ],
                 'label' => [
                     'class' => true,
@@ -292,6 +293,12 @@ class KsesHelper extends OsecBaseClass
                 'ul' => [
                     'class' => true,
                     'role' => true,
+                ],
+                'details' => [
+                    'class' => true,
+                ],
+                'summary' => [
+                    'class' => true,
                 ],
             ];
         }

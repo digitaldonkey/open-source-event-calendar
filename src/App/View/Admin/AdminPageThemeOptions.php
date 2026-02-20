@@ -96,14 +96,6 @@ class AdminPageThemeOptions extends AdminPageAbstract
             self::MENU_SLUG,
             $this->display_page(...)
         );
-        if (false !== $this->app->settings->get('less_variables_page')) {
-            // Make copy of Theme Options page at its old location.
-            $submenu['themes.php'][] = [
-                __('Calendar Theme Options', 'open-source-event-calendar'),
-                'manage_osec_options',
-                OSEC_ADMIN_BASE_URL . '&page=' . self::MENU_SLUG,
-            ];
-        }
         $this->app->settings->set('less_variables_page', $theme_options_page);
     }
 
@@ -116,43 +108,6 @@ class AdminPageThemeOptions extends AdminPageAbstract
      */
     public function add_meta_box(): void
     {
-        $screen = $this->app->settings->get('less_variables_page');
-
-        add_meta_box(
-            'submitdiv_custom',
-            __('Publish', 'open-source-event-calendar'),
-            $this->display_section_submit(...),
-            $screen,
-            'side',
-            'default'
-        );
-
-        add_meta_box(
-            'exportdiv_custom',
-            __('Export', 'open-source-event-calendar'),
-            $this->display_section_export(...),
-            $screen,
-            'side',
-            'default'
-        );
-        add_filter('get_user_option_closedpostboxes_{post_type_slug}', function ($closed) {
-            if (false === $closed) {
-                $closed = array ('exportdiv_custom');
-            }
-
-            return $closed;
-        });
-
-        foreach ($this->get_sections() as $id => $section) {
-            add_meta_box(
-                $id,
-                $section['name'],
-                $this->display_meta_box(...),
-                $screen,
-                'normal',
-                'default'
-            );
-        }
     }
 
     /**
@@ -174,30 +129,18 @@ class AdminPageThemeOptions extends AdminPageAbstract
                 'nonce_name' => self::$NONCE['nonce_name'],
                 'referrer'   => false,
             ],
-            'metabox_left' => [
+            'metabox_side' => [
                 'screen' => $this->app->settings->get('themes_option_page'),
                 'action' => 'normal',
                 'object' => null,
             ],
-            'metabox_right' => [
+            'metabox_normal' => [
                 'screen' => $this->app->settings->get('themes_option_page'),
                 'action' => 'side',
                 'object' => null,
             ],
             'action' =>
                 '?controller=front&action=' . self::$NONCE['action'] . '&plugin=' . OSEC_PLUGIN_NAME,
-        ];
-        ThemeLoader::factory($this->app)
-                   ->get_file('theme-options/page_two_col.twig', $args, true)
-                   ->render();
-    }
-
-    /**
-     * Displays the meta box for the settings page.
-     */
-    public function display_section_submit(mixed $obj, mixed $box): void
-    {
-        $args = [
             'submit' => [
                 'id'    => self::SUBMIT_ID,
                 'value' => __('Save Options', 'open-source-event-calendar'),
@@ -206,21 +149,43 @@ class AdminPageThemeOptions extends AdminPageAbstract
                 'id'    => self::RESET_ID,
                 'value' => __('Reset to theme Defaults', 'open-source-event-calendar'),
             ],
+            'export_text_1'   => esc_html__('Export', 'open-source-event-calendar'),
+            'export_text_2'   => esc_html__('Exports saved variables only.', 'open-source-event-calendar'),
+            'export' => $this->get_export(),
         ];
+        $less_variables = LessController::factory($this->app)->get_saved_variables();
+        $renderer = ThemeVariablesFactory::factory($this->app);
+        $args['sections'] = [];
+        foreach ($this->get_sections() as $id => $section) {
+            foreach ($less_variables as $variable_id => $var) {
+                if (! isset($args['sections'][$id])) {
+                    $args['sections'][$id] = [
+                        'name' => $section['name'],
+                        'html' => '',
+                    ];
+                }
+                if ($var['tab'] === $id) {
+                    $var['id'] = $variable_id;
+                    $args['sections'][$id]['html'] .= $renderer->createRenderer($var)->render();
+                }
+            }
+        }
         ThemeLoader::factory($this->app)
-                   ->get_file('theme-options/section_submit.twig', $args, true)
+                   ->get_file('admin_page_theme_options.twig', $args, true)
                    ->render();
     }
 
     /**
      * Displays the meta box export.
      */
-    public function display_section_export(mixed $obj, mixed $box): void
+    public function get_export(): string
     {
         $variables = LessController::factory($this->app)->get_saved_variables();
         $args      = [
-            'text_1'   => esc_html__('Exports SAVED variables only.', 'open-source-event-calendar'),
-            'text_2'   => esc_html__('There is no import.', 'open-source-event-calendar'),
+            'export_text_3' => esc_html__(
+                'Import via browser console. Color pickers will update after saving form.',
+                'open-source-event-calendar'
+            ),
             'sections' => [],
         ];
         foreach ($this->get_sections() as $id => $section) {
@@ -231,33 +196,8 @@ class AdminPageThemeOptions extends AdminPageAbstract
                 }
             }
         }
-        ThemeLoader::factory($this->app)
+        return ThemeLoader::factory($this->app)
                    ->get_file('theme-options/section_export.twig', $args, true)
-                   ->render();
-    }
-
-    /**
-     * Displays the meta box for the settings page.
-     */
-    public function display_meta_box(mixed $obj, mixed $box): void
-    {
-        static $less_variables = null;
-        if (is_null($less_variables)) {
-            $less_variables = LessController::factory($this->app)->get_saved_variables();
-        }
-
-        $html = '';
-        foreach ($less_variables as $variable_id => $var) {
-            if ($var['tab'] === $box['id']) {
-                $var['id'] = $variable_id;
-                $html      .= ThemeVariablesFactory::factory($this->app)
-                                                   ->createRenderer($var)
-                                                   ->render();
-            }
-        }
-        echo wp_kses(
-            $html,
-            $this->app->kses->allowed_html_backend()
-        );
+                   ->get_content();
     }
 }

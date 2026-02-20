@@ -1,0 +1,8 @@
+#ai1ec-embedding ul {
+  padding-left: 1em;
+  list-style: revert;
+}
+#ai1ec-embedding code {
+  white-space: normal;
+  display: inline-table;
+}

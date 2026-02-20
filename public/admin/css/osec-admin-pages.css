@@ -1,11 +1,12 @@
-.wrap:after {
-  content: ' ';
-  display: table;
-  clear: both;
+#poststuff {
+  max-width: 70rem;
+}
+#poststuff .postbox-container {
+  max-width: 50rem;
 }
 #poststuff .inside {
-  margin-top: 0.75em;
-  margin-bottom: 0.75em;
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 #poststuff .inside:after {
   content: ' ';
@@ -18,7 +19,6 @@
   }
 }
 .ai1ec-form-group {
-  padding: 0.5em 0;
   display: block;
 }
 .ai1ec-form-group::after {
@@ -61,12 +61,13 @@
     width: auto;
   }
 }
-.ai1ec-form-group > label {
-  /* Styles taken from WordPress .form-table th{...} */
-  width: 200px;
-  text-align: left;
+.ai1ec-form-group label {
   line-height: 1.3;
   font-weight: 600;
+}
+.ai1ec-form-group > label {
+  width: 200px;
+  text-align: left;
 }
 @media screen and (min-width: 783px) {
   .ai1ec-form-group > label {
@@ -95,93 +96,18 @@
 .osec-text-center {
   text-align: center;
 }
-/*.ai1ec-tab-content > .ai1ec-tab-pane.ai1ec-active ~ .ai1ec-tab-pane-not-loaded {*/
-/*    display: none;*/
-/*}*/
-/*.ai1ec-admin-view-settings {*/
-/*    margin: 0 0 0.75em;*/
-/*}*/
-/*.ai1ec-admin-view-settings td {*/
-/*    text-align: center;*/
-/*}*/
-/*.ai1ec-admin-view-settings td:first-child {*/
-/*    text-align: right;*/
-/*}*/
-/*.timely .ai1ec-default-filters .ai1ec-help-block {*/
-/*    font-size: 0.85em;*/
-/*    line-height: 1.4em;*/
-/*    margin-bottom: 0;*/
-/*}*/
-/*#exact_date {*/
-/*    background: no-repeat url(../img/date-field-icon.png) 95% 40%;*/
-/*    width: 110px;*/
-/*}*/
-/*.ai1ec-recaptcha-settings label {*/
-/*    width: 180px;*/
-/*}*/
-/*.ai1ec-recaptcha-settings #recaptcha-private-key {*/
-/*    margin-bottom: 0;*/
-/*}*/
-/*#ai1ec-embedding-trigger:hover {*/
-/*    text-decoration: none;*/
-/*}*/
-/*#ai1ec-embedding .ai1ec-alert:last-child {*/
-/*    margin-bottom: 0;*/
-/*}*/
-/*.ai1ec-week-view-hours input.ai1ec-input-sm {*/
-/*    width: 2em;*/
-/*}*/
-/*.ai1ec-week-view-hours .input-group {*/
-/*    display: inline-block;*/
-/*}*/
-/*!* ICS Feeds *!*/
-/*.ai1ec-feed-comments-enabled,*/
-/*.ai1ec-feed-map-display-enabled,*/
-/*.ai1ec-feed-category {*/
-/*    margin-right: 0.5em;*/
-/*}*/
-/*#ics .ajax-loading {*/
-/*    margin: 0.45em;*/
-/*}*/
-/*#ics .ai1ec-form-group {*/
-/*    width: 100%;*/
-/*}*/
-/*#ics .ai1ec-panel-heading a {*/
-/*    word-break: break-word;*/
-/*}*/
-/*#ics .ai1ec-feed-url {*/
-/*    margin-bottom: 15px;*/
-/*}*/
-/*#ics .ai1ec-feed-actions {*/
-/*    margin-top: 15px;*/
-/*}*/
-/*#ics #osec_cancel_ics {*/
-/*    display: none;*/
-/*}*/
-/*#ics .ai1ec-form-group {*/
-/*    margin-bottom: 10px;*/
-/*}*/
-/*!* Calendar theme options *!*/
-/*#ai1ec-less-variables-tabs .inside {*/
-/*    margin: 10px 0;*/
-/*}*/
-/*.ai1ec_event_page_osec-admin-edit-css #poststuff,*/
-/*.ai1ec_event_page_osec-admin-edit-css .metabox-holder {*/
-/*    padding-top: 0;*/
-/*}*/
-/*div.ai1ec-form-group > .ai1ec-setting-fieldset {*/
-/*    margin: 40px 15px 0px 15px;*/
-/*}*/
-/* TODO Mähhh*/
-@media screen and (min-width: 783px) {
-  .ai1ec-feed-url-group > div {
-    flex-grow: 1;
-    display: flex;
-  }
+input[readonly],
+textarea[readonly] {
+  color: #818181;
 }
-.ai1ec-feed-url-group .ai1ec-feed-url {
-  width: 100%;
+input[readonly]:focus-visible,
+textarea[readonly]:focus-visible {
+  outline: 0;
+  box-shadow: none;
 }
-.ai1ec-feed-container > div {
-  margin: 0.5em 1em;
+a .dashicons {
+  text-decoration: none;
+}
+.js-export {
+  white-space: pre;
 }

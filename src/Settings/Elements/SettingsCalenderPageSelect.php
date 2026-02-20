@@ -35,7 +35,7 @@ class SettingsCalenderPageSelect extends SettingsAbstract
     public function render($html = '', $wrap = true): string
     {
         return $this->warp_in_form_group(
-            $this->getPageViewLink()
+            $this->get_page_selector()
         );
     }
 
@@ -44,7 +44,7 @@ class SettingsCalenderPageSelect extends SettingsAbstract
      *
      * @return string HTML snippet.
      */
-    protected function getPageSelector()
+    protected function get_select()
     {
         $html = '<select id="' . self::ELEMENT_ID .
                 '" class="ai1ec-form-control" name="' . self::ELEMENT_ID . '">';
@@ -90,29 +90,26 @@ class SettingsCalenderPageSelect extends SettingsAbstract
      *
      * @return string HTML snippet.
      */
-    protected function getPageViewLink()
+    protected function get_page_selector()
     {
-        if (empty($this->args['value'])) {
-            return '';
-        }
-        $post = get_post($this->args['value']);
-        if (empty($post->ID)) {
-            return '';
-        }
         $args = [
             'id' => self::ELEMENT_ID,
             'label' => __('Calendar page', 'open-source-event-calendar'),
-            'page_selector' => $this->getPageSelector(),
+            'page_selector' => $this->get_select(),
             'view_label' => __('View', 'open-source-event-calendar'),
-            'link'  => get_permalink($post->ID),
-            'title' => apply_filters(
-                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                'the_title',
-                $post->post_title,
-                $post->ID
-            ),
         ];
-
+        if (!empty($this->args['value'])) {
+            $post = get_post($this->args['value']);
+            if ($post) {
+                $args['link'] = get_permalink($post->ID);
+                $args['title'] = apply_filters(
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                    'the_title',
+                    $post->post_title,
+                    $post->ID
+                );
+            }
+        }
         return ThemeLoader::factory($this->app)
                           ->get_file('setting/calendar-page-selector.twig', $args, true)
                           ->get_content();
