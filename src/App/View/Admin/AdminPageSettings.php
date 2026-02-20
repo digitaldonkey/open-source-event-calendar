@@ -96,7 +96,7 @@ class AdminPageSettings extends AdminPageAbstract
         $screen_id = $this->app->settings->get('settings_page');
 
         add_meta_box(
-            OSEC_POST_TYPE . 'general_settings',
+            'osec_event_general_settings',
             __('Viewing Events', 'open-source-event-calendar'),
             $this->display_meta_box_general_settings(...),
             $screen_id,
@@ -104,7 +104,7 @@ class AdminPageSettings extends AdminPageAbstract
             'high'
         );
         add_meta_box(
-            OSEC_POST_TYPE . 'editing_settings',
+            'osec_event_editing_settings',
             __('Adding/Editing Events', 'open-source-event-calendar'),
             $this->display_meta_editing_settings(...),
             $screen_id,
@@ -112,7 +112,7 @@ class AdminPageSettings extends AdminPageAbstract
             'default'
         );
         add_meta_box(
-            OSEC_POST_TYPE . 'maps_settings',
+            'osec_event_maps_settings',
             _x('Location maps', 'meta box', 'open-source-event-calendar'),
             $this->display_meta_box_maps_settings(...),
             $screen_id,
@@ -120,7 +120,7 @@ class AdminPageSettings extends AdminPageAbstract
             'default'
         );
         add_meta_box(
-            OSEC_POST_TYPE . 'advanced_settings',
+            'osec_event_advanced_settings',
             __('Advanced Settings', 'open-source-event-calendar'),
             $this->display_meta_box_advanced_settings(...),
             $screen_id,
@@ -129,7 +129,7 @@ class AdminPageSettings extends AdminPageAbstract
         );
 
         add_meta_box(
-            OSEC_POST_TYPE . 'cache_settings',
+            'osec_event_cache_settings',
             __('Cache Report', 'open-source-event-calendar'),
             $this->display_meta_box_cache_settings(...),
             $screen_id,
@@ -137,7 +137,7 @@ class AdminPageSettings extends AdminPageAbstract
             'default'
         );
         add_meta_box(
-            OSEC_POST_TYPE . 'shortcode_info',
+            'osec_event_shortcode_info',
             __('Shortcodes', 'open-source-event-calendar'),
             $this->display_meta_box_shortcode_info(...),
             $screen_id,
@@ -145,7 +145,7 @@ class AdminPageSettings extends AdminPageAbstract
             'default'
         );
         add_meta_box(
-            OSEC_POST_TYPE . 'save_settings',
+            'osec_event_save_settings',
             _x('Publish', 'meta box', 'open-source-event-calendar'),
             $this->display_meta_box_save_settings(...),
             $screen_id,
@@ -207,7 +207,8 @@ class AdminPageSettings extends AdminPageAbstract
             __('Save Settings', 'open-source-event-calendar'),
             'primary',
             'submit',
-            false
+            false,
+            ['id' => 'osec_save_settings' ]
         );
     }
 

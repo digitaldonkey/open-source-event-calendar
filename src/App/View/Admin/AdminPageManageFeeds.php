@@ -54,7 +54,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
     {
         // Add the 'ICS Import Settings' meta box.
         add_meta_box(
-            'ai1ec-feeds',
+            'osec_event_feeds',
             _x('Feed Subscriptions', 'meta box', 'open-source-event-calendar'),
             $this->display_meta_box(...),
             $this->app->settings->get('feeds_page'),

@@ -45,7 +45,8 @@ describe('Plugin install', function(){
         await pageObject.go_to_url(url);
         await pageObject.doLogin();
 
-        await pageObject.getElement(By.id('ai1ec-general-settings'))
+        // wait for some form element
+        await pageObject.getElement(By.id('calendar_page_id'))
 
         // Set day
         await pageObject.setWeekDay(By.id('week_start_day'));
@@ -60,7 +61,7 @@ describe('Plugin install', function(){
 
         // Waiting releoad.
         await pageObject.waitToSeeWhatHappens(700, true);
-        await pageObject.getElement(By.id('ai1ec-general-settings'));
+        await pageObject.getElement(By.id('calendar_page_id'));
 
         await pageObject.takeScreenshot(this);
 
@@ -103,12 +104,9 @@ describe('Plugin install', function(){
         await pageObject.go_to_url(url);
         await pageObject.doLogin();
 
-        // Switch to cache report
-        const cacheMenuLink = await pageObject.driver.findElement(By.id('osec-link-cache'));
-        await cacheMenuLink.click();
         // Wait.
         // TODO For now just a screenshot to see...
-        await pageObject.getElement(By.id('osec-cache'))
+        await pageObject.getElement(By.id('osec_event_cache_settings'))
         await pageObject.takeScreenshot(this);
     })
 
@@ -145,9 +143,9 @@ describe('Plugin install', function(){
         await pageObject.go_to_url(url);
         await pageObject.doLogin();
 
-        // Js generated link should be visible.
-        const mainElementID = 'ai1ec-feeds';
-        await pageObject.getElement(By.id( 'ai1ec-feeds'));
+        // Metabox link should be visible.
+        const mainElementID = 'osec_event_feeds';
+        await pageObject.getElement(By.id(mainElementID) );
 
         // Submit/Save
         const feedUrl = 'https://ics.calendarlabs.com/641/64bc8358/FIFA_Womens_World_Cup.ics'
@@ -159,7 +157,7 @@ describe('Plugin install', function(){
         await feedUrlAddButton.click();
 
         // Required to call/wait again.
-        await pageObject.getElement(By.id( 'ai1ec-feeds'));
+        await pageObject.getElement(By.id(mainElementID));
 
         // .ai1ec-alert-success should contain "Imported 53 events"
         const expectedText = 'Imported 53 events';
@@ -185,11 +183,12 @@ describe('Plugin install', function(){
         await pageObject.go_to_url(url);
         await pageObject.doLogin();
 
-        // Js generated link should be visible.
-        await pageObject.getElement(By.id('ai1ec-feeds'));
+        // Metabox be visible.
+        const mainElementID = 'osec_event_feeds';
+        await pageObject.getElement(By.id(mainElementID));
 
-        // Open ICS panel.
-        const panelLink = await pageObject.getElement(By.css('a[data-toggle="ai1ec-collapse"]'));
+        // Open ICS details.
+        const panelLink = await pageObject.getElement(By.css('#osec-feeds-list details:first-of-type > summary'));
         await panelLink.click();
 
         // osec_delete_ics
@@ -202,7 +201,7 @@ describe('Plugin install', function(){
         await deleteEventsButton.click();
 
         // Required to call/wait again.
-        await pageObject.getElement(By.id('ai1ec-feeds'));
+        await pageObject.getElement(By.id(mainElementID));
         await pageObject.getElement(By.css('.ai1ec-alert'));
 
         // .ai1ec-alert should contain "Deleted 53 events"
