@@ -183,28 +183,28 @@ I may also provide paid support.
 ---
 
 ## Screenshots
-![Month view](../assets/screenshot-1.png)
+![Month view](assets/screenshot-1.png)
 Month View
 
-![Week view](../assets/screenshot-2.png)
+![Week view](assets/screenshot-2.png)
 Week View
 
-![Agenda view](../assets/screenshot-3.png)
+![Agenda view](assets/screenshot-3.png)
 Agenda View
 
-![Calendar Block UI](../assets/screenshot-4.png)
+![Calendar Block UI](assets/screenshot-4.png)
 Calendar Block UI
 
-![Manage iCal Feeds](../assets/screenshot-5.png)
+![Manage iCal Feeds](assets/screenshot-5.png)
 Manage iCal Feeds
 
-![Recurring Events](../assets/screenshot-6.png)
+![Recurring Events](assets/screenshot-6.png)
 Recurring Events
 
-![Cache Settings](../assets/screenshot-7.png)
+![Cache Settings](assets/screenshot-7.png)
 Cache Settings
 
-![Mobile Agenda View](../assets/screenshot-8.png)
+![Mobile Agenda View](assets/screenshot-8.png)
 Mobile Agenda View
 
 ## Contributors

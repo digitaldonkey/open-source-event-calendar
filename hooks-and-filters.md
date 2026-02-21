@@ -1566,6 +1566,48 @@ add_filter('osec_ics_import_alias', $term);
 
 @file **../src/App/View/Admin/AdminPageAddEvent.php**
 
+### osec_admin_edit_event_input_panels_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter content boxes in Event Edit
+
+```php
+add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
+```
+
+#### Description
+
+
+Like Date-and-time, Location, Tickets... Allows you to add or limit Event information options.
+
+#### Parameters
+
+
+ - **$boxes** <span style="color:crimson"> </span> Array of HTML output (bootstrap3 panels).
+ - **$event** <span style="color:crimson"> </span> Event instance.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter content boxes in Event Edit
+ *
+ * Like Date-and-time, Location, Tickets...
+ * Allows you to add or limit Event information options.
+ *
+ * @param  array  $boxes  Array of HTML output (bootstrap3 panels).
+ * @param  Event  $event  Event instance.
+ *
+ * @file src/App/View/Admin/AdminPageAddEvent.php
+ */
+add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
+```
+
+</details>
+
+
 ### osec_post_form_before_venue_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -1643,87 +1685,6 @@ Content must be a table row aka wrapped in in tr-Html-Tags.
  * @file src/App/View/Admin/AdminPageAddEvent.php
  */
 add_filter('osec_post_form_after_venue_html', $html);
-```
-
-</details>
-
-
-### osec_admin_edit_event_input_panels_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter content boxes in Event Edit
-
-```php
-add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
-```
-
-#### Description
-
-
-Like Date-and-time, Location, Tickets... Allows you to add or limit Event information options.
-
-#### Parameters
-
-
- - **$boxes** <span style="color:crimson"> </span> Array of HTML output (bootstrap3 panels).
- - **$event** <span style="color:crimson"> </span> Event instance.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter content boxes in Event Edit
- *
- * Like Date-and-time, Location, Tickets...
- * Allows you to add or limit Event information options.
- *
- * @param  array  $boxes  Array of HTML output (bootstrap3 panels).
- * @param  Event  $event  Event instance.
- *
- * @file src/App/View/Admin/AdminPageAddEvent.php
- */
-add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
-```
-
-</details>
-
-
----
-
-
-@file **../src/App/View/Admin/AdminPageManageFeeds.php**
-
-### osec_calendar_feeds <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter FeedsController.
-
-```php
-add_filter('osec_calendar_feeds', $feed);
-```
-
-#### Parameters
-
-
- - **$feed** <span style="color:crimson"> </span> 
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter FeedsController.
- *
- * @since 1.0
- *
- * @param  FeedsController  $feed
- *
- * @file src/App/View/Admin/AdminPageManageFeeds.php
- */
-add_filter('osec_calendar_feeds', $feed);
 ```
 
 </details>
@@ -1884,13 +1845,13 @@ add_filter('osec_robots_install', $bool);
 </details>
 
 
-### osec_admin_setting_tabs_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_admin_setting_sections_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter or add tabs on AdminPageSettings
 
 ```php
-add_filter('osec_admin_setting_tabs_alter', $tabs);
+add_filter('osec_admin_setting_sections_alter', $tabs);
 ```
 
 #### Parameters
@@ -1912,7 +1873,7 @@ add_filter('osec_admin_setting_tabs_alter', $tabs);
  *
  * @file src/App/View/Admin/AdminPageSettings.php
  */
-add_filter('osec_admin_setting_tabs_alter', $tabs);
+add_filter('osec_admin_setting_sections_alter', $tabs);
 ```
 
 </details>
@@ -6115,6 +6076,48 @@ add_filter('osec_ics_import_alias', $term);
 
 @file **../src/App/View/Admin/AdminPageAddEvent.php**
 
+### osec_admin_edit_event_input_panels_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter content boxes in Event Edit
+
+```php
+add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
+```
+
+#### Description
+
+
+Like Date-and-time, Location, Tickets... Allows you to add or limit Event information options.
+
+#### Parameters
+
+
+ - **$boxes** <span style="color:crimson"> </span> Array of HTML output (bootstrap3 panels).
+ - **$event** <span style="color:crimson"> </span> Event instance.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter content boxes in Event Edit
+ *
+ * Like Date-and-time, Location, Tickets...
+ * Allows you to add or limit Event information options.
+ *
+ * @param  array  $boxes  Array of HTML output (bootstrap3 panels).
+ * @param  Event  $event  Event instance.
+ *
+ * @file src/App/View/Admin/AdminPageAddEvent.php
+ */
+add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
+```
+
+</details>
+
+
 ### osec_post_form_before_venue_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -6192,87 +6195,6 @@ Content must be a table row aka wrapped in in tr-Html-Tags.
  * @file src/App/View/Admin/AdminPageAddEvent.php
  */
 add_filter('osec_post_form_after_venue_html', $html);
-```
-
-</details>
-
-
-### osec_admin_edit_event_input_panels_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter content boxes in Event Edit
-
-```php
-add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
-```
-
-#### Description
-
-
-Like Date-and-time, Location, Tickets... Allows you to add or limit Event information options.
-
-#### Parameters
-
-
- - **$boxes** <span style="color:crimson"> </span> Array of HTML output (bootstrap3 panels).
- - **$event** <span style="color:crimson"> </span> Event instance.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter content boxes in Event Edit
- *
- * Like Date-and-time, Location, Tickets...
- * Allows you to add or limit Event information options.
- *
- * @param  array  $boxes  Array of HTML output (bootstrap3 panels).
- * @param  Event  $event  Event instance.
- *
- * @file src/App/View/Admin/AdminPageAddEvent.php
- */
-add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
-```
-
-</details>
-
-
----
-
-
-@file **../src/App/View/Admin/AdminPageManageFeeds.php**
-
-### osec_calendar_feeds <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter FeedsController.
-
-```php
-add_filter('osec_calendar_feeds', $feed);
-```
-
-#### Parameters
-
-
- - **$feed** <span style="color:crimson"> </span> 
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter FeedsController.
- *
- * @since 1.0
- *
- * @param  FeedsController  $feed
- *
- * @file src/App/View/Admin/AdminPageManageFeeds.php
- */
-add_filter('osec_calendar_feeds', $feed);
 ```
 
 </details>
@@ -6433,13 +6355,13 @@ add_filter('osec_robots_install', $bool);
 </details>
 
 
-### osec_admin_setting_tabs_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_admin_setting_sections_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter or add tabs on AdminPageSettings
 
 ```php
-add_filter('osec_admin_setting_tabs_alter', $tabs);
+add_filter('osec_admin_setting_sections_alter', $tabs);
 ```
 
 #### Parameters
@@ -6461,7 +6383,7 @@ add_filter('osec_admin_setting_tabs_alter', $tabs);
  *
  * @file src/App/View/Admin/AdminPageSettings.php
  */
-add_filter('osec_admin_setting_tabs_alter', $tabs);
+add_filter('osec_admin_setting_sections_alter', $tabs);
 ```
 
 </details>
