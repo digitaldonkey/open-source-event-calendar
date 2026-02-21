@@ -3,7 +3,7 @@
 Tags: calendar, events, ics, ical importer
 Requires PHP: 8.2
 Requires at least: 6.6
-Tested up to: 6.9
+Tested up to: 6.9.1
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Plugin URI: https://github.com/digitaldonkey/open-source-event-calendar

@@ -9,9 +9,13 @@ class MakeReadme
 {
     private const PLUGIN_DIR = __DIR__ . '/../..';
 
-    private const DEBUG = true;
+    private const DEBUG = false;
 
     private array $lines = [];
+
+    private string $markdown_source;
+
+
     /**
      * Makes a Readme.
      **
@@ -30,6 +34,7 @@ class MakeReadme
                 'https://ddev-wordpress.ddev.site/wp-content/plugins/open-source-event-calendar/'
             );
 
+            $this->markdown_source = OSEC_PATH . 'README.md';
 
             /**
              * Every array entry represents n lines of readme in the given order.
@@ -39,7 +44,8 @@ class MakeReadme
              *   - any function output
              * You may use:
              *   - true to create a sandard value (e.g: 'Tested up to' => "Tested up to: 6.9\n",)
-             *   - a string containing ##VALUE## to reformat a entry (e.g: 'The value is ##VALUE##.' => 'The value is 6.9')
+             *   - a string containing ##VALUE## to reformat a entry
+             *       e.g: 'The value is ##VALUE##.' => 'The value is 6.9'
              *   - a callable to output anything else.
              *     You are responsible to provide line-endings as the sections needs.
              */
@@ -85,10 +91,9 @@ class MakeReadme
             }
 
             // Make the file.
-            $output_file = realpath(OSEC_PATH . 'README.txt');
+            $output_file = trailingslashit(realpath(OSEC_PATH)) . 'README.txt';
             $lines = implode('', $this->lines);
-
-            if (file_put_contents(OSEC_PATH . 'README.txt', $lines)) {
+            if (file_put_contents($output_file, $lines)) {
                 \WP_CLI::success('Sucessfully created readme file:' . $output_file);
                 if (self::DEBUG) {
                     // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -104,26 +109,21 @@ class MakeReadme
 
     protected function parse_description_sections(): array
     {
-        $mdFilePath = OSEC_PATH . '.github/README.md';
-        $lines = file($mdFilePath, FILE_IGNORE_NEW_LINES);
+        $lines = file($this->markdown_source, FILE_IGNORE_NEW_LINES);
 
         $sections = [];
         $currentTitle = 'Header';   // default section name
         $currentContent = [];
 
-        foreach ($lines as $line)
-        {
+        foreach ($lines as $line) {
             # New section every time we come across a ## Header
-            if (preg_match('/^##(?!#)\s+(.*)$/', $line, $match))
-            {
+            if (preg_match('/^##(?!#)\s+(.*)$/', $line, $match)) {
                 # Save section
                 $sections[$currentTitle] = trim(implode("\n", $currentContent));
 
-                $currentTitle = trim($match[1]);
+                $currentTitle   = trim($match[1]);
                 $currentContent = [$line];
-            }
-            else
-            {
+            } else {
                 $currentContent[] = $line;
             }
         }
@@ -140,10 +140,10 @@ class MakeReadme
 
         # Sections to not include in WordPress readme
         $except_sections = [
-            "Header",  # Everything from start of file to first ## Section
-            "Table of Contents",
-            "Screenshots",  # Formated as a different section
-            "Contributors"
+            'Header',  # Everything from start of file to first ## Section
+            'Table of Contents',
+            'Screenshots',  # Formated as a different section
+            'Contributors',
         ];
 
         return implode(
@@ -162,18 +162,16 @@ class MakeReadme
     protected function format_screenshots_for_wp(): string
     {
         // TODO: Not cool running this a second time, reading and parsing the entire file again
-        $screenshotsSectionText = $this->parse_description_sections()["Screenshots"];
+        $screenshotsSectionText = $this->parse_description_sections()['Screenshots'];
 
         $screenshots = [];
-        foreach (explode("\n", $screenshotsSectionText) as $line)
-        {
+        foreach (explode("\n", $screenshotsSectionText) as $line) {
             # Match the text format of "[CAPTION](screenshot-NUMBER)"
-            if (preg_match('/!\[(.*?)\]\(.*screenshot-(\d+).*\)/', $line, $matches))
-            {
+            if (preg_match('/!\[(.*?)\]\(.*screenshot-(\d+).*\)/', $line, $matches)) {
                 $caption = $matches[1];
-                $number = $matches[2];
+                $number  = $matches[2];
 
-                $screenshots[] = $number . ". " . $caption;
+                $screenshots[] = $number . '. ' . $caption;
             }
         }
 
