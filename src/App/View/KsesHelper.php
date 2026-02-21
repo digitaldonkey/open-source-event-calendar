@@ -202,6 +202,7 @@ class KsesHelper extends OsecBaseClass
                     'onfocus' => true,
                     'placeholder' => true,
                     'size' => true,
+                    'step' => true,
                     'style' => true,
                     'tabindex' => true,
                     'type' => true,
