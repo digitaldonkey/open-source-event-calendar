@@ -34,7 +34,7 @@ references:
         composer.lock
         open-source-event-calendar.php
         constants.php
-        README.md
+        README.txt
         LICENSE
   workspace_root: &workspace_root /tmp
 
