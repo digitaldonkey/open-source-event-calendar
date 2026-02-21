@@ -5,6 +5,12 @@
 
 @muted_color: #818181;
 
+// DEBUG leftover columns
+//*[class^='ai1ec-col-'] {
+//    outline: 1px dashed deeppink;
+//}
+
+
 #poststuff {
     // Limit overall width.
     max-width: 70rem;
@@ -123,10 +129,12 @@
     }
 }
 
-
-/* TODO DEBUG ONLY */
-*[class^='ai1ec-col-'] {
-    outline: 1px dashed deeppink;
+.form-table td div {
+    background: rgba(246, 247, 247, 0.5);
+    padding: 6px 6px 15px 6px;
+    &:last-of-type {
+        padding-bottom: 6px;
+    }
 }
 
 .osec-text-center {
