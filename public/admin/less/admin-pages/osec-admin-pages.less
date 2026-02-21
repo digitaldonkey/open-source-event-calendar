@@ -18,21 +18,10 @@
         max-width: 50rem;
     }
 
-    .inside {
-        margin-top: 1em;
-        margin-bottom: 1em;
-        &:after {
-            content: ' ';
-            display: table;
-            clear: both;
-        }
-
-        @media screen and (min-width: 783px) {
-            & {
-                padding: 0 26px;
-            }
-        }
-
+    .inside:after {
+        content: ' ';
+        display: table;
+        clear: both;
     }
 }
 

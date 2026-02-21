@@ -6,3 +6,12 @@
   white-space: normal;
   display: inline-table;
 }
+#poststuff .postbox .inside {
+  padding-top: 1em;
+  padding-bottom: 0.5em;
+}
+@media screen and (min-width: 783px) {
+  #poststuff .postbox .inside {
+    padding: 0.5em 26px 1em;
+  }
+}

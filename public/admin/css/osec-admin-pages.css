@@ -4,19 +4,10 @@
 #poststuff .postbox-container {
   max-width: 50rem;
 }
-#poststuff .inside {
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
 #poststuff .inside:after {
   content: ' ';
   display: table;
   clear: both;
-}
-@media screen and (min-width: 783px) {
-  #poststuff .inside {
-    padding: 0 26px;
-  }
 }
 .ai1ec-form-group {
   display: block;

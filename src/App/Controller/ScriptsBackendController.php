@@ -46,13 +46,13 @@ class ScriptsBackendController extends OsecBaseClass
             // Meabe this was mainly made to conceal additional paes widget we don't have.
             //
             $settings->get('settings_page')                                                     => [
+                ['style', 'bootstrap.min.css'],
                 ['script', 'common'],
                 ['script', 'wp-lists'],
                 ['script', 'postbox'],
+                ['script', 'post'],
                 ['style', 'osec-admin-pages.css'],
                 ['style', 'osec-admin-page-settings.css'],
-                ['style', 'bootstrap.min.css'],
-                ['script', 'post'],
             ],
             $settings->get('feeds_page')                                                        => [
                 ['script', 'common'],
