@@ -1,8 +1,8 @@
 <div class="timely ai1ec-single-event
 	ai1ec-event-id-{{ post_id }}
 	ai1ec-event-instance-id-{{ instance_id }}
-	{% if event.is_multiday %}ai1ec-multiday{% endif %}
-	{% if event.is_allday %}ai1ec-allday{% endif %}">
+	{% if is_multiday_event %}ai1ec-multiday{% endif %}
+	{% if is_allday_event %}ai1ec-allday{% endif %}">
 
     <a id="wp--skip-link--target"></a>
 
@@ -79,11 +79,11 @@
                     </div>
                 {% endif %}
 
-                {% if cost is not empty or event.is_free %}
+                {% if cost is not empty or is_free_event %}
                     <div class="ai1ec-cost ai1ec-row">
                         <div class="ai1ec-field-label {{ col1 }}">{{ text_cost }}</div>
                         <div class="ai1ec-field-value {{ col2 }}">
-                            {{ event.is_free ? text_free : cost }}
+                            {{ is_free_event ? text_free : cost }}
                         </div>
                     </div>
                 {% endif %}

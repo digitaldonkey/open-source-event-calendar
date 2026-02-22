@@ -94,7 +94,8 @@ class OnedayView extends AbstractView
             'title'                    => $title,
             'type'                     => 'oneday',
             'cell_array'               => $cell_array,
-            'show_location_in_title'   => $settings->get('show_location_in_title'),
+            'show_location_in_title'   => $this->app->settings->get('feature_event_location')
+                                            && $this->app->settings->get('show_location_in_title'),
             'now_top'                  => $now,
             'now_text'                 => $now_text,
             'time_format'              => $time_format,

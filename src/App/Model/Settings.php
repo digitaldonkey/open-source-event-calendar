@@ -71,6 +71,7 @@ class Settings extends OsecBaseInitialized
             }
         }
         ksort($allSettings);
+
         return $allSettings;
     }
 
@@ -327,30 +328,30 @@ class Settings extends OsecBaseInitialized
     {
         // Renderer-> class must be in this namespace (Osec\Html\Settings\XXX).
         $this->defaultOptions = [
-            'osec_db_version'                => [
+            'osec_db_version' => [
                 'type'    => 'string',
                 'default' => false,
             ],
-            'feeds_page'                     => [
+            'feeds_page' => [
                 'type'    => 'string',
                 'default' => false,
             ],
-            'settings_page'                  => [
+            'settings_page' => [
                 'type'    => 'string',
                 'default' => false,
             ],
-            'less_variables_page'            => [
+            'less_variables_page' => [
                 'type'    => 'string',
                 'default' => false,
             ],
             // TODO Is this correct?
             // This is the WP default format commented out.
             // 'input_date_format' => ['type' => 'string', 'default' => 'd/m/yyyy'],
-            'plugins_options'                => [
+            'plugins_options' => [
                 'type'    => 'array',
                 'default' => [],
             ],
-            'calendar_page_id'               => [
+            'calendar_page_id' => [
                 'type'     => 'mixed',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCalenderPageSelect',
@@ -359,7 +360,7 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => false,
             ],
-            'week_start_day'                 => [
+            'week_start_day' => [
                 'type'     => 'int',
                 'renderer' => [
                     'class'   => 'Osec\Settings\Elements\SettingsSelect',
@@ -368,9 +369,9 @@ class Settings extends OsecBaseInitialized
                     'label'   => __('Week starts on', 'open-source-event-calendar'),
                     'options' => 'get_weekdays_settings',
                 ],
-                'default'  => (int) get_option('start_of_week', 1),
+                'default'  => (int)get_option('start_of_week', 1),
             ],
-            'enabled_views'                  => [
+            'enabled_views' => [
                 'type'     => 'array',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsEnabledViews',
@@ -425,7 +426,7 @@ class Settings extends OsecBaseInitialized
                 ],
             ],
             // THis is actually an ALIAS
-            'timezone_string'                => [
+            'timezone_string' => [
                 'type'     => 'wp_option',
                 'renderer' => [
                     'class'   => 'Osec\Settings\Elements\SettingsSelect',
@@ -435,13 +436,13 @@ class Settings extends OsecBaseInitialized
                     'options' => 'Osec\App\Model\Date\Timezones::get_timezones',
                     'help'    => __(
                         'This is an alias to wp-settings timezone and could also be 
-                            changed on /wp-admin/options-general.php.',
+                            changed on <a href="/wp-admin/options-general.php">Settings&nbsp;>&nbsp;general</a>.',
                         'open-source-event-calendar'
                     ),
                 ],
                 'default'  => Timezones::factory($this->app)->get_default_timezone(),
             ],
-            'default_tags_categories'        => [
+            'default_tags_categories' => [
                 'type'     => 'array',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCatsTagsFilter',
@@ -457,7 +458,7 @@ class Settings extends OsecBaseInitialized
                     'tags'       => [],
                 ],
             ],
-            'exact_date'                     => [
+            'exact_date' => [
                 'type'     => 'string',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsInput',
@@ -467,7 +468,7 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => '',
             ],
-            'agenda_events_per_page'         => [
+            'agenda_events_per_page' => [
                 'type'     => 'int',
                 'renderer' => [
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
@@ -479,7 +480,7 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => 10,
             ],
-            'week_view_starts_at'            => [
+            'week_view_starts_at' => [
                 'type'     => 'int',
                 'renderer' => [
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
@@ -491,7 +492,7 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => 8,
             ],
-            'week_view_ends_at'              => [
+            'week_view_ends_at' => [
                 'type'     => 'int',
                 'renderer' => [
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
@@ -503,12 +504,29 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => 24,
             ],
-            'month_word_wrap'                => [
+            'show_year_in_agenda_dates' => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
-                    'label' => __('<strong>Word-wrap event stubs</strong> in Month view', 'open-source-event-calendar'),
+                    'label' => __(
+                        'Show year in calendar date labels',
+                        'open-source-event-calendar'
+                    ),
+                    'help' => __(
+                        'For output date formats please check <a href="/wp-admin/options-general.php">
+                             Settings&nbsp;>&nbsp;general</a>.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => false,
+            ],
+            'month_word_wrap' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'viewing-events',
+                    'label' => __('Word-wrap event stubs in Month view', 'open-source-event-calendar'),
                     'help'  => __('Only applies to events that span a single day.', 'open-source-event-calendar'),
                 ],
                 'default'  => false,
@@ -519,94 +537,57 @@ class Settings extends OsecBaseInitialized
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
                     'label' => __(
-                        'In Agenda-like views, <strong>include all events
-                            from last day shown</strong>',
+                        'In Agenda-like views, include all events
+                            from last day shown',
                         'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
             ],
-            'agenda_events_expanded'         => [
+            'agenda_events_expanded' => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
                     'label' => __(
-                        'Keep all events <strong>expanded</strong> in Agenda view (disables toggler).',
-                        'open-source-event-calendar'
-                    ),
-                ],
-                'default'  => false,
-            ],
-            'show_year_in_agenda_dates'      => [
-                'type'     => 'bool',
-                'renderer' => [
-                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
-                    'tab'   => 'viewing-events',
-                    'label' => __(
-                        '<strong>Show year</strong> in calendar date labels',
-                        'open-source-event-calendar'
-                    ),
-                ],
-                'default'  => false,
-            ],
-            'show_location_in_title'         => [
-                'type'     => 'bool',
-                'renderer' => [
-                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
-                    'tab'   => 'viewing-events',
-                    'label' => __(
-                        '<strong>Show location in event titles</strong> in calendar views',
+                        'Keep all events expanded in Agenda view (disables toggler).',
                         'open-source-event-calendar'
                     ),
                 ],
                 'default'  => true,
             ],
-            'exclude_from_search'            => [
+            'exclude_from_search' => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
                     'label' => __(
-                        '<strong>Exclude</strong> events from search results',
+                        'Exclude events from search results',
                         'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
             ],
-            'turn_off_subscription_buttons'  => [
+            'turn_off_subscription_buttons' => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
                     'label' => __(
-                        'Hide <strong>Subscribe</strong>/<strong>Add to Calendar</strong> 
+                        'Hide Subscribe/Add to Calendar 
                             buttons in calendar and single event views ',
                         'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
             ],
-            'hide_maps_until_clicked'        => [
+            'affix_filter_menu' => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
                     'label' => __(
-                        ' Hide <strong>Google Maps</strong> until clicked',
-                        'open-source-event-calendar'
-                    ),
-                ],
-                'default'  => true,
-            ],
-
-            'affix_filter_menu'                      => [
-                'type'     => 'bool',
-                'renderer' => [
-                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
-                    'tab'   => 'viewing-events',
-                    'label' => __(
-                        ' <strong>Affix filter menu</strong> to top of window when it scrolls out of view',
+                        ' Affix filter menu to top of window when it scrolls out of view',
                         'open-source-event-calendar'
                     ),
                     'help'  => __(
@@ -616,7 +597,7 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => false,
             ],
-            'affix_vertical_offset_md'               => [
+            'affix_vertical_offset_md' => [
                 'type'     => 'int',
                 'renderer' => [
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
@@ -628,7 +609,7 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => 0,
             ],
-            'affix_vertical_offset_lg'               => [
+            'affix_vertical_offset_lg' => [
                 'type'     => 'int',
                 'renderer' => [
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
@@ -642,7 +623,7 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => 0,
             ],
-            'affix_vertical_offset_sm'               => [
+            'affix_vertical_offset_sm' => [
                 'type'     => 'int',
                 'renderer' => [
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
@@ -656,7 +637,7 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => 0,
             ],
-            'affix_vertical_offset_xs'               => [
+            'affix_vertical_offset_xs' => [
                 'type'     => 'int',
                 'renderer' => [
                     'class'  => 'Osec\Settings\Elements\SettingsInput',
@@ -670,25 +651,13 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => 0,
             ],
-            'strict_compatibility_content_filtering' => [
+            'hide_featured_image' => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
                     'label' => __(
-                        'Strict compatibility content filtering',
-                        'open-source-event-calendar'
-                    ),
-                ],
-                'default'  => false,
-            ],
-            'hide_featured_image'                    => [
-                'type'     => 'bool',
-                'renderer' => [
-                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
-                    'tab'   => 'viewing-events',
-                    'label' => __(
-                        ' <strong>Hide featured image</strong> from event details page',
+                        ' Hide featured image from event details page',
                         'open-source-event-calendar'
                     ),
                     'help'  => __(
@@ -698,25 +667,25 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => false,
             ],
-            'featured_image_fallback'                    => [
+            'featured_image_fallback' => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
                     'label' => __(
-                        ' <strong>Use featured image fallbacks</strong> if no featured image is set in event',
+                        'Use featured image fallbacks if no featured image is set in event',
                         'open-source-event-calendar'
                     ),
                     'help'  => __(
                         'Select if your want to use category images as featured image fallback on event page.
-                         Fallbacks can be influenced by hook osec_avatar_valid_callbacks.
+                         Fallbacks can be influenced by hook <code>osec_avatar_valid_callbacks</code>.
                         ',
                         'open-source-event-calendar'
                     ),
                 ],
                 'default'  => true,
             ],
-            'input_date_format'                      => [
+            'input_date_format' => [
                 'type'     => 'string',
                 'renderer' => [
                     'class'   => 'Osec\Settings\Elements\SettingsSelect',
@@ -743,44 +712,83 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => 'def',
             ],
-            'input_24h_time'                         => [
+            'input_24h_time' => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'editing-events',
                     'label' => __(
-                        ' Use <strong>24h time</strong> in time pickers',
+                        ' Use 24h time in time pickers',
                         'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
             ],
-            'disable_autocompletion'                 => [
+
+            'strict_compatibility_content_filtering' => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
-                    'tab'   => 'editing-events',
+                    'tab'   => 'advanced',
                     'label' => __(
-                        '<strong>Disable address autocomplete</strong> function',
+                        'Strict compatibility content filtering',
                         'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
             ],
-            'geo_region_biasing'                     => [
+            'skip_in_the_loop_check' => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
-                    'tab'   => 'editing-events',
+                    'tab'   => 'advanced',
                     'label' => __(
-                        'Use the configured <strong>region</strong> (WordPress locale) 
-                            to bias the address autocomplete function ',
+                        'Skip in_the_loop() check
+                            that protects against multiple calendar output',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'Try enabling this option if your calendar does not appear on the calendar page.
+                            It is needed for compatibility with a small number of themes that call
+                            <code>the_content()</code> from outside of The Loop. Leave disabled otherwise.',
                         'open-source-event-calendar'
                     ),
                 ],
                 'default'  => false,
             ],
-            'calendar_css_selector'                  => [
+            'osec_use_frontend_rendering' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'advanced',
+                    'label' => __('Use frontend rendering.', 'open-source-event-calendar'),
+                    'help'  => __(
+                        'Renders calendar views on the client rather than the server;
+                            significantly improves performance.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => true,
+            ],
+            'render_css_as_link' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'advanced',
+                    'label' => __(
+                        'Link CSS in <code>&lt;head&gt;</code>
+                            section when file cache is unavailable.',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'Serve CSS as a link if file cache is not enabled rather than have
+                            it output inline (recommended).',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => true,
+            ],
+            'calendar_css_selector' => [
                 'type'     => 'string',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsInput',
@@ -792,65 +800,14 @@ class Settings extends OsecBaseInitialized
                             calendar a DOM element other than the usual page content container
                             if you are unable to create an appropriate page template
                             for the calendar page. To use, enter a CSS selcctor that evaluates to a single DOM element.
-                            Any existing markup found within the target will be replaced by the 
-                            calendar. Will only work if selector is <strong>outside</strong> the page content loop.',
+                            Any existing markup found within the target will be replaced by the
+                            calendar. Will only work if selector is outside the page content loop.',
                         'open-source-event-calendar'
                     ),
                 ],
                 'default'  => '',
             ],
-            'skip_in_the_loop_check'                 => [
-                'type'     => 'bool',
-                'renderer' => [
-                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
-                    'tab'   => 'advanced',
-                    'label' => __(
-                        '<strong>Skip <tt>in_the_loop()</tt> check </strong> 
-                            that protects against multiple calendar output',
-                        'open-source-event-calendar'
-                    ),
-                    'help'  => __(
-                        'Try enabling this option if your calendar does not appear on the calendar page. 
-                            It is needed for compatibility with a small number of themes that call
-                            <code>the_content()</code> from outside of The Loop. Leave disabled otherwise.',
-                        'open-source-event-calendar'
-                    ),
-                ],
-                'default'  => false,
-            ],
-            'osec_use_frontend_rendering'            => [
-                'type'     => 'bool',
-                'renderer' => [
-                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
-                    'tab'   => 'advanced',
-                    'label' => __('Use frontend rendering.', 'open-source-event-calendar'),
-                    'help'  => __(
-                        'Renders calendar views on the client rather than the server; 
-                            significantly improves performance.',
-                        'open-source-event-calendar'
-                    ),
-                ],
-                'default'  => true,
-            ],
-            'render_css_as_link'                     => [
-                'type'     => 'bool',
-                'renderer' => [
-                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
-                    'tab'   => 'advanced',
-                    'label' => __(
-                        '<strong>Link CSS</strong> in <code>&lt;head&gt;</code>
-                            section when file cache is unavailable.',
-                        'open-source-event-calendar'
-                    ),
-                    'help'  => __(
-                        'Serve CSS as a link if file cache is not enabled rather than have  
-                            it output inline (recommended).',
-                        'open-source-event-calendar'
-                    ),
-                ],
-                'default'  => true,
-            ],
-            'edit_robots_txt'                        => [
+            'edit_robots_txt' => [
                 'type'     => 'string',
                 'renderer' => [
                     'class'    => 'Osec\Settings\Elements\SettingsTextarea',
@@ -864,7 +821,7 @@ class Settings extends OsecBaseInitialized
 						<code><a href="https://en.wikipedia.org/wiki/Robots.txt" target="_blank">robots.txt</a></code>
 						protocol, is a convention for cooperating web crawlers and other web robots
 						about accessing all or part of a website that is otherwise publicly viewable.<br />
-						The file is dynamically created using <a href="/?robots=1" target="_blank">/?robots=1</a> 
+						The file is dynamically created using <a href="/?robots=1" target="_blank">/?robots=1</a>
 						and should map to <a href="/robots.txt" target="_blank">/robots.txt</a>
 						If you maintain a static robots.txt you should copy over above directives.',
                         'open-source-event-calendar'
@@ -872,11 +829,11 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => __('Save settings and reload page to generate.', 'open-source-event-calendar'),
             ],
-            'ics_cron_freq'                          => [
+            'ics_cron_freq' => [
                 'type'    => 'string',
                 'default' => 'hourly',
             ],
-            'display_print_button'           => [
+            'display_print_button' => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
@@ -892,18 +849,147 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => false,
             ],
-            'always_use_calendar_timezone'           => [
+            'always_use_calendar_timezone' => [
                 'type'     => 'bool',
                 'renderer' => [
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
                     'label' => __(
-                        'Display events in <strong>calendar time zone</strong>',
+                        'Display events in calendar time zone',
                         'open-source-event-calendar'
                     ),
                     'help'  => __(
-                        'If this box is checked events will appear in the calendar time zone with time zone 
+                        'If this box is checked events will appear in the calendar time zone with time zone
                             information displayed on the event details page.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => false,
+            ],
+            'feature_event_location' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'features',
+                    'label' => __(
+                        'Enable event location',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'Add and display event location information.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => true,
+            ],
+            'show_location_in_title' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckboxFeatureEventLocation',
+                    'tab'   => 'location',
+                    'label' => __(
+                        'Show location in event titles in calendar views',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => true,
+            ],
+            'feature_event_location_maps' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckboxFeatureEventLocation',
+                    'tab'   => 'location',
+                    'label' => __(
+                        'Enable maps for event location',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'Add and display event location maps. Requires event locations.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => true,
+            ],
+            'hide_maps_until_clicked' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckboxFeatureEventLocationMaps',
+                    'tab'   => 'location',
+                    'label' => __(
+                        ' Hide Google Maps until clicked',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => true,
+            ],
+            'disable_autocompletion' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'location',
+                    'label' => __(
+                        'Disable address autocomplete function',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => false,
+            ],
+            'geo_region_biasing' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'location',
+                    'label' => __(
+                        'Use the configured region (WordPress locale)
+                            to bias the address autocomplete function ',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => false,
+            ],
+            'feature_organizer_contact' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'features',
+                    'label' => __(
+                        'Enable organizer contact',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'Add and display organizer contact information for events.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => true,
+            ],
+            'feature_allow_coast' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'features',
+                    'label' => __(
+                        'Enable event coast',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'Add and display event coast and buy tickets url.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => true,
+            ],
+            'feature_allow_comments' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'features',
+                    'label' => __(
+                        'Enable comments on events',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'Enables comments on events post type.',
                         'open-source-event-calendar'
                     ),
                 ],

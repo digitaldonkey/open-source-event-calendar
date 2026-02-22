@@ -49,38 +49,47 @@ class AdminPageAddEvent extends OsecBaseClass
 
         $meta_boxes = [
             'meta_box_date' => [
-                OSEC_POST_TYPE . 'meta_box_date',
+                'osec_event_meta_box_date',
                 esc_html__('Event date and time', 'open-source-event-calendar'),
                 $this->meta_box_date(...),
                 OSEC_POST_TYPE,
                 'advanced',
                 'high',
             ],
-            'meta_box_location' => [
-                OSEC_POST_TYPE . 'meta_box_location',
+        ];
+
+        if ($this->app->settings->get('feature_event_location')) {
+            $meta_boxes['meta_box_location'] = [
+                'osec_event_meta_box_location',
                 esc_html__('Event location', 'open-source-event-calendar'),
                 $this->meta_box_location(...),
                 OSEC_POST_TYPE,
                 'normal',
                 'high',
-            ],
-            'meta_box_tickets' => [
-                OSEC_POST_TYPE . 'meta_box_tickets',
+            ];
+        }
+
+        if ($this->app->settings->get('feature_allow_coast')) {
+            $meta_boxes['meta_box_tickets'] = [
+                'osec_event_meta_box_tickets',
                 esc_html__('Event cost and Tickets', 'open-source-event-calendar'),
                 $this->meta_box_tickets(...),
                 OSEC_POST_TYPE,
                 'normal',
                 'high',
-            ],
-            'meta_box_organizer' => [
+            ];
+        }
+
+        if ($this->app->settings->get('feature_organizer_contact')) {
+            $meta_boxes['meta_box_organizer'] = [
                 OSEC_POST_TYPE . 'meta_box_organizer',
                 esc_html__('Organizer contact', 'open-source-event-calendar'),
                 $this->meta_box_organizer(...),
                 OSEC_POST_TYPE,
                 'normal',
                 'high',
-            ],
-        ];
+            ];
+        }
 
         if ($parent) {
             // Edited reoccurring events:

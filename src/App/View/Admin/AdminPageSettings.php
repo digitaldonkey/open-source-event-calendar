@@ -94,64 +94,106 @@ class AdminPageSettings extends AdminPageAbstract
     public function add_meta_box(): void
     {
         $screen_id = $this->app->settings->get('settings_page');
+        $meta_boxes = [
+            [
+                'osec_event_general_settings',
+                __('Viewing Events', 'open-source-event-calendar'),
+                $this->display_meta_box_general_settings(...),
+                $screen_id,
+                'normal',
+                'high',
+                'default_order' => 10,
+            ],
+            [
+                'osec_event_editing_settings',
+                __('Adding/Editing Events', 'open-source-event-calendar'),
+                $this->display_meta_editing_settings(...),
+                $screen_id,
+                'normal',
+                'default',
+                'default_order' => 15,
+            ],
+            [
+                'osec_event_features',
+                _x('Features', 'meta box', 'open-source-event-calendar'),
+                $this->display_meta_box_features(...),
+                $screen_id,
+                'normal',
+                'default',
+                'default_order' => 20,
+            ],
+            [
+                'osec_event_advanced_settings',
+                __('Advanced Settings', 'open-source-event-calendar'),
+                $this->display_meta_box_advanced_settings(...),
+                $screen_id,
+                'normal',
+                'default',
+                'default_order' => 90,
+            ],
+            [
+                'osec_event_cache_settings',
+                __('Cache Report', 'open-source-event-calendar'),
+                $this->display_meta_box_cache_settings(...),
+                $screen_id,
+                'normal',
+                'default',
+                'default_order' => 35,
+            ],
+            [
+                'osec_event_shortcode_info',
+                __('Shortcodes', 'open-source-event-calendar'),
+                $this->display_meta_box_shortcode_info(...),
+                $screen_id,
+                'normal',
+                'default',
+                'default_order' => 40,
+            ],
+            [
+                'osec_event_save_settings',
+                _x('Publish', 'meta box', 'open-source-event-calendar'),
+                $this->display_meta_box_save_settings(...),
+                $screen_id,
+                'side',
+                'default',
+                'default_order' => 45,
+            ],
+        ];
 
-        add_meta_box(
-            'osec_event_general_settings',
-            __('Viewing Events', 'open-source-event-calendar'),
-            $this->display_meta_box_general_settings(...),
-            $screen_id,
-            'normal',
-            'high'
-        );
-        add_meta_box(
-            'osec_event_editing_settings',
-            __('Adding/Editing Events', 'open-source-event-calendar'),
-            $this->display_meta_editing_settings(...),
-            $screen_id,
-            'normal',
-            'default'
-        );
-        add_meta_box(
-            'osec_event_maps_settings',
-            _x('Location maps', 'meta box', 'open-source-event-calendar'),
-            $this->display_meta_box_maps_settings(...),
-            $screen_id,
-            'normal',
-            'default'
-        );
-        add_meta_box(
-            'osec_event_advanced_settings',
-            __('Advanced Settings', 'open-source-event-calendar'),
-            $this->display_meta_box_advanced_settings(...),
-            $screen_id,
-            'normal',
-            'default'
-        );
+        if ($this->app->settings->get('feature_event_location')) {
+            $meta_boxes[] = [
+                'osec_event_location_settings',
+                _x('Location and maps', 'meta box', 'open-source-event-calendar'),
+                $this->display_meta_box_location(...),
+                $screen_id,
+                'normal',
+                'default',
+                'default_order' => 25,
+            ];
+        }
 
-        add_meta_box(
-            'osec_event_cache_settings',
-            __('Cache Report', 'open-source-event-calendar'),
-            $this->display_meta_box_cache_settings(...),
-            $screen_id,
-            'normal',
-            'default'
-        );
-        add_meta_box(
-            'osec_event_shortcode_info',
-            __('Shortcodes', 'open-source-event-calendar'),
-            $this->display_meta_box_shortcode_info(...),
-            $screen_id,
-            'normal',
-            'default'
-        );
-        add_meta_box(
-            'osec_event_save_settings',
-            _x('Publish', 'meta box', 'open-source-event-calendar'),
-            $this->display_meta_box_save_settings(...),
-            $screen_id,
-            'side',
-            'default'
-        );
+        /**
+         * Alter admin page settings metaboxes.
+         *
+         * Allows to change which Elements you see on admin page settings.
+         * you may also alter the default order.
+         *
+         * @since 1.0
+         *
+         * @param  array  $theme  Array of Less variables
+         */
+        $meta_boxes = apply_filters('osec_admin_page_metaboxes_alter', $meta_boxes);
+
+        // Order by 'default_order' column.
+        // Metabox order is not final, but a user preference.
+        //  @see wp_usermeta: meta-box-order_osec_event_page..., closedpostboxes..., metaboxhidden_...
+        $order = array_column($meta_boxes, 'default_order');
+        array_multisort($order, SORT_ASC, $meta_boxes);
+
+        foreach ($meta_boxes as $meta_box) {
+            unset($meta_box['default_order']);
+            add_meta_box(...$meta_box);
+        }
     }
 
 
@@ -215,9 +257,13 @@ class AdminPageSettings extends AdminPageAbstract
     /**
      * Displays the maps meta box settings page.
      */
-    public function display_meta_box_maps_settings(mixed $obj, mixed $box)
+    public function display_meta_box_features(mixed $obj, mixed $box)
     {
-        echo 'Advanced maps ';
+        ThemeLoader::factory($this->app)->get_file(
+            'setting/metabox_plain.twig',
+            $this->getSection('features'),
+            true
+        )->render();
     }
 
     /**
@@ -229,8 +275,19 @@ class AdminPageSettings extends AdminPageAbstract
             'setting/metabox_plain.twig',
             $this->getSection('viewing-events'),
             true
-        )
-        ->render();
+        )->render();
+    }
+
+    /**
+     * Displays the maps meta box settings page.
+     */
+    public function display_meta_box_location(mixed $obj, mixed $box)
+    {
+        ThemeLoader::factory($this->app)->get_file(
+            'setting/metabox_plain.twig',
+            $this->getSection('location'),
+            true
+        )->render();
     }
 
     /**
@@ -247,6 +304,7 @@ class AdminPageSettings extends AdminPageAbstract
             $tabs = [
                 'viewing-events' => [],
                 'editing-events' => [],
+                'location' => [],
                 'advanced'       => [],
             ];
             $sections = $this->getVisibleTabs(

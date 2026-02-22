@@ -56,7 +56,6 @@ class EventSingleView extends OsecBaseClass
         $settings     = $this->app->settings;
         $rrule        = RepeatRuleToText::factory($this->app);
         $taxonomyView = EventTaxonomyView::factory($this->app);
-        $location     = EventLocationView::factory($this->app);
         $ticketView   = EventTicketView::factory($this->app);
         $contentView  = EventContentView::factory($this->app);
         $timeView     = EventTimeView::factory($this->app);
@@ -84,20 +83,6 @@ class EventSingleView extends OsecBaseClass
          */
         $extra_buttons = apply_filters('osec_rendering_single_event_actions', '', $event);
 
-        /**
-         * Location in to single Event view
-         *
-         * @since 1.0
-         *
-         * @param  array  $event  Current Event Object.
-         *
-         * @param  array  $html  Event location.
-         */
-        $venues_html   = apply_filters(
-            'osec_rendering_single_event_venues',
-            nl2br((string)$location->get_location($event)),
-            $event
-        );
         $timezone_info = [
             'show_timezone'       => false,
             'text_timezone_title' => null,
@@ -139,18 +124,16 @@ class EventSingleView extends OsecBaseClass
         do_action('osec_alter_single_event_page_before_render', $event);
 
         $args = [
-            'event'                  => $event,
+            'event'                  => $event, // Deprecated. Leaving for legacy.
+            'is_multiday_event'      => $event->is_multiday(),
+            'is_allday_event'      => $event->is_allday(),
             'recurrence'             => $rrule->rrule_to_text($event->get('recurrence_rules', '')),
             // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
             'exclude'                => $timeView->get_exclude_html($event, $rrule),
             'categories'             => $taxonomyView->get_categories_html($event),
             'tags'                   => $taxonomyView->get_tags_html($event),
-            'location'               => $venues_html,
-            'map'                    => $location->get_map_view($event),
-            'contact'                => $ticketView->get_contact_html($event),
             'back_to_calendar'       => $contentView->get_back_to_calendar_button_html(
-                $event->get('start')
-                      ->format()
+                $event->get('start')->format()
             ),
             'subscribe_url'          => $subscribe_url,
             'subscribe_url_no_html'  => $subscribe_url . '&no_html=true',
@@ -161,14 +144,10 @@ class EventSingleView extends OsecBaseClass
             'hide_featured_image'    => $settings->get('hide_featured_image'),
             'extra_buttons'          => $extra_buttons,
             'text_add_calendar'      => __('Add to Calendar', 'open-source-event-calendar'),
-            'subscribe_buttons_text' => CalendarSubscribeButtonView::factory($this->app)
-                                                                   ->get_labels(),
+            'subscribe_buttons_text' => CalendarSubscribeButtonView::factory($this->app)->get_labels(),
             'text_get_calendar'      => __('Get a Timely Calendar', 'open-source-event-calendar'),
             'text_when'              => __('When:', 'open-source-event-calendar'),
             'text_where'             => __('Where:', 'open-source-event-calendar'),
-            'text_cost'              => __('Cost:', 'open-source-event-calendar'),
-            'text_contact'           => __('Contact:', 'open-source-event-calendar'),
-            'text_free'              => __('Free', 'open-source-event-calendar'),
             'text_repeats'           => __('Repeats', 'open-source-event-calendar'),
             'text_xcludes'           => __('Excludes', 'open-source-event-calendar'),
             'text_categories'        => __('Categories', 'open-source-event-calendar'),
@@ -176,13 +155,64 @@ class EventSingleView extends OsecBaseClass
             'timezone_info'          => $timezone_info,
             'content_img_url'        => $event->get_runtime('content_img_url'),
             'post_id'                => $event->get('post_id'),
-            'ticket_url'             => $event->get('ticket_url'),
-            'tickets_url_label'      => $event->get_runtime('tickets_url_label'),
             'start'                  => $event->get('start'),
             'end'                    => $event->get('end'),
-            'cost'                   => $event->get('cost'),
             'instance_id'            => $event->get('instance_id'),
         ];
+
+        /**
+         * Feature coast & ticket url
+         */
+        if ($settings->get('feature_allow_coast')) {
+            $args = array_merge($args, [
+                'is_free_event'          => $event->get('is_free'),
+                'cost'                   => $event->get('cost'),
+                'text_cost'              => __('Cost:', 'open-source-event-calendar'),
+                'text_free'              => __('Free', 'open-source-event-calendar'),
+                'tickets_url_label'      => $event->get_runtime('tickets_url_label'),
+                'ticket_url'             => $event->get('ticket_url'),
+            ]);
+        }
+
+        /**
+         * Feature organizer contact
+         */
+        if ($settings->get('feature_organizer_contact')) {
+            $args = array_merge($args, [
+                'text_contact'           => __('Contact:', 'open-source-event-calendar'),
+                'contact'                => $ticketView->get_contact_html($event),
+            ]);
+        }
+
+        /**
+         *  feature location & maps
+         */
+        if ($settings->get('feature_event_location')) {
+            $location = EventLocationView::factory($this->app);
+            /**
+             * Location in to single Event view
+             *
+             * @since 1.0
+             *
+             * @param  array  $event  Current Event Object.
+             *
+             * @param  array  $html  Event location.
+             */
+            $venues_html = apply_filters(
+                'osec_rendering_single_event_venues',
+                nl2br((string)$location->get_location($event)),
+                $event
+            );
+            $args = array_merge($args, [
+                'location' => $venues_html,
+            ]);
+
+            if ($settings->get('feature_event_location_maps')) {
+                $args = array_merge($args, [
+                    'map' => $location->get_map_view($event),
+                ]);
+            }
+        }
 
         if (
             ! empty($args['recurrence']) &&

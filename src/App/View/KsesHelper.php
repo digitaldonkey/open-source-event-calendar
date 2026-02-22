@@ -208,6 +208,7 @@ class KsesHelper extends OsecBaseClass
                     'type' => true,
                     'value' => true,
                     'readonly' => true,
+                    'disabled' => true,
                 ],
                 'label' => [
                     'class' => true,
