@@ -1,0 +1,35 @@
+#wpbody-content {
+  max-width: 68rem;
+}
+#osec-time-and-date-box .form-table th {
+  width: 120px;
+}
+#osec-time-and-date-box .osec_start-date-input-group {
+  padding: 6px 6px;
+}
+@media screen and (min-width: 783px) {
+  #osec-time-and-date-box .osec_start-date-input-group {
+    background: linear-gradient(to right, #f6f6f7 0%, rgba(255, 255, 255, 0) 100%);
+  }
+}
+#osec-time-and-date-box .osec_start-date-input-group > div {
+  padding-bottom: 12px;
+}
+#osec-time-and-date-box .osec_start-date-input-group > div:last-of-type {
+  padding-bottom: 0;
+}
+#osec-time-and-date-box .osec_start-date-input-group .ai1ec-form-control {
+  background-color: white;
+  width: auto;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+@media screen and (min-width: 783px) {
+  #osec-time-and-date-box .osec_start-date-input-group .ai1ec-form-control {
+    margin-bottom: 0;
+  }
+}
+#osec-time-and-date-box .calendricalDatePopup td,
+#osec-time-and-date-box .calendricalDatePopup th {
+  display: table-cell !important;
+}
