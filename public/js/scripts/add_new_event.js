@@ -74,13 +74,18 @@ timely.define([
         },
         d = function () {
             jQuery("#osec_google_map").click(i.toggle_visibility_of_google_map_on_click),
-                jQuery("#osec_input_coordinates").change(i.toggle_visibility_of_coordinate_fields_on_click),
-                jQuery("#post").submit(p), jQuery("input.ai1ec-coordinates").blur(i.update_map_from_coordinates_on_blur),
-                jQuery("#osec_additional_publish_button").on("click", o.trigger_publish),
-                jQuery(document).on("change", "#osec_table_coordinates", o.show_end_fields).on("click", "#osec_repeat_apply", o.handle_click_on_apply_button).on("click", "#osec_repeat_cancel", o.handle_click_on_cancel_modal).on("click", "#osec_monthly_type_bymonthday, #osec_monthly_type_byday", o.handle_checkbox_monthly_tab_modal).on("click", ".ai1ec-btn-group-grid a", o.handle_click_on_toggle_buttons),
-                jQuery("#osec_repeat_box").on("hidden.bs.modal", o.handle_modal_hide), o.execute_pseudo_handlers(),
-                jQuery("#widgetField > a").on("click", o.handle_animation_of_calendar_widget),
-                jQuery("#osec_is_free_event").on("change", u.handle_change_is_free)
+            jQuery("#osec_input_coordinates").change(i.toggle_visibility_of_coordinate_fields_on_click),
+            jQuery("#post").submit(p), jQuery("input.ai1ec-coordinates").blur(i.update_map_from_coordinates_on_blur),
+            jQuery("#osec_additional_publish_button").on("click", o.trigger_publish),
+            jQuery(document)
+                .on("change", "#osec_repeat-end-select", o.show_end_fields)
+                .on("click", "#osec_repeat_apply", o.handle_click_on_apply_button)
+                .on("click", "#osec_repeat_cancel", o.handle_click_on_cancel_modal)
+                .on("click", "#osec_monthly_type_bymonthday, #osec_monthly_type_byday", o.handle_checkbox_monthly_tab_modal)
+                .on("click", ".ai1ec-btn-group-grid a", o.handle_click_on_toggle_buttons),
+            jQuery("#osec_repeat_box").on("hidden.bs.modal", o.handle_modal_hide), o.execute_pseudo_handlers(),
+            jQuery("#widgetField > a").on("click", o.handle_animation_of_calendar_widget),
+            jQuery("#osec_is_free_event").on("change", u.handle_change_is_free)
         },
         g = function () {
             jQuery("#osec_event").insertAfter("#osec_event_inline_alert"),

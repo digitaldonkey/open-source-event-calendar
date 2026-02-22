@@ -1854,7 +1854,7 @@ timely.define("domReady", [], function () {
         function (e, t, n, r, i) {
             var s = i.get_ajax_url(),
                 o = function () {
-                    var t = e("#osec_table_coordinates option:selected").val();
+                    var t = e("#osec_repeat-end-select option:selected").val();
                     switch (t) {
                         case "0":
                             e("#osec_until_holder, #osec_count_holder").collapse("hide");
@@ -1912,7 +1912,7 @@ timely.define("domReady", [], function () {
                         case "custom":
                             "1" === e("#osec_is_box_repeat").val() ? (o += "RDATE=") : (o += "EXDATE="), (o += e("#osec_rec_custom_dates").val()), (f = !1);
                     }
-                    var E = e("#osec_table_coordinates").val();
+                    var E = e("#osec_repeat-end-select").val();
                     if ("1" === E && f) o += "COUNT=" + e("#osec_count").val() + ";";
                     else if ("2" === E && f) {
                         var S = e("#osec_until-date-input").val();
@@ -5884,7 +5884,7 @@ timely.define("domReady", [], function () {
                         e("input.ai1ec-coordinates").blur(i.update_map_from_coordinates_on_blur),
                         e("#osec_additional_publish_button").on("click", o.trigger_publish),
                         e(document)
-                            .on("change", "#osec_table_coordinates", o.show_end_fields)
+                            .on("change", "#osec_repeat-end-select", o.show_end_fields)
                             .on("click", "#osec_repeat_apply", o.handle_click_on_apply_button)
                             .on("click", "#osec_repeat_cancel", o.handle_click_on_cancel_modal)
                             .on("click", "#osec_monthly_type_bymonthday, #osec_monthly_type_byday", o.handle_checkbox_monthly_tab_modal)

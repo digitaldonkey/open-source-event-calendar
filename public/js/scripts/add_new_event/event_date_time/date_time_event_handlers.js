@@ -1,6 +1,7 @@
 timely.define(["jquery_timely", "ai1ec_config", "scripts/add_new_event/event_date_time/date_time_utility_functions", "external_libs/jquery.calendrical_timespan", "libs/utils", "external_libs/bootstrap/button"], function (e, t, n, r, i) {
-    var s = i.get_ajax_url(), o = function () {
-        var t = e("#osec_table_coordinates option:selected").val();
+    var s = i.get_ajax_url(),
+        o = function () {
+        var t = e("#osec_repeat-end-select option:selected").val();
         switch (t) {
             case"0":
                 e("#osec_until_holder, #osec_count_holder").collapse("hide");
@@ -49,7 +50,7 @@ timely.define(["jquery_timely", "ai1ec_config", "scripts/add_new_event/event_dat
             case"custom":
                 "1" === e("#osec_is_box_repeat").val() ? o += "RDATE=" : o += "EXDATE=", o += e("#osec_rec_custom_dates").val(), f = !1
         }
-        var E = e("#osec_table_coordinates").val();
+        var E = e("#osec_repeat-end-select").val();
         if ("1" === E && f) o += "COUNT=" + e("#osec_count").val() + ";"; else if ("2" === E && f) {
             var S = e("#osec_until-date-input").val();
             S = r.parseDate(S, t.date_format);
