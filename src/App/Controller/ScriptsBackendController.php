@@ -95,7 +95,7 @@ class ScriptsBackendController extends OsecBaseClass
                     ['style', 'bootstrap.min.css'],
                     ['style', 'add_new_event.css'],
                     ['script', 'add_new_event.js'],
-                    ['style', 'osec-admin-pge-edit-event.css'],
+                    ['style', 'osec-admin-page-edit-event.css'],
                     ['style', 'box-event-time-and-date.css'],
                 ]
             );
