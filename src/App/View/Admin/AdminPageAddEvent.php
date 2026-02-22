@@ -319,8 +319,9 @@ class AdminPageAddEvent extends OsecBaseClass
                 'rrule_text' => esc_html($rrule_text),
             ],
             'excludes' => [
-                'checked' => !empty($event->get('exception_rules')) ? 'checked="checked"' : '',
-                'disabled' => $is_repeating_event ? '' : ' disabled="disabled"',
+                'checked' => ($event->get('recurrence_rules'))
+                         && !empty($event->get('exception_rules')) ? 'checked="checked"' : '',
+                'disabled' => $is_repeating_event || $event->get('recurrence_rules') ? '' : ' disabled="disabled"',
                 'exrule_value' => $event->get('exception_rules'),
                 'label' => esc_html__('Exclude', 'open-source-event-calendar') . ($has_excluded_events ? ':' : '...' ),
                 'exrule_text' => esc_html($exrule_text),
