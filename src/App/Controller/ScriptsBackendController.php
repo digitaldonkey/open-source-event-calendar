@@ -91,11 +91,11 @@ class ScriptsBackendController extends OsecBaseClass
         ) {
             return $this->process_enqueue(
                 [
+                    ['style', 'box-event-location.css'],
                     ['style', 'bootstrap.min.css'],
                     ['style', 'add_new_event.css'],
                     ['script', 'add_new_event.js'],
-                    ['style', 'osec-admin-pages.css'],
-                    ['style', 'box-event-location.css'],
+                    ['style', 'osec-admin-pge-edit-event.css'],
                     ['style', 'box-event-time-and-date.css'],
                 ]
             );

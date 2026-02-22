@@ -14,32 +14,34 @@
                     {{ start_date.label }}:
                 </label>
             </th>
-            <td class="">
-                <div class="date-modifyer">
-                    <input type="checkbox"
-                           name="osec_all_day_event"
-                           id="osec_all_day_event"
-                           value="1" {{ all_day_event.checked }}>
-                    <label for="osec_all_day_event">
-                        {{ all_day_event.label }}
-                    </label>
-                </div>
-                <div class="date-modifyer">
-                    <input type="checkbox"
-                           name="osec_instant_event"
-                           id="osec_instant_event"
-                           value="1" {{ instant_event.checked }}>
-                    <label for="osec_instant_event">
-                        {{ instant_event.label }}
-                    </label>
-                </div>
-                <div class="timely">
-                    <input type="text" class="ai1ec-date-input ai1ec-form-control" id="osec_start-date-input">
-                    <input type="text" class="ai1ec-time-input ai1ec-form-control" id="osec_start-time-input">
-                    <input type="hidden"
-                           name="osec_start_time"
-                           id="osec_start-time"
-                           value="{{ start_date.input_value }}">
+            <td>
+                <div class="osec_start-date-input-group">
+                    <div class="date-modifyer">
+                        <input type="checkbox"
+                               name="osec_all_day_event"
+                               id="osec_all_day_event"
+                               value="1" {{ all_day_event.checked }}>
+                        <label for="osec_all_day_event">
+                            {{ all_day_event.label }}
+                        </label>
+                    </div>
+                    <div class="date-modifyer">
+                        <input type="checkbox"
+                               name="osec_instant_event"
+                               id="osec_instant_event"
+                               value="1" {{ instant_event.checked }}>
+                        <label for="osec_instant_event">
+                            {{ instant_event.label }}
+                        </label>
+                    </div>
+                    <div class="timely">
+                        <input type="text" class="ai1ec-date-input ai1ec-form-control" id="osec_start-date-input">
+                        <input type="text" class="ai1ec-time-input ai1ec-form-control" id="osec_start-time-input">
+                        <input type="hidden"
+                               name="osec_start_time"
+                               id="osec_start-time"
+                               value="{{ start_date.input_value }}">
+                    </div>
                 </div>
             </td>
         </tr>
@@ -50,12 +52,14 @@
                 </label>
             </th>
             <td class="timely">
-                <input type="text" class="ai1ec-date-input ai1ec-form-control" id="osec_end-date-input">
-                <input type="text" class="ai1ec-time-input ai1ec-form-control" id="osec_end-time-input">
-                <input type="hidden"
-                       name="osec_end_time"
-                       id="osec_end-time"
-                       value="{{ end_date.input_value }}">
+                <div class="osec_start-date-input-group">
+                    <input type="text" class="ai1ec-date-input ai1ec-form-control" id="osec_end-date-input">
+                    <input type="text" class="ai1ec-time-input ai1ec-form-control" id="osec_end-time-input">
+                    <input type="hidden"
+                           name="osec_end_time"
+                           id="osec_end-time"
+                           value="{{ end_date.input_value }}">
+                </div>
             </td>
         </tr>
         <tr>
