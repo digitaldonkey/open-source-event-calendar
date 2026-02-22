@@ -285,7 +285,8 @@ class AgendaView extends AbstractView
             $event_props['filtered_title']            = $event->get_runtime('filtered_title');
             $event_props['edit_post_link']            = $event->get_runtime('edit_post_link');
             $event_props['content_img_url']           = $event->get_runtime('content_img_url');
-            $event_props['filtered_content']          = $event->get_runtime('filtered_content');
+            $event_props['filtered_content']          = $this->app->settings->get('feature_use_excerpt') ?
+                         $event->get_runtime('post_excerpt') : $event->get_runtime('filtered_content');
             $event_props['ticket_url_label']          = $event->get_runtime('ticket_url_label');
             $event_props['permalink']                 = $event->get_runtime('instance_permalink');
             $event_props['categories_html']           = $event->get_runtime('categories_html');

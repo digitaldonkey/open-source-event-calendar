@@ -5,8 +5,6 @@ namespace Osec\App\View\Event;
 use Osec\App\Controller\AccessControl;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\Bootstrap\OsecBaseClass;
-use Osec\Exception\BootstrapException;
-use Osec\Exception\Exception;
 use Osec\Settings\HtmlFactory;
 use Osec\Theme\ThemeLoader;
 
@@ -23,99 +21,92 @@ class EventContentView extends OsecBaseClass
     /**
      * Format events excerpt view.
      *
-     * @param  string  $text  Content to excerpt.
+     * @param  string  $default_excerpt  Content to excerpt.
      *
      * @return string Formatted event excerpt.
      */
-    public function get_the_excerpt($text = '')
+    public function get_the_excerpt($default_excerpt = '')
     {
         if ( ! AccessControl::is_our_post_type()) {
-            return $text;
+            return $default_excerpt;
         }
-        $event = new Event($this->app, get_the_ID());
-
-        ob_start();
-        echo '<div class="wp-block-event-excerpt">';
-        echo wp_kses(
-            $this->excerpt_view($event),
-            $this->app->kses->allowed_html_frontend()
+        return $this->get_excerpt(
+            new Event($this->app, get_the_ID())
         );
-        // Re-apply any filters to the post content that normally would have
-        // been applied if it weren't for our interference (below).
-        echo '<div class="wp-block-event-excerpt__excerpt has-small-font-size">';
-        echo esc_html(
-            EventPostView::factory($this->app)->trim_excerpt($event)
-        );
-        echo '</div>';
-        echo '</div>';
-        return ob_get_clean();
     }
 
     /**
-     * Render event excerpt header.
+     * Generates an excerpt from the given content string.
      *
-     * @param  Event  $event  Event to render excerpt for.
+     * Adapted from WordPress's `wp_trim_excerpt' function that is not useful
+     * for applying to custom content.
      *
-     * @return string Content is not returned, just rendered.
-     * @throws BootstrapException
-     * @throws Exception
+     * @param  Event  $event
+     * @param  int  $length
+     * @param  string  $more
+     *
+     * @return string The excerpt.
      */
-    public function excerpt_view(Event $event): string
+    public function get_excerpt(Event $event, $length = null, $more = '[...]'): string
     {
-        $locationView = EventLocationView::factory($this->app);
-        $location     = esc_html(str_replace("\n", ', ', rtrim((string)$locationView->get_location($event))));
-        $args         = [
-            'event'      => $event,
-            'location'   => $location,
-            'text_when'  => __('When:', 'open-source-event-calendar'),
-            'text_where' => __('Where:', 'open-source-event-calendar'),
-        ];
+        if (is_null($length)) {
+            $length = OSEC_EXCERPT_LENGTH_WORDS;
+        }
+        $post = $event->get('post');
 
-        return ThemeLoader::factory($this->app)
-                          ->get_file('event-excerpt.twig', $args, true)
-                          ->get_content();
-    }
-
-    /**
-     * Avoid re-adding `wpautop` for Ai1EC instances.
-     *
-     * @param  string  $content  Processed content.
-     *
-     * @return string Paragraphs enclosed text.
-     */
-    public function event_excerpt_noautop($content)
-    {
-        if ( ! AccessControl::is_our_post_type()) {
-            return wpautop($content);
+        if (
+            $this->app->settings->get('feature_use_excerpt')
+            && !empty($post->post_excerpt)
+        ) {
+            // Custom excerpt
+            $raw_excerpt = $post->post_excerpt;
+        } else {
+            // Generate excerpt
+            // 'main' contains text before more OR all content.
+            $content = get_extended($post->post_content);
+            $raw_excerpt = $content['main'];
         }
 
-        return $content;
-    }
+        if ( ! isset($raw_excerpt[0])) {
+            $raw_excerpt = '&nbsp;';
+        }
 
-    public function get_post_excerpt(Event $event)
-    {
-        $content = wp_strip_all_tags(
-            strip_shortcodes(
-                apply_filters(
-                    'osec_the_content',
-                    apply_filters(
-                        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                        'the_content',
-                        $event->get('post')->post_content
-                    )
-                )
-            )
+        $text = wp_strip_all_tags(
+            $raw_excerpt
         );
-        $content = preg_replace('/\s+/', ' ', $content);
-        $words   = explode(' ', (string)$content);
-        if (count($words) > 25) {
-            return implode(
-                ' ',
-                array_slice($words, 0, 25)
-            ) . ' [...]';
-        }
+        $text = strip_shortcodes($text);
+        $text = str_replace(']]>', ']]&gt;', $text);
+        $text = wp_strip_all_tags($text);
 
-        return $content;
+        $excerpt_length = apply_filters(
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+            'excerpt_length',
+            $length
+        );
+        $excerpt_more = apply_filters(
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+            'excerpt_more',
+            $more
+        );
+        $words = preg_split(
+            '/\s+/',
+            $text,
+            $excerpt_length + 1,
+            PREG_SPLIT_NO_EMPTY
+        );
+        if (count($words) > $excerpt_length) {
+            array_pop($words);
+            $text = implode(' ', $words);
+            $text = $text . $excerpt_more;
+        } else {
+            $text = implode(' ', $words);
+        }
+        return apply_filters(
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+            'wp_trim_excerpt',
+            $text,
+            $raw_excerpt
+        );
     }
 
     /**

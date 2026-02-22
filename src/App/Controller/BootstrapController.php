@@ -261,22 +261,9 @@ class BootstrapController
             PHP_INT_MAX
         );
 
-        // Replcace core (non-HTML) excerpt for events.
-        add_filter(
-            'render_block',
-            function ($block_content, $block) use ($app) {
-                if ('core/post-excerpt' !== $block['blockName']) {
-                    return $block_content;
-                }
-                if (AccessControl::is_our_post_type()) {
-                    return EventContentView::factory($app)->get_the_excerpt();
-                }
-
-                return $block_content;
-            },
-            10,
-            2
-        );
+        add_filter('get_the_excerpt', function (string $post_excerpt) use ($app) {
+            return EventContentView::factory($app)->get_the_excerpt($post_excerpt);
+        });
 
         add_filter('robots_txt', function (string $output, bool $is_public) use ($app) {
              return RobotsTxt::factory($app)->rules($output, $is_public);

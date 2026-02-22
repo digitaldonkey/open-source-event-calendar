@@ -167,9 +167,6 @@ class EventType extends OsecBaseClass
                 'custom-fields',
                 'thumbnail',
                 'author',
-                // Todo Add 'excerpt'.
-                // https://stackoverflow.com/questions/45436051/how-to-add-excerpt-in-custom-post-type-in-wordpress
-                // 'excerpt'
             ],
             'exclude_from_search' => $this->app->settings->get('exclude_from_search'),
             'show_in_rest' => true,
@@ -177,6 +174,10 @@ class EventType extends OsecBaseClass
 
         if ($this->app->settings->get('feature_allow_comments')) {
             $post_type_vars['supports'][] = 'comments';
+        }
+
+        if ($this->app->settings->get('feature_use_excerpt')) {
+            $post_type_vars['supports'][] = 'excerpt';
         }
 
         /**

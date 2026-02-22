@@ -5,7 +5,7 @@ namespace Osec\App\View\Calendar;
 use Osec\App\Controller\AppendContentController;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\View\Event\EventColorView;
-use Osec\App\View\Event\EventPostView;
+use Osec\App\View\Event\EventContentView;
 use Osec\App\View\Event\EventTaxonomyView;
 use Osec\App\View\Event\EventTicketView;
 use Osec\App\View\Event\EventTimeView;
@@ -58,7 +58,7 @@ trait ViewRuntimePropsTrait
         $event->set_runtime('ticket_url_label', $ticketView->get_tickets_url_label($event, false));
         $event->set_runtime('edit_post_link', get_edit_post_link($event->get('post_id')));
         $event->set_runtime('edit_post_instance_link', $event->get_instance_edit_link());
-        $event->set_runtime('post_excerpt', EventPostView::factory($app)->trim_excerpt($event));
+        $event->set_runtime('post_excerpt', EventContentView::factory($app)->get_excerpt($event));
         $color = EventColorView::factory($app);
         $event->set_runtime('faded_color', $color->get_faded_color($event));
         $event->set_runtime('rgba_color', $color->get_rgba_color($event));
