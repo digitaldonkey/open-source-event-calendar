@@ -129,8 +129,8 @@ class EventType extends OsecBaseClass
         // ========================================
         // = register custom post type for events =
         // ========================================
-        // phpcs:ignore WordPress.NamingConventions.ValidPostTypeSlug.NotStringLiteral
-        register_post_type(OSEC_POST_TYPE, [
+
+        $post_type_vars = [
             'labels'              => [
                 'name'               => _x('Events', 'Custom post type name', 'open-source-event-calendar'),
                 'singular_name'      => _x('Event', 'Custom post type name (singular)', 'open-source-event-calendar'),
@@ -164,17 +164,36 @@ class EventType extends OsecBaseClass
             'supports'            => [
                 'title',
                 'editor',
-                'comments',
                 'custom-fields',
                 'thumbnail',
                 'author',
-                // TDOD Add??
+                // Todo Add 'excerpt'.
                 // https://stackoverflow.com/questions/45436051/how-to-add-excerpt-in-custom-post-type-in-wordpress
-                'excerpt',
+                // 'excerpt'
             ],
             'exclude_from_search' => $this->app->settings->get('exclude_from_search'),
             'show_in_rest' => true,
-        ]);
+        ];
+
+        if ($this->app->settings->get('feature_allow_comments')) {
+            $post_type_vars['supports'][] = 'comments';
+        }
+
+        /**
+         * Register post type Event
+         *
+         * Alter params before register_post_type()
+         *
+         * @wp_hook init
+         *
+         * @since 1.0
+         *
+         * @param  bool  $do_debug  Debug or not.
+         */
+        $post_type_vars = apply_filters('osec_pre_register_post_type', $post_type_vars);
+
+        // phpcs:ignore WordPress.NamingConventions.ValidPostTypeSlug.NotStringLiteral
+        register_post_type(OSEC_POST_TYPE, $post_type_vars);
 
         // get event contributor if saved in the db
         $contributor = get_role('osec_event_assistant');
