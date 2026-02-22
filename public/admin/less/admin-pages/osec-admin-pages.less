@@ -68,14 +68,6 @@
         padding: 4px 0 6px;
         width: 100%;
         font-size: 14px;
-
-        @media screen and (min-width: 783px) {
-            & {
-                width: auto;
-            }
-
-        }
-
     }
 
     & label {
@@ -95,6 +87,14 @@
             }
         }
 
+    }
+
+    & > div {
+        @media screen and (min-width: 783px) {
+            & {
+                width: fit-content;
+            }
+        }
     }
 
     & > label:only-child,
