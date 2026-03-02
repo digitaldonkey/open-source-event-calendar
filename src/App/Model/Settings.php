@@ -1011,6 +1011,10 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => false,
             ],
+            'twig_cache'                             => [
+                'type'     => 'string',
+                'default'  => '',
+            ],
         ];
     }
 
