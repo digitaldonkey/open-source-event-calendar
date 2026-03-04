@@ -2,6 +2,7 @@
 
 namespace Osec\App\View\Admin;
 
+use Osec\App\Controller\MapsController;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventEditing;
@@ -67,6 +68,7 @@ class AdminPageAddEvent extends OsecBaseClass
                 'normal',
                 'high',
             ];
+            MapsController::factory($this->app)->register_assets();
         }
 
         if ($this->app->settings->get('feature_allow_coast')) {
@@ -380,13 +382,13 @@ class AdminPageAddEvent extends OsecBaseClass
             'address'          => esc_attr($event->get('address')),
             'show_coordinates' => $show_coordinates,
             'coordinates_title'   => esc_html__('Coordinates', 'open-source-event-calendar'),
-            'coordinates_label' => esc_html__('Use coordinates', 'open-source-event-calendar'),
+            'coordinates_label' => esc_html__('Use your own coordinates', 'open-source-event-calendar'),
             'latitude_label'   => esc_html__('Latitude:', 'open-source-event-calendar'),
-            'latitude'         => $show_coordinates ? (float)$event->get('latitude', 0) : '',
+            'latitude'         => (float) $event->get('latitude', ''),
             'longitude_label'   => esc_html__('Longitude:', 'open-source-event-calendar'),
-            'longitude'        => $show_coordinates ? $event->get('longitude', 0) : '',
-            'show_map'         => $event->get('show_map'),
-            'show_map_label'   => esc_html__('Show Map', 'open-source-event-calendar'),
+            'longitude'        => (float) $event->get('longitude', ''),
+            'show_map'         => (bool) $event->get('show_map'),
+            'show_map_label'   => esc_html__('Show Map on event', 'open-source-event-calendar'),
             'city'             => esc_html($event->get('city', '')),
             'province'         => esc_html($event->get('province', '')),
             'postal_code'      => esc_attr($event->get('postal_code', '')),

@@ -459,7 +459,6 @@ class BootstrapController
                 }
             );
 
-            // TODO This seems to do nothing
             add_action(
                 'admin_enqueue_scripts',
                 function ($hook_suffix) use ($app) {

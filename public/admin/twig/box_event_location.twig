@@ -36,8 +36,8 @@
             <th scope="row">
                 {{ coordinates_title }}
             </th>
-            <td>
-                <div class="inline-checkbox">
+            <td >
+                <div id="osec_table_coordinates_wrapper" class="inline-checkbox">
                     <input
                             id="osec_input_coordinates"
                             type="checkbox"
@@ -49,7 +49,7 @@
                         {{ coordinates_label }}
                     </label>
                 </div>
-                <table id="osec_table_coordinates">
+                <table id="osec_table_coordinates" {% if not show_coordinates_checkbox %} class="is-hidden"{% endif %}>
                     <tbody>
                     <tr>
                         <th>
@@ -61,8 +61,9 @@
                             <input
                                     name="osec_latitude"
                                     id="osec_latitude"
-                                    type="number"
-                                    step="0.000001"
+                                    class="osec-js-ensure-dotted"
+                                    type="{% if show_coordinates_checkbox %}text{% else %}hidden{% endif %}"
+                                    pattern="/([-+]?\d\d+[\.]\d+)/"
                                     value="{{ latitude }}">
                         </td>
                     </tr>
@@ -73,11 +74,12 @@
                             </label>
                         </th>
                         <td>
-                            <input type="text"
+                            <input
                                    name="osec_longitude"
                                    id="osec_longitude"
-                                   type="number"
-                                   step="0.000001"
+                                   class="osec-js-ensure-dotted"
+                                   type="{% if show_coordinates_checkbox %}text{% else %}hidden{% endif %}"
+                                   pattern="/([-+]?\d\d+[\.]\d+)/"
                                    value="{{ longitude }}">
                         </td>
                     </tr>
@@ -95,14 +97,14 @@
                         {{ show_map_label }}
                     </label>
                 </div>
-                <div class="ai1ec-map-preview {% if show_map %}ai1ec-map-visible{% endif %}">
-                    <div id="osec_map_canvas"></div>
-                </div>
             </td>
         </tr>
-        {% if post_venue_html %}{{ post_venue_html }}{% endif %}
         </tbody>
     </table>
+    <div class="osec-map-preview">
+        <div id="osec-map"></div>
+    </div>
+    {% if post_venue_html %}{{ post_venue_html }}{% endif %}
     <input type="hidden" name="osec_city" id="osec_city" value="{{ city }}">
     <input type="hidden" name="osec_province" id="osec_province" value="{{ province }}">
     <input type="hidden" name="osec_postal_code" id="osec_postal_code" value="{{ postal_code }}">

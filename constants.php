@@ -380,7 +380,6 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
             'osec'
         );
     }
-
     // Lets globalize Table names for now.
     if (! defined('OSEC_DB__EVENTS')) {
         define(
@@ -416,6 +415,47 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         define(
             'OSEC_EXCERPT_LENGTH_WORDS',
             35
+        );
+    }
+
+    /**
+     * Leaflet version
+     *
+     * @see osec_leaflet_library_alter.
+     */
+    if (! defined('OSEC_LEAFLET_VERSION')) {
+        define(
+            'OSEC_LEAFLET_VERSION',
+            '1.9.4'
+        );
+    }
+
+
+    /**
+     * Experimental.
+     *
+     * Define how address is saved/displayed after location search.
+     * @see https://nominatim.org/release-docs/develop/api/Lookup/
+     *
+     * E.g:
+     *   separator, translating into a comma.
+     *   ISO3166-2-lvl4: "DE-BE"
+     *   amenity: "Berghain"
+     *   road: "Am Wriezener Bahnhof"
+     *   house_number: "65"
+     *   postcode: "10243"
+     *   city: "Berlin"
+     *   quarter: "Andreasviertel"
+     *   suburb: "Friedrichshain"
+     *   state: "Bayern"
+     *   borough: "Friedrichshain-Kreuzberg"
+     *   country: "Deutschland"
+     *   country_code: "de"
+     */
+    if (! defined('OSEC_GEOCODE_TO_ADDRESS_TEMPLATE')) {
+        define(
+            'OSEC_GEOCODE_TO_ADDRESS_TEMPLATE',
+            'road,house_number,separator,borough|suburb,separator,postcode,city,separator,state,separator,country'
         );
     }
 

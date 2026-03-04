@@ -1,10 +1,33 @@
 #osec-event-location-box .inline-checkbox {
-    line-height: 1.8;
+    line-height: 2.8;
 }
+
 #osec-event-location-box .inline-checkbox input {
     vertical-align: middle;
 }
-#osec-event-location-box .ai1ec-map-preview {
-    margin-top: .5em;
-    max-width: 36vw;
+
+#osec-event-location-box .osec-map-preview {
+    border: 1px solid #ddd;
+    width: 100%;
+}
+
+/* Coordinates (visually hidden) */
+#osec_table_coordinates {
+    width: 100%;
+    overflow: hidden;
+    display: block;
+    max-height: 400px; /* Just for animate */
+    transition: max-height .3s ease-in-out;
+}
+
+#osec_table_coordinates.is-hidden {
+    max-height: 0;
+}
+/* Prevent width-jumping */
+#osec_table_coordinates_wrapper {
+    min-width: 20em;
+}
+
+#osec_table_coordinates input {
+    max-width: 312px;
 }
