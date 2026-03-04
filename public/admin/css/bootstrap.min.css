@@ -6549,10 +6549,6 @@ ul.ai1ec-dropdown-menu li {
 .ai1ec-modal-open .ai1ec-geo-ac-results {
   z-index: 2040;
 }
-/*#icon-edit.icon32-posts-ai1ec_event,*/
-/*#icon-post.icon32-posts-ai1ec_event {*/
-/*  background: url(../img/timely-post-type.png) no-repeat center center;*/
-/*}*/
 #menu-posts-osec_event.menu-icon-post div.wp-menu-image {
   background-image: url(../img/timely-admin-menu.png);
 }

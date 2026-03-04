@@ -932,7 +932,7 @@ class Settings extends OsecBaseInitialized
                     'class' => 'Osec\Settings\Elements\SettingsCheckboxFeatureEventLocationMaps',
                     'tab'   => 'location',
                     'label' => __(
-                        ' Hide Google Maps until clicked',
+                        ' Hide Maps until clicked',
                         'open-source-event-calendar'
                     ),
                 ],
@@ -949,6 +949,52 @@ class Settings extends OsecBaseInitialized
                     ),
                 ],
                 'default'  => false,
+            ],
+            'display_gmap_link' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'location',
+                    'label' => __(
+                        'Display link to google maps',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => true,
+            ],
+            'display_osm_link' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'location',
+                    'label' => __(
+                        'Display link to OpenStreetMaps',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => false,
+            ],
+            'location_maps_zoom' => [
+                'type'     => 'int',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsInput',
+                    'tab'   => 'location',
+                    'label' => __('Map zoom level', 'open-source-event-calendar'),
+                    'type'   => 'append',
+                    'append'   => '[0-28]',
+                ],
+                'default'  => 15,
+            ],
+            'location_maps_max_zoom' => [
+                'type'     => 'int',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsInput',
+                    'tab'   => 'location',
+                    'label' => __('Map max zoom level', 'open-source-event-calendar'),
+                    'type'   => 'append',
+                    'append'   => '[0-28]',
+                ],
+                'default'  => 20,
             ],
             'geo_region_biasing' => [
                 'type'     => 'bool',

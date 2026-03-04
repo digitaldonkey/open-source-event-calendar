@@ -3,7 +3,6 @@
 namespace Osec\App\View\Event;
 
 use Osec\App\Model\PostTypeEvent\Event;
-use Osec\App\WpmlHelper;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
 use Osec\Theme\ThemeLoader;
@@ -49,37 +48,11 @@ class EventLocationView extends OsecBaseClass
         }
         $address = $event->get('address');
         if ($address) {
-            $bits = explode(',', (string)$address);
+            $bits = explode(',', (string) $address);
             $bits = array_map('trim', $bits);
-
-            // If more than three comma-separated values, treat first value as
-            // the street address, last value as the country, and everything
-            // in the middle as the city, state, etc.
-            if (count($bits) >= 3) {
-                // Append the street address
-                $street_address = array_shift($bits) . "\n";
-                if ($street_address) {
-                    $location .= $street_address;
-                }
-                // Save the country for the last line
-                $country = array_pop($bits);
-                // Append the middle bit(s) (filtering out any zero-length strings)
-                $bits = array_filter($bits, 'strval');
-                if ($bits) {
-                    $location .= implode(', ', $bits) . "\n";
-                }
-                if ($country) {
-                    $location .= $country . "\n";
-                }
-            } else {
-                // There are two or less comma-separated values, so just append
-                // them each on their own line (filtering out any zero-length strings)
-                $bits     = array_filter($bits, 'strval');
-                $location .= implode("\n", $bits);
-            }
+            $location .= implode("\n", $bits);
         }
-
-        return $location;
+        return nl2br($location);
     }
 
     /**
@@ -90,7 +63,7 @@ class EventLocationView extends OsecBaseClass
      *
      * @return string
      **/
-    public function get_map_view(Event $event): string
+    public function get_map_public_view(Event $event): string
     {
         if ( ! $event->get('show_map')) {
             return '';
@@ -102,15 +75,35 @@ class EventLocationView extends OsecBaseClass
         }
 
         $args = [
-            'address'                 => $location,
-            'gmap_url_link'           => $this->get_gmap_url($event),
+            'text_full_map_gmap'           => __('View on Google maps', 'open-source-event-calendar'),
+            'gmap_url_link'           => esc_url($this->get_gmap_url($event)), // Deprecated, legacy.
+            'text_full_map_osm'           => __('View on OpenStreetMap', 'open-source-event-calendar'),
+            'osm_link_url'            => esc_url($this->get_osm_url($event)),
             'hide_maps_until_clicked' => $this->app->settings->get('hide_maps_until_clicked'),
             'text_view_map'           => __('Click to view map', 'open-source-event-calendar'),
-            'text_full_map'           => __('View Full-Size Map', 'open-source-event-calendar'),
+            'height'                  => '20em',
+            'data'                    => [
+                'venue'                   => esc_attr($event->get('venue')),
+                'address'                 => esc_attr($event->get('address')),
+                'lat'                     => floatval($event->get('latitude')),
+                'long'                    => floatval($event->get('longitude')),
+                'maxzoom'                 => intval($this->app->settings->get('location_maps_max_zoom')),
+                'zoom'                    => intval($this->app->settings->get('location_maps_zoom')),
+                'attribution'             => esc_attr(
+                    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                ),
+            ],
         ];
-
+        /**
+         * Alter maps data before rendering.
+         *
+         * @since 1.0
+         *
+         * @param  array  $args  Debug or not.
+         */
+        $args = apply_filters('osec_event_map_public_alter', $args);
         return ThemeLoader::factory($this->app)
-                          ->get_file('event-map.twig', $args, false)
+                          ->get_file('event-map-public.twig', $args, false)
                           ->get_content();
     }
 
@@ -147,13 +140,55 @@ class EventLocationView extends OsecBaseClass
      */
     public function get_gmap_url(Event $event)
     {
-        $lang     = WpmlHelper::factory($this->app)->get_language();
-        $location = $this->get_latlng($event);
-        if ( ! $location) {
-            $location = $event->get('address');
+        if (!$this->app->settings->get('display_gmap_link')) {
+            return '';
+        }
+        $location = $event->get('address');
+        $url = 'https://www.google.com//maps/search/?api=1&iwloc=addr&query=' . rawurlencode((string)$location);
+
+        /**
+         * Alter google maps link
+         *
+         * @since 1.1
+         *
+         * @param  string  $url  Url.
+         *
+         * @param  array  $event  Event.
+         */
+        $url = apply_filters('osec_gmaps_link_alter', $url, $event);
+        return esc_url($url);
+    }
+
+    /**
+     * Returns the URL to the Google Map for the given event object.
+     *
+     * @param  Event  $event
+     *    The event object to display a map for
+     *
+     * @return string
+     * @throws BootstrapException
+     */
+    public function get_osm_url(Event $event)
+    {
+        if (!$this->app->settings->get('display_osm_link')) {
+            return '';
         }
 
-        return 'https://www.google.com/maps?f=q&hl=' . rawurlencode((string)$lang) .
-               '&source=embed&q=' . rawurlencode((string)$location);
+        $lat = $event->get('latitude');
+        $long = $event->get('longitude');
+        $zoom = '15';
+        $url = "https://www.openstreetmap.org/?mlat=$lat&mlon=$long#map=$zoom/$lat/$long";
+
+        /**
+         * Alter OpenStreetMaps link
+         *
+         * @since 1.1
+         *
+         * @param  string  $url  Url.
+         *
+         * @param  array  $event  Event.
+         */
+        $url = apply_filters('osec_osm_link_alter', $url, $event);
+        return esc_url($url);
     }
 }

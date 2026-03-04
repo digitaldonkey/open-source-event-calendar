@@ -1,0 +1,34 @@
+{% if hide_maps_until_clicked %}
+    <div class="osec-map-placeholder" style="height: {{ height }};">
+        <strong>
+            <i class="ai1ec-fa ai1ec-fa-map-marker"></i>
+            {{ text_view_map }}
+        </strong>
+    </div>
+{% endif %}
+<div class="osec-map-container {% if hide_maps_until_clicked %}osec-map-container-hidden{% endif %}">
+    <div id="osec-map"
+            {%- for key, value in data -%}
+                data-{{ key }}="{{ value }}"
+            {%- endfor -%}
+         style="height: {{ height }};"
+    ></div>
+</div>
+{% if gmap_url_link %}
+    <a class="osec-gmap-link"
+       href="{{ gmap_url_link|raw }}" target="_blank"
+       title="{{ text_full_map_gmap }}"
+    >
+        {{ text_full_map_gmap }}
+        <span class="dashicons dashicons-external"></span>
+    </a>
+{% endif %}
+{% if osm_link_url %}
+    <a class="osec-gmap-link"
+       href="{{ osm_link_url|raw }}" target="_blank"
+       title="{{ text_full_map_osm }}"
+    >
+        {{ text_full_map_osm }}
+        <span class="dashicons dashicons-external"></span>
+    </a>
+{% endif %}

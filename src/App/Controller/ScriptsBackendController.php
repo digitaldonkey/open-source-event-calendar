@@ -81,6 +81,7 @@ class ScriptsBackendController extends OsecBaseClass
             return $this->process_enqueue($enqueuables[$hook_suffix]);
         }
 
+        // Edit post type event.
         $post_pages = [
             'post.php'     => true,
             'post-new.php' => true,
@@ -93,8 +94,9 @@ class ScriptsBackendController extends OsecBaseClass
                 [
                     ['style', 'box-event-location.css'],
                     ['style', 'bootstrap.min.css'],
-                    ['style', 'add_new_event.css'],
                     ['script', 'add_new_event.js'],
+                    ['script', 'leaflet'],
+                    ['script', 'admin-box-event-map.js'],
                     ['style', 'osec-admin-page-edit-event.css'],
                     ['style', 'box-event-time-and-date.css'],
                 ]

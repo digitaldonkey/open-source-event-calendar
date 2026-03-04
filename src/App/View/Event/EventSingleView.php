@@ -2,6 +2,7 @@
 
 namespace Osec\App\View\Event;
 
+use Osec\App\Controller\MapsController;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\View\Calendar\CalendarSubscribeButtonView;
@@ -189,6 +190,7 @@ class EventSingleView extends OsecBaseClass
          */
         if ($settings->get('feature_event_location')) {
             $location = EventLocationView::factory($this->app);
+
             /**
              * Location in to single Event view
              *
@@ -200,7 +202,7 @@ class EventSingleView extends OsecBaseClass
              */
             $venues_html = apply_filters(
                 'osec_rendering_single_event_venues',
-                nl2br((string)$location->get_location($event)),
+                $location->get_location($event),
                 $event
             );
             $args = array_merge($args, [
@@ -208,8 +210,10 @@ class EventSingleView extends OsecBaseClass
             ]);
 
             if ($settings->get('feature_event_location_maps')) {
+                $maps = MapsController::factory($this->app);
+                $maps->register_assets();
                 $args = array_merge($args, [
-                    'map' => $location->get_map_view($event),
+                    'map' => $location->get_map_public_view($event),
                 ]);
             }
         }
