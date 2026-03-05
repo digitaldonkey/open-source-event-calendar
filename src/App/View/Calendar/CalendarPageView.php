@@ -508,32 +508,42 @@ class CalendarPageView extends OsecBaseClass
             return '';
         }
 
+        $httx_url = str_replace(
+            'webcal://',
+            Request::get_protocoll() . '://',
+            OSEC_EXPORT_URL
+        );
+
+        $url_args = '';
+        $is_filterd = false;
+        $use_lang = WpmlHelper::factory($this->app)->get_language();
+        if (!is_null($use_lang)) {
+            $url_args = '&lang=' . $use_lang;
+        }
+        if (! empty($view_args['cat_ids'])) {
+            $url_args    .= '&osec_cat_ids=' . implode(',', $view_args['cat_ids']);
+            $is_filterd = true;
+        }
+        if (! empty($view_args['tag_ids'])) {
+            $url_args .= '&osec_tag_ids=' . implode(',', $view_args['tag_ids']);
+            $is_filterd = true;
+        }
+        if (! empty($view_args['post_ids'])) {
+            $url_args .= '&osec_post_ids=' . implode(',', $view_args['post_ids']);
+            $is_filterd = true;
+        }
         $args = [
-            'url_args'           => '',
-            'is_filtered'        => false,
-            'export_url'         => OSEC_EXPORT_URL,
-            'export_url_no_html' => OSEC_EXPORT_URL . '&no_html=true',
+            'is_filtered'        => $is_filterd,
+            'export_url_webcal'         => esc_url_raw(OSEC_EXPORT_URL . $url_args),
+            'export_url_webcal_no_html' => esc_url_raw(OSEC_EXPORT_URL . '&no_html=true' . $url_args),
+            'export_url' => esc_url_raw($httx_url . $url_args),
+            'export_url_no_html' => esc_url_raw($httx_url . '&no_html=true' . $url_args),
             'text_filtered'      => __('Subscribe to filtered calendar', 'open-source-event-calendar'),
             'text_subscribe'     => __('Subscribe', 'open-source-event-calendar'),
             'text_get_calendar'  => __('Get a Timely Calendar', 'open-source-event-calendar'),
-            'text'               => CalendarSubscribeButtonView::factory($this->app)
-                                                               ->get_labels(),
+            'text'               => CalendarSubscribeButtonView::factory($this->app)->get_labels(),
             'placement'          => 'up',
         ];
-        if (! empty($view_args['cat_ids'])) {
-            $args['url_args']    .= '&osec_cat_ids=' . implode(',', $view_args['cat_ids']);
-            $args['is_filtered'] = true;
-        }
-        if (! empty($view_args['tag_ids'])) {
-            $args['url_args']    .= '&osec_tag_ids=' .
-                                    implode(',', $view_args['tag_ids']);
-            $args['is_filtered'] = true;
-        }
-        if (! empty($view_args['post_ids'])) {
-            $args['url_args']    .= '&osec_post_ids=' .
-                                    implode(',', $view_args['post_ids']);
-            $args['is_filtered'] = true;
-        }
 
         /**
          * Subscribe buttons alter
@@ -546,11 +556,6 @@ class CalendarPageView extends OsecBaseClass
          * @param  array  $view_args  View arguments
          */
         $args = apply_filters('osec_subscribe_buttons_arguments', $args, $view_args);
-        $use_lang = WpmlHelper::factory($this->app)->get_language();
-        if (!is_null($use_lang)) {
-            $args['url_args'] .= '&lang=' . $use_lang;
-        }
-
         return ThemeLoader::factory($this->app)
                           ->get_file('subscribe-buttons.twig', $args, false)
                           ->get_content();

@@ -136,4 +136,24 @@ class Request extends OsecBaseClass
         // phpcs: enable
         return null;
     }
+
+    public static function get_protocoll()
+    {
+        $isSecure = false;
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+            $isSecure = true;
+        } elseif (
+            (
+                ! empty($_SERVER['HTTP_X_FORWARDED_PROTO'])
+                && sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_PROTO'])) === 'https'
+            )
+            || (
+                ! empty($_SERVER['HTTP_X_FORWARDED_SSL'])
+                && sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_SSL'])) === 'on'
+            )
+        ) {
+            $isSecure = true;
+        }
+        return $isSecure ? 'https' : 'http';
+    }
 }
