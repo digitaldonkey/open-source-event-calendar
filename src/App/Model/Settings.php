@@ -275,11 +275,16 @@ class Settings extends OsecBaseInitialized
     protected function initialize()
     {
         $this->setDefaults();
-        $values = $this->app->options->get(self::WP_OPTION_KEY, []);
+        $stored_options = $this->app->options->get(self::WP_OPTION_KEY, []);
+
+        if ($stored_options instanceof Settings) {
+            // Warn about unsupported legacy...
+            throw new Exception('Legacy settings are not supported anymore.');
+        }
 
         // Ensure we have up to date wp-option values.
-        if (is_array(is_array($values))) {
-            foreach ($values as $key => $val) {
+        if (is_array($stored_options)) {
+            foreach ($stored_options as $key => $val) {
                 if (isset($val['type']) && $val['type'] === 'wp_option') {
                     $default      = $this->defaultOptions[$key]['default'];
                     $val['value'] = get_option($key, $default);
@@ -287,35 +292,30 @@ class Settings extends OsecBaseInitialized
             }
         }
 
+        // Set changed for Settings persistence on shutdown.
         $this->changeUpdateStatus(false);
-        $test_version = false;
-        if (is_array($values)) { // always assign existing values, if any
-            $this->options = $values;
-            if (isset($values['calendar_page_id'])) {
-                $test_version = $values['calendar_page_id']['version'];
+
+        // Ensure option-versions matching current version.
+        $stored_options_version = null;
+
+        if (is_array($stored_options)) {
+            // Always assign existing values, if any
+            $this->options = $stored_options;
+            if (isset($stored_options['calendar_page_id'])) {
+                $stored_options_version = $stored_options['calendar_page_id']['version'];
             }
         }
-        $upgrade = false;
         // check for updated translations
         $this->registerDefaultValues();
-        if (
-            // process meta updates changes
-            empty($values) || (
-                false !== $test_version &&
-                OSEC_VERSION !== $test_version
-            )
-        ) {
+
+        // Install/update settings if required.
+        if (empty($stored_options) || is_null($stored_options_version) || OSEC_VERSION !== $stored_options_version ) {
             $this->registerDefaultValues();
             $this->updateNameTranslations();
             $this->changeUpdateStatus(true);
-            $upgrade = true;
-        } elseif ($values instanceof Settings) {
-            // TODO REMOVE process legacy...
-            throw new Exception('Legacy settings are not supported anymore.');
-        }
-        if (true === $upgrade) {
             $this->perform_upgrade_actions();
         }
+
         ShutdownController::factory($this->app)->register(
             $this->shutdown(...)
         );
@@ -1158,9 +1158,9 @@ class Settings extends OsecBaseInitialized
      */
 
     /**
-     * Do things needed on every plugin upgrade.
+     * Do things required on plugin updates.
      *
-     * // TODO WE WILL NEED THIS SOMEWHERE ELSE
+     * Runs if OSEC_VERSION does not match $options['calendar_page_id']['version'].
      */
     public function perform_upgrade_actions()
     {
