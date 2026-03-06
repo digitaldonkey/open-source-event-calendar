@@ -1124,7 +1124,26 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 if ($k === 'BYDAY') {
                     $v = [];
                     foreach ($exploded as $day) {
-                        $v[] = ['DAY' => $day];
+                        if (! ctype_alpha($day)) {
+                            // e.g: $day == 2WE
+                            // https://regex101.com/r/LQnNAr/2
+                            $matches = [];
+                            preg_match(
+                                '/^(?\'nth\'[-+]?[\d]*)(?\'day\'[a-zA-Z]{2})$/m',
+                                $day,
+                                $matches,
+                                PREG_OFFSET_CAPTURE,
+                            );
+                            $nth = $matches['nth'][0];
+                            $day = $matches['day'][0];
+                            // @see https://github.com/iCalcreator/iCalcreator/blob/a4d35d7a58c08b816dc8a7778db19f461c1429bd/test/RecurMonthTest.php#L861
+                            $v[] = [
+                                $nth,
+                                'DAY' => $day,
+                            ];
+                        } else {
+                            $v[] = ['DAY' => $day];
+                        }
                     }
                 } else {
                     $v = $exploded;
