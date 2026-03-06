@@ -804,6 +804,140 @@ add_filter('osec_font_dirs', $variables);
 ---
 
 
+@file **../src/App/Controller/MapsController.php**
+
+### osec_maps_backend_options_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Leaflet map options
+
+```php
+add_filter('osec_maps_backend_options_alter', $maps_backend_options);
+```
+
+#### Description
+
+
+Lets you alter Leaflet map options on Event Edit. You may change zoom levels, limit address search by changing geocodingQueryParams and how address is converted from search result to Wp-form (address_template). Check out console.log(osec_leaflet_admin) at Event edit page. @see: https://www.liedman.net/leaflet-control-geocoder/docs/interfaces/geocoders.NominatimOptions.html
+
+#### Parameters
+
+
+ - **$maps_backend_options** <span style="color:crimson"> </span> Javascript options for admin-box-event-map.js.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Leaflet map options
+ *
+ * Lets you alter Leaflet map options on Event Edit.
+ * You may change zoom levels, limit address search
+ * by changing geocodingQueryParams and how address is converted from search result to Wp-form
+ * (address_template).
+ * Check out console.log(osec_leaflet_admin) at Event edit page.
+ * @see: https://www.liedman.net/leaflet-control-geocoder/docs/interfaces/geocoders.NominatimOptions.html
+ *
+ * @since 1.1
+ *
+ * @param  array  $maps_backend_options  Javascript options for admin-box-event-map.js.
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_maps_backend_options_alter', $maps_backend_options);
+```
+
+</details>
+
+
+### osec_maps_public_options_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter public Leaflet map options
+
+```php
+add_filter('osec_maps_public_options_alter', $maps_backend_options);
+```
+
+#### Description
+
+
+Lets you alter Leaflet map options on Event view.
+
+#### Parameters
+
+
+ - **$maps_backend_options** <span style="color:crimson"> </span> Javascript options event-map-public.js.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter public Leaflet map options
+ *
+ * Lets you alter Leaflet map options on Event view.
+ *
+ * @since 1.1
+ *
+ * @param  array  $maps_backend_options  Javascript options event-map-public.js.
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_maps_public_options_alter', $maps_backend_options);
+```
+
+</details>
+
+
+### osec_leaflet_library_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Leaflet Library.
+
+```php
+add_filter('osec_leaflet_library_alter', $leaflet);
+```
+
+#### Description
+
+
+Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+
+#### Parameters
+
+
+ - **$leaflet** <span style="color:crimson"> </span> Osec leaflet urls.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Leaflet Library.
+ *
+ * Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+ *
+ * @since 1.1
+ *
+ * @param  array  $leaflet Osec leaflet urls.
+ *
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_leaflet_library_alter', $leaflet);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/Controller/Router.php**
 
 ### osec_request_filter_types <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -1564,6 +1698,54 @@ add_filter('osec_ics_import_alias', $term);
 ---
 
 
+@file **../src/App/Model/PostTypeEvent/EventType.php**
+
+### osec_pre_register_post_type <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Register post type Event
+
+```php
+add_filter('osec_pre_register_post_type', $do_debug);
+```
+
+#### Description
+
+
+Alter params before register_post_type()
+
+#### Parameters
+
+
+ - **$do_debug** <span style="color:crimson"> </span> Debug or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Register post type Event
+ *
+ * Alter params before register_post_type()
+ *
+ * @wp_hook init
+ *
+ * @since 1.0
+ *
+ * @param  bool  $do_debug  Debug or not.
+ *
+ * @file src/App/Model/PostTypeEvent/EventType.php
+ */
+add_filter('osec_pre_register_post_type', $do_debug);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/View/Admin/AdminPageAddEvent.php**
 
 ### osec_admin_edit_event_input_panels_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -1840,6 +2022,48 @@ add_filter('osec_robots_install', $bool);
  * @file src/App/View/Admin/AdminPageSettings.php
  */
 add_filter('osec_robots_install', $bool);
+```
+
+</details>
+
+
+### osec_admin_page_metaboxes_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter admin page settings metaboxes.
+
+```php
+add_filter('osec_admin_page_metaboxes_alter', $theme);
+```
+
+#### Description
+
+
+Allows to change which Elements you see on admin page settings. you may also alter the default order.
+
+#### Parameters
+
+
+ - **$theme** <span style="color:crimson"> </span> Array of Less variables
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter admin page settings metaboxes.
+ *
+ * Allows to change which Elements you see on admin page settings.
+ * you may also alter the default order.
+ *
+ * @since 1.0
+ *
+ * @param  array  $theme  Array of Less variables
+ *
+ * @file src/App/View/Admin/AdminPageSettings.php
+ */
+add_filter('osec_admin_page_metaboxes_alter', $theme);
 ```
 
 </details>
@@ -3010,6 +3234,119 @@ add_filter('osec_back_to_calendar_button_html_alter', $args);
 ---
 
 
+@file **../src/App/View/Event/EventLocationView.php**
+
+### osec_event_map_public_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter maps data before rendering.
+
+```php
+add_filter('osec_event_map_public_alter', $args);
+```
+
+#### Parameters
+
+
+ - **$args** <span style="color:crimson"> </span> Debug or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter maps data before rendering.
+ *
+ * @since 1.0
+ *
+ * @param  array  $args  Debug or not.
+ *
+ * @file src/App/View/Event/EventLocationView.php
+ */
+add_filter('osec_event_map_public_alter', $args);
+```
+
+</details>
+
+
+### osec_gmaps_link_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter google maps link
+
+```php
+add_filter('osec_gmaps_link_alter', $url $event);
+```
+
+#### Parameters
+
+
+ - **$url** <span style="color:crimson"> </span> Url.
+ - **$event** <span style="color:crimson"> </span> Event.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter google maps link
+ *
+ * @since 1.1
+ *
+ * @param  string  $url  Url.
+ *
+ * @param  array  $event  Event.
+ *
+ * @file src/App/View/Event/EventLocationView.php
+ */
+add_filter('osec_gmaps_link_alter', $url $event);
+```
+
+</details>
+
+
+### osec_osm_link_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter OpenStreetMaps link
+
+```php
+add_filter('osec_osm_link_alter', $url $event);
+```
+
+#### Parameters
+
+
+ - **$url** <span style="color:crimson"> </span> Url.
+ - **$event** <span style="color:crimson"> </span> Event.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter OpenStreetMaps link
+ *
+ * @since 1.1
+ *
+ * @param  string  $url  Url.
+ *
+ * @param  array  $event  Event.
+ *
+ * @file src/App/View/Event/EventLocationView.php
+ */
+add_filter('osec_osm_link_alter', $url $event);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/View/Event/EventSingleView.php**
 
 ### osec_rendering_single_event_actions <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -3049,6 +3386,40 @@ add_filter('osec_rendering_single_event_actions', $event $html);
 </details>
 
 
+### osec_alter_single_event_page_before_render <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Alter Event before rendering on a single Event page.
+
+```php
+do_action('osec_alter_single_event_page_before_render', $event);
+```
+
+#### Parameters
+
+
+ - **$event** <span style="color:crimson"> </span> passed by reference. So can be modified.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Event before rendering on a single Event page.
+ *
+ * @since 1.0
+ *
+ * @param  Event  $event  passed by reference. So can be modified.
+ *
+ * @file src/App/View/Event/EventSingleView.php
+ */
+do_action('osec_alter_single_event_page_before_render', $event);
+```
+
+</details>
+
+
 ### osec_rendering_single_event_venues <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -3081,40 +3452,6 @@ add_filter('osec_rendering_single_event_venues', $event $html);
  * @file src/App/View/Event/EventSingleView.php
  */
 add_filter('osec_rendering_single_event_venues', $event $html);
-```
-
-</details>
-
-
-### osec_alter_single_event_page_before_render <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Alter Event before rendering on a single Event page.
-
-```php
-do_action('osec_alter_single_event_page_before_render', $event);
-```
-
-#### Parameters
-
-
- - **$event** <span style="color:crimson"> </span> passed by reference. So can be modified.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter Event before rendering on a single Event page.
- *
- * @since 1.0
- *
- * @param  Event  $event  passed by reference. So can be modified.
- *
- * @file src/App/View/Event/EventSingleView.php
- */
-do_action('osec_alter_single_event_page_before_render', $event);
 ```
 
 </details>
@@ -5314,6 +5651,140 @@ add_filter('osec_font_dirs', $variables);
 ---
 
 
+@file **../src/App/Controller/MapsController.php**
+
+### osec_maps_backend_options_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Leaflet map options
+
+```php
+add_filter('osec_maps_backend_options_alter', $maps_backend_options);
+```
+
+#### Description
+
+
+Lets you alter Leaflet map options on Event Edit. You may change zoom levels, limit address search by changing geocodingQueryParams and how address is converted from search result to Wp-form (address_template). Check out console.log(osec_leaflet_admin) at Event edit page. @see: https://www.liedman.net/leaflet-control-geocoder/docs/interfaces/geocoders.NominatimOptions.html
+
+#### Parameters
+
+
+ - **$maps_backend_options** <span style="color:crimson"> </span> Javascript options for admin-box-event-map.js.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Leaflet map options
+ *
+ * Lets you alter Leaflet map options on Event Edit.
+ * You may change zoom levels, limit address search
+ * by changing geocodingQueryParams and how address is converted from search result to Wp-form
+ * (address_template).
+ * Check out console.log(osec_leaflet_admin) at Event edit page.
+ * @see: https://www.liedman.net/leaflet-control-geocoder/docs/interfaces/geocoders.NominatimOptions.html
+ *
+ * @since 1.1
+ *
+ * @param  array  $maps_backend_options  Javascript options for admin-box-event-map.js.
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_maps_backend_options_alter', $maps_backend_options);
+```
+
+</details>
+
+
+### osec_maps_public_options_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter public Leaflet map options
+
+```php
+add_filter('osec_maps_public_options_alter', $maps_backend_options);
+```
+
+#### Description
+
+
+Lets you alter Leaflet map options on Event view.
+
+#### Parameters
+
+
+ - **$maps_backend_options** <span style="color:crimson"> </span> Javascript options event-map-public.js.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter public Leaflet map options
+ *
+ * Lets you alter Leaflet map options on Event view.
+ *
+ * @since 1.1
+ *
+ * @param  array  $maps_backend_options  Javascript options event-map-public.js.
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_maps_public_options_alter', $maps_backend_options);
+```
+
+</details>
+
+
+### osec_leaflet_library_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Leaflet Library.
+
+```php
+add_filter('osec_leaflet_library_alter', $leaflet);
+```
+
+#### Description
+
+
+Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+
+#### Parameters
+
+
+ - **$leaflet** <span style="color:crimson"> </span> Osec leaflet urls.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Leaflet Library.
+ *
+ * Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+ *
+ * @since 1.1
+ *
+ * @param  array  $leaflet Osec leaflet urls.
+ *
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_leaflet_library_alter', $leaflet);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/Controller/Router.php**
 
 ### osec_request_filter_types <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -6074,6 +6545,54 @@ add_filter('osec_ics_import_alias', $term);
 ---
 
 
+@file **../src/App/Model/PostTypeEvent/EventType.php**
+
+### osec_pre_register_post_type <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Register post type Event
+
+```php
+add_filter('osec_pre_register_post_type', $do_debug);
+```
+
+#### Description
+
+
+Alter params before register_post_type()
+
+#### Parameters
+
+
+ - **$do_debug** <span style="color:crimson"> </span> Debug or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Register post type Event
+ *
+ * Alter params before register_post_type()
+ *
+ * @wp_hook init
+ *
+ * @since 1.0
+ *
+ * @param  bool  $do_debug  Debug or not.
+ *
+ * @file src/App/Model/PostTypeEvent/EventType.php
+ */
+add_filter('osec_pre_register_post_type', $do_debug);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/View/Admin/AdminPageAddEvent.php**
 
 ### osec_admin_edit_event_input_panels_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -6350,6 +6869,48 @@ add_filter('osec_robots_install', $bool);
  * @file src/App/View/Admin/AdminPageSettings.php
  */
 add_filter('osec_robots_install', $bool);
+```
+
+</details>
+
+
+### osec_admin_page_metaboxes_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter admin page settings metaboxes.
+
+```php
+add_filter('osec_admin_page_metaboxes_alter', $theme);
+```
+
+#### Description
+
+
+Allows to change which Elements you see on admin page settings. you may also alter the default order.
+
+#### Parameters
+
+
+ - **$theme** <span style="color:crimson"> </span> Array of Less variables
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter admin page settings metaboxes.
+ *
+ * Allows to change which Elements you see on admin page settings.
+ * you may also alter the default order.
+ *
+ * @since 1.0
+ *
+ * @param  array  $theme  Array of Less variables
+ *
+ * @file src/App/View/Admin/AdminPageSettings.php
+ */
+add_filter('osec_admin_page_metaboxes_alter', $theme);
 ```
 
 </details>
@@ -7520,6 +8081,119 @@ add_filter('osec_back_to_calendar_button_html_alter', $args);
 ---
 
 
+@file **../src/App/View/Event/EventLocationView.php**
+
+### osec_event_map_public_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter maps data before rendering.
+
+```php
+add_filter('osec_event_map_public_alter', $args);
+```
+
+#### Parameters
+
+
+ - **$args** <span style="color:crimson"> </span> Debug or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter maps data before rendering.
+ *
+ * @since 1.0
+ *
+ * @param  array  $args  Debug or not.
+ *
+ * @file src/App/View/Event/EventLocationView.php
+ */
+add_filter('osec_event_map_public_alter', $args);
+```
+
+</details>
+
+
+### osec_gmaps_link_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter google maps link
+
+```php
+add_filter('osec_gmaps_link_alter', $url $event);
+```
+
+#### Parameters
+
+
+ - **$url** <span style="color:crimson"> </span> Url.
+ - **$event** <span style="color:crimson"> </span> Event.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter google maps link
+ *
+ * @since 1.1
+ *
+ * @param  string  $url  Url.
+ *
+ * @param  array  $event  Event.
+ *
+ * @file src/App/View/Event/EventLocationView.php
+ */
+add_filter('osec_gmaps_link_alter', $url $event);
+```
+
+</details>
+
+
+### osec_osm_link_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter OpenStreetMaps link
+
+```php
+add_filter('osec_osm_link_alter', $url $event);
+```
+
+#### Parameters
+
+
+ - **$url** <span style="color:crimson"> </span> Url.
+ - **$event** <span style="color:crimson"> </span> Event.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter OpenStreetMaps link
+ *
+ * @since 1.1
+ *
+ * @param  string  $url  Url.
+ *
+ * @param  array  $event  Event.
+ *
+ * @file src/App/View/Event/EventLocationView.php
+ */
+add_filter('osec_osm_link_alter', $url $event);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/View/Event/EventSingleView.php**
 
 ### osec_rendering_single_event_actions <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -7559,6 +8233,40 @@ add_filter('osec_rendering_single_event_actions', $event $html);
 </details>
 
 
+### osec_alter_single_event_page_before_render <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Alter Event before rendering on a single Event page.
+
+```php
+do_action('osec_alter_single_event_page_before_render', $event);
+```
+
+#### Parameters
+
+
+ - **$event** <span style="color:crimson"> </span> passed by reference. So can be modified.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Event before rendering on a single Event page.
+ *
+ * @since 1.0
+ *
+ * @param  Event  $event  passed by reference. So can be modified.
+ *
+ * @file src/App/View/Event/EventSingleView.php
+ */
+do_action('osec_alter_single_event_page_before_render', $event);
+```
+
+</details>
+
+
 ### osec_rendering_single_event_venues <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -7591,40 +8299,6 @@ add_filter('osec_rendering_single_event_venues', $event $html);
  * @file src/App/View/Event/EventSingleView.php
  */
 add_filter('osec_rendering_single_event_venues', $event $html);
-```
-
-</details>
-
-
-### osec_alter_single_event_page_before_render <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Alter Event before rendering on a single Event page.
-
-```php
-do_action('osec_alter_single_event_page_before_render', $event);
-```
-
-#### Parameters
-
-
- - **$event** <span style="color:crimson"> </span> passed by reference. So can be modified.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter Event before rendering on a single Event page.
- *
- * @since 1.0
- *
- * @param  Event  $event  passed by reference. So can be modified.
- *
- * @file src/App/View/Event/EventSingleView.php
- */
-do_action('osec_alter_single_event_page_before_render', $event);
 ```
 
 </details>
