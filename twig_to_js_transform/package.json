@@ -10,6 +10,7 @@
   "license": "GPL-3",
   "description": "Transform twig templates to be useable for frontend rendering in OSEC calendar",
   "dependencies": {
+    "escape-string-regexp": "^5.0.0",
     "npm": "^11.3.0",
     "twig": "^0.7.2"
   }
