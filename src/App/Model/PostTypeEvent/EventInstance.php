@@ -187,9 +187,7 @@ class EventInstance extends OsecBaseClass
 
         $recurrenceEndDate = clone $origEventTime->getObject();
 
-        // TODO Seems we repeat for max 3 Years (on Save).
-        //   This should be a transparent by having a setting in App.
-        $recurrenceEndDate->modify('+ 3 years');
+        $recurrenceEndDate->modify(OSEC_REOCCURRENCE_TIMEFRAME);
 
         $recurrence_dates = [];
         if ($event->get('recurrence_dates')) {
