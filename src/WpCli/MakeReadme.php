@@ -15,6 +15,20 @@ class MakeReadme
 
     private string $markdown_source;
 
+    private ?array $sections = null;
+
+    /**
+     * Sections to not include in WordPress readme
+     * They are reparsed.
+     * @var array|string[]
+     */
+    private array $except_sections = [
+        'Header',  # Everything from start of file to first ## Section
+        'Table of Contents',
+        'Screenshots',  # Formated as a different section
+        'Contributors',
+    ];
+
 
     /**
      * Makes a Readme.
@@ -35,6 +49,7 @@ class MakeReadme
             );
 
             $this->markdown_source = OSEC_PATH . 'README.md';
+            $this->sections = $this->parse_description_sections();
 
             /**
              * Every array entry represents n lines of readme in the given order.
@@ -136,25 +151,20 @@ class MakeReadme
 
     protected function get_value_long_description(): string
     {
-        $sections = $this->parse_description_sections();
-
-        # Sections to not include in WordPress readme
-        $except_sections = [
-            'Header',  # Everything from start of file to first ## Section
-            'Table of Contents',
-            'Screenshots',  # Formated as a different section
-            'Contributors',
-        ];
-
-        return implode(
-            "\n\n",
-            array_diff_key($sections, array_flip($except_sections))
-        );
+        $active_sections = array_diff_key($this->sections, array_flip($this->except_sections));
+        foreach ($active_sections as $sectionId => $content) {
+            $lines = explode("\n", $content);
+            // Remove title.
+            unset($lines['0']);
+            $content = "\n== " . $sectionId . " ==\n\n" . implode("\n", $lines);
+            $active_sections [$sectionId] = $content;
+        }
+        return implode("\n", $active_sections);
     }
 
     protected function get_value_changelog(): string
     {
-        return "\n## Changelog"
+        return "\n== Changelog ==\n\n"
             . file_get_contents(OSEC_PATH . '/CHANGELOG.md');
     }
 
@@ -162,7 +172,7 @@ class MakeReadme
     protected function format_screenshots_for_wp(): string
     {
         // TODO: Not cool running this a second time, reading and parsing the entire file again
-        $screenshotsSectionText = $this->parse_description_sections()['Screenshots'];
+        $screenshotsSectionText = $this->sections['Screenshots'];
 
         $screenshots = [];
         foreach (explode("\n", $screenshotsSectionText) as $line) {
@@ -175,7 +185,7 @@ class MakeReadme
             }
         }
 
-        return "\n\n## Screenshots\n" . implode("\n", $screenshots) . "\n";
+        return "\n\n== Screenshots ==\n" . implode("\n", $screenshots) . "\n";
     }
 
     protected function get_value_version(): string
