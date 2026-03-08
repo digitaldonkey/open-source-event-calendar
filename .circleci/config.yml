@@ -119,9 +119,28 @@ jobs:
       - *copy_vendor
       - run:
           name: Run code quality tests
-          command: vendor/bin/grumphp run --testsuite=code_quality
+          command: vendor/bin/wp
 
-  # Default configuration Database testing jobs
+  static_release_job:
+    <<: *container_config
+    steps:
+      - checkout
+      - *attach_workspace
+      - *copy_vendor
+      - run:
+          name: Check if README.txt is up to date
+          command: |
+            set -Eeuxo pipefail
+            # Create readme
+            vendor/bin/wp osec updateReadme
+            if output=$(git status --porcelain) && [ -z "$output" ]; then
+              echo "No changes detected"
+              exit 0;
+            else
+              echo "wp osec updateReadme revealed uncomitted changes"
+              exit 1;
+            fi
+# Default configuration Database testing jobs
   db_job: &db_job
     <<: *container_config
     docker:
@@ -413,6 +432,12 @@ workflows:
       - static_job:
           requires:
             - build
+      - static_release_job:
+          requires:
+            - static_job
+          filters:
+            branches:
+              only: /test-master/
       - db_job:
           requires:
             - build
