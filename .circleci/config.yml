@@ -150,12 +150,12 @@ jobs:
           command: |
             set -Eeuxo pipefail
             # Install WP
-            ln -s . $WP_CORE_DIR/wp-plugins/ 
-            $WP_CLI config create --path="$WP_CORE_DIR --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
-            $WP_CLI core install --path="$WP_CORE_DIR --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com"
-            $WP_CLI core install --path="$WP_CORE_DIR wp plugin activate open-source-event-calendar
+            ln -s /home/circleci/open-source-event-calendar/ $WP_CORE_DIR/wp-content/plugins/
+            $WP_CLI config create --path=$WP_CORE_DIR --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
+            $WP_CLI core install --path=$WP_CORE_DIR --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com"
+            $WP_CLI --path=$WP_CORE_DIR plugin activate open-source-event-calendar
             # Create readme
-            $WP_CLI --path="$WP_CORE_DIR" osec update-readme
+            $WP_CLI --path="$WP_CORE_DIR" osec update_readme
             if output=$(git status --porcelain) && [ -z "$output" ]; then
               echo "No changes detected"
               exit 0;
