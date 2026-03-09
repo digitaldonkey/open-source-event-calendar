@@ -546,9 +546,8 @@ workflows:
             - release_test_job
             - db_job
             - static_job
+            - static_release_job
             - db_job_maria_10_5
-  # TODO      - db_job_php_8_1
-  #   Maybe https://stackoverflow.com/a/43442839/308533
             - db_job_php_8_3
             - db_job_mysql_8
           filters:
