@@ -124,7 +124,7 @@ class EventTimeView extends OsecBaseClass
         /**
          * Alter timespan Html Display.
          *
-         * You might alter some parts of this in other hooks!
+         * You might alter some parts of this in other hooks.
          *
          * @since 1.0
          *
