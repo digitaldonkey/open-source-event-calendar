@@ -273,7 +273,7 @@ jobs:
       - image: cimg/mariadb:10.5
         <<: *ENV_DB_IMAGE
 
-# This is default job: 'db_job'
+# TODO WHY DISABLED?
 #  db_job_maria_11:
 #    <<: *db_job
 #    docker:
@@ -282,18 +282,26 @@ jobs:
 #      - image: cimg/mariadb:11.4
 #        <<: *ENV_DB_IMAGE
 
-  db_job_php_8_1:
-    <<: *db_job
-    docker:
-      - image: cimg/php:8.1
-        <<: *ENV_PHP_IMAGE
-      - image: cimg/mariadb:11.4
-        <<: *ENV_DB_IMAGE
-
   db_job_php_8_3:
     <<: *db_job
     docker:
       - image: cimg/php:8.3
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+
+  db_job_php_8_4:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.4
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+
+  db_job_php_8_5:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.5
         <<: *ENV_PHP_IMAGE
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
@@ -305,15 +313,6 @@ jobs:
         <<: *ENV_PHP_IMAGE
       - image: cimg/mysql:8.0
         <<: *ENV_DB_IMAGE
-
-  #  db_job_php_8_0:
-  #    <<: *db_job
-  #    docker:
-  #      - image: cimg/php:8.0.28
-  #        <<: *ENV_PHP_IMAGE
-  #      - image: cimg/cimg/mariadb:11.4
-  #        <<: *ENV_DB_IMAGE
-  # mclay/minify && Grumphp and others require PHP > 8.1.
 
   create_release_job:
     <<: *container_config
@@ -485,6 +484,10 @@ jobs:
       - run:
           name: "Publish Release on GitHub"
           command: |
+            # Allow other branches, but only deploy on master 
+            if [ "$CIRCLE_BRANCH" != "master" ]; then
+                circleci-agent step halt
+            fi
             git describe --tags --exact-match > /dev/null 2>&1 && VERSION=$(git describe --tags) || VERSION="dev"
             if [ "$VERSION" == "dev" ]; then
                 ghr -prerelease -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
@@ -511,8 +514,9 @@ workflows:
           filters:
             branches:
               only:
-                - /test-master/
                 - master
+                - test-master
+                # TODO RENAME test-master TO - ^release.*
       - db_job:
           requires:
             - build
@@ -520,20 +524,41 @@ workflows:
           requires:
             - build
           filters:
-            branches:
-              only: /master/
+            only:
+              - master
+              - test-master
       - db_job_php_8_3:
           requires:
             - build
           filters:
             branches:
-              only: /master/
+              only:
+                - master
+                - test-master
+      - db_job_php_8_4:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+                - test-master
+      - db_job_php_8_5:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+                - test-master
       - db_job_mysql_8:
           requires:
             - build
           filters:
             branches:
-              only: /master/            -
+              only:
+                - master
+                - test-master
       - create_release_job:
           requires:
             - db_job
@@ -549,7 +574,13 @@ workflows:
             - static_release_job
             - db_job_maria_10_5
             - db_job_php_8_3
+            - db_job_php_8_4
+            - db_job_php_8_5
             - db_job_mysql_8
+# TODO
+#            - release_test_job_8_3
+#            - release_test_job_8_4
+#            - release_test_job_8_5
           filters:
             branches:
               only: /master/
