@@ -129,12 +129,10 @@ jobs:
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
     environment:
-      - WP_CORE_DIR: /var/www/html # /tmp/docroot
+      - WP_CORE_DIR: /home/circleci/wordpress
       - WP_HOST: *WP_HOST
-      - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
-      - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - WP_VERSION: *WP_VERSION
-      - WP_CLI: /tmp/vendor/bin/wp
+      - WP_CLI: /home/circleci/wordpress/vendor/bin/wp
     steps:
       - checkout
       - *attach_workspace
@@ -142,9 +140,7 @@ jobs:
       - run:
           name: Release test VARIABLES
           command: |
-            echo "CONSTANTS:"
-            echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-            echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"            
+            echo "CONSTANTS:"            
             echo " WP_HOST: $WP_HOST"
             echo " WP_CORE_DIR: $WP_CORE_DIR"
             echo " WP_VERSION: $WP_VERSION"
@@ -153,8 +149,13 @@ jobs:
           name: Check if README.txt is up to date
           command: |
             set -Eeuxo pipefail
+            # Install WP
+            ln -s . $WP_CORE_DIR/wp-plugins/ 
+            $WP_CLI config create --path="$WP_CORE_DIR --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
+            $WP_CLI core install --path="$WP_CORE_DIR --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com"
+            $WP_CLI core install --path="$WP_CORE_DIR wp plugin activate open-source-event-calendar
             # Create readme
-            vendor/bin/wp vendor/bin/wp --path="$WP_CORE_DIR" osec update-readme
+            $WP_CLI --path="$WP_CORE_DIR" osec update-readme
             if output=$(git status --porcelain) && [ -z "$output" ]; then
               echo "No changes detected"
               exit 0;
