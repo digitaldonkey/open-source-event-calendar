@@ -129,16 +129,16 @@ jobs:
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
     environment:
-      - WP_CORE_DIR: /home/circleci/wordpress
+      - WP_CORE_DIR: /tmp/wordpress
       - WP_HOST: *WP_HOST
       - WP_VERSION: *WP_VERSION
-      - WP_CLI: /home/circleci/wordpress/vendor/bin/wp
+      - WP_CLI: vendor/bin/wp
     steps:
       - checkout
       - *attach_workspace
       - *copy_vendor
       - run:
-          name: Release test VARIABLES
+          name: Static release test VARIABLES
           command: |
             echo "CONSTANTS:"            
             echo " WP_HOST: $WP_HOST"
