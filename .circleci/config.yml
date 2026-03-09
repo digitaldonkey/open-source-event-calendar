@@ -183,7 +183,7 @@ jobs:
               exit 1;
             fi
       - run:
-          name: Verify hooks-and-filters.md is up to date
+          name: Verify Twig frontend templates are up to date
           command: |
             set -Eeuxo pipefail
             cd twig_to_js_transform
@@ -194,11 +194,11 @@ jobs:
               echo "No changes detected"
               exit 0;
             else
-              echo "Generating hooks-and-filters.md: revealed uncommitted changes"
+              echo "Generating Twig-js templates: revealed uncommitted changes"
               exit 1;
             fi
       - run:
-          name: Verify Twig frontend templates are up to date
+          name: Verify hooks-and-filters.md is up to date
           command: |
             set -Eeuxo pipefail
             git clone git@github.com:digitaldonkey/hookster_markdown.git
@@ -210,7 +210,7 @@ jobs:
               echo "No changes detected"
               exit 0;
             else
-              echo "Generating Twig-js templates: revealed uncommitted changes"
+              echo "Generating hooks-and-filters.md: revealed uncommitted changes"
               exit 1;
             fi
 # Default configuration Database testing jobs
