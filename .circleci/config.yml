@@ -128,6 +128,13 @@ jobs:
         <<: *ENV_PHP_IMAGE
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
+    environment:
+      - WP_CORE_DIR: /var/www/html # /tmp/docroot
+      - WP_HOST: *WP_HOST
+      - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
+      - WP_ORG_USERNAME: *WP_ORG_USERNAME
+      - WP_VERSION: *WP_VERSION
+      - WP_CLI: /tmp/vendor/bin/wp
     steps:
       - checkout
       - *attach_workspace
