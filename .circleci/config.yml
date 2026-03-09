@@ -123,16 +123,31 @@ jobs:
 
   static_release_job:
     <<: *container_config
+    docker:
+      - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
     steps:
       - checkout
       - *attach_workspace
       - *copy_vendor
       - run:
+          name: Release test VARIABLES
+          command: |
+            echo "CONSTANTS:"
+            echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
+            echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"            
+            echo " WP_HOST: $WP_HOST"
+            echo " WP_CORE_DIR: $WP_CORE_DIR"
+            echo " WP_VERSION: $WP_VERSION"
+            echo " $($WP_CLI --version) $WP_CLI"
+      - run:
           name: Check if README.txt is up to date
           command: |
             set -Eeuxo pipefail
             # Create readme
-            open-source-event-calendar/vendor/bin/wp vendor/bin/wp --path="$WP_CORE_DIR" osec update-readme
+            vendor/bin/wp vendor/bin/wp --path="$WP_CORE_DIR" osec update-readme
             if output=$(git status --porcelain) && [ -z "$output" ]; then
               echo "No changes detected"
               exit 0;
