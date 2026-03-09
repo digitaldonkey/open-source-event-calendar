@@ -132,7 +132,7 @@ jobs:
           command: |
             set -Eeuxo pipefail
             # Create readme
-            vendor/bin/wp osec updateReadme
+            open-source-event-calendar/vendor/bin/wp vendor/bin/wp --path="$WP_CORE_DIR" osec update-readme
             if output=$(git status --porcelain) && [ -z "$output" ]; then
               echo "No changes detected"
               exit 0;
