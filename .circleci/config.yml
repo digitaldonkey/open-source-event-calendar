@@ -119,9 +119,101 @@ jobs:
       - *copy_vendor
       - run:
           name: Run code quality tests
-          command: vendor/bin/grumphp run --testsuite=code_quality
+          command: vendor/bin/wp
 
-  # Default configuration Database testing jobs
+  static_release_job:
+    <<: *container_config
+    docker:
+      - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+    environment:
+      - WP_CORE_DIR: /tmp/wordpress
+      - WP_HOST: *WP_HOST
+      - WP_VERSION: *WP_VERSION
+      - WP_CLI: vendor/bin/wp
+    steps:
+      - checkout
+      - *attach_workspace
+      - *copy_vendor
+      - run:
+          name: Static release test VARIABLES
+          command: |
+            echo "CONSTANTS:"            
+            echo " WP_HOST: $WP_HOST"
+            echo " WP_CORE_DIR: $WP_CORE_DIR"
+            echo " WP_VERSION: $WP_VERSION"
+            echo " $($WP_CLI --version) $WP_CLI"
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:3306 -timeout 1m
+      - run:
+          name: Install Wordpress
+          command: |
+            set -Eeuxo pipefail
+            # Install WP
+            ln -s /home/circleci/open-source-event-calendar/ $WP_CORE_DIR/wp-content/plugins/
+            $WP_CLI config create --path=$WP_CORE_DIR --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
+            $WP_CLI core install --path=$WP_CORE_DIR --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com"
+            $WP_CLI --path=$WP_CORE_DIR plugin activate open-source-event-calendar
+      - run:
+          name: Install NVM
+          command: |            
+            # Only install nvm if it's not already installed
+            if command -v nvm &> /dev/null; then
+              echo "nvm is already installed. Skipping nvm install.";
+            else
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash;
+            
+              echo 'export NVM_DIR="$HOME/.nvm"' >> "$BASH_ENV";
+              echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use' >> "$BASH_ENV";
+              source "$BASH_ENV";
+            fi
+      - run:
+          name: Verify Readme.txt is up to date
+          command: |
+            set -Eeuxo pipefail
+            $WP_CLI --path="$WP_CORE_DIR" osec update_readme
+            if output=$(git status --porcelain) && [ -z "$output" ]; then
+              echo "No changes detected"
+              exit 0;
+            else
+              echo "wp osec updateReadme revealed uncomitted changes"
+              exit 1;
+            fi
+      - run:
+          name: Verify Twig frontend templates are up to date
+          command: |
+            set -Eeuxo pipefail
+            cd twig_to_js_transform
+            nvm install
+            npm install
+            npm run build-twig-frontend            
+            if output=$(git status --porcelain) && [ -z "$output" ]; then
+              echo "No changes detected"
+              exit 0;
+            else
+              echo "Generating Twig-js templates: revealed uncommitted changes"
+              exit 1;
+            fi
+      - run:
+          name: Verify hooks-and-filters.md is up to date
+          command: |
+            set -Eeuxo pipefail
+            git clone git@github.com:digitaldonkey/hookster_markdown.git
+            cd hookster_markdown
+            nvm install
+            npm install
+            npm run build-hooks-and-filters            
+            if output=$(git status --porcelain) && [ -z "$output" ]; then
+              echo "No changes detected"
+              exit 0;
+            else
+              echo "Generating hooks-and-filters.md: revealed uncommitted changes"
+              exit 1;
+            fi
+# Default configuration Database testing jobs
   db_job: &db_job
     <<: *container_config
     docker:
@@ -413,6 +505,14 @@ workflows:
       - static_job:
           requires:
             - build
+      - static_release_job:
+          requires:
+            - static_job
+          filters:
+            branches:
+              only:
+                - /test-master/
+                - master
       - db_job:
           requires:
             - build
@@ -422,12 +522,6 @@ workflows:
           filters:
             branches:
               only: /master/
-      #      - db_job_php_8_1:
-#          requires:
-#            - build
-#          filters:
-#            branches:
-#              only: /master/
       - db_job_php_8_3:
           requires:
             - build
@@ -452,9 +546,8 @@ workflows:
             - release_test_job
             - db_job
             - static_job
+            - static_release_job
             - db_job_maria_10_5
-  # TODO      - db_job_php_8_1
-  #   Maybe https://stackoverflow.com/a/43442839/308533
             - db_job_php_8_3
             - db_job_mysql_8
           filters:

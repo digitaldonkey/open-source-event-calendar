@@ -37,9 +37,9 @@ class MakeReadme
      *
      *     wp osec udateReadme
      *
-     * @when after_wp_load
+     * @when before_wp_load
      */
-    public function updateReadme()
+    public function update_readme()
     {
         try {
             require_once self::PLUGIN_DIR . '/constants.php';
