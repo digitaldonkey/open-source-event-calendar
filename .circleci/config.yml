@@ -146,6 +146,9 @@ jobs:
             echo " WP_VERSION: $WP_VERSION"
             echo " $($WP_CLI --version) $WP_CLI"
       - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:3306 -timeout 1m
+      - run:
           name: Check if README.txt is up to date
           command: |
             set -Eeuxo pipefail
