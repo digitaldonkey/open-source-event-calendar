@@ -158,6 +158,19 @@ jobs:
             $WP_CLI core install --path=$WP_CORE_DIR --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com"
             $WP_CLI --path=$WP_CORE_DIR plugin activate open-source-event-calendar
       - run:
+          name: Install NVM
+          command: |            
+            # Only install nvm if it's not already installed
+            if command -v nvm &> /dev/null; then
+              echo "nvm is already installed. Skipping nvm install.";
+            else
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash;
+            
+              echo 'export NVM_DIR="$HOME/.nvm"' >> "$BASH_ENV";
+              echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use' >> "$BASH_ENV";
+              source "$BASH_ENV";
+            fi
+      - run:
           name: Verify Readme.txt is up to date
           command: |
             set -Eeuxo pipefail
@@ -174,7 +187,7 @@ jobs:
           command: |
             set -Eeuxo pipefail
             cd twig_to_js_transform
-            nvm use
+            nvm install
             npm install
             npm run build-hooks-and-filters            
             if output=$(git status --porcelain) && [ -z "$output" ]; then
@@ -190,7 +203,7 @@ jobs:
             set -Eeuxo pipefail
             git clone git@github.com:digitaldonkey/hookster_markdown.git
             cd hookster_markdown
-            nvm use
+            nvm install
             npm install
             npm run build-twig-frontend            
             if output=$(git status --porcelain) && [ -z "$output" ]; then
