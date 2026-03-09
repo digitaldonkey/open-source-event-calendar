@@ -152,7 +152,7 @@ The principle behind this plugin is to be Open Source. Get in touch on [GitHub](
 
 Writing this fork was [a huge effort](https://github.com/wp-plugins/all-in-one-event-calendar/compare/master...digitaldonkey:open-source-event-calendar:master).
 
-Digitaldonkey believes everybody should be able to set up and manage public calendars. 
+Digitaldonkey believes everybody should be able to set up and manage public calendars! 
 
 If you are implementing this plugin for others you should support ongoing development with a [donation](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6) or [contribution](https://github.com/digitaldonkey/open-source-event-calendar/issues). 
 
