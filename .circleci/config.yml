@@ -521,9 +521,7 @@ workflows:
           requires:
             - build
           filters:
-            only:
-              - master
-              - test-master
+            only: /^(master|release-.*)$/
       - db_job_php_8_3:
           requires:
             - build
