@@ -158,8 +158,8 @@ class AdminPageAddEvent extends OsecBaseClass
                     'time' => EventTimeView::factory($this->app)->get_timespan_html($child, 'long'),
                 ];
             }
+            ThemeLoader::factory($this->app)->get_file('box_event_children.twig', $args, true)->render();
         }
-        ThemeLoader::factory($this->app)->get_file('box_event_children.twig', $args, true)->render();
     }
 
     /**
