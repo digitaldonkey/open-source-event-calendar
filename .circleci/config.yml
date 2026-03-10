@@ -472,21 +472,21 @@ jobs:
   release_test_job_php_8_3:
     <<: *release_test_job
     docker:
-      - image: cimg/php:8.3
+      - image: cimg/php:8.3-browsers
         <<: *ENV_PHP_IMAGE
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
   release_test_job_php_8_4:
     <<: *release_test_job
     docker:
-      - image: cimg/php:8.4
+      - image: cimg/php:8.4-browsers
         <<: *ENV_PHP_IMAGE
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
   release_test_job_php_8_5:
     <<: *release_test_job
     docker:
-      - image: cimg/php:8.5
+      - image: cimg/php:8.5-browsers
         <<: *ENV_PHP_IMAGE
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
