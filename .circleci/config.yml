@@ -571,6 +571,15 @@ workflows:
       - release_test_job:
           requires:
             - create_release_job
+      - release_test_job_php_8_3:
+          requires:
+            - create_release_job
+      - release_test_job_php_8_4:
+          requires:
+            - create_release_job
+      - release_test_job_php_8_5:
+          requires:
+            - create_release_job
       - publish-github-release_job:
           requires:
             - static_job
