@@ -94,7 +94,7 @@ class AdminPageAddEvent extends OsecBaseClass
         }
 
         if ($parent) {
-            // Edited reoccurring events:
+            // Edited recurring events:
             // Base recurrence event -> displaying link reference to parent
             $meta_boxes['meta_box_parent'] = [
                     OSEC_POST_TYPE . 'meta_box_parent',

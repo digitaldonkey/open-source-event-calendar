@@ -407,7 +407,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     }
 
     /**
-     * Define the timeframe for reoccurring events.
+     * Define the timeframe for recurring events.
      *
      * Relative time frame.
      * Don't get excessive, it affects performance,
