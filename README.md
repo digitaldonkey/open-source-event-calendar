@@ -135,6 +135,17 @@ OSEC is a fork of the GPL licensed plugin All-in-one-Event-Calendar by Timely. A
 
 If you love truly open source software and don't mind to get your hands dirty you should join here. Free people need free software to manage and share events in a selfhosted manner.
 
+## External services
+
+OSEC may connect to OpenStreetMap to render maps. If you using maps feature make sure you agree with [Terms of Service](https://operations.osmfoundation.org/policies/)
+
+OSEC may connect to OpenStreetMap Nominatim geocoding API. [Terms of Service](https://operations.osmfoundation.org/policies/nominatim/).
+You may need to switch the servive on a heavy traffic site as Nominatim allows an *absolute maximum of 1 request per second*.
+
+By default leaflet and leaflet-control-geocoder are loaded from unpkg.com. [Terms of Service](https://app.unpkg.com/policies@1.0.1).
+
+You can change using hooks: `osec_leaflet_library_alter`, `osec_leaflet_geocoder_library_alter`.
+
 ## Migration Notes
 Database structure is not fully compatible with All-in-One Event Calendar v2.3.4
 

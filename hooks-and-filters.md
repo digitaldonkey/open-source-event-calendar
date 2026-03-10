@@ -935,6 +935,41 @@ add_filter('osec_leaflet_library_alter', $leaflet);
 </details>
 
 
+### osec_leaflet_geocoder_library_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Leaflet geocoder library (leaflet-control-geocoder)
+
+```php
+add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
+```
+
+#### Parameters
+
+
+ - **$leaflet** <span style="color:crimson"> </span> Osec leaflet urls.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Leaflet geocoder library (leaflet-control-geocoder)
+ *
+ * @since 1.1
+ *
+ * @param  array  $leaflet Osec leaflet urls.
+ *
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
+```
+
+</details>
+
+
 ---
 
 
@@ -5777,6 +5812,41 @@ Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
  * @file src/App/Controller/MapsController.php
  */
 add_filter('osec_leaflet_library_alter', $leaflet);
+```
+
+</details>
+
+
+### osec_leaflet_geocoder_library_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Leaflet geocoder library (leaflet-control-geocoder)
+
+```php
+add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
+```
+
+#### Parameters
+
+
+ - **$leaflet** <span style="color:crimson"> </span> Osec leaflet urls.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Leaflet geocoder library (leaflet-control-geocoder)
+ *
+ * @since 1.1
+ *
+ * @param  array  $leaflet Osec leaflet urls.
+ *
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
 ```
 
 </details>

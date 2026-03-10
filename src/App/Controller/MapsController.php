@@ -37,24 +37,7 @@ class MapsController extends OsecBaseClass
         );
 
         if (is_admin()) {
-            // Maybe for geocoding?
-            wp_register_script(
-                'leaflet-control-geocoder',
-                'https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js',
-                null,
-                OSEC_VERSION,
-                ['in_footer' => true]
-            );
-
-            // Adopted custom styles
-            // @see https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css
-            wp_enqueue_style(
-                'control-geocoder.css',
-                OSEC_ADMIN_THEME_CSS_URL . 'control-geocoder.css',
-                null,
-                OSEC_VERSION . time(),
-            );
-
+            $this->register_leaflet_geocoder();
 
             wp_register_script(
                 'admin-box-event-map.js',
@@ -157,6 +140,40 @@ class MapsController extends OsecBaseClass
             $leaflet['style'],
             [],
             OSEC_VERSION
+        );
+    }
+
+    protected function register_leaflet_geocoder(): void
+    {
+        $leaflet_geocoder = [
+            'script' => 'https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js',
+            'style'  => OSEC_ADMIN_THEME_CSS_URL . 'control-geocoder.css',
+        ];
+        /**
+         * Alter Leaflet geocoder library (leaflet-control-geocoder)
+         *
+         * @since 1.1
+         *
+         * @param  array  $leaflet Osec leaflet urls.
+         *
+         */
+        $leaflet_geocoder = apply_filters('osec_leaflet_geocoder_library_alter', $leaflet_geocoder);
+
+        wp_register_script(
+            'leaflet-control-geocoder',
+            $leaflet_geocoder['script'],
+            null,
+            OSEC_VERSION,
+            ['in_footer' => true]
+        );
+
+        // Adopted custom styles
+        // @see https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css
+        wp_enqueue_style(
+            'control-geocoder.css',
+            $leaflet_geocoder['style'],
+            null,
+            OSEC_VERSION,
         );
     }
 }
