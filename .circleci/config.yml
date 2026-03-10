@@ -511,17 +511,18 @@ workflows:
       - static_release_job:
           requires:
             - static_job
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
       - db_job:
           requires:
             - build
+          filters:
+            branches:
+              only: /^(master|release-.*)$/
       - db_job_maria_10_5:
           requires:
             - build
           filters:
-            only: /^(master|release-.*)$/
+            branches:
+              only: /^(master|release-.*)$/
       - db_job_php_8_3:
           requires:
             - build
