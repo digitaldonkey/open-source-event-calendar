@@ -513,10 +513,7 @@ workflows:
             - static_job
           filters:
             branches:
-              only:
-                - master
-                - test-master
-                # TODO RENAME test-master TO - ^release.*
+              only: /^(master|release-.*)$/
       - db_job:
           requires:
             - build
@@ -532,33 +529,25 @@ workflows:
             - build
           filters:
             branches:
-              only:
-                - master
-                - test-master
+              only: /^(master|release-.*)$/
       - db_job_php_8_4:
           requires:
             - build
           filters:
             branches:
-              only:
-                - master
-                - test-master
+              only: /^(master|release-.*)$/
       - db_job_php_8_5:
           requires:
             - build
           filters:
             branches:
-              only:
-                - master
-                - test-master
+              only: /^(master|release-.*)$/
       - db_job_mysql_8:
           requires:
             - build
           filters:
             branches:
-              only:
-                - master
-                - test-master
+              only: /^(master|release-.*)$/
       - create_release_job:
           requires:
             - db_job
