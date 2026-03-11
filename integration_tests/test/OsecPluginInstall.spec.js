@@ -434,7 +434,7 @@ describe('Plugin install', function(){
             'Pariser Platz 1\n' +
             'Mitte Mitte\n' +
             '10117 Berlin\n' +
-            'Deutschland'
+            'Germany'
         );
 
         // Click map placeholder
