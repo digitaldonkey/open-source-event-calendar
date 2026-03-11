@@ -444,10 +444,13 @@ describe('Plugin install', function(){
 
         // Check for Map marker
         const marker = await pageObject.getElement(By.css('.leaflet-marker-pane > img'));
-        const markerImg = await marker.getAttribute('src');
-        pageObject.assert.equal(
-            markerImg,
-            'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png'
+        const markerImgUrl = await marker.getAttribute('src');
+        // https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png
+        // Version is a constant, marker-icon suffix might change depending on screen.
+        pageObject.assert.ok(
+            markerImgUrl.startsWith('https://unpkg.com/leaflet')
+            && markerImgUrl.endsWith('.png')
+            && markerImgUrl.includes('marker-icon')
         );
 
     });
