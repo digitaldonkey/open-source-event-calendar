@@ -353,7 +353,6 @@ describe('Plugin install', function(){
         const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event';
         await pageObject.go_to_url(url);
 
-        // TODO Why we do not get logged out before?
         await pageObject.doLogin();
 
         // Switch to extended sceen options (to avoid hovering).
@@ -383,5 +382,71 @@ describe('Plugin install', function(){
         await trashPermanentlyLink.click();
 
         await pageObject.waitToSeeWhatHappens(500, true);
+    })
+
+    it('Add Event with map', async function () {
+        const url = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
+        await pageObject.go_to_url(url);
+
+        await pageObject.doLogin();
+
+
+        // Add Event title
+        const titleInput = await pageObject.getElement(By.id('title'));
+        await titleInput.sendKeys('Event with map');
+        await pageObject.waitToSeeWhatHappens(500, true);
+
+        // Search on map
+        const mapSearchInput = await pageObject.getElement(By.css('#osec-map input[type="search"]'));
+        await mapSearchInput.sendKeys('Brandenburger Tor, Pariser Platz 1, Mitte Mitte, 10117 Berlin, Deutschland');
+        await pageObject.waitToSeeWhatHappens(500, true);
+        // Click result
+        const resultSuggestion = await pageObject.getElement(By.css('#osec-map .leaflet-control-geocoder-alternatives li[data-result-index="0"]'));
+        await resultSuggestion.click();
+        // Ensure Map is displayed
+        const mapCheckbox = await pageObject.getElement(By.id('osec_google_map'));
+        await mapCheckbox.click();
+
+        await pageObject.takeScreenshot(this);
+
+
+        // Save event
+        const publishButton = await pageObject.getElement(By.id('publish'));
+        pageObject.driver.executeScript("arguments[0].scrollIntoView(true);", publishButton);
+        await pageObject.waitToSeeWhatHappens(500, true);
+        publishButton.click();
+        await pageObject.waitToSeeWhatHappens(1000, true);
+        // Go to Event
+        const showPageLink = await pageObject.getElement(By.css('#message a'));
+        await showPageLink.click();
+        await pageObject.waitToSeeWhatHappens(1000, true);
+
+        // Check for address
+        const addressValue = await pageObject.getElement(By.css('.entry-content .osec-location'));
+        const text = await addressValue.getText();
+
+        await pageObject.takeScreenshot(this);
+
+        pageObject.assert.equal(
+            text,
+            'Brandenburger Tor\n' +
+            'Pariser Platz 1\n' +
+            'Mitte Mitte\n' +
+            '10117 Berlin\n' +
+            'Deutschland'
+        );
+
+        // Click map placeholder
+        const placeholder = await pageObject.getElement(By.css('.osec-map-placeholder'));
+        await placeholder.click();
+        await pageObject.waitToSeeWhatHappens(1000, true);
+        // Check for Map marker
+        const marker = await pageObject.getElement(By.css('.leaflet-marker-pane > img'));
+        const markerImg = await marker.getAttribute('src');
+        pageObject.assert.equal(
+            markerImg,
+            'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png'
+        );
+
     });
 })
