@@ -296,7 +296,7 @@ jobs:
               echo "No changes detected"
               exit 0;
             else
-              echo "wp osec updateReadme revealed uncomitted changes"
+              echo "`wp osec update_readme` revealed uncomitted changes"
               exit 1;
             fi
       - run:
@@ -528,6 +528,9 @@ workflows:
       - static_release_job:
           requires:
             - static_job
+          filters:
+            branches:
+              only: /^(master|release-.*)$/
       - db_job:
           requires:
             - build

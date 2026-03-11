@@ -398,6 +398,7 @@ describe('Plugin install', function(){
 
         // Search on map
         const mapSearchInput = await pageObject.getElement(By.css('#osec-map input[type="search"]'));
+        // Note: We put in German name but expect English result "Brandenburg Gate"
         await mapSearchInput.sendKeys('Brandenburger Tor, Pariser Platz 1, Mitte Mitte, 10117 Berlin, Deutschland');
         await pageObject.waitToSeeWhatHappens(500, true);
         // Click result
@@ -429,7 +430,7 @@ describe('Plugin install', function(){
 
         pageObject.assert.equal(
             text,
-            'Brandenburger Tor\n' +
+            'Brandenburg Gate\n' +
             'Pariser Platz 1\n' +
             'Mitte Mitte\n' +
             '10117 Berlin\n' +
