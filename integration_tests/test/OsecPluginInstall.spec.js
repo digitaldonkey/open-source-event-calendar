@@ -426,8 +426,6 @@ describe('Plugin install', function(){
         const addressValue = await pageObject.getElement(By.css('.entry-content .osec-location'));
         const text = await addressValue.getText();
 
-        await pageObject.takeScreenshot(this);
-
         pageObject.assert.equal(
             text,
             'Brandenburg Gate\n' +
@@ -441,6 +439,9 @@ describe('Plugin install', function(){
         const placeholder = await pageObject.getElement(By.css('.osec-map-placeholder'));
         await placeholder.click();
         await pageObject.waitToSeeWhatHappens(1000, true);
+
+        await pageObject.takeScreenshot(this);
+
         // Check for Map marker
         const marker = await pageObject.getElement(By.css('.leaflet-marker-pane > img'));
         const markerImg = await marker.getAttribute('src');
