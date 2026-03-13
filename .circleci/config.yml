@@ -524,7 +524,7 @@ jobs:
             echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"
       - run:
           name: Deploy assets to WordPress plugin directory
-          command: /home/circleci/open-source-event-calendar/.circleci/deploy-assets.sh
+          command: /home/circleci/open-source-event-calendar/.circleci/deploy-wp-plugin-assets.sh
     environment:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
