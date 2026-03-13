@@ -230,11 +230,11 @@ jobs:
             find /tmp/release/$WP_ORG_PLUGIN_NAME -type f -name '*.sh' -o -name '*.cmd' | xargs rm
             (cd /tmp/release/ && zip -r /tmp/$OSEC_RELEASE_FILE $WP_ORG_PLUGIN_NAME)
       - store_artifacts:
-          path: /tmp/open-source-event-calendar.zip
+          path: /tmp/$OSEC_RELEASE_FILE
       - persist_to_workspace:
           root: *workspace_root
           paths:
-            - open-source-event-calendar.zip
+            - $OSEC_RELEASE_FILE
 
   # Ensures generated docs and templates are up to date.
   static_release_job:
@@ -505,9 +505,9 @@ jobs:
             fi
             git describe --tags --exact-match > /dev/null 2>&1 && VERSION=$(git describe --tags) || VERSION="dev"
             if [ "$VERSION" == "dev" ]; then
-                ghr -prerelease -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
+                ghr -prerelease -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/$OSEC_RELEASE_FILE
             else
-              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
+              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/$OSEC_RELEASE_FILE
             fi             
 
   wp_deploy_assets_job:
@@ -521,14 +521,14 @@ jobs:
           command: |
             # WP_ORG_SVN_PASSWORD
             echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-            echo " WP_HOST: $WP_HOST"
-            echo " WP_CORE_DIR: $WP_CORE_DIR"
             echo " WP_VERSION: $WP_VERSION"
-            echo " $($WP_CLI --version) $WP_CLI"
-            ls -al /tmp/open-source-event-calendar.zip
+            ls -al /tmp//tmp/$OSEC_RELEASE_FILE
       - run:
           name: Deploy assets to WordPress plugin directory
-          command: /home/circleci/open-source-event-calendar/.circleci/deploy-assets.sh
+          command: |
+#            cd /tmp
+#            unzip  open-source-event-calendar.zip
+            /home/circleci/open-source-event-calendar/.circleci/deploy-assets.sh
     environment:
       # Rewrite environment
       # Standard WP at docroot. Osec release tar goes into wp-plugins.
