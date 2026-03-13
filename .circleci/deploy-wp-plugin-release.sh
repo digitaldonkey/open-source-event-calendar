@@ -35,7 +35,7 @@ fi
 
 # Unpack release for svn.
  mkdir /tmp/release_files
- unzip  open-source-event-calendar.zip -d /tmp/release_files
+ unzip  /tmp/open-source-event-calendar.zip -d /tmp/release_files
 
 PLUGIN_BUILD_PATH="/tmp/release_files/open-source-event-calendar"
 PLUGIN_SVN_PATH="/tmp/svn"
@@ -43,7 +43,7 @@ PLUGIN_SVN_PATH="/tmp/svn"
 # Tag of the latest tagged commit across all branches.
 LATEST_GIT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
 
-if [[ $CIRCLE_TAG !== $LATEST_GIT_TAG ]]; then
+if [[ $CIRCLE_TAG != $LATEST_GIT_TAG ]]; then
     echo "LATEST_GIT_TAG:$LATEST_GIT_TAG  is not matching LATEST_GIT_TAG: $LATEST_GIT_TAG." 1>&2
 #    exit 1
 fi
