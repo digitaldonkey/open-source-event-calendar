@@ -489,7 +489,7 @@ jobs:
         <<: *ENV_DB_IMAGE
 
   # Publish github release
-  publish-github-release_job:
+  publish_github_release_job:
     docker:
       - image: cibuilds/github:0.13
     working_directory: ~/open-source-event-calendar
@@ -526,8 +526,31 @@ jobs:
       - run:
           name: Deploy assets to WordPress plugin directory
           command: /home/circleci/open-source-event-calendar/.circleci/deploy-assets.sh
-#            cd /tmp
-#            unzip  open-source-event-calendar.zip
+    environment:
+      - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
+      - WP_ORG_USERNAME: *WP_ORG_USERNAME
+      - WP_VERSION: *WP_VERSION
+      - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
+
+  wp_deploy_wp_org_job:
+    <<: *container_config
+    steps:
+      - checkout
+      - *attach_workspace
+      - *install_subversion
+      - run:
+          name: Deploy to wordpress.org variables
+          command: |
+            # WP_ORG_SVN_PASSWORD
+            echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
+            echo " WP_VERSION: $WP_VERSION"
+            ls -al /tmp/$OSEC_RELEASE_FILE
+      - run:
+          name: Deploy assets to WordPress plugin directory
+          command: |
+             cd /tmp
+             unzip  open-source-event-calendar.zip
+             /home/circleci/open-source-event-calendar/.circleci/deploy-wp-org.sh
     environment:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
@@ -612,7 +635,7 @@ workflows:
           filters:
             branches:
               only: /^(master|release-.*)$/
-      - publish-github-release_job:
+      - publish_github_release_job:
           requires:
             - static_job
             - db_job
@@ -633,4 +656,9 @@ workflows:
               only: /^\d+\.\d+\.\d+$/
       - wp_deploy_assets_job:
           requires:
-            - create_release_job
+            - publish_github_release_job
+          filters:
+            branches:
+              only: /master/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
