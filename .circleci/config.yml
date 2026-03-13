@@ -522,15 +522,13 @@ jobs:
             # WP_ORG_SVN_PASSWORD
             echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
             echo " WP_VERSION: $WP_VERSION"
-            ls -al /tmp//tmp/$OSEC_RELEASE_FILE
+            ls -al /tmp/$OSEC_RELEASE_FILE
       - run:
           name: Deploy assets to WordPress plugin directory
           command: /home/circleci/open-source-event-calendar/.circleci/deploy-assets.sh
 #            cd /tmp
 #            unzip  open-source-event-calendar.zip
     environment:
-      # Rewrite environment
-      # Standard WP at docroot. Osec release tar goes into wp-plugins.
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - WP_VERSION: *WP_VERSION
