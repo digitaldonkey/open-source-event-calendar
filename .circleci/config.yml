@@ -528,6 +528,7 @@ jobs:
       - run:
           name: Deploy assets to WordPress plugin directory
           command: .circleci/deploy_assets.sh
+    working_directory: ~/open-source-event-calendar
     environment:
       # Rewrite environment
       # Standard WP at docroot. Osec release tar goes into wp-plugins.
