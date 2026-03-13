@@ -521,16 +521,13 @@ jobs:
           command: |
             # WP_ORG_SVN_PASSWORD
             echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-            echo " WP_VERSION: $WP_VERSION"
-            ls -al /tmp/$OSEC_RELEASE_FILE
+            echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"
       - run:
           name: Deploy assets to WordPress plugin directory
           command: /home/circleci/open-source-event-calendar/.circleci/deploy-assets.sh
     environment:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
-      - WP_VERSION: *WP_VERSION
-      - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
 
   wp_deploy_wp_org_job:
     <<: *container_config
