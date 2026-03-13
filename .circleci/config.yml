@@ -86,7 +86,6 @@ references:
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
 jobs:
-
   # BUILD
   build:
     <<: *container_config
@@ -345,7 +344,6 @@ jobs:
       - WP_CORE_DIR: /var/www/html # /tmp/docroot
       - WP_HOST: *WP_HOST
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
-      - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - WP_VERSION: *WP_VERSION
       - WP_CLI: /tmp/vendor/bin/wp
       - OSEC_RELEASE_FILE: open-source-event-calendar.zip
@@ -397,7 +395,6 @@ jobs:
             echo""
             echo "CONSTANTS:"
             echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-            echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"            
             echo " WP_HOST: $WP_HOST"
             echo " WP_CORE_DIR: $WP_CORE_DIR"
             echo " WP_VERSION: $WP_VERSION"
@@ -513,6 +510,35 @@ jobs:
               ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
             fi             
 
+    wp_deploy_assets_job:
+      <<: *container_config
+      steps:
+        - checkout
+        - *attach_workspace
+        - *install_subversion
+        - run:
+            name: Deploy to wordpress.org variables
+            command: |
+              echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
+              echo " WP_HOST: $WP_HOST"
+              echo " WP_CORE_DIR: $WP_CORE_DIR"
+              echo " WP_VERSION: $WP_VERSION"
+              echo " $($WP_CLI --version) $WP_CLI"
+              ls -al /tmp/open-source-event-calendar.zip
+        - run:
+            name: Deploy assets to WordPress plugin directory
+            command: .circleci/deploy_assets.sh
+      environment:
+        # Rewrite environment
+        # Standard WP at docroot. Osec release tar goes into wp-plugins.
+        - WP_CORE_DIR: /var/www/html # /tmp/docroot
+        - WP_HOST: *WP_HOST
+        - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
+        - WP_ORG_USERNAME: *WP_ORG_USERNAME
+        - WP_VERSION: *WP_VERSION
+        - WP_CLI: /tmp/vendor/bin/wp
+        - OSEC_RELEASE_FILE: open-source-event-calendar.zip
+
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
@@ -611,3 +637,6 @@ workflows:
               only: /master/
             tags:
               only: /^\d+\.\d+\.\d+$/
+      - wp_deploy_assets_job:
+          requires:
+            - create_release_job
