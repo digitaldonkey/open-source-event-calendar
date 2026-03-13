@@ -544,10 +544,7 @@ jobs:
             ls -al /tmp/$OSEC_RELEASE_FILE
       - run:
           name: Deploy assets to WordPress plugin directory
-          command: |
-             cd /tmp
-             unzip  open-source-event-calendar.zip
-             /home/circleci/open-source-event-calendar/.circleci/deploy-wp-org.sh
+          command: /home/circleci/open-source-event-calendar/.circleci/deploy-wp-plugin-release.sh
     environment:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
