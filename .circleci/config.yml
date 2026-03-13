@@ -86,7 +86,6 @@ references:
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
 jobs:
-
   # BUILD
   build:
     <<: *container_config
@@ -345,10 +344,9 @@ jobs:
       - WP_CORE_DIR: /var/www/html # /tmp/docroot
       - WP_HOST: *WP_HOST
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
-      - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - WP_VERSION: *WP_VERSION
       - WP_CLI: /tmp/vendor/bin/wp
-      - OSEC_RELEASE_FILE: open-source-event-calendar.zip
+      - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
       - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
     steps:
       - browser-tools/install-chrome
@@ -397,7 +395,6 @@ jobs:
             echo""
             echo "CONSTANTS:"
             echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-            echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"            
             echo " WP_HOST: $WP_HOST"
             echo " WP_CORE_DIR: $WP_CORE_DIR"
             echo " WP_VERSION: $WP_VERSION"
@@ -492,7 +489,7 @@ jobs:
         <<: *ENV_DB_IMAGE
 
   # Publish github release
-  publish-github-release_job:
+  publish_github_release_job:
     docker:
       - image: cibuilds/github:0.13
     working_directory: ~/open-source-event-calendar
@@ -513,6 +510,49 @@ jobs:
               ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
             fi             
 
+  wp_deploy_assets_job:
+    <<: *container_config
+    steps:
+      - checkout
+      - *attach_workspace
+      - *install_subversion
+      - run:
+          name: Deploy to wordpress.org variables
+          command: |
+            # WP_ORG_SVN_PASSWORD
+            echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
+            echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"
+      - run:
+          name: Deploy assets to WordPress plugin directory
+          command: /home/circleci/open-source-event-calendar/.circleci/deploy-wp-plugin-assets.sh
+    environment:
+      - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
+      - WP_ORG_USERNAME: *WP_ORG_USERNAME
+
+  wp_deploy_wp_org_job:
+    <<: *container_config
+    steps:
+      - checkout
+      - *attach_workspace
+      - *install_subversion
+      - run:
+          name: Deploy to wordpress.org variables
+          command: |
+            # WP_ORG_SVN_PASSWORD
+            echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
+            echo " WP_VERSION: $WP_VERSION"
+            ls -al /tmp/$OSEC_RELEASE_FILE
+      - run:
+          name: Deploy assets to WordPress plugin directory
+          command: |
+             cd /tmp
+             unzip  open-source-event-calendar.zip
+             /home/circleci/open-source-event-calendar/.circleci/deploy-wp-org.sh
+    environment:
+      - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
+      - WP_ORG_USERNAME: *WP_ORG_USERNAME
+      - WP_VERSION: *WP_VERSION
+      - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
@@ -592,7 +632,7 @@ workflows:
           filters:
             branches:
               only: /^(master|release-.*)$/
-      - publish-github-release_job:
+      - publish_github_release_job:
           requires:
             - static_job
             - db_job
@@ -606,6 +646,14 @@ workflows:
             - release_test_job_php_8_3
             - release_test_job_php_8_4
             - release_test_job_php_8_5
+          filters:
+            branches:
+              only: /master/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
+      - wp_deploy_assets_job:
+          requires:
+            - create_release_job
           filters:
             branches:
               only: /master/
