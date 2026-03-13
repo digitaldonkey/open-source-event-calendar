@@ -5,12 +5,12 @@ set +o history
 
 if [[ -z "$CIRCLECI" ]]; then
     echo "This script can only be run by CircleCI. Aborting." 1>&2
-    exit 1
+#    exit 1
 fi
 
 if [[ -z "$CIRCLE_BRANCH" || "$CIRCLE_BRANCH" != "master" ]]; then
     echo "Build branch is required and must be 'master' branch. Stopping deployment." 1>&2
-    exit 0
+#    exit 0
 fi
 
 if [[ -z "$WP_ORG_PASSWORD" ]]; then
@@ -27,6 +27,12 @@ if [[ -z "$WP_ORG_USERNAME" ]]; then
     echo "WordPress.org username not set. Aborting." 1>&2
     exit 1
 fi
+
+# Only needed in deploy Plugin.
+#if [[ ! -s "/tmp/$OSEC_RELEASE_FILE" ]]; then
+#    echo "Can not find release zip. Aborting." 1>&2
+#    exit 1
+#fi
 
 PLUGIN_SVN_PATH="/tmp/svn"
 
@@ -49,4 +55,4 @@ svn stat | grep '^?' | awk '{print $2}' | xargs -I x svn add x@
 svn stat | grep '^!' | awk '{print $2}' | xargs -I x svn rm --force x@
 
 # Commit to SVN
-# svn ci --no-auth-cache --username $WP_ORG_USERNAME --password $WP_ORG_PASSWORD -m "Deploy new assets"
+# svn ci --no-auth-cache --username $WP_ORG_USERNAME --password $WP_ORG_SVN_PASSWORD -m "Deploy new assets"

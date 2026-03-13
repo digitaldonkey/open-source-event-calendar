@@ -346,7 +346,7 @@ jobs:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_VERSION: *WP_VERSION
       - WP_CLI: /tmp/vendor/bin/wp
-      - OSEC_RELEASE_FILE: open-source-event-calendar.zip
+      - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
       - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
     steps:
       - browser-tools/install-chrome
@@ -519,6 +519,7 @@ jobs:
       - run:
           name: Deploy to wordpress.org variables
           command: |
+            # WP_ORG_SVN_PASSWORD
             echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
             echo " WP_HOST: $WP_HOST"
             echo " WP_CORE_DIR: $WP_CORE_DIR"
@@ -527,19 +528,14 @@ jobs:
             ls -al /tmp/open-source-event-calendar.zip
       - run:
           name: Deploy assets to WordPress plugin directory
-          command: .circleci/deploy_assets.sh
-    working_directory: ~/open-source-event-calendar
+          command: /home/circleci/open-source-event-calendar/.circleci/deploy-assets.sh
     environment:
       # Rewrite environment
       # Standard WP at docroot. Osec release tar goes into wp-plugins.
-      - WP_CORE_DIR: /var/www/html # /tmp/docroot
-      - WP_HOST: *WP_HOST
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - WP_VERSION: *WP_VERSION
-      - WP_CLI: /tmp/vendor/bin/wp
-      - OSEC_RELEASE_FILE: open-source-event-calendar.zip
-
+      - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
