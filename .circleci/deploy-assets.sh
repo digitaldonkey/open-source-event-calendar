@@ -13,7 +13,7 @@ if [[ -z "$CIRCLE_BRANCH" || "$CIRCLE_BRANCH" != "master" ]]; then
 #    exit 0
 fi
 
-if [[ -z "$WP_ORG_PASSWORD" ]]; then
+if [[ -z "$WP_ORG_SVN_PASSWORD" ]]; then
     echo "WordPress.org password not set. Aborting." 1>&2
     exit 1
 fi
