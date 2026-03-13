@@ -44,7 +44,7 @@ PLUGIN_SVN_PATH="/tmp/svn"
 LATEST_GIT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
 
 if [[ $CIRCLE_TAG != $LATEST_GIT_TAG ]]; then
-    echo "LATEST_GIT_TAG:$LATEST_GIT_TAG  is not matching LATEST_GIT_TAG: $LATEST_GIT_TAG." 1>&2
+    echo "LATEST_GIT_TAG:$LATEST_GIT_TAG  is not matching this tag : $CIRCLE_TAG." 1>&2
 #    exit 1
 fi
 
@@ -61,22 +61,27 @@ fi
 # Checkout the SVN repo
 svn co -q "http://svn.wp-plugins.org/$WP_ORG_PLUGIN_NAME" $PLUGIN_SVN_PATH
 
-## Move to SVN directory
-#cd $PLUGIN_SVN_PATH
-#
-## Delete the trunk directory
-#rm -rf ./trunk
-#
-## Copy our new version of the plugin as the new trunk directory
-#cp -r $PLUGIN_BUILD_PATH ./trunk
+echo "Existing SVN tags before deploy"
+ls $PLUGIN_SVN_PATH/tags
 
-## Add new files to SVN
-#svn stat | grep '^?' | awk '{print $2}' | xargs -I x svn add x@
+## Move to SVN directory
+cd $PLUGIN_SVN_PATH
+
+## Delete the trunk directory
+rm -rf ./trunk
+
+# Copy our new version of the plugin as the new trunk directory
+cp -r $PLUGIN_BUILD_PATH ./trunk
+
+# copy for tags
+svn copy trunk tags/$LATEST_GIT_TAG
+
+# Add new files to SVN
+svn stat | grep '^?' | awk '{print $2}' | xargs -I x svn add x@
+
+# Remove deleted files from SVN
+svn stat | grep '^!' | awk '{print $2}' | xargs -I x svn rm --force x@
 #
-## Remove deleted files from SVN
-#svn stat | grep '^!' | awk '{print $2}' | xargs -I x svn rm --force x@
-#
-# svn copy trunk tags/1.1.0
 #
 ## Commit to SVN
 # svn ci --no-auth-cache --username $WP_ORG_USERNAME --password $WP_ORG_SVN_PASSWORD -m "Deploy OSEC assets"
