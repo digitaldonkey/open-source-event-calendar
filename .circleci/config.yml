@@ -655,10 +655,10 @@ workflows:
             tags:
               only: /^\d+\.\d+\.\d+$/
       - wp_deploy_assets_job:
-          requires:
-            - publish_github_release_job
-          filters:
-            branches:
-              only: /master/
-            tags:
-              only: /^\d+\.\d+\.\d+$/
+#          requires:
+#            - publish_github_release_job
+#          filters:
+#            branches:
+#              only: /master/
+#            tags:
+#              only: /^\d+\.\d+\.\d+$/
