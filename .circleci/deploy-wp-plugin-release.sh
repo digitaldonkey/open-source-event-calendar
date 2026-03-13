@@ -53,6 +53,20 @@ if [[ $CIRCLE_TAG != $LATEST_GIT_TAG ]]; then
 #    exit 1
 fi
 
+[[ $CIRCLE_TAG =~ /^\d+\.\d+\.\d+$/ ]]; then
+    echo "CIRCLE_TAG is a semantic tag." 1>&2
+#    exit 1
+  else
+    echo "CIRCLE_TAG is NOT semantic tag." 1>&2
+fi
+
+[[ "$LATEST_GIT_TAG" =~ /^\d+\.\d+\.\d+$/ ]]; then
+    echo "LATEST_GIT_TAG:$LATEST_GIT_TAG is a semantic tag." 1>&2
+#    exit 1
+  else
+    echo "LATEST_GIT_TAG:$LATEST_GIT_TAG is NOT a semantic tag." 1>&2
+fi
+
 # Check if the latest SVN tag exists already
 TAG=$(svn ls "https://plugins.svn.wordpress.org/$WP_ORG_PLUGIN_NAME/tags/$LATEST_GIT_TAG")
 error=$?
