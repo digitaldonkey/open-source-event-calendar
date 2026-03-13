@@ -22,7 +22,7 @@ describe('Plugin install', function(){
 
     afterEach(async function(){
         //Enter actions to be performed after test
-        await pageObject.driver.manage().deleteAllCookies();
+        await pageObject.doLogout();
     });
 
     after(async () => {
@@ -243,7 +243,7 @@ describe('Plugin install', function(){
         await pageObject.waitToSeeWhatHappens(500, true);
 
         const publishButton = await pageObject.getElement(By.id('publish'));
-        publishButton.click();
+        await publishButton.click();
         await pageObject.waitToSeeWhatHappens(500, true);
 
         // Wait for save
@@ -254,8 +254,6 @@ describe('Plugin install', function(){
         // Wait for single event to load
         const backToCalendarLink = await pageObject.getElement(By.css('.ai1ec-calendar-link'));
         await backToCalendarLink.click();
-
-        // TODO ensure Title Text?
 
         // Calendar view Month should be visible by default.
         // Switch to next month .ai1ec-title-buttons a.ai1ec-next-month
@@ -387,9 +385,7 @@ describe('Plugin install', function(){
     it('Add Event with map', async function () {
         const url = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
         await pageObject.go_to_url(url);
-
         await pageObject.doLogin();
-
 
         // Add Event title
         const titleInput = await pageObject.getElement(By.id('title'));
@@ -413,9 +409,9 @@ describe('Plugin install', function(){
 
         // Save event
         const publishButton = await pageObject.getElement(By.id('publish'));
-        pageObject.driver.executeScript("arguments[0].scrollIntoView(true);", publishButton);
+        await pageObject.driver.executeScript("arguments[0].scrollIntoView(true);", publishButton);
         await pageObject.waitToSeeWhatHappens(500, true);
-        publishButton.click();
+        await publishButton.click();
         await pageObject.waitToSeeWhatHappens(1000, true);
         // Go to Event
         const showPageLink = await pageObject.getElement(By.css('#message a'));
@@ -425,14 +421,29 @@ describe('Plugin install', function(){
         // Check for address
         const addressValue = await pageObject.getElement(By.css('.entry-content .osec-location'));
         const text = await addressValue.getText();
+        const textArray = text.split('\n');
 
+        // Cant manage to force leaflets language
+        // to bve consisten locally and in pipeline.
+        // So we split handle German and English by or condition.
+        // This might fail if you browser has a differen language.
+        const locationTitle = textArray.shift();
+        pageObject.assert.ok(
+            locationTitle === 'Brandenburger Tor' || locationTitle === 'Brandenburg Gate',
+            'Location Title is set'
+        )
+        const country = textArray.pop();
+        pageObject.assert.ok(
+            country === 'Deutschland' || country === 'Germany',
+            'Location country is set'
+        )
+
+        const address = textArray.join("\n")
         pageObject.assert.equal(
-            text,
-            'Brandenburg Gate\n' +
+            address,
             'Pariser Platz 1\n' +
             'Mitte Mitte\n' +
-            '10117 Berlin\n' +
-            'Germany'
+            '10117 Berlin'
         );
 
         // Click map placeholder
@@ -452,6 +463,106 @@ describe('Plugin install', function(){
             && markerImgUrl.endsWith('.png')
             && markerImgUrl.includes('marker-icon')
         );
+        await pageObject.waitToSeeWhatHappens(800, true);
+    });
 
+    it('Verify Excerpt', async function () {
+        await pageObject.driver.manage().deleteAllCookies();
+
+        const title = 'Event using Excerpt';
+        // WP editor would add line breaks anyway. So they are required.
+        const content = 'CONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT';
+        const excerptContent = 'EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT';
+
+        const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
+        await pageObject.go_to_url(url);
+        await pageObject.doLogin();
+
+        // wait for some form element
+        const excerptCheckbox = await pageObject.getElement(By.id('feature_use_excerpt'))
+        const isEnabled = await excerptCheckbox.isSelected();
+        if (!isEnabled) {
+            await excerptCheckbox.click()
+        }
+
+        const submitSettings = await pageObject.getElement(By.id('osec_save_settings'))
+        await pageObject.driver.executeScript("arguments[0].scrollIntoView(true); console.log(arguments);", submitSettings);
+
+        await submitSettings.submit();
+        await pageObject.waitToSeeWhatHappens(800, true);
+        await pageObject.takeScreenshot(this);
+
+        const editUrl = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
+        await pageObject.go_to_url(editUrl);
+
+
+        // Add Event title
+        const titleInput = await pageObject.getElement(By.id('title'));
+        await titleInput.sendKeys(title);
+
+        // Switch to code view to avoid tinymce
+        const button = await pageObject.getElement(By.id('content-html'));
+        await button.click();
+        await pageObject.waitToSeeWhatHappens(500, true);
+
+        // Add content
+        await pageObject.driver.executeScript("document.getElementById('content').value = arguments[0]", content);
+
+        // Add excerpt text
+        const excerptInput = await pageObject.getElement(By.id('excerpt'));
+        await excerptInput.sendKeys(excerptContent);
+
+        // Save event
+        const publishButton = await pageObject.getElement(By.id('publish'));
+        await pageObject.driver.executeScript("arguments[0].scrollIntoView(true);", publishButton);
+        await pageObject.waitToSeeWhatHappens(500, true);
+        await publishButton.click();
+        await pageObject.waitToSeeWhatHappens(1000, true);
+
+        // Go store ID and navigate to Event
+        const showPageLink = await pageObject.getElement(By.css('#message a'));
+        await showPageLink.click();
+        await pageObject.waitToSeeWhatHappens(1000, true);
+
+        await pageObject.takeScreenshot(this);
+
+        // Check for content is on Single
+        const singleEventContentSel = await pageObject.getElement(By.tagName('body'));
+        const singleContent = await singleEventContentSel.getText();
+
+        pageObject.assert.ok(
+            singleContent.includes(content),
+            'The Event single page contains content'
+        );
+
+        pageObject.assert.ok(
+            ! singleContent.includes(excerptContent),
+            'The Event single page does not contain teaser content'
+        );
+
+        // Check if content is not on Calendar
+        // Wait for single event to load
+        const backToCalendarLink = await pageObject.getElement(By.css('a.ai1ec-calendar-link'));
+        await backToCalendarLink.click();
+        await pageObject.waitToSeeWhatHappens(1000, true);
+
+        // Hover
+        const popupTrigger = await pageObject.getElement(By.partialLinkText(title));
+        const actions = pageObject.driver.actions({async: true});
+        await actions.move({origin: popupTrigger}).perform();
+
+        const calendarEventContentSel = await pageObject.getElement(By.css('body'));
+        const calendarContent = await calendarEventContentSel.getText();
+
+        pageObject.assert.ok(
+            calendarContent.includes(excerptContent),
+            'The teaser/excerpt on calendar contains excerpt content'
+        );
+
+        pageObject.assert.ok(
+            ! calendarContent.includes(content),
+            'Event on calendar does not contain main content'
+        );
+        await pageObject.takeScreenshot(this);
     });
 })
