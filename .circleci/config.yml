@@ -230,11 +230,11 @@ jobs:
             find /tmp/release/$WP_ORG_PLUGIN_NAME -type f -name '*.sh' -o -name '*.cmd' | xargs rm
             (cd /tmp/release/ && zip -r /tmp/$OSEC_RELEASE_FILE $WP_ORG_PLUGIN_NAME)
       - store_artifacts:
-          path: /tmp/$OSEC_RELEASE_FILE
+          path: /tmp/open-source-event-calendar.zip
       - persist_to_workspace:
           root: *workspace_root
           paths:
-            - $OSEC_RELEASE_FILE
+            - open-source-event-calendar.zip
 
   # Ensures generated docs and templates are up to date.
   static_release_job:
@@ -505,9 +505,9 @@ jobs:
             fi
             git describe --tags --exact-match > /dev/null 2>&1 && VERSION=$(git describe --tags) || VERSION="dev"
             if [ "$VERSION" == "dev" ]; then
-                ghr -prerelease -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/$OSEC_RELEASE_FILE
+                ghr -prerelease -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
             else
-              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/$OSEC_RELEASE_FILE
+              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
             fi             
 
   wp_deploy_assets_job:
