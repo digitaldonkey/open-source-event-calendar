@@ -8,7 +8,7 @@ if [[ -z "$CIRCLECI" ]]; then
     exit 1
 fi
 
-if [[ -z "$CIRCLE_BRANCH" || "$CIRCLE_BRANCH" != "master" ]]; then
+if [[ -z "$CIRCLE_BRANCH" || "$CIRCLE_BRANCH" != "master" || "$CIRCLE_BRANCH" != "evaluate-deployment" ]]; then
     echo "Build branch is required and must be 'master' branch. Stopping deployment." 1>&2
     exit 0
 fi
