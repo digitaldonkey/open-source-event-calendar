@@ -541,8 +541,9 @@ jobs:
             # WP_ORG_SVN_PASSWORD
             echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
             echo " WP_VERSION: $WP_VERSION"
+            echo "CIRCLE_TAG: $CIRCLE_TAG"
             ls -alh /tmp/$OSEC_RELEASE_FILE
-            CIRCLE_TAG: $CIRCLE_TAG
+
       - run:
           name: Deploy assets to WordPress plugin directory
           command: /home/circleci/open-source-event-calendar/.circleci/deploy-wp-plugin-release.sh
