@@ -10,7 +10,12 @@ fi
 
 if [[ -z "$CIRCLE_BRANCH" || "$CIRCLE_BRANCH" != "master" ]]; then
     echo "Build branch is required and must be 'master' branch. Stopping deployment." 1>&2
-#    exit 0
+#    exit 1
+fi
+
+if [[ -z "$CIRCLE_TAG" ]]; then
+    echo "Git tag is required. Stopping deployment." 1>&2
+#    exit 1
 fi
 
 if [[ -z "$WP_ORG_SVN_PASSWORD" ]]; then
@@ -35,7 +40,7 @@ fi
 
 # Unpack release for svn.
  mkdir /tmp/release_files
- unzip  /tmp/open-source-event-calendar.zip -d /tmp/release_files
+ unzip  /tmp/open-source-event-calendar.zip -d /tmp/release_files -q
 
 PLUGIN_BUILD_PATH="/tmp/release_files/open-source-event-calendar"
 PLUGIN_SVN_PATH="/tmp/svn"
