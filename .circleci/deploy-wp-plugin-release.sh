@@ -40,7 +40,7 @@ fi
 
 # Unpack release for svn.
  mkdir /tmp/release_files
- unzip  /tmp/open-source-event-calendar.zip -d /tmp/release_files -q
+ unzip -qq /tmp/open-source-event-calendar.zip -d /tmp/release_files
 
 PLUGIN_BUILD_PATH="/tmp/release_files/open-source-event-calendar"
 PLUGIN_SVN_PATH="/tmp/svn"
