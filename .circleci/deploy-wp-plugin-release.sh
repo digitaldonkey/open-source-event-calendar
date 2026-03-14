@@ -93,4 +93,4 @@ svn stat | grep '^?' | awk '{print $2}' | xargs -I x svn add x@
 svn stat | grep '^!' | awk '{print $2}' | xargs -I x svn rm --force x@
 
 # Commit to SVN
-svn ci --no-auth-cache --username $WP_ORG_USERNAME --password $WP_ORG_SVN_PASSWORD -m "Deploy OSEC assets"
+svn ci --no-auth-cache --username $WP_ORG_USERNAME --password $WP_ORG_SVN_PASSWORD -m "Deploy OSEC RELEASE: $CIRCLE_TAG"
