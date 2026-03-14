@@ -10,12 +10,18 @@ fi
 
 if [[ -z "$CIRCLE_BRANCH" || "$CIRCLE_BRANCH" != "master" ]]; then
     echo "Build branch is required and must be 'master' branch. Stopping deployment." 1>&2
-#    exit 1
+    exit 1
 fi
 
 if [[ -z "$CIRCLE_TAG" ]]; then
     echo "Git tag is required. Stopping deployment." 1>&2
-#    exit 1
+    exit 1
+fi
+
+# Check if we have semantic number tag.
+if [[ ! $CIRCLE_TAG =~ ^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]; then
+    echo "CIRCLE_TAG:$CIRCLE_TAG is NOT a semantic tag. Stopping deployment." 1>&2
+    exit 1
 fi
 
 if [[ -z "$WP_ORG_SVN_PASSWORD" ]]; then
@@ -53,11 +59,6 @@ if [[ $CIRCLE_TAG != $LATEST_GIT_TAG ]]; then
 #    exit 1
 fi
 
-if [[ ! $CIRCLE_TAG =~ ^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]; then
-    echo "CIRCLE_TAG:$CIRCLE_TAG is NOT a semantic tag." 1>&2
-    exit 1
-fi
-
 # Check if the latest SVN tag exists already
 TAG=$(svn ls "https://plugins.svn.wordpress.org/$WP_ORG_PLUGIN_NAME/tags/$LATEST_GIT_TAG")
 error=$?
@@ -90,7 +91,6 @@ svn stat | grep '^?' | awk '{print $2}' | xargs -I x svn add x@
 
 # Remove deleted files from SVN
 svn stat | grep '^!' | awk '{print $2}' | xargs -I x svn rm --force x@
-#
-#
-## Commit to SVN
-# svn ci --no-auth-cache --username $WP_ORG_USERNAME --password $WP_ORG_SVN_PASSWORD -m "Deploy OSEC assets"
+
+# Commit to SVN
+svn ci --no-auth-cache --username $WP_ORG_USERNAME --password $WP_ORG_SVN_PASSWORD -m "Deploy OSEC assets"

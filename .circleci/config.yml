@@ -659,4 +659,9 @@ workflows:
               only: /^\d+\.\d+\.\d+$/
       - wp_deploy_wp_org_job:
           requires:
-            - create_release_job
+            - publish_github_release_job
+          filters:
+            branches:
+              only: /master/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
