@@ -539,19 +539,17 @@ jobs:
           name: Deploy to wordpress.org variables
           command: |
             # WP_ORG_SVN_PASSWORD
-            echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-            echo " WP_VERSION: $WP_VERSION"
-            ls -al /tmp/$OSEC_RELEASE_FILE
+            echo "WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
+            echo "WP_ORG_USERNAME: $WP_ORG_USERNAME"
+            echo "WP_ORG_SVN_PASSWORD: ****"
+            echo "CIRCLE_TAG: $CIRCLE_TAG"
+            ls -alh /tmp/$OSEC_RELEASE_FILE
       - run:
           name: Deploy assets to WordPress plugin directory
-          command: |
-             cd /tmp
-             unzip  open-source-event-calendar.zip
-             /home/circleci/open-source-event-calendar/.circleci/deploy-wp-org.sh
+          command: /home/circleci/open-source-event-calendar/.circleci/deploy-wp-plugin-release.sh
     environment:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
-      - WP_VERSION: *WP_VERSION
       - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
 
 # Orchestrate jobs using workflows
@@ -654,6 +652,14 @@ workflows:
       - wp_deploy_assets_job:
           requires:
             - create_release_job
+          filters:
+            branches:
+              only: /master/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
+      - wp_deploy_wp_org_job:
+          requires:
+            - publish_github_release_job
           filters:
             branches:
               only: /master/
