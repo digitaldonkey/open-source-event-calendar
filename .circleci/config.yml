@@ -542,7 +542,7 @@ jobs:
             echo "WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
             echo "WP_ORG_USERNAME: $WP_ORG_USERNAME"
             echo "WP_ORG_SVN_PASSWORD: ****"
-            echo "CIRCLE_TAG: "$CIRCLE_TAG"
+            echo "CIRCLE_TAG: $CIRCLE_TAG"
             ls -alh /tmp/$OSEC_RELEASE_FILE
       - run:
           name: Deploy assets to WordPress plugin directory
