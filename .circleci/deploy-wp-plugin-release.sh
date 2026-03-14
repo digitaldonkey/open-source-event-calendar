@@ -53,14 +53,14 @@ if [[ $CIRCLE_TAG != $LATEST_GIT_TAG ]]; then
 #    exit 1
 fi
 TEST_TAG="1.0.11"
-if [[ $TEST_TAG =~ /^\d+\.\d+\.\d+$/ ]]; then
+if [[ $TEST_TAG =~ ^\d+\.\d+\.\d+$ ]]; then
     echo "TEST_TAG is a semantic tag." 1>&2
 #    exit 1
   else
     echo "TEST_TAG is NOT semantic tag." 1>&2
 fi
 
-if [[ "$LATEST_GIT_TAG" =~ /^\d+\.\d+\.\d+$/ ]]; then
+if [[ "$LATEST_GIT_TAG" =~ ^\d+\.\d+\.\d+$ ]]; then
     echo "LATEST_GIT_TAG:$LATEST_GIT_TAG is a semantic tag." 1>&2
 #    exit 1
   else
@@ -76,12 +76,11 @@ if [ $error == 0 ]; then
     exit 0
 fi
 
-
 # Checkout the SVN repo
 svn co -q "http://svn.wp-plugins.org/$WP_ORG_PLUGIN_NAME" $PLUGIN_SVN_PATH
 
 echo "Existing SVN tags before deploy"
-ls $PLUGIN_SVN_PATH/tags
+ls -m $PLUGIN_SVN_PATH/tags
 
 ## Move to SVN directory
 cd $PLUGIN_SVN_PATH
