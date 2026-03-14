@@ -52,12 +52,12 @@ if [[ $CIRCLE_TAG != $LATEST_GIT_TAG ]]; then
     echo "LATEST_GIT_TAG:$LATEST_GIT_TAG  is not matching this tag : $CIRCLE_TAG." 1>&2
 #    exit 1
 fi
-
-if [[ $CIRCLE_TAG =~ /^\d+\.\d+\.\d+$/ ]]; then
-    echo "CIRCLE_TAG is a semantic tag." 1>&2
+TEST_TAG="1.0.11"
+if [[ $TEST_TAG =~ /^\d+\.\d+\.\d+$/ ]]; then
+    echo "TEST_TAG is a semantic tag." 1>&2
 #    exit 1
   else
-    echo "CIRCLE_TAG is NOT semantic tag." 1>&2
+    echo "TEST_TAG is NOT semantic tag." 1>&2
 fi
 
 if [[ "$LATEST_GIT_TAG" =~ /^\d+\.\d+\.\d+$/ ]]; then

@@ -539,9 +539,9 @@ jobs:
           name: Deploy to wordpress.org variables
           command: |
             # WP_ORG_SVN_PASSWORD
-            echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-            echo " WP_VERSION: $WP_VERSION"
-            echo " CIRCLE_TAG: "$CIRCLE_TAG""
+            echo "WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
+            echo "WP_ORG_USERNAME: $WP_ORG_USERNAME"
+            echo "CIRCLE_TAG: "$CIRCLE_TAG""
             ls -alh /tmp/$OSEC_RELEASE_FILE
 
       - run:
