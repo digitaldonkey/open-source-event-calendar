@@ -41,6 +41,11 @@ class Settings extends OsecBaseInitialized
     protected $defaultOptions;
 
     /**
+     * @var array The core options of the plugin.
+     */
+    public $defaultSettingsSections;
+
+    /**
      * Delete all Osec prefixed options.
      *
      * @param  bool  $purge
@@ -326,6 +331,16 @@ class Settings extends OsecBaseInitialized
      */
     protected function setDefaults()
     {
+        /**
+         * Sometimes refered as "tab" due to legacy.
+         */
+        $this->defaultSettingsSections = [
+            'viewing-events' => [],
+            'editing-events' => [],
+            'location'       => [],
+            'advanced'       => [],
+        ];
+
         // Renderer-> class must be in this namespace (Osec\Html\Settings\XXX).
         $this->defaultOptions = [
             'osec_db_version' => [
@@ -1056,6 +1071,22 @@ class Settings extends OsecBaseInitialized
                     ),
                 ],
                 'default'  => false,
+            ],
+            'feature_shortcodes' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'features',
+                    'label' => __(
+                        'Enable Shortcodes',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'Enables Osec shortcodes. Disabling will not remove any shortcodes from content, but hide them',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => true,
             ],
             'twig_cache'                             => [
                 'type'     => 'string',

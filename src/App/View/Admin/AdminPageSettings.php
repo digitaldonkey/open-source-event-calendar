@@ -141,15 +141,6 @@ class AdminPageSettings extends AdminPageAbstract
                 'default_order' => 35,
             ],
             [
-                'osec_event_shortcode_info',
-                __('Shortcodes', 'open-source-event-calendar'),
-                $this->display_meta_box_shortcode_info(...),
-                $screen_id,
-                'normal',
-                'default',
-                'default_order' => 40,
-            ],
-            [
                 'osec_event_save_settings',
                 _x('Publish', 'meta box', 'open-source-event-calendar'),
                 $this->display_meta_box_save_settings(...),
@@ -159,6 +150,18 @@ class AdminPageSettings extends AdminPageAbstract
                 'default_order' => 45,
             ],
         ];
+
+        if ($this->app->settings->get('feature_shortcodes')) {
+            $meta_boxes[] = [
+                'osec_event_shortcode_info',
+                __('Shortcodes', 'open-source-event-calendar'),
+                $this->display_meta_box_shortcode_info(...),
+                $screen_id,
+                'normal',
+                'default',
+                'default_order' => 40,
+            ];
+        }
 
         if ($this->app->settings->get('feature_event_location')) {
             $meta_boxes[] = [
@@ -291,7 +294,7 @@ class AdminPageSettings extends AdminPageAbstract
     }
 
     /**
-     * Wrapp legacy getVisibleTabs() function
+     * Wrapp cache around getSettingsSections() function
      *
      * @param $section_name
      *
@@ -301,16 +304,7 @@ class AdminPageSettings extends AdminPageAbstract
     {
         static $sections = null;
         if (is_null($sections)) {
-            $tabs = [
-                'viewing-events' => [],
-                'editing-events' => [],
-                'location' => [],
-                'advanced'       => [],
-            ];
-            $sections = $this->getVisibleTabs(
-                $this->app->settings->get_options(),
-                $tabs
-            );
+            $sections = $this->getSettingsSections();
             /**
              * Alter or add tabs on AdminPageSettings
              *
@@ -328,11 +322,13 @@ class AdminPageSettings extends AdminPageAbstract
      *
      * @return array
      */
-    protected function getVisibleTabs(array $plugin_settings, array $tabs)
+    protected function getSettingsSections()
     {
+        $plugin_settings = $this->app->settings->get_options();
+        $tabs = $this->app->settings->defaultSettingsSections;
         $index = 0;
         foreach ($plugin_settings as $id => $setting) {
-            // if the setting is shown
+            // Only settings with renderer are relevant.
             if (isset($setting['renderer'])) {
                 $tab_to_use = $setting['renderer']['item'] ?? $setting['renderer']['tab'];
                 // check if it's the first one
@@ -354,56 +350,15 @@ class AdminPageSettings extends AdminPageAbstract
                     'index'  => ++$index,
                     'html'   => SettingsRenderer::factory($this->app)->render($setting),
                 ];
-                // if the settings has an item tab, set the item as active.
-                if (isset($setting['renderer']['item'])) {
-                    if (! isset($tabs[$setting['renderer']['tab']]['items_active'][$setting['renderer']['item']])) {
-                        $tabs[$setting['renderer']['tab']]['items_active'][$setting['renderer']['item']] = true;
-                    }
-                }
             }
         }
-        $tabs_to_display = [];
         // now let's see what tabs to display.
         foreach ($tabs as $name => $tab) {
             // sort by weights
             if (isset($tab['elements'])) {
                 asort($tab['elements']);
             }
-            // if a tab has more than one item.
-            if (isset($tab['items'])) {
-                // if no item is active, nothing is shown
-                if (empty($tab['items_active'])) {
-                    continue;
-                }
-                // if only one item is active, do not use the dropdown
-                if (count($tab['items_active']) === 1) {
-                    $name        = key($tab['items_active']);
-                    $tab['name'] = $tab['items'][$name];
-                    unset($tab['items']);
-                } else {
-                    // check active items for the dropdown
-                    foreach ($tab['items'] as $item => $longname) {
-                        if (! isset($tab['items_active'][$item])) {
-                            unset($tab['items'][$item]);
-                        }
-                    }
-                }
-                // Check to avoid overriding tabs
-                if (! isset($tabs_to_display[$name])) {
-                    $tabs_to_display[$name] = $tab;
-                } else {
-                    $tabs_to_display[$name]['elements'] = $tab['elements'];
-                }
-            } elseif (isset($tab['elements'])) {
-                // Check to avoid overriding tabs
-                if (! isset($tabs_to_display[$name])) {
-                    $tabs_to_display[$name] = $tab;
-                } else {
-                    $tabs_to_display[$name]['elements'] = $tab['elements'];
-                }
-            }
         }
-
-        return $tabs_to_display;
+        return $tabs;
     }
 }

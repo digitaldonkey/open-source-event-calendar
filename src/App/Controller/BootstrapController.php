@@ -284,13 +284,19 @@ class BootstrapController
         add_shortcode(
             OSEC_SHORTCODE,
             function ($atts) use ($app) {
-                $this->request::set_current_page(get_queried_object_id());
-                return wp_kses(
-                    CalendarShortcodeView::factory($app)->shortcode($atts),
-                    $this->app->kses->allowed_html_frontend()
-                );
+                if ($this->app->settings->get('feature_shortcodes')) {
+                    $this->request::set_current_page(get_queried_object_id());
+                    return wp_kses(
+                        CalendarShortcodeView::factory($app)->shortcode($atts),
+                        $this->app->kses->allowed_html_frontend()
+                    );
+                }
+                // If disabled we will still replace any osec shortcodes
+                // to avoid them being printed as content.
+                return '';
             }
         );
+
 
         add_action(
             'updated_option',
