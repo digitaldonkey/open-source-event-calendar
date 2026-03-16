@@ -296,7 +296,7 @@ jobs:
               echo "No changes detected"
               exit 0;
             else
-              echo "\n\033[0;31mThe command: wp osec update_readme revealed uncommitted changes.\033[0m\n"
+              echo "The command: wp osec update_readme revealed uncommitted changes."
               git diff README.txt
               exit 1;
             fi
@@ -313,7 +313,7 @@ jobs:
               echo "No changes detected"
               exit 0;
             else
-              echo "\n\033[0;31mGenerating Twig-js templates: revealed uncommitted changes.\033[0m\n"
+              echo "Generating Twig-js templates: revealed uncommitted changes."
               git diff
               exit 1;
             fi
@@ -331,7 +331,7 @@ jobs:
               echo "No changes detected"
               exit 0;
             else
-              echo "\n\033[0;31mGenerating hooks-and-filters.md: revealed uncommitted changes.\033[0m\n"
+              echo "Generating hooks-and-filters.md: revealed uncommitted changes."
               git diff
               exit 1;
             fi
