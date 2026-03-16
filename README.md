@@ -171,6 +171,19 @@ If you are implementing this plugin for others you should support ongoing develo
 
 Those wishing to contribute to the development of this project, please see the [Development Guide](https://github.com/digitaldonkey/open-source-event-calendar/blob/master/.github/CONTRIBUTORS.md) for more information.
 
+## Upgrade Notice
+
+= 1.0.7 =
+
+Categories and Tags renamed
+Upgrading from pre 1.0.7 requires you to rename taxonomies due to prefix requirements.
+
+```
+# events_categories => osec_events_categories
+UPDATE  `wp_term_taxonomy` SET  `taxonomy` =  'osec_events_categories' WHERE  `taxonomy` = 'events_categories';
+# events_tags       => osec_events_tags
+UPDATE  `wp_term_taxonomy` SET  `taxonomy` =  'osec_events_tags' WHERE  `taxonomy` = 'events_tags';
+```
 
 ## Frequently Asked Questions
 
