@@ -290,14 +290,15 @@ jobs:
           name: Verify Readme.txt is up to date
           command: |
             set -Eeuxo pipefail
-            $WP_CLI --path="$WP_CORE_DIR" osec update_readme
-            if [[ -z "$(git status -s)" ]]; then
-              echo "No changes detected"
-              exit 0;
-            else              
+            $WP_CLI --path="$WP_CORE_DIR" osec update_readme            
+            output=$(git status -s 2>&1)
+            if [[ $? -ne 0 || -z "$output" ]]; then           
               echo "\n\033[0;31mThe command: wp osec update_readme revealed uncomitted changes.\033[0m\n"
               git diff README.txt
               exit 1;
+            else
+              echo "No changes detected"
+              exit 0;                        
             fi
       - run:
           name: Verify Twig frontend templates are up to date
