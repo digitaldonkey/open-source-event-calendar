@@ -226,10 +226,10 @@ class EventType extends OsecBaseClass
         }
 
         // Add event managing capabilities to administrator, editor, author.
-        // The last created capability is "manage_osec_feeds", so check for
+        // The last created capability is "manage_osec_events_categories", so check for
         // that one.
         $role = get_role('administrator');
-        if (is_object($role) && ! $role->has_cap('manage_osec_feeds')) {
+        if (is_object($role) && ! $role->has_cap('manage_osec_events_categories')) {
             $role_list = ['administrator', 'editor', 'author'];
             foreach ($role_list as $role_name) {
                 $role = get_role($role_name);
