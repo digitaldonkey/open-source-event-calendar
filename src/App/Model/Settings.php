@@ -317,8 +317,8 @@ class Settings extends OsecBaseInitialized
         if (empty($stored_options) || is_null($stored_options_version) || OSEC_VERSION !== $stored_options_version ) {
             $this->registerDefaultValues();
             $this->updateNameTranslations();
+            $this->perform_upgrade_actions($stored_options);
             $this->changeUpdateStatus(true);
-            $this->perform_upgrade_actions();
         }
 
         ShutdownController::factory($this->app)->register(
@@ -1193,11 +1193,19 @@ class Settings extends OsecBaseInitialized
      *
      * Runs if OSEC_VERSION does not match $options['calendar_page_id']['version'].
      */
-    public function perform_upgrade_actions()
+    public function perform_upgrade_actions($stored_options)
     {
-        $option = $this->app->options;
-        $option->set('osec_force_flush_rewrite_rules', true, true);
-        $option->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true, true);
-        $option->set(ThemeLoader::OPTION_FORCE_CLEAN, true, true);
+        // Remove deprecated settings if necessary.
+        if (is_array($stored_options)) {
+            foreach ($stored_options as $id => $data) {
+                if (!isset($this->defaultOptions[$id])) {
+                    unset($this->options[$id]);
+                }
+            }
+        }
+        $options = $this->app->options;
+        $options->set('osec_force_flush_rewrite_rules', true, true);
+        $options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true, true);
+        $options->set(ThemeLoader::OPTION_FORCE_CLEAN, true, true);
     }
 }
