@@ -295,7 +295,7 @@ jobs:
               echo "No changes detected"
               exit 0;
             else              
-              echo "wp osec update_readme revealed uncomitted changes"
+              echo "\n\033[0;31m The command: wp osec update_readme revealed uncomitted changes\033[0m\n"
               git diff README.txt
               exit 1;
             fi
