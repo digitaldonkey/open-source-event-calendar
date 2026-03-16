@@ -291,7 +291,7 @@ jobs:
           command: |
             set -Eeuxo pipefail
             $WP_CLI --path="$WP_CORE_DIR" osec update_readme
-            if [output=$(git status --porcelain) && [ -z "$output" ]]; then
+            if [[ -z "$(git status -s)" ]]; then
               echo "No changes detected"
               exit 0;
             else              
@@ -307,7 +307,7 @@ jobs:
             nvm install
             npm install
             npm run build-twig-frontend            
-            if output=$(git status --porcelain) && [ -z "$output" ]; then
+            if [[ -z "$(git status -s)" ]]; then
               echo "No changes detected"
               exit 0;
             else
@@ -324,7 +324,7 @@ jobs:
             nvm install
             npm install
             npm run build-hooks-and-filters            
-            if output=$(git status --porcelain) && [ -z "$output" ]; then
+            if [[ -z "$(git status -s)" ]]; then
               echo "No changes detected"
               exit 0;
             else
