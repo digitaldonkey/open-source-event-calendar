@@ -294,8 +294,9 @@ jobs:
             if output=$(git status --porcelain) && [ -z "$output" ]; then
               echo "No changes detected"
               exit 0;
-            else
+            else              
               echo "`wp osec update_readme` revealed uncomitted changes"
+              git diff README.txt
               exit 1;
             fi
       - run:
@@ -311,6 +312,7 @@ jobs:
               exit 0;
             else
               echo "Generating Twig-js templates: revealed uncommitted changes"
+              git diff
               exit 1;
             fi
       - run:
@@ -327,6 +329,7 @@ jobs:
               exit 0;
             else
               echo "Generating hooks-and-filters.md: revealed uncommitted changes"
+              git diff
               exit 1;
             fi
 
