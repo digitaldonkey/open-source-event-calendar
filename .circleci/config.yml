@@ -291,11 +291,11 @@ jobs:
           command: |
             set -Eeuxo pipefail
             $WP_CLI --path="$WP_CORE_DIR" osec update_readme
-            if output=$(git status --porcelain) && [ -z "$output" ]; then
+            if [output=$(git status --porcelain) && [ -z "$output" ]]; then
               echo "No changes detected"
               exit 0;
             else              
-              echo "\n\033[0;31m The command: wp osec update_readme revealed uncomitted changes\033[0m\n"
+              echo "\n\033[0;31mThe command: wp osec update_readme revealed uncomitted changes.\033[0m\n"
               git diff README.txt
               exit 1;
             fi
@@ -311,7 +311,7 @@ jobs:
               echo "No changes detected"
               exit 0;
             else
-              echo "Generating Twig-js templates: revealed uncommitted changes"
+              echo "\n\033[0;31mGenerating Twig-js templates: revealed uncommitted changes.\033[0m\n"
               git diff
               exit 1;
             fi
@@ -328,7 +328,7 @@ jobs:
               echo "No changes detected"
               exit 0;
             else
-              echo "Generating hooks-and-filters.md: revealed uncommitted changes"
+              echo "\n\033[0;31mGenerating hooks-and-filters.md: revealed uncommitted changes.\033[0m\n"
               git diff
               exit 1;
             fi
