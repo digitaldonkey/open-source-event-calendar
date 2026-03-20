@@ -1,8 +1,8 @@
-<div class="ai1ec-event-avatar timely {{ classes }}">
+<div class="ai1ec-event-avatar {{ classes }}">
     {% if link %}
         <a href="{{ link }}">
     {% endif %}
-            <img src="{{ src }}" alt="{{ alt }}"  {% if width %} width="{{ width }}"{% endif %} {% if height %} height="{{ height }}"{% endif %} />
+            <img itemprop="image" src="{{ src }}" alt="{{ alt }}" {% if width %} width="{{ width }}"{% endif %} {% if height %} height="{{ height }}"{% endif %} />
     {% if link %}
         </a>
     {% endif %}

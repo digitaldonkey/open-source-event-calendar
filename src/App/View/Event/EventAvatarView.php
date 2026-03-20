@@ -38,12 +38,17 @@ class EventAvatarView extends OsecBaseClass
         Event $event,
         ?array $fallback_order = null,
         string $classes = '',
-        bool $wrap_permalink = true
+        bool $wrap_permalink = true,
+        bool $hide_featured_image = false
     ): string {
         $data = $this->get_event_avatar_data($event, $fallback_order);
 
         if (empty($data['url'])) {
             return '';
+        }
+
+        if ($hide_featured_image) {
+            return ' <meta itemprop="image" content="' . esc_url($data['url']) . '">';
         }
 
         $classes .= ' ai1ec-' . $data['image_source'];
