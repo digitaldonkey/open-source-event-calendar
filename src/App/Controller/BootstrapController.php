@@ -210,6 +210,7 @@ class BootstrapController
             EnvironmentCheck::factory($app);
             // Add taxonomies.
             AdminPageManageTaxonomies::factory($app)->add_taxonomy_actions();
+            DateFormatsFrontend::factory($app);
         });
 
         add_action('init', function () use ($app) {
@@ -374,10 +375,6 @@ class BootstrapController
                     if (AdminPageSettings::MENU_SLUG === $menu_slug) {
                         AdminPageSettings::factory($app)->add_meta_box();
                     }
-                }
-                if ($current_screen->id === 'options-general') {
-                    // Add date formats on Settings-general.php.
-                    DateFormatsFrontend::factory($app);
                 }
                 if ($current_screen->id === 'edit-osec_event') {
                     EditPostActions::factory($app)->add_bulk_action_duplicate_event($current_screen);
