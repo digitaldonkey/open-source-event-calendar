@@ -272,10 +272,11 @@ describe('Plugin install', function(){
         const eventCountMonth = await eventsInMonth.length;
 
         const daysInNextMonth = new Date(new Date().getFullYear(), new Date().getUTCMonth()+2, 0).getDate()
-        console.log({daysInNextMonth, eventCountMonth});
 
-        pageObject.assert.ok(
-            daysInNextMonth === eventCountMonth
+        pageObject.assert.equal(
+            eventCountMonth,
+            daysInNextMonth,
+            'Number of Events matches days in next month'
         )
 
         // Switch view to agenda
@@ -395,7 +396,7 @@ describe('Plugin install', function(){
         // Search on map
         const mapSearchInput = await pageObject.getElement(By.css('#osec-map input[type="search"]'));
         // Note: We put in German name but expect English result "Brandenburg Gate"
-        await mapSearchInput.sendKeys('Brandenburger Tor, Pariser Platz 1, Mitte Mitte, 10117 Berlin, Deutschland');
+        await mapSearchInput.sendKeys('Brandenburger Tor, Pariser Platz 1, 10117 Berlin, Deutschland');
         await pageObject.waitToSeeWhatHappens(500, true);
         // Click result
         const resultSuggestion = await pageObject.getElement(By.css('#osec-map .leaflet-control-geocoder-alternatives li[data-result-index="0"]'));
@@ -419,12 +420,13 @@ describe('Plugin install', function(){
         await pageObject.waitToSeeWhatHappens(1000, true);
 
         // Check for address
+
         const addressValue = await pageObject.getElement(By.css('.entry-content .osec-location'));
         const text = await addressValue.getText();
         const textArray = text.split('\n');
 
         // Cant manage to force leaflets language
-        // to bve consisten locally and in pipeline.
+        // to be consistent locally and in pipeline.
         // So we split handle German and English by or condition.
         // This might fail if you browser has a differen language.
         const locationTitle = textArray.shift();
@@ -441,9 +443,8 @@ describe('Plugin install', function(){
         const address = textArray.join("\n")
         pageObject.assert.equal(
             address,
-            'Pariser Platz 1\n' +
-            'Mitte Mitte\n' +
-            '10117 Berlin'
+            'Pariser Platz 1\n10117 Berlin\nMitte',
+            'Address as expected'
         );
 
         // Click map placeholder

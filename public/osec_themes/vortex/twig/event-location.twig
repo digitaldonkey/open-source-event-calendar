@@ -15,10 +15,10 @@
                 <span itemprop="addressLocality">{{ city }}</span><br />
             {% endif %}
             {% if province %}
-                <span class="visually-hidden province" itemprop="addressRegion">{{ province }}</span>
+                <span class="visually-hidden province" itemprop="addressRegion">{{ province }}<br /></span>
             {% endif %}
             {% if country %}
-                <span class="country visually-hidden" itemprop="addressCountry">{{ country }}</span>
+                <span class="country visually-hidden" itemprop="addressCountry">{{ country }}<br /></span>
             {% endif %}
         </div>
     {% endif %}
