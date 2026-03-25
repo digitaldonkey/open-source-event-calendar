@@ -39,20 +39,46 @@ class EventLocationView extends OsecBaseClass
     /*
      * Return any available location details separated by newlines
     */
-    public function get_location(Event $event)
+    public function get_location(Event $event): string
     {
-        $location = '';
-        $venue    = $event->get('venue');
-        if ($venue) {
-            $location .= $venue . "\n";
-        }
         $address = $event->get('address');
-        if ($address) {
-            $bits = explode(',', (string) $address);
-            $bits = array_map('trim', $bits);
-            $location .= implode("\n", $bits);
+        $address_components = [
+            'city'        => $event->get('city'),
+            'province'    => $event->get('province'),
+            'postal_code' => $event->get('postal_code'),
+            'country'     => $event->get('country'),
+        ];
+        // Remove everything we have as a address component value.
+        if (!empty($address)) {
+            $address = str_replace(
+                array_filter(array_values($address_components)),
+                '',
+                $address
+            );
+            // Cleanup: Leading commas, Ending commas, Commas followed by commas
+            $pattern = '/^(?:\h*,\h*)+|(?:\h*,\h*)+$|,\h*(?=,\h*)/mx';
+            $address = preg_replace($pattern, '', $address);
+            $address = trim($address);
         }
-        return nl2br($location);
+
+        $args = array_merge(
+            $address_components,
+            [
+                'venue'       => esc_html($event->get('venue')),
+                'show_map'    => (bool) $event->get('show_map'),
+                'latitude'    => (float) $event->get('latitude'),
+                'longitude'   => (float) $event->get('longitude'),
+                // Remove everything we have as a address component value.
+                'address' => $address,
+            ]
+        );
+        $has_args = !empty(array_filter(array_values($args)));
+        if ($has_args) {
+            return ThemeLoader::factory($this->app)
+                              ->get_file('event-location.twig', $args, false)
+                              ->get_content();
+        }
+        return '';
     }
 
     /**
@@ -81,7 +107,7 @@ class EventLocationView extends OsecBaseClass
             'osm_link_url'            => esc_url($this->get_osm_url($event)),
             'hide_maps_until_clicked' => $this->app->settings->get('hide_maps_until_clicked'),
             'text_view_map'           => __('Click to view map', 'open-source-event-calendar'),
-            'height'                  => '20em',
+            'height'                  => $this->app->settings->get('location_maps_map_height'),
             'data'                    => [
                 'venue'                   => esc_attr($event->get('venue')),
                 'address'                 => esc_attr($event->get('address')),

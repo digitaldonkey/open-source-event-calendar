@@ -1,0 +1,16 @@
+{% if recurrence is not empty %}
+	<div class="osec-recurrence">
+		<i class="ai1ec-fa ai1ec-fa-repeat"></i>
+		<span class="label">{{ text_repeats }}: </span>
+		{{- recurrence | capitalize | e('html_attr') -}}
+	</div>
+	{%- if exclude is not empty -%}
+		<div class=osec-recurrence--excludes">
+			<i class="ai1ec-fa ai1ec-fa-exclamation-triangle"></i>
+			<span class="label">{{ text_xcludes }}: </span>
+			<span class="osec-recurrence--excludes-text">
+				{{ exclude }}
+			</span>
+		</div>
+	{%- endif -%}
+{% endif %}

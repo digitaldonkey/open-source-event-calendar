@@ -20,8 +20,53 @@ use Osec\Theme\ThemeLoader;
  */
 class EventSingleView extends OsecBaseClass
 {
+    public function add_actions()
+    {
+        global $post;
+
+        // Wrap the main template block with itemscope schema.org/Event
+        add_filter('render_block', function ($block_content, $block) {
+            global $post;
+
+            if (!$post || $post->post_type !== 'osec_event') {
+                return $block_content;
+            }
+
+            if ($block['blockName'] === 'core/group') {
+                // Heuristik: viele InnerBlocks = wahrscheinlich Wrapper
+                if (! empty($block['innerBlocks']) && count($block['innerBlocks']) > 2) {
+                    $has_post_content = false;
+                    // Check if this block contains core/post-content block.
+                    foreach ($block['innerBlocks'] as $inner) {
+                        if ($inner['blockName'] === 'core/post-content') {
+                            $has_post_content = true;
+                            break;
+                        }
+                    }
+
+                    if ($has_post_content) {
+                        $theme_id = $this->app->options->get('osec_current_theme', [])['stylesheet'];
+                        $theme_class = esc_attr('osec-single-event osec-' . $theme_id . '-single-event');
+                        return '<div itemscope itemtype="https://schema.org/Event" class="' . $theme_class . '">'
+                                 . $block_content
+                               . '</div>';
+                    }
+                }
+            }
+            return $block_content;
+        }, 10, 2);
+
+        //  Wrap the content with itemprop "description".
+        add_filter('the_content', function ($content) {
+            if (is_singular(OSEC_POST_TYPE) && in_the_loop() && is_main_query()) {
+                $content = '<div itemprop="description">' . $content . '</div>';
+            }
+            return $content;
+        });
+    }
+
     /**
-     * @return The html of the footer
+     * @return String Html of the footer
      */
     public function get_footer(Event $event)
     {
@@ -72,6 +117,15 @@ class EventSingleView extends OsecBaseClass
             'content_img_url',
             $contentView->get_content_img_url($event)
         );
+        $event->set_runtime(
+            'cost_number',
+            $ticketView->get_cost_value($event)
+        );
+        $event->set_runtime(
+            'cost_iso_4217_currency',
+            $ticketView->get_cost_iso_4217_currency($event)
+        );
+
 
         /**
          * Add extra HTML to single Event view
@@ -125,6 +179,11 @@ class EventSingleView extends OsecBaseClass
         do_action('osec_alter_single_event_page_before_render', $event);
 
         $args = [
+            'title' => apply_filters(
+                'the_title',
+                $event->get('post')->post_title,
+                $event->get('post_id')
+            ),
             'event'                  => $event, // Deprecated. Leaving for legacy.
             'is_multiday_event'      => $event->is_multiday(),
             'is_allday_event'      => $event->is_allday(),
@@ -142,6 +201,10 @@ class EventSingleView extends OsecBaseClass
             'edit_instance_text'     => null,
             'google_url'             => 'http://www.google.com/calendar/render?cid=' . rawurlencode($subscribe_url),
             'show_subscribe_buttons' => ! $settings->get('turn_off_subscription_buttons'),
+
+            // Has image??
+            'has_any_image'          => !is_null(EventAvatarView::factory($this->app)->get_event_avatar_url($event)),
+
             'hide_featured_image'    => $settings->get('hide_featured_image'),
             'extra_buttons'          => $extra_buttons,
             'text_add_calendar'      => __('Add to Calendar', 'open-source-event-calendar'),
@@ -150,7 +213,7 @@ class EventSingleView extends OsecBaseClass
             'text_when'              => __('When:', 'open-source-event-calendar'),
             'text_where'             => __('Where:', 'open-source-event-calendar'),
             'text_repeats'           => __('Repeats', 'open-source-event-calendar'),
-            'text_xcludes'           => __('Excludes', 'open-source-event-calendar'),
+            'text_xcludes'           => __('Excluding', 'open-source-event-calendar'),
             'text_categories'        => __('Categories', 'open-source-event-calendar'),
             'text_tags'              => __('Tags', 'open-source-event-calendar'),
             'timezone_info'          => $timezone_info,
@@ -172,6 +235,8 @@ class EventSingleView extends OsecBaseClass
                 'text_free'              => __('Free', 'open-source-event-calendar'),
                 'tickets_url_label'      => $event->get_runtime('tickets_url_label'),
                 'ticket_url'             => $event->get('ticket_url'),
+                'cost_number'   => $event->get_runtime('cost_number'),
+                'cost_iso_4217_currency' => $event->get_runtime('cost_iso_4217_currency'),
             ]);
         }
 
@@ -181,7 +246,7 @@ class EventSingleView extends OsecBaseClass
         if ($settings->get('feature_organizer_contact')) {
             $args = array_merge($args, [
                 'text_contact'           => __('Contact:', 'open-source-event-calendar'),
-                'contact'                => $ticketView->get_contact_html($event),
+                'contact' => EventContactView::factory($this->app)->get_contact_html($event),
             ]);
         }
 
@@ -223,14 +288,32 @@ class EventSingleView extends OsecBaseClass
             $event->get('instance_id') &&
             current_user_can('edit_osec_events')
         ) {
-            $args['edit_instance_url']  = $event->get_instance_edit_link();
+            $args['edit_instance_url']  = esc_attr($event->get_instance_edit_link());
             $args['edit_instance_text'] = sprintf(
                 /* translators: Date */
                 __('Edit this occurrence (%s)', 'open-source-event-calendar'),
                 $event->get('start')->format_i18n('M j')
             );
+            $args['edit_serries_url']  = esc_attr($event->get_edit_link());
+            $args['edit_serries_text'] = __('Edit event', 'open-source-event-calendar');
+        }
+       $theme_id = $this->app->options->get('osec_current_theme', [])['stylesheet'];
+        $args['wrapper_classes'] = [
+            'ai1ec-single-event', // Legacy.
+            'osec-' . esc_attr($theme_id) . '-single-event',
+            'ai1ec-event-id-' . esc_attr($event->get('post_id')),
+            'ai1ec-event-instance-id-' . esc_attr($event->get('instance_id')),
+        ];
+        if ($event->is_allday()) {
+            $args['wrapper_classes'][] = 'ai1ec-allday';
+            $args['wrapper_classes'][] = 'osec-allday';
+        }
+        if ($event->is_multiday()) {
+            $args['wrapper_classes'][] = 'ai1ec-multiday';
+            $args['wrapper_classes'][] = 'osec-multiday';
         }
 
+        // Also includes recurrence.twig template.
         return ThemeLoader::factory($this->app)
                           ->get_file('event-single.twig', $args, false)
                           ->get_content();

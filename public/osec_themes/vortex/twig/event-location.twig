@@ -1,0 +1,32 @@
+<div class="event-location" itemprop="location" itemscope itemtype="https://schema.org/Place">
+    {% if venue %}
+        <span class="event-venue" itemprop="name">{{ venue }}</span><br />
+    {% endif %}
+
+    {% if (address or city or province or postal_code or country) %}
+        <div class="address" itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">
+            {% if address %}
+                <span itemprop="streetAddress">{{ address }}</span><br />
+            {% endif %}
+            {% if postal_code %}
+                <span class="postal-code" itemprop="postalCode">{{ postal_code }}</span>
+            {% endif %}
+            {% if city %}
+                <span itemprop="addressLocality">{{ city }}</span><br />
+            {% endif %}
+            {% if province %}
+                <span class="visually-hidden province" itemprop="addressRegion">{{ province }}</span>
+            {% endif %}
+            {% if country %}
+                <span class="country visually-hidden" itemprop="addressCountry">{{ country }}</span>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if (show_map and latitude and longitude) %}
+    <div class="geo" itemprop="geo" itemscope itemtype="https://schema.org/GeoCoordinates">
+        <meta itemprop="latitude" content="{{ latitude }}" />
+        <meta itemprop="longitude" content="{{ longitude }}" />
+    </div>
+    {% endif %}
+</div>

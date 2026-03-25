@@ -46,10 +46,12 @@ class OnedayView extends AbstractView
             $this->getFilterDefaults($view_args),
         );
         // Create pagination links.
-        $title = $local_date->format_i18n(
-            $this->app->options->get('date_format', 'l, M j, Y')
+        $title = EventTimeView::format_long_date($local_date, true);
+        $pagination_links = $this->getPagination(
+            $args,
+            $title,
+            EventTimeView::format_short_date($local_date, $this->app->settings->get('show_year_in_agenda_dates', false))
         );
-        $pagination_links = $this->getPagination($args, $title);
 
         // Calculate today marker's position.
         $midnight = (new DT('now', 'sys.default'))
@@ -352,7 +354,7 @@ class OnedayView extends AbstractView
      * @see AbstractView->getPagination() for usage.
      *
      */
-    public function get_oneday_pagination_links($args, $title): array
+    public function get_oneday_pagination_links($args, $title, $title_short): array
     {
         $links     = [];
         $orig_date = $args['exact_date'];
@@ -380,7 +382,8 @@ class OnedayView extends AbstractView
         $links[]            = HtmlFactory::factory($this->app)->create_datepicker_link(
             $args,
             $args['exact_date'],
-            $title
+            $title,
+            $title_short
         );
 
         // ============

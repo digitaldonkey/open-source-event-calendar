@@ -1,0 +1,24 @@
+{% if available_views | length > 1 %}
+    <div class="plana-flyout-menu ai1ec-pull-right">
+        <button class="plana-flyout-menu--button">
+            <i class="ai1ec-icon-{{ current_view }} ai1ec-view-icon"></i>
+            {{ view_names[current_view] }}
+            <span class="caret">▾</span>
+        </button>
+        <ul class="plana-flyout-menu--menu" role="menu">
+            {% for key, args in available_views %}
+                {% if key != current_view %}
+                    <li>
+                        <a id="ai1ec-view-{{ key }}"
+                                {{ data_type | raw }}
+                           class="link {{ key }}"
+                           href="{{ available_views[key].href }}">
+                            <i class="ai1ec-icon-{{ key }} ai1ec-view-icon"></i>
+                            {{ available_views[key].desc }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
