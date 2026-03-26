@@ -578,9 +578,6 @@ workflows:
       - db_job:
           requires:
             - build
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
       - db_job_maria_10_5:
           requires:
             - build
