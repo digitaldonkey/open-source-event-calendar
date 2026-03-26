@@ -12,7 +12,6 @@ use Osec\Exception\BootstrapException;
 use Osec\Exception\TimezoneException;
 use Osec\Http\Request\Request;
 use Osec\Settings\HtmlFactory;
-use Osec\Twig\TwigExtension;
 
 /**
  * The concrete class for day view.
@@ -308,17 +307,8 @@ class WeekView extends AbstractView
                         'end_truncated'    => $evt->get('end_truncated'),
                         'popup_timespan'   => EventTimeView::factory($this->app)
                                                            ->get_timespan_html($evt->get('orig'), 'short'),
-                        'avatar'           => TwigExtension::avatar(
-                            $evt,
-                            [
-                                'post_thumbnail',
-                                'content_img',
-                                'location_avatar',
-                                'category_avatar',
-                            ],
-                            '',
-                            false
-                        ),
+                        'avatar'           => $evt->getavatar(true),
+                        'avatar_not_wrapped' => $evt->getavatar(false),
                     ];
 
                     if ('notallday' === $event_type) {
