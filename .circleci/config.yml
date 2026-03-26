@@ -290,12 +290,12 @@ jobs:
           name: Verify Readme.txt is up to date
           command: |
             set -Eeuxo pipefail
-            $WP_CLI --path="$WP_CORE_DIR" osec update_readme
+            $WP_CLI --path="$WP_CORE_DIR" osec make_readme
             if output=$(git status --porcelain) && [ -z "$output" ]; then
               echo "No changes detected"
               exit 0;
             else              
-              echo "wp osec update_readme revealed uncomitted changes"
+              echo "wp osec make_readme revealed uncomitted changes"
               git diff README.txt
               exit 1;
             fi
