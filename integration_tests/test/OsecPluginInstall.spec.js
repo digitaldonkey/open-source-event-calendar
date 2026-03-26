@@ -301,8 +301,10 @@ describe('Plugin install', function(){
         // In this case (Daily Event) we also should see 10 days.
         const daysInAgenda = await pageObject.driver.findElements(By.className('ai1ec-day'));
         const daysInAgendaCount =  await daysInAgenda.length;
-        pageObject.assert.ok(
-            10 === daysInAgendaCount
+        pageObject.assert.equal(
+            daysInAgendaCount,
+            10,
+            'Agenda contains 10 Events (default setting)'
         )
 
         // Switch view to weekly
@@ -325,7 +327,8 @@ describe('Plugin install', function(){
         const eventCountWeek =  await eventsInWeek.length;
         pageObject.assert.equal(
             eventCountWeek,
-            7
+            7,
+            'Daily event occurs 7 times a week.'
         );
 
         // Switch view to daily
@@ -342,8 +345,10 @@ describe('Plugin install', function(){
 
         const eventsInDay = await pageObject.driver.findElements(By.className('ai1ec-event-title'));
         const eventCountDay =  await eventsInDay.length;
-        pageObject.assert.ok(
-            1 === eventCountDay
+        pageObject.assert.equal(
+            eventCountDay,
+            1,
+            'Daily Event occurs once on day view.'
         );
         await pageObject.go_to_url(url);
     });
