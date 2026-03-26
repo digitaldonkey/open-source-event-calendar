@@ -56,8 +56,8 @@ class DTTest extends TestBase
     {
         global $osec_app;
 
-        /* @var int $weekStartInUTC Date and time (GMT): Monday, 11. November 2024 00:00:00 */
-        $weekStartInUTC = 1731283200;
+        /* @var int $weekStartInUTC Monday November 11, 2024 00:00:00 in time zone Europe/Berlin (CET) */
+        $weekStartInUTC = 1731279600;
 
         /* @var int $ranomDateInThisWeek Date and time (GMT): Thursday, 14. November 2024 17:45:00 */
         $ranomDateInThisWeek = 1731606300;
