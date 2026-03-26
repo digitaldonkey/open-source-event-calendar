@@ -479,7 +479,7 @@ class AdminPageAddEvent extends OsecBaseClass
     {
         wp_deregister_script('autosave');
         $autosave_key = array_search('autosave', $input, true);
-        if (false === $autosave_key || ! is_scalar($autosave_key)) {
+        if (false !== $autosave_key || ! is_scalar($autosave_key)) {
             unset($input[$autosave_key]);
         }
 

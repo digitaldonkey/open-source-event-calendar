@@ -1,0 +1,47 @@
+<i class="ai1ec-fa ai1ec-icon-rss ai1ec-fa-fw"></i>
+<div class="plana-flyout-menu plana-flyout-menu--wide">
+	<button class="plana-flyout-menu--button">
+		{% if subscribe_label is not empty %}
+			{{ subscribe_label }}
+		{% else %}
+			{% if is_filtered %}
+				{{ text_filtered }}
+			{% else %}
+				{{ text_subscribe }}
+			{% endif %}
+		{% endif %}
+		<span class="caret">▾</span>
+	</button>
+	<ul class="plana-flyout-menu--menu" role="menu">
+		<li>
+			<a class="link" target="_blank" title="{{ text.title.timely }}" href="{{ export_url }}">
+				<i class="ai1ec-fa  ai1ec-fa-fw ai1ec-icon-timely"></i>
+				{{ text.label.timely }}
+			</a>
+		</li>
+		<li>
+			<a class="link" target="_blank" title="{{ text.title.google }}" href="http://www.google.com/calendar/render?cid={{ export_url | url_encode | e('html_attr') }}">
+				<i class="ai1ec-fa ai1ec-icon-google  ai1ec-fa-fw"></i>
+				{{ text.label.google }}
+			</a>
+		</li>
+		<li>
+			<a class="link" target="_blank" title="{{ text.title.outlook }}" href="{{ export_url_webcal_no_html }}">
+				<i class="ai1ec-fa ai1ec-icon-windows  ai1ec-fa-fw"></i>
+				{{ text.label.outlook }}
+			</a>
+		</li>
+		<li>
+			<a class="link" target="_blank" title="{{ text.title.apple }}" href="{{ export_url_no_html }}">
+				<i class="ai1ec-fa ai1ec-icon-apple  ai1ec-fa-fw"></i>
+				{{ text.label.apple }}
+			</a>
+		</li>
+		<li>
+			<a class="link" title="{{ text.title.plaintext }}" href="{{ export_url_no_html }}">
+				<i class="ai1ec-fa ai1ec-icon-calendar ai1ec-fa-fw"></i>
+				{{ text.label.plaintext }}
+			</a>
+		</li>
+	</ul>
+</div>

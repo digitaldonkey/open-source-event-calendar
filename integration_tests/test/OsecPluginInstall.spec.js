@@ -272,10 +272,11 @@ describe('Plugin install', function(){
         const eventCountMonth = await eventsInMonth.length;
 
         const daysInNextMonth = new Date(new Date().getFullYear(), new Date().getUTCMonth()+2, 0).getDate()
-        console.log({daysInNextMonth, eventCountMonth});
 
-        pageObject.assert.ok(
-            daysInNextMonth === eventCountMonth
+        pageObject.assert.equal(
+            eventCountMonth,
+            daysInNextMonth,
+            'Number of Events matches days in next month'
         )
 
         // Switch view to agenda
@@ -300,8 +301,10 @@ describe('Plugin install', function(){
         // In this case (Daily Event) we also should see 10 days.
         const daysInAgenda = await pageObject.driver.findElements(By.className('ai1ec-day'));
         const daysInAgendaCount =  await daysInAgenda.length;
-        pageObject.assert.ok(
-            10 === daysInAgendaCount
+        pageObject.assert.equal(
+            daysInAgendaCount,
+            10,
+            'Agenda contains 10 Events (default setting)'
         )
 
         // Switch view to weekly
@@ -324,7 +327,8 @@ describe('Plugin install', function(){
         const eventCountWeek =  await eventsInWeek.length;
         pageObject.assert.equal(
             eventCountWeek,
-            7
+            7,
+            'Daily event occurs 7 times a week.'
         );
 
         // Switch view to daily
@@ -341,8 +345,10 @@ describe('Plugin install', function(){
 
         const eventsInDay = await pageObject.driver.findElements(By.className('ai1ec-event-title'));
         const eventCountDay =  await eventsInDay.length;
-        pageObject.assert.ok(
-            1 === eventCountDay
+        pageObject.assert.equal(
+            eventCountDay,
+            1,
+            'Daily Event occurs once on day view.'
         );
         await pageObject.go_to_url(url);
     });
@@ -395,7 +401,7 @@ describe('Plugin install', function(){
         // Search on map
         const mapSearchInput = await pageObject.getElement(By.css('#osec-map input[type="search"]'));
         // Note: We put in German name but expect English result "Brandenburg Gate"
-        await mapSearchInput.sendKeys('Brandenburger Tor, Pariser Platz 1, Mitte Mitte, 10117 Berlin, Deutschland');
+        await mapSearchInput.sendKeys('Brandenburger Tor, Pariser Platz 1, 10117 Berlin, Deutschland');
         await pageObject.waitToSeeWhatHappens(500, true);
         // Click result
         const resultSuggestion = await pageObject.getElement(By.css('#osec-map .leaflet-control-geocoder-alternatives li[data-result-index="0"]'));
@@ -419,12 +425,13 @@ describe('Plugin install', function(){
         await pageObject.waitToSeeWhatHappens(1000, true);
 
         // Check for address
+
         const addressValue = await pageObject.getElement(By.css('.entry-content .osec-location'));
         const text = await addressValue.getText();
         const textArray = text.split('\n');
 
         // Cant manage to force leaflets language
-        // to bve consisten locally and in pipeline.
+        // to be consistent locally and in pipeline.
         // So we split handle German and English by or condition.
         // This might fail if you browser has a differen language.
         const locationTitle = textArray.shift();
@@ -441,9 +448,8 @@ describe('Plugin install', function(){
         const address = textArray.join("\n")
         pageObject.assert.equal(
             address,
-            'Pariser Platz 1\n' +
-            'Mitte Mitte\n' +
-            '10117 Berlin'
+            'Pariser Platz 1\n10117 Berlin\nMitte',
+            'Address as expected'
         );
 
         // Click map placeholder

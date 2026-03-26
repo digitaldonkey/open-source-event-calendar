@@ -26,6 +26,7 @@ use Osec\App\View\Admin\AdminPageThemeOptions;
 use Osec\App\View\Calendar\CalendarShortcodeView;
 use Osec\App\View\Event\EventContentView;
 use Osec\App\View\Event\EventPostView;
+use Osec\App\View\Event\EventSingleView;
 use Osec\App\View\WpPluginActonLinks;
 use Osec\App\WpmlHelper;
 use Osec\Bootstrap\App;
@@ -210,24 +211,19 @@ class BootstrapController
             EnvironmentCheck::factory($app);
             // Add taxonomies.
             AdminPageManageTaxonomies::factory($app)->add_taxonomy_actions();
+            DateFormatsFrontend::factory($app);
         });
 
         add_action('init', function () use ($app) {
-                EventType::factory($app)->register();
+            EventType::factory($app)->register();
         }, 10, 1);
 
-        add_filter(
-            'use_block_editor_for_post_type',
-            function ($current_status, $post_type) {
-                if ($post_type === OSEC_POST_TYPE) {
-                    return false;
-                }
-                return $current_status;
-            },
-            10,
-            2
-        );
-
+        add_filter('use_block_editor_for_post_type', function ($current_status, $post_type) {
+            if ($post_type === OSEC_POST_TYPE) {
+                return false;
+            }
+            return $current_status;
+        }, 10, 2);
 
         // Initialize router
         add_action('init', $this->initialize_router(...), PHP_INT_MAX - 1);
@@ -242,24 +238,14 @@ class BootstrapController
         ScriptsFrontendController::add_actions($app, is_admin());
         TrashController::add_actions($app, is_admin());
 
-        add_action(
-            'pre_http_request',
-            function ($status, $output, $url) use ($app) {
+        add_action('pre_http_request', function ($status, $output, $url) use ($app) {
                 Request::factory($app)->pre_http_request($status, $output, $url);
-
                 return $status;
-            },
-            10,
-            3
-        );
+        }, 10, 3);
 
-        add_action(
-            'init',
-            function () use ($app) {
-                ThemeLoader::factory($app)->clean_cache_on_upgrade();
-            },
-            PHP_INT_MAX
-        );
+        add_action('init', function () use ($app) {
+            ThemeLoader::factory($app)->clean_cache_on_upgrade();
+        }, PHP_INT_MAX);
 
         add_filter('get_the_excerpt', function (string $post_excerpt) use ($app) {
             return EventContentView::factory($app)->get_the_excerpt($post_excerpt);
@@ -368,10 +354,6 @@ class BootstrapController
                         AdminPageSettings::factory($app)->add_meta_box();
                     }
                 }
-                if ($current_screen->id === 'options-general') {
-                    // Add date formats on Settings-general.php.
-                    DateFormatsFrontend::factory($app);
-                }
                 if ($current_screen->id === 'edit-osec_event') {
                     EditPostActions::factory($app)->add_bulk_action_duplicate_event($current_screen);
                 }
@@ -471,6 +453,10 @@ class BootstrapController
                     ScriptsBackendController::factory($app)->admin_enqueue_scripts($hook_suffix);
                 }
             );
+
+            FeedsController::add_actions($app, is_admin());
+            // If AdminPageAllEvents.
+            AdminPageAllEvents::add_actions($app, is_admin());
         } else {
             // Is not "is_admin()"
             add_action(
@@ -495,11 +481,8 @@ class BootstrapController
                     RequestRedirect::factory($app)->handle_categories_and_tags();
                 }
             );
+            EventSingleView::factory($app)->add_actions();
         }
-
-        FeedsController::add_actions($app, is_admin());
-        // If AdminPageAllEvents.
-        AdminPageAllEvents::add_actions($app, is_admin());
     }
 
     /**

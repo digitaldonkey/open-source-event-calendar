@@ -1011,6 +1011,22 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => 20,
             ],
+            'location_maps_map_height' => [
+                'type'     => 'string',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsInput',
+                    'tab'   => 'location',
+                    'label' => __('Map height (frontend)', 'open-source-event-calendar'),
+                    'type'   => 'append',
+                    'append'   => '[CSS length units]',
+                    'help'  => __(
+                        'It is recommended to use absolute values like rem or px. 
+                        Leaflet sets its own font-size, placeholder- and map-height may vary using em.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => '20rem',
+            ],
             'geo_region_biasing' => [
                 'type'     => 'bool',
                 'renderer' => [
@@ -1046,7 +1062,7 @@ class Settings extends OsecBaseInitialized
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'features',
                     'label' => __(
-                        'Enable event coast',
+                        'Enable Event cost and Tickets ',
                         'open-source-event-calendar'
                     ),
                     'help'  => __(

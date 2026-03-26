@@ -520,15 +520,12 @@ input.ai1ec-timepicker[readonly] {
 	// .timely, not body.
 	margin: 0;
 	font-family: @font-family-base;
-
 	font-size: @font-size-base;
-	font-size: var(--wp--preset--font-size--small);
-	//line-height: @line-height-base;
-	line-height: 1.55;
-
+	// font-size: var(--wp--preset--font-size--small);
+	// line-height: 1.55;
+	line-height: @line-height-base;
 	color: @text-color;
 	word-wrap: break-word;
-	//outline: 4px solid cyan;
 
 	a {
 		border: none;
@@ -1021,4 +1018,16 @@ a.ai1ec-custom-filter {
 
 img[data-ai1ec-hidden] {
 	display: none;
+}
+
+.visually-hidden {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	border: 0 !important;
+	margin: -1px !important;
+	clip: rect(0, 0, 0, 0) !important;
+	overflow: hidden !important;
+	white-space: nowrap !important;
 }

@@ -355,6 +355,7 @@ class EventType extends OsecBaseClass
                 'switch_osec_themes',
                 'manage_osec_options',
                 'manage_osec_feeds',
+                'manage_osec_events_categories',
             ];
             foreach ($delete_caps as $cap) {
                 foreach (array_keys($wp_roles->roles) as $role) {

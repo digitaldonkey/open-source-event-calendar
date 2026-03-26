@@ -58,7 +58,8 @@ trait ViewRuntimePropsTrait
         $event->set_runtime('ticket_url_label', $ticketView->get_tickets_url_label($event, false));
         $event->set_runtime('edit_post_link', get_edit_post_link($event->get('post_id')));
         $event->set_runtime('edit_post_instance_link', $event->get_instance_edit_link());
-        $event->set_runtime('post_excerpt', EventContentView::factory($app)->get_excerpt($event));
+        $event->set_runtime('post_excerpt', EventContentView::factory($app)
+                                                            ->get_excerpt(get_post($event->get('post_id'))));
         $color = EventColorView::factory($app);
         $event->set_runtime('faded_color', $color->get_faded_color($event));
         $event->set_runtime('rgba_color', $color->get_rgba_color($event));

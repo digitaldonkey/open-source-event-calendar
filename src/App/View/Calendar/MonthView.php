@@ -316,17 +316,8 @@ class MonthView extends AbstractView
                     'start_truncated'  => $evt->get('start_truncated'),
                     'end_truncated'    => $evt->get('end_truncated'),
                     'popup_timespan'   => TwigExtension::timespan($evt, 'short'),
-                    'avatar'           => TwigExtension::avatar(
-                        $evt,
-                        [
-                            'post_thumbnail',
-                            'content_img',
-                            'location_avatar',
-                            'category_avatar',
-                        ],
-                        '',
-                        false
-                    ),
+                    'avatar'           => $evt->getavatar(true),
+                    'avatar_not_wrapped' => $evt->getavatar(false),
                 ];
             }
             $weeks[$week][] = [

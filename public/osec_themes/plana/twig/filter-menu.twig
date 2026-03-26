@@ -1,0 +1,45 @@
+{% if osec_before_filter_menu is defined %}
+	{{ osec_before_filter_menu | raw }}
+{% endif %}
+<div class="osec-taxonomy-filters {% if
+		categories is empty
+		and tags is empty
+		and additional_filters is empty
+		and contribution_buttons is empty
+		and additional_buttons is empty
+%}ai1ec-hidden{% endif %}">
+	<span class="osec-taxonomy-filters--label">{{ label }}:</span>
+	<span class="osec-taxonomy-filters--filters">
+
+		{% if categories is not empty %}
+			<span class="osec-taxonomy-filters--item">
+				<i class="ai1ec-fa ai1ec-fa-folder-open"></i>
+				{{ categories | raw }}
+			</span>
+		{% endif %}
+
+		{% if tags is not empty %}
+			<span class="osec-taxonomy-filters--item">
+			<i class="ai1ec-fa ai1ec-fa-tags"></i>
+			{{ tags | raw }}
+		</span>
+		{% endif %}
+
+	</span>
+
+	{% if additional_filters is defined %}
+		<ul class="plana-flyout-menu--menu" role="menu">
+			{{ additional_filters | raw }}
+		</ul>
+	{% endif %}
+
+	{% if contribution_buttons is defined %}
+		<ul class="plana-flyout-menu--menu" role="menu">
+			{{ contribution_buttons | raw }}
+		</ul>
+	{% endif %}
+
+	{% if additional_buttons is defined %}
+		{{ additional_buttons | raw }}
+	{% endif %}
+</div>

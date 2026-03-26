@@ -52,13 +52,15 @@ class TwigExtension extends AbstractExtension
         Event $event,
         $fallback_order = null,
         $classes = '',
-        $wrap_permalink = true
+        $wrap_permalink = true,
+        $hide_featured_image = false
     ) {
         return EventAvatarView::factory($event->get('app'))->get_event_avatar(
             $event,
             $fallback_order,
             $classes,
-            $wrap_permalink
+            $wrap_permalink,
+            $hide_featured_image
         );
     }
 

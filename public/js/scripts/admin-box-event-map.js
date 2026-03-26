@@ -114,7 +114,6 @@ class GeocoderMap {
 
     formatAddress = (geocode) => {
         const template = this.options.geocode_to_address_template;
-
         // Experimental.
         // @see OSEC_GEOCODE_TO_ADDRESS_TEMPLATE
         if (!template || template.length === 0) {
@@ -134,9 +133,9 @@ class GeocoderMap {
                     // Get the first available alternative only.
                     if (Object.hasOwn(address, alternative)) {
                         value = value.concat(address[alternative] + ' ');
-                        return true;
+                        return false;
                     }
-                    return false;
+                    return true;
                 });
             }
             else if (address[current]) {
@@ -155,7 +154,7 @@ class GeocoderMap {
     }
 
     updateWpForm (geocode){
-        function update(id, value) {
+        function updateElement(id, value) {
             const elm = document.getElementById(id);
             elm.value = value ?? '';
         }
@@ -164,12 +163,12 @@ class GeocoderMap {
         if (!venue.value && geocode.name) {
             venue.value = geocode.name;
         }
-        update('osec_address', geocode.display_name);
-        update('osec_city', geocode.address.city);
-        update('osec_province', geocode.address.borough);
-        update('osec_postal_code', geocode.address.postcode);
-        update('osec_country', geocode.address.country);
-        update('osec_country_short', geocode.address.country_code);
+        updateElement('osec_address', geocode.display_name);
+        updateElement('osec_city', geocode.address.city);
+        updateElement('osec_province', geocode.address.borough);
+        updateElement('osec_postal_code', geocode.address.postcode);
+        updateElement('osec_country', geocode.address.country);
+        updateElement('osec_country_short', geocode.address.country_code);
     }
 
     // Search Results template

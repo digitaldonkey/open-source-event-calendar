@@ -15,7 +15,7 @@ use Osec\Bootstrap\OsecBaseClass;
 class MapsController extends OsecBaseClass
 {
     protected $default_js_params = [
-        'map_height'    => '50vh',
+        'map_height'    => '20em',
         'map_max_zooom' => '19',
         'map_zoom'      => '16',
     ];
@@ -25,6 +25,12 @@ class MapsController extends OsecBaseClass
         if (! $this->app->settings->get('feature_event_location')) {
             return;
         }
+
+
+        $this->default_js_params['map_height'] = $this->app->settings->get(
+            'location_maps_map_height',
+            $this->default_js_params
+        );
 
         $this->register_leaflet();
 

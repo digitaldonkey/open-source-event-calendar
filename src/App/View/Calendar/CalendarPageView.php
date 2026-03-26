@@ -169,6 +169,7 @@ class CalendarPageView extends OsecBaseClass
             $filter_args = [
                 'categories'           => $categories,
                 'tags'                 => $tags,
+                'label' => __('Filter by', 'open-source-event-calendar'),
                 /**
                  * @see Filter documentation 'osec_contribution_buttons' at AbstractView->getNavigation().
                  */
@@ -491,7 +492,7 @@ class CalendarPageView extends OsecBaseClass
         ];
 
         return ThemeLoader::factory($this->app)
-                  ->get_file('views_dropdown.twig', $args, false)
+                  ->get_file('views-dropdown.twig', $args, false)
                   ->get_content();
     }
 

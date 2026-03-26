@@ -30,9 +30,7 @@ class EventContentView extends OsecBaseClass
         if ( ! AccessControl::is_our_post_type()) {
             return $default_excerpt;
         }
-        return $this->get_excerpt(
-            new Event($this->app, get_the_ID())
-        );
+        return $this->get_excerpt(get_post(get_the_ID()));
     }
 
     /**
@@ -47,12 +45,11 @@ class EventContentView extends OsecBaseClass
      *
      * @return string The excerpt.
      */
-    public function get_excerpt(Event $event, $length = null, $more = '[...]'): string
+    public function get_excerpt(\WP_Post $post, $length = null, $more = '[...]'): string
     {
         if (is_null($length)) {
             $length = OSEC_EXCERPT_LENGTH_WORDS;
         }
-        $post = $event->get('post');
 
         if (
             $this->app->settings->get('feature_use_excerpt')
@@ -139,7 +136,7 @@ class EventContentView extends OsecBaseClass
         $args = [
             'href' => $href,
             'text' => esc_attr(__('Back to Calendar', 'open-source-event-calendar')),
-            'tooltip' => esc_attr(__('View all events', 'open-source-event-calendar')),
+            'tooltip' => esc_attr(__('Back to events', 'open-source-event-calendar')),
             'template' => 'back-to-calendar-button.twig',
         ];
         /**

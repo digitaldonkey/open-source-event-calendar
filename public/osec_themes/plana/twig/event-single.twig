@@ -1,133 +1,179 @@
-<div class="timely plana-single-event ai1ec-single-event
-	ai1ec-event-id-{{ post_id }}
-	ai1ec-event-instance-id-{{ instance_id }}
-	{% if is_multiday_event %}ai1ec-multiday{% endif %}
-	{% if is_allday_event %}ai1ec-allday{% endif %}">
+<div class="{{ wrapper_classes|join(' ') }}">
     <a id="wp--skip-link--target"></a>
-    <div class="ai1ec-actions">
-        <div class="ai1ec-btn-group-vertical ai1ec-clearfix">
+    <div class="l-header">
+        <div class="osec-back-link osec-back-link--top ">
             {{ back_to_calendar | raw }}
         </div>
+    </div>
+    <div class="l-content">
+        <div class="l-main">
+            <div class="l-content-header">
+                <h2 itemprop="name" class="visually-hidden">{{ title }}</h2>
+            </div>
+            <div class="l-content">
+                <div class="block-details">
+                    <dl class="osec-event-details">
 
-        <div class="ai1ec-btn-group-vertical ai1ec-clearfix">
-            {% if ticket_url is not empty %}
-                <a href="{{ ticket_url | e( 'html_attr' ) }}" target="_blank"
-                   class="ai1ec-tickets ai1ec-btn ai1ec-btn-sm ai1ec-btn-primary
-					ai1ec-tooltip-trigger"
-                   title="{{ tickets_url_label | e( 'html_attr' ) }}"
-                   data-placement="left">
-                    <i class="ai1ec-fa ai1ec-fa-ticket ai1ec-fa-fw"></i>
-                    <span class="ai1ec-hidden-xs">
-					{{ tickets_url_label }}
-				</span>
-                </a>
-            {% endif %}
+                        <dt class="label label--when">{{ text_when }}</dt>
+                        <dd class="event-date-time">
+                            <span class="dt-duration">
+                                <strong>{{ event | timespan | raw }}</strong>
+                                {% if timezone_info.show_timezone %}
+                                    <abbr class="ai1ec-initialism ai1ec-tooltip-trigger"
+                                          title="{{ timezone_info.text_timezone_title | e( 'html_attr' ) }}">
+                                        {{ timezone_info.event_timezone }}
+                                    </abbr>
+                                {% endif %}
+                            </span>
+                            {% include 'recurrence.twig' %}
+                            <div class="visually-hidden dt-start" itemprop="startDate" content="{{ start }}">
+                                {{ start }}
+                            </div>
+                            <div class="visually-hidden dt-end" itemprop="endDate" content="{{ end }}">{{ end }}</div>
+                        </dd>
 
-            {% if show_subscribe_buttons %}
-                {% include 'subscribe-buttons.twig' with {
-                    'export_url':             subscribe_url,
-                    'export_url_no_html':     subscribe_url_no_html,
-                    'subscribe_label':        text_add_calendar,
-                    'text':                   subscribe_buttons_text,
-                } %}
-            {% endif %}
+                        {% if location is not empty %}
+                            <dt class="label label--where">{{ text_where }}</dt>
+                            <dd class="osec-location">
+                                {{ location | raw }}
+                            </dd>
+                        {% endif %}
+
+                        {% if cost is not empty or is_free_event %}
+                            <dt class="label label--cost">{{ text_cost }}</dt>
+                            <dd class="cost" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                                {% if is_free_event %}
+                                    <meta itemprop="isAccessibleForFree" content="true"/>
+                                    {{ text_free }}
+                                {% else %}
+                                    <meta itemprop="priceCurrency" content="{{ cost_iso_4217_currency }}">
+                                    <span class="event-price" itemprop="price" content="{{ cost_number }}">
+                                        {{ cost }}
+                                    </span>
+                                {% endif %}
+                                {%~ if ticket_url is not empty -%}
+                                    <a
+                                        title="{{ tickets_url_label | e( 'html_attr' ) }}"
+                                        href="{{ ticket_url | e( 'html_attr' ) }}"
+                                        target="_blank"
+                                        class="tickets-url action-link"
+                                        itemprop="url"
+                                    >
+                                        {{- tickets_url_label -}}
+                                        <i class="ai1ec-fa ai1ec-fa-external-link"></i>
+                                    </a>
+                                {%- endif %}
+                            </dd>
+                        {% endif %}
+
+                        {% if contact is not empty %}
+                            <dt class="label label--contact">{{ text_contact }}</dt>
+                            <dd>
+                                {{ contact | raw }}
+                            </dd>
+                        {% endif %}
+
+                        {% if categories is not empty %}
+                            <dt class="label label--categories"></dt>
+                            <dd class="event-categories">
+                                <span class="label--categories">
+                                    <i class="ai1ec-fa ai1ec-fa-folder-open"></i>&nbsp;{{ text_categories }}:
+                                </span>
+                                <span class="timely categories-content">
+                                    {{ categories | raw }}
+                                </span>
+                            </dd>
+                        {% endif %}
+
+                        {% if tags is not empty %}
+                            <dt class="label"></dt>
+                            <dd class="event-tags">
+                                <span class="label--tags">
+                                    <i class="ai1ec-fa ai1ec-fa-tags"></i>&nbsp;{{ text_tags }}:
+                                </span>
+                                <span class="timely tags-content">
+                                    {{ tags | raw }}
+                                </span>
+                            </dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+
+            <div class="l-content-footer">
+                {% if edit_instance_url is not empty or edit_serries_url is not empty %}
+                    <div class="osec-edit-event-actions">
+                        <i class="ai1ec-fa ai1ec-fa-pencil"></i>&nbsp;
+                        {% if edit_serries_url is not empty %}
+                            <a class="action-link edit-link"
+                               title="{{ edit_serries_text | e('html_attr') }}"
+                               href="{{ edit_serries_url }}">
+                                {{ edit_serries_text | e('html_attr') }}
+                            </a>
+                        {% endif %}
+
+                        {% if edit_instance_url is not empty %}
+                            <a class="action-link edit-link"
+                               title="{{ edit_instance_text | e('html_attr') }}"
+                               href="{{ edit_instance_url }}">
+                                {{ edit_instance_text | e('html_attr') }}
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if show_subscribe_buttons %}
+                    <div class="subscribe-buttons">
+                        {% include 'subscribe-buttons.twig' with {
+                            'export_url':             subscribe_url,
+                            'export_url_no_html':     subscribe_url_no_html,
+                            'subscribe_label':        text_add_calendar,
+                            'text':                   subscribe_buttons_text,
+                        } %}
+                    </div>
+                {% endif %}
+                {% if extra_buttons %}
+                    {{ extra_buttons | raw }}
+                {% endif %}
+            </div>
         </div>
 
-        {% if extra_buttons %}
-            {{ extra_buttons | raw }}
-        {% endif %}
-    </div>
-
-    {% if map is empty %}
-    <div class="ai1ec-event-details ai1ec-clearfix">
-        {% else %}
-        <div class="ai1ec-event-details ">
-            <div class="plana-block plana-block--map ai1ec-map">
-                {{ map | raw }}
-            </div>
-            <div class="">
-                {% endif %}
-
-                <div class="plana-block plana-block--time ai1ec-time ">
-                    <div class="ai1ec-field-label">{{ text_when }}</div>
-                    <div class="ai1ec-field-value">
-                        <div class="dt-duration">
-                            {{ event | timespan | raw }}
-                            {% if timezone_info.show_timezone %}
-                                <abbr class="ai1ec-initialism ai1ec-tooltip-trigger"
-                                      title="{{ timezone_info.text_timezone_title | e( 'html_attr' ) }}">{{ timezone_info.event_timezone }}</abbr>
-                            {% endif %}
-                        </div>
-                        {% include 'recurrence.twig' %}
-                    </div>
-                    <div class="ai1ec-hidden dt-start">{{ start }}</div>
-                    <div class="ai1ec-hidden dt-end">{{ end }}</div>
-                </div>
-
-                {% if location is not empty %}
-                    <div class="plana-block plana-block--location ai1ec-location ">
-                        <div class="ai1ec-field-label">{{ text_where }}</div>
-                        <div class="ai1ec-field-value osec-location">
-                            {{ location | raw }}
-                        </div>
-                    </div>
-                {% endif %}
-
-                {% if cost is not empty or is_free_event %}
-                    <div class="plana-block plana-block--cost ai1ec-cost ">
-                        <div class="ai1ec-field-label ">{{ text_cost }}</div>
-                        <div class="ai1ec-field-value ">
-                            {{ is_free_event ? text_free : cost }}
-                        </div>
-                    </div>
-                {% endif %}
-
-                {% if contact is not empty %}
-                    <div class="plana-block plana-block--contact ai1ec-contact ">
-                        <div class="ai1ec-field-label ">{{ text_contact }}</div>
-                        <div class="ai1ec-field-value ">{{ contact | raw }}</div>
-                    </div>
-                {% endif %}
-
-                {% if categories is not empty %}
-                    <div class="plana-block plana-block--categories ai1ec-categories ">
-                        <div class="ai1ec-field-label">
-                            <i class="ai1ec-fa ai1ec-fa-folder-open ai1ec-tooltip-trigger"
-                               title="{{ text_categories | e( 'html_attr' ) }}"></i>
-                        </div>
-                        <div class="ai1ec-field-value">
-                            {{ categories | raw }}
-                        </div>
-                    </div>
-                {% endif %}
-
-                {% if tags is not empty %}
-                    <div class="plana-block plana-block--tags ai1ec-tags ">
-                        <div class="ai1ec-field-label">
-                            <i class="ai1ec-fa ai1ec-fa-tags ai1ec-tooltip-trigger"
-                               title="{{ text_tags | e( 'html_attr' ) }}"></i>
-                        </div>
-                        <div class="ai1ec-field-value">
-                            {{ tags | raw }}
-                        </div>
-                    </div>
-                {% endif %}
-
-                {% if map is empty %}
-            </div>{# /.ai1ec-event-details #}
-            {% else %}
-        </div>{# /.#}
-    </div>{# /.ai1ec-event-details. #}
-    {% endif %}
-
-    {% if not hide_featured_image %}
-        {% if content_img_url is empty %}
+        {% if hide_featured_image %}
+            {#  Only print schema.org/Image metatag  #}
             {{ event | avatar( [
                 'post_thumbnail',
                 'location_avatar',
                 'category_avatar'
-            ], 'timely alignleft', false ) | raw }}
+            ], 'block--image', false, true ) | raw }}
+            {% set avatar = null %}
+        {% else %}
+            {#  Get image  #}
+            {% set avatar = event | avatar( [
+                'post_thumbnail',
+                'location_avatar',
+                'category_avatar'
+            ], 'block--image', false, false ) %}
         {% endif %}
-    {% endif %}
 
+        {% if map is not empty or avatar is not empty %}
+            <div class="l-aside">
+                {% if avatar is not empty %}
+                    <div class="l-aside--item">
+                        {{ avatar | raw }}
+                    </div>
+                {% endif %}
+                {% if map is not empty %}
+                    <div class="l-aside--item">
+                        <div class="block--map osec-map">
+                            {{ map | raw }}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="l-footer">
+        <div class="osec-back-link osec-back-link--bottom">
+            {{ back_to_calendar | raw }}
+        </div>
+    </div>
 </div>

@@ -12,7 +12,6 @@ use Osec\Exception\BootstrapException;
 use Osec\Exception\TimezoneException;
 use Osec\Http\Request\Request;
 use Osec\Settings\HtmlFactory;
-use Osec\Twig\TwigExtension;
 
 /**
  * The concrete class for day view.
@@ -46,10 +45,12 @@ class OnedayView extends AbstractView
             $this->getFilterDefaults($view_args),
         );
         // Create pagination links.
-        $title = $local_date->format_i18n(
-            $this->app->options->get('date_format', 'l, M j, Y')
+        $title = EventTimeView::format_long_date($local_date, true);
+        $pagination_links = $this->getPagination(
+            $args,
+            $title,
+            EventTimeView::format_short_date($local_date, $this->app->settings->get('show_year_in_agenda_dates', false))
         );
-        $pagination_links = $this->getPagination($args, $title);
 
         // Calculate today marker's position.
         $midnight = (new DT('now', 'sys.default'))
@@ -262,17 +263,8 @@ class OnedayView extends AbstractView
                     'end_truncated'    => $evt->get('end_truncated'),
                     'popup_timespan'   => EventTimeView::factory($this->app)
                                                        ->get_timespan_html($evt->get('orig'), 'short'),
-                    'avatar'           => TwigExtension::avatar(
-                        $evt,
-                        [
-                            'post_thumbnail',
-                            'content_img',
-                            'location_avatar',
-                            'category_avatar',
-                        ],
-                        '',
-                        false
-                    ),
+                    'avatar'           => $evt->getavatar(true),
+                    'avatar_not_wrapped' => $evt->getavatar(false),
                 ];
 
                 if ('notallday' === $event_type) {
@@ -352,7 +344,7 @@ class OnedayView extends AbstractView
      * @see AbstractView->getPagination() for usage.
      *
      */
-    public function get_oneday_pagination_links($args, $title): array
+    public function get_oneday_pagination_links($args, $title, $title_short): array
     {
         $links     = [];
         $orig_date = $args['exact_date'];
@@ -380,7 +372,8 @@ class OnedayView extends AbstractView
         $links[]            = HtmlFactory::factory($this->app)->create_datepicker_link(
             $args,
             $args['exact_date'],
-            $title
+            $title,
+            $title_short
         );
 
         // ============

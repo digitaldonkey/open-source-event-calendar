@@ -7,24 +7,17 @@
     </div>
 {% endif %}
 <div class="osec-map-container {% if hide_maps_until_clicked %}osec-map-container-hidden{% endif %}">
-    <div id="osec-map"
-            {%- for key, value in data -%}
-                data-{{ key }}="{{ value }}"
-            {%- endfor -%}
-         style="height: {{ height }};"
-    ></div>
+    <div id="osec-map" {% for key, value in data %}data-{{ key }}="{{ value }}" {% endfor -%} style="height:{{ height }}">
+    </div>
 </div>
 {% if gmap_url_link %}
-    <a class="osec-gmap-link"
-       href="{{ gmap_url_link|raw }}" target="_blank"
-       title="{{ text_full_map_gmap }}"
-    >
+    <a class="osec-map-link osec-gmap-link action-link" href="{{ gmap_url_link|raw }}" target="_blank" title="{{ text_full_map_gmap }}">
         {{ text_full_map_gmap }}
         <span class="dashicons dashicons-external"></span>
     </a>
 {% endif %}
 {% if osm_link_url %}
-    <a class="osec-gmap-link"
+    <a class="osec-map-link osec-osm-link action-link"
        href="{{ osm_link_url|raw }}" target="_blank"
        title="{{ text_full_map_osm }}"
     >
