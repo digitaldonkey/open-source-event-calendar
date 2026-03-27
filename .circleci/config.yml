@@ -675,8 +675,3 @@ workflows:
     <<: *build_test_deploy_workflow_jobs
   tagged-build:
     <<: *build_test_deploy_workflow_jobs
-    filters:
-      branches:
-        only: /master/
-      tags:
-        only: /^\d+\.\d+\.\d+$/
