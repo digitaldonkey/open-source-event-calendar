@@ -670,8 +670,7 @@ build_test_deploy: &build_test_deploy
 
 workflows:
   # Default Workflow
-  build_test_deploy:
-    <<: *build_test_deploy
+  <<: *build_test_deploy
   # Default Workflow on git TAG
   tagged-build:
     <<: *build_test_deploy
