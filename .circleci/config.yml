@@ -564,116 +564,118 @@ jobs:
 
 # Running same workflow on branch and tags
 build_test_deploy_workflow_jobs: &build_test_deploy_workflow_jobs
-    - build
-    - static_job:
-        requires:
-          - build
-    - static_release_job:
-        requires:
-          - static_job
-        filters:
-          branches:
-            only: /^(master|release-.*)$/
-    - db_job:
-        requires:
-          - build
-    - db_job_maria_10_5:
-        requires:
-          - build
-        filters:
-          branches:
-            only: /^(master|release-.*)$/
-    - db_job_php_8_3:
-        requires:
-          - build
-        filters:
-          branches:
-            only: /^(master|release-.*)$/
-    - db_job_php_8_4:
-        requires:
-          - build
-        filters:
-          branches:
-            only: /^(master|release-.*)$/
-    - db_job_php_8_5:
-        requires:
-          - build
-        filters:
-          branches:
-            only: /^(master|release-.*)$/
-    - db_job_mysql_8:
-        requires:
-          - build
-        filters:
-          branches:
-            only: /^(master|release-.*)$/
-    - create_release_job:
-        requires:
-          - db_job
-          - static_job
-    - release_test_job:
-        requires:
-          - create_release_job
-    - release_test_job_php_8_3:
-        requires:
-          - create_release_job
-        filters:
-          branches:
-            only: /^(master|release-.*)$/
-    - release_test_job_php_8_4:
-        requires:
-          - create_release_job
-        filters:
-          branches:
-            only: /^(master|release-.*)$/
-    - release_test_job_php_8_5:
-        requires:
-          - create_release_job
-        filters:
-          branches:
-            only: /^(master|release-.*)$/
-    - publish_github_release_job:
-        requires:
-          - static_job
-          - db_job
-          - static_release_job
-          - db_job_maria_10_5
-          - db_job_php_8_3
-          - db_job_php_8_4
-          - db_job_php_8_5
-          - db_job_mysql_8
-          - release_test_job
-          - release_test_job_php_8_3
-          - release_test_job_php_8_4
-          - release_test_job_php_8_5
-        filters:
-          branches:
-            only: /master/
-          tags:
-            only: /^\d+\.\d+\.\d+$/
-    - wp_deploy_assets_job:
-        requires:
-          - create_release_job
-        filters:
-          branches:
-            only: /master/
-          tags:
-            only: /^\d+\.\d+\.\d+$/
-    - wp_deploy_wp_org_job:
-        requires:
-          - publish_github_release_job
-        filters:
-          branches:
-            only: /master/
-          tags:
-            only: /^\d+\.\d+\.\d+$/
+  - build
+  - static_job:
+      requires:
+        - build
+  - static_release_job:
+      requires:
+        - static_job
+      filters:
+        branches:
+          only: /^(master|release-.*)$/
+  - db_job:
+      requires:
+        - build
+  - db_job_maria_10_5:
+      requires:
+        - build
+      filters:
+        branches:
+          only: /^(master|release-.*)$/
+  - db_job_php_8_3:
+      requires:
+        - build
+      filters:
+        branches:
+          only: /^(master|release-.*)$/
+  - db_job_php_8_4:
+      requires:
+        - build
+      filters:
+        branches:
+          only: /^(master|release-.*)$/
+  - db_job_php_8_5:
+      requires:
+        - build
+      filters:
+        branches:
+          only: /^(master|release-.*)$/
+  - db_job_mysql_8:
+      requires:
+        - build
+      filters:
+        branches:
+          only: /^(master|release-.*)$/
+  - create_release_job:
+      requires:
+        - db_job
+        - static_job
+  - release_test_job:
+      requires:
+        - create_release_job
+  - release_test_job_php_8_3:
+      requires:
+        - create_release_job
+      filters:
+        branches:
+          only: /^(master|release-.*)$/
+  - release_test_job_php_8_4:
+      requires:
+        - create_release_job
+      filters:
+        branches:
+          only: /^(master|release-.*)$/
+  - release_test_job_php_8_5:
+      requires:
+        - create_release_job
+      filters:
+        branches:
+          only: /^(master|release-.*)$/
+  - publish_github_release_job:
+      requires:
+        - static_job
+        - db_job
+        - static_release_job
+        - db_job_maria_10_5
+        - db_job_php_8_3
+        - db_job_php_8_4
+        - db_job_php_8_5
+        - db_job_mysql_8
+        - release_test_job
+        - release_test_job_php_8_3
+        - release_test_job_php_8_4
+        - release_test_job_php_8_5
+      filters:
+        branches:
+          only: /master/
+        tags:
+          only: /^\d+\.\d+\.\d+$/
+  - wp_deploy_assets_job:
+      requires:
+        - create_release_job
+      filters:
+        branches:
+          only: /master/
+        tags:
+          only: /^\d+\.\d+\.\d+$/
+  - wp_deploy_wp_org_job:
+      requires:
+        - publish_github_release_job
+      filters:
+        branches:
+          only: /master/
+        tags:
+          only: /^\d+\.\d+\.\d+$/
 
 workflows:
   build_test_deploy: # This is the name of the workflow, feel free to change it to better match your workflow.
     # Inside the workflow, you define the jobs you want to run.
-    jobs: &build_test_deploy_workflow_jobs
+    jobs:
+      <<: *build_test_deploy_workflow_jobs
   tagged-build:
-      jobs: &build_test_deploy_workflow_jobs
+    jobs:
+      <<: *build_test_deploy_workflow_jobs
       filters:
         branches:
           only: /master/
