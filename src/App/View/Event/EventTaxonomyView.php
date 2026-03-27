@@ -334,14 +334,13 @@ class EventTaxonomyView extends OsecBaseClass
                                 ->create_href_helper_instance(['cat_ids' => $category->term_id])
                                 ->generate_href();
             $class = '';
-            $data_type = '';
             $title = '';
             if ($category->description) {
                 $title = 'title="' . esc_attr($category->description) . '" ';
             }
 
             $html        = '';
-            $class       .= ' ai1ec-category';
+            $class       .= 'ai1ec-category';
             $color_style = '';
             if ($format === 'inline') {
                 $taxonomy    = TaxonomyAdapter::factory($this->app);
@@ -354,8 +353,8 @@ class EventTaxonomyView extends OsecBaseClass
                 $class .= '-inline';
             }
 
-            $html .= '<a ' . $data_type . ' class="' . $class .
-                     ' ai1ec-term-id-' . $category->term_id . ' p-category" ' .
+            $html .= '<a class="' . $class .
+                     ' ai1ec-term-id-' . $category->term_id . ' p-category" itemprop="keywords" ' .
                      $title . $color_style . 'href="' . $href . '">';
 
             if ($format === 'blocks') {
@@ -392,15 +391,13 @@ class EventTaxonomyView extends OsecBaseClass
                                ->generate_href();
 
             $class     = '';
-            $data_type = '';
             $title     = '';
             if ($tag->description) {
                 $title = 'title="' . esc_attr($tag->description) . '" ';
             }
-            $tag = '<a ' . $data_type . ' class="ai1ec-tag ' . $class .
+            $tag = '<a class="ai1ec-tag' . $class .
                    ' ai1ec-term-id-' . $tag->term_id . '" ' . $title .
-                   'href="' . $href . '">' .
-                   '<i class="ai1ec-fa ai1ec-fa-tag"></i>' .
+                   'href="' . $href . '" itemprop="keywords">' .
                    esc_html($tag->name) . '</a>';
         }
 

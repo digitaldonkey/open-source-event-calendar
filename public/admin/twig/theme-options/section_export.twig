@@ -1,10 +1,17 @@
-<p>{{ text_1 }}</p>
-<textarea readonly class="widefat">
+<textarea readonly class="widefat" rows="10">
 {% for section in sections %}
-{{~ section.section.name }}
-{% for id,variable in section.variables %}
-    '{{ variable.description }}':'{{ variable.value }}'
+{{- section.section.name }}
+    {%~ for id,variable in section.variables %}
+        '{{ variable.description }}':'{{ variable.value }}'
     {%~ endfor ~%}
-{% endfor %}
+{%- endfor %}
 </textarea>
-<p>{{ text_2 }}</p>
+{{ export_text_3 }}
+<textarea readonly class="widefat js-export" rows="10">
+{% apply spaceless %}
+{%- for section in sections -%}{%- for id,variable in section.variables -%}
+document.getElementById('{{ id }}').value='{{ variable.value }}';
+{% endfor -%}
+{%- endfor -%}
+{% endapply %}
+</textarea>

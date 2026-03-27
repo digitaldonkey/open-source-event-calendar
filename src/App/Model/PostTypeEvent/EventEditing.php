@@ -38,6 +38,11 @@ class EventEditing extends OsecBaseClass
      */
     public function save_post(int $post_id, WP_Post $post, bool $update)
     {
+        // TODO
+        //  If there is $_REQUEST['data']['wp_autosave'] set
+        //  the nonce will be invalid and Event data is missing
+        //  How we can tell autosave to transfer our Event data?
+
         $nonce = RequestParser::get_param(self::NONCE_NAME, null);
         $action = RequestParser::get_param('action', null);
         if (!$nonce || wp_verify_nonce($nonce, self::NONCE_ACTION) !== 1) {

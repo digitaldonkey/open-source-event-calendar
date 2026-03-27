@@ -192,7 +192,8 @@ class AgendaView extends AbstractView
             'show_year_in_agenda_dates' => $this->app->settings->get('show_year_in_agenda_dates'),
             'expanded'                  => $view_args['agenda_toggle'] !== 'false',
             'no_toggle'                 => $view_args['agenda_toggle'] !== 'false',
-            'show_location_in_title'    => $this->app->settings->get('show_location_in_title'),
+            'show_location_in_title'    => $this->app->settings->get('feature_event_location')
+                                                && $this->app->settings->get('show_location_in_title'),
             'page_offset'               => $view_args['page_offset'],
             'navigation'                => $navigation,
             'pagination_links'          => $pagination_links,
@@ -240,7 +241,7 @@ class AgendaView extends AbstractView
      *      ['notallday'] => all other events occurring on this day
      *    ['today'] => bool if date is today
      *
-     * @param  array  $events
+     * @param  Event[] $events
      * @param  RequestParser  $request
      *
      * @return array
@@ -284,7 +285,8 @@ class AgendaView extends AbstractView
             $event_props['filtered_title']            = $event->get_runtime('filtered_title');
             $event_props['edit_post_link']            = $event->get_runtime('edit_post_link');
             $event_props['content_img_url']           = $event->get_runtime('content_img_url');
-            $event_props['filtered_content']          = $event->get_runtime('filtered_content');
+            $event_props['filtered_content']          = $this->app->settings->get('feature_use_excerpt') ?
+                         $event->get_runtime('post_excerpt') : $event->get_runtime('filtered_content');
             $event_props['ticket_url_label']          = $event->get_runtime('ticket_url_label');
             $event_props['permalink']                 = $event->get_runtime('instance_permalink');
             $event_props['categories_html']           = $event->get_runtime('categories_html');

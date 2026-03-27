@@ -10,8 +10,7 @@
 		   class="ai1ec-load-event"
 			>{{ event.filtered_title | truncate | raw }}</a>
 		{% if show_location_in_title and event.venue is not empty %}
-			<span class="ai1ec-event-location"
-				>{{ text_venue_separator }}{{ event.venue }}</span>
+			<span class="ai1ec-event-location">{{ text_venue_separator }}{{ event.venue }}</span>
 		{% endif %}
 		{% if is_ticket_button_enabled and event.ticket_url is not empty %}
 			<a class="ai1ec-pull-right ai1ec-btn ai1ec-btn-primary ai1ec-btn-xs

@@ -1,0 +1,156 @@
+.plana-flyout-menu {
+  @lineheight: 2.5;
+  @foregroundColor: var(--wp--preset--color--contrast, buttontext);
+  @backgroundColor: var(--wp--preset--color--accent, buttonFace);
+
+  margin-bottom: .25em;
+  position: relative;
+  display: inline-block;
+  font-size: var(--wp--preset--font-size--small);
+
+  min-width: 7em;
+  &.plana-flyout-menu--wide {
+    min-width: 16em;
+  }
+
+  .plana-flyout-menu--button {
+    min-width: inherit;
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    line-height: @lineheight;
+    text-align: left;
+    font-size: inherit;
+    border: 0;
+    cursor: pointer;
+    background: @backgroundColor;
+    color: @foregroundColor;
+    padding-left: .6em;
+
+    &:hover {
+      border-bottom: 0;
+      background: @foregroundColor;
+      color: @backgroundColor;
+    }
+
+    >i {
+      margin-right: .6em;
+    }
+
+    .caret {
+      margin-right: .6em;
+      flex-grow: 1;
+      text-align: right;
+    }
+  }
+
+  .plana-flyout-menu--menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: none;
+    position: absolute;
+    min-width: inherit;
+    z-index: 10;
+    font-size: .95em;
+    background: @backgroundColor;
+  }
+
+  .link {
+    width: inherit;
+    text-decoration: none;
+    display: flex;
+    line-height: @lineheight;
+    align-items: center;
+    padding-left: .6em;
+    padding-right: .6em;
+    font-size: .9em;
+
+    &,
+    &:visited { // Visited overrides tomely default.
+      color: @foregroundColor;
+      background: @backgroundColor;
+    }
+
+    &:hover {
+      color: @backgroundColor;
+      background: @foregroundColor;
+    }
+
+    i {
+      padding-right: .6em;
+    }
+  }
+
+  &:focus-within .plana-flyout-menu--menu,
+  &:hover .plana-flyout-menu--menu {
+    display: block;
+
+  }
+}
+
+.plana-flyout-menu--taxonomy {
+  min-width: 12em;
+  margin-left: .6em;
+  margin-right: 1.2em;
+
+  .plana-flyout-menu--button {
+    > .ai1ec-clear-filter {
+      margin-right: .6em;
+    }
+  }
+
+  .plana-flyout-menu--menu {
+    border: 1px solid @foregroundColor;
+  }
+
+  .link-wrapper {
+    padding: .4em 0 .4em .4em;
+    display: block;
+    float: left;
+  }
+
+  .link {
+    line-height: 1.6;
+    display: inline-flex;
+    border-radius: 4px;
+    border: 1px solid @foregroundColor;
+    >i {
+      padding-left: .6em;
+      padding-right: 0;
+    }
+    .ai1ec-color-swatch {
+      margin-right: .6em;
+    }
+  }
+
+  .term-is-selected .link {
+    color: @backgroundColor;
+    background: @foregroundColor;
+  }
+
+  // Keep button hover-colored whaile selecting tags.
+  &:focus-within ,
+  &:hover {
+    .plana-flyout-menu--button {
+      color: @backgroundColor;
+      background: @foregroundColor;
+    }
+  }
+}
+
+.osec-taxonomy-filters {
+  margin-bottom: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  .osec-taxonomy-filters--label {
+    margin-right: .5em;
+  }
+  .osec-taxonomy-filters--filters {
+  }
+  .osec-taxonomy-filters--item {
+    white-space: nowrap;
+  }
+}

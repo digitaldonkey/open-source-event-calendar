@@ -309,6 +309,14 @@ class Event extends OsecBaseClass
             . '&instance=' . $instance_id
         );
     }
+
+    public function get_edit_link()
+    {
+        return admin_url(
+            'post.php?post=' . $this->entity->get('post_id') . '&action=edit'
+        );
+    }
+
     /**
      * Wrapper to get property value.
      *
@@ -366,7 +374,6 @@ class Event extends OsecBaseClass
             $wrap_permalink
         );
     }
-
     /**
      * Retrieving avatar data
      *
@@ -462,9 +469,13 @@ class Event extends OsecBaseClass
      */
     public function is_multiday()
     {
+
+
         if (null === $this->isMultiday) {
-            $start            = $this->get('start');
-            $end              = $this->get('end');
+            $start = $this->get('start');
+            $end = $this->get('end');
+            // Remove one sec. So All day dooes not become Multiday.
+            $end->adjust(-1, 'ms');
             $this->isMultiday = ($start->format('Y-m-d') !== $end->format('Y-m-d'));
         }
         return $this->isMultiday;

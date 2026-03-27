@@ -1,114 +1,113 @@
-<div class="ai1ec-panel-heading">
-    <a data-toggle="ai1ec-collapse"
-       data-parent="#osec-add-new-event-accordion"
-       href="#osec-event-location-box">
-        <i class="ai1ec-fa ai1ec-fa-map-marker ai1ec-fa-fw"></i>
-        {{ pane_title }}
-    </a>
-</div>
-<div id="osec-event-location-box" class="ai1ec-panel-collapse ai1ec-collapse">
-    <div class="ai1ec-panel-body">
-        <div class="ai1ec-row">
-            <div class="ai1ec-col-md-8 ai1ec-col-lg-6">
-                <table class="ai1ec-form ai1ec-location-form">
-                    <tbody>
-                    {% if post_venue_html %}
-                        {{ post_venue_html }}
-                    {% endif %}
-                    <tr>
-                        <td class="ai1ec-first">
-                            <label for="osec_venue">
-                                {{ venue_label }}
-                            </label>
-                        </td>
-                        <td>
-                            <input
-                                id="osec_venue"
-                                type="text"
-                                name="osec_venue"
-                                class="ai1ec-form-control"
-                                value="{{ venue }}"
-                            />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <label for="osec_address">
-                                {{ address_label }}
-                            </label>
-                        </td>
-                        <td>
-                            <input type="text" name="osec_address" id="osec_address"
-                                   class="ai1ec-form-control"
-                                   value="{{ address }}">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">
-                            <label for="osec_input_coordinates">
-                                <input
-                                    id="osec_input_coordinates"
-                                    type="checkbox"
-                                    value="1"
-                                    name="osec_input_coordinates"
-                                    {% if show_coordinates_checkbox %}checked="checked"{% endif %}
-                                >
-                                {{ coordinates_label }}
-                            </label>
-                        </td>
-                    </tr>
-                    {% if post_venue_html %}{{ post_venue_html }}{% endif %}
-                    </tbody>
-                </table>
-                <table id="osec_table_coordinates" class="ai1ec-form ai1ec-location-form">
+<div id="osec-event-location-box">
+    <table class="form-table ai1ec-location-form">
+        <tbody>
+        {% if post_venue_html %}
+            {{ post_venue_html }}
+        {% endif %}
+        <tr>
+            <th scope="row">
+                <label for="osec_venue">
+                    {{ venue_label }}
+                </label>
+            </th>
+            <td>
+                <input
+                        id="osec_venue"
+                        type="text"
+                        name="osec_venue"
+                        class=""
+                        value="{{ venue }}"
+                />
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <label for="osec_address">
+                    {{ address_label }}
+                </label>
+            </th>
+            <td>
+                <input type="text" name="osec_address" id="osec_address"
+                       class=""
+                       value="{{ address }}">
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">
+                {{ coordinates_title }}
+            </th>
+            <td >
+                <div id="osec_table_coordinates_wrapper" class="inline-checkbox">
+                    <input
+                            id="osec_input_coordinates"
+                            type="checkbox"
+                            value="1"
+                            name="osec_input_coordinates"
+                            {% if show_coordinates_checkbox %}checked="checked"{% endif %}
+                    >
+                    <label for="osec_input_coordinates">
+                        {{ coordinates_label }}
+                    </label>
+                </div>
+                <table id="osec_table_coordinates" {% if not show_coordinates_checkbox %} class="is-hidden"{% endif %}>
                     <tbody>
                     <tr>
-                        <td class="ai1ec-first">
+                        <th>
                             <label for="osec_latitude">
                                 {{ latitude_label }}
                             </label>
-                        </td>
+                        </th>
                         <td>
-                            <input type="text" name="osec_latitude" id="osec_latitude"
-                                   class="ai1ec-coordinates ai1ec-form-control"
-                                   value="{{ latitude }}">
+                            <input
+                                    name="osec_latitude"
+                                    id="osec_latitude"
+                                    class="osec-js-ensure-dotted"
+                                    type="{% if show_coordinates_checkbox %}text{% else %}hidden{% endif %}"
+                                    pattern="/([-+]?\d\d+[\.]\d+)/"
+                                    value="{{ latitude }}">
                         </td>
                     </tr>
                     <tr>
-                        <td>
+                        <th>
                             <label for="osec_longitude">
                                 {{ longitude_label }}
                             </label>
-                        </td>
+                        </th>
                         <td>
-                            <input type="text" name="osec_longitude" id="osec_longitude"
-                                   class="ai1ec-coordinates ai1ec-form-control"
+                            <input
+                                   name="osec_longitude"
+                                   id="osec_longitude"
+                                   class="osec-js-ensure-dotted"
+                                   type="{% if show_coordinates_checkbox %}text{% else %}hidden{% endif %}"
+                                   pattern="/([-+]?\d\d+[\.]\d+)/"
                                    value="{{ longitude }}">
                         </td>
                     </tr>
                     </tbody>
                 </table>
-            </div>
-            <div class="ai1ec-col-md-4 ai1ec-col-lg-6">
-                <label for="osec_google_map">
+                <div class="inline-checkbox">
                     <input
-                        id="osec_google_map"
-                        type="checkbox"
-                        value="1"
-                        name="osec_google_map"
-                        {% if show_map %}checked="checked"{% endif %}
+                            id="osec_google_map"
+                            type="checkbox"
+                            value="1"
+                            name="osec_google_map"
+                            {% if show_map %}checked="checked"{% endif %}
                     >
-                    {{ show_map_label }}
-                </label>
-                <div class="ai1ec-map-preview {% if show_map %}ai1ec-map-visible{% endif %}">
-                    <div id="osec_map_canvas"></div>
+                    <label for="osec_google_map">
+                        {{ show_map_label }}
+                    </label>
                 </div>
-            </div>
-        </div>
-        <input type="hidden" name="osec_city" id="osec_city" value="{{ city }}">
-        <input type="hidden" name="osec_province" id="osec_province" value="{{ province }}">
-        <input type="hidden" name="osec_postal_code" id="osec_postal_code" value="{{ postal_code }}">
-        <input type="hidden" name="osec_country" id="osec_country" value="{{ country }}">
-        <input type="hidden" name="osec_country_short" id="osec_country_short" value="">
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="osec-map-preview">
+        <div id="osec-map"></div>
     </div>
+    {% if post_venue_html %}{{ post_venue_html }}{% endif %}
+    <input type="hidden" name="osec_city" id="osec_city" value="{{ city }}">
+    <input type="hidden" name="osec_province" id="osec_province" value="{{ province }}">
+    <input type="hidden" name="osec_postal_code" id="osec_postal_code" value="{{ postal_code }}">
+    <input type="hidden" name="osec_country" id="osec_country" value="{{ country }}">
+    <input type="hidden" name="osec_country_short" id="osec_country_short" value="">
 </div>

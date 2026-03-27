@@ -1,4 +1,14 @@
-<p><a target="_blank" href="{{ link }}">
-  {{ view }} "{{ title|raw }}"
-  <i class="ai1ec-fa ai1ec-fa-arrow-right"></i>
-</a></p>
+<label class="ai1ec-control-label" for="{{ id }}">
+  {{ label }}
+</label>
+<div>
+  {{ page_selector|raw }}
+  {% if link and title %}
+  <p>
+    <a target="_blank" href="{{ link }}">
+      {{ view_label }} "{{ title|raw }}"
+      <span class="dashicons dashicons-arrow-right-alt"></span>
+    </a>
+  </p>
+  {% endif %}
+</div>

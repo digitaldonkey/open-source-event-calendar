@@ -610,7 +610,7 @@ class AdminDateRepeatBox extends OsecBaseClass
         ];
 
         ?>
-        <select name="osec_table_coordinates" id="osec_table_coordinates">
+        <select name="osec_repeat-end-select" id="osec_repeat-end-select">
             <?php foreach ($options as $key => $val) : ?>
                 <option value="<?php echo esc_attr($key); ?>"
                     <?php

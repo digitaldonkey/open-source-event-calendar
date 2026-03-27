@@ -499,13 +499,13 @@ class DT implements Stringable
             // Set to week start day.
             $tmp_day->modify('last ' . $this->get_week_start_day());
         }
-        // Set time to day beginning.
-        $tmp_day->modify('today');
 
         // Deliver week start in requested or sites timezone.
         $timezone = $timezone ?: Timezones::factory($this->app)->get_default_timezone_object();
         $weekStartDateAndTime = new DT((int) $tmp_day->format('U'), $timezone->getName());
         $weekStartDateAndTime->set_preferred_timezone($timezone);
+        // Set time to day beginning.
+        $weekStartDateAndTime->date->modify('today');
 
         // Convert into Osec Date.
         return $weekStartDateAndTime;

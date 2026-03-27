@@ -8,10 +8,10 @@
         <p> {{deleted_message }}</p>
     </div>
 {% endif %}
-<div class="wrap">
+<div id="poststuff" class="wrap">
     <h1 class="wp-heading-inline">{{ page_title }}</h1>
     <h3 class="">{{ current_theme_label }}</h3>
-    <div class="theme-browser wp-clearfix">
+    <div class="theme-browser inside">
         <div id="current-theme"  class="theme {% if current_theme.has_screenshot %} has-screenshot{% endif %}">
             {% if current_theme.has_screenshot %}
                 <div class="theme-screenshot">
@@ -34,12 +34,10 @@
             </div>
         </div>
     </div>
-    <hr class="wp-clearfix"/>
     {% if display_theme_list %}
         <h3>{{ available_themes_label }}</h3>
-        <div class="theme-browser ">
+        <div class="theme-browser inside">
             {{ available_themes|raw }}
         </div>
-        <hr class="wp-clearfix"/>
     {% endif %}
 </div>

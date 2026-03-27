@@ -2,6 +2,7 @@
 
 namespace Osec\Settings\Elements;
 
+use Osec\Bootstrap\OsecBaseClass;
 use Osec\Cache\CacheApcu;
 use Osec\Cache\CacheDb;
 use Osec\Cache\CacheFactory;
@@ -17,15 +18,14 @@ use Osec\Theme\ThemeLoader;
  * @package Settings
  * @replaces Ai1ec_Html_Setting_Cache
  */
-class SettingsCache extends SettingsAbstract
+class SettingsCache extends OsecBaseClass
 {
-    public function render($html = '', $wrap = true): string
+    public function render($html = '', $wrap = true)
     {
         $args = $this->get_twig_cache_args();
-        $file = ThemeLoader::factory($this->app)
-                           ->get_file('setting/cache_info.twig', $args, true);
-
-        return $this->warp_in_form_group($file->get_content());
+        ThemeLoader::factory($this->app)
+           ->get_file('setting/cache_info.twig', $args, true)
+           ->render();
     }
 
     /**
@@ -79,8 +79,8 @@ class SettingsCache extends SettingsAbstract
             'available_caches'     => $available_caches,
             'twig_cache_available' => (bool) $twigCache,
             'twig_path'            => $twigCache ? $twigCache->getCachePath() : CacheFile::OSEC_FILE_CACHE_UNAVAILABLE,
-            'id'                   => $this->args['id'],
-            'label'                => $this->args['renderer']['label'],
+            'id'                   => 'twig_cache',
+            'info'                => __('Caches used in given order.', 'open-source-event-calendar'),
             'text'                 => [
                 'refresh' => __('Check again', 'open-source-event-calendar'),
                 'nocache' => __('Templates cache is not writable', 'open-source-event-calendar'),

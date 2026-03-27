@@ -22,7 +22,7 @@ describe('Plugin install', function(){
 
     afterEach(async function(){
         //Enter actions to be performed after test
-        await pageObject.driver.manage().deleteAllCookies();
+        await pageObject.doLogout();
     });
 
     after(async () => {
@@ -45,7 +45,8 @@ describe('Plugin install', function(){
         await pageObject.go_to_url(url);
         await pageObject.doLogin();
 
-        await pageObject.getElement(By.id('ai1ec-general-settings'))
+        // wait for some form element
+        await pageObject.getElement(By.id('calendar_page_id'))
 
         // Set day
         await pageObject.setWeekDay(By.id('week_start_day'));
@@ -60,7 +61,7 @@ describe('Plugin install', function(){
 
         // Waiting releoad.
         await pageObject.waitToSeeWhatHappens(700, true);
-        await pageObject.getElement(By.id('ai1ec-general-settings'));
+        await pageObject.getElement(By.id('calendar_page_id'));
 
         await pageObject.takeScreenshot(this);
 
@@ -103,12 +104,9 @@ describe('Plugin install', function(){
         await pageObject.go_to_url(url);
         await pageObject.doLogin();
 
-        // Switch to cache report
-        const cacheMenuLink = await pageObject.driver.findElement(By.id('osec-link-cache'));
-        await cacheMenuLink.click();
         // Wait.
         // TODO For now just a screenshot to see...
-        await pageObject.getElement(By.id('osec-cache'))
+        await pageObject.getElement(By.id('osec_event_cache_settings'))
         await pageObject.takeScreenshot(this);
     })
 
@@ -145,9 +143,9 @@ describe('Plugin install', function(){
         await pageObject.go_to_url(url);
         await pageObject.doLogin();
 
-        // Js generated link should be visible.
-        const mainElementID = 'ai1ec-feeds';
-        await pageObject.getElement(By.id( 'ai1ec-feeds'));
+        // Metabox link should be visible.
+        const mainElementID = 'osec_event_feeds';
+        await pageObject.getElement(By.id(mainElementID) );
 
         // Submit/Save
         const feedUrl = 'https://ics.calendarlabs.com/641/64bc8358/FIFA_Womens_World_Cup.ics'
@@ -159,7 +157,7 @@ describe('Plugin install', function(){
         await feedUrlAddButton.click();
 
         // Required to call/wait again.
-        await pageObject.getElement(By.id( 'ai1ec-feeds'));
+        await pageObject.getElement(By.id(mainElementID));
 
         // .ai1ec-alert-success should contain "Imported 53 events"
         const expectedText = 'Imported 53 events';
@@ -185,11 +183,12 @@ describe('Plugin install', function(){
         await pageObject.go_to_url(url);
         await pageObject.doLogin();
 
-        // Js generated link should be visible.
-        await pageObject.getElement(By.id('ai1ec-feeds'));
+        // Metabox be visible.
+        const mainElementID = 'osec_event_feeds';
+        await pageObject.getElement(By.id(mainElementID));
 
-        // Open ICS panel.
-        const panelLink = await pageObject.getElement(By.css('a[data-toggle="ai1ec-collapse"]'));
+        // Open ICS details.
+        const panelLink = await pageObject.getElement(By.css('#osec-feeds-list details:first-of-type > summary'));
         await panelLink.click();
 
         // osec_delete_ics
@@ -202,7 +201,7 @@ describe('Plugin install', function(){
         await deleteEventsButton.click();
 
         // Required to call/wait again.
-        await pageObject.getElement(By.id('ai1ec-feeds'));
+        await pageObject.getElement(By.id(mainElementID));
         await pageObject.getElement(By.css('.ai1ec-alert'));
 
         // .ai1ec-alert should contain "Deleted 53 events"
@@ -244,7 +243,7 @@ describe('Plugin install', function(){
         await pageObject.waitToSeeWhatHappens(500, true);
 
         const publishButton = await pageObject.getElement(By.id('publish'));
-        publishButton.click();
+        await publishButton.click();
         await pageObject.waitToSeeWhatHappens(500, true);
 
         // Wait for save
@@ -255,8 +254,6 @@ describe('Plugin install', function(){
         // Wait for single event to load
         const backToCalendarLink = await pageObject.getElement(By.css('.ai1ec-calendar-link'));
         await backToCalendarLink.click();
-
-        // TODO ensure Title Text?
 
         // Calendar view Month should be visible by default.
         // Switch to next month .ai1ec-title-buttons a.ai1ec-next-month
@@ -275,10 +272,11 @@ describe('Plugin install', function(){
         const eventCountMonth = await eventsInMonth.length;
 
         const daysInNextMonth = new Date(new Date().getFullYear(), new Date().getUTCMonth()+2, 0).getDate()
-        console.log({daysInNextMonth, eventCountMonth});
 
-        pageObject.assert.ok(
-            daysInNextMonth === eventCountMonth
+        pageObject.assert.equal(
+            eventCountMonth,
+            daysInNextMonth,
+            'Number of Events matches days in next month'
         )
 
         // Switch view to agenda
@@ -303,8 +301,10 @@ describe('Plugin install', function(){
         // In this case (Daily Event) we also should see 10 days.
         const daysInAgenda = await pageObject.driver.findElements(By.className('ai1ec-day'));
         const daysInAgendaCount =  await daysInAgenda.length;
-        pageObject.assert.ok(
-            10 === daysInAgendaCount
+        pageObject.assert.equal(
+            daysInAgendaCount,
+            10,
+            'Agenda contains 10 Events (default setting)'
         )
 
         // Switch view to weekly
@@ -327,7 +327,8 @@ describe('Plugin install', function(){
         const eventCountWeek =  await eventsInWeek.length;
         pageObject.assert.equal(
             eventCountWeek,
-            7
+            7,
+            'Daily event occurs 7 times a week.'
         );
 
         // Switch view to daily
@@ -344,8 +345,10 @@ describe('Plugin install', function(){
 
         const eventsInDay = await pageObject.driver.findElements(By.className('ai1ec-event-title'));
         const eventCountDay =  await eventsInDay.length;
-        pageObject.assert.ok(
-            1 === eventCountDay
+        pageObject.assert.equal(
+            eventCountDay,
+            1,
+            'Daily Event occurs once on day view.'
         );
         await pageObject.go_to_url(url);
     });
@@ -354,7 +357,6 @@ describe('Plugin install', function(){
         const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event';
         await pageObject.go_to_url(url);
 
-        // TODO Why we do not get logged out before?
         await pageObject.doLogin();
 
         // Switch to extended sceen options (to avoid hovering).
@@ -384,5 +386,189 @@ describe('Plugin install', function(){
         await trashPermanentlyLink.click();
 
         await pageObject.waitToSeeWhatHappens(500, true);
+    })
+
+    it('Add Event with map', async function () {
+        const url = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
+        await pageObject.go_to_url(url);
+        await pageObject.doLogin();
+
+        // Add Event title
+        const titleInput = await pageObject.getElement(By.id('title'));
+        await titleInput.sendKeys('Event with map');
+        await pageObject.waitToSeeWhatHappens(500, true);
+
+        // Search on map
+        const mapSearchInput = await pageObject.getElement(By.css('#osec-map input[type="search"]'));
+        // Note: We put in German name but expect English result "Brandenburg Gate"
+        await mapSearchInput.sendKeys('Brandenburger Tor, Pariser Platz 1, 10117 Berlin, Deutschland');
+        await pageObject.waitToSeeWhatHappens(500, true);
+        // Click result
+        const resultSuggestion = await pageObject.getElement(By.css('#osec-map .leaflet-control-geocoder-alternatives li[data-result-index="0"]'));
+        await resultSuggestion.click();
+        // Ensure Map is displayed
+        const mapCheckbox = await pageObject.getElement(By.id('osec_google_map'));
+        await mapCheckbox.click();
+
+        await pageObject.takeScreenshot(this);
+
+
+        // Save event
+        const publishButton = await pageObject.getElement(By.id('publish'));
+        await pageObject.driver.executeScript("arguments[0].scrollIntoView(true);", publishButton);
+        await pageObject.waitToSeeWhatHappens(500, true);
+        await publishButton.click();
+        await pageObject.waitToSeeWhatHappens(1000, true);
+        // Go to Event
+        const showPageLink = await pageObject.getElement(By.css('#message a'));
+        await showPageLink.click();
+        await pageObject.waitToSeeWhatHappens(1000, true);
+
+        // Check for address
+
+        const addressValue = await pageObject.getElement(By.css('.entry-content .osec-location'));
+        const text = await addressValue.getText();
+        const textArray = text.split('\n');
+
+        // Cant manage to force leaflets language
+        // to be consistent locally and in pipeline.
+        // So we split handle German and English by or condition.
+        // This might fail if you browser has a differen language.
+        const locationTitle = textArray.shift();
+        pageObject.assert.ok(
+            locationTitle === 'Brandenburger Tor' || locationTitle === 'Brandenburg Gate',
+            'Location Title is set'
+        )
+        const country = textArray.pop();
+        pageObject.assert.ok(
+            country === 'Deutschland' || country === 'Germany',
+            'Location country is set'
+        )
+
+        const address = textArray.join("\n")
+        pageObject.assert.equal(
+            address,
+            'Pariser Platz 1\n10117 Berlin\nMitte',
+            'Address as expected'
+        );
+
+        // Click map placeholder
+        const placeholder = await pageObject.getElement(By.css('.osec-map-placeholder'));
+        await placeholder.click();
+        await pageObject.waitToSeeWhatHappens(1000, true);
+
+        await pageObject.takeScreenshot(this);
+
+        // Check for Map marker
+        const marker = await pageObject.getElement(By.css('.leaflet-marker-pane > img'));
+        const markerImgUrl = await marker.getAttribute('src');
+        // https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png
+        // Version is a constant, marker-icon suffix might change depending on screen.
+        pageObject.assert.ok(
+            markerImgUrl.startsWith('https://unpkg.com/leaflet')
+            && markerImgUrl.endsWith('.png')
+            && markerImgUrl.includes('marker-icon')
+        );
+        await pageObject.waitToSeeWhatHappens(800, true);
+    });
+
+    it('Verify Excerpt', async function () {
+        await pageObject.driver.manage().deleteAllCookies();
+
+        const title = 'Event using Excerpt';
+        // WP editor would add line breaks anyway. So they are required.
+        const content = 'CONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT';
+        const excerptContent = 'EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT EXCERPT';
+
+        const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
+        await pageObject.go_to_url(url);
+        await pageObject.doLogin();
+
+        // wait for some form element
+        const excerptCheckbox = await pageObject.getElement(By.id('feature_use_excerpt'))
+        const isEnabled = await excerptCheckbox.isSelected();
+        if (!isEnabled) {
+            await excerptCheckbox.click()
+        }
+
+        const submitSettings = await pageObject.getElement(By.id('osec_save_settings'))
+        await pageObject.driver.executeScript("arguments[0].scrollIntoView(true); console.log(arguments);", submitSettings);
+
+        await submitSettings.submit();
+        await pageObject.waitToSeeWhatHappens(800, true);
+        await pageObject.takeScreenshot(this);
+
+        const editUrl = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
+        await pageObject.go_to_url(editUrl);
+
+
+        // Add Event title
+        const titleInput = await pageObject.getElement(By.id('title'));
+        await titleInput.sendKeys(title);
+
+        // Switch to code view to avoid tinymce
+        const button = await pageObject.getElement(By.id('content-html'));
+        await button.click();
+        await pageObject.waitToSeeWhatHappens(500, true);
+
+        // Add content
+        await pageObject.driver.executeScript("document.getElementById('content').value = arguments[0]", content);
+
+        // Add excerpt text
+        const excerptInput = await pageObject.getElement(By.id('excerpt'));
+        await excerptInput.sendKeys(excerptContent);
+
+        // Save event
+        const publishButton = await pageObject.getElement(By.id('publish'));
+        await pageObject.driver.executeScript("arguments[0].scrollIntoView(true);", publishButton);
+        await pageObject.waitToSeeWhatHappens(500, true);
+        await publishButton.click();
+        await pageObject.waitToSeeWhatHappens(1000, true);
+
+        // Go store ID and navigate to Event
+        const showPageLink = await pageObject.getElement(By.css('#message a'));
+        await showPageLink.click();
+        await pageObject.waitToSeeWhatHappens(1000, true);
+
+        await pageObject.takeScreenshot(this);
+
+        // Check for content is on Single
+        const singleEventContentSel = await pageObject.getElement(By.tagName('body'));
+        const singleContent = await singleEventContentSel.getText();
+
+        pageObject.assert.ok(
+            singleContent.includes(content),
+            'The Event single page contains content'
+        );
+
+        pageObject.assert.ok(
+            ! singleContent.includes(excerptContent),
+            'The Event single page does not contain teaser content'
+        );
+
+        // Check if content is not on Calendar
+        // Wait for single event to load
+        const backToCalendarLink = await pageObject.getElement(By.css('a.ai1ec-calendar-link'));
+        await backToCalendarLink.click();
+        await pageObject.waitToSeeWhatHappens(1000, true);
+
+        // Hover
+        const popupTrigger = await pageObject.getElement(By.partialLinkText(title));
+        const actions = pageObject.driver.actions({async: true});
+        await actions.move({origin: popupTrigger}).perform();
+
+        const calendarEventContentSel = await pageObject.getElement(By.css('body'));
+        const calendarContent = await calendarEventContentSel.getText();
+
+        pageObject.assert.ok(
+            calendarContent.includes(excerptContent),
+            'The teaser/excerpt on calendar contains excerpt content'
+        );
+
+        pageObject.assert.ok(
+            ! calendarContent.includes(content),
+            'Event on calendar does not contain main content'
+        );
+        await pageObject.takeScreenshot(this);
     });
 })

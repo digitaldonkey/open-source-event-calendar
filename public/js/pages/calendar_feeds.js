@@ -270,19 +270,19 @@ timely.define("domReady", [], function () {
             var u = t.make_alert(n.message, "error");
             e("#ics-alerts").append(u)
         } else {
-            s(), e("#ai1ec-feeds-after").addClass("ai1ec-well ai1ec-well-sm").insertAfter("#ics .ai1ec-form-horizontal");
+            s(), e("#ai1ec-feeds-after").addClass("osec-well").insertAfter("#ics .ai1ec-form-horizontal");
             var a = n.update.data.feed_id, f = e(n.message),
-                l = e('.ai1ec_feed_id[value="' + a + '"] ').closest(".ai1ec-feed-container");
+                l = e('.ai1ec_feed_id[value="' + a + '"] ').closest(".osec-feed-container");
             f.find(".ai1ec-collapse").removeClass("ai1ec-collapse");
-            var l = e('.ai1ec_feed_id[value="' + a + '"] ').closest(".ai1ec-feed-container");
+            var l = e('.ai1ec_feed_id[value="' + a + '"] ').closest(".osec-feed-container");
             l.length ? l.replaceWith(f) : e("#ai1ec-feeds-after").after(f), n.update && n.update.data && !n.update.data.error && i(n.update.data)
         }
     }, r = function (n) {
-        var r = e("input[value=" + n.feed_id + "]").closest(".ai1ec-feed-container"), i = n.error ? "error" : "success",
+        var r = e("input[value=" + n.feed_id + "]").closest(".osec-feed-container"), i = n.error ? "error" : "success",
             s = t.make_alert(n.message, i);
         n.error ? e(".osec_update_ics", r).button("reset") : r.remove(), e("#ics-alerts").append(s)
     }, i = function (n) {
-        var r = e("input[value=" + n.feed_id + "]").closest(".ai1ec-feed-container"), i = n.error ? "error" : "success",
+        var r = e("input[value=" + n.feed_id + "]").closest(".osec-feed-container"), i = n.error ? "error" : "success",
             s = t.make_alert(n.message, i);
         e(".osec_update_ics", r).button("reset"), e("#ics-alerts").append(s)
     }, s = function () {
@@ -1328,13 +1328,22 @@ timely.define("domReady", [], function () {
             }
         }
     }(e)
-}), timely.define("scripts/calendar_feeds/ics/ics_event_handlers", ["jquery_timely", "scripts/calendar_feeds/ics/ics_ajax_handlers", "libs/utils", "ai1ec_config", "external_libs/select2"], function ($, t, n, r) {
-    var i = n.get_ajax_url(), s = function () {
-        var s = $(this), o = $("#osec_feed_url"), u = o.val().trim().replace("webcal://", "http://"),
-            a = $("#osec_feed_id").val(), f = !1, l;
-        $(".ai1ec-feed-url, #osec_feed_url").css("border-color", "#DFDFDF"), $("#ai1ec-feed-error").remove(), a || $(".ai1ec-feed-url").each(function () {
+}),
+timely.define("scripts/calendar_feeds/ics/ics_event_handlers", ["jquery_timely", "scripts/calendar_feeds/ics/ics_ajax_handlers", "libs/utils", "ai1ec_config", "external_libs/select2"], function ($, t, n, r) {
+    var i = n.get_ajax_url(),
+        // Add new feed
+        s = function () {
+            var s = $(this),
+                o = $("#osec_feed_url"),
+                u = o.val().trim().replace("webcal://", "http://"),
+                a = $("#osec_feed_id").val(), // Update feed if not null.
+                f = !1,
+                l;
+        $(".ai1ec-feed-url, #osec_feed_url").css("border-color", "#DFDFDF"),
+        $(".ai1ec-alert.ai1ec-alert-danger").remove(), a || $(".saved-feed-url").each(function () {
             this.value === u && ($(this).css("border-color", "#FF0000"), f = !0, l = r.duplicate_feed_message)
         }), n.isUrl(u) || (f = !0, l = r.invalid_url_message);
+
         if (f) o.addClass("input-error").focus().before(n.make_alert(l, "error")); else {
             s.button("loading");
             var c = $("#osec_comments_enabled").is(":checked") ? 1 : 0,
@@ -1360,8 +1369,9 @@ timely.define("domReady", [], function () {
             }), a && (m.feed_id = a), $.post(i, m, t.handle_add_new_ics, "json")
         }
     }, o = function () {
+        // Edit feed
         var t = $(this),
-            n = t.closest(".ai1ec-feed-container"),
+            n = t.closest(".osec-feed-container"),
             r = $("#ai1ec-feeds-after"),
             i = $("#osec_ics_add_new, #osec_add_new_ics > i"),
             s = $("#osec_ics_update"),
@@ -1384,12 +1394,12 @@ timely.define("domReady", [], function () {
             $("#osec_feed_tags").select2("val", u.split(","));
         for (var l in f) $('[id="ai1ec_feed_cfg_' + l.toLowerCase() + '"]').select2("val", f[l].split(",") || f[l]);
         var c = $(".ai1ec-feed-content", n);
-        c.hide(), $("#osec_cancel_ics").show(), $("#ai1ec-feeds-after").removeClass("ai1ec-well ai1ec-well-sm").insertAfter(c), $("#ics .ai1ec-alert").remove()
+        c.hide(), $("#osec_cancel_ics").css('display', 'inline-flex'), $("#ai1ec-feeds-after").removeClass("osec-well").insertAfter(c), $("#ics .ai1ec-alert").remove()
     }, u = function (n) {
-        return $("#ai1ec-feeds-after").addClass("ai1ec-well ai1ec-well-sm").insertAfter("#ics .ai1ec-form-horizontal"), $(".ai1ec-feed-content").show(), t.reset_form(), $("#osec_cancel_ics").hide(), !1
+        return $("#ai1ec-feeds-after").addClass("osec-well").insertAfter("#ics .ai1ec-form-horizontal"), $(".ai1ec-feed-content").show(), t.reset_form(), $("#osec_cancel_ics").hide(), !1
     }, a = function (n) {
         n.preventDefault();
-        var r = $(this).hasClass("remove") ? !0 : !1, s = $($(this).data("el")), o = s.closest(".ai1ec-feed-container"),
+        var r = $(this).hasClass("remove") ? !0 : !1, s = $($(this).data("el")), o = s.closest(".osec-feed-container"),
             u = $(".ai1ec_feed_id", o).val(), a = {
                 action: "osec_delete_ics",
                 feed_id: u,
@@ -1400,7 +1410,7 @@ timely.define("domReady", [], function () {
     }, f = function () {
         $("#osec-ics-modal .ai1ec-btn").data("el", this), $("#osec-ics-modal").modal({backdrop: "static"})
     }, l = function () {
-        var n = $(this), r = n.closest(".ai1ec-feed-container"), s = $(".ai1ec_feed_id", r).val(),
+        var n = $(this), r = n.closest(".osec-feed-container"), s = $(".ai1ec_feed_id", r).val(),
             o = {action: "osec_update_ics", feed_id: s, nonce: timely.requirejs.config('ai1ec_config').calendar_feeds_nonce};
         n.button("loading"), $.post(i, o, t.handle_update_ics, "json")
     }, c = function () {

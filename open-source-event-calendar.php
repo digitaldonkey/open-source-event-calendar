@@ -3,21 +3,21 @@
 /**
  * Plugin Name: Open Source Event Calendar
  * Plugin URI: https://github.com/digitaldonkey/open-source-event-calendar
- * Description: With Osec you can create, share and aggregate and import (ical, ics)
- * Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
+ * Description: An event calendar with native iCal / ICS import and export
  * Author: digitaldonkey, Time.ly Network Inc
  * Author URI: https://github.com/digitaldonkey
- * Contributors: digitaldonkey, hubrik, vtowel, yani.iliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
+ * Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
+ * Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
  * Tags: calendar, events, ics, ical importer
  * Requires at least: 6.6
  * Tested up to: 6.9
  * Requires PHP: 8.2
- * Stable Tag: 1.0.11
+ * Stable Tag: 1.1.0
  * License: GPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: open-source-event-calendar
  * Domain Path: /languages
- * Version: 1.0.11
+ * Version: 1.1.0
  */
 
 if (! defined('ABSPATH')) {
@@ -91,13 +91,20 @@ register_deactivation_hook(
     }
 );
 
-// Helpers
-add_action(
-    'admin_enqueue_scripts',
-    function () {
-        $type = get_post_type();
-        if ($type && $type === OSEC_POST_TYPE) {
-            wp_dequeue_script('autosave');
-        }
+if (defined('WP_CLI') && WP_CLI) {
+    require_once __DIR__ . '/src/WpCli/MakeReadme.php';
+    WP_CLI::add_command('osec', '\Osec\WpCli\MakeReadme');
+}
+
+/**
+ * Autosaving Event Data does not currently work.
+ * Only post data is saved.
+ * If editing a Event Instance autosave is disabled when calling get_instance_id().
+ * EventEditing->save_post() is not receiving Event Data.
+ */
+add_action('admin_enqueue_scripts', function () {
+    $type = get_post_type();
+    if ($type && $type === OSEC_POST_TYPE) {
+        wp_dequeue_script('autosave');
     }
-);
+});

@@ -64,7 +64,10 @@ class RenderEvent extends RenderCalendar
 
         // Else return event details as components.
         return [
-            'data'     => $view->get_content($event),
+            'data' => wp_kses(
+                $view->get_content($event),
+                $this->app->kses->allowed_html_frontend()
+            ),
             'is_event' => true,
             'footer'   => $footer_html,
         ];

@@ -34,7 +34,7 @@ references:
         composer.lock
         open-source-event-calendar.php
         constants.php
-        README.md
+        README.txt
         LICENSE
   workspace_root: &workspace_root /tmp
 
@@ -86,7 +86,6 @@ references:
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
 jobs:
-
   # BUILD
   build:
     <<: *container_config
@@ -119,9 +118,9 @@ jobs:
       - *copy_vendor
       - run:
           name: Run code quality tests
-          command: vendor/bin/grumphp run --testsuite=code_quality
+          command: vendor/bin/wp
 
-  # Default configuration Database testing jobs
+# Default configuration Database testing jobs
   db_job: &db_job
     <<: *container_config
     docker:
@@ -181,27 +180,26 @@ jobs:
       - image: cimg/mariadb:10.5
         <<: *ENV_DB_IMAGE
 
-# This is default job: 'db_job'
-#  db_job_maria_11:
-#    <<: *db_job
-#    docker:
-#      - image: cimg/php:8.2
-#        <<: *ENV_PHP_IMAGE
-#      - image: cimg/mariadb:11.4
-#        <<: *ENV_DB_IMAGE
-
-  db_job_php_8_1:
-    <<: *db_job
-    docker:
-      - image: cimg/php:8.1
-        <<: *ENV_PHP_IMAGE
-      - image: cimg/mariadb:11.4
-        <<: *ENV_DB_IMAGE
-
   db_job_php_8_3:
     <<: *db_job
     docker:
       - image: cimg/php:8.3
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+
+  db_job_php_8_4:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.4
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+
+  db_job_php_8_5:
+    <<: *db_job
+    docker:
+      - image: cimg/php:8.5
         <<: *ENV_PHP_IMAGE
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
@@ -213,15 +211,6 @@ jobs:
         <<: *ENV_PHP_IMAGE
       - image: cimg/mysql:8.0
         <<: *ENV_DB_IMAGE
-
-  #  db_job_php_8_0:
-  #    <<: *db_job
-  #    docker:
-  #      - image: cimg/php:8.0.28
-  #        <<: *ENV_PHP_IMAGE
-  #      - image: cimg/cimg/mariadb:11.4
-  #        <<: *ENV_DB_IMAGE
-  # mclay/minify && Grumphp and others require PHP > 8.1.
 
   create_release_job:
     <<: *container_config
@@ -246,7 +235,108 @@ jobs:
           root: *workspace_root
           paths:
             - open-source-event-calendar.zip
-  release_test_job:
+
+  # Ensures generated docs and templates are up to date.
+  static_release_job:
+    <<: *container_config
+    docker:
+      - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+    environment:
+      - WP_CORE_DIR: /tmp/wordpress
+      - WP_HOST: *WP_HOST
+      - WP_VERSION: *WP_VERSION
+      - WP_CLI: vendor/bin/wp
+    steps:
+      - checkout
+      - *attach_workspace
+      - *copy_vendor
+      - run:
+          name: Static release test VARIABLES
+          command: |
+            echo "CONSTANTS:"            
+            echo " WP_HOST: $WP_HOST"
+            echo " WP_CORE_DIR: $WP_CORE_DIR"
+            echo " WP_VERSION: $WP_VERSION"
+            echo " $($WP_CLI --version) $WP_CLI"
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:3306 -timeout 1m
+      - run:
+          name: Install Wordpress
+          command: |
+            set -Eeuxo pipefail
+            # Install WP
+            ln -s /home/circleci/open-source-event-calendar/ $WP_CORE_DIR/wp-content/plugins/
+            $WP_CLI config create --path=$WP_CORE_DIR --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
+            $WP_CLI core install --path=$WP_CORE_DIR --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com"
+            $WP_CLI --path=$WP_CORE_DIR plugin activate open-source-event-calendar
+      - run:
+          name: Install NVM
+          command: |
+            # Only install nvm if it's not already installed
+            if command -v nvm &> /dev/null; then
+              echo "nvm is already installed. Skipping nvm install.";
+            else
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash;
+            
+              echo 'export NVM_DIR="$HOME/.nvm"' >> "$BASH_ENV";
+              echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use' >> "$BASH_ENV";
+              source "$BASH_ENV";
+            fi
+      - run:
+          name: Verify Readme.txt is up to date
+          command: |
+            set -Eeuxo pipefail
+            $WP_CLI --path="$WP_CORE_DIR" osec make_readme
+            if output=$(git status --porcelain) && [ -z "$output" ]; then
+              echo "No changes detected"
+              exit 0;
+            else              
+              echo "wp osec make_readme revealed uncomitted changes"
+              git diff README.txt
+              exit 1;
+            fi
+      - run:
+          name: Verify Twig frontend templates are up to date
+          command: |
+            set -Eeuxo pipefail
+            cd twig_to_js_transform
+            nvm install
+            npm install
+            npm run build-twig-frontend            
+            output=$(git status -s 2>&1)
+            if [[ $? -ne 0 || -z "$output" ]]; then
+              echo "No changes detected"
+              exit 0;
+            else
+              echo "Generating Twig-js templates: revealed uncommitted changes."
+              git diff
+              exit 1;
+            fi
+      - run:
+          name: Verify hooks-and-filters.md is up to date
+          command: |
+            set -Eeuxo pipefail
+            git clone git@github.com:digitaldonkey/hookster_markdown.git
+            cd hookster_markdown
+            nvm install
+            npm install
+            npm run build-hooks-and-filters            
+            output=$(git status -s 2>&1)
+            if [[ $? -ne 0 || -z "$output" ]]; then
+              echo "No changes detected"
+              exit 0;
+            else
+              echo "Generating hooks-and-filters.md: revealed uncommitted changes."
+              git diff
+              exit 1;
+            fi
+
+  # Integration tests
+  release_test_job: &release_test_job
     <<: *db_job
     docker:
       - image: cimg/php:8.2-browsers
@@ -259,10 +349,9 @@ jobs:
       - WP_CORE_DIR: /var/www/html # /tmp/docroot
       - WP_HOST: *WP_HOST
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
-      - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - WP_VERSION: *WP_VERSION
       - WP_CLI: /tmp/vendor/bin/wp
-      - OSEC_RELEASE_FILE: open-source-event-calendar.zip
+      - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
       - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
     steps:
       - browser-tools/install-chrome
@@ -311,7 +400,6 @@ jobs:
             echo""
             echo "CONSTANTS:"
             echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-            echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"            
             echo " WP_HOST: $WP_HOST"
             echo " WP_CORE_DIR: $WP_CORE_DIR"
             echo " WP_VERSION: $WP_VERSION"
@@ -383,7 +471,30 @@ jobs:
           path: /tmp/integration_test_results/screenshots
           when: always
 
-  publish-github-release_job:
+  release_test_job_php_8_3:
+    <<: *release_test_job
+    docker:
+      - image: cimg/php:8.3-browsers
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+  release_test_job_php_8_4:
+    <<: *release_test_job
+    docker:
+      - image: cimg/php:8.4-browsers
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+  release_test_job_php_8_5:
+    <<: *release_test_job
+    docker:
+      - image: cimg/php:8.5-browsers
+        <<: *ENV_PHP_IMAGE
+      - image: cimg/mariadb:11.4
+        <<: *ENV_DB_IMAGE
+
+  # Publish github release
+  publish_github_release_job:
     docker:
       - image: cibuilds/github:0.13
     working_directory: ~/open-source-event-calendar
@@ -393,14 +504,58 @@ jobs:
       - run:
           name: "Publish Release on GitHub"
           command: |
+            # Allow other branches, but only deploy on master 
+            if [ "$CIRCLE_BRANCH" != "master" ]; then
+                circleci-agent step halt
+            fi
             git describe --tags --exact-match > /dev/null 2>&1 && VERSION=$(git describe --tags) || VERSION="dev"
             if [ "$VERSION" == "dev" ]; then
                 ghr -prerelease -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
             else
               ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
-            fi
-            
+            fi             
 
+  wp_deploy_assets_job:
+    <<: *container_config
+    steps:
+      - checkout
+      - *attach_workspace
+      - *install_subversion
+      - run:
+          name: Deploy to wordpress.org variables
+          command: |
+            # WP_ORG_SVN_PASSWORD
+            echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
+            echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"
+      - run:
+          name: Deploy assets to WordPress plugin directory
+          command: /home/circleci/open-source-event-calendar/.circleci/deploy-wp-plugin-assets.sh
+    environment:
+      - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
+      - WP_ORG_USERNAME: *WP_ORG_USERNAME
+
+  wp_deploy_wp_org_job:
+    <<: *container_config
+    steps:
+      - checkout
+      - *attach_workspace
+      - *install_subversion
+      - run:
+          name: Deploy to wordpress.org variables
+          command: |
+            # WP_ORG_SVN_PASSWORD
+            echo "WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
+            echo "WP_ORG_USERNAME: $WP_ORG_USERNAME"
+            echo "WP_ORG_SVN_PASSWORD: ****"
+            echo "CIRCLE_TAG: $CIRCLE_TAG"
+            ls -alh /tmp/$OSEC_RELEASE_FILE
+      - run:
+          name: Deploy assets to WordPress plugin directory
+          command: /home/circleci/open-source-event-calendar/.circleci/deploy-wp-plugin-release.sh
+    environment:
+      - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
+      - WP_ORG_USERNAME: *WP_ORG_USERNAME
+      - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
@@ -413,6 +568,12 @@ workflows:
       - static_job:
           requires:
             - build
+      - static_release_job:
+          requires:
+            - static_job
+          filters:
+            branches:
+              only: /^(master|release-.*)$/
       - db_job:
           requires:
             - build
@@ -421,25 +582,31 @@ workflows:
             - build
           filters:
             branches:
-              only: /master/
-      #      - db_job_php_8_1:
-#          requires:
-#            - build
-#          filters:
-#            branches:
-#              only: /master/
+              only: /^(master|release-.*)$/
       - db_job_php_8_3:
           requires:
             - build
           filters:
             branches:
-              only: /master/
+              only: /^(master|release-.*)$/
+      - db_job_php_8_4:
+          requires:
+            - build
+          filters:
+            branches:
+              only: /^(master|release-.*)$/
+      - db_job_php_8_5:
+          requires:
+            - build
+          filters:
+            branches:
+              only: /^(master|release-.*)$/
       - db_job_mysql_8:
           requires:
             - build
           filters:
             branches:
-              only: /master/            -
+              only: /^(master|release-.*)$/
       - create_release_job:
           requires:
             - db_job
@@ -447,16 +614,54 @@ workflows:
       - release_test_job:
           requires:
             - create_release_job
-      - publish-github-release_job:
+      - release_test_job_php_8_3:
           requires:
-            - release_test_job
-            - db_job
+            - create_release_job
+          filters:
+            branches:
+              only: /^(master|release-.*)$/
+      - release_test_job_php_8_4:
+          requires:
+            - create_release_job
+          filters:
+            branches:
+              only: /^(master|release-.*)$/
+      - release_test_job_php_8_5:
+          requires:
+            - create_release_job
+          filters:
+            branches:
+              only: /^(master|release-.*)$/
+      - publish_github_release_job:
+          requires:
             - static_job
+            - db_job
+            - static_release_job
             - db_job_maria_10_5
-  # TODO      - db_job_php_8_1
-  #   Maybe https://stackoverflow.com/a/43442839/308533
             - db_job_php_8_3
+            - db_job_php_8_4
+            - db_job_php_8_5
             - db_job_mysql_8
+            - release_test_job
+            - release_test_job_php_8_3
+            - release_test_job_php_8_4
+            - release_test_job_php_8_5
+          filters:
+            branches:
+              only: /master/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
+      - wp_deploy_assets_job:
+          requires:
+            - create_release_job
+          filters:
+            branches:
+              only: /master/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
+      - wp_deploy_wp_org_job:
+          requires:
+            - publish_github_release_job
           filters:
             branches:
               only: /master/

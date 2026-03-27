@@ -5,34 +5,12 @@
 //
 
 @import "bootstrap/mixins.less";
+@import "plana-flyout-menu";
+@import "event-single";
 
-.ai1ec-btn,
-.ai1ec-calendar-toolbar {
-	border: 1px solid #ddd;
-	border-color: rgba( 0, 0, 0, 0.1 );
-	background-image: none;
-}
-.ai1ec-btn,
-.ai1ec-btn.ai1ec-active,
-.ai1ec-btn:active,
-.ai1ec-btn-group .ai1ec-dropdown-toggle,
-.ai1ec-btn-group.ai1ec-open .ai1ec-dropdown-toggle,
-.ai1ec-dropdown-menu,
-.timely .ai1ec-form-control,
-.ai1ec-calendar-toolbar.ai1ec-affix {
-	.ai1ec-box-shadow( none );
-}
-.ai1ec-nav > li > a:hover,
-.ai1ec-nav-pills > .ai1ec-active > a,
-.ai1ec-nav > .ai1ec-dropdown:hover > a,
-.ai1ec-nav-pills > .ai1ec-active > a:hover,
-.ai1ec-nav > .ai1ec-dropdown.ai1ec-active > a:hover,
-.ai1ec-nav-tabs .ai1ec-open .ai1ec-dropdown-toggle,
-.ai1ec-nav-pills .ai1ec-open .ai1ec-dropdown-toggle,
-.ai1ec-nav > li.ai1ec-dropdown.ai1ec-open.ai1ec-active > a:hover {
-	background-image: none;
-	.ai1ec-box-shadow( inset 0 0 2px fade( @dropdown-link-hover-color, 30% ) );
-}
+@lineheight: 2.5;
+@foregroundColor: var(--wp--preset--color--contrast, buttontext);
+@backgroundColor: var(--wp--preset--color--accent, buttonFace);
 
 .ai1ec-filter-selector,
 .ai1ec-agenda-view .ai1ec-event.ai1ec-expanded,
@@ -65,7 +43,8 @@
 .ai1ec-agenda-widget-view .ai1ec-date-title,
 .ai1ec-week-view .ai1ec-week .ai1ec-event-container,
 .ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
-	background-image: none !important;
+	background-image: none; // Removes gradient.
+	background-color: @agenda-date-bg;
 	.ai1ec-box-shadow( none );
 }
 .ai1ec-full-event th,
@@ -93,21 +72,29 @@
 	}
 }
 
-// Simplifying single page.
-.plana-block {
-	display: flex;
-	align-items: flex-start;
+.action-link {
+	// TODO Is there any consistent logic in these vars?
+	//@foregroundColor: var(--wp--preset--color--base, buttontext);
+	//@backgroundColor: var(--wp--preset--color--contrast, buttonFace);
+	@foregroundColor: var(--wp--preset--color--contrast, buttontext);
+	@backgroundColor: var(--wp--preset--color--accent, buttonFace);
+	@editColor: var(--wp-admin-theme-color, buttonFace);
 
-	.ai1ec-field-label {
-		margin-right: 1em;
-		text-align: left;
-		@media (min-width: @screen-md) {
-			width: 5em;
-		}
+	display: inline-block;
+	padding: 0 .6em;
+	line-height: 2;
+	margin: .2em 0;
+	text-decoration: none;
+	color: @foregroundColor;
+	background: @backgroundColor;
+
+	&:hover {
+		background: @foregroundColor;
+		color: @backgroundColor;
 	}
-}
-.plana-single-event {
-	.ai1ec-dropdown-menu li>a {
-		line-height: 2.1;
+	&.edit-link {
+		&:hover {
+			background: @editColor;
+		}
 	}
 }

@@ -14,8 +14,6 @@ use Osec\Exception\ImportExportParseException;
 use Osec\Exception\InvalidArgumentException;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderJson;
-use Osec\Settings\Elements\ModalQuestion;
-use Osec\Settings\HtmlFactory;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -34,13 +32,6 @@ class FeedsController extends OsecBaseClass
     public const CRON_HOOK_NAME = 'osec_cron';
 
     public const NONCE_NAME = 'calendar_feeds_nonce';
-
-    /**
-     * @var array
-     *   title: The title of the tab and the title of the configuration section
-     *   id: The id used in the generation of the tab
-     */
-    protected array $variables = ['id' => 'ics'];
 
     /**
      * @var ?ExecutionLimitController Instance of execution guard.
@@ -131,7 +122,7 @@ class FeedsController extends OsecBaseClass
      *
      * @return array Static data merged with variable data.
      */
-    private static function merge_commom_vars(array $data): array
+    public static function merge_commom_vars(array $data): array
     {
         static $common_data = null;
         if (is_null($common_data)) {
@@ -159,6 +150,7 @@ class FeedsController extends OsecBaseClass
                     'open-source-event-calendar'
                 ),
                 'feed_url_label'    => esc_html__('iCalendar/.ics Feed URL:', 'open-source-event-calendar'),
+                'feed_url_placeholder' => __('Feed url (required)', 'open-source-event-calendar'),
                 'categories_label'  => esc_html__('Event categories', 'open-source-event-calendar'),
                 'tags_label'        => esc_html__('Tag with', 'open-source-event-calendar'),
                 'comments_label'    => esc_html__('Allow comments', 'open-source-event-calendar'),
@@ -738,105 +730,13 @@ class FeedsController extends OsecBaseClass
     }
 
     /**
-     * Renders the HTML for the tabbed navigation
-     *
-     * @return string Echoes the HTML string that act as tab header for the plugin
-     *   Echoes the HTML string that act as tab header for the plugin
-     * @throws BootstrapException
-     * @throws \Osec\Exception\Exception
-     */
-    public function get_tab_header(): string
-    {
-        return ThemeLoader::factory($this->app)->get_file(
-            'feed_tab_header.twig',
-            [
-                'title' => esc_html__('ICS', 'open-source-event-calendar'),
-                'id'    => esc_attr($this->variables['id']),
-            ],
-            true
-        )->get_content();
-    }
-
-    public function get_tab_content(): string
-    {
-        // Render the opening div
-        $html = '<div class="ai1ec-tab-pane" id="' . $this->variables['id'] . '">';
-
-        $factory = HtmlFactory::factory($this->app);
-
-        $select2_cats = $factory->create_select2_multiselect(
-            [
-                'name'        => 'osec_feed_category[]',
-                'id'          => 'osec_feed_category',
-                'use_id'      => true,
-                'type'        => 'category',
-                'placeholder' => __('Categories (optional)', 'open-source-event-calendar'),
-            ],
-            get_terms([
-                'taxonomy' => 'osec_events_categories',
-                'hide_empty' => false,
-            ])
-        );
-        $select2_tags = $factory->create_select2_input(
-            ['id' => 'osec_feed_tags']
-        );
-
-        $modal = new ModalQuestion(
-            $this->app,
-            [
-                'id'                 => 'osec-ics-modal',
-                'header_text'        => esc_html__('Removing ICS Feed', 'open-source-event-calendar'),
-                'body_text'          => esc_html__(
-                    'Do you want to keep the events imported from the calendar or remove them?',
-                    'open-source-event-calendar'
-                ),
-                'keep_button_text'   => esc_html__('Keep Events', 'open-source-event-calendar'),
-                'delete_button_text' => esc_html__('Remove Events', 'open-source-event-calendar'),
-            ]
-        );
-
-        $cron_freq = ThemeLoader::factory($this->app)
-            ->get_file(
-                'feed_cron_freq.twig',
-                [
-                    'options' => self::cron_options(),
-                    'cron_freq' => $this->app->settings->get('ics_cron_freq'),
-                ],
-                true
-            );
-
-        $args = self::merge_commom_vars([
-            'cron_freq'        => $cron_freq->get_content(),
-            'events_categories' => $select2_cats->get_content(),
-            'event_tags'       => $select2_tags->get_content(),
-            'feeds_options_header_html' => apply_filters(
-                'osec_admin_ics_feeds_options_header_html',
-                null
-            ),
-            'feeds_options_after_settings_html' => apply_filters(
-                'osec_admin_ics_feeds_options_after_settings_html',
-                null
-            ),
-            'feed_rows'        => $this->getRows(),
-            'modal'            => $modal->render(),
-        ]);
-
-        $html .= ThemeLoader::factory($this->app)
-                            ->get_file('admin_page_feeds.twig', $args, true)
-                            ->get_content();
-        $html .= '</div>';
-
-        return $html;
-    }
-
-    /**
      * get_feed_rows function
      *
      * Creates feed rows to display on settings page
      *
      * @return String feed rows
      **/
-    protected function getRows()
+    public function getRows()
     {
         // Select all added feeds
         $rows = $this->app->db->select(
@@ -856,7 +756,6 @@ class FeedsController extends OsecBaseClass
         );
 
         $html = '';
-
         foreach ($rows as $row) {
             $feed_categories = explode(',', $row->feed_category);
             $categories      = [];
@@ -887,8 +786,9 @@ class FeedsController extends OsecBaseClass
                 'keep_old_events'      => (int) $row->keep_old_events,
                 'feed_import_timezone' => (int) $row->import_timezone,
             ]);
-            $html .= ThemeLoader::factory($this->app)->get_file('feed_row.twig', $args, true)
-                                ->get_content();
+            $html .= ThemeLoader::factory($this->app)
+                        ->get_file('feed_row.twig', $args, true)
+                        ->get_content();
         }
 
         return $html;

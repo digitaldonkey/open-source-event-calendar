@@ -8,9 +8,7 @@
 				{{ wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false, false) }}
 				{{ wp_nonce_field( 'meta-box-order', 'meta-box-order-nonce', false, false) }}
 			{% endautoescape %}
-			<div id="post-body" class="metabox-holder">
-				{% block layout %}{% endblock %}
-			</div>
+			{% block layout %}{% endblock %}
 		</form>
 	</div> {# /#poststuff  #}
 </div>{# /.wrap #}

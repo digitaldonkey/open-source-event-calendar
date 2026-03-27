@@ -26,6 +26,7 @@ use Osec\App\View\Admin\AdminPageThemeOptions;
 use Osec\App\View\Calendar\CalendarShortcodeView;
 use Osec\App\View\Event\EventContentView;
 use Osec\App\View\Event\EventPostView;
+use Osec\App\View\Event\EventSingleView;
 use Osec\App\View\WpPluginActonLinks;
 use Osec\App\WpmlHelper;
 use Osec\Bootstrap\App;
@@ -214,21 +215,15 @@ class BootstrapController
         });
 
         add_action('init', function () use ($app) {
-                EventType::factory($app)->register();
+            EventType::factory($app)->register();
         }, 10, 1);
 
-        add_filter(
-            'use_block_editor_for_post_type',
-            function ($current_status, $post_type) {
-                if ($post_type === OSEC_POST_TYPE) {
-                    return false;
-                }
-                return $current_status;
-            },
-            10,
-            2
-        );
-
+        add_filter('use_block_editor_for_post_type', function ($current_status, $post_type) {
+            if ($post_type === OSEC_POST_TYPE) {
+                return false;
+            }
+            return $current_status;
+        }, 10, 2);
 
         // Initialize router
         add_action('init', $this->initialize_router(...), PHP_INT_MAX - 1);
@@ -243,41 +238,18 @@ class BootstrapController
         ScriptsFrontendController::add_actions($app, is_admin());
         TrashController::add_actions($app, is_admin());
 
-        add_action(
-            'pre_http_request',
-            function ($status, $output, $url) use ($app) {
+        add_action('pre_http_request', function ($status, $output, $url) use ($app) {
                 Request::factory($app)->pre_http_request($status, $output, $url);
-
                 return $status;
-            },
-            10,
-            3
-        );
+        }, 10, 3);
 
-        add_action(
-            'init',
-            function () use ($app) {
-                ThemeLoader::factory($app)->clean_cache_on_upgrade();
-            },
-            PHP_INT_MAX
-        );
+        add_action('init', function () use ($app) {
+            ThemeLoader::factory($app)->clean_cache_on_upgrade();
+        }, PHP_INT_MAX);
 
-        // Replcace core (non-HTML) excerpt for events.
-        add_filter(
-            'render_block',
-            function ($block_content, $block) use ($app) {
-                if ('core/post-excerpt' !== $block['blockName']) {
-                    return $block_content;
-                }
-                if (AccessControl::is_our_post_type()) {
-                    return EventContentView::factory($app)->get_the_excerpt();
-                }
-
-                return $block_content;
-            },
-            10,
-            2
-        );
+        add_filter('get_the_excerpt', function (string $post_excerpt) use ($app) {
+            return EventContentView::factory($app)->get_the_excerpt($post_excerpt);
+        });
 
         add_filter('robots_txt', function (string $output, bool $is_public) use ($app) {
              return RobotsTxt::factory($app)->rules($output, $is_public);
@@ -298,13 +270,19 @@ class BootstrapController
         add_shortcode(
             OSEC_SHORTCODE,
             function ($atts) use ($app) {
-                $this->request::set_current_page(get_queried_object_id());
-                return wp_kses(
-                    CalendarShortcodeView::factory($app)->shortcode($atts),
-                    $this->app->kses->allowed_html_frontend()
-                );
+                if ($this->app->settings->get('feature_shortcodes')) {
+                    $this->request::set_current_page(get_queried_object_id());
+                    return wp_kses(
+                        CalendarShortcodeView::factory($app)->shortcode($atts),
+                        $this->app->kses->allowed_html_frontend()
+                    );
+                }
+                // If disabled we will still replace any osec shortcodes
+                // to avoid them being printed as content.
+                return '';
             }
         );
+
 
         add_action(
             'updated_option',
@@ -327,7 +305,7 @@ class BootstrapController
             /**
              * Gets Ui Element Repeatbox
              *
-             * On Event editing you may add a reoccuring event.
+             * On Event editing you may add a recurring event.
              * Ui is loaded via admin-ajax.php... action=osec_get_repeat_box&repeat=1&post_id=1295
              */
             add_action(
@@ -352,7 +330,7 @@ class BootstrapController
             /**
              * save rrurle and convert it to text
              *
-             * On Event editing you may add a reoccurring event.
+             * On Event editing you may add a recurring event.
              * Ui is loaded via admin-ajax.php... action=osec_get_repeat_box&repeat=1&post_id=1295
              */
             add_action(
@@ -469,13 +447,16 @@ class BootstrapController
                 }
             );
 
-            // TODO This seems to do nothing
             add_action(
                 'admin_enqueue_scripts',
                 function ($hook_suffix) use ($app) {
                     ScriptsBackendController::factory($app)->admin_enqueue_scripts($hook_suffix);
                 }
             );
+
+            FeedsController::add_actions($app, is_admin());
+            // If AdminPageAllEvents.
+            AdminPageAllEvents::add_actions($app, is_admin());
         } else {
             // Is not "is_admin()"
             add_action(
@@ -500,11 +481,8 @@ class BootstrapController
                     RequestRedirect::factory($app)->handle_categories_and_tags();
                 }
             );
+            EventSingleView::factory($app)->add_actions();
         }
-
-        FeedsController::add_actions($app, is_admin());
-        // If AdminPageAllEvents.
-        AdminPageAllEvents::add_actions($app, is_admin());
     }
 
     /**
