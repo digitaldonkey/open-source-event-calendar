@@ -561,9 +561,9 @@ jobs:
 # See: https://circleci.com/docs/workflows/
 #   & https://circleci.com/docs/configuration-reference/#workflows
 
+
 # Running same workflow on branch and tags
-build_test_deploy: &build_test_deploy
-  jobs:
+build_test_deploy_workflow_jobs: &build_test_deploy_workflow_jobs
     - build
     - static_job:
         requires:
@@ -669,13 +669,15 @@ build_test_deploy: &build_test_deploy
             only: /^\d+\.\d+\.\d+$/
 
 workflows:
-  # Default Workflow
-  <<: *build_test_deploy
-  # Default Workflow on git TAG
+  build_test_deploy: # This is the name of the workflow, feel free to change it to better match your workflow.
+    # Inside the workflow, you define the jobs you want to run.
+    jobs:
+      <<: *build_test_deploy_workflow_jobs
   tagged-build:
-    <<: *build_test_deploy
-    filters:
-      branches:
-        only: /master/
-      tags:
-        only: /^\d+\.\d+\.\d+$/
+    jobs:
+      <<: *build_test_deploy_workflow_jobs
+      filters:
+        branches:
+          only: /master/
+        tags:
+          only: /^\d+\.\d+\.\d+$/
