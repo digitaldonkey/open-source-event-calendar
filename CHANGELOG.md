@@ -1,11 +1,13 @@
 = 1.1.0 =
-- OpenStreetMap support including Geocoding in Edit form. Removed outdated Google Maps support.
+- OpenStreetMap support including Geocoding in Edit form.
+- Added full schema.org/Event support for single Event page using plana theme. Check [search engine readability](https://validator.schema.org).
+- Reworked backend forms: Event edit, Themes, Theme options, Settings, Feeds.
+- Reworked PLANA theme fit better into current WP standard themes.
+- Removed outdated Google Maps support.
 - Reworked Readme.md to look better on github. Build tool to generate Readme.txt from Readme.md, CHANGELOG.md and constants.
 - Automated WordPress plugin directory deployment
 - Excerpt support: Enables to write Event summary and content separately.
 - Ability to enable/disable features: Location, Excerpt, Maps, Coast, Comments, Shortcodes.
-- Reworked backend forms: Event edit, Themes, Theme options, Settings, Feeds.
-- 
 
 = 1.0.11 =
 - Beautified Theme options admin page
