@@ -35,11 +35,11 @@ class MakeReadme
      **
      * ## EXAMPLES
      *
-     *     wp osec udateReadme
+     *     wp osec make_readme
      *
      * @when before_wp_load
      */
-    public function update_readme()
+    public function make_readme()
     {
         try {
             require_once self::PLUGIN_DIR . '/constants.php';

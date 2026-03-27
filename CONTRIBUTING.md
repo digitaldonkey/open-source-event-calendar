@@ -211,7 +211,7 @@ A wpl cli action generates the WordPress **Readme.txt** from Readme.md and const
 
 ```bash
 # Readme.md -> Readme.txt 
-ddev wp osec update_readme
+ddev wp osec make_readme
 ```
 
 ### hooks-and-filters docs
