@@ -6,6 +6,7 @@
 
 @import "bootstrap/mixins.less";
 @import "plana-flyout-menu";
+@import "plana-toolbar";
 @import "event-single";
 
 @lineheight: 2.5;
@@ -46,6 +47,10 @@
 	background-image: none; // Removes gradient.
 	background-color: @agenda-date-bg;
 	.ai1ec-box-shadow( none );
+	color: @link-color;
+	&:hover {
+		color: @link-hover-color;
+	}
 }
 .ai1ec-full-event th,
 .ai1ec-excerpt .ai1ec-field-label {
@@ -54,22 +59,10 @@
 	background: rgba(0,0,0,0.05);
 }
 
-.ai1ec-time {
-	.ai1ec-field-value {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: flex-start;
-		align-items: center;
-
-		.dt-duration {
-			margin-right: 1em;
-			font-weight: bold;
-		}
-		.ai1ec-recurrence {
-			margin-top: .5em;
-			font-size: .9rem;
-		}
-	}
+.ai1ec-month-view .ai1ec-event-time,
+.ai1ec-week-view .ai1ec-event-time,
+.ai1ec-oneday-view .ai1ec-event-time {
+	font-size: .75em;
 }
 
 .action-link {
@@ -82,12 +75,13 @@
 
 	display: inline-block;
 	padding: 0 .6em;
-	line-height: 2;
-	margin: .2em 0;
+	line-height: 2.62;
 	text-decoration: none;
 	color: @foregroundColor;
 	background: @backgroundColor;
-
+	min-width: 2em;
+	text-align: center;
+	margin-bottom: .2em;
 	&:hover {
 		background: @foregroundColor;
 		color: @backgroundColor;
@@ -97,4 +91,29 @@
 			background: @editColor;
 		}
 	}
+	@media (min-width: 25rem) {
+		padding-right: 1em;
+		padding-left: 1em;
+	}
+
 }
+
+.osec-subscribe-container {
+	white-space: nowrap;
+	.ai1ec-fa.ai1ec-fa-fw {
+		width: 20px;
+		margin-left: 1em;
+	}
+}
+
+
+//.alignfull {
+//	outline: 2px dashed deeppink;
+//}
+
+
+//.is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
+//	max-width: var(--wp--style--global--content-size);
+//	margin-left: auto !important;
+//	margin-right: auto !important;
+//}

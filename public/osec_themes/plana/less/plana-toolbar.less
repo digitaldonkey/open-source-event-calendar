@@ -1,0 +1,44 @@
+.plana-toolbar {
+  margin-bottom: .25em;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: var(--wp--preset--font-size--small);
+
+  .osec-date-select {
+    width: auto;
+  }
+}
+
+.plana-pagination {
+  display: inline-flex;
+  //min-width: 21.375rem;
+
+  .ai1ec-minical-trigger {
+    .ai1ec-calendar-title-short,
+    .ai1ec-calendar-title {
+      font-size: inherit;
+      @media (min-width: 25rem) {
+        //min-width: 3.5em;
+        padding-right: 1em;
+        padding-left: 1em;
+      }
+    }
+  }
+
+  .action-link {
+    line-height: 2.5;
+    font-size: var(--wp--preset--font-size--normal);
+
+    white-space: nowrap;
+    min-width: 2.1em;
+    @media (min-width: 25rem) {
+      //min-width: 3.5em;
+    }
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    &:last-of-type {
+      border-right: 0;
+    }
+  }
+}

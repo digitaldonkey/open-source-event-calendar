@@ -4792,7 +4792,7 @@ add_filter('osec_date_picker_href_args', $href_args $args);
 #### Description
 
 
-Rendered in datepicker_link.twig
+Rendered in datepicker-link.twig
 
 #### Parameters
 
@@ -4808,7 +4808,7 @@ Rendered in datepicker_link.twig
 /**
  * Alter href arguments for datepicker
  *
- * Rendered in datepicker_link.twig
+ * Rendered in datepicker-link.twig
  *
  * @since 1.00
  *
@@ -9763,7 +9763,7 @@ add_filter('osec_date_picker_href_args', $href_args $args);
 #### Description
 
 
-Rendered in datepicker_link.twig
+Rendered in datepicker-link.twig
 
 #### Parameters
 
@@ -9779,7 +9779,7 @@ Rendered in datepicker_link.twig
 /**
  * Alter href arguments for datepicker
  *
- * Rendered in datepicker_link.twig
+ * Rendered in datepicker-link.twig
  *
  * @since 1.00
  *
