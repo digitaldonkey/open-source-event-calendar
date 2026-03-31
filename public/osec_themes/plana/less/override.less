@@ -81,7 +81,7 @@
 	background: @backgroundColor;
 	min-width: 2em;
 	text-align: center;
-	margin-bottom: .2em;
+	margin-bottom: .25rem;
 	&:hover {
 		background: @foregroundColor;
 		color: @backgroundColor;
@@ -96,6 +96,18 @@
 		padding-left: 1em;
 	}
 
+	// Requires more specificity.
+	&.osec-read-more {
+		color: @foregroundColor;
+		background: @backgroundColor;
+
+		&:hover,
+		&:focus,
+		&:active {
+			color: @backgroundColor;
+			background: @foregroundColor;
+		}
+	}
 }
 
 .osec-subscribe-container {
@@ -105,6 +117,7 @@
 		margin-left: 1em;
 	}
 }
+
 
 
 //.alignfull {
@@ -117,3 +130,7 @@
 //	margin-left: auto !important;
 //	margin-right: auto !important;
 //}
+
+table.ai1ec-month-view {
+	margin-bottom: .25rem;
+}
