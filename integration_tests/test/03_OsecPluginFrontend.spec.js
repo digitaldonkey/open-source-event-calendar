@@ -105,7 +105,7 @@ describe('Frontend tests', function(){
                     await backToCalendarLink.click();
 
                     // Calendar view Month should be visible by default.
-                    // Switch to next month .ai1ec-title-buttons a.ai1ec-next-month
+                    // Switch to next month a.ai1ec-next-month
                     const nextMonthLink = await pageObject.getElement(By.css('a.ai1ec-next-month'));
                     await nextMonthLink.click();
 
@@ -129,9 +129,7 @@ describe('Frontend tests', function(){
                     )
 
                     // Switch view to agenda
-                    let viewsDropdownLink = await pageObject.getElement(By.css('a[data-toggle="ai1ec-dropdown"]'));
-                    await viewsDropdownLink.click();
-
+                    await pageObject.openViewSelectorMenue(theme);
                     const agendaDropdownLink = await pageObject.getElement(By.id('ai1ec-view-agenda'));
                     await agendaDropdownLink.click();
 
@@ -157,14 +155,13 @@ describe('Frontend tests', function(){
                     )
 
                     // Switch view to weekly
-                    viewsDropdownLink = await pageObject.getElement(By.css('a[data-toggle="ai1ec-dropdown"]'));
-                    await viewsDropdownLink.click();
+                    await pageObject.openViewSelectorMenue(theme);
                     const weeklyDropdownLink = await pageObject.getElement(By.id('ai1ec-view-week'));
                     await weeklyDropdownLink.click();
 
                     // Calendar view Week should be visible by default.
-                    // Switch to next week .ai1ec-title-buttons a.ai1ec-next-week
-                    const nextWeekLink = await pageObject.getElement(By.css('.ai1ec-title-buttons a.ai1ec-next-week'));
+                    // Switch to next week .ai1ec-next-week
+                    const nextWeekLink = await pageObject.getElement(By.css('a.ai1ec-next-week'));
                     await nextWeekLink.click();
                     await pageObject.waitToSeeWhatHappens(500);
 
@@ -183,9 +180,7 @@ describe('Frontend tests', function(){
                     );
 
                     // Switch view to daily
-                    viewsDropdownLink = await pageObject.getElement(By.css('a[data-toggle="ai1ec-dropdown"]'));
-                    await viewsDropdownLink.click();
-
+                    await pageObject.openViewSelectorMenue(theme);
                     const dailyDropdownLink = await pageObject.getElement(By.id('ai1ec-view-oneday'));
                     await dailyDropdownLink.click();
 
@@ -368,12 +363,12 @@ describe('Frontend tests', function(){
                     await pageObject.driver.executeScript("arguments[0].scrollIntoView(true);", publishButton);
                     await pageObject.waitToSeeWhatHappens(500, true);
                     await publishButton.click();
-                    await pageObject.waitToSeeWhatHappens(1000, true);
+                    await pageObject.waitToSeeWhatHappens(500, true);
 
                     // Go store ID and navigate to Event
                     const showPageLink = await pageObject.getElement(By.css('#message a'));
                     await showPageLink.click();
-                    await pageObject.waitToSeeWhatHappens(1000, true);
+                    await pageObject.waitToSeeWhatHappens(500, true);
 
                     await pageObject.takeScreenshot(this);
 
@@ -393,7 +388,7 @@ describe('Frontend tests', function(){
 
                     // Check if content is not on Calendar
                     // Wait for single event to load
-                    const backToCalendarLink = await pageObject.getElement(By.css('a.ai1ec-calendar-link'));
+                    const backToCalendarLink = await pageObject.getElement(By.css('.osec-calendar-back-link'));
                     await backToCalendarLink.click();
                     await pageObject.waitToSeeWhatHappens(1000, true);
 

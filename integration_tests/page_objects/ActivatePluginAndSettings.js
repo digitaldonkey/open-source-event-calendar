@@ -142,7 +142,7 @@ class ActivatePluginAndSettings extends WpLogin {
         await saveButtonElement.click();
 
         // Waiting releoad.
-        await this.waitToSeeWhatHappens(700, true);
+        await this.waitToSeeWhatHappens(300, true);
         await this.getElement(By.id('calendar_page_id'));
 
         // Check Weekstart Day.
@@ -213,6 +213,26 @@ class ActivatePluginAndSettings extends WpLogin {
             throw new Error('enterText requires instance of WebElement as first param')
         }
         return await this.selectByValue(webElement, timezone);
+    }
+
+    /**
+     * Open Views Selector.
+     *
+     * Dependend on the theme Views-selector will open by hover or by click.
+     *
+     * @returns {Promise<void>}
+     * @param timezone
+     */
+    async openViewSelectorMenue(theme){
+        if (theme === 'plana') {
+            const popupTrigger = await this.getElement(By.className('plana-flyout-menu--button'));
+            const actions = this.driver.actions();
+            actions.move({origin: popupTrigger}).perform();
+        }
+        else {
+            let viewsDropdownLink = await this.getElement(By.css('a[data-toggle="ai1ec-dropdown"]'));
+            await viewsDropdownLink.click();
+        }
     }
 
 }

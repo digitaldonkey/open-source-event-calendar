@@ -14,10 +14,6 @@ describe('Plugin install & Setup', function(){
         pageObject = await WpPlugin.build();
     })
 
-    beforeEach(async function(){
-        //Enter actions performed before test
-    });
-
     afterEach(async function(){
         //Enter actions to be performed after test
         await pageObject.doLogout();
