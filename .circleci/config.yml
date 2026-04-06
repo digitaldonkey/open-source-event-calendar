@@ -426,6 +426,10 @@ jobs:
             echo "ls -al $WP_CORE_DIR/wp-content/uploads" && ls -al $WP_CORE_DIR/wp-content/uploads
             echo "ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache" && ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
       - run:
+          name: Add settings.local.js
+          command: |
+            echo "<?php\n define('OSEC_UNINSTALL_PLUGIN_DATA', true);\n" > integration_tests/settings.local.js
+      - run:
           name: Apache2 webserver
           command: |
             sudo mkdir -p /var/run/apache2
