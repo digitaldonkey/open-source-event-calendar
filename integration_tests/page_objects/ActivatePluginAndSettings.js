@@ -1,16 +1,88 @@
 const WpLogin = require ('./WpLogin');
 const {Key, By, Select, WebElement, until} = require('selenium-webdriver');
 
+/**
+ * Get current active theme if not set yet.
+ * At first call we will save to settings.
+ */
 class ActivatePluginAndSettings extends WpLogin {
+
+    async getActiveTheme(){
+        if (this.settings.currentTheme) {
+            return this.settings.currentTheme;
+        }
+        const url = this.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-themes';
+        await this.go_and_do_login(url);
+        this.settings.currentTheme = await this.getThemeIdOnThemePage();
+    }
+
+    async getThemeIdOnThemePage() {
+        const currentTheme = await this.getElement(By.id('current-theme'));
+        const currentThemeId = await currentTheme.getAttribute('data-id');
+        return currentThemeId;
+    }
+
+    async setTheme(theme) {
+        const url = this.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-themes';
+        await this.go_and_do_login(url);
+        const current = await this.getThemeIdOnThemePage();
+        if (theme !== current) {
+            const activateThemeLink = await this.getElement(By.className(`activatelink-${theme}`));
+            await activateThemeLink.click();
+            await this.waitToSeeWhatHappens(500);
+        }
+    }
+
+    /**
+     * Resets Osec Plugin.
+     *
+     * Deletes all Settings and Content.
+     * Re-enables current theme if required.
+     *
+     * @returns {Promise<void>}
+     */
+    async resetOsecPlugin(theme = null) {
+        if (!theme) {
+            theme = this.getActiveTheme();
+        }
+        await this.activateOsecPlugin();
+        const settingsUrl = this.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
+        await this.go_and_do_login(settingsUrl);
+        await this.setupOsecPlugin();
+        if (theme && theme !== 'vortex') {
+           await this.setTheme(theme);
+        }
+        else if (this.settings.currentTheme && this.settings.currentTheme !== 'vortex') {
+            await this.setTheme(this.settings.currentTheme);
+        }
+        await this.doLogout();
+    }
 
     /**
      * Activate Osec WP Plugin
      *
      * @returns bool
      */
-    async activateOsecPlugin(){
-        const revealed = await this.driver.findElement(By.id('activate-open-source-event-calendar'));
+    async activateOsecPlugin() {
+        const url= this.settings.domain + '/wp-admin/plugins.php';
+        await this.go_and_do_login(url);
+
+        const revealed = await this.driver.findElement(By.css('#activate-open-source-event-calendar, #deactivate-open-source-event-calendar'));
         await this.driver.wait(until.elementIsVisible(revealed));
+
+        // If Plugin is activated disable it first.
+        const elmId = await revealed.getDomAttribute('id');
+
+        if (elmId === 'deactivate-open-source-event-calendar') {
+            await revealed.click();
+
+            // Delete Plugin Page
+            await this.deletePluginPage();
+
+            console.info('OSEC: re-enabling plugin')
+            return this.activateOsecPlugin();
+        }
+
         await revealed.click();
         const isActivated = await this.driver.findElement(By.id('message'));
         await this.driver.wait(until.elementIsVisible(isActivated));
@@ -21,11 +93,89 @@ class ActivatePluginAndSettings extends WpLogin {
             throw new Error('Can not find `Plugin activated` message');
         }
 
-        const configureMessage = await this.driver.findElement(By.css('.message a[href="' + this.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings"]'));
-        const yyy = await configureMessage.getText();
-        if (yyy !== 'Click here to set it up now »') {
-            throw new Error('Can not find `Click here to set it up now »` message');
+        try{
+            const configureMessage = await this.driver.findElement(By.css('.message a[href="' + this.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings"]'));
+            const yyy = await configureMessage.getText();
+            if (yyy === 'Click here to set it up now »') {
+                return true
+            }
         }
+        catch(exception){
+            return false;
+        }
+        return true;
+    }
+
+
+    async deletePluginPage() {
+        const url= this.settings.domain + '/wp-admin/edit.php?post_type=page';
+        await this.go_and_do_login(url);
+        await this.driver.manage().setTimeouts({ implicit: 1000 });
+        const trashButtons = await this.driver.findElements(By.css('a[aria-label="Move “Calendar” to the Trash"]'));
+        if (trashButtons.length) {
+            const deletes = [];
+            for(let link of trashButtons) {
+                const href = await link.getAttribute('href');
+                deletes.push(href);
+            }
+            for(let delLink of deletes) {
+                await this.go_to_url(delLink);
+            }
+        }
+        await this.driver.manage().setTimeouts({ implicit: 50000 })
+    }
+
+    async setupOsecPlugin(){
+
+        // wait for some form element
+        await this.getElement(By.id('calendar_page_id'));
+
+        // Set day
+        await this.setWeekDay(By.id('week_start_day'));
+
+        // Set timezone to Europe/Berlin
+        const timezoneSelect = await this.getElement(By.id('timezone_string'))
+        await this.setTimezone(timezoneSelect);
+
+        // Submit/Save
+        const saveButtonElement = await this.getElement(By.id('osec_save_settings'));
+        await saveButtonElement.click();
+
+        // Waiting releoad.
+        await this.waitToSeeWhatHappens(700, true);
+        await this.getElement(By.id('calendar_page_id'));
+
+        // Check Weekstart Day.
+        const weekStart = await this.getElement(
+            By.id('week_start_day')
+        );
+        const weekStartSelect = new Select(weekStart);
+        const option = await weekStartSelect.getFirstSelectedOption();
+        const isMondaySelected = option.isSelected();
+        this.assert.ok(isMondaySelected);
+
+        // Check settings pages calendar page id is saved
+        // By default Select is "Create new page" after saving it should be "Calendar" and a Link is visible.
+        // calenderPage value would be int WP Page ID.
+        const calenderPageSelect = await this.getElement(By.id('calendar_page_id'));
+        const calenderPageSelectedText = await this.getSelectSingleValue(calenderPageSelect, true);
+        this.assert.ok(
+            calenderPageSelectedText === 'Calendar'
+        )
+
+        // Check timezone saved.
+        const timeZoneSelect = await this.getElement(By.id('timezone_string'));
+        const timeZoneSelectedValue = await this.getSelectSingleValue(timeZoneSelect);
+        this.assert.ok(
+            timeZoneSelectedValue === this.settings.AdminPageSettings.timeZone
+        );
+
+        // New view-link below select#calendar_page_id
+        const calendarLink = await this.getElement(By.css('#calendar_page_id~p>a'));
+        const calendarPageLinkText = await calendarLink.getText();
+        this.assert.ok(
+            calendarPageLinkText === 'View "Calendar"'
+        )
         return true;
     }
 

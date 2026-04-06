@@ -46,19 +46,19 @@ class BasePage {
      * @returns {!ThenableWebDriver}
      */
     static setupWebDriver (settings) {
-        if (settings.isHeadless) {
+        if (settings.headless) {
             return new Builder()
                 .forBrowser(Browser.CHROME)
                 .setChromeOptions(
                     new chrome.Options()
-                    .addArguments('--headless').windowSize(settings.screen)
+                    .addArguments('--headless')
                     .addArguments('--disable-gpu')
                     .addArguments('--ignore-certificate-errors')
                 )
                 .setFirefoxOptions(
                     new firefox.Options()
                         .addArguments('--headless')
-                        .windowSize(this.settings.screen))
+                        .windowSize(settings.screen))
                         .setCapability('acceptInsecureCerts', true)
                 .build();
         }
@@ -69,6 +69,18 @@ class BasePage {
                 .addArguments('--incognito')
         )
         .build();
+    }
+
+    /**
+     * Helper functions from here.
+     */
+    async go_and_do_login(url){
+        await this.go_to_url(url);
+        // body.login-action-login
+        const isLoggedIn = await this.isLoggedIn();
+        if (!isLoggedIn) {
+            await this.doLogin();
+        }
     }
 
     async go_to_url(url){
@@ -107,14 +119,15 @@ class BasePage {
     /**
      *
      * @param findBy By
+     * @param timeout Timeout in ms
      * @returns {Promise<WebElement>}
      */
-    async getElement(findBy) {
+    async getElement(findBy, timeout = 6000) {
         if (!findBy instanceof By) {
             throw new Error('getElement requires instance of By as first param')
         }
         const element = await this.driver.findElement(findBy);
-        return this.driver.wait(until.elementIsVisible(element), 6000);
+        return this.driver.wait(until.elementIsVisible(element), timeout);
     }
 
     /**
