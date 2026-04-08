@@ -80,7 +80,8 @@ class ActivatePluginAndSettings extends WpLogin {
             await this.deletePluginPage();
 
             console.info('OSEC: re-enabling plugin')
-            return this.activateOsecPlugin();
+            await this.activateOsecPlugin();
+            return;
         }
 
         await revealed.click();
