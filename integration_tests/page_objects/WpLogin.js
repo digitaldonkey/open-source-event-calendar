@@ -58,8 +58,7 @@ class WpLogin extends BasePage {
     async isLoggedIn(){
         // Frontend: body.logged-in
         // Backend: body.wp-admin
-        const isLoggedIn = await this.driver.executeScript("return Array.prototype.includes.call(document.getElementsByTagName('body')[0].classList, 'logged-in')||Array.prototype.includes.call(document.getElementsByTagName('body')[0].classList, 'wp-admin')");;
-        return isLoggedIn;
+        return this.driver.executeScript("return Array.prototype.includes.call(document.getElementsByTagName('body')[0].classList, 'logged-in')||Array.prototype.includes.call(document.getElementsByTagName('body')[0].classList, 'wp-admin')");
     }
 }
 module.exports = WpLogin;
