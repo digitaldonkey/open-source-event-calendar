@@ -112,6 +112,7 @@ class ActivatePluginAndSettings extends WpLogin {
         await this.go_and_do_login(url);
         await this.driver.manage().setTimeouts({ implicit: 1000 });
         const trashButtons = await this.driver.findElements(By.css('a[aria-label="Move “Calendar” to the Trash"]'));
+        console.log({pagesToDelete: trashButtons})
         if (trashButtons.length) {
             const deletes = [];
             for(let link of trashButtons) {
