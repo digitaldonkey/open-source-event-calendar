@@ -78,15 +78,15 @@ class ThemeLoader extends OsecBaseClass
         // Default theme's path is always the last in the list of paths to check,
         // so add it first (path list is a stack).
         $this->add_path_theme(
-            OSEC_DEFAULT_THEME_PATH . DIRECTORY_SEPARATOR,
-            OSEC_THEMES_URL . '/' . OSEC_DEFAULT_THEME_NAME . '/'
+            OSEC_DEFAULT_THEME_ROOT . '/' . OSEC_ROOT_THEME_NAME . '/',
+            OSEC_THEMES_URL . '/' . OSEC_ROOT_THEME_NAME . '/'
         );
 
         // If using a child theme, set flag and push its path to top of stack.
-        if (OSEC_DEFAULT_THEME_NAME !== $theme['stylesheet']) {
+        if (OSEC_ROOT_THEME_NAME !== $theme['stylesheet']) {
             $this->childTheme = true;
             $this->add_path_theme(
-                $theme['theme_dir'] . DIRECTORY_SEPARATOR,
+                $theme['theme_dir'] . '/',
                 $theme['theme_url'] . '/'
             );
         }
@@ -218,8 +218,8 @@ class ThemeLoader extends OsecBaseClass
         // Default theme's path is always later in the list of paths to check,
         // so add it first (path list is a stack).
         $this->add_path_theme(
-            $path . '/public/' . OSEC_THEME_FOLDER . '/' . OSEC_DEFAULT_THEME_NAME . '/',
-            $url . '/public/' . OSEC_THEME_FOLDER . '/' . OSEC_DEFAULT_THEME_NAME . '/',
+            $path . '/public/' . OSEC_THEME_FOLDER . '/' . OSEC_ROOT_THEME_NAME . '/',
+            $url . '/public/' . OSEC_THEME_FOLDER . '/' . OSEC_ROOT_THEME_NAME . '/',
             true
         );
 
