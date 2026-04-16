@@ -41,27 +41,32 @@ class ActivatePluginAndSettings extends WpLogin {
      *
      * @returns {Promise<void>}
      */
-    async resetOsecPlugin(theme = null) {
+    async resetOsecPlugin(theme = null)    {
         if (!theme) {
             theme = this.getActiveTheme();
         }
-        await this.activateOsecPlugin();
+        const isActivatedClean = await this.activateOsecPlugin();
+        if (!isActivatedClean) {
+            return false;
+        }
+
         const settingsUrl = this.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
         await this.go_and_do_login(settingsUrl);
         await this.setupOsecPlugin();
-        if (theme && theme !== 'vortex') {
+        if (theme && theme !== 'plana') {
            await this.setTheme(theme);
         }
-        else if (this.settings.currentTheme && this.settings.currentTheme !== 'vortex') {
+        else if (this.settings.currentTheme && this.settings.currentTheme !== 'plana') {
             await this.setTheme(this.settings.currentTheme);
         }
         await this.doLogout();
+        return true;
     }
 
     /**
      * Activate Osec WP Plugin
      *
-     * @returns bool
+     * @returns bool If install was clean. (Osec Settings not set yet).
      */
     async activateOsecPlugin() {
         const url= this.settings.domain + '/wp-admin/plugins.php';
@@ -80,8 +85,8 @@ class ActivatePluginAndSettings extends WpLogin {
             await this.deletePluginPage();
 
             console.info('OSEC: re-enabling plugin')
-            await this.activateOsecPlugin();
-            return;
+            const suscess = await this.activateOsecPlugin();
+            return suscess;
         }
 
         await revealed.click();
@@ -95,7 +100,9 @@ class ActivatePluginAndSettings extends WpLogin {
         }
 
         try{
+            await this.driver.manage().setTimeouts({ implicit: 1000 });
             const configureMessage = await this.driver.findElement(By.css('.message a[href="' + this.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings"]'));
+            await this.driver.manage().setTimeouts({ implicit: 50000 })
             const yyy = await configureMessage.getText();
             if (yyy === 'Click here to set it up now »') {
                 return true
@@ -104,7 +111,7 @@ class ActivatePluginAndSettings extends WpLogin {
         catch(exception){
             return false;
         }
-        return true;
+        return false;
     }
 
 
@@ -113,7 +120,7 @@ class ActivatePluginAndSettings extends WpLogin {
         await this.go_and_do_login(url);
         await this.driver.manage().setTimeouts({ implicit: 1000 });
         const trashButtons = await this.driver.findElements(By.css('a[aria-label="Move “Calendar” to the Trash"]'));
-        console.log({pagesToDelete: trashButtons})
+        // console.log({pagesToDelete: trashButtons})
         if (trashButtons.length) {
             const deletes = [];
             for(let link of trashButtons) {
@@ -234,6 +241,12 @@ class ActivatePluginAndSettings extends WpLogin {
         else {
             let viewsDropdownLink = await this.getElement(By.css('a[data-toggle="ai1ec-dropdown"]'));
             await viewsDropdownLink.click();
+        }
+    }
+
+    doFailTest(isReadyToRun) {
+        if (!isReadyToRun) {
+            throw 'OSEC_UNINSTALL_PLUGIN_DATA must be TRUE for testing';
         }
     }
 

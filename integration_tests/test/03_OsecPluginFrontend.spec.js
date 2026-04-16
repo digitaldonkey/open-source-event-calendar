@@ -29,7 +29,7 @@ describe('Frontend tests', function(){
             // Will set pageObject.settings.currentTheme
             await pageObject.getActiveTheme();
         }
-        console.log({settings: pageObject.settings})
+        // console.log({settings: pageObject.settings})
     })
 
     after(async () => {
@@ -40,7 +40,15 @@ describe('Frontend tests', function(){
     // Running test for every Theme.
     themes.forEach(function (theme) {
         describe('Test theme: ' + theme + '?', function () {
+
+            /* shouldSkip Is set if we want to test only one theme by settings.*/
             let shouldSkip = false;
+
+            /**
+             * isReady
+             *   If OSEC_UNINSTALL_PLUGIN_DATA is not set tests would fail.
+             */
+            let isReady = false;
 
             before(async function(){
                 if (pageObject.settings.currentThemeOnly) {
@@ -51,7 +59,7 @@ describe('Frontend tests', function(){
                     }
                 }
                 // Resets Plugin and enables current theme.
-                await pageObject.resetOsecPlugin(theme);
+                isReady = await pageObject.resetOsecPlugin(theme);
             });
 
             afterEach(async function () {
@@ -61,11 +69,13 @@ describe('Frontend tests', function(){
             describe('Run tests for: ' + theme, function(){
 
                 it('Set up theme', async function () {
+                    pageObject.doFailTest(isReady);
                     console.info('Set up theme: ' + theme + ' Should skip: ' + shouldSkip);
-                   await pageObject.setTheme(theme);
+                    await pageObject.setTheme(theme);
                 });
 
                 it('Add daily repeating event', async function () {
+                    pageObject.doFailTest(isReady);
                     const url = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
                     await pageObject.go_and_do_login(url);
 
@@ -200,6 +210,7 @@ describe('Frontend tests', function(){
                 });
 
                 it('Delete daily repeating event', async function () {
+                    pageObject.doFailTest(isReady);
                     const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event';
                     await pageObject.go_and_do_login(url);
 
@@ -233,6 +244,7 @@ describe('Frontend tests', function(){
                 })
 
                 it('Add Event with map', async function () {
+                    pageObject.doFailTest(isReady);
                     const url = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
                     await pageObject.go_and_do_login(url);
 
@@ -316,6 +328,7 @@ describe('Frontend tests', function(){
                 });
 
                 it('Verify Excerpt', async function () {
+                    pageObject.doFailTest(isReady);
                     const title = 'Event using Excerpt';
                     // WP editor would add line breaks anyway. So they are required.
                     const content = 'CONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT';
