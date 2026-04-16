@@ -186,7 +186,8 @@ jobs:
     docker:
       - image: cimg/php:8.3
         <<: *ENV_PHP_IMAGE
-        PHP_VERSION_ID: php8.3
+        environment:
+          PHP_VERSION_ID: php8.3
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
@@ -195,7 +196,8 @@ jobs:
     docker:
       - image: cimg/php:8.4
         <<: *ENV_PHP_IMAGE
-        PHP_VERSION_ID: php8.4
+        environment:
+          PHP_VERSION_ID: php8.4
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
@@ -204,7 +206,8 @@ jobs:
     docker:
       - image: cimg/php:8.5
         <<: *ENV_PHP_IMAGE
-        PHP_VERSION_ID: php8.5
+        environment:
+          PHP_VERSION_ID: php8.5
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
