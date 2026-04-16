@@ -492,6 +492,9 @@ jobs:
     docker:
       - image: cimg/php:8.3-browsers
         <<: *ENV_PHP_IMAGE
+        environment:
+          <<: *ENV_VARS
+          PHP_VERSION_ID: php8.3
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
   release_test_job_php_8_4:
@@ -499,6 +502,9 @@ jobs:
     docker:
       - image: cimg/php:8.4-browsers
         <<: *ENV_PHP_IMAGE
+        environment:
+          <<: *ENV_VARS
+          PHP_VERSION_ID: php8.4
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
   release_test_job_php_8_5:
@@ -506,6 +512,9 @@ jobs:
     docker:
       - image: cimg/php:8.5-browsers
         <<: *ENV_PHP_IMAGE
+        environment:
+          <<: *ENV_VARS
+          PHP_VERSION_ID: php8.5
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
