@@ -13,7 +13,9 @@ class ActivatePluginAndSettings extends WpLogin {
         }
         const url = this.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-themes';
         await this.go_and_do_login(url);
-        this.settings.currentTheme = await this.getThemeIdOnThemePage();
+        const currenTheme = await this.getThemeIdOnThemePage();
+        this.settings.currentTheme = currenTheme;
+        return currenTheme;
     }
 
     async getThemeIdOnThemePage() {

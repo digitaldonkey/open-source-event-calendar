@@ -48,7 +48,7 @@ references:
 
   # Default DB Docker image environement
   ENV_PHP_IMAGE: &ENV_PHP_IMAGE
-    environment:
+    environment: &ENV_VARS
       TZ: "Europe/Berlin"
       MYSQL_DATABASE: wp_ci
       MYSQL_USER: wp_ci
@@ -187,6 +187,7 @@ jobs:
       - image: cimg/php:8.3
         <<: *ENV_PHP_IMAGE
         environment:
+          <<: *ENV_VARS
           PHP_VERSION_ID: php8.3
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
@@ -197,6 +198,7 @@ jobs:
       - image: cimg/php:8.4
         <<: *ENV_PHP_IMAGE
         environment:
+          <<: *ENV_VARS
           PHP_VERSION_ID: php8.4
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
@@ -207,6 +209,7 @@ jobs:
       - image: cimg/php:8.5
         <<: *ENV_PHP_IMAGE
         environment:
+          <<: *ENV_VARS
           PHP_VERSION_ID: php8.5
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
@@ -411,6 +414,7 @@ jobs:
             echo " WP_CORE_DIR: $WP_CORE_DIR"
             echo " WP_VERSION: $WP_VERSION"
             echo " $($WP_CLI --version) $WP_CLI"
+            echo " PHP_VERSION_ID: $PHP_VERSION_ID"
       - run:
           name: Install WordPress (DB, no unit test scripts)
           command: |

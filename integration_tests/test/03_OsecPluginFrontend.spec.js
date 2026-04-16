@@ -59,7 +59,8 @@ describe('Frontend tests', function(){
                     }
                 }
                 // Resets Plugin and enables current theme.
-                isReady = await pageObject.resetOsecPlugin(theme);
+                const isPurged = await pageObject.resetOsecPlugin(theme);
+                isReady = isPurged;
             });
 
             afterEach(async function () {
