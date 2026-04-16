@@ -53,6 +53,7 @@ references:
       MYSQL_DATABASE: wp_ci
       MYSQL_USER: wp_ci
       MYSQL_PASSWORD: wp_ci
+      PHP_VERSION_ID: php8.2
 
   # Default container configuration
   container_config: &container_config
@@ -185,6 +186,7 @@ jobs:
     docker:
       - image: cimg/php:8.3
         <<: *ENV_PHP_IMAGE
+        PHP_VERSION_ID: php8.3
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
@@ -193,6 +195,7 @@ jobs:
     docker:
       - image: cimg/php:8.4
         <<: *ENV_PHP_IMAGE
+        PHP_VERSION_ID: php8.4
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
@@ -201,6 +204,7 @@ jobs:
     docker:
       - image: cimg/php:8.5
         <<: *ENV_PHP_IMAGE
+        PHP_VERSION_ID: php8.5
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
@@ -365,9 +369,9 @@ jobs:
       - run:
           name: Install Apache, MySQL client and PHP extension
           command: |
-            sudo apt-get update
-            sudo add-apt-repository ppa:ondrej/php -y                   
-            sudo apt-get install -y mysql-client apache2 php8.2-{fpm,cli,bz2,curl,mbstring,intl,bcmath,xml,mysql,zip,gd,mbstring,apcu}
+            sudo LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php  -y
+            sudo apt-get update   
+            sudo apt-get install -y mysql-client apache2 $PHP_VERSION_ID-{fpm,cli,bz2,curl,mbstring,intl,bcmath,xml,mysql,zip,gd,mbstring,apcu}
             sudo rm -rf /var/lib/apt/lists/*
       - run:
           name: Add WordPress domain to hosts file
