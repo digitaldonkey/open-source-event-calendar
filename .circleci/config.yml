@@ -53,7 +53,7 @@ references:
       MYSQL_DATABASE: wp_ci
       MYSQL_USER: wp_ci
       MYSQL_PASSWORD: wp_ci
-      PHP_VERSION_ID: php8.2
+      PHP_VERSION: 8.2
 
   # Default container configuration
   container_config: &container_config
@@ -139,11 +139,11 @@ jobs:
       - run:
           name: Update outdated apt key
           command: (cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
-      - run:
-          name: Install MySQL client and PHP extension
-          command: sudo apt-get update
-                    && sudo apt-get install -y mysql-client 
-                    && sudo rm -rf /var/lib/apt/lists/*
+#      - run:
+#          name: Install MySQL client and PHP extension
+#          command: sudo apt-get update
+#                    && sudo apt-get install -y mysql-client
+#                    && sudo rm -rf /var/lib/apt/lists/*
       - run:
           name: Set PHP Timezone
           command: |
@@ -188,7 +188,7 @@ jobs:
         <<: *ENV_PHP_IMAGE
         environment:
           <<: *ENV_VARS
-          PHP_VERSION_ID: php8.3
+          PHP_VERSION: 8.3
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
@@ -199,7 +199,7 @@ jobs:
         <<: *ENV_PHP_IMAGE
         environment:
           <<: *ENV_VARS
-          PHP_VERSION_ID: php8.4
+          PHP_VERSION: 8.4
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
@@ -210,7 +210,7 @@ jobs:
         <<: *ENV_PHP_IMAGE
         environment:
           <<: *ENV_VARS
-          PHP_VERSION_ID: php8.5
+          PHP_VERSION: 8.5
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
@@ -377,7 +377,7 @@ jobs:
           command: |
             sudo LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php  -y
             sudo apt-get update   
-            sudo apt-get install -y mysql-client apache2 $PHP_VERSION_ID-{fpm,cli,bz2,curl,mbstring,intl,bcmath,xml,mysql,zip,gd,mbstring,apcu}
+            sudo apt-get install -y mysql-client apache2 php$PHP_VERSION-{fpm,cli,bz2,curl,mbstring,intl,bcmath,xml,mysql,zip,gd,mbstring,apcu}
             sudo rm -rf /var/lib/apt/lists/*
       - run:
           name: Add WordPress domain to hosts file
@@ -414,7 +414,7 @@ jobs:
             echo " WP_CORE_DIR: $WP_CORE_DIR"
             echo " WP_VERSION: $WP_VERSION"
             echo " $($WP_CLI --version) $WP_CLI"
-            echo " PHP_VERSION_ID: $PHP_VERSION_ID"
+            echo " PHP_VERSION: $PHP_VERSION"
       - run:
           name: Install WordPress (DB, no unit test scripts)
           command: |
@@ -448,12 +448,12 @@ jobs:
             sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf            
             sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
-            sudo bash -c "echo 'extension=apcu.so'  >>/etc/php/8.2/fpm/php.ini"
-            sudo bash -c "echo 'apc.enabled = 1'    >>/etc/php/8.2/fpm/php.ini"
-            sudo bash -c "echo 'apc.enable_cli = 1' >>/etc/php/8.2/fpm/php.ini"                
-            sudo a2enconf php8.2-fpm
+            sudo bash -c "echo 'extension=apcu.so'  >>/etc/php/$PHP_VERSION/fpm/php.ini"
+            sudo bash -c "echo 'apc.enabled = 1'    >>/etc/php/$PHP_VERSION/fpm/php.ini"
+            sudo bash -c "echo 'apc.enable_cli = 1' >>/etc/php/$PHP_VERSION/fpm/php.ini"                
+            sudo a2enconf php$PHP_VERSION-fpm
             sudo a2enmod proxy_fcgi setenvif rewrite
-            sudo /etc/init.d/php8.2-fpm start
+            sudo /etc/init.d/php$PHP_VERSION-fpm start
             sudo apachectl -DFOREGROUND
           background: True
       - node/install-packages:
@@ -494,7 +494,7 @@ jobs:
         <<: *ENV_PHP_IMAGE
         environment:
           <<: *ENV_VARS
-          PHP_VERSION_ID: php8.3
+          PHP_VERSION: 8.3
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
   release_test_job_php_8_4:
@@ -504,7 +504,7 @@ jobs:
         <<: *ENV_PHP_IMAGE
         environment:
           <<: *ENV_VARS
-          PHP_VERSION_ID: php8.4
+          PHP_VERSION: 8.4
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
   release_test_job_php_8_5:
@@ -514,7 +514,7 @@ jobs:
         <<: *ENV_PHP_IMAGE
         environment:
           <<: *ENV_VARS
-          PHP_VERSION_ID: php8.5
+          PHP_VERSION: 8.5
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
