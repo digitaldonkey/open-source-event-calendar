@@ -439,8 +439,7 @@ jobs:
       - run:
           name: Add constants-local.php
           command: |
-            cd ~/open-source-event-calendar/
-            echo "<?php define('OSEC_UNINSTALL_PLUGIN_DATA', true);" > constants-local.php
+            echo "<?php define('OSEC_UNINSTALL_PLUGIN_DATA', true);" > ~/open-source-event-calendar/constants-local.php
       - run:
           name: Apache2 webserver
           command: |

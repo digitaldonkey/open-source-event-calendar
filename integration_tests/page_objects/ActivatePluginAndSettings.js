@@ -41,7 +41,7 @@ class ActivatePluginAndSettings extends WpLogin {
      * Deletes all Settings and Content.
      * Re-enables current theme if required.
      *
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
     async resetOsecPlugin(theme = null)    {
         if (!theme) {
@@ -71,6 +71,7 @@ class ActivatePluginAndSettings extends WpLogin {
      * @returns bool If install was clean. (Osec Settings not set yet).
      */
     async activateOsecPlugin() {
+        console.log('activateOsecPlugin START');
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
 
@@ -88,8 +89,11 @@ class ActivatePluginAndSettings extends WpLogin {
 
             console.info('OSEC: re-enabling plugin')
             const suscess = await this.activateOsecPlugin();
+            this.waitToSeeWhatHappens(2000);
             return suscess;
         }
+        console.log('activateOsecPlugin IS ENABLED');
+
 
         await revealed.click();
         const isActivated = await this.driver.findElement(By.id('message'));
