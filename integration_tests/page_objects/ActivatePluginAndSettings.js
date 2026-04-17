@@ -72,7 +72,6 @@ class ActivatePluginAndSettings extends WpLogin {
      */
     async activateOsecPlugin() {
         console.log('activateOsecPlugin START');
-        await this.takeScreenshot(this);
 
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
@@ -87,7 +86,6 @@ class ActivatePluginAndSettings extends WpLogin {
 
         if (elmId === 'deactivate-open-source-event-calendar') {
             console.log('activateOsecPlugin WILL BE DISABLED');
-            await this.takeScreenshot(this);
 
             await revealed.click();
             await this.waitToSeeWhatHappens(1000);
