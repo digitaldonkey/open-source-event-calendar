@@ -83,13 +83,17 @@ class ActivatePluginAndSettings extends WpLogin {
 
         if (elmId === 'deactivate-open-source-event-calendar') {
             await revealed.click();
+            console.log('activateOsecPlugin DISABLED PLUGIN');
+
+            await this.waitToSeeWhatHappens(1000);
 
             // Delete Plugin Page
+            console.log('activateOsecPlugin DELETE PAGE');
             await this.deletePluginPage();
+            await this.waitToSeeWhatHappens(1000);
 
             console.info('OSEC: re-enabling plugin')
             const suscess = await this.activateOsecPlugin();
-            this.waitToSeeWhatHappens(2000);
             return suscess;
         }
         console.log('activateOsecPlugin IS ENABLED');

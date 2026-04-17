@@ -8,11 +8,6 @@ const {
 let pageObject = null;
 
 
-
-// TODO
-//   - Current Theme is not kept when selected.
-
-
 describe('Frontend tests', function(){
     this.timeout(50000);
     let themes = [
