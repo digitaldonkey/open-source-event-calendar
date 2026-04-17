@@ -72,6 +72,8 @@ class ActivatePluginAndSettings extends WpLogin {
      */
     async activateOsecPlugin() {
         console.log('activateOsecPlugin START');
+        await this.takeScreenshot(this);
+
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
 
@@ -80,11 +82,14 @@ class ActivatePluginAndSettings extends WpLogin {
 
         // If Plugin is activated disable it first.
         const elmId = await revealed.getDomAttribute('id');
+        console.log('activateOsecPlugin REVELED elmId: ' + elmId);
+
 
         if (elmId === 'deactivate-open-source-event-calendar') {
-            await revealed.click();
-            console.log('activateOsecPlugin DISABLED PLUGIN');
+            console.log('activateOsecPlugin WILL BE DISABLED');
+            await this.takeScreenshot(this);
 
+            await revealed.click();
             await this.waitToSeeWhatHappens(1000);
 
             // Delete Plugin Page
@@ -96,10 +101,10 @@ class ActivatePluginAndSettings extends WpLogin {
             const suscess = await this.activateOsecPlugin();
             return suscess;
         }
-        console.log('activateOsecPlugin IS ENABLED');
 
-
+        console.log('activateOsecPlugin WILL BE ENABLED');
         await revealed.click();
+
         const isActivated = await this.driver.findElement(By.id('message'));
         await this.driver.wait(until.elementIsVisible(isActivated));
         const message = await this.driver.findElement(By.css('#message>p'));
