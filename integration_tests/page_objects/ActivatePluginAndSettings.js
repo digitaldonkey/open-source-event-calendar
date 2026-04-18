@@ -82,13 +82,13 @@ class ActivatePluginAndSettings extends WpLogin {
         await this.go_and_do_login(url);
 
         console.log('      activateOsecPlugin ENABLING PLUGIN');
-        const enableButton = await this.driver.findElement(By.id('activate-open-source-event-calendar'));
-        await this.driver.wait(until.elementIsVisible(enableButton), 2000);
+
+        const enableButton = await this.getElement(By.id('activate-open-source-event-calendar'));
+        console.log({enableButton});
         await enableButton.click();
 
-        const isActivated = await this.driver.findElement(By.id('message'));
-        await this.driver.wait(until.elementIsVisible(isActivated));
-        const message = await this.driver.findElement(By.css('#message>p'));
+        const isActivated = await this.getElement(By.id('message'));
+        const message = await this.getElement(By.css('#message>p'));
         const messageText = await message.getText();
 
         if (messageText !== 'Plugin activated.') {
