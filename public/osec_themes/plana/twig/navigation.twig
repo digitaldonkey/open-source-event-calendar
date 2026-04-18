@@ -1,0 +1,14 @@
+<div class="plana-toolbar">
+	{% if display_date_navigation %}
+		{{ before_pagination | raw }}
+		{{ pagination_links | raw }}
+	{% endif %}
+	{{ after_pagination | raw }}
+    {{ views_dropdown | raw }}
+    {% if contribution_buttons is defined %}
+		{{ contribution_buttons | raw }}
+	{% endif %}
+	{% if below_toolbar is defined %}
+		{{ below_toolbar | raw }}
+	{% endif %}
+</div>

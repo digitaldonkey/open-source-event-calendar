@@ -40,7 +40,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = Plugin Version =
     // ==================
     if (! defined('OSEC_VERSION')) {
-        define('OSEC_VERSION', '1.1.0');
+        define('OSEC_VERSION', '1.1.1');
     }
 
     // =================
@@ -81,7 +81,14 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = Default theme name =
     // ======================
     if (! defined('OSEC_DEFAULT_THEME_NAME')) {
-        define('OSEC_DEFAULT_THEME_NAME', 'vortex');
+        define('OSEC_DEFAULT_THEME_NAME', 'plana');
+    }
+
+    // ======================
+    // = Root theme name =
+    // ======================
+    if (! defined('OSEC_ROOT_THEME_NAME')) {
+        define('OSEC_ROOT_THEME_NAME', 'vortex');
     }
 
     // ================

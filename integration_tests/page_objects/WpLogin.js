@@ -14,17 +14,25 @@ class WpLogin extends BasePage {
      * @returns {Promise<void>}
      */
     async doLogout(){
+        const isLoggedIn = await this.isLoggedIn();
+        if (!isLoggedIn) {
+            return;
+        }
         // Hover logout
         const popupTrigger = await this.getElement(By.id('wp-admin-bar-top-secondary'));
         const actions = this.driver.actions({async: true});
         await actions.move({origin: popupTrigger}).perform();
         const logoutLink = await this.getElement(By.css('#wp-admin-bar-logout a'));
         const logoutUrl = await logoutLink.getAttribute('href');
-        this.waitToSeeWhatHappens(500, true)
-        this.go_to_url(logoutUrl);
+        await this.waitToSeeWhatHappens(500, true)
+        await this.go_to_url(logoutUrl);
     }
 
     async doLogin(auth){
+        const isLoggedIn = await this.isLoggedIn();
+        if (isLoggedIn) {
+            return;
+        }
         if (!auth) {
             auth = this.settings.wpLogin.admin;
         }
@@ -47,5 +55,10 @@ class WpLogin extends BasePage {
         return this.driver.wait(until.elementIsVisible(revealed));
     }
 
+    async isLoggedIn(){
+        // Frontend: body.logged-in
+        // Backend: body.wp-admin
+        return this.driver.executeScript("return Array.prototype.includes.call(document.getElementsByTagName('body')[0].classList, 'logged-in')||Array.prototype.includes.call(document.getElementsByTagName('body')[0].classList, 'wp-admin')");
+    }
 }
 module.exports = WpLogin;

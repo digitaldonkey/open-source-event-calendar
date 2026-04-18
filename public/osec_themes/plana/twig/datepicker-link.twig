@@ -1,0 +1,11 @@
+<a class="ai1ec-minical-trigger ai1ec-tooltip-trigger osec-date-select action-link"
+{% for attribute, value in attributes %}
+{{ attribute }}="{{ value }}"
+{% endfor %}
+	{{ data_type | raw }}
+title="{{ text_date }}"
+>
+<i class="ai1ec-fa ai1ec-fa-calendar-o"></i>
+<span class="ai1ec-calendar-title">{{ title }}</span>
+<span class="ai1ec-calendar-title-short">{{ title_short }}</span>
+</a>
