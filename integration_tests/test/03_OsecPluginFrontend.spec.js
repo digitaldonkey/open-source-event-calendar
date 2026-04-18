@@ -2,8 +2,7 @@
 const WpPlugin = require('../page_objects/ActivatePluginAndSettings');
 
 const {
-    until,
-    By, Select,
+    By,
 } = require('selenium-webdriver');
 let pageObject = null;
 
@@ -54,8 +53,7 @@ describe('Frontend tests', function(){
                     }
                 }
                 // Resets Plugin and enables current theme.
-                const isPurged = await pageObject.resetOsecPlugin(theme);
-                isReady = isPurged;
+                isReady = await pageObject.resetOsecPlugin(theme);
             });
 
             afterEach(async function () {
@@ -239,7 +237,7 @@ describe('Frontend tests', function(){
                     await pageObject.waitToSeeWhatHappens(500, true);
                 })
 
-                it('Add Event with map', async function () {
+                it('Verify Event with map', async function () {
                     pageObject.doFailTest(isReady);
                     const url = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
                     await pageObject.go_and_do_login(url);

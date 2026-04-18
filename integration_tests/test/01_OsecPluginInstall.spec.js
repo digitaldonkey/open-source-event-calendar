@@ -1,10 +1,6 @@
 //wp-admin/plugins.php
 const WpPlugin = require('../page_objects/ActivatePluginAndSettings');
 
-const {
-    until,
-    By, Select,
-} = require('selenium-webdriver');
 let pageObject = null;
 
 describe('Plugin install & Setup', function(){

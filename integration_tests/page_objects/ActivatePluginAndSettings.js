@@ -71,43 +71,26 @@ class ActivatePluginAndSettings extends WpLogin {
      * @returns bool If install was clean. (Osec Settings not set yet).
      */
     async activateOsecPlugin() {
-        console.log('activateOsecPlugin START');
+
+        const isEnabled = await this.isPluginActive();
+        if (isEnabled) {
+            await this.disablePluginAndCleanup();
+        }
 
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
 
-        let revealed = await this.driver.findElement(By.css('#activate-open-source-event-calendar, #deactivate-open-source-event-calendar'));
-        await this.driver.wait(until.elementIsVisible(revealed), 2000);
-
-        // If Plugin is activated disable it first.
-        const elmId = await revealed.getDomAttribute('id');
-        console.log('activateOsecPlugin REVELED elmId: ' + elmId);
-
-
-        if (elmId === 'deactivate-open-source-event-calendar') {
-            console.log('activateOsecPlugin WILL BE DISABLED');
-            await revealed.click();
-            await this.waitToSeeWhatHappens(1000);
-
-            // Delete Plugin Page
-            console.log('activateOsecPlugin DELETE PAGE');
-            await this.deletePluginPage();
-            await this.waitToSeeWhatHappens(1000);
-
-            console.info('OSEC: re-enabling plugin')
-            const suscess = await this.activateOsecPlugin();
-            return suscess;
-        }
-
-        console.log('activateOsecPlugin WILL BE ENABLED');
-        await revealed.click();
+        console.log('activateOsecPlugin ENABLING PLUGIN');
+        const enableButton = await this.driver.findElement(By.id('activate-open-source-event-calendar'));
+        await this.driver.wait(until.elementIsVisible(enableButton), 2000);
+        await enableButton.click();
 
         const isActivated = await this.driver.findElement(By.id('message'));
         await this.driver.wait(until.elementIsVisible(isActivated));
         const message = await this.driver.findElement(By.css('#message>p'));
-        const xxx = await message.getText();
+        const messageText = await message.getText();
 
-        if (xxx !== 'Plugin activated.') {
+        if (messageText !== 'Plugin activated.') {
             throw new Error('Can not find `Plugin activated` message');
         }
 
@@ -127,23 +110,42 @@ class ActivatePluginAndSettings extends WpLogin {
     }
 
 
+    async isPluginActive(){
+        const url= this.settings.domain + '/wp-admin/plugins.php';
+        await this.go_and_do_login(url);
+        return this.driver.executeScript("return document.getElementById('deactivate-open-source-event-calendar')");
+    }
+
+    async disablePluginAndCleanup() {
+        const disableButton = await this.driver.findElement(By.id('deactivate-open-source-event-calendar'));
+        await this.driver.wait(until.elementIsVisible(disableButton), 2000);
+
+        console.log('disablePluginAndCleanup: DISABLING PLUGIN');
+        await disableButton.click()
+
+        // Delete Plugin Page
+        console.log('disablePluginAndCleanup: DELETE PAGE');
+        await this.deletePluginPage();
+    }
+
     async deletePluginPage() {
         const url= this.settings.domain + '/wp-admin/edit.php?post_type=page';
         await this.go_and_do_login(url);
         await this.driver.manage().setTimeouts({ implicit: 1000 });
         const trashButtons = await this.driver.findElements(By.css('a[aria-label="Move “Calendar” to the Trash"]'));
-        // console.log({pagesToDelete: trashButtons})
+
         if (trashButtons.length) {
             const deletes = [];
             for(let link of trashButtons) {
                 const href = await link.getAttribute('href');
                 deletes.push(href);
             }
+            console.log({deletes});
             for(let delLink of deletes) {
                 await this.go_to_url(delLink);
             }
         }
-        await this.driver.manage().setTimeouts({ implicit: 50000 })
+        await this.driver.manage().setTimeouts({ implicit: 50000 });
     }
 
     async setupOsecPlugin(){
