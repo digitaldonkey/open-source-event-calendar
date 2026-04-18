@@ -118,8 +118,7 @@ class ActivatePluginAndSettings extends WpLogin {
     }
 
     async disablePluginAndCleanup() {
-        const disableButton = await this.driver.findElement(By.id('deactivate-open-source-event-calendar'));
-        await this.driver.wait(until.elementIsVisible(disableButton), 2000);
+        const disableButton = await this.getElement(By.id('deactivate-open-source-event-calendar'));
 
         console.log('      disablePluginAndCleanup: DISABLING PLUGIN');
         await disableButton.click()
