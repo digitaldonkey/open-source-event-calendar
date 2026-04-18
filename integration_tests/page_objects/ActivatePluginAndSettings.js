@@ -118,6 +118,7 @@ class ActivatePluginAndSettings extends WpLogin {
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
         const isActive = await this.driver.executeScript("return document.getElementById('deactivate-open-source-event-calendar') !== null;");
+        console.log('      isPluginActive: ' + isActive);
         return isActive
     }
 
