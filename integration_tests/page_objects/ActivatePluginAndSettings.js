@@ -71,25 +71,17 @@ class ActivatePluginAndSettings extends WpLogin {
      * @returns bool If install was clean. (Osec Settings not set yet).
      */
     async activateOsecPlugin() {
+        console.log('      activateOsecPlugin START');
 
         const isEnabled = await this.isPluginActive();
-        console.log({isEnabled})
         if (isEnabled) {
             await this.disablePluginAndCleanup();
-            await this.waitToSeeWhatHappens(2000);
         }
 
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
 
-        await this.waitToSeeWhatHappens(2000);
-
-        console.log('      activateOsecPlugin ENABLING PLUGIN');
-        const isEnabled2 = await this.isPluginActive();
-        console.log({isEnabled2})
-
-        const enableButton = await this.getElement(By.id('activate-open-source-event-calendar'));
-        console.log({enableButton});
+        const enableButton = await this.getElement(By.css('#activate-open-source-event-calendar'));
         await enableButton.click();
 
         const isActivated = await this.getElement(By.id('message'));
@@ -120,27 +112,30 @@ class ActivatePluginAndSettings extends WpLogin {
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
         const isActive = await this.driver.executeScript("return document.getElementById('deactivate-open-source-event-calendar') !== null;");
-        console.log('      isPluginActive: ' + isActive);
         return isActive
     }
 
+    /**
+     * Uninstall and purge if possible.
+     *
+     * @returns {Promise<void>}
+     */
     async disablePluginAndCleanup() {
+        console.log('      disablePluginAndCleanup: DISABLING PLUGIN');
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
         const disableButton = await this.getElement(By.id('deactivate-open-source-event-calendar'));
-
-        console.log('      disablePluginAndCleanup: DISABLING PLUGIN', {disableButton});
-
         await disableButton.click()
 
         // Delete Plugin Page
         console.log('      disablePluginAndCleanup: DELETE PAGE(s)');
         await this.deletePluginPage();
 
-        await this.go_and_do_login(url);
         console.log('      activateOsecPlugin CHECK IF DISABLED SUCCESSFULLY');
         const isEnabled2 = await this.isPluginActive();
-        console.log({isEnabled2})
+        if (isEnabled2) {
+            throw "The plugin can not be disabled cleanly. Ensure OSEC_UNINSTALL_PLUGIN_DATA is true and FS_METHOD='direct'. Or deactivation might fail and you will end up here. "
+        }
         console.log('      disablePluginAndCleanup: ALL DONE');
     }
 
