@@ -196,7 +196,8 @@ class MakeReadme
 
     protected function get_value_tested_up_to(): string
     {
-        $wp_version = wp_get_wp_version();
+        $wp_versions = explode('.', wp_get_wp_version());
+        $wp_version = $wp_versions[0] . '.' . $wp_versions[1];
         return "Tested up to: $wp_version\n";
     }
 
