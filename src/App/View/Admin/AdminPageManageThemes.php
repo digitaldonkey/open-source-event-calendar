@@ -58,6 +58,7 @@ class AdminPageManageThemes extends AdminPageAbstract
                     esc_html($osec_current_theme->title),
                     esc_html($osec_current_theme->version),
                 ),
+                'theme_id' => esc_attr($osec_current_theme->stylesheet),
                 'description' => $osec_current_theme->description,
                 'has_tags' => (bool) $osec_current_theme->tags,
                 'tags' => esc_html__('Tags:', 'open-source-event-calendar')

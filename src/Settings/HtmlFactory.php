@@ -106,7 +106,7 @@ class HtmlFactory extends OsecBaseClass
         /**
          * Alter href arguments for datepicker
          *
-         * Rendered in datepicker_link.twig
+         * Rendered in datepicker-link.twig
          *
          * @since 1.00
          *
@@ -136,7 +136,7 @@ class HtmlFactory extends OsecBaseClass
             'title_short' => $title_short,
         ];
 
-        return $loader->get_file('datepicker_link.twig', $args);
+        return $loader->get_file('datepicker-link.twig', $args);
     }
 
     /**

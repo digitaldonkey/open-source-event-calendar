@@ -1,0 +1,13 @@
+<div class="plana-pagination">
+	{% for link in links %}
+		{% if link is iterable %}
+			<a class="{{ link.class }} ai1ec-load-view action-link {% if not link.enabled %}ai1ec-disabled{% endif %}"
+				{{ data_type | raw }}
+				href="{{ link.href | e('html_attr') }}">
+				{{ link.text | raw }}
+			</a>
+		{% else %}
+			{{ link | raw }}
+		{% endif %}
+	{% endfor %}
+</div>

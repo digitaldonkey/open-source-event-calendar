@@ -501,6 +501,8 @@ input.ai1ec-timepicker[readonly] {
 	// Applies for calendar page and Shortcode. Not in Blocks.
 	.wp-block-post-content > & {
 		.ai1ec-agenda-view {
+			max-width: var(--wp--style--global--content-size);
+			margin: 0 auto;
 			@media (min-width: @screen-sm) {
 				padding: 2em var(--wp--style--root--padding-right) 2em var(--wp--style--root--padding-left);
 			}
@@ -640,57 +642,6 @@ input.ai1ec-timepicker[readonly] {
 		display: inline-block;
 		.ai1ec-opacity( 0.8 );
 		padding: 0.5em;
-	}
-}
-
-// Twenty Twelve/Twenty Thirteen fixes
-.entry-content,
-.comment-content,
-.site-footer .widget {
-	.timely {
-		a {
-			color: @link-color;
-			&:visited {
-				color: @link-color;
-			}
-			&:hover {
-				color: @link-hover-color;
-			}
-		}
-		.ai1ec-btn-default {
-			color: @btn-default-color !important;
-			&:hover {
-				color: @btn-default-color !important;
-			}
-		}
-		.ai1ec-dropdown-menu > li > a {
-			color: @dropdown-link-color;
-			&:hover,
-			&:focus {
-				color: @dropdown-link-hover-color;
-			}
-		}
-		.ai1ec-dropdown-menu > .ai1ec-active > a {
-			&,
-			&:hover,
-			&:focus {
-				color: @dropdown-link-active-color;
-			}
-		}
-		.ai1ec-dropdown-menu > .ai1ec-disabled > a {
-			&,
-			&:hover,
-			&:focus {
-				color: @dropdown-link-disabled-color;
-			}
-		}
-		.ai1ec-nav > li {
-			margin: 0;
-		}
-	}
-	.ai1ec-agenda-widget-view .ai1ec-date-title,
-	.ai1ec-agenda-view .ai1ec-date-title {
-		color: mix( @text-color, @agenda-date-title-bg, 85% );
 	}
 }
 
@@ -967,10 +918,10 @@ a.ai1ec-custom-filter {
 		margin: 2px -8px 0;
 		padding: 1px 8px;
 	}
+
 	.ai1ec-event-avatar {
 		margin: @line-height-computed / 3 auto;
 		position: relative;
-		width: 85%;
 		img {
 			width: 100%;
 		}

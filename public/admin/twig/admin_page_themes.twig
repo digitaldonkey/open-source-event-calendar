@@ -12,7 +12,7 @@
     <h1 class="wp-heading-inline">{{ page_title }}</h1>
     <h3 class="">{{ current_theme_label }}</h3>
     <div class="theme-browser inside">
-        <div id="current-theme"  class="theme {% if current_theme.has_screenshot %} has-screenshot{% endif %}">
+        <div id="current-theme" data-id="{{ current_theme.theme_id }}" class="theme {% if current_theme.has_screenshot %}has-screenshot{% endif %}">
             {% if current_theme.has_screenshot %}
                 <div class="theme-screenshot">
                     <img src="{{ current_theme.screenshot_uri }}" alt="{{ current_theme.screenshot_alt }}"/>

@@ -322,6 +322,7 @@ class AdminThemeList extends WP_List_Table
                 'tags_title' => esc_html__('Tags:', 'open-source-event-calendar'),
                 'tags' => esc_html(implode(', ', $theme['Tags'])),
                 'activate_text' => esc_attr__('Activate', 'open-source-event-calendar'),
+                'theme_id' => $theme_name,
                 'activate_link' => add_query_arg(
                     [
                             'osec_action' => AdminPageManageThemes::$NONCE['action'],

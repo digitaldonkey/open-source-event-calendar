@@ -133,7 +133,7 @@ class FrontendCssController extends OsecBaseClass
 
             return $this->cache->get(self::COMPILED_CSS_KEY);
         } catch (CacheNotSetException $e) {
-            $recompiledCss = LessController::factory($this->app)->parse_less_files();
+            $recompiledCss = LessController::factory($this->app)->parse_less_files(null, false);
             try {
                 $this->update_persistence_layer($recompiledCss);
 
@@ -357,7 +357,7 @@ class FrontendCssController extends OsecBaseClass
         }
         try {
             // Try to parse the css
-            $css = $lessCtrl->parse_less_files($variables);
+            $css = $lessCtrl->parse_less_files($variables, false);
             // Reset the parse time to force a browser reload of the CSS, whether we are
             // updating persistence or not. Do it here to be sure files compile ok.
             // TODO Verify that this is not necessary anymore.
