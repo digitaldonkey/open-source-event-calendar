@@ -2,8 +2,7 @@
 const WpPlugin = require('../page_objects/ActivatePluginAndSettings');
 
 const {
-    until,
-    By, Select,
+    By,
 } = require('selenium-webdriver');
 let pageObject = null;
 

@@ -1,17 +1,14 @@
 //wp-admin/plugins.php
 const WpPlugin = require('../page_objects/ActivatePluginAndSettings');
 
-const {
-    until,
-    By, Select,
-} = require('selenium-webdriver');
 let pageObject = null;
 
 describe('Plugin install & Setup', function(){
-    this.timeout(50000);
+    this.timeout(120000);
 
     before (async function() {
-        pageObject = await WpPlugin.build();
+        const build = await WpPlugin.build();
+        pageObject = build;
     })
 
     afterEach(async function(){
@@ -24,21 +21,17 @@ describe('Plugin install & Setup', function(){
         await pageObject.driver.quit();
     });
 
-
     it('WordPress activate Osec plugin', async function () {
         const url= pageObject.settings.domain + '/wp-admin/plugins.php';
         await pageObject.go_and_do_login(url);
 
         const isActivatedClean = await pageObject.activateOsecPlugin();
         await pageObject.takeScreenshot(this);
-        if (!isActivatedClean) {
-            console.warn('OSEC_UNINSTALL_PLUGIN_DATA must be TRUE for testing')
-        }
+
         pageObject.assert.ok(
             isActivatedClean,
             'The install is new at plugin activate.'
         );
-        await pageObject.takeScreenshot(this);
     });
 
     it('Update osec settings', async function () {
@@ -51,8 +44,12 @@ describe('Plugin install & Setup', function(){
         // Re-enable the plugin
         const url= pageObject.settings.domain + '/wp-admin/plugins.php';
         await pageObject.go_and_do_login(url);
+        await pageObject.takeScreenshot(this);
 
         const isActivatedClean = await pageObject.activateOsecPlugin();
+
+        await pageObject.takeScreenshot(this);
+
         pageObject.assert.ok(
             isActivatedClean,
             'All data hase been purged. If OSEC_UNINSTALL_PLUGIN_DATA=TRUE data will be purged on reinstall.'

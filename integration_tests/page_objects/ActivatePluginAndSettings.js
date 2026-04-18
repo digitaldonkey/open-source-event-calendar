@@ -1,5 +1,5 @@
 const WpLogin = require ('./WpLogin');
-const {Key, By, Select, WebElement, until} = require('selenium-webdriver');
+const { By, Select, WebElement, until} = require('selenium-webdriver');
 
 /**
  * Get current active theme if not set yet.
@@ -13,7 +13,9 @@ class ActivatePluginAndSettings extends WpLogin {
         }
         const url = this.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-themes';
         await this.go_and_do_login(url);
-        this.settings.currentTheme = await this.getThemeIdOnThemePage();
+        const currenTheme = await this.getThemeIdOnThemePage();
+        this.settings.currentTheme = currenTheme;
+        return currenTheme;
     }
 
     async getThemeIdOnThemePage() {
@@ -39,62 +41,59 @@ class ActivatePluginAndSettings extends WpLogin {
      * Deletes all Settings and Content.
      * Re-enables current theme if required.
      *
-     * @returns {Promise<void>}
+     * @returns {Promise<boolean>}
      */
-    async resetOsecPlugin(theme = null) {
+    async resetOsecPlugin(theme = null)    {
         if (!theme) {
             theme = this.getActiveTheme();
         }
-        await this.activateOsecPlugin();
+        const isActivatedClean = await this.activateOsecPlugin();
+        if (!isActivatedClean) {
+            return false;
+        }
+
         const settingsUrl = this.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
         await this.go_and_do_login(settingsUrl);
         await this.setupOsecPlugin();
-        if (theme && theme !== 'vortex') {
+        if (theme && theme !== 'plana') {
            await this.setTheme(theme);
         }
-        else if (this.settings.currentTheme && this.settings.currentTheme !== 'vortex') {
+        else if (this.settings.currentTheme && this.settings.currentTheme !== 'plana') {
             await this.setTheme(this.settings.currentTheme);
         }
         await this.doLogout();
+        return true;
     }
 
     /**
      * Activate Osec WP Plugin
      *
-     * @returns bool
+     * @returns bool If install was clean. (Osec Settings not set yet).
      */
     async activateOsecPlugin() {
+        const isEnabled = await this.isPluginActive();
+        if (isEnabled) {
+            await this.disablePluginAndCleanup();
+        }
+
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
 
-        const revealed = await this.driver.findElement(By.css('#activate-open-source-event-calendar, #deactivate-open-source-event-calendar'));
-        await this.driver.wait(until.elementIsVisible(revealed));
+        const enableButton = await this.getElement(By.css('#activate-open-source-event-calendar'));
+        await enableButton.click();
 
-        // If Plugin is activated disable it first.
-        const elmId = await revealed.getDomAttribute('id');
+        const isActivated = await this.getElement(By.id('message'));
+        const message = await this.getElement(By.css('#message>p'));
+        const messageText = await message.getText();
 
-        if (elmId === 'deactivate-open-source-event-calendar') {
-            await revealed.click();
-
-            // Delete Plugin Page
-            await this.deletePluginPage();
-
-            console.info('OSEC: re-enabling plugin')
-            return this.activateOsecPlugin();
-        }
-
-        await revealed.click();
-        const isActivated = await this.driver.findElement(By.id('message'));
-        await this.driver.wait(until.elementIsVisible(isActivated));
-        const message = await this.driver.findElement(By.css('#message>p'));
-        const xxx = await message.getText();
-
-        if (xxx !== 'Plugin activated.') {
+        if (messageText !== 'Plugin activated.') {
             throw new Error('Can not find `Plugin activated` message');
         }
 
         try{
+            await this.driver.manage().setTimeouts({ implicit: 1000 });
             const configureMessage = await this.driver.findElement(By.css('.message a[href="' + this.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings"]'));
+            await this.driver.manage().setTimeouts({ implicit: 60000 })
             const yyy = await configureMessage.getText();
             if (yyy === 'Click here to set it up now »') {
                 return true
@@ -103,15 +102,44 @@ class ActivatePluginAndSettings extends WpLogin {
         catch(exception){
             return false;
         }
-        return true;
+        return false;
     }
 
+
+    async isPluginActive(){
+        const url= this.settings.domain + '/wp-admin/plugins.php';
+        await this.go_and_do_login(url);
+        const isActive = await this.driver.executeScript("return document.getElementById('deactivate-open-source-event-calendar') !== null;");
+        return isActive
+    }
+
+    /**
+     * Uninstall and purge if possible.
+     *
+     * @returns {Promise<void>}
+     */
+    async disablePluginAndCleanup() {
+        const url= this.settings.domain + '/wp-admin/plugins.php';
+        await this.go_and_do_login(url);
+        const disableButton = await this.getElement(By.id('deactivate-open-source-event-calendar'));
+        await disableButton.click()
+
+        // Delete Plugin Page
+        await this.deletePluginPage();
+
+        // CHECK SUCESS
+        const isEnabled = await this.isPluginActive();
+        if (isEnabled) {
+            throw "The plugin can not be disabled cleanly. Ensure OSEC_UNINSTALL_PLUGIN_DATA is true and FS_METHOD='direct'. Or deactivation might fail and you will end up here. "
+        }
+    }
 
     async deletePluginPage() {
         const url= this.settings.domain + '/wp-admin/edit.php?post_type=page';
         await this.go_and_do_login(url);
         await this.driver.manage().setTimeouts({ implicit: 1000 });
         const trashButtons = await this.driver.findElements(By.css('a[aria-label="Move “Calendar” to the Trash"]'));
+
         if (trashButtons.length) {
             const deletes = [];
             for(let link of trashButtons) {
@@ -122,7 +150,7 @@ class ActivatePluginAndSettings extends WpLogin {
                 await this.go_to_url(delLink);
             }
         }
-        await this.driver.manage().setTimeouts({ implicit: 50000 })
+        await this.driver.manage().setTimeouts({ implicit: 60000 });
     }
 
     async setupOsecPlugin(){
@@ -232,6 +260,12 @@ class ActivatePluginAndSettings extends WpLogin {
         else {
             let viewsDropdownLink = await this.getElement(By.css('a[data-toggle="ai1ec-dropdown"]'));
             await viewsDropdownLink.click();
+        }
+    }
+
+    doFailTest(isReadyToRun) {
+        if (!isReadyToRun) {
+            throw 'OSEC_UNINSTALL_PLUGIN_DATA must be TRUE for testing';
         }
     }
 

@@ -24,8 +24,8 @@ class WpLogin extends BasePage {
         await actions.move({origin: popupTrigger}).perform();
         const logoutLink = await this.getElement(By.css('#wp-admin-bar-logout a'));
         const logoutUrl = await logoutLink.getAttribute('href');
-        this.waitToSeeWhatHappens(500, true)
-        this.go_to_url(logoutUrl);
+        await this.waitToSeeWhatHappens(500, true)
+        await this.go_to_url(logoutUrl);
     }
 
     async doLogin(auth){
@@ -58,8 +58,7 @@ class WpLogin extends BasePage {
     async isLoggedIn(){
         // Frontend: body.logged-in
         // Backend: body.wp-admin
-        const isLoggedIn = await this.driver.executeScript("return Array.prototype.includes.call(document.getElementsByTagName('body')[0].classList, 'logged-in')||Array.prototype.includes.call(document.getElementsByTagName('body')[0].classList, 'wp-admin')");;
-        return isLoggedIn;
+        return this.driver.executeScript("return Array.prototype.includes.call(document.getElementsByTagName('body')[0].classList, 'logged-in')||Array.prototype.includes.call(document.getElementsByTagName('body')[0].classList, 'wp-admin')");
     }
 }
 module.exports = WpLogin;

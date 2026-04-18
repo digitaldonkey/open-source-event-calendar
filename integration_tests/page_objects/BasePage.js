@@ -18,9 +18,10 @@ class BasePage {
         this.assert = assert;
         this.settings = settings;
         this.driver = driver;
-        this.driver.manage().window().maximize();
-        this.driver.manage().setTimeouts({implicit: (10000)});
         this.screenshotCount = 1;
+        this.driver.manage().window().maximize().then(()=>{
+            this.driver.manage().setTimeouts({implicit: (60000)});
+        })
     }
 
     static async build () {
@@ -33,10 +34,8 @@ class BasePage {
             settings = require('../settings.js');
         }
         const theClass = this;
-        return this.setupWebDriver(settings)
-            .then(function(driver){
-                return new theClass(settings, driver);
-            });
+        const driver = await this.setupWebDriver(settings);
+        return new theClass(settings, driver)
     }
 
     /**
@@ -84,7 +83,7 @@ class BasePage {
     }
 
     async go_to_url(url){
-        console.log('      get: ' + url);
+        console.info('      get: ' + url);
         return this.driver.get(url);
     }
 
@@ -127,7 +126,8 @@ class BasePage {
             throw new Error('getElement requires instance of By as first param')
         }
         const element = await this.driver.findElement(findBy);
-        return this.driver.wait(until.elementIsVisible(element), timeout);
+        await this.driver.wait(until.elementIsVisible(element), timeout);
+        return element;
     }
 
     /**
