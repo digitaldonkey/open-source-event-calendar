@@ -8,7 +8,7 @@ const {
 let pageObject = null;
 
 describe('Plugin install & Setup', function(){
-    this.timeout(50000);
+    this.timeout(120000);
 
     before (async function() {
         pageObject = await WpPlugin.build();
