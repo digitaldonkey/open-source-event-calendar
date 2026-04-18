@@ -477,7 +477,7 @@ jobs:
               cd integration_tests/ && 
               MOCHA_FILE=/tmp/integration_test_results/mocha-junit.xml \
               MOCHA_SCREENSHOT_DIR=/tmp/integration_test_results/screenshots \
-              NODE_ENV=development npx mocha test/**/*.spec.js --timeout 60000
+              npm run test
             )
           when: always
       - store_test_results:
