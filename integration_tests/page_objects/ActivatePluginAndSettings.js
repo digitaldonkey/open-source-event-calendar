@@ -73,6 +73,7 @@ class ActivatePluginAndSettings extends WpLogin {
     async activateOsecPlugin() {
 
         const isEnabled = await this.isPluginActive();
+        console.log({isEnabled})
         if (isEnabled) {
             await this.disablePluginAndCleanup();
             await this.waitToSeeWhatHappens(2000);
@@ -80,6 +81,7 @@ class ActivatePluginAndSettings extends WpLogin {
 
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
+        await this.waitToSeeWhatHappens(2000);
 
         console.log('      activateOsecPlugin ENABLING PLUGIN');
 
@@ -114,7 +116,8 @@ class ActivatePluginAndSettings extends WpLogin {
     async isPluginActive(){
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
-        return this.driver.executeScript("return document.getElementById('deactivate-open-source-event-calendar')");
+        const isActive = await this.driver.executeScript("return document.getElementById('activate-open-source-event-calendar') === null;");
+        return isActive
     }
 
     async disablePluginAndCleanup() {
