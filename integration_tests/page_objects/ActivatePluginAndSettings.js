@@ -127,7 +127,8 @@ class ActivatePluginAndSettings extends WpLogin {
         await this.go_and_do_login(url);
         const disableButton = await this.getElement(By.id('deactivate-open-source-event-calendar'));
 
-        console.log('      disablePluginAndCleanup: DISABLING PLUGIN');
+        console.log('      disablePluginAndCleanup: DISABLING PLUGIN', {disableButton});
+
         await disableButton.click()
 
         // Delete Plugin Page
