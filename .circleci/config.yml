@@ -422,6 +422,7 @@ jobs:
             bash ./bin/install-wp-tests.sh $MYSQL_DATABASE $MYSQL_USER $MYSQL_PASSWORD $WP_HOST $WP_VERSION true true
             $WP_CLI config create --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
             $WP_CLI core install --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com"
+            $WP_CLI config set FS_METHOD direct
       - run:
           name: Install Open source event calendar plugin (release)
           command: |
