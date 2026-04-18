@@ -34,10 +34,8 @@ class BasePage {
             settings = require('../settings.js');
         }
         const theClass = this;
-        return this.setupWebDriver(settings)
-            .then(function(driver){
-                return new theClass(settings, driver);
-            });
+        const driver = await this.setupWebDriver(settings);
+        return new theClass(settings, driver)
     }
 
     /**

@@ -81,7 +81,7 @@ class ActivatePluginAndSettings extends WpLogin {
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
 
-        console.log('activateOsecPlugin ENABLING PLUGIN');
+        console.log('      activateOsecPlugin ENABLING PLUGIN');
         const enableButton = await this.driver.findElement(By.id('activate-open-source-event-calendar'));
         await this.driver.wait(until.elementIsVisible(enableButton), 2000);
         await enableButton.click();
@@ -121,11 +121,11 @@ class ActivatePluginAndSettings extends WpLogin {
         const disableButton = await this.driver.findElement(By.id('deactivate-open-source-event-calendar'));
         await this.driver.wait(until.elementIsVisible(disableButton), 2000);
 
-        console.log('disablePluginAndCleanup: DISABLING PLUGIN');
+        console.log('      disablePluginAndCleanup: DISABLING PLUGIN');
         await disableButton.click()
 
         // Delete Plugin Page
-        console.log('disablePluginAndCleanup: DELETE PAGE(s)');
+        console.log('      disablePluginAndCleanup: DELETE PAGE(s)');
         await this.deletePluginPage();
     }
 

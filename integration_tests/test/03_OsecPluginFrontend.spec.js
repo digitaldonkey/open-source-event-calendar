@@ -18,7 +18,6 @@ describe('Frontend tests', function(){
 
     before (async function() {
         pageObject = await WpPlugin.build();
-
         if (pageObject.settings.currentThemeOnly) {
             // Will set pageObject.settings.currentTheme
             await pageObject.getActiveTheme();
