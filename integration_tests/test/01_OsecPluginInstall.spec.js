@@ -7,7 +7,8 @@ describe('Plugin install & Setup', function(){
     this.timeout(120000);
 
     before (async function() {
-        pageObject = await WpPlugin.build();
+        const build = await WpPlugin.build();
+        pageObject = build;
     })
 
     afterEach(async function(){
