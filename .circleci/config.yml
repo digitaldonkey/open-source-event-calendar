@@ -281,7 +281,7 @@ jobs:
             # Install WP
             ln -s /home/circleci/open-source-event-calendar/ $WP_CORE_DIR/wp-content/plugins/
             $WP_CLI config create --path=$WP_CORE_DIR --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
-            $WP_CLI core install --path=$WP_CORE_DIR --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com"
+            $WP_CLI core install --path=$WP_CORE_DIR --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com" --skip-email
             $WP_CLI --path=$WP_CORE_DIR plugin activate open-source-event-calendar
       - run:
           name: Install NVM
@@ -421,7 +421,7 @@ jobs:
             sudo chown root:circleci $WP_CORE_DIR/.. && sudo chmod g+w $WP_CORE_DIR/.. && sudo rm -rf $WP_CORE_DIR 
             bash ./bin/install-wp-tests.sh $MYSQL_DATABASE $MYSQL_USER $MYSQL_PASSWORD $WP_HOST $WP_VERSION true true
             $WP_CLI config create --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
-            $WP_CLI core install --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com"
+            $WP_CLI core install --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com" --skip-email
             $WP_CLI config set FS_METHOD direct --path=$WP_CORE_DIR
       - run:
           name: Install Open source event calendar plugin (release)
