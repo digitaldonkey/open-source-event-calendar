@@ -41,7 +41,7 @@ class LessController extends OsecBaseClass
      */
     public function __construct(
         App $app,
-        string $default_theme_url = OSEC_DEFAULT_THEME_URL
+        string $default_theme_url = OSEC_THEMES_URL . '/' . OSEC_ROOT_THEME_NAME . '/'
     ) {
         parent::__construct($app);
 
@@ -510,8 +510,8 @@ class LessController extends OsecBaseClass
             'osec_font_dirs',
             [
                 'AI1EC' => [
-                    $theme['theme_dir'] . DIRECTORY_SEPARATOR . 'font',
-                    OSEC_DEFAULT_THEME_PATH . DIRECTORY_SEPARATOR . 'font',
+                    $theme['theme_dir'] . '/font',
+                    OSEC_DEFAULT_THEME_ROOT . '/' . OSEC_ROOT_THEME_NAME . '/font',
                 ],
             ]
         );
