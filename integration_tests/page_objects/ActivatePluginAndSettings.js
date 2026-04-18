@@ -82,6 +82,8 @@ class ActivatePluginAndSettings extends WpLogin {
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
 
+        await this.waitToSeeWhatHappens(2000);
+
         console.log('      activateOsecPlugin ENABLING PLUGIN');
         const isEnabled2 = await this.isPluginActive();
         console.log({isEnabled2})
