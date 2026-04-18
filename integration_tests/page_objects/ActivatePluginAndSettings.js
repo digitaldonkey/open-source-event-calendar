@@ -126,6 +126,7 @@ class ActivatePluginAndSettings extends WpLogin {
         // Delete Plugin Page
         console.log('      disablePluginAndCleanup: DELETE PAGE(s)');
         await this.deletePluginPage();
+        console.log('      disablePluginAndCleanup: DONE');
     }
 
     async deletePluginPage() {

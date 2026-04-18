@@ -65,7 +65,7 @@ describe('Frontend tests', function(){
 
                 it('Set up theme', async function () {
                     pageObject.doFailTest(isReady);
-                    console.info('Set up theme: ' + theme + ' Should skip: ' + shouldSkip);
+                    console.info('      Set up theme: ' + theme + ' Should skip: ' + shouldSkip);
                     await pageObject.setTheme(theme);
                 });
 
