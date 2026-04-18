@@ -307,11 +307,12 @@ jobs:
             nvm install
             npm install
             npm run build-twig-frontend            
-            if output=$(git status --porcelain) && [ -z "$output" ]; then
+            output=$(git status -s 2>&1)
+            if [[ $? -ne 0 || -z "$output" ]]; then
               echo "No changes detected"
               exit 0;
             else
-              echo "Generating Twig-js templates: revealed uncommitted changes"
+              echo "Generating Twig-js templates: revealed uncommitted changes."
               git diff
               exit 1;
             fi
@@ -324,11 +325,12 @@ jobs:
             nvm install
             npm install
             npm run build-hooks-and-filters            
-            if output=$(git status --porcelain) && [ -z "$output" ]; then
+            output=$(git status -s 2>&1)
+            if [[ $? -ne 0 || -z "$output" ]]; then
               echo "No changes detected"
               exit 0;
             else
-              echo "Generating hooks-and-filters.md: revealed uncommitted changes"
+              echo "Generating hooks-and-filters.md: revealed uncommitted changes."
               git diff
               exit 1;
             fi

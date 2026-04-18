@@ -219,6 +219,9 @@ Cache Settings
 ![Mobile Agenda View](assets/screenshot-8.png)
 Mobile Agenda View
 
+![Schema.org/Event data validator](assets/screenshot-9.png)
+Schema.org/Event data validator
+
 ## Contributors
 ### WordPress:
 digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov

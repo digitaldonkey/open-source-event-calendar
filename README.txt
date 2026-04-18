@@ -3,7 +3,7 @@
 Tags: calendar, events, ics, ical importer
 Requires PHP: 8.2
 Requires at least: 6.6
-Tested up to: 6.9
+Tested up to: 6.9.4
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Plugin URI: https://github.com/digitaldonkey/open-source-event-calendar
@@ -13,8 +13,8 @@ Author URI: https://github.com/digitaldonkey
 Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 Text Domain: open-source-event-calendar
-Stable Tag: 1.0.11
-Version: 1.0.11
+Stable Tag: 1.1.0
+Version: 1.1.0
 
 An event calendar with native iCal / ICS import and export
 
@@ -202,17 +202,20 @@ I may also provide paid support.
 6. Recurring Events
 7. Cache Settings
 8. Mobile Agenda View
+9. Schema.org/Event data validator
 
 == Changelog ==
 
 = 1.1.0 =
-- OpenStreetMap support including Geocoding in Edit form. Removed outdated Google Maps support.
+- OpenStreetMap support including Geocoding in Edit form.
+- Added full schema.org/Event support for single Event page using plana theme. Check [search engine readability](https://validator.schema.org).
+- Reworked backend forms: Event edit, Themes, Theme options, Settings, Feeds.
+- Reworked PLANA theme fit better into current WP standard themes.
+- Removed outdated Google Maps support.
 - Reworked Readme.md to look better on github. Build tool to generate Readme.txt from Readme.md, CHANGELOG.md and constants.
 - Automated WordPress plugin directory deployment
 - Excerpt support: Enables to write Event summary and content separately.
 - Ability to enable/disable features: Location, Excerpt, Maps, Coast, Comments, Shortcodes.
-- Reworked backend forms: Event edit, Themes, Theme options, Settings, Feeds.
-- 
 
 = 1.0.11 =
 - Beautified Theme options admin page

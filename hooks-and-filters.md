@@ -3230,6 +3230,58 @@ add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
 ---
 
 
+@file **../src/App/View/Event/EventContactView.php**
+
+### osec_contact_url_link <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter or add contact data before render
+
+```php
+add_filter('osec_contact_url_link', $args $has_data $event);
+```
+
+#### Description
+
+
+Visible Event single ´Organizer contact info´
+
+#### Parameters
+
+
+ - **$args** <span style="color:crimson"> </span> Args in use.
+ - **$has_data** <span style="color:crimson"> bool</span> Must be true to render
+ - **$event** <span style="color:crimson"> Event</span> 
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter or add contact data before render
+ *
+ * Visible Event single ´Organizer contact info´
+ *
+ * @since 1.0
+ *
+ * @param string  $args  Args in use.
+ * @param bool $has_data Must be true to render
+ * @param Event $event
+ *
+ * @return array
+ *
+ * @file src/App/View/Event/EventContactView.php
+ */
+add_filter('osec_contact_url_link', $args $has_data $event);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/View/Event/EventContentView.php**
 
 ### osec_back_to_calendar_button_html_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -3701,25 +3753,24 @@ add_filter('osec_buy_tickets_url_icon', $html);
 </details>
 
 
-### osec_contact_url_link <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_currency_to_iso4217_map <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter contact_url label
+Add Currency symbols (UTF-8) => ISO 4217 Code
 
 ```php
-add_filter('osec_contact_url_link', $contact_url $event_website_link);
+add_filter('osec_currency_to_iso4217_map', $currencyMap);
 ```
 
 #### Description
 
 
-Visible Event single if ´Organizer contact info´ -> Website URL is set.
+<meta itemprop="priceCurrency" content="EUR"> @see https://schema.org/priceCurrency
 
 #### Parameters
 
 
- - **$contact_url** <span style="color:crimson"> </span> Url in use.
- - **$event_website_link** <span style="color:crimson"> </span> Multilingual label for the link.
+ - **$currencyMap** <span style="color:crimson"> </span> 
 
 <details markdown="1">
 <summary>Source</summary>
@@ -3727,20 +3778,58 @@ Visible Event single if ´Organizer contact info´ -> Website URL is set.
 
 ```php
 /**
- * Alter contact_url label
+ * Add Currency symbols (UTF-8) => ISO 4217 Code
  *
- * Visible Event single if ´Organizer contact info´
- * -> Website URL is set.
+ * <meta itemprop="priceCurrency" content="EUR">
+ * @see https://schema.org/priceCurrency
  *
- * @since 1.0
+ * @since 1.1
  *
- * @param  string  $contact_url  Url in use.
- *
- * @param  string  $event_website_link  Multilingual label for the link.
+ * @param  array  $currencyMap
+ * .
+ * @return array
  *
  * @file src/App/View/Event/EventTicketView.php
  */
-add_filter('osec_contact_url_link', $contact_url $event_website_link);
+add_filter('osec_currency_to_iso4217_map', $currencyMap);
+```
+
+</details>
+
+
+### osec_currency_iso4217_value_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Allows you to alter or provide a valid priceCurrency
+
+```php
+add_filter('osec_currency_iso4217_value_alter', $cost_currency $coast);
+```
+
+#### Parameters
+
+
+ - **$cost_currency** <span style="color:crimson"> </span> Assumed ISO 4217 value.
+ - **$coast** <span style="color:crimson"> </span> Raw field value.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Allows you to alter or provide a valid priceCurrency
+ *
+ * @see https://schema.org/priceCurrency
+ * @since 1.0
+ *
+ * @param  string  $cost_currency Assumed ISO 4217 value.
+ * @param  string  $coast Raw field value.
+ * @return string Must return ISO 4217 3 letter string as schema requires or null to hide.
+ *
+ * @file src/App/View/Event/EventTicketView.php
+ */
+add_filter('osec_currency_iso4217_value_alter', $cost_currency $coast);
 ```
 
 </details>
@@ -8112,6 +8201,58 @@ add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
 ---
 
 
+@file **../src/App/View/Event/EventContactView.php**
+
+### osec_contact_url_link <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter or add contact data before render
+
+```php
+add_filter('osec_contact_url_link', $args $has_data $event);
+```
+
+#### Description
+
+
+Visible Event single ´Organizer contact info´
+
+#### Parameters
+
+
+ - **$args** <span style="color:crimson"> </span> Args in use.
+ - **$has_data** <span style="color:crimson"> bool</span> Must be true to render
+ - **$event** <span style="color:crimson"> Event</span> 
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter or add contact data before render
+ *
+ * Visible Event single ´Organizer contact info´
+ *
+ * @since 1.0
+ *
+ * @param string  $args  Args in use.
+ * @param bool $has_data Must be true to render
+ * @param Event $event
+ *
+ * @return array
+ *
+ * @file src/App/View/Event/EventContactView.php
+ */
+add_filter('osec_contact_url_link', $args $has_data $event);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/View/Event/EventContentView.php**
 
 ### osec_back_to_calendar_button_html_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -8583,25 +8724,24 @@ add_filter('osec_buy_tickets_url_icon', $html);
 </details>
 
 
-### osec_contact_url_link <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_currency_to_iso4217_map <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter contact_url label
+Add Currency symbols (UTF-8) => ISO 4217 Code
 
 ```php
-add_filter('osec_contact_url_link', $contact_url $event_website_link);
+add_filter('osec_currency_to_iso4217_map', $currencyMap);
 ```
 
 #### Description
 
 
-Visible Event single if ´Organizer contact info´ -> Website URL is set.
+<meta itemprop="priceCurrency" content="EUR"> @see https://schema.org/priceCurrency
 
 #### Parameters
 
 
- - **$contact_url** <span style="color:crimson"> </span> Url in use.
- - **$event_website_link** <span style="color:crimson"> </span> Multilingual label for the link.
+ - **$currencyMap** <span style="color:crimson"> </span> 
 
 <details markdown="1">
 <summary>Source</summary>
@@ -8609,20 +8749,58 @@ Visible Event single if ´Organizer contact info´ -> Website URL is set.
 
 ```php
 /**
- * Alter contact_url label
+ * Add Currency symbols (UTF-8) => ISO 4217 Code
  *
- * Visible Event single if ´Organizer contact info´
- * -> Website URL is set.
+ * <meta itemprop="priceCurrency" content="EUR">
+ * @see https://schema.org/priceCurrency
  *
- * @since 1.0
+ * @since 1.1
  *
- * @param  string  $contact_url  Url in use.
- *
- * @param  string  $event_website_link  Multilingual label for the link.
+ * @param  array  $currencyMap
+ * .
+ * @return array
  *
  * @file src/App/View/Event/EventTicketView.php
  */
-add_filter('osec_contact_url_link', $contact_url $event_website_link);
+add_filter('osec_currency_to_iso4217_map', $currencyMap);
+```
+
+</details>
+
+
+### osec_currency_iso4217_value_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Allows you to alter or provide a valid priceCurrency
+
+```php
+add_filter('osec_currency_iso4217_value_alter', $cost_currency $coast);
+```
+
+#### Parameters
+
+
+ - **$cost_currency** <span style="color:crimson"> </span> Assumed ISO 4217 value.
+ - **$coast** <span style="color:crimson"> </span> Raw field value.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Allows you to alter or provide a valid priceCurrency
+ *
+ * @see https://schema.org/priceCurrency
+ * @since 1.0
+ *
+ * @param  string  $cost_currency Assumed ISO 4217 value.
+ * @param  string  $coast Raw field value.
+ * @return string Must return ISO 4217 3 letter string as schema requires or null to hide.
+ *
+ * @file src/App/View/Event/EventTicketView.php
+ */
+add_filter('osec_currency_iso4217_value_alter', $cost_currency $coast);
 ```
 
 </details>
