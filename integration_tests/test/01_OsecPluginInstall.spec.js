@@ -44,8 +44,12 @@ describe('Plugin install & Setup', function(){
         // Re-enable the plugin
         const url= pageObject.settings.domain + '/wp-admin/plugins.php';
         await pageObject.go_and_do_login(url);
+        await pageObject.takeScreenshot(this);
 
         const isActivatedClean = await pageObject.activateOsecPlugin();
+
+        await pageObject.takeScreenshot(this);
+
         pageObject.assert.ok(
             isActivatedClean,
             'All data hase been purged. If OSEC_UNINSTALL_PLUGIN_DATA=TRUE data will be purged on reinstall.'
