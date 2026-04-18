@@ -132,7 +132,12 @@ class ActivatePluginAndSettings extends WpLogin {
         // Delete Plugin Page
         console.log('      disablePluginAndCleanup: DELETE PAGE(s)');
         await this.deletePluginPage();
-        console.log('      disablePluginAndCleanup: DONE');
+
+        await this.go_and_do_login(url);
+        console.log('      activateOsecPlugin CHECK IF DISABLED SUCCESSFULLY');
+        const isEnabled2 = await this.isPluginActive();
+        console.log({isEnabled2})
+        console.log('      disablePluginAndCleanup: ALL DONE');
     }
 
     async deletePluginPage() {
