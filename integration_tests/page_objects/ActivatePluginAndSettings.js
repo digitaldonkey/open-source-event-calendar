@@ -76,8 +76,8 @@ class ActivatePluginAndSettings extends WpLogin {
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
 
-        const revealed = await this.driver.findElement(By.css('#activate-open-source-event-calendar, #deactivate-open-source-event-calendar'));
-        await this.driver.wait(until.elementIsVisible(revealed));
+        let revealed = await this.driver.findElement(By.css('#activate-open-source-event-calendar, #deactivate-open-source-event-calendar'));
+        await this.driver.wait(until.elementIsVisible(revealed), 2000);
 
         // If Plugin is activated disable it first.
         const elmId = await revealed.getDomAttribute('id');
@@ -86,7 +86,6 @@ class ActivatePluginAndSettings extends WpLogin {
 
         if (elmId === 'deactivate-open-source-event-calendar') {
             console.log('activateOsecPlugin WILL BE DISABLED');
-
             await revealed.click();
             await this.waitToSeeWhatHappens(1000);
 
