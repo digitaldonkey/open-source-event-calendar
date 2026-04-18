@@ -112,6 +112,7 @@ class ActivatePluginAndSettings extends WpLogin {
         const url= this.settings.domain + '/wp-admin/plugins.php';
         await this.go_and_do_login(url);
         const isActive = await this.driver.executeScript("return document.getElementById('deactivate-open-source-event-calendar') !== null;");
+        console.log('      isPluginActive:' + isActive);
         return isActive
     }
 
@@ -131,9 +132,10 @@ class ActivatePluginAndSettings extends WpLogin {
         console.log('      disablePluginAndCleanup: DELETE PAGE(s)');
         await this.deletePluginPage();
 
+        // CHECK SUCESS
         console.log('      activateOsecPlugin CHECK IF DISABLED SUCCESSFULLY');
-        const isEnabled2 = await this.isPluginActive();
-        if (isEnabled2) {
+        const isEnabled = await this.isPluginActive();
+        if (isEnabled) {
             throw "The plugin can not be disabled cleanly. Ensure OSEC_UNINSTALL_PLUGIN_DATA is true and FS_METHOD='direct'. Or deactivation might fail and you will end up here. "
         }
         console.log('      disablePluginAndCleanup: ALL DONE');
