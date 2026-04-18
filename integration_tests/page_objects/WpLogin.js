@@ -24,8 +24,8 @@ class WpLogin extends BasePage {
         await actions.move({origin: popupTrigger}).perform();
         const logoutLink = await this.getElement(By.css('#wp-admin-bar-logout a'));
         const logoutUrl = await logoutLink.getAttribute('href');
-        this.waitToSeeWhatHappens(500, true)
-        this.go_to_url(logoutUrl);
+        await this.waitToSeeWhatHappens(500, true)
+        await this.go_to_url(logoutUrl);
     }
 
     async doLogin(auth){

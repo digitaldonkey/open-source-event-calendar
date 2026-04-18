@@ -18,9 +18,10 @@ class BasePage {
         this.assert = assert;
         this.settings = settings;
         this.driver = driver;
-        this.driver.manage().window().maximize();
-        this.driver.manage().setTimeouts({implicit: (10000)});
         this.screenshotCount = 1;
+        this.driver.manage().window().maximize().then(()=>{
+            this.driver.manage().setTimeouts({implicit: (60000)});
+        })
     }
 
     static async build () {

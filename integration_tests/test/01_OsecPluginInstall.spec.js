@@ -20,7 +20,6 @@ describe('Plugin install & Setup', function(){
         await pageObject.driver.quit();
     });
 
-
     it('WordPress activate Osec plugin', async function () {
         const url= pageObject.settings.domain + '/wp-admin/plugins.php';
         await pageObject.go_and_do_login(url);
