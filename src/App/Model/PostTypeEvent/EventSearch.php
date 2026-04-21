@@ -9,6 +9,7 @@ use Osec\App\WpmlHelper;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
+use Osec\Exception\TimezoneException;
 
 /**
  * Search Event.
@@ -68,7 +69,7 @@ class EventSearch extends OsecBaseClass
      *                                        "last day" which actually might be first day to display
      *                                      ---> Depending on $page_offset
      *                                           date > defaults to "from last day to time" [sic!])
-*                                      true:   Set to true to include all events from last day ignoring {$limit}
+     *                                 true:   Set to true to include all events from last day ignoring {$limit}
      *                             NOTE FROM NICOLA: be careful, if you want a query with events
      *                             that have a start date which is greater than today, pass 0 as
      *                             this parameter. If you pass false ( or pass nothing ) you end up with a query
@@ -203,18 +204,24 @@ class EventSearch extends OsecBaseClass
             }
             $date_last = $event->get('start');
         }
-        $date_first = new DT($date_first);
-        $date_last  = new DT($date_last);
-        // jus show next/prev links, in case no event found is shown.
-        $next = true;
-        $prev = true;
+
+        // Display Prev/Next buttons?
+        /* @var bool $next if there are events after $date_last */
+        $next = false;
+        /* @var bool $prev if there are events before $date_first */
+        $prev = false;
+        if ($date_first && $date_last) {
+            $future_and_past = $this->get_next_and_past_events($date_first, $date_last);
+            $next            = $future_and_past['future_events_count'] > 0;
+            $prev            = $future_and_past['pre_events_count'] > 0;
+        }
 
         return [
             'events'     => $events,
             'prev'       => $prev,
             'next'       => $next,
-            'date_first' => $date_first,
-            'date_last'  => $date_last,
+            'date_first' => new DT($date_first),
+            'date_last'  => new DT($date_last),
         ];
     }
 
@@ -764,5 +771,29 @@ class EventSearch extends OsecBaseClass
         }
 
         return new Event($this->app, $post_id, $instance_id);
+    }
+
+    /**
+     * Check if there are Events before and after given range.
+     *
+     * @param  DT  $first
+     * @param  DT  $last
+     *
+     * @return void
+     * @throws BootstrapException
+     * @throws TimezoneException
+     */
+    private function get_next_and_past_events(DT $first, DT $last)
+    {
+        $query   = $this->db->prepare(
+            'SELECT' .
+            ' COUNT(CASE WHEN start < %d THEN 1 ELSE NULL END) as pre_events_count,' .
+            ' COUNT(CASE WHEN start > %d THEN 1 ELSE NULL END) as future_events_count' .
+            ' FROM ' . $this->db->get_table_name(OSEC_DB__INSTANCES),
+            [$first->format_to_gmt(), $last->format_to_gmt()]
+        );
+        $results = $this->db->get_results($query, ARRAY_A);
+
+        return $results[0];
     }
 }

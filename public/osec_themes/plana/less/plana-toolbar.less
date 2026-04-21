@@ -32,6 +32,9 @@
   }
 
   .action-link {
+    >i {
+      padding: .8125em  1em;
+    }
     line-height: 2.5;
     font-size: var(--wp--preset--font-size--normal);
 
@@ -43,6 +46,11 @@
     border-right: 1px solid rgba(0, 0, 0, 0.1);
     &:last-of-type {
       border-right: 0;
+    }
+    &[disabled],
+    &[disabled]:hover {
+      border: 0;
+      cursor: not-allowed;
     }
   }
 }

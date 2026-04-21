@@ -71,23 +71,31 @@
 	//@backgroundColor: var(--wp--preset--color--contrast, buttonFace);
 	@foregroundColor: var(--wp--preset--color--contrast, buttontext);
 	@backgroundColor: var(--wp--preset--color--accent, buttonFace);
+	@mutedColor: var(--wp--preset--color--cyan-bluish-gray, lightgray);
 	@editColor: var(--wp-admin-theme-color, buttonFace);
 
 	display: inline-block;
 	padding: 0 .6em;
 	line-height: 2.62;
 	text-decoration: none;
+
 	color: @foregroundColor;
 	background: @backgroundColor;
+	&[disabled] {
+		color: @mutedColor;
+		//border: 0;
+	}
+
 	min-width: 2em;
 	text-align: center;
 	margin-bottom: .25rem;
-	&:hover {
+
+	&:not([disabled]):hover {
 		background: @foregroundColor;
 		color: @backgroundColor;
 	}
 	&.edit-link {
-		&:hover {
+		&:not([disabled]):hover {
 			background: @editColor;
 		}
 	}

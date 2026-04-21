@@ -3,6 +3,7 @@
 namespace Osec\App\Model\Date;
 
 use DateTime;
+use DateTimeZone;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 
@@ -50,11 +51,15 @@ class UIDateFormats extends OsecBaseClass
     /**
      * Timstamp of this day start.
      *
+     * At given or default timezone.
+     *
      * @return int Timestamp
      */
-    public function currentDay(): int
+    public function currentDay(?DateTimeZone $timezone = null): int
     {
         $date = clone $this->currentTime;
+        $timezone = $timezone ?: Timezones::factory($this->app)->get_default_timezone_object();
+        $date->setTimezone($timezone);
         $date->setTime(0, 0, 0);
 
         return (int)$date->format('U');
