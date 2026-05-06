@@ -12,12 +12,12 @@
  * Requires at least: 6.6
  * Tested up to: 6.9
  * Requires PHP: 8.2
- * Stable Tag: 1.1.1
+ * Stable Tag: 1.1.2
  * License: GPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: open-source-event-calendar
  * Domain Path: /languages
- * Version: 1.1.1
+ * Version: 1.1.2
  */
 
 if (! defined('ABSPATH')) {
