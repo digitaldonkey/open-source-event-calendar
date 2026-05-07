@@ -23,18 +23,25 @@
     font-size: var(--wp--preset--font-size--normal);
   }
 
-  .ai1ec-minical-trigger {
+  .osec-date-select {
     z-index: 3;
 
     .ai1ec-calendar-title-short,
     .ai1ec-calendar-title {
       font-size: inherit;
     }
+
     .ai1ec-calendar-title {
+      padding-left: 1em;
+
       @media (min-width: 25rem) {
         min-width: 3.5em;
         width: auto;
       }
+    }
+    &.action-link > i {
+      padding-left: 0;
+      padding-right: 0;
     }
   }
 
