@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fa225af2956e35b95e296283244ecf63",
+    "content-hash": "763b12be406956522c65be771f46a3ab",
     "packages": [
         {
             "name": "cweagans/composer-configurable-plugin",
