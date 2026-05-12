@@ -268,6 +268,31 @@ class EventInstance extends OsecBaseClass
     }
 
     /**
+     * Parse RRULE string into associative array (replaces removed RecurFactory::parseRexrule()).
+     *
+     * @param  string  $rrule  RRULE string (e.g., "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE")
+     * @return array Parsed rules array
+     */
+    protected function parseRrule(string $rrule): array
+    {
+        $rules = [];
+        foreach (explode(';', $rrule) as $part) {
+            $part = trim($part);
+            if (empty($part)) {
+                continue;
+            }
+            if (str_contains($part, '=')) {
+                [$key, $value] = explode('=', $part, 2);
+                $rules[$key] = $value;
+            } else {
+                // Handle standalone values (e.g., RDATE, EXDATE entries)
+                $rules[$part] = true;
+            }
+        }
+        return $rules;
+    }
+
+    /**
      * @param  array  $data
      * @param  string  $rrule
      * @param  DateTime  $wdate
@@ -290,7 +315,7 @@ class EventInstance extends OsecBaseClass
             'RDATE',
         ];
         $rulesArray = array_filter(
-            RecurFactory::parseRexrule($rrule),
+            $this->parseRrule($rrule),
             function ($k) use ($ignoreKeys) {
                 return ! in_array($k, $ignoreKeys, true);
             },
