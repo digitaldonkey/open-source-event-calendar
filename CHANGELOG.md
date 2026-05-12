@@ -4,7 +4,8 @@
 
  - = 1.1.2 =
 - Fix webcal URLs are not generated when OSEC_SCRIPT_URL uses https. #18
-- Fix: Tags not working in Edit form,
+- Fix: Tags not working in Edit form
+- Agenda-forward-and-back-buttons-are-not-transative #32
 
 = 1.1.1 =
 - Change default theme to plana
