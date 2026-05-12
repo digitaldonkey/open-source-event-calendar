@@ -1,3 +1,15 @@
+= 1.1.3 =
+ - minor reponsive improvements in Plana theme
+ - Removed: Serverside Javascript compression
+
+ - = 1.1.2 =
+- Fix webcal URLs are not generated when OSEC_SCRIPT_URL uses https. #18
+- Fix: Tags not working in Edit form,
+
+= 1.1.1 =
+- Change default theme to plana
+- Reworking Plana theme
+ 
 = 1.1.0 =
 - OpenStreetMap support including Geocoding in Edit form.
 - Added full schema.org/Event support for single Event page using plana theme. Check [search engine readability](https://validator.schema.org).

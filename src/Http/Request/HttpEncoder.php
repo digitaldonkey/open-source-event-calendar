@@ -11,17 +11,69 @@ namespace Osec\Http\Request;
  * @replaces Ai1ec_HTTP_Encoder
  * @author     Time.ly Network Inc.
  */
-class HttpEncoder extends HttpEncoderBase
+class HttpEncoder
 {
+    protected $content = '';
+    protected $headers = array();
+
     /**
-     * Overrides parent function and removed Content-Length header to avoid
-     * some problems if our JavaScript is somehow prepended by 3rd party code.
+     * Get an HTTP Encoder object
      *
-     * @return void Method does not return.
+     * @param array $spec options
+     *
+     * 'content': (string required) content to be encoded
+     *
+     * 'type': (string) if set, the Content-Type header will have this value.
+     *
      */
+    public function __construct($spec)
+    {
+        $this->content = $spec['content'];
+        $this->headers['Content-Length'] = (string)mb_strlen($this->content, '8bit');
+        if (isset($spec['type'])) {
+            $this->headers['Content-Type'] = $spec['type'];
+        }
+    }
+
+    /**
+     * Get array of output headers to be sent
+     *
+     * E.g.
+     * <code>
+     * array(
+     *     'Content-Length' => '615'
+     *     ,'Content-Encoding' => 'x-gzip'
+     *     ,'Vary' => 'Accept-Encoding'
+     * )
+     * </code>
+     *
+     * @return array
+     */
+    public function getHeaders()
+    {
+        return $this->headers;
+    }
+
     public function sendHeaders()
     {
-        unset($this->headers['Content-Length']);
-        parent::sendHeaders();
+        foreach ($this->headers as $name => $val) {
+            header($name . ': ' . $val);
+        }
+    }
+
+    /**
+     * Send output headers and content
+     *
+     * A shortcut for sendHeaders() and echo getContent()
+     *
+     * You must call this before headers are sent and it probably cannot be
+     * used in conjunction with zlib output buffering / mod_gzip. Errors are
+     * not handled purposefully.
+     */
+    public function sendAll()
+    {
+        $this->sendHeaders();
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        echo $this->content;
     }
 }
