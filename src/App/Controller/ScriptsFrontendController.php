@@ -473,7 +473,6 @@ class ScriptsFrontendController extends OsecBaseClass
                     'type'    => 'text/javascript',
                 ]
             );
-            $http_encoder->encode();
             $http_encoder->sendAll();
         }
         ResponseHelper::stop();
