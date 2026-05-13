@@ -1,8 +1,12 @@
+= 1.1.4 =
+ - Upgrade Icalcreateor to 2.4.1
+ - Cleaned some PHP-8.5 deprecation messages.
+
 = 1.1.3 =
  - minor reponsive improvements in Plana theme
  - Removed: Serverside Javascript compression
 
- - = 1.1.2 =
+ = 1.1.2 =
 - Fix webcal URLs are not generated when OSEC_SCRIPT_URL uses https. #18
 - Fix: Tags not working in Edit form
 - Agenda-forward-and-back-buttons-are-not-transative #32
