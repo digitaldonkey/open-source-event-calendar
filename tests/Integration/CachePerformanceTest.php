@@ -1,6 +1,6 @@
 <?php
 
-namespace Osec\Tests\integration;
+namespace Osec\Tests\Integration;
 
 use Osec\Cache\CacheApcu;
 use Osec\Cache\CacheDb;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Osec\Tests\Unit\App\Model;
+namespace Osec\Tests\Unit\App\Model\Date;
 
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
