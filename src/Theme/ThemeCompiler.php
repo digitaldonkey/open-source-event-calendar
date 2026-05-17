@@ -36,7 +36,7 @@ class ThemeCompiler extends OsecBaseClass
      */
     public function generate()
     {
-        header('Content-Type: text/plain; charset=utf-8');
+        header('Content-Type: text/plain; charset=UTF-8');
         $start = microtime(true);
 
         if ( ! ThemeLoader::factory($this->app)->clear_cache()) {
