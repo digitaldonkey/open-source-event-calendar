@@ -22,18 +22,6 @@
                     "provenance": "root"
                 }
             }
-        ],
-        "kigkonsult/icalcreator": [
-            {
-                "package": "kigkonsult/icalcreator",
-                "description": "Fix ctype_digit() deprecation notices",
-                "url": "composer-patches/kigkonsult_icalcreator_2.40.0.patch",
-                "sha256": "20216005077fdb657f247e677ba20876a257d6c64ed5279de73bdd4722373516",
-                "depth": 1,
-                "extra": {
-                    "provenance": "root"
-                }
-            }
         ]
     }
 }

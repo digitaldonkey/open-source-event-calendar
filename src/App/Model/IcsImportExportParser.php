@@ -146,7 +146,12 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // Initialize empty custom exclusions structure
         $exclusions = [];
         // go over each event
-        while ($e = $v->getComponent('vevent')) {
+        // NOTE: getComponent() no longer filters by type in v2.41.x, use getComponents() + filter
+        $events = array_filter(
+            $v->getComponents(),
+            fn($c) => $c instanceof \Kigkonsult\Icalcreator\Vevent
+        );
+        foreach ($events as $e) {
             /* @var \Kigkonsult\Icalcreator\Vevent $e Vevent component. */
             /* @var array $data Data to create Event. */
             $data = [];
@@ -155,9 +160,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // = Start & end times =
             // =====================
             /* @var array $start [params => [VALUE => STRING], value => DateTime ] */
-            $startValue = $e->getDtstart(true);
+            $startValue = $this->extractDateTimeInfo($e->getDtstart(true));
 
-            $endValue = $e->getDtend(true);
+            $endValue = $this->extractDateTimeInfo($e->getDtend(true));
             // For cases where a "VEVENT" calendar component
             // specifies a "DTSTART" property with a DATE value type but none
             // of "DTEND" nor "DURATION" property, the event duration is taken to
@@ -171,27 +176,27 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $endValue = $e->getDuration(true, true);
                 if (empty($endValue)) {
                     // TODO
-                    //   It will crash with $start['value']['hour']??
+                    //   It will crash with $startValue['value']['hour']??
                     //  ALL END STUFF SEEMS BASED ON OLD Lib returning Array-STUFF?
 
                     // #2 if only DATE value is set for start, set duration to 1 day
-                    if (! isset($start['value']['hour'])) {
+                    if (! isset($startValue['value']['hour'])) {
                         $endValue = [
                             'value' => [
-                                'year'  => $start['value']['year'],
-                                'month' => $start['value']['month'],
-                                'day'   => $start['value']['day'] + 1,
+                                'year'  => $startValue['value']['year'],
+                                'month' => $startValue['value']['month'],
+                                'day'   => $startValue['value']['day'] + 1,
                                 'hour'  => 0,
                                 'min'   => 0,
                                 'sec'   => 0,
                             ],
                         ];
-                        if (isset($start['value']['tz'])) {
-                            $endValue['value']['tz'] = $start['value']['tz'];
+                        if (isset($startValue['value']['tz'])) {
+                            $endValue['value']['tz'] = $startValue['value']['tz'];
                         }
                     } else {
                         // #3 set end date to start time
-                        $endValue = $start;
+                        $endValue = $startValue;
                     }
                 }
             }
@@ -721,6 +726,34 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         }
 
         return $timezone;
+    }
+
+    /**
+     * Extract datetime info from Pc object (iCalcreator v2.41.x compatibility).
+     *
+     * In v2.40.x, getDtstart(true) and getDtend(true) returned an array with
+     * ['value' => DateTime, 'params' => array]. In v2.41.x, they return a Pc
+     * object with getValue() and getParams() methods. This helper normalizes
+     * both formats to the array structure expected by the rest of the code.
+     *
+     * @param  mixed  $pc  Pc object or array from getDtstart()/getDtend()
+     * @return array Normalized array with ['value' => DateTime, 'params' => array]
+     */
+    protected function extractDateTimeInfo($pc): array
+    {
+        if ($pc instanceof \Kigkonsult\Icalcreator\Pc) {
+            return [
+                'value' => $pc->getValue(),
+                'params' => $pc->getParams() ?? [],
+            ];
+        }
+        if (is_array($pc)) {
+            return $pc;
+        }
+        return [
+            'value' => $pc,
+            'params' => [],
+        ];
     }
 
     /**

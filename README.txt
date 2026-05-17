@@ -13,8 +13,8 @@ Author URI: https://github.com/digitaldonkey
 Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 Text Domain: open-source-event-calendar
-Stable Tag: 1.1.2
-Version: 1.1.2
+Stable Tag: 1.1.4
+Version: 1.1.4
 
 An event calendar with native iCal / ICS import and export
 
@@ -206,6 +206,23 @@ I may also provide paid support.
 
 == Changelog ==
 
+= 1.1.4 =
+ - Upgrade Icalcreateor to 2.4.1
+ - Cleaned some PHP-8.5 deprecation messages.
+
+= 1.1.3 =
+ - minor reponsive improvements in Plana theme
+ - Removed: Serverside Javascript compression
+
+ = 1.1.2 =
+- Fix webcal URLs are not generated when OSEC_SCRIPT_URL uses https. #18
+- Fix: Tags not working in Edit form
+- Agenda-forward-and-back-buttons-are-not-transative #32
+
+= 1.1.1 =
+- Change default theme to plana
+- Reworking Plana theme
+ 
 = 1.1.0 =
 - OpenStreetMap support including Geocoding in Edit form.
 - Added full schema.org/Event support for single Event page using plana theme. Check [search engine readability](https://validator.schema.org).

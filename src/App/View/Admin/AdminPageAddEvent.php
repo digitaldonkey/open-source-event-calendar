@@ -241,11 +241,11 @@ class AdminPageAddEvent extends OsecBaseClass
      * @throws \Osec\App\Model\PostTypeEvent\InvalidArgumentException
      * @throws \Osec\Exception\BootstrapException
      */
-    protected function get_parent(): Event|false
+    protected function get_parent(): ?Event
     {
         $event = $this->get_event();
         static $parent = null;
-        if ($event) {
+        if ($event && $event->get('post_id')) {
             $parent = EventParent::factory($this->app)->get_parent_event($event->get('post_id'));
         }
         if ($parent) {

@@ -369,13 +369,13 @@ class EventParent extends OsecBaseClass
      *
      * @return int|bool ID of parent event or bool(false)
      */
-    public function get_parent_event(?int $current_id)
+    public function get_parent_event(?int $current_id): ?int
     {
         static $parents = null;
         if (null === $parents) {
             $parents = CacheMemory::factory($this->app);
         }
-        $parent_id = $parents->get($current_id);
+        $parent_id = $current_id ? $parents->get($current_id) : null;
         if (is_null($parent_id)) {
             $db = $this->app->db;
             $parent = $db->get_row(
@@ -390,15 +390,12 @@ class EventParent extends OsecBaseClass
                     $current_id
                 )
             );
-            if (
-                empty($parent) ||
-                'trash' === $parent->post_status
-            ) {
-                $parent_id = false;
-            } else {
+            if (! empty($parent) && 'trash' === $parent->post_status) {
                 $parent_id = (int) $parent->ID;
             }
-            $parents->set($current_id, $parent_id);
+            if ($current_id && ! is_null($parent_id)) { // Is null on Add new event.
+                $parents->set($current_id, $parent_id);
+            }
         }
         return $parent_id;
     }
