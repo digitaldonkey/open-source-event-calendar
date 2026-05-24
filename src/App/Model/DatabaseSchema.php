@@ -7,12 +7,6 @@ use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\DatabaseErrorException;
 
-// TODO
-// There was a very complicated Schema management.
-// Not really disabled but deactivated the $this->checkDelta() --> sucess ...
-// So far tested only against blank/new DB, so enabling works.
-// Needs review,
-
 /**
  * Event manage form backend view layer.
  *
@@ -57,9 +51,6 @@ class DatabaseSchema extends OsecBaseClass
             if (
                 /**
                  * Define if Database schema upgrade should be executed
-                 *
-                 * Currently DatabaseSchema->apply_delta() is disabled.
-                 * TODO Decide to throw schema stuff out entirely or fix it.
                  *
                  * @since 1.0
                  *
@@ -136,18 +127,6 @@ class DatabaseSchema extends OsecBaseClass
 				UNIQUE KEY evt_instance (post_id,start)
 				) CHARACTER SET utf8;";
 
-        if (OSEC_DEBUG) {
-            $debug_view_name = $table_name . '_readable_date';
-            $sql             .= " CREATE VIEW `$debug_view_name` AS SELECT
-         id,
-         post_id,
-         `start`, 
-         DATE_FORMAT(FROM_UNIXTIME(`start`), '%Y-%m-%d %H:%i') AS 'start_formatted',
-        `end`,
-         DATE_FORMAT(FROM_UNIXTIME(`end`), '%Y-%m-%d %H:%i') AS 'end_formatted' 
-        FROM $table_name; ";
-        }
-
         // ================================
         // = Create table category colors =
         // ================================
@@ -162,7 +141,7 @@ class DatabaseSchema extends OsecBaseClass
         $table_name = $dbi->get_table_name(OSEC_DB__FEEDS);
         $sql        .= "CREATE TABLE $table_name (
 					feed_id bigint NOT NULL AUTO_INCREMENT,
-					feed_url varchar(255) NOT NULL,
+					feed_url varchar(768) NOT NULL,
 					feed_name varchar(255) NOT NULL,
 					feed_category varchar(255) NOT NULL,
 					feed_tags varchar(255) NOT NULL,
