@@ -15,6 +15,7 @@ use Osec\Exception\InvalidArgumentException;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderJson;
 use Osec\Theme\ThemeLoader;
+use WP_Term;
 
 /**
  * The class which handles ics feeds tab.
@@ -612,6 +613,7 @@ class FeedsController extends OsecBaseClass
             RenderJson::factory($this->app)
                       ->render(['data' => $output]);
         } else {
+            $this->detach_feed($feed_id);
             $this->delete_ics_feed(true, $feed_id);
         }
         exit(0);
@@ -670,6 +672,37 @@ class FeedsController extends OsecBaseClass
         }
 
         return $output;
+    }
+
+    public function detach_feed(int $feed_id)
+    {
+        $feed_url = $this->get_feed_uri_by_id($feed_id);
+
+        // Disabled vars.
+        $changeTime = time();
+        $name_prefix = 'Feed removed@ ' . gmdate('Y-m-d H:i:s', $changeTime) . ' ';
+        $slug_suffix = '_disabeled_at_' . gmdate('U', $changeTime) . ': ';
+
+        // Rename term to reflect detaching.
+        $feedName = self::get_term_name_from_uri(
+            $this->get_feed_uri_by_id($feed_id)
+        );
+        $term = get_term_by('name', $feedName, 'osec_events_feeds');
+        if ($term instanceof WP_Term) {
+            wp_update_term($term->term_id, 'osec_events_feeds', [
+                'name' => $name_prefix . $term->name,
+                'slug' => $term->slug . $slug_suffix,
+            ]);
+        }
+
+        // Detach Event/Feed relation (prevents further updates).
+        $events_table = $this->app->db->get_table_name(OSEC_DB__EVENTS);
+        $sql = $this->app->db->prepare(
+            "UPDATE {$events_table} SET `ical_feed_url` = %s, `ical_uid` = '' WHERE `ical_feed_url` = %s",
+            $name_prefix . $feed_url,
+            $feed_url
+        );
+       $this->app->db->get_results($sql);
     }
 
     public static function cron_options(): array
@@ -843,7 +876,7 @@ class FeedsController extends OsecBaseClass
                 'keep_tags_categories' => (int) RequestParser::get_param('keep_tags_categories', 0),
                 'keep_old_events'      => (int) RequestParser::get_param('keep_old_events', 0),
                 'import_timezone'      => (int) RequestParser::get_param('feed_import_timezone', 0),
-                'remove_events'        => (bool) (int) RequestParser::get_param('remove_events', false),
+                'remove_events'        => (RequestParser::get_param('remove_events') === 'true'),
             ];
         }
 
