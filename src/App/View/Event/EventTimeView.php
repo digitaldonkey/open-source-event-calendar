@@ -92,7 +92,7 @@ class EventTimeView extends OsecBaseClass
             unset($end_date_string);
         }
         if ($displayEndTime) {
-            $date_string  .= self::timeSeparator();
+            $date_string  .= $displayEndDate ? self::timeSeparator() : self::timespanSeparator();
             $date_string .= $this->format_time($end);
         }
 
