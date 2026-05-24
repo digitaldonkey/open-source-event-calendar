@@ -469,14 +469,12 @@ class Event extends OsecBaseClass
      */
     public function is_multiday()
     {
-
-
         if (null === $this->isMultiday) {
             $start = $this->get('start');
             $end = $this->get('end');
-            // Remove one sec. So All day dooes not become Multiday.
-            $end->adjust(-1, 'ms');
-            $this->isMultiday = ($start->format('Y-m-d') !== $end->format('Y-m-d'));
+            $diff = $end->diff_sec($start);
+            $dayDiff = ($start->format('Y-m-d') !== $end->format('Y-m-d'));
+            $this->isMultiday = ($diff > 86400 && $dayDiff);
         }
         return $this->isMultiday;
     }
