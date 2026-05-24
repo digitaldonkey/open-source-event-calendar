@@ -831,8 +831,8 @@ class FeedsController extends OsecBaseClass
             }
 
             $requestArgs = [
-                'feed_url'             => $url,
-                'feed_name'            => $url,
+                'feed_url'             => $url ?? '',
+                'feed_name'            => $url ?? '',
                 // Update integer or New null.
                 'feed_id'              => $feedId,
                 'feed_category'        => $feed_categories,
@@ -843,7 +843,7 @@ class FeedsController extends OsecBaseClass
                 'keep_tags_categories' => (int) RequestParser::get_param('keep_tags_categories', 0),
                 'keep_old_events'      => (int) RequestParser::get_param('keep_old_events', 0),
                 'import_timezone'      => (int) RequestParser::get_param('feed_import_timezone', 0),
-                'remove_events'        => RequestParser::get_param('remove_events', false),
+                'remove_events'        => (bool) (int) RequestParser::get_param('remove_events', false),
             ];
         }
 
