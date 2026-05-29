@@ -2,6 +2,7 @@
 
 namespace Osec\App\Controller;
 
+use Osec\App\Model\DatabaseSchema;
 use Osec\App\Model\Date\DateFormatsFrontend;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Notifications\NotificationAdmin;
@@ -517,6 +518,7 @@ class BootstrapController
         /* @global $osec_app App Osec object Registry */
         global $osec_app;
         $osec_app = App::factory();
+        DatabaseSchema::factory($osec_app)->verifySqlSchema();
 
         return new self($osec_app);
     }
