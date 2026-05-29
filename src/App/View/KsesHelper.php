@@ -83,6 +83,14 @@ class KsesHelper extends OsecBaseClass
                 'strong' => [
 
                 ],
+                'abbr' => [
+                    'class' => true,
+                    'style' => true,
+                    'title' => true,
+                ],
+                'small' => [
+                    'class' => true,
+                ],
                 'table'  => [
                     'cellspacing' => true,
                     'class'       => true,
@@ -342,6 +350,9 @@ class KsesHelper extends OsecBaseClass
                     'tabindex' => true,
                 ],
                 'small' => [
+                    'class' => true,
+                    'style' => true,
+                    'title' => true,
                 ],
                 'span' => [
                     'aria-hidden' => true,
