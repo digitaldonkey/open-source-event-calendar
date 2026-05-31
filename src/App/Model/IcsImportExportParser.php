@@ -710,6 +710,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $date_fields = array_merge(
             $dates, // start, end,
             [
+                'uid' => $UID, // Used for phpunit testing.
                 'allday' => $allday,
                 'instant_event' => $isInstantEvent,
             ]
