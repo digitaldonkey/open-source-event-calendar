@@ -692,12 +692,6 @@ class DatabaseSchema extends OsecBaseClass
             $dbi->query(
                 "DROP TABLE IF EXISTS {$events},{$event_instances},{$event_feeds},{$event_category_meta}"
             );
-            // View
-            $debug_view_name = $event_instances . '_readable_date';
-            $dbi->query($dbi->prepare(
-                'DROP VIEW IF EXISTS %s;',
-                $debug_view_name
-            ));
         }
     }
 
