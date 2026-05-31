@@ -84,6 +84,7 @@ class BasePage {
 
     async go_to_url(url){
         console.info('      get: ' + url);
+        console.trace();
         return this.driver.get(url);
     }
 

@@ -45,12 +45,12 @@ describe('Frontend tests', function(){
              */
             let isReady = false;
 
-            before(async function(){
+            before (async function(){
                 if (pageObject.settings.currentThemeOnly) {
                     shouldSkip = theme !== pageObject.settings.currentTheme;
                     if (shouldSkip) {
                         console.info(`Skipping tests for ${theme}.`)
-                        return this.skip();
+                        this.skip();
                     }
                 }
                 // Resets Plugin and enables current theme.

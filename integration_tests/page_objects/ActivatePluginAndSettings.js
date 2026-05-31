@@ -49,6 +49,7 @@ class ActivatePluginAndSettings extends WpLogin {
         }
         const isActivatedClean = await this.activateOsecPlugin();
         if (!isActivatedClean) {
+            console.error('Could not reset Plugin to a clean (purged) state.')
             return false;
         }
 
@@ -61,7 +62,6 @@ class ActivatePluginAndSettings extends WpLogin {
         else if (this.settings.currentTheme && this.settings.currentTheme !== 'plana') {
             await this.setTheme(this.settings.currentTheme);
         }
-        await this.doLogout();
         return true;
     }
 
