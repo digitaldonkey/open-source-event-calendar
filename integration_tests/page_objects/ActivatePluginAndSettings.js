@@ -91,9 +91,7 @@ class ActivatePluginAndSettings extends WpLogin {
         }
 
         try{
-            await this.driver.manage().setTimeouts({ implicit: 1000 });
             const configureMessage = await this.driver.findElement(By.css('.message a[href="' + this.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings"]'));
-            await this.driver.manage().setTimeouts({ implicit: 60000 })
             const yyy = await configureMessage.getText();
             if (yyy === 'Click here to set it up now »') {
                 return true
