@@ -206,7 +206,6 @@ class EventEntity extends OsecBaseClass
     {
         parent::__construct($app);
         $this->start = new DT('now', 'sys.default');
-        $this->timezone_name = $this->start->get_timezone();
         $this->end   = clone $this->start;
         $this->end->adjust(1, 'hour');
     }
@@ -281,10 +280,7 @@ class EventEntity extends OsecBaseClass
         // Time fields
         if (isset($time_fields[$name])) {
             // object of DT type is now handled in it itself
-            $this->{$name}->set_date_time(
-                $value,
-                ! $this->timezone_name ? 'UTC' : $this->timezone_name
-            );
+            $this->{$name}->set_date_time($value);
             $this->adjust_preferred_timezone();
         } else {
             // NON-Time-fields.
@@ -325,8 +321,10 @@ class EventEntity extends OsecBaseClass
         if ( ! $do_adjust) {
             return;
         }
-        $timezone = Timezones::factory($this->app)->get($this->timezone_name);
-        $this->set_preferred_timezone($timezone);
+        if (!empty($this->timezone_name)) {
+            $timezone = Timezones::factory($this->app)->get($this->timezone_name);
+            $this->set_preferred_timezone($timezone);
+        }
     }
 
     /**

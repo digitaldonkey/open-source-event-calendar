@@ -157,14 +157,15 @@ class EventSingleView extends OsecBaseClass
             $this->app->settings
                 ->get('always_use_calendar_timezone')
             && $event->get('timezone_name') !== $default_tz
+            && $event->get('timezone_name') !== 'UTC'
         ) {
             $timezone_info = [
                 'show_timezone'       => true,
-                'event_timezone'      => $event->get('timezone_name'),
+                'event_timezone'      => $event->get('start')->get_gmt_offset_as_text(),
                 'text_timezone_title' => sprintf(
                     /* translators: Timezone */
                     __('Event was created in the %s time zone', 'open-source-event-calendar'),
-                    $event->get('start')->get_gmt_offset_as_text()
+                    $event->get('timezone_name')
                 ),
             ];
         }

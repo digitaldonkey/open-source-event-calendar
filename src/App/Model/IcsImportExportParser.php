@@ -8,7 +8,6 @@ use Kigkonsult\Icalcreator\CalendarComponent;
 use Kigkonsult\Icalcreator\IcalInterface;
 use Kigkonsult\Icalcreator\Vcalendar;
 use Kigkonsult\Icalcreator\Vevent;
-use Kigkonsult\Icalcreator\Vtimezone;
 use Osec\App\Controller\StrictContentFilterController;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
@@ -18,8 +17,6 @@ use Osec\App\Model\PostTypeEvent\EventTaxonomy;
 use Osec\App\View\Event\EventAvatarView;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
-use Osec\Exception\BootstrapException;
-use Osec\Exception\Exception;
 use Osec\Exception\ImportExportParseException;
 use Osec\Exception\TimezoneException;
 
@@ -101,105 +98,72 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $comment_status = $args['comment_status'] ?? 'open';
         $do_show_map    = $args['do_show_map'] ?? 0;
         $v->sort();
-        // Reverse the sort order, so that RECURRENCE-IDs are listed before the
-        // defining recurrence events, and therefore take precedence during
-        // caching.
-        // TODO This isn't a public prop anymore. Find another way to reverse?
-        // $v->components = array_reverse( $v->components );
 
         /*
          * Timezone Data
          */
+        /* @var string $local_timezone WP Timezone */
+        $local_timezone = Timezones::factory($this->app)->get_default_timezone();
 
-        $overrideCalendarTz = (bool)$feed->import_timezone;
-
-        /* @var string $timezone Calendar-Feed default Timezone */
-        $timezone = Timezones::factory($this->app)->get_default_timezone();
-        $localTimezone = $timezone;
-
-            // Fetch default timezone in case individual properties don't define it
-        /* @var $tz Vtimezone Timezone Component. */
-        $tz = $v->getComponent('vtimezone');
-        if (! empty($tz)) {
-            $timezone = $tz->getTzid(false);
-        }
-        unset($tz);
-
-        /*
-         * @var ?string $enforcedTz Timzone String
-         *      Might be set by X-WR-TIMEZONE or local override
-         *       or of $overrideCalendarTz we use Plugins Default $localTimezone.
+        /**
+         * @var string $x_wr_timezone X-WR-TIMEZONE
+         *  - is not part of the iCalendar standard in either RFC 2445 or RFC 5545.
+         *  - is typically used fora default calendar display timezone.
+         *  - WR timezone is used for Force Override true, falling back to local.
          */
-        $enforcedTz    = null;
-        $x_wr_timezone = $v->getXprop('X-WR-TIMEZONE');
-        $TzEnforced    = false;
-        if (is_array($x_wr_timezone) && isset($x_wr_timezone[1])) {
+        $x_wr_timezone = null;
+        $x_wr_timezone_comp = $v->getXprop('X-WR-TIMEZONE');
+        if (is_array($x_wr_timezone_comp) && isset($x_wr_timezone_comp[1])) {
             // "Specify your timestamps in UTC and add the X-WR-TIMEZONE"
-            $TzEnforced = (string)$x_wr_timezone[1];
-            $timezone   = $TzEnforced;
-        } elseif ($overrideCalendarTz) {
-            $TzEnforced = $localTimezone;
+            $x_wr_timezone = (string) $x_wr_timezone_comp[1];
         }
-        // Verify
-        $timezone = $this->isRecognizedTz($timezone) ? $timezone : $localTimezone;
+        $x_wr_timezone = $this->isRecognizedTz($x_wr_timezone) ? $x_wr_timezone : null;
+        unset($x_wr_timezone_comp);
+
+        // UI "Assign default time zone to events in UTC, DATE (only) Floating local time events.
+        $override_timezone = $x_wr_timezone ?? $local_timezone;
+
+        /**
+         * Change override timzone for feed
+         *
+         * Alter time zone of a feed. Effecting UTC and DATE (only) Floating local time events.
+         *
+         * @since 1.5
+         *
+         * @param string $override_timezone Currently calculated value
+         * @param  object  $feed  Ical feed
+         * @param  ?string  $x_wr_timezone  X_WR_TIMEZONE if available
+         * @param  string  $local_timezone  Default Timezone
+         */
+        $override_timezone = apply_filters(
+            'osec_feed_timezone_override',
+            $override_timezone,
+            $feed,
+            $x_wr_timezone,
+            $local_timezone
+        );
 
         // Initialize empty custom exclusions structure
         $exclusions = [];
-        // go over each event
-        // NOTE: getComponent() no longer filters by type in v2.41.x, use getComponents() + filter
+
+        // Filter out events only.
         $events = array_filter(
             $v->getComponents(),
             fn($c) => $c instanceof \Kigkonsult\Icalcreator\Vevent
         );
+
+        // Walk events.
         foreach ($events as $e) {
             /* @var \Kigkonsult\Icalcreator\Vevent $e Vevent component. */
-            /* @var array $data Data to create Event. */
-            $data = [];
 
-            // =====================
-            // = Start & end times =
-            // =====================
-            /* @var array $start [params => [VALUE => STRING], value => DateTime ] */
-            $startValue = $this->extractDateTimeInfo($e->getDtstart(true));
-
-            $endValue = $this->extractDateTimeInfo($e->getDtend(true));
-            // For cases where a "VEVENT" calendar component
-            // specifies a "DTSTART" property with a DATE value type but none
-            // of "DTEND" nor "DURATION" property, the event duration is taken to
-            // be one day.  For cases where a "VEVENT" calendar component
-            // specifies a "DTSTART" property with a DATE-TIME value type but no
-            // "DTEND" property, the event ends on the same calendar date and
-            // time of day specified by the "DTSTART" property.
-
-            if (empty($endValue)) {
-                // #1 if duration is present, assign it to end time
-                $endValue = $e->getDuration(true, true);
-                if (empty($endValue)) {
-                    // TODO
-                    //   It will crash with $startValue['value']['hour']??
-                    //  ALL END STUFF SEEMS BASED ON OLD Lib returning Array-STUFF?
-
-                    // #2 if only DATE value is set for start, set duration to 1 day
-                    if (! isset($startValue['value']['hour'])) {
-                        $endValue = [
-                            'value' => [
-                                'year'  => $startValue['value']['year'],
-                                'month' => $startValue['value']['month'],
-                                'day'   => $startValue['value']['day'] + 1,
-                                'hour'  => 0,
-                                'min'   => 0,
-                                'sec'   => 0,
-                            ],
-                        ];
-                        if (isset($startValue['value']['tz'])) {
-                            $endValue['value']['tz'] = $startValue['value']['tz'];
-                        }
-                    } else {
-                        // #3 set end date to start time
-                        $endValue = $startValue;
-                    }
-                }
-            }
+            /* @var array $data Data to create Event */
+            $data = $this->process_event_date_fields(
+                $e,
+                $local_timezone, // Default
+                (bool) $feed->import_timezone, // Should override
+                $x_wr_timezone, // Calendar TZ
+                $override_timezone
+            );
 
             /* Categories */
             $categories   = $e->getXprop('CATEGORIES', false, true);
@@ -222,9 +186,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     false
                 );
             }
-            $tags = $e->getXprop('X-TAGS', false, true);
 
             /* Tags */
+            $tags = $e->getXprop('X-TAGS', false, true);
             $imported_tags = [EventTaxonomy::TAGS => []];
             // If the user chose to preserve taxonomies during import, add tags.
             if ($tags && $feed->keep_tags_categories) {
@@ -244,42 +208,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     true
                 );
             }
-
-            /*
-            AllDay */
-            // Event is all-day if no time components are defined
-            $allday = $this->isTimeless($startValue['value']) &&
-                      $this->isTimeless($endValue['value']);
-            // Also check the proprietary MS all-day field.
-            $ms_allday = $e->getXprop('X-MICROSOFT-CDO-ALLDAYEVENT');
-            if (! empty($ms_allday) && $ms_allday[1] === 'TRUE') {
-                $allday = true;
-            }
-
-            $eventTimezone = $allday ? $timezone : $localTimezone;
-
-            $start = $this->createDTFromValue($startValue, $eventTimezone, $TzEnforced);
-            $end   = $this->createDTFromValue($endValue, $eventTimezone, $TzEnforced);
-            if (false === $start || false === $end) {
-                // phpcs:disable WordPress.PHP.DevelopmentFunctions
-                throw new ImportExportParseException(
-                    esc_html(
-                        'Failed to parse one or more dates given timezone "' .
-                        var_export($eventTimezone, true) . '"'
-                    )
-                );
-                // phpcs:enable
-            }
-
-            // If all-day, and start and end times are equal, then this event has
-            // invalid end time (happens sometimes with poorly implemented iCalendar
-            // exports, such as in The Event Calendar), so set end time to 1 day
-            // after start time.
-
-            if ($allday && $start->format('dmY') === $end->format('dmY')) {
-                $end->adjust_day(+1);
-            }
-            $data += compact('start', 'end', 'allday');
 
             // =======================================
             // = Recurrence rules & recurrence dates =
@@ -352,6 +280,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 }
                 $exdate .= implode(',', $exclusions[$e->getXprop('uid')]);
             }
+
             // ========================
             // = Latitude & longitude =
             // ========================
@@ -493,11 +422,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 ],
             ];
             // register any custom exclusions for given event
-            $exclusions = $this->addRecurringEventsExclusions(
-                $e,
-                $exclusions,
-                $start
-            );
+            $exclusions = $this->addRecurringEventsExclusions($e, $exclusions);
 
             /**
              * Alter FeedsData before processing.
@@ -528,6 +453,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // If no result, perform the feed based check.
             if (null === $matching_event_id) {
                 $matching_event_id = $search
+
                     ->get_matching_event_id(
                         $event->get('ical_uid'),
                         $event->get('ical_feed_url'),
@@ -587,8 +513,247 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         return $output;
     }
 
-    public function isRecognizedTz(string $tz): bool
+    /**
+     * Process date fields
+     *
+     * For cases where a "VEVENT" calendar component
+     * specifies a "DTSTART" property with a DATE value type but none
+     * of "DTEND" nor "DURATION" property, the event duration is taken to
+     * be one day.  For cases where a "VEVENT" calendar component
+     * specifies a "DTSTART" property with a DATE-TIME value type but no
+     * "DTEND" property, the event ends on the same calendar date and
+     * time of day specified by the "DTSTART" property.
+     *
+     * @param \Kigkonsult\Icalcreator\Vevent $e The Event
+     * @param string $local_timezone Local (WordPress) timezone.
+     * @param ?string $override_timezone Ui Setting to override import with local TZ.
+     *
+     * @return array
+     */
+    public function process_event_date_fields(
+        Vevent $e,
+        string $local_timezone, // = Default TZ
+        bool $override_UTC_TZ,
+        ?string $x_wr_timezone = null,
+        ?string $override_timezone = null
+    ): array {
+        // For reference only.
+        $UID = $e->getUid();
+
+        /* @var array $DtStart See \Kigkonsult\Icalcreator\Pc->getAsArray() to understand. */
+        $DtStart = $e->getDtstart(true)->getAsArray();
+
+        /* @var DateTime $startValue Start date and time or date. */
+        $startValue = $DtStart['value'];
+        $startValueParams = $DtStart['params'];
+        unset($DtStart);
+
+        /**
+         * @var bool $isDateOnly : There is no time set in DTStart.
+         *
+         *  The default value type is DATE-TIME. The time value
+         *  MUST be one of the forms defined for the DATE-TIME value type.
+         * The value type can be set to a DATE value type.
+         * e.g VALUE=DATE:19960401.
+         * In case of DATE values (VALUE=DATE)
+         *  - No VTIMEZONE is needed (full day in local TZ).
+         *  - Local timezone applies.
+         * @see https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4
+         */
+        $isDateOnly = isset($startValueParams['VALUE'])
+                      && $startValueParams['VALUE'] === 'DATE'
+                      && $this->isTimeless($startValue);
+
+        /**
+         * @var bool $isLocalTimeEvent Floating local time events.
+         *
+         * The local time form is simply a time value that does not contain
+         * the UTC designator nor does it reference a time zone.
+         *
+         * Time values of this type are said to be "floating" and are not
+         * bound to any time zone in particular.  They are used to represent
+         * the same hour, minute, and second value regardless of which time
+         * zone is currently being observed.  For example, an event can be
+         * defined that indicates that an individual will be busy from 11:00
+         * AM to 1:00 PM every day, no matter which time zone the person is
+         * in.
+         * In these cases, a local time can be specified.  The recipient
+         * of an iCalendar object with a property value consisting of a local
+         * time, without any relative time zone information, SHOULD interpret
+         * the value as being fixed to whatever time zone the "ATTENDEE" is
+         * in at any given moment.  This means that two "Attendees", may
+         * participate in the same event at different UTC times; floating
+         * time SHOULD only be used where that is reasonable behavior.
+         *
+         * In most cases, a fixed time is desired. To properly communicate a
+         * fixed time in a property value, either UTC time or local time with
+         * time zone reference MUST be specified.
+         *
+         * The use of local time in a TIME value without the "TZID" property
+         * parameter is to be interpreted as floating time, regardless of the
+         * existence of "VTIMEZONE" calendar components in the iCalendar
+         * object.
+         *
+         * - No TZID
+         * - No UTC time
+         */
+        $isLocalTimeEvent = isset($startValueParams['ISLOCALTIME'])
+                            && $startValueParams['ISLOCALTIME'] === true;
+
+        /**
+         * @var ?string $event_timezone Event DateTime timezone if applicable and valid
+         *
+         *  - it is not needed explicitly as it is included in the DateTime value.
+         *  - if it's not recognizes it might be an issue.
+         */
+        $event_timezone = isset($startValueParams['TZID']) ? $startValueParams['TZID'] : null;
+        if (!is_null($event_timezone) && !$this->isRecognizedTz($event_timezone)) {
+            throw new TimezoneException(
+                esc_html(
+                    'Invalid event timezone: ' . (string) $event_timezone
+                )
+            );
+        }
+
+        $durationEnd = null;
+        if ($e->getDuration(false, true) instanceof DateTime) {
+            $durationEnd = $e->getDuration(false, true);
+        }
+
+        /**
+         * @var ?DateTime $endValue End date and time or date.
+         */
+        $endValue = $e->getDtend() ?? 0 ?: null;
+        if (empty($endValue)) {
+            // #1 if duration is present, assign it to end time
+            $endValue = $durationEnd;
+            if (empty($endValue)) {
+                // #2 if only DATE value is set for start, set duration to 1 day
+                if ($isDateOnly) {
+                    $endValue = clone $startValue;
+                    $endValue->modify('+1 day');
+                } else {
+                    // #3 set end date to start time
+                    $endValue = clone $startValue;
+                }
+            }
+        }
+
+        /**
+         * @var bool $isInstantEvent Defined by providing only a DTSTART
+         *   (Start Date/Time) with a DATE-TIME value type, while entirely
+         *   omitting both the DTEND (End Date/Time) and DURATION properties.
+         *   By spec, if DTEND is missing, it implicitly occurs at the
+         *   identical date and time as DTSTART.
+         */
+        $isInstantEvent = empty($endValue)
+                          || (!empty($endValue) && $startValue->format('U') === $endValue->format('U'));
+
+        /**
+         * @var bool $allday If Event spans full day.
+         */
+        $allday = $isDateOnly
+                  || (
+                      self::isTimeless($startValue)
+                      && self::isTimeless($endValue)
+                  );
+        // Check the proprietary MS all-day field.
+        $ms_allday = $e->getXprop('X-MICROSOFT-CDO-ALLDAYEVENT');
+        if (! empty($ms_allday) && $ms_allday[1] === 'TRUE') {
+            $allday = true;
+        }
+
+        // Apply timezone if necessary.
+        $dates = [
+            'start' => $startValue,
+            'end' => $endValue,
+        ];
+        foreach ($dates as $key => $dateTime) {
+            /**
+             * @var bool $is_UTC If Event time us set in UTC DATE-TIME values.
+             *
+             * No VTIMEZONE is needed because UTC is globally defined.
+             * Consumers convert from UTC into local display time themselves.
+             */
+            $is_UTC = $dateTime->getTimezone()
+                      && $dateTime->getOffset() === 0;
+
+            if ($is_UTC) {
+                $applied_Timezone = 'UTC';
+
+                if ($isLocalTimeEvent || $isDateOnly) {
+                    $applied_Timezone = $x_wr_timezone ?? $local_timezone;
+                }
+
+                // Final TZ
+                $timezone = new DateTimeZone($override_UTC_TZ ? $override_timezone : $applied_Timezone);
+
+                // Floating time and Allday Events use local time.
+                if ($isLocalTimeEvent || $isDateOnly) {
+                    $dateTime = new DateTime($dateTime->format('Y-m-d H:i:s'), $timezone);
+                }
+
+                $dateTime = $dateTime->setTimezone($timezone);
+
+                // Reset to TZ relative date start.
+                if ($isDateOnly) {
+                    $dateTime->setTime(0, 0, 0);
+                }
+
+                $DT = new DT($dateTime, $timezone->getName());
+            } else {
+                $DT = new DT($dateTime, $dateTime->getTimezone()->getName());
+            }
+            $dates[$key] = $DT;
+        }
+
+        $date_fields = array_merge(
+            $dates, // start, end,
+            [
+                'allday' => $allday,
+                'instant_event' => $isInstantEvent,
+            ]
+        );
+
+        // Add info at if run by phpunit.
+        if (isset($_SERVER['SCRIPT_FILENAME'])
+            && sanitize_text_field(wp_unslash($_SERVER['SCRIPT_FILENAME'])) === './vendor/bin/phpunit'
+        ) {
+            $date_fields = array_merge(
+                $date_fields, // start, end, allday, instant_event
+                [
+                    'uid' => $UID,
+                    'startval_localized' => $date_fields['start']->format('Y-m-d H:i:s', $local_timezone),
+                    'startval_UTC'       => $date_fields['start']->format('U'),
+                    'startval_TZ'        => $date_fields['start']->get_timezone(),
+                    'start_is_local_timezone'  => $date_fields['start']->get_timezone() === $local_timezone,
+                    'endval_localized'   => $date_fields['end']->format('Y-m-d H:i:s', $local_timezone),
+                    'endval_UTC'         => $date_fields['end']->format('U'),
+                    'endval_TZ'          => $date_fields['end']->get_timezone(),
+                    // phpcs:disable Squiz.PHP.CommentedOutCode.Found
+                    //  'source' => explode("\r\n", $e->createComponent()),
+                    //  'params' => [
+                    //      'dateOnly' => $isDateOnly,
+                    //      'localTimeEvent' => $isLocalTimeEvent,
+                    //      'allday' => $allday,
+                    //      'instant_event' => $isInstantEvent,
+                    //      'ics_timezone' => $event_timezone,
+                    //],
+                    // phpcs:enable Squiz.PHP.CommentedOutCode.Found
+                ]
+            );
+        }
+        return $date_fields;
+    }
+
+    public function isRecognizedTz(mixed $tz): bool
     {
+        if (!$tz) {
+            return false;
+        }
+        if ($tz instanceof DateTimeZone) {
+            $tz = $tz->getName();
+        }
         try {
             $tztest = timezone_open($tz);
         } catch (\Exception) {
@@ -650,64 +815,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      *
      * @return bool Timelessness.
      */
-    protected function isTimeless(DateTime $datetime)
+    public static function isTimeless(DateTime $datetime)
     {
         return $datetime->format('His') === '000000';
-    }
-
-    /**
-     *
-     * @param  array  $time  iCalcreator time property array
-     *                                     (*full* format expected)
-     * @param  string  $def_timezone  Default time zone in case not defined
-     *                                    in $time
-     * @param  null  $forced_timezone  Timezone to use instead of UTC.
-     *
-     * @return DT
-     *
-     * @throws BootstrapException
-     * @throws Exception
-     * @throws TimezoneException
-     */
-    protected function createDTFromValue(array $time, $def_timezone, $forced_timezone = null): DT
-    {
-        if (! $time['value'] instanceof DateTime) {
-            throw new Exception('Invalid DateTime value');
-        }
-        $dateTime = $time['value'];
-
-        // Params value might be DATE
-        $isDateValue = isset($time['params']['VALUE']) && $time['params']['VALUE'] === 'DATE'
-                       && $this->isTimeless($dateTime);
-
-        $date_time = new DT($dateTime);
-
-        // Find a Timezone.
-        if (isset($time['params']['TZID'])) {
-            $timezone = $time['params']['TZID'];
-            // Verify custom timezone.
-            if (false === $this->isRecognizedTz($timezone)) {
-                throw new TimezoneException(
-                    esc_html(
-                        'Invalid timzone: ' . (string) $timezone
-                    )
-                );
-            }
-        } elseif (! $dateTime->getTimezone() instanceof DateTimeZone) {
-            // No TZ in date? Set default.
-            $timezone = $def_timezone;
-        }
-
-        // Apply Timezone.
-        if (! empty($timezone)) {
-            if ($timezone === 'UTC' && $forced_timezone !== null) {
-                $date_time->set_timezone($forced_timezone);
-            } else {
-                $date_time->set_timezone($timezone);
-            }
-        }
-
-        return $date_time;
     }
 
     /**
@@ -784,7 +894,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      *
      * @return array Modified exclusions structure.
      */
-    protected function addRecurringEventsExclusions($e, $exclusions, $start)
+    protected function addRecurringEventsExclusions($e, $exclusions)
     {
         $recurrence_id = $e->getXprop('recurrence-id');
         if (

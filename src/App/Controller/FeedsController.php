@@ -827,7 +827,7 @@ class FeedsController extends OsecBaseClass
         return $html;
     }
 
-    public function get_feed_uri_by_id(int $feed_id): string
+    public function get_feed_uri_by_id(int $feed_id): ?string
     {
         return $this->app->db->get_var(
             $this->app->db->prepare(

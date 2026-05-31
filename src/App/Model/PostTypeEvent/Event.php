@@ -812,17 +812,16 @@ class Event extends OsecBaseClass
 
     /**
      * Set the event as if it has no end time
+     *
+     * Instant Start-End: Because no DTEND property is included,
+     * RFC 5545 dictates the event ends exactly at
+     * the same date and time it begins.
      */
     public function set_no_end_time()
     {
         $this->set('instant_event', true);
         $start = $this->get('start');
-        $end   = new DT($start);
-        $end->set_time(
-            $start->format('H'),
-            $start->format('i') + 30,
-            $start->format('s')
-        );
+        $end   = clone $start;
         $this->set('end', $end);
     }
 
@@ -968,8 +967,12 @@ class Event extends OsecBaseClass
         if ($date instanceof DT) {
             return $date;
         }
-
-        return new DT($date);
+        $date = new DT($date);
+        $tz = $this->entity->get('timezone_name', false);
+        if ($tz) {
+            $date->set_timezone($this->entity->get('timezone_name'));
+        }
+        return $date;
     }
 
     protected function handlePropertyConstruct_timezone_name($value)

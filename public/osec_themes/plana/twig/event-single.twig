@@ -19,10 +19,9 @@
                             <span class="dt-duration">
                                 <strong>{{ event | timespan | raw }}</strong>
                                 {% if timezone_info.show_timezone %}
-                                    <abbr class="ai1ec-initialism ai1ec-tooltip-trigger"
-                                          title="{{ timezone_info.text_timezone_title | e( 'html_attr' ) }}">
-                                        {{ timezone_info.event_timezone }}
-                                    </abbr>
+                                    <div class="osec-timezone-info">
+                                        {{ timezone_info.text_timezone_title | e( 'html_attr' ) }} <span class="osec-timezone-info--gmt">({{ timezone_info.event_timezone }})</span>
+                                    </div>
                                 {% endif %}
                             </span>
                             {% include 'recurrence.twig' %}

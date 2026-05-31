@@ -19,7 +19,15 @@
                 {{ feed_url_label }}
             </label>
             <div class="feed-url-container timely">
-                <input type="text" placeholder="{{ feed_url_placeholder }}" name="osec_feed_url" id="osec_feed_url"  class="ai1ec-feed-url">
+                <input
+                       id="osec_feed_url"
+                       class="ai1ec-feed-url"
+                       type="text"
+                       placeholder="{{ feed_url_placeholder }}"
+                       name="osec_feed_url"
+                       minlength="10"
+                       maxlength="768"
+                >
             </div>
         </div>
         <div class="osec-two-col">

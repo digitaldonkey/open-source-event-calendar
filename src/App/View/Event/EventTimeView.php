@@ -52,8 +52,13 @@ class EventTimeView extends OsecBaseClass
         }
 
         // Localize time.
+        $end = $event->get('end', null);
+        if ($end && $event->is_allday()) {
+            // Prevent Allday events from showing up at 0:00 next day.
+            $end->adjust(-1, 'second');
+        }
         $start = new DT($event->get('start'));
-        $end   = new DT($event->get('end'));
+        $end   = new DT($end);
 
         $break_years = $start->format('Y') !== $end->format('Y');
         $date_string = '';

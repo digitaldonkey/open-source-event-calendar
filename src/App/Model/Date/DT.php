@@ -266,7 +266,7 @@ class DT implements Stringable
     public function get_timezone(): ?string
     {
         $timezone = $this->date->getTimezone();
-        if (false === $timezone) {
+        if (! $timezone) {
             return null;
         }
 
@@ -327,7 +327,7 @@ class DT implements Stringable
     {
         $offset = $this->date->getOffset() / 3600;
 
-        return 'GMT' . ($offset > 0 ? '+' : '') . $offset;
+        return 'GMT' . ($offset >= 0 ? '+' : '') . $offset;
     }
 
     /**

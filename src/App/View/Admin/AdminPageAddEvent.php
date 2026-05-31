@@ -297,6 +297,8 @@ class AdminPageAddEvent extends OsecBaseClass
 
         $is_repeating_event = !empty($event->get('recurrence_rules'));
         $has_excluded_events = !empty($event->get('exception_rules'));
+        $default_tz = Timezones::factory($this->app)->get_default_timezone();
+
         $args = [
             'instance_id'     => $instance_id,
             'timezones_list'  => Timezones::factory($this->app)->get_timezones(true),
@@ -320,7 +322,7 @@ class AdminPageAddEvent extends OsecBaseClass
                 'label' => esc_html__('Time zone', 'open-source-event-calendar'),
                 'empty_text' => esc_html__('Choose your time zone', 'open-source-event-calendar'),
                 'timezones_list'  => Timezones::factory($this->app)->get_timezones(true),
-                'current_timezone' => $event->get('timezone_name'),
+                'current_timezone' => $event->get('timezone_name', $default_tz),
             ],
             'show_recurrence_and_excludes' => !($instance_id || $parent_event_id),
             'recurrence' => [
