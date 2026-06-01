@@ -848,8 +848,8 @@ class FeedsController extends OsecBaseClass
                 wp_die(esc_html__('User not allowed to manage feeds.', 'open-source-event-calendar'));
             }
 
-            if (!empty($_REQUEST['feed_url'])) {
-                $url = wp_http_validate_url(RequestParser::get_param('feed_url'));
+            if (isset($_REQUEST['feed_url']) && ! empty($_REQUEST['feed_url'])) {
+                $url = esc_url_raw(wp_unslash($_REQUEST['feed_url']));
             }
 
             $feedId = RequestParser::get_param('feed_id', null);

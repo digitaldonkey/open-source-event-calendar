@@ -10,7 +10,7 @@
  * Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
  * Tags: calendar, events, ics, ical importer
  * Requires at least: 6.6
- * Tested up to: 6.9
+ * Tested up to: 7.0
  * Requires PHP: 8.2
  * Stable Tag: 1.1.4
  * License: GPL-3.0-or-later

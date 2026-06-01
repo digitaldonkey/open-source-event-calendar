@@ -58,7 +58,7 @@ class MakeReadme
              *   - open-source-event-calendar.php headers reformated
              *   - any function output
              * You may use:
-             *   - true to create a sandard value (e.g: 'Tested up to' => "Tested up to: 6.9\n",)
+             *   - true to create a standard value (e.g: 'Tested up to' => "Tested up to: 6.9\n",)
              *   - a string containing ##VALUE## to reformat a entry
              *       e.g: 'The value is ##VALUE##.' => 'The value is 6.9'
              *   - a callable to output anything else.

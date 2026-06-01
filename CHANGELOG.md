@@ -1,3 +1,11 @@
+= 1.1.5 =
+- Add unit tests for iCal import dates handling and fix date issues related to iCalcreateor 2.41 upgrade
+- Extended ical_feed_url max length from to 768 chars #34
+- Timezone storage and display improved
+- Remove feed 'Keep Events' fixed. Enhanced filter so a filter relating removed feed is kept
+- End times short by a minute. Fixes #33
+- Checked WordPress 7.x compatibility
+
 = 1.1.4 =
  - Upgrade Icalcreateor to 2.4.1
  - Cleaned some PHP-8.5 deprecation messages.

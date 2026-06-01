@@ -1250,11 +1250,6 @@ Define if Database schema upgrade should be executed
 add_filter('osec_perform_scheme_update', $do_schema_update);
 ```
 
-#### Description
-
-
-Currently DatabaseSchema->apply_delta() is disabled. TODO Decide to throw schema stuff out entirely or fix it.
-
 #### Parameters
 
 
@@ -1267,9 +1262,6 @@ Currently DatabaseSchema->apply_delta() is disabled. TODO Decide to throw schema
 ```php
 /**
  * Define if Database schema upgrade should be executed
- *
- * Currently DatabaseSchema->apply_delta() is disabled.
- * TODO Decide to throw schema stuff out entirely or fix it.
  *
  * @since 1.0
  *
@@ -1287,6 +1279,53 @@ add_filter('osec_perform_scheme_update', $do_schema_update);
 
 
 @file **../src/App/Model/IcsImportExportParser.php**
+
+### osec_feed_timezone_override <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Change override timzone for feed
+
+```php
+add_filter('osec_feed_timezone_override', $override_timezone $feed $x_wr_timezone $local_timezone);
+```
+
+#### Description
+
+
+Alter time zone of a feed. Effecting UTC and DATE (only) Floating local time events.
+
+#### Parameters
+
+
+ - **$override_timezone** <span style="color:crimson"> string</span> Currently calculated value
+ - **$feed** <span style="color:crimson"> </span> Ical feed
+ - **$x_wr_timezone** <span style="color:crimson"> </span> X_WR_TIMEZONE if available
+ - **$local_timezone** <span style="color:crimson"> </span> Default Timezone
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Change override timzone for feed
+ *
+ * Alter time zone of a feed. Effecting UTC and DATE (only) Floating local time events.
+ *
+ * @since 1.5
+ *
+ * @param string $override_timezone Currently calculated value
+ * @param  object  $feed  Ical feed
+ * @param  ?string  $x_wr_timezone  X_WR_TIMEZONE if available
+ * @param  string  $local_timezone  Default Timezone
+ *
+ * @file src/App/Model/IcsImportExportParser.php
+ */
+add_filter('osec_feed_timezone_override', $override_timezone $feed $x_wr_timezone $local_timezone);
+```
+
+</details>
+
 
 ### osec_ics_import_pre_init_event <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
@@ -6221,11 +6260,6 @@ Define if Database schema upgrade should be executed
 add_filter('osec_perform_scheme_update', $do_schema_update);
 ```
 
-#### Description
-
-
-Currently DatabaseSchema->apply_delta() is disabled. TODO Decide to throw schema stuff out entirely or fix it.
-
 #### Parameters
 
 
@@ -6238,9 +6272,6 @@ Currently DatabaseSchema->apply_delta() is disabled. TODO Decide to throw schema
 ```php
 /**
  * Define if Database schema upgrade should be executed
- *
- * Currently DatabaseSchema->apply_delta() is disabled.
- * TODO Decide to throw schema stuff out entirely or fix it.
  *
  * @since 1.0
  *
@@ -6258,6 +6289,53 @@ add_filter('osec_perform_scheme_update', $do_schema_update);
 
 
 @file **../src/App/Model/IcsImportExportParser.php**
+
+### osec_feed_timezone_override <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Change override timzone for feed
+
+```php
+add_filter('osec_feed_timezone_override', $override_timezone $feed $x_wr_timezone $local_timezone);
+```
+
+#### Description
+
+
+Alter time zone of a feed. Effecting UTC and DATE (only) Floating local time events.
+
+#### Parameters
+
+
+ - **$override_timezone** <span style="color:crimson"> string</span> Currently calculated value
+ - **$feed** <span style="color:crimson"> </span> Ical feed
+ - **$x_wr_timezone** <span style="color:crimson"> </span> X_WR_TIMEZONE if available
+ - **$local_timezone** <span style="color:crimson"> </span> Default Timezone
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Change override timzone for feed
+ *
+ * Alter time zone of a feed. Effecting UTC and DATE (only) Floating local time events.
+ *
+ * @since 1.5
+ *
+ * @param string $override_timezone Currently calculated value
+ * @param  object  $feed  Ical feed
+ * @param  ?string  $x_wr_timezone  X_WR_TIMEZONE if available
+ * @param  string  $local_timezone  Default Timezone
+ *
+ * @file src/App/Model/IcsImportExportParser.php
+ */
+add_filter('osec_feed_timezone_override', $override_timezone $feed $x_wr_timezone $local_timezone);
+```
+
+</details>
+
 
 ### osec_ics_import_pre_init_event <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
