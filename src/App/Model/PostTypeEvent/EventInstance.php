@@ -283,7 +283,18 @@ class EventInstance extends OsecBaseClass
             }
             if (str_contains($part, '=')) {
                 [$key, $value] = explode('=', $part, 2);
-                $rules[$key] = $value;
+                switch ($key) {
+                    case 'BYDAY':
+                        $rules[$key] = explode(',', $value);
+                        break;
+                    case 'BYMONTH':
+                    case 'BYMONTHDAY':
+                    case 'BYSETPOS':
+                        $rules[$key] = array_map('intval', explode(',', $value));
+                        break;
+                    default:
+                        $rules[$key] = $value;
+                }
             } else {
                 // Handle standalone values (e.g., RDATE, EXDATE entries)
                 $rules[$part] = true;
