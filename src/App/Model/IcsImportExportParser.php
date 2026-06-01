@@ -165,6 +165,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $override_timezone
             );
 
+            $eventTimezone = $data['start']->getObject()->getTimezone()->getName();
+            $allday = $data['allday'];
+
             /* Categories */
             $categories   = $e->getXprop('CATEGORIES', false, true);
             $imported_cat = [EventTaxonomy::CATEGORIES => []];
