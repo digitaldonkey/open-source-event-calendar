@@ -881,7 +881,12 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
     {
         $ical_uid      = $e->getUid();
         $recurrence_id = $e->getRecurrenceid();
-        if (false !== $recurrence_id) {
+        if ($recurrence_id instanceof \DateTime) {
+            $uts_time = $recurrence_id->setTimezone(new DateTimeZone('UTC'));
+            $ical_uid = $uts_time->format('Ymd\THms\Z') . '-' . $ical_uid;
+        }
+
+        if (is_array($recurrence_id)) {
             $ical_uid = implode('', array_values($recurrence_id)) . '-' .
                         $ical_uid;
         }

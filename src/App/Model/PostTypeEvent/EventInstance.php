@@ -105,9 +105,7 @@ class EventInstance extends OsecBaseClass
             'end'     => $event->get('end')->format_to_gmt(),
         ];
         $duration   = $event->get('end')->diff_sec($event->get('start'));
-
         $_start = $event->get('start')->format_to_gmt();
-        $_end   = $event->get('end')->format_to_gmt();
 
         // Always cache initial instance
         $events[$_start] = $event_item;
