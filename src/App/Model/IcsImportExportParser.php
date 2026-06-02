@@ -405,7 +405,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 'ical_source_url'  => $e->getXprop('url'),
                 'ical_organizer'   => $organizer,
                 'ical_contact'     => $contact,
-                'ical_uid'         => $this->getIcalUid($e),
+                'ical_uid'         => $this->getIcalUid($e, $allday),
                 'categories'       => array_keys($imported_cat[EventTaxonomy::CATEGORIES]),
                 'tags'             => array_keys($imported_tags[EventTaxonomy::TAGS]),
                 'feed'             => $feed,
@@ -873,24 +873,27 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
     /**
      * Returns modified ical uid for google recurring edited events.
      *
+     * For a recurring event series, the UID alone refers to the whole
+     * recurrence set. RECURRENCE-ID narrows that reference down to a
+     * single instance.
+     *
+     * @see https://icalendar.org/iCalendar-RFC-5545/3-8-4-4-recurrence-id.html
+     *
      * @param  vevent  $e  Vevent object.
      *
      * @return string ICAL uid.
      */
-    protected function getIcalUid($e)
+    protected function getIcalUid($e, $is_allday)
     {
         $ical_uid      = $e->getUid();
         $recurrence_id = $e->getRecurrenceid();
         if ($recurrence_id instanceof \DateTime) {
-            $uts_time = $recurrence_id->setTimezone(new DateTimeZone('UTC'));
-            $ical_uid = $uts_time->format('Ymd\THms\Z') . '-' . $ical_uid;
+            if ($is_allday) {
+                $ical_uid = $recurrence_id->format('Ymd') . '-' . $ical_uid;
+            } else {
+                $ical_uid = $recurrence_id->format('Ymd\THms\Z') . '-' . $ical_uid;
+            }
         }
-
-        if (is_array($recurrence_id)) {
-            $ical_uid = implode('', array_values($recurrence_id)) . '-' .
-                        $ical_uid;
-        }
-
         return $ical_uid;
     }
 
