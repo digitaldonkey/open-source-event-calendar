@@ -390,7 +390,7 @@ class EventParent extends OsecBaseClass
                     $current_id
                 )
             );
-            if (! empty($parent) && 'trash' === $parent->post_status) {
+            if (! empty($parent) && 'trash' !== $parent->post_status) {
                 $parent_id = (int) $parent->ID;
             }
             if ($current_id && ! is_null($parent_id)) { // Is null on Add new event.

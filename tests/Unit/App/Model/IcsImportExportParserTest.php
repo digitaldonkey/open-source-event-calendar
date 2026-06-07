@@ -5,7 +5,9 @@ namespace Osec\Tests\Unit\App\Model;
 use Kigkonsult\Icalcreator\IcalInterface;
 use Kigkonsult\Icalcreator\Vcalendar;
 use Osec\App\Model\Date\DT;
+use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\IcsImportExportParser;
+use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\Exception\ImportExportParseException;
 use Osec\Tests\Utilities\TestBase;
 use PHPUnit\Util\InvalidDataSetException;
@@ -301,5 +303,85 @@ class IcsImportExportParserTest extends TestBase
             'expected' => $expected['local_timezone_shanghai'],
         ];
         yield from $datasets;
+    }
+
+    public function test_simple_occurrences_ics()
+    {
+        global $osec_app;
+        $DATA = [
+            'events_in_db' => [],
+            'feed' =>
+                (object)[
+                    'feed_id'              => '2',
+                    'feed_url'             => 'https://ddev-wordpress.ddev.site/wp-content/plugins/open-source-event-calendar/tests/Unit/App/Model/ical_feeds/simple_reoccurrences.ics',
+                    'feed_name'            => 'Most Simple reoccurrences',
+                    'feed_category'        => '',
+                    'feed_tags'            => '',
+                    'comments_enabled'     => '0',
+                    'map_display_enabled'  => '0',
+                    'keep_tags_categories' => '0',
+                    'keep_old_events'      => '0',
+                    'import_timezone'      => '1',
+                ],
+            'comment_status' => 'closed',
+            'do_show_map'    => 0,
+            'source'         => file_get_contents(__DIR__ . '/ical_feeds/simple_reoccurrences.ics'),
+        ];
+        $value = IcsImportExportParser::factory($osec_app)->import($DATA);
+        $this->assertEquals(1, $value['count']);
+
+        // Verify number of instances
+        $event_id = (int) EventSearch::factory($osec_app)->get_event_ids_for_feed($DATA['feed']->feed_url)[0];
+        $time_zone = Timezones::factory($osec_app)->get_default_timezone();
+        $inserted = EventSearch::factory($osec_app)->get_events_between(
+            new DT(strtotime('10 July 2024 00:00:00 ' . $time_zone), $time_zone),
+            new DT(strtotime('25 September 2024 00:00:00 ' . $time_zone), $time_zone),
+            ['post_ids' => [$event_id]]
+        );
+        $this->assertEquals(6, count($inserted));
+
+        // TODO DATE VERIFICATIONS
+        //   Regarding timezones, the "always_use_calendar_timezone" setting.
+        //   and the Feed->import_timezone setting.
+    }
+
+    public function test_simple_occurrences_with_oveeride_ics()
+    {
+        global $osec_app;
+        $DATA  = [
+            'events_in_db'   => [],
+            'feed'           =>
+                (object)[
+                    'feed_id'              => '2',
+                    'feed_url'             => 'https://ddev-wordpress.ddev.site/wp-content/plugins/open-source-event-calendar/tests/Unit/App/Model/ical_feeds/simple_occurrences_with_oveeride.ics',
+                    'feed_name'            => 'simple_occurrences_with_oveeride.ics',
+                    'feed_category'        => '',
+                    'feed_tags'            => '',
+                    'comments_enabled'     => '0',
+                    'map_display_enabled'  => '0',
+                    'keep_tags_categories' => '0',
+                    'keep_old_events'      => '0',
+                    'import_timezone'      => '1',
+                ],
+            'comment_status' => 'closed',
+            'do_show_map'    => 0,
+            'source'         => file_get_contents(__DIR__ . '/ical_feeds/simple_occurrences_with_oveeride.ics'),
+        ];
+        $value = IcsImportExportParser::factory($osec_app)->import($DATA);
+        $this->assertEquals(2, $value['count']);
+
+        // Verify number of instances
+        $event_id  = (int)EventSearch::factory($osec_app)->get_event_ids_for_feed($DATA['feed']->feed_url)[0];
+        $time_zone = Timezones::factory($osec_app)->get_default_timezone();
+        $inserted  = EventSearch::factory($osec_app)->get_events_between(
+            new DT(strtotime('06 January 2025 00:00:00 ' . $time_zone), $time_zone),
+            new DT(strtotime('03 February 2025 00:00:00 ' . $time_zone), $time_zone),
+            ['post_ids' => [$event_id]]
+        );
+        $this->assertEquals(4, count($inserted));
+
+        // TODO DATE VERIFICATIONS
+        //   Regarding timezones, the "always_use_calendar_timezone" setting.
+        //   and the Feed->import_timezone setting.
     }
 }

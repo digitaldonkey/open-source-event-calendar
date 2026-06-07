@@ -4,11 +4,13 @@ namespace Osec\App\Model\PostTypeEvent;
 
 use DateTime;
 use DateTimeZone;
-use Exception;
-use Kigkonsult\Icalcreator\Util\RecurFactory;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Exception\Exception;
+use Osec\Exception\TimezoneException;
+use RRule\RfcParser;
+use RRule\RRule;
 
 /**
  * Event instance management model.
@@ -161,7 +163,7 @@ class EventInstance extends OsecBaseClass
      *
      * @param  Event  $event  Event to generate instances for.
      * @param  array  $event_instance  First instance contents.
-     * @param  int  $_start  Timestamp of first occurence.
+     * @param  int  $_start  Event start time UTC timestamp.
      * @param  int  $duration  Event duration in seconds.
      * @param  string  $timezone  Target timezone.
      *
@@ -175,61 +177,50 @@ class EventInstance extends OsecBaseClass
         $timezone
     ) {
         $events = [];
+        $origEventTime = new DT($_start, 'UTC');
 
-        // TODO
-        // There are more bugs in here. We need to test all options.
-        // We need TESTS for all rrule options you can select in Frontend.
+        $recurrence_time_limit = new DateTime();
+        $recurrence_time_limit->modify(OSEC_REOCCURRENCE_TIMEFRAME);
 
-        $origEventTime = new DT($_start, $timezone);
-        $wdate         = $origEventTime->getObject();
+        // TODO:
+        //   Do we need to check for lower boundary limits?
+        //   To prevent DB overflow DB with a very old start date?
 
-        $recurrenceEndDate = clone $origEventTime->getObject();
+        $recurrence_list = array_unique(
+            array_merge(
+                $this->process_rrule_datelist(
+                    $event->get('recurrence_dates'),
+                    $origEventTime
+                ),
+                $this->process_rrule_freq(
+                    $event->get('recurrence_rules'),
+                    $origEventTime->getObject(),
+                    $recurrence_time_limit,
+                    $timezone
+                ),
+            ),
+            SORT_NUMERIC
+        );
 
-        $recurrenceEndDate->modify(OSEC_REOCCURRENCE_TIMEFRAME);
-
-        $recurrence_dates = [];
-        if ($event->get('recurrence_dates')) {
-            $this->createRecurringDates(
-                $recurrence_dates,
-                $event->get('recurrence_dates'),
-                $origEventTime,
-                $timezone
-            );
-        }
-
-        $exclude_dates = [];
-        if ($event->get('exception_dates')) {
-            $this->createRecurringDates(
-                $exclude_dates,
-                $event->get('exception_dates'),
-                $origEventTime,
-                $timezone
-            );
-        }
-
-        if ($event->get('exception_rules')) {
-            $this->createRepeatDates(
-                $exclude_dates,
-                $event->get('exception_rules'),
-                $wdate,
-                $recurrenceEndDate,
-                $timezone
-            );
-        }
-
-        if ($event->get('recurrence_rules')) {
-            $this->createRepeatDates(
-                $recurrence_dates,
-                $event->get('recurrence_rules'),
-                $wdate,
-                $recurrenceEndDate,
-                $timezone
-            );
-        }
+        $exclude_list = array_unique(
+            array_merge(
+                $this->process_rrule_datelist(
+                    $event->get('exception_dates'),
+                    $origEventTime
+                ),
+                $this->process_rrule_freq(
+                    $event->get('exception_rules'),
+                    $origEventTime->getObject(),
+                    $recurrence_time_limit,
+                    $timezone,
+                )
+            ),
+            SORT_STRING
+        );
 
         // Add the instances
-        foreach (array_keys($recurrence_dates) as $timestamp) {
-            if ( ! isset($exclude_dates[$timestamp])) {
+        foreach ($recurrence_list as $timestamp) {
+            if ( ! in_array($timestamp, $exclude_list, true)) {
                 $events[$timestamp] = [
                     'post_id' => $event_instance['post_id'],
                     'start'   => $timestamp,
@@ -237,7 +228,6 @@ class EventInstance extends OsecBaseClass
                 ];
             }
         }
-
         return $events;
     }
 
@@ -245,121 +235,117 @@ class EventInstance extends OsecBaseClass
      * @param  array  $dates
      * @param  string  $rule
      * @param  DT  $start
-     * @param $timezone
      *
-     * @return void
+     * @return array
      * @throws \Osec\Exception\BootstrapException
      * @throws \Osec\Exception\TimezoneException
      */
-    protected function createRecurringDates(array &$dates, string $rule, DT $start, $timezone): void
+    protected function process_rrule_datelist(?string $rule, DT $start): array
     {
-        foreach (explode(',', (string)$rule) as $date) {
-            $i_date = clone $start;
-            $spec   = sscanf($date, '%04d%02d%02d');
-            $i_date->set_date(
-                $spec[0],
-                $spec[1],
-                $spec[2]
-            );
-            $dates[$i_date->format_to_gmt()] = true;
+        $dates = [];
+        if ($rule) {
+            foreach (explode(',', (string)$rule) as $date) {
+                $i_date = clone $start;
+                $spec   = sscanf($date, '%04d%02d%02d');
+                $i_date->set_date(
+                    $spec[0],
+                    $spec[1],
+                    $spec[2]
+                );
+                $dates[] = (int) $i_date->format_to_gmt();
+            }
         }
+        return $dates;
     }
 
     /**
-     * Parse RRULE string into associative array (replaces removed RecurFactory::parseRexrule()).
-     *
-     * @param  string  $rrule  RRULE string (e.g., "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE")
-     * @return array Parsed rules array
-     */
-    protected function parseRrule(string $rrule): array
-    {
-        $rules = [];
-        foreach (explode(';', $rrule) as $part) {
-            $part = trim($part);
-            if (empty($part)) {
-                continue;
-            }
-            if (str_contains($part, '=')) {
-                [$key, $value] = explode('=', $part, 2);
-                switch ($key) {
-                    case 'BYDAY':
-                        $rules[$key] = explode(',', $value);
-                        break;
-                    case 'BYMONTH':
-                    case 'BYMONTHDAY':
-                    case 'BYSETPOS':
-                        $rules[$key] = array_map('intval', explode(',', $value));
-                        break;
-                    default:
-                        $rules[$key] = $value;
-                }
-            } else {
-                // Handle standalone values (e.g., RDATE, EXDATE entries)
-                $rules[$part] = true;
-            }
-        }
-        return $rules;
-    }
-
-    /**
-     * @param  array  $data
      * @param  string  $rrule
-     * @param  DateTime  $wdate
-     * @param  DateTime  $repearUntil
+     * @param  DateTime  $start
+     * @param  DateTime  $recurrence_time_limit
      * @param  string  $timezone
      *
-     * @return void
-     * @throws Exception
+     * @return array
+     * @throws \DateInvalidTimeZoneException
+     * @throws TimezoneException
      */
-    protected function createRepeatDates(
-        array &$data,
-        string $rrule,
-        DateTime $wdate,
-        DateTime $repearUntil,
+    protected function process_rrule_freq(
+        ?string $rrule,
+        DateTime $start,
+        DateTime $recurrence_time_limit,
         string $timezone
-    ) {
-        $unprocessedData = [];
-        $ignoreKeys      = [
-            'EXDATE',
-            'RDATE',
-        ];
-        $rulesArray = array_filter(
-            $this->parseRrule($rrule),
-            function ($k) use ($ignoreKeys) {
-                return ! in_array($k, $ignoreKeys, true);
+    ): array {
+        $data = [];
+
+        // Empty rule check.
+        if (empty($rrule)) {
+            return $data;
+        }
+        // Tailing semicolon must be removed.
+        $rrule = rtrim(trim($rrule), ';');
+
+        // EXDATE and RDATE andled in process_rrule_datelist().
+        $rrule_array = $this->filter_rrules_array(
+            RfcParser::parseRRule($rrule, $start),
+            ['EXDATE', 'RDATE']
+        );
+
+        if (!empty($rrule_array)) {
+            DT::require_php_timezone_utc();
+
+            // Add a sane max limit, because all generated events
+            // are represented in wp_osec_event_instances.
+            if (
+                (! isset($rrule_array['UNTIL']) || empty($rrule_array['UNTIL']))
+                && (! isset($rrule_array['COUNT']) || empty($rrule_array['COUNT']))
+            ) {
+                $rrule_array['UNTIL'] = $recurrence_time_limit;
+            }
+
+            $rulez = new RRule($rrule_array);
+            if ($rulez->isInfinite()) {
+                throw new Exception(esc_html('Too much to handle.'));
+            }
+
+            foreach ($rulez as $occurrence) {
+                $instanceDate = new DateTime(
+                    '@' . $occurrence->getTimestamp(),
+                    new DateTimeZone($timezone)
+                );
+                $instanceDate->setTime(
+                    (int) $start->format('H'),
+                    (int) $start->format('i'),
+                );
+                $data[] = $instanceDate->getTimestamp();
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * Parse rrules.
+     *
+     * If no rule is left, only date an empty DTSTARTS is returned.
+     *
+     * @param ?array $ignores_keys array of keys to ignore/remove.
+     * @param $rrule_array
+     *
+     * @return array
+     */
+    protected function filter_rrules_array(array $rrule_array, ?array $ignores_keys): array
+    {
+        $ignores_keys = is_array($ignores_keys) ? $ignores_keys : [];
+        $array = array_filter(
+            $rrule_array,
+            function ($k) use ($ignores_keys) {
+                return ! in_array($k, $ignores_keys, true);
             },
             ARRAY_FILTER_USE_KEY
         );
-
-        if ( ! empty($rulesArray)) {
-            // Removed unnecessary date_default_timezone_set('UTC'). Just to be sure.
-            DT::require_php_timezone_utc();
-
-            if (isset($rulesArray['UNTIL'])) {
-                // @see https://github.com/iCalcreator/iCalcreator/issues/119
-                $rulesArray['UNTIL'] = new DateTime($rulesArray['UNTIL']);
-            }
-
-            // The first array is the result and it is passed by reference
-            RecurFactory::recur2date(
-                $unprocessedData,
-                $rulesArray,
-                $wdate,
-                $wdate,
-                $repearUntil
-            );
-            // Change format to match UTC->DATE
-            foreach ($unprocessedData as $dateStamp => $bool) {
-                $instanceDate = new DateTime($dateStamp, new DateTimeZone($timezone));
-                $instanceDate->setTime(
-                    (int)$wdate->format('H'),
-                    (int)$wdate->format('i'),
-                );
-                $data[$instanceDate->getTimestamp()] = $bool;
-            }
+        if (count($array) > 1) { // The date will always be there.
+            return $array;
         }
+        return [];
     }
-
     /**
      * Removes EventInstance entries using their IDS.
      *

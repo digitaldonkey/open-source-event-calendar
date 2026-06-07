@@ -17,7 +17,10 @@ use Osec\App\Model\PostTypeEvent\EventTaxonomy;
 use Osec\App\View\Event\EventAvatarView;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Exception\BootstrapException;
+use Osec\Exception\Exception;
 use Osec\Exception\ImportExportParseException;
+use Osec\Exception\InvalidArgumentException;
 use Osec\Exception\TimezoneException;
 
 /**
@@ -36,6 +39,16 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      * Recurrence rule class. Contains filter method.
      */
     protected ?RepeatRuleToText $ruleFilter = null;
+
+    /**
+     * @var array $override_exclussions Format is [UID][...].
+     *
+     * Overriding events (same UID) may a REOCURRENCE-ID
+     * containing a date, to alter the provided FREQ.
+     * Thus events having a REOCURRENCE-ID need to get into
+     * the exclude list of the parent (repeating) event.
+     */
+    protected $override_exclussions = [];
 
     /**
      * @param  array  $arguments
@@ -76,7 +89,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      * @param  array  $args  Arbitrary arguments map.
      *
      * @return array Info about Import
-     * @throws ImportExportParseException
      *
      * @internal param string   $comment_status WP comment status: 'open' or
      *   'closed'.
@@ -99,10 +111,11 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $do_show_map    = $args['do_show_map'] ?? 0;
         $v->sort();
 
-        /*
+        /**
          * Timezone Data
+         *
+         * @var string $local_timezone WP Timezone
          */
-        /* @var string $local_timezone WP Timezone */
         $local_timezone = Timezones::factory($this->app)->get_default_timezone();
 
         /**
@@ -143,9 +156,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $local_timezone
         );
 
-        // Initialize empty custom exclusions structure
-        $exclusions = [];
-
         // Filter out events only.
         $events = array_filter(
             $v->getComponents(),
@@ -165,7 +175,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $override_timezone
             );
 
-            $eventTimezone = $data['start']->getObject()->getTimezone()->getName();
+            $event_timezone = $data['start']->getObject()->getTimezone()->getName();
             $allday = $data['allday'];
 
             /* Categories */
@@ -217,16 +227,21 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // =======================================
             $rrule = $e->createRrule();
             if ($rrule) {
+                // Remove prefix `RRULE:`
                 $rrule = explode(':', (string)$rrule);
                 $rrule = trim(end($rrule));
             }
+
             $exrule = $e->createExrule();
             if ($exrule) {
+                // Remove Prefix `EXULE:`
                 $exrule = explode(':', (string)$exrule);
                 $exrule = trim(end($exrule));
             }
+
             $rdate = $e->createRdate();
             if ($rdate) {
+                // Remove Prefix `RDATE:`
                 $rdate = explode(':', (string)$rdate);
                 $rdate = trim(end($rdate));
             }
@@ -234,54 +249,30 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // ===================
             // = Exception dates =
             // ===================
-            $exdate = '';
-            $exdates = $e->createExdate();
-            if ($exdates) {
-                // We may have two formats:
-                // one exdate with many dates ot more EXDATE rules
-                $exdates      = explode('EXDATE', (string)$exdates);
-                $def_timezone = $this->getTimezone($eventTimezone);
-                foreach ($exdates as $exd) {
-                    if (empty($exd)) {
-                        continue;
-                    }
-                    $exploded       = explode(':', $exd);
-                    $excpt_timezone = $def_timezone;
-                    $excpt_date     = null;
-                    foreach ($exploded as $particle) {
-                        if (str_starts_with($particle, ';TZID=')) {
-                            $excpt_timezone = substr($particle, 6);
-                        } else {
-                            $excpt_date = trim($particle);
-                        }
-                    }
-                    // Google sends YYYYMMDD for all-day excluded events
-                    if (
-                        $allday &&
-                        8 === strlen((string)$excpt_date)
-                    ) {
-                        $excpt_date     .= 'T000000Z';
-                        $excpt_timezone = 'UTC';
-                    }
-                    $ex_dt = new DT($excpt_date, $excpt_timezone);
-                    if ($ex_dt) {
-                        if (isset($exdate[0])) {
-                            $exdate .= ',';
-                        }
-                        $exdate .= $ex_dt->format('Ymd\THis', $excpt_timezone);
-                    }
-                }
+
+            /* @var $exdates DateTime[] A list of dates. */
+            $exdates = [];
+            // EXDATE may have two formats:
+            //   one exdate with many dates ot more EXDATE rules
+            while (false !== ($pc = $e->getExdate())) {
+                $exdates = array_merge($exdates, $pc);
             }
-            // Add custom exclusions if there any
-            $recurrence_id = $e->getXprop('recurrence-id');
-            if (
-                false === $recurrence_id &&
-                ! empty($exclusions[$e->getXprop('uid')])
-            ) {
-                if (isset($exdate[0])) {
-                    $exdate .= ',';
+
+            /* @var string $exdate Aggregated exdates to store in DB */
+            $exdate = '';
+            if (!empty($exdates)) {
+                // Format for DB entry
+                $last_id = count($exdates) - 1;
+                foreach ($exdates as $i => $item) {
+                    if ($allday) {
+                        $exdate .= gmdate('Ymd', $item->format('U'));
+                    } else {
+                        $exdate .= gmdate('Ymd\THis\Z', $item->format('U'));
+                    }
+                    if ($i !== $last_id) {
+                        $exdate .= ',';
+                    }
                 }
-                $exdate .= implode(',', $exclusions[$e->getXprop('uid')]);
             }
 
             // ========================
@@ -415,6 +406,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     'post_type'      => OSEC_POST_TYPE,
                     'post_author'    => 1,
                     'post_title'     => $e->getSummary(),
+                    'post_parent'    => null,
                     'post_content'   => stripslashes(
                         str_replace(
                             '\n',
@@ -424,8 +416,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     ),
                 ],
             ];
-            // register any custom exclusions for given event
-            $exclusions = $this->addRecurringEventsExclusions($e, $exclusions);
 
             /**
              * Alter FeedsData before processing.
@@ -445,6 +435,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $event->set_no_end_time();
             }
 
+            $post_ID = null;
             $recurrence = $event->get('recurrence_rules');
             $search     = EventSearch::factory($this->app);
             // first let's check by UID
@@ -456,7 +447,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // If no result, perform the feed based check.
             if (null === $matching_event_id) {
                 $matching_event_id = $search
-
                     ->get_matching_event_id(
                         $event->get('ical_uid'),
                         $event->get('ical_feed_url'),
@@ -468,7 +458,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 // =================================================
                 // = Event was not found, so store it and the post =
                 // =================================================
-                $event->save();
+                $post_ID = $event->save();
                 ++$output['count'];
             } else {
                 // ======================================================
@@ -486,7 +476,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     // Update the event
                     $event->set('post_id', $matching_event_id);
                     $event->set('post', $post);
-                    $event->save(true);
+                    $post_ID = $event->save(true);
                     ++$output['count'];
                 }
             }
@@ -511,9 +501,88 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 wp_set_post_terms($event->get('post_id'), array_keys($ids), $tax_name);
             }
             unset($output['events_to_delete'][$event->get('post_id')]);
+
+            /**
+             * If REOCURRENCE-ID contains a date,
+             * it must be included in parent event exclude list.
+             */
+            $recurrence_id = $e->getRecurrenceid();
+            $exclude_date = null;
+            if ($recurrence_id instanceof \DateTime) {
+                if ($allday) {
+                    $exclude_date = $recurrence_id->format('Ymd');
+                } else {
+                    $exclude_date = $recurrence_id->format('Ymd\THms\Z');
+                    // T%02d%02d%02d%s
+                }
+                $exclusions[$e->getUid()][] = $exdate;
+            }
+            $this->add_parent_child_relations(
+                $e->getUid(),
+                $post_ID,
+                $exclude_date,
+            );
+
+            // End event processing.
         }
 
+        // Update parent/child relations.
+        $this->process_parent_child_relations();
         return $output;
+    }
+
+    protected function add_parent_child_relations(string $uid, int $post_ID, ?string $recurrence_id): void {
+        if (!isset($this->override_exclussions[$uid])) {
+            $this->override_exclussions[$uid] = [];
+        }
+        $this->override_exclussions[$uid][] = [
+            'post_ID' => $post_ID,
+            'recurrence_id' => $recurrence_id,
+        ];
+    }
+
+    protected function process_parent_child_relations(): void {
+        foreach ($this->override_exclussions as $uid => $items) {
+            $parent_id = null;
+            $children = [];
+            $child_exclude_dates = '';
+            foreach ($items as $item) {
+                if ($item['recurrence_id']) {
+                    // Child
+                    $children[] = $item;
+                    $child_exclude_dates .= $item['recurrence_id'] . ',';
+                } else {
+                    if (!is_null($parent_id)) {
+                        throw new Exception(esc_html('There must be only one parent.'));
+                    }
+                    $parent_id = $item['post_ID'];
+                }
+            }
+
+            if (!is_null($parent_id) && count($children) > 0) {
+                // If there are parent/childrens relations:
+
+                // Update parent with excludes
+                $parent_event = new Event($this->app, $parent_id);
+                $exception_dates = $parent_event->get('exception_dates', '');
+
+                if (!empty($exception_dates)) {
+                    $exception_dates .= ',';
+                }
+                $exception_dates .= $child_exclude_dates;
+                $exception_dates = rtrim($exception_dates, ',');
+                $parent_event->set('exception_dates', $exception_dates);
+                $parent_event->save(true);
+
+                // Update children with Parent relation
+                foreach ($children as $child) {
+                    wp_update_post([
+                        'ID'          => $child['post_ID'],
+                        'post_parent' => $parent_id,
+                    ]);
+                }
+            }
+        }
     }
 
     /**
@@ -543,16 +612,16 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // For reference only.
         $UID = $e->getUid();
 
-        /* @var array $DtStart See \Kigkonsult\Icalcreator\Pc->getAsArray() to understand. */
-        $DtStart = $e->getDtstart(true)->getAsArray();
+        /* @var array $start_raw See \Kigkonsult\Icalcreator\Pc->getAsArray() to understand. */
+        $start_raw = $e->getDtstart(true)->getAsArray();
 
-        /* @var DateTime $startValue Start date and time or date. */
-        $startValue = $DtStart['value'];
-        $startValueParams = $DtStart['params'];
-        unset($DtStart);
+        /* @var DateTime $start_value Start date and time or date. */
+        $start_value = $start_raw['value'];
+        $start_value_params = $start_raw['params'];
+        unset($start_raw);
 
         /**
-         * @var bool $isDateOnly : There is no time set in DTStart.
+         * @var bool $is_date_only : There is no time set in DTStart.
          *
          *  The default value type is DATE-TIME. The time value
          *  MUST be one of the forms defined for the DATE-TIME value type.
@@ -563,12 +632,12 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
          *  - Local timezone applies.
          * @see https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4
          */
-        $isDateOnly = isset($startValueParams['VALUE'])
-                      && $startValueParams['VALUE'] === 'DATE'
-                      && $this->isTimeless($startValue);
+        $is_date_only = isset($start_value_params['VALUE'])
+                      && $start_value_params['VALUE'] === 'DATE'
+                      && $this->isTimeless($start_value);
 
         /**
-         * @var bool $isLocalTimeEvent Floating local time events.
+         * @var bool $is_local_time Floating local time events.
          *
          * The local time form is simply a time value that does not contain
          * the UTC designator nor does it reference a time zone.
@@ -600,8 +669,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
          * - No TZID
          * - No UTC time
          */
-        $isLocalTimeEvent = isset($startValueParams['ISLOCALTIME'])
-                            && $startValueParams['ISLOCALTIME'] === true;
+        $is_local_time = isset($start_value_params['ISLOCALTIME'])
+                            && $start_value_params['ISLOCALTIME'] === true;
 
         /**
          * @var ?string $event_timezone Event DateTime timezone if applicable and valid
@@ -609,56 +678,53 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
          *  - it is not needed explicitly as it is included in the DateTime value.
          *  - if it's not recognizes it might be an issue.
          */
-        $event_timezone = isset($startValueParams['TZID']) ? $startValueParams['TZID'] : null;
+        $event_timezone = $start_value_params['TZID'] ?? null;
         if (!is_null($event_timezone) && !$this->isRecognizedTz($event_timezone)) {
             throw new TimezoneException(
                 esc_html(
-                    'Invalid event timezone: ' . (string) $event_timezone
+                    'Invalid event timezone: ' . $event_timezone
                 )
             );
         }
 
-        $durationEnd = null;
+        $duration_end = null;
         if ($e->getDuration(false, true) instanceof DateTime) {
-            $durationEnd = $e->getDuration(false, true);
+            $duration_end = $e->getDuration(false, true);
         }
 
         /**
-         * @var ?DateTime $endValue End date and time or date.
+         * @var ?DateTime $end_value End date and time or date.
          */
-        $endValue = $e->getDtend() ?? 0 ?: null;
-        if (empty($endValue)) {
+        $end_value = $e->getDtend() ?? 0 ?: null;
+        if (empty($end_value)) {
             // #1 if duration is present, assign it to end time
-            $endValue = $durationEnd;
-            if (empty($endValue)) {
-                // #2 if only DATE value is set for start, set duration to 1 day
-                if ($isDateOnly) {
-                    $endValue = clone $startValue;
-                    $endValue->modify('+1 day');
-                } else {
-                    // #3 set end date to start time
-                    $endValue = clone $startValue;
+            $end_value = $duration_end;
+            if (empty($end_value)) {
+                // #2 set end date to start time.
+                $end_value = clone $start_value;
+                if ($is_date_only) {
+                    // #3 if only DATE value is set for start, set duration to 1 day.
+                    $end_value->modify('+1 day');
                 }
             }
         }
 
         /**
-         * @var bool $isInstantEvent Defined by providing only a DTSTART
+         * @var bool $is_instant Defined by providing only a DTSTART
          *   (Start Date/Time) with a DATE-TIME value type, while entirely
          *   omitting both the DTEND (End Date/Time) and DURATION properties.
          *   By spec, if DTEND is missing, it implicitly occurs at the
          *   identical date and time as DTSTART.
          */
-        $isInstantEvent = empty($endValue)
-                          || (!empty($endValue) && $startValue->format('U') === $endValue->format('U'));
-
+        $is_instant = (!empty($end_value) && $start_value->format('U') === $end_value->format('U'))
+                    || empty($end_value);
         /**
          * @var bool $allday If Event spans full day.
          */
-        $allday = $isDateOnly
+        $allday = $is_date_only
                   || (
-                      self::isTimeless($startValue)
-                      && self::isTimeless($endValue)
+                      self::isTimeless($start_value)
+                      && self::isTimeless($end_value)
                   );
         // Check the proprietary MS all-day field.
         $ms_allday = $e->getXprop('X-MICROSOFT-CDO-ALLDAYEVENT');
@@ -668,44 +734,44 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
 
         // Apply timezone if necessary.
         $dates = [
-            'start' => $startValue,
-            'end' => $endValue,
+            'start' => $start_value,
+            'end' => $end_value,
         ];
-        foreach ($dates as $key => $dateTime) {
+        foreach ($dates as $key => $date) {
             /**
-             * @var bool $is_UTC If Event time us set in UTC DATE-TIME values.
+             * @var bool $is_utc If Event time us set in UTC DATE-TIME values.
              *
              * No VTIMEZONE is needed because UTC is globally defined.
              * Consumers convert from UTC into local display time themselves.
              */
-            $is_UTC = $dateTime->getTimezone()
-                      && $dateTime->getOffset() === 0;
+            $is_utc = $date->getTimezone()
+                      && $date->getOffset() === 0;
 
-            if ($is_UTC) {
-                $applied_Timezone = 'UTC';
+            if ($is_utc) {
+                $applied_timezone = 'UTC';
 
-                if ($isLocalTimeEvent || $isDateOnly) {
-                    $applied_Timezone = $x_wr_timezone ?? $local_timezone;
+                if ($is_local_time || $is_date_only) {
+                    $applied_timezone = $x_wr_timezone ?? $local_timezone;
                 }
 
                 // Final TZ
-                $timezone = new DateTimeZone($override_UTC_TZ ? $override_timezone : $applied_Timezone);
+                $timezone = new DateTimeZone($override_UTC_TZ ? $override_timezone : $applied_timezone);
 
                 // Floating time and Allday Events use local time.
-                if ($isLocalTimeEvent || $isDateOnly) {
-                    $dateTime = new DateTime($dateTime->format('Y-m-d H:i:s'), $timezone);
+                if ($is_local_time || $is_date_only) {
+                    $date = new DateTime($date->format('Y-m-d H:i:s'), $timezone);
                 }
 
-                $dateTime = $dateTime->setTimezone($timezone);
+                $date = $date->setTimezone($timezone);
 
                 // Reset to TZ relative date start.
-                if ($isDateOnly) {
-                    $dateTime->setTime(0, 0, 0);
+                if ($is_date_only) {
+                    $date->setTime(0, 0, 0);
                 }
 
-                $DT = new DT($dateTime, $timezone->getName());
+                $DT = new DT($date, $timezone->getName());
             } else {
-                $DT = new DT($dateTime, $dateTime->getTimezone()->getName());
+                $DT = new DT($date, $date->getTimezone()->getName());
             }
             $dates[$key] = $DT;
         }
@@ -715,7 +781,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             [
                 'uid' => $UID, // Used for phpunit testing.
                 'allday' => $allday,
-                'instant_event' => $isInstantEvent,
+                'instant_event' => $is_instant,
             ]
         );
 
@@ -737,10 +803,10 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     // phpcs:disable Squiz.PHP.CommentedOutCode.Found
                     //  'source' => explode("\r\n", $e->createComponent()),
                     //  'params' => [
-                    //      'dateOnly' => $isDateOnly,
-                    //      'localTimeEvent' => $isLocalTimeEvent,
+                    //      'is_date_only' => $is_date_only,
+                    //      'is_local_time' => $is_local_time,
                     //      'allday' => $allday,
-                    //      'instant_event' => $isInstantEvent,
+                    //      'instant_event' => $is_instant,
                     //      'ics_timezone' => $event_timezone,
                     //],
                     // phpcs:enable Squiz.PHP.CommentedOutCode.Found
@@ -831,7 +897,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      *
      * @return string Valid timezone name to use.
      */
-    protected function getTimezone($def_timezone)
+    protected function getTimezone($def_timezone): string
     {
         $parser   = Timezones::factory($this->app);
         $timezone = $parser->get_name($def_timezone);
@@ -840,34 +906,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         }
 
         return $timezone;
-    }
-
-    /**
-     * Extract datetime info from Pc object (iCalcreator v2.41.x compatibility).
-     *
-     * In v2.40.x, getDtstart(true) and getDtend(true) returned an array with
-     * ['value' => DateTime, 'params' => array]. In v2.41.x, they return a Pc
-     * object with getValue() and getParams() methods. This helper normalizes
-     * both formats to the array structure expected by the rest of the code.
-     *
-     * @param  mixed  $pc  Pc object or array from getDtstart()/getDtend()
-     * @return array Normalized array with ['value' => DateTime, 'params' => array]
-     */
-    protected function extractDateTimeInfo($pc): array
-    {
-        if ($pc instanceof \Kigkonsult\Icalcreator\Pc) {
-            return [
-                'value' => $pc->getValue(),
-                'params' => $pc->getParams() ?? [],
-            ];
-        }
-        if (is_array($pc)) {
-            return $pc;
-        }
-        return [
-            'value' => $pc,
-            'params' => [],
-        ];
     }
 
     /**
@@ -883,7 +921,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      *
      * @return string ICAL uid.
      */
-    protected function getIcalUid($e, $is_allday)
+    protected function getIcalUid($e, $is_allday): string
     {
         $ical_uid      = $e->getUid();
         $recurrence_id = $e->getRecurrenceid();
@@ -895,59 +933,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             }
         }
         return $ical_uid;
-    }
-
-    /**
-     * Returns modified exclusions structure for given event.
-     *
-     * @param  Vevent  $e  Vcalendar event object. // TODO ?? TYPE OK?
-     * @param  array  $exclusions  Exclusions.
-     * @param  DT  $start  Date time object.
-     *
-     * @return array Modified exclusions structure.
-     */
-    protected function addRecurringEventsExclusions($e, $exclusions)
-    {
-        $recurrence_id = $e->getXprop('recurrence-id');
-        if (
-            false === $recurrence_id ||
-            ! isset($recurrence_id['year']) ||
-            ! isset($recurrence_id['month']) ||
-            ! isset($recurrence_id['day'])
-        ) {
-            return $exclusions;
-        }
-
-        $year = null;
-        $month = null;
-        $day = null;
-        $hour = null;
-        $min = null;
-        $sec = null;
-        // phpcs:ignore WordPress.PHP.DontExtract.extract_extract
-        extract($recurrence_id, EXTR_IF_EXISTS);
-        $timezone = '';
-        $exdate   = sprintf('%04d%02d%02d', $year, $month, $day);
-        if (
-            null === $hour ||
-            null === $min ||
-            null === $sec
-        ) {
-            $hour = '00';
-            $min  = '00';
-            $sec  = '00';
-            $timezone = 'Z';
-        }
-        $exdate                            .= sprintf(
-            'T%02d%02d%02d%s',
-            $hour,
-            $min,
-            $sec,
-            $timezone
-        );
-        $exclusions[$e->getXprop('uid')][] = $exdate;
-
-        return $exclusions;
     }
 
     public function export(array $arguments, array $params = []): string
@@ -1055,11 +1040,11 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
 
         // Prepend featured image if available.
         $size       = null;
-        $avatarView = EventAvatarView::factory($this->app);
-        $matches    = $avatarView->get_image_from_content($content);
+        $avatar_view = EventAvatarView::factory($this->app);
+        $matches    = $avatar_view->get_image_from_content($content);
         // if no img is already present - add thumbnail
         if (empty($matches)) {
-            $img_url = $avatarView->get_post_thumbnail_url($event, $size);
+            $img_url = $avatar_view->get_post_thumbnail_url($event, $size);
             if ($img_url) {
                 $content = '<div class="ai1ec-event-avatar alignleft timely"><img src="' .
                            esc_attr($img_url) . '" width="' . $size[0] . '" height="' .
@@ -1251,7 +1236,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $recurrence = $event->get('recurrence_rules');
         $recurrence = $this->filterRule($recurrence);
         if (! empty($recurrence)) {
-            $rules = [];
             foreach (explode(';', $recurrence) as $v) {
                 if (! str_contains($v, '=')) {
                     continue;
@@ -1314,8 +1298,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $exceptions = $this->filterRule($exceptions);
         $exrule     = [];
         if (! empty($exceptions)) {
-            $rules = [];
-
             foreach (explode(';', $exceptions) as $v) {
                 if (! str_contains($v, '=')) {
                     continue;
@@ -1387,6 +1369,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 );
             }
         }
+
+        // Exclusions handling
+
         $exception_dates = $event->get('exception_dates');
         $exception_dates = $this->filterRule($exception_dates);
         if (! empty($exception_dates)) {
@@ -1417,14 +1402,23 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      * Convert value, so it be safe to use on ICS feed. Used before passing to
      * iCalcreator methods, for rendering.
      *
-     * @param  string  $value  Text to be sanitized
+     * @param mixed $value Scalar or Array of Scalars to be sanitized.
      *
-     * @return string Safe value, for use in HTML
+     * @return string|array Safe value with coresponding type.
      */
-    protected function sanitizeValue($value)
+    protected function sanitizeValue(mixed $value): string|array
     {
-        if (! is_scalar($value)) {
+        if (is_array($value)) {
+            array_walk(
+                $value,
+                function (&$value) {
+                    $value = $this->sanitizeValue($value);
+                }
+            );
             return $value;
+        }
+        if (! is_scalar($value)) {
+            throw new InvalidArgumentException();
         }
         $safe_eol = "\n";
         $value    = strtr(
@@ -1453,6 +1447,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      * @param  string  $rule  Rule or dates value.
      *
      * @return string Fixed rule or dates value.
+     * @throws BootstrapException
      */
     protected function filterRule($rule)
     {
