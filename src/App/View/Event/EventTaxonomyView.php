@@ -354,7 +354,7 @@ class EventTaxonomyView extends OsecBaseClass
             }
 
             $html .= '<a class="' . $class .
-                     ' ai1ec-term-id-' . $category->term_id . ' p-category" itemprop="keywords" ' .
+                     ' ai1ec-term-id-' . $category->term_id . ' p-category" ' .
                      $title . $color_style . 'href="' . $href . '">';
 
             if ($format === 'blocks') {
@@ -367,7 +367,7 @@ class EventTaxonomyView extends OsecBaseClass
                     'class="ai1ec-fa ai1ec-fa-folder-open"></i>';
             }
 
-            $html     .= esc_html($category->name) . '</a>';
+            $html     .= '<span itemprop="keywords" >' . esc_html($category->name) . '</span></a>';
             $category = $html;
         }
 
@@ -397,8 +397,8 @@ class EventTaxonomyView extends OsecBaseClass
             }
             $tag = '<a class="ai1ec-tag' . $class .
                    ' ai1ec-term-id-' . $tag->term_id . '" ' . $title .
-                   'href="' . $href . '" itemprop="keywords">' .
-                   esc_html($tag->name) . '</a>';
+                   'href="' . $href . '"><span itemprop="keywords">' .
+                   esc_html($tag->name) . '</span></a>';
         }
 
         return implode(' ', $tags);
