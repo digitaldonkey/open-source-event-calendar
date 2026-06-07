@@ -8,12 +8,12 @@ DTSTART:20250106T090000Z
 DTEND:20250106T100000Z
 RRULE:FREQ=WEEKLY;COUNT=5
 SUMMARY:Weekly Team Meeting
-DESCRIPTION:Event should show up like following:
- 2025-01-06 09:00
- 2025-01-13 14:00 ← overridden, moved
- 2025-01-20 09:00
- 2025-01-27 09:00
- 2025-02-03 09:00
+DESCRIPTION:Event should show up like following:\n
+ 2025-01-06 09:00\n
+ 2025-01-13 14:00 ← overridden, moved\n
+ 2025-01-20 09:00\n
+ 2025-01-27 09:00\n
+ 2025-02-03 09:00\n
 END:VEVENT
 BEGIN:VEVENT
 UID:event-123@example.com
