@@ -375,7 +375,7 @@ class IcsImportExportParserTest extends TestBase
         $time_zone = Timezones::factory($osec_app)->get_default_timezone();
         $inserted  = EventSearch::factory($osec_app)->get_events_between(
             new DT(strtotime('06 January 2025 00:00:00 ' . $time_zone), $time_zone),
-            new DT(strtotime('03 February 2025 00:00:00 ' . $time_zone), $time_zone),
+            new DT(strtotime('03 February 2025 23:59:59 ' . $time_zone), $time_zone),
             ['post_ids' => [$event_id]]
         );
         $this->assertEquals(4, count($inserted));
