@@ -12,7 +12,8 @@
         "louis1021/sg-i-calendar": "dev-master",
         "php": ">=8.2",
         "twig/twig": "^3.23",
-        "wikimedia/less.php": "^5.5"
+        "wikimedia/less.php": "^5.5",
+        "rlanvin/php-rrule": "^2.6"
     },
     "license": "GPL-3.0-or-later",
     "autoload": {
