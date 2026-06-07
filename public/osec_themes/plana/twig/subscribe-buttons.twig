@@ -14,12 +14,6 @@
 	</button>
 	<ul class="plana-flyout-menu--menu" role="menu">
 		<li>
-			<a class="link" target="_blank" title="{{ text.title.timely }}" href="{{ export_url }}">
-				<i class="ai1ec-fa  ai1ec-fa-fw ai1ec-icon-timely"></i>
-				{{ text.label.timely }}
-			</a>
-		</li>
-		<li>
 			<a class="link" target="_blank" title="{{ text.title.google }}" href="http://www.google.com/calendar/render?cid={{ export_url | url_encode | e('html_attr') }}">
 				<i class="ai1ec-fa ai1ec-icon-google  ai1ec-fa-fw"></i>
 				{{ text.label.google }}

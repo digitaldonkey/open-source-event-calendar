@@ -23,14 +23,6 @@
 	<ul class="ai1ec-dropdown-menu ai1ec-pull-{{ alignment2 }}" role="menu">
 		<li>
 			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
-				data-placement="{{ alignment }}" title="{{ text.title.timely }}"
-				href="{{ export_url }}">
-				<i class="ai1ec-fa  ai1ec-fa-fw ai1ec-icon-timely"></i>
-				{{ text.label.timely }}
-			</a>
-		</li>
-		<li>
-			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
 			  data-placement="{{ alignment }}" title="{{ text.title.google }}"
 			  href="http://www.google.com/calendar/render?cid={{ export_url | url_encode | e('html_attr') }}">
 				<i class="ai1ec-fa ai1ec-icon-google  ai1ec-fa-fw"></i>
