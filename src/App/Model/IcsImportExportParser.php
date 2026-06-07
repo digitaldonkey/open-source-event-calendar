@@ -410,7 +410,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     'post_content'   => stripslashes(
                         str_replace(
                             '\n',
-                            '<br />',
+                            "\n",
                             $e->getDescription()
                         )
                     ),
