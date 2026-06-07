@@ -759,36 +759,40 @@ a.ai1ec-custom-filter {
 }
 
 // ======================
-// = Agenda widget view =
+// = Agenda view =
 // ======================
 
 // Elements in common with Agenda view
 .ai1ec-agenda-widget-view,
 .ai1ec-agenda-view {
 	.ai1ec-date-title {
-		border: 1px solid mix( @text-color, @agenda-date-title-bg, 30% );
-		border-top: none;
-		border-radius: 5px;
-		.ai1ec-box-shadow( 0 2px 2px rgba(0,0,0,0.08) );
-		.ai1ec-box-sizing( border-box );
-		color: mix( @text-color, @agenda-date-title-bg, 85% );
-		float: left;
-		font-weight: bold !important;
-		#gradient > .ai1ec-vertical-three-colors(
-			@agenda-date-title-bg,
-			@agenda-date-title-bg,
-			1em,
-			mix(@agenda-date-title-bg, @text-color, 88%)
-		);
-		filter: none; // IE8 doesn't get how to do this gradient for some reason
-		line-height: 1.2em;
-		margin: (@font-size-base / 2) 0.75em;
-		overflow: hidden;
-		text-align: center;
-		text-shadow: 0 1px 0 @text-emboss;
-		width: 4em;
-		&:hover {
-			color: @text-color !important;
+		display: none;
+		@media (min-width: 30rem) {
+			display: block;
+			border: 1px solid mix( @text-color, @agenda-date-title-bg, 30% );
+			border-top: none;
+			border-radius: 5px;
+			.ai1ec-box-shadow( 0 2px 2px rgba(0,0,0,0.08) );
+			.ai1ec-box-sizing( border-box );
+			color: mix( @text-color, @agenda-date-title-bg, 85% );
+			float: left;
+			font-weight: bold !important;
+			#gradient > .ai1ec-vertical-three-colors(
+							@agenda-date-title-bg,
+							@agenda-date-title-bg,
+							1em,
+							mix(@agenda-date-title-bg, @text-color, 88%)
+			);
+			filter: none; // IE8 doesn't get how to do this gradient for some reason
+			line-height: 1.2em;
+			margin: (@font-size-base / 2) 0.75em;
+			overflow: hidden;
+			text-align: center;
+			text-shadow: 0 1px 0 @text-emboss;
+			width: 4em;
+			&:hover {
+				color: @text-color !important;
+			}
 		}
 	}
 	.ai1ec-month {
