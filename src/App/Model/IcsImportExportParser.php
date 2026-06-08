@@ -435,30 +435,27 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $event->set_no_end_time();
             }
 
-            $post_ID = null;
             $recurrence = $event->get('recurrence_rules');
             $search     = EventSearch::factory($this->app);
             // first let's check by UID
-            $matching_event_id = $search
-                ->get_matching_event_by_uid_and_url(
-                    $event->get('ical_uid'),
-                    $event->get('ical_feed_url')
-                );
+            $matching_event_id = $search->get_matching_event_by_uid_and_url(
+                $event->get('ical_uid'),
+                $event->get('ical_feed_url')
+            );
             // If no result, perform the feed based check.
             if (null === $matching_event_id) {
-                $matching_event_id = $search
-                    ->get_matching_event_id(
-                        $event->get('ical_uid'),
-                        $event->get('ical_feed_url'),
-                        $event->get('start'),
-                        ! empty($recurrence)
-                    );
+                $matching_event_id = $search->get_matching_event_id(
+                    $event->get('ical_uid'),
+                    $event->get('ical_feed_url'),
+                    $event->get('start'),
+                    ! empty($recurrence)
+                );
             }
             if (null === $matching_event_id) {
                 // =================================================
                 // = Event was not found, so store it and the post =
                 // =================================================
-                $post_ID = $event->save();
+                $event->save();
                 ++$output['count'];
             } else {
                 // ======================================================
@@ -476,7 +473,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     // Update the event
                     $event->set('post_id', $matching_event_id);
                     $event->set('post', $post);
-                    $post_ID = $event->save(true);
+                    $event->save(true);
                     ++$output['count'];
                 }
             }
@@ -517,9 +514,10 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 }
                 $exclusions[$e->getUid()][] = $exdate;
             }
+
             $this->add_parent_child_relations(
                 $e->getUid(),
-                $post_ID,
+                $event,
                 $exclude_date,
             );
 
@@ -531,41 +529,44 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         return $output;
     }
 
-    protected function add_parent_child_relations(string $uid, int $post_ID, ?string $recurrence_id): void {
+    protected function add_parent_child_relations(string $uid, Event $event, ?string $recurrence_id): void {
         if (!isset($this->override_exclussions[$uid])) {
             $this->override_exclussions[$uid] = [];
         }
         $this->override_exclussions[$uid][] = [
-            'post_ID' => $post_ID,
+            'event' => $event,
             'recurrence_id' => $recurrence_id,
         ];
     }
 
     protected function process_parent_child_relations(): void {
         foreach ($this->override_exclussions as $uid => $items) {
-            $parent_id = null;
+            /* @var ?Event $parent_event  This is the Parent Event */
+            $parent_event = null;
             $children = [];
             $child_exclude_dates = '';
-            foreach ($items as $item) {
-                if ($item['recurrence_id']) {
-                    // Child
-                    $children[] = $item;
-                    $child_exclude_dates .= $item['recurrence_id'] . ',';
-                } else {
-                    if (!is_null($parent_id)) {
-                        throw new Exception(esc_html('There must be only one parent.'));
+
+            if (count($items) > 1) {
+                foreach ($items as $item) {
+                    if ($item['recurrence_id']) {
+                        // Child
+                        $children[] = $item;
+                        $child_exclude_dates .= $item['recurrence_id'] . ',';
+                    } else {
+                        if (!is_null($parent_event)) {
+                            throw new Exception(esc_html('There must be only one parent.'));
+                        }
+                        $parent_event = $item['event'];
                     }
-                    $parent_id = $item['post_ID'];
                 }
             }
 
-            if (!is_null($parent_id) && count($children) > 0) {
-                // If there are parent/childrens relations:
-
+            // If there are parent/children relations:
+            if ($parent_event && count($children) > 0) {
+                //
                 // Update parent with excludes
-                $parent_event = new Event($this->app, $parent_id);
+                //
                 $exception_dates = $parent_event->get('exception_dates', '');
-
                 if (!empty($exception_dates)) {
                     $exception_dates .= ',';
                 }
@@ -573,13 +574,25 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $exception_dates = rtrim($exception_dates, ',');
                 $parent_event->set('exception_dates', $exception_dates);
                 $parent_event->save(true);
-
+                //
                 // Update children with Parent relation
+                //
                 foreach ($children as $child) {
-                    wp_update_post([
-                        'ID'          => $child['post_ID'],
-                        'post_parent' => $parent_id,
-                    ]);
+                    $child_event = $child['event'];
+                    $post = $child_event->get('post', null);
+
+                    // I do not know why they are different.
+                    if ($post instanceof \WP_Post) {
+                        // UI import
+                        $post->post_parent = $parent_event->get('post_id');
+                    } elseif ($post instanceof \StdClass) {
+                        // PHP unit
+                        $post->post_parent = $parent_event->get('post_id');
+                        $post->ID = $child_event->get('post_id');
+                    } else {
+                        throw new Exception(esc_html('Where is my child?'));
+                    }
+                    wp_update_post($post);
                 }
             }
         }

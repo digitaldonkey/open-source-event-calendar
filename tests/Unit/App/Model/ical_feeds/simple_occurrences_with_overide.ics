@@ -2,12 +2,12 @@ BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Example Corp//Calendar Demo//EN
 BEGIN:VEVENT
-UID:event-123@example.com
+UID:simple_occurrences_with_overide
 DTSTAMP:20250101T080000Z
 DTSTART:20250106T090000Z
 DTEND:20250106T100000Z
 RRULE:FREQ=WEEKLY;COUNT=5
-SUMMARY:Weekly Team Meeting
+SUMMARY:Simple occurrence with overide
 DESCRIPTION:Event should show up like following:\n
  2025-01-06 09:00\n
  2025-01-13 14:00 ← overridden, moved\n
@@ -16,12 +16,12 @@ DESCRIPTION:Event should show up like following:\n
  2025-02-03 09:00\n
 END:VEVENT
 BEGIN:VEVENT
-UID:event-123@example.com
+UID:simple_occurrences_with_overide
 DTSTAMP:20250101T080000Z
 RECURRENCE-ID:20250113T090000Z
 DTSTART:20250113T140000Z
 DTEND:20250113T150000Z
-SUMMARY:Weekly Team Meeting (Moved)
+SUMMARY:Simple occurrence (Moved)
 DESCRIPTION:Event should show up like following:\n
  2025-01-06 09:00\n
  2025-01-13 14:00 ← overridden\n

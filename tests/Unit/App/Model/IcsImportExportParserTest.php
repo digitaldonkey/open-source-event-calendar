@@ -20,78 +20,94 @@ use PHPUnit\Util\InvalidDataSetException;
  */
 class IcsImportExportParserTest extends TestBase
 {
-    public function test_process_ical_source()
+
+    /**
+     * Simple feed test
+     */
+    public function test_simple_occurrences_ics()
     {
         global $osec_app;
         $DATA = [
-            'events_in_db'   =>
-                [
-                    59  => 0,
-                    60  => 1,
-                    61  => 2,
-                    62  => 3,
-                    63  => 4,
-                    64  => 5,
-                    65  => 6,
-                    66  => 7,
-                    67  => 8,
-                    68  => 9,
-                    69  => 10,
-                    70  => 11,
-                    71  => 12,
-                    72  => 13,
-                    73  => 14,
-                    74  => 15,
-                    75  => 16,
-                    76  => 17,
-                    77  => 18,
-                    78  => 19,
-                    79  => 20,
-                    80  => 21,
-                    81  => 22,
-                    82  => 23,
-                    83  => 24,
-                    84  => 25,
-                    85  => 26,
-                    86  => 27,
-                    87  => 28,
-                    88  => 29,
-                    89  => 30,
-                    90  => 31,
-                    91  => 32,
-                    92  => 33,
-                    93  => 34,
-                    94  => 35,
-                    95  => 36,
-                    96  => 37,
-                    97  => 38,
-                    98  => 39,
-                    99  => 40,
-                    100 => 41,
-                    101 => 42,
-                    102 => 43,
-                    103 => 44,
-                ],
-            'feed'           =>
+            'events_in_db' => [],
+            'feed' =>
                 (object)[
-                    'feed_id'              => '1',
-                    'feed_url'             => 'https://ics.calendarlabs.com/641/64bc8358/FIFA_Womens_World_Cup.ics',
-                    'feed_name'            => 'FIFA Womens World Cup',
-                    'feed_category'        => '3',
+                    'feed_id'              => '4',
+                    'feed_url'             => 'https://ddev-wordpress.ddev.site/wp-content/plugins/open-source-event-calendar/tests/Unit/App/Model/ical_feeds/simple_reoccurrences.ics',
+                    'feed_name'            => 'Most Simple reoccurrences',
+                    'feed_category'        => '',
                     'feed_tags'            => '',
                     'comments_enabled'     => '0',
                     'map_display_enabled'  => '0',
                     'keep_tags_categories' => '0',
                     'keep_old_events'      => '0',
-                    'import_timezone'      => '0',
+                    'import_timezone'      => '1',
                 ],
             'comment_status' => 'closed',
             'do_show_map'    => 0,
-            'source'         => file_get_contents(__DIR__ . '/ical_feeds/feed_1.ics'),
+            'source'         => file_get_contents(__DIR__ . '/ical_feeds/simple_reoccurrences.ics'),
         ];
         $value = IcsImportExportParser::factory($osec_app)->import($DATA);
-        $this->assertEquals(53, $value['count']);
+        $this->assertEquals(1, $value['count']);
+
+        // Verify number of instances
+        $event_id = (int) EventSearch::factory($osec_app)->get_event_ids_for_feed($DATA['feed']->feed_url)[0];
+        $time_zone = Timezones::factory($osec_app)->get_default_timezone();
+        $inserted = EventSearch::factory($osec_app)->get_events_between(
+            new DT(strtotime('10 July 2024 00:00:00 ' . $time_zone), $time_zone),
+            new DT(strtotime('25 September 2024 00:00:00 ' . $time_zone), $time_zone),
+            ['post_ids' => [$event_id]]
+        );
+        $this->assertEquals(6, count($inserted));
+
+        // TODO DATE VERIFICATIONS
+        //   Regarding timezones, the "always_use_calendar_timezone" setting.
+        //   and the Feed->import_timezone setting.
     }
+
+    /**
+     * Reoccurrence and overrides.
+     */
+    public function test_simple_occurrences_with_oveeride_ics()
+    {
+        global $osec_app;
+        $DATA  = [
+            'events_in_db'   => [],
+            'feed'           =>
+                (object)[
+                    'feed_id'              => '3',
+                    'feed_url'             => 'https://ddev-wordpress.ddev.site/wp-content/plugins/open-source-event-calendar/tests/Unit/App/Model/ical_feeds/simple_occurrences_with_overide.ics',
+                    'feed_name'            => 'simple_occurrences_with_overide.ics',
+                    'feed_category'        => '',
+                    'feed_tags'            => '',
+                    'comments_enabled'     => '0',
+                    'map_display_enabled'  => '0',
+                    'keep_tags_categories' => '0',
+                    'keep_old_events'      => '0',
+                    'import_timezone'      => '1',
+                ],
+            'comment_status' => 'closed',
+            'do_show_map'    => 0,
+            'source'         => file_get_contents(__DIR__ . '/ical_feeds/simple_occurrences_with_overide.ics'),
+        ];
+        $value = IcsImportExportParser::factory($osec_app)->import($DATA);
+        $this->assertEquals(2, $value['count']);
+
+        // Verify number of instances
+        $event_id  = (int)EventSearch::factory($osec_app)->get_event_ids_for_feed($DATA['feed']->feed_url)[0];
+        $time_zone = Timezones::factory($osec_app)->get_default_timezone();
+        $inserted  = EventSearch::factory($osec_app)->get_events_between(
+            new DT(strtotime('06 January 2025 00:00:00 ' . $time_zone), $time_zone),
+            new DT(strtotime('03 February 2025 23:59:59 ' . $time_zone), $time_zone),
+            ['post_ids' => [$event_id]]
+        );
+        $this->assertEquals(4, count($inserted));
+
+        // TODO DATE VERIFICATIONS
+        //   Regarding timezones, the "always_use_calendar_timezone" setting.
+        //   and the Feed->import_timezone setting.
+    }
+
+
     public function test_process_ical_with_many_props()
     {
         global $osec_app;
@@ -120,6 +136,14 @@ class IcsImportExportParserTest extends TestBase
 
 
     /**
+     * Detailed test.
+     *
+     * This is an test using a JSON data for exact validation.
+     * The content of test_date_processing_results.json results
+     * was generated from source after manual verification.
+     *   @see src/App/Model/IcsImportExportParser.php:780
+     *        and uncomment echo json_encode($debug, JSON_PRETTY_PRINT) below.
+     *
      * @dataProvider date_processing_JsonResultsProvider
      * @source data is: ical_feeds/feed_2.ics
      *
@@ -168,7 +192,7 @@ class IcsImportExportParserTest extends TestBase
                 );
 
 
-                // Verify result availibility.
+                // Verify result availability.
                 $uid = $eventDateData['uid'];
                 if (! isset($expected[$uid])) {
                     throw new InvalidDataSetException(esc_html('Event ' . $uid . ' does not exist in dataset'));
@@ -252,6 +276,11 @@ class IcsImportExportParserTest extends TestBase
         // echo json_encode($debug, JSON_PRETTY_PRINT);
     }
 
+    /**
+     * Test data for test_date_processing.
+     *
+     * @return \Generator
+     */
     public static function date_processing_JsonResultsProvider(): \Generator
     {
         // Crafted ical source file wich should cover all date variants.
@@ -305,83 +334,32 @@ class IcsImportExportParserTest extends TestBase
         yield from $datasets;
     }
 
-    public function test_simple_occurrences_ics()
+    /**
+     * The first test.
+     */
+    public function test_process_ical_source()
     {
         global $osec_app;
         $DATA = [
-            'events_in_db' => [],
-            'feed' =>
-                (object)[
-                    'feed_id'              => '2',
-                    'feed_url'             => 'https://ddev-wordpress.ddev.site/wp-content/plugins/open-source-event-calendar/tests/Unit/App/Model/ical_feeds/simple_reoccurrences.ics',
-                    'feed_name'            => 'Most Simple reoccurrences',
-                    'feed_category'        => '',
-                    'feed_tags'            => '',
-                    'comments_enabled'     => '0',
-                    'map_display_enabled'  => '0',
-                    'keep_tags_categories' => '0',
-                    'keep_old_events'      => '0',
-                    'import_timezone'      => '1',
-                ],
-            'comment_status' => 'closed',
-            'do_show_map'    => 0,
-            'source'         => file_get_contents(__DIR__ . '/ical_feeds/simple_reoccurrences.ics'),
-        ];
-        $value = IcsImportExportParser::factory($osec_app)->import($DATA);
-        $this->assertEquals(1, $value['count']);
-
-        // Verify number of instances
-        $event_id = (int) EventSearch::factory($osec_app)->get_event_ids_for_feed($DATA['feed']->feed_url)[0];
-        $time_zone = Timezones::factory($osec_app)->get_default_timezone();
-        $inserted = EventSearch::factory($osec_app)->get_events_between(
-            new DT(strtotime('10 July 2024 00:00:00 ' . $time_zone), $time_zone),
-            new DT(strtotime('25 September 2024 00:00:00 ' . $time_zone), $time_zone),
-            ['post_ids' => [$event_id]]
-        );
-        $this->assertEquals(6, count($inserted));
-
-        // TODO DATE VERIFICATIONS
-        //   Regarding timezones, the "always_use_calendar_timezone" setting.
-        //   and the Feed->import_timezone setting.
-    }
-
-    public function test_simple_occurrences_with_oveeride_ics()
-    {
-        global $osec_app;
-        $DATA  = [
             'events_in_db'   => [],
             'feed'           =>
                 (object)[
-                    'feed_id'              => '2',
-                    'feed_url'             => 'https://ddev-wordpress.ddev.site/wp-content/plugins/open-source-event-calendar/tests/Unit/App/Model/ical_feeds/simple_occurrences_with_oveeride.ics',
-                    'feed_name'            => 'simple_occurrences_with_oveeride.ics',
+                    'feed_id'              => '1',
+                    'feed_url'             => 'https://ics.calendarlabs.com/641/64bc8358/FIFA_Womens_World_Cup.ics',
+                    'feed_name'            => 'FIFA Womens World Cup',
                     'feed_category'        => '',
                     'feed_tags'            => '',
                     'comments_enabled'     => '0',
                     'map_display_enabled'  => '0',
                     'keep_tags_categories' => '0',
                     'keep_old_events'      => '0',
-                    'import_timezone'      => '1',
+                    'import_timezone'      => '0',
                 ],
             'comment_status' => 'closed',
             'do_show_map'    => 0,
-            'source'         => file_get_contents(__DIR__ . '/ical_feeds/simple_occurrences_with_oveeride.ics'),
+            'source'         => file_get_contents(__DIR__ . '/ical_feeds/feed_1.ics'),
         ];
         $value = IcsImportExportParser::factory($osec_app)->import($DATA);
-        $this->assertEquals(2, $value['count']);
-
-        // Verify number of instances
-        $event_id  = (int)EventSearch::factory($osec_app)->get_event_ids_for_feed($DATA['feed']->feed_url)[0];
-        $time_zone = Timezones::factory($osec_app)->get_default_timezone();
-        $inserted  = EventSearch::factory($osec_app)->get_events_between(
-            new DT(strtotime('06 January 2025 00:00:00 ' . $time_zone), $time_zone),
-            new DT(strtotime('03 February 2025 23:59:59 ' . $time_zone), $time_zone),
-            ['post_ids' => [$event_id]]
-        );
-        $this->assertEquals(4, count($inserted));
-
-        // TODO DATE VERIFICATIONS
-        //   Regarding timezones, the "always_use_calendar_timezone" setting.
-        //   and the Feed->import_timezone setting.
+        $this->assertEquals(53, $value['count']);
     }
 }

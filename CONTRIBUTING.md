@@ -287,6 +287,21 @@ SELECT id, post_id, `start`, DATE_FORMAT(FROM_UNIXTIME(`start`), '%Y-%m-%d %H:%i
  
 @see https://github.com/digitaldonkey/open-source-event-calendar/wiki/Understanding-data-modell
 
+# Feeds
+
+Feeds got a huge update. To improve RFC5445 support `kigkonsult/icalcreator` was updated and
+rlanvin/php-rrule added. 
+
+We have test feeds in tests/Unit/App/Model/ical_feeds/*.ics 
+
+You can "Subscribe" to them for testing using localhost. e.g:
+
+https://ddev-wordpress.ddev.site/wp-content/plugins/open-source-event-calendar/tests/Unit/App/Model/ical_feeds/google_cycling_halifax.ics
+
+There are a few basic phpunit-tests allowing to test the "challenging heritage"
+`IcsImportExportParser->add_vcalendar_events_to_db(Vcalendar $v, array $args)`
+@see tests/Unit/App/Model/IcsImportExportParserTest.php
+
 ## This document
 
 is constant work in Progress. Please PR if you can help to improve. 

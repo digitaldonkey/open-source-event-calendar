@@ -5,6 +5,14 @@
 - Remove feed 'Keep Events' fixed. Enhanced filter so a filter relating removed feed is kept
 - End times short by a minute. Fixes #33
 - Checked WordPress 7.x compatibility
+- Buffers are not cleared before rendering Ical or Json. Caused wrong HTTP content type for Json/ical in sad circumstances
+- Adapt to WP-7 CSS change
+- Fix Calendar url decoding. Fixes #35
+- icalCreator feed import refactored, added tests for dates and reuoccurence handling. Added php-rrule to circumvent Iclalcreator API changes.
+- Fix: parent event not found
+- Hide date boxes in Agenda views on screens <16rem/480px.
+- Remove Add to timely calendar from subscribe options
+
 
 = 1.1.4 =
  - Upgrade Icalcreateor to 2.4.1
