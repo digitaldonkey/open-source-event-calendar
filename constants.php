@@ -2,6 +2,11 @@
 
 use Osec\Command\ExportEvents;
 
+/* phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols */
+if (! defined('ABSPATH')) {
+    exit;
+}
+
 /**
  * Define required constants, if these have not been defined already.
  *
@@ -40,7 +45,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = Plugin Version =
     // ==================
     if (! defined('OSEC_VERSION')) {
-        define('OSEC_VERSION', '1.1.6');
+        define('OSEC_VERSION', '1.1.7');
     }
 
     // =================
