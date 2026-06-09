@@ -117,6 +117,7 @@ class WpmlHelper extends OsecBaseClass
             if (empty($translations)) {
                 // TODO
                 //   This is untested. Please remove comment when you can it verify working.
+                /* phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound */
                 $trid = apply_filters('wpml_element_trid', null, $page_id, 'post_' . OSEC_POST_TYPE);
                 if ($trid) {
                     $translations += (array)$sitepress->get_element_translations($trid);
@@ -377,6 +378,7 @@ class WpmlHelper extends OsecBaseClass
             if (isset($sitepress) && $sitepress instanceof SitePress) {
                 $sitepress->switch_lang($this->language);
             }
+            /* phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound */
             if (
                 defined('QTRANS_INIT') &&
                 isset($q_config) &&

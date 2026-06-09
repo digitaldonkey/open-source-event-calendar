@@ -179,6 +179,7 @@ class EventSingleView extends OsecBaseClass
          */
         do_action('osec_alter_single_event_page_before_render', $event);
 
+        /* phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound */
         $args = [
             'title' => apply_filters(
                 'the_title',
