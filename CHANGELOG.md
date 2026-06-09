@@ -1,3 +1,6 @@
+= 1.1.7 =
+- plugin-check waste of time release only
+
 = 1.1.6 =
 - Add unit tests for iCal import dates handling and fix date issues related to iCalcreateor 2.41 upgrade
 - Extended ical_feed_url max length from to 768 chars #34

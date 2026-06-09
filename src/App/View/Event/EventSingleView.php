@@ -179,9 +179,9 @@ class EventSingleView extends OsecBaseClass
          */
         do_action('osec_alter_single_event_page_before_render', $event);
 
-        /* phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound */
         $args = [
             'title' => apply_filters(
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                 'the_title',
                 $event->get('post')->post_title,
                 $event->get('post_id')
