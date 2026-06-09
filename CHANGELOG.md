@@ -12,7 +12,8 @@
 - Fix: parent event not found
 - Hide date boxes in Agenda views on screens <16rem/480px
 - Remove Add to timely calendar from subscribe options
-- Imported events now reflect overrides 
+- Imported events now reflect overrides with RECURRENCE-ID
+- Improve toggle-all button display in plana theme
 
 
 = 1.1.4 =

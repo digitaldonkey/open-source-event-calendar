@@ -413,14 +413,16 @@ timely.define("domReady", [], function () {
 }), timely.define("scripts/calendar/agenda_view", ["jquery_timely"], function (e) {
     var t = function () {
         e(this).closest(".ai1ec-event").toggleClass("ai1ec-expanded").find(".ai1ec-event-summary").slideToggle(300)
-    }, n = function () {
+    }, collapse_all = function () {
         var t = e(this).closest(".ai1ec-calendar");
-        t.find(".ai1ec-expanded .ai1ec-event-toggle").click()
-    }, r = function () {
+        t.find(".ai1ec-expanded .ai1ec-event-toggle").click();
+        e('#osec-calendar-view').toggleClass('osec-all-events-collapsed', true).toggleClass('osec-all-events-expanded', false)
+    }, expand_all = function () {
         var t = e(this).closest(".ai1ec-calendar");
-        t.find(".ai1ec-event:not(.ai1ec-expanded) .ai1ec-event-toggle").click()
+        t.find(".ai1ec-event:not(.ai1ec-expanded) .ai1ec-event-toggle").click();
+        e('#osec-calendar-view').toggleClass('osec-all-events-collapsed', false).toggleClass('osec-all-events-expanded', true)
     };
-    return {toggle_event: t, collapse_all: n, expand_all: r}
+    return {toggle_event: t, collapse_all: collapse_all, expand_all: expand_all}
 }), timely.define("external_libs/modernizr", [], function () {
     var e = function (e, t, n) {
         function S(e) {
@@ -5888,7 +5890,8 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
             n.find(".ai1ec-event-instance-id-" + r).addClass("ai1ec-raised")
         })
     }, m = function (t) {
-        var n = e(this), r = n.closest(".ai1ec-calendar"), i = n.data("instanceId"),
+        var n = e(this), r = n.closest(".ai1ec-calendar"),
+            i = n.data("instanceId"),
             s = e(t.toElement || t.relatedTarget), o = r.find(".ai1ec-event-instance-id-" + i);
         if (s.is(o) || s.parent().is(o)) return;
         r.find(".ai1ec-event-instance-id-" + i).clearQueue().removeClass("ai1ec-raised")
