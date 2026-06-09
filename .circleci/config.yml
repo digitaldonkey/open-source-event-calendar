@@ -575,7 +575,7 @@ jobs:
             echo "CIRCLE_TAG: $CIRCLE_TAG"
             ls -alh /tmp/$OSEC_RELEASE_FILE
       - run:
-          name: Deploy assets to WordPress plugin directory
+          name: Deploy Plugin to WordPress plugin directory
           command: /home/circleci/open-source-event-calendar/.circleci/deploy-wp-plugin-release.sh
     environment:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
