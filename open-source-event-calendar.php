@@ -9,7 +9,7 @@
  * Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
  * Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
  * Tags: calendar, events, ics, ical importer
- * Requires at least: 6.6
+ * Requires at least: 6.7
  * Tested up to: 7.0
  * Requires PHP: 8.2
  * Stable Tag: 1.1.5
