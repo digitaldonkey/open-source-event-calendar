@@ -10,8 +10,9 @@
 - Fix Calendar url decoding. Fixes #35
 - icalCreator feed import refactored, added tests for dates and reuoccurence handling. Added php-rrule to circumvent Iclalcreator API changes.
 - Fix: parent event not found
-- Hide date boxes in Agenda views on screens <16rem/480px.
+- Hide date boxes in Agenda views on screens <16rem/480px
 - Remove Add to timely calendar from subscribe options
+- Imported events now reflect overrides 
 
 
 = 1.1.4 =

@@ -3,7 +3,7 @@
 Tags: calendar, events, ics, ical importer
 Requires PHP: 8.2
 Requires at least: 6.6
-Tested up to: 6.9
+Tested up to: 7.0
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Plugin URI: https://github.com/digitaldonkey/open-source-event-calendar
@@ -205,6 +205,23 @@ I may also provide paid support.
 9. Schema.org/Event data validator
 
 == Changelog ==
+
+= 1.1.5 =
+- Add unit tests for iCal import dates handling and fix date issues related to iCalcreateor 2.41 upgrade
+- Extended ical_feed_url max length from to 768 chars #34
+- Timezone storage and display improved
+- Remove feed 'Keep Events' fixed. Enhanced filter so a filter relating removed feed is kept
+- End times short by a minute. Fixes #33
+- Checked WordPress 7.x compatibility
+- Buffers are not cleared before rendering Ical or Json. Caused wrong HTTP content type for Json/ical in sad circumstances
+- Adapt to WP-7 CSS change
+- Fix Calendar url decoding. Fixes #35
+- icalCreator feed import refactored, added tests for dates and reuoccurence handling. Added php-rrule to circumvent Iclalcreator API changes.
+- Fix: parent event not found
+- Hide date boxes in Agenda views on screens <16rem/480px
+- Remove Add to timely calendar from subscribe options
+- Imported events now reflect overrides 
+
 
 = 1.1.4 =
  - Upgrade Icalcreateor to 2.4.1

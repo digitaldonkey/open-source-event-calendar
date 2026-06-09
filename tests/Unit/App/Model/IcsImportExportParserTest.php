@@ -20,7 +20,6 @@ use PHPUnit\Util\InvalidDataSetException;
  */
 class IcsImportExportParserTest extends TestBase
 {
-
     /**
      * Simple feed test
      */
