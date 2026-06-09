@@ -17,6 +17,7 @@
 .plana-pagination {
   display: inline-flex;
   flex-wrap: wrap;
+  flex-grow: 1;
 
   font-size: var(--wp--preset--font-size--small);
   @media (min-width: 36.25rem) {
@@ -87,4 +88,16 @@
       padding-left: 1em;
     }
   }
+}
+
+// Toggle all event button
+#ai1ec-agenda-collapse-all,
+#ai1ec-agenda-expand-all {
+  min-width: 7em;
+  margin-right: .1em;
+  font-size: var(--wp--preset--font-size--normal);
+}
+.osec-all-events-collapsed #ai1ec-agenda-collapse-all,
+.osec-all-events-expanded #ai1ec-agenda-expand-all {
+  display: none;
 }

@@ -210,6 +210,8 @@ class CalendarPageView extends OsecBaseClass
                 'filter_menu'       => $filter_menu,
                 'view'              => $view,
                 'subscribe_buttons' => $subscribe_buttons,
+                'agenda_events_expanded' => $this->app->settings->get('agenda_events_expanded'),
+
                 /**
                  * Add Html above calendar
                  *

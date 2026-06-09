@@ -9,7 +9,7 @@
 		<div id="osec-calendar-view-container" class="osec-calendar-view-container">
 			<div id="osec-calendar-view-loading"
 				 class="ai1ec-loading osec-calendar-view-loading"></div>
-			<div id="osec-calendar-view" class="osec-calendar-view">
+			<div id="osec-calendar-view" class="osec-calendar-view {{ (agenda_events_expanded) ? 'osec-all-events-expanded' : 'osec-all-events-collapsed' }}">
 				{{ view }}
 			</div>
 		</div>
