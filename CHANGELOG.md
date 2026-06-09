@@ -1,4 +1,4 @@
-= 1.1.5 =
+= 1.1.6 =
 - Add unit tests for iCal import dates handling and fix date issues related to iCalcreateor 2.41 upgrade
 - Extended ical_feed_url max length from to 768 chars #34
 - Timezone storage and display improved
@@ -14,7 +14,7 @@
 - Remove Add to timely calendar from subscribe options
 - Imported events now reflect overrides with RECURRENCE-ID
 - Improve toggle-all button display in plana theme
-
+- 1.1.5 was dropped due to deployment issues
 
 = 1.1.4 =
  - Upgrade Icalcreateor to 2.4.1
