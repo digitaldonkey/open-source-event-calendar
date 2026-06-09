@@ -14,7 +14,7 @@
 	</button>
 	<ul class="plana-flyout-menu--menu" role="menu">
 		<li>
-			<a class="link" target="_blank" title="{{ text.title.google }}" href="http://www.google.com/calendar/render?cid={{ export_url | url_encode | e('html_attr') }}">
+			<a class="link" target="_blank" title="{{ text.title.google }}" href="http://www.google.com/calendar/render?cid={{ export_url_webcal | url_encode | e('html_attr') }}">
 				<i class="ai1ec-fa ai1ec-icon-google  ai1ec-fa-fw"></i>
 				{{ text.label.google }}
 			</a>
@@ -26,7 +26,7 @@
 			</a>
 		</li>
 		<li>
-			<a class="link" target="_blank" title="{{ text.title.apple }}" href="{{ export_url_no_html }}">
+			<a class="link" target="_blank" title="{{ text.title.apple }}" href="{{ export_url_webcal_no_html }}">
 				<i class="ai1ec-fa ai1ec-icon-apple  ai1ec-fa-fw"></i>
 				{{ text.label.apple }}
 			</a>
