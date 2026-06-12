@@ -280,7 +280,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // ========================
             $latitude = null;
             $longitude = null;
-            $geo_tag  = $e->getXprop('geo');
+            $geo_tag  = $e->getGeo();
             if (is_array($geo_tag)) {
                 if (
                     isset($geo_tag['latitude']) &&
@@ -307,7 +307,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // ===================
             $address  = '';
             $venue = '';
-            $location = $e->getXprop('location');
+            $location = $e->getLocation();
             $matches  = [];
             // This regexp matches a venue / address in the format
             // "venue @ address" or "venue - address".
@@ -351,14 +351,14 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // ===============================
             // = Contact name, phone, e-mail =
             // ===============================
-            $organizer = $e->getXprop('organizer');
+            $organizer = $e->getOrganizer();
             if (
                 str_starts_with((string)$organizer, 'MAILTO:') &&
                 ! str_contains((string)$organizer, '@')
             ) {
                 $organizer = substr((string)$organizer, 7);
             }
-            $contact  = $e->getXprop('contact');
+            $contact  = $e->getContact();
             $elements = explode(';', (string)$contact, 4);
             foreach ($elements as $el) {
                 $el = trim($el);

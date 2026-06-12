@@ -1,0 +1,83 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//192.168.97.5//NONSGML kigkonsult.se iCalcreator 2.41.92//
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+UID:36616230-6439-4362-b862-653761346533
+X-FROM-URL:https://ddev-wordpress.ddev.site
+X-WR-CALNAME:ddev-wordpress.ddev.site
+X-WR-CALDESC:
+X-WR-TIMEZONE:Europe/Berlin
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+TZUNTIL:20280326T010000Z
+X-LIC-LOCATION:Europe/Berlin
+BEGIN:STANDARD
+TZNAME:CET
+DTSTART:20251026T030000
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+RDATE:20261025T030000
+RDATE:20271031T030000
+END:STANDARD
+BEGIN:DAYLIGHT
+TZNAME:CEST
+DTSTART:20260329T020000
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+RDATE:20270328T020000
+END:DAYLIGHT
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:fully-fledged_event@ddev-wordpress.ddev.site
+DTSTAMP:20260612T084049Z
+ATTACH:https://ddev-wordpress.ddev.site/wp-content/uploads/2026/03/bauwagen
+ 03_3235.jpg
+CATEGORIES;LANGUAGE=en-US:Cat 1
+CONTACT:Marry Poppins\; +1586909808098\; fern@sehturm.de\; http://donkeymed
+ ia.eu
+DESCRIPTION:Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt
+  Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt E
+ xcerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Exc
+ erpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excer
+ pt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt
+  Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt \nLorem ipsum dolor sit a
+ met\, consetetur sadipscing elitr\, sed diam nonumy eirmod tempor invidunt
+  ut labore et dolore magna aliquyam erat\, sed diam voluptua. At vero eos
+ et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren\, n
+ o sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor s
+ it amet\, consetetur sadipscing elitr\, sed diam nonumy eirmod tempor invi
+ dunt ut labore et dolore magna aliquyam erat\, sed diam voluptua. At vero
+ eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren
+ \, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+DTSTART;TZID=Europe/Berlin:20260610T224900
+DTEND;TZID=Europe/Berlin:20260610T234900
+EXRULE:FREQ=WEEKLY;INTERVAL=4;BYDAY=WE;WKST=MO
+GEO:+52.520828;+13.409421
+LOCATION:Venue name @ Panoramastraße 1a\, Mitte\, 10178 Berlin\, Deutschlan
+ d
+RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;WKST=MO
+SEQUENCE:0
+SUMMARY:Fully fledged event
+URL:https://ddev-wordpress.ddev.site/event/fully-fledged-event/
+X-ALT-DESC;FMTTYPE=text/html:\\n\\n\\n<TITLE>\\n\\n<img src="https://ddev-wordpress.ddev.site/wp-cont
+ ent/uploads/2026/03/bauwagen03_3235-300x202.jpg" width="300" height="202" />Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excer
+ pt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt
+  Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt E
+ xcerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Exc
+ erpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excerpt Excer
+ pt Excerpt Excerpt Excerpt Excerpt Excerpt \nLorem ipsum dolor sit
+ amet\, consetetur sadipscing elitr\, sed diam nonumy eirmod tempor invidun
+ t ut labore et dolore magna aliquyam erat\, sed diam voluptua. At vero eos
+  et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren\,
+ no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor
+ sit amet\, consetetur sadipscing elitr\, sed diam nonumy eirmod tempor inv
+ idunt ut labore et dolore magna aliquyam erat\, sed diam voluptua. At vero
+  eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergre
+ n\, no sea takimata sanctus est Lorem ipsum dolor sit amet.\n</
+ HTML>
+X-TAGS;LANGUAGE=en-US:tag1\,tag2
+X-COST:10€
+X-TICKETS-URL:https://ddev-wordpress-integration-test.ddev.site
+END:VEVENT
+END:VCALENDAR
