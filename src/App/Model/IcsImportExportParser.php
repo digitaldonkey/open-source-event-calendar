@@ -1042,16 +1042,23 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             )
         );
 
+        // Prepend Excerpt if in use.
+        $content_raw = $event->get('post')->post_content;
+        if ($this->app->settings->get('feature_use_excerpt')) {
+            $content_raw = $event->get('post')->post_excerpt . "\n\n" . $content_raw;
+        }
+
         $content = apply_filters(
             'osec_the_content',
             apply_filters(
                 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                 'the_content',
-                $event->get('post')->post_content
+                $content_raw
             )
         );
         $content = str_replace(']]>', ']]&gt;', $content);
         $content = html_entity_decode($content, ENT_QUOTES, 'UTF-8');
+
 
         // Prepend featured image if available.
         $size       = null;
@@ -1060,12 +1067,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $img_url = $avatar_view->get_post_thumbnail_url($event, $size);
 
         // if no img is already present - add thumbnail
-        if (empty($content_image_uri)) {
-            if ($img_url && $use_html) {
-                $content = '<div class="ai1ec-event-avatar alignleft timely"><img src="' .
-                           esc_attr($img_url) . '" width="' . $size[0] . '" height="' .
-                           $size[1] . '" /></div>' . $content;
-            }
+        $html_image = '';
+        if (empty($content_image_uri) && $img_url && $use_html) {
+            $html_image = '<img src="' . esc_attr($img_url) . '" width="' . $size[0] . '" height="' . $size[1] . '" />';
         }
         // Set image with ATTACH
         if ($img_url || $content_image_uri) {
@@ -1079,12 +1083,12 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         if ($use_html) {
             $e->setDescription(
                 $this->sanitizeValue(
-                    strip_shortcodes($content)
+                    wp_strip_all_tags(strip_shortcodes($content))
                 )
             );
             if (! empty($content)) {
-                $html_content = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">\n' .
-                                '<HTML>\n<HEAD>\n<TITLE></TITLE>\n</HEAD>\n<BODY>' . $content .
+                $html_content = '<!DOCTYPE html>\n' .
+                                '<HTML>\n<HEAD>\n<TITLE></TITLE>\n</HEAD>\n<BODY>' . $html_image . $content .
                                 '</BODY></HTML>';
                 $e->setXprop(
                     'X-ALT-DESC',

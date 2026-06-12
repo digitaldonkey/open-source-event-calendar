@@ -21,6 +21,8 @@ class EventContentView extends OsecBaseClass
     /**
      * Format events excerpt view.
      *
+     * Only works in Loop.
+     *
      * @param  string  $default_excerpt  Content to excerpt.
      *
      * @return string Formatted event excerpt.

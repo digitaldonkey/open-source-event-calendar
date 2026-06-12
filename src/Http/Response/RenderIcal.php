@@ -16,7 +16,10 @@ class RenderIcal extends RenderStrategyAbstract
     {
         $this->cleanOutputBuffers();
         header('Content-type: text/calendar; charset=utf-8');
-        echo esc_html($params['data']);
+        echo wp_kses(
+            $params['data'],
+            $this->app->kses->allowed_html_frontend()
+        );
         ResponseHelper::stop();
     }
 }
