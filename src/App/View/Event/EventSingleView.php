@@ -5,7 +5,7 @@ namespace Osec\App\View\Event;
 use Osec\App\Controller\MapsController;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\PostTypeEvent\Event;
-use Osec\App\View\Calendar\CalendarSubscribeButtonView;
+use Osec\App\View\Calendar\CalendarSubscribeView;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Theme\ThemeLoader;
@@ -106,8 +106,10 @@ class EventSingleView extends OsecBaseClass
         $contentView  = EventContentView::factory($this->app);
         $timeView     = EventTimeView::factory($this->app);
 
-        $subscribe_url = OSEC_EXPORT_URL . '&osec_post_ids=' .
-                         $event->get('post_id');
+        $subscribe_buttons = CalendarSubscribeView::factory($this->app)->render_subscribe(
+            '&osec_post_ids=' . $event->get('post_id'),
+            false
+        );
 
         $event->set_runtime(
             'tickets_url_label',
@@ -197,21 +199,14 @@ class EventSingleView extends OsecBaseClass
             'back_to_calendar'       => $contentView->get_back_to_calendar_button_html(
                 $event->get('start')->format()
             ),
-            'subscribe_url'          => $subscribe_url,
-            'subscribe_url_no_html'  => $subscribe_url . '&no_html=true',
+            'subscribe_buttons' => $subscribe_buttons,
             'edit_instance_url'      => null,
             'edit_instance_text'     => null,
-            'google_url'             => 'http://www.google.com/calendar/render?cid=' . rawurlencode($subscribe_url),
-            'show_subscribe_buttons' => ! $settings->get('turn_off_subscription_buttons'),
-
             // Has image??
             'has_any_image'          => !is_null(EventAvatarView::factory($this->app)->get_event_avatar_url($event)),
-
             'hide_featured_image'    => $settings->get('hide_featured_image'),
             'extra_buttons'          => $extra_buttons,
             'text_add_calendar'      => __('Add to Calendar', 'open-source-event-calendar'),
-            'subscribe_buttons_text' => CalendarSubscribeButtonView::factory($this->app)->get_labels(),
-            'text_get_calendar'      => __('Get a Timely Calendar', 'open-source-event-calendar'),
             'text_when'              => __('When:', 'open-source-event-calendar'),
             'text_where'             => __('Where:', 'open-source-event-calendar'),
             'text_repeats'           => __('Repeats', 'open-source-event-calendar'),

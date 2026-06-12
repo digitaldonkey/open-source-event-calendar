@@ -511,14 +511,9 @@ class CalendarPageView extends OsecBaseClass
             return '';
         }
 
-        $httx_url = str_replace(
-            'webcal://',
-            Request::get_protocoll() . '://',
-            OSEC_EXPORT_URL
-        );
-
         $url_args = '';
         $is_filterd = false;
+
         $use_lang = WpmlHelper::factory($this->app)->get_language();
         if (!is_null($use_lang)) {
             $url_args = '&lang=' . $use_lang;
@@ -535,32 +530,9 @@ class CalendarPageView extends OsecBaseClass
             $url_args .= '&osec_post_ids=' . implode(',', $view_args['post_ids']);
             $is_filterd = true;
         }
-        $args = [
-            'is_filtered'        => $is_filterd,
-            'export_url_webcal'         => esc_url_raw(OSEC_EXPORT_URL . $url_args),
-            'export_url_webcal_no_html' => esc_url_raw(OSEC_EXPORT_URL . '&no_html=true' . $url_args),
-            'export_url' => esc_url_raw($httx_url . $url_args),
-            'export_url_no_html' => esc_url_raw($httx_url . '&no_html=true' . $url_args),
-            'text_filtered'      => __('Subscribe to filtered calendar', 'open-source-event-calendar'),
-            'text_subscribe'     => __('Subscribe', 'open-source-event-calendar'),
-            'text_get_calendar'  => __('Get a Timely Calendar', 'open-source-event-calendar'),
-            'text'               => CalendarSubscribeButtonView::factory($this->app)->get_labels(),
-            'placement'          => 'up',
-        ];
-
-        /**
-         * Subscribe buttons alter
-         *
-         * Alter arguments for subscribe-buttons.twig template
-         *
-         * @since 1.0
-         *
-         * @param  array  $args  Twig args
-         * @param  array  $view_args  View arguments
-         */
-        $args = apply_filters('osec_subscribe_buttons_arguments', $args, $view_args);
-        return ThemeLoader::factory($this->app)
-                          ->get_file('subscribe-buttons.twig', $args, false)
-                          ->get_content();
+        return CalendarSubscribeView::factory($this->app)->render_subscribe(
+            $url_args,
+            $is_filterd
+        );
     }
 }

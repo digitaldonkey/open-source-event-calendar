@@ -223,7 +223,7 @@ class EventAvatarView extends OsecBaseClass
      *
      * @return  string|null
      */
-    protected function getPostAttachmentUrl(
+    public function getPostAttachmentUrl(
         Event $event,
         array $ordered_img_sizes,
         &$size
@@ -309,7 +309,7 @@ class EventAvatarView extends OsecBaseClass
      *
      * @return array
      */
-    public function get_image_from_content($content)
+    public function get_image_from_content($content): array
     {
         preg_match(
             '/<img([^>]+)src=["\']?([^"\'\ >]+)([^>]*)>/i',
@@ -318,6 +318,16 @@ class EventAvatarView extends OsecBaseClass
         );
 
         return $matches;
+    }
+
+    public function get_image_uri_from_content($content): string
+    {
+        $uri = '';
+        $matches = $this->get_image_from_content($content);
+        if (isset($matches[2])) {
+            $uri = $matches[2];
+        }
+        return $uri;
     }
 
     /**

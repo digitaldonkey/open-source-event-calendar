@@ -120,16 +120,9 @@
                         {% endif %}
                     </div>
                 {% endif %}
-                {% if show_subscribe_buttons %}
-                    <div class="subscribe-buttons">
-                        {% include 'subscribe-buttons.twig' with {
-                            'export_url':             subscribe_url,
-                            'export_url_no_html':     subscribe_url_no_html,
-                            'subscribe_label':        text_add_calendar,
-                            'text':                   subscribe_buttons_text,
-                        } %}
-                    </div>
-                {% endif %}
+                <div class="subscribe-buttons">
+                {{ subscribe_buttons|raw }}
+                </div>
                 {% if extra_buttons %}
                     {{ extra_buttons | raw }}
                 {% endif %}

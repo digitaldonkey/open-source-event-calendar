@@ -12,9 +12,9 @@
 				{{ subscribe_label }}
 			{% else %}
 				{% if is_filtered %}
-					{{ text_filtered }}
+					{{ subscribe_text.filtered }}
 				{% else %}
-					{{ text_subscribe }}
+					{{ subscribe_text.unfiltered }}
 				{% endif %}
 			{% endif %}
 			<span class="ai1ec-caret"></span>
@@ -23,34 +23,42 @@
 	<ul class="ai1ec-dropdown-menu ai1ec-pull-{{ alignment2 }}" role="menu">
 		<li>
 			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
-			  data-placement="{{ alignment }}" title="{{ text.title.google }}"
-			  href="http://www.google.com/calendar/render?cid={{ export_url_webcal | url_encode | e('html_attr') }}">
+			  data-placement="{{ alignment }}" title="{{ title.google }}"
+			  href="http://www.google.com/calendar/render?cid={{ url_webcal_no_html | url_encode }}">
 				<i class="ai1ec-fa ai1ec-icon-google  ai1ec-fa-fw"></i>
-				{{ text.label.google }}
+				{{ label.google }}
 			</a>
 		</li>
 		<li>
 			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
-			  data-placement="{{ alignment }}" title="{{ text.title.outlook }}"
-			  href="{{ export_url_webcal_no_html }}">
+			  data-placement="{{ alignment }}" title="{{ title.outlook }}"
+			  href="{{ url_webcal }}">
 				<i class="ai1ec-fa ai1ec-icon-windows  ai1ec-fa-fw"></i>
-				{{ text.label.outlook }}
+				{{ label.outlook }}
 			</a>
 		</li>
 		<li>
 			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
-			  data-placement="{{ alignment }}" title="{{ text.title.apple }}"
-			  href="{{ export_url_webcal_no_html }}">
+			  data-placement="{{ alignment }}" title="{{ title.apple }}"
+			  href="{{ url_webcal_no_html }}">
 				<i class="ai1ec-fa ai1ec-icon-apple  ai1ec-fa-fw"></i>
-				{{ text.label.apple }}
+				{{ label.apple }}
 			</a>
 		</li>
 		<li>
 			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto"
-			  data-placement="{{ alignment }}" title="{{ text.title.plaintext }}"
-			  href="{{ export_url_no_html }}">
+			  data-placement="{{ alignment }}" title="{{ title.plaintext }}"
+			  href="{{ url_webcal_no_html }}">
 				<i class="ai1ec-fa ai1ec-icon-calendar ai1ec-fa-fw"></i>
-				{{ text.label.plaintext }}
+				{{ label.plaintext }}
+			</a>
+		</li>
+		<li>
+			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto"
+			   data-placement="{{ alignment }}" title="{{ title.download }}"
+			   href="{{ url_download }}">
+				<i class="ai1ec-fa ai1ec-icon-calendar ai1ec-fa-fw"></i>
+				{{ label.download }}
 			</a>
 		</li>
 	</ul>

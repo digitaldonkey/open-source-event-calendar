@@ -20,14 +20,7 @@
                 </a>
             {% endif %}
 
-            {% if show_subscribe_buttons %}
-                {% include 'subscribe-buttons.twig' with {
-                    'export_url':             subscribe_url,
-                    'export_url_no_html':     subscribe_url_no_html,
-                    'subscribe_label':        text_add_calendar,
-                    'text':                   subscribe_buttons_text,
-                } %}
-            {% endif %}
+            {{ subscribe_buttons|raw }}
         </div>
 
         {% if extra_buttons %}

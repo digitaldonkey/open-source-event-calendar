@@ -1009,6 +1009,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $export = false,
         array $params = []
     ) {
+        $use_html = isset($params['no_html']) && $params['no_html'] === false;
+
         $tz = Timezones::factory($this->app)->get_default_timezone();
         $e = $calendar->newVevent();
 
@@ -1054,21 +1056,30 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // Prepend featured image if available.
         $size       = null;
         $avatar_view = EventAvatarView::factory($this->app);
-        $matches    = $avatar_view->get_image_from_content($content);
+        $content_image_uri    = $avatar_view->get_image_uri_from_content($content);
+        $img_url = $avatar_view->get_post_thumbnail_url($event, $size);
+
         // if no img is already present - add thumbnail
-        if (empty($matches)) {
-            $img_url = $avatar_view->get_post_thumbnail_url($event, $size);
-            if ($img_url) {
+        if (empty($content_image_uri)) {
+            if ($img_url && $use_html) {
                 $content = '<div class="ai1ec-event-avatar alignleft timely"><img src="' .
                            esc_attr($img_url) . '" width="' . $size[0] . '" height="' .
                            $size[1] . '" /></div>' . $content;
             }
         }
+        // Set image with ATTACH
+        if ($img_url || $content_image_uri) {
+            // Use featured image if available or fall back to content image if exists.
+            $img_url = $img_url ? $avatar_view->getPostAttachmentUrl($event, ['full'], $size) : $content_image_uri;
+            $e->setAttach(
+                $this->sanitizeValue($img_url),
+            );
+        }
 
-        if (isset($params['no_html']) && $params['no_html']) {
+        if ($use_html) {
             $e->setDescription(
                 $this->sanitizeValue(
-                    wp_strip_all_tags(strip_shortcodes($content))
+                    strip_shortcodes($content)
                 )
             );
             if (! empty($content)) {
@@ -1083,7 +1094,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 unset($html_content);
             }
         } else {
-            $e->setDescription($this->sanitizeValue($content));
+            $e->setDescription(
+                $this->sanitizeValue(wp_strip_all_tags($content))
+            );
         }
         $revision = (int)current(
             array_keys(
