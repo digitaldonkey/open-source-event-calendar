@@ -1,3 +1,11 @@
+= 1.1.8 = 
+- Fix Location, GEO and Contact - Events from ICS feed lose their location #40
+- Weekly/Monthly view not respecting the "week starts on day" when set to Sunday #38
+- Add iCal ORGANIZER prop import/export
+- fix HTML display in iCal export
+- Unify how subscribe buttons are displayd and oepened in apps
+- Add image as attachment to ical export.
+
 = 1.1.7 =
 - plugin-check waste of time release only
 

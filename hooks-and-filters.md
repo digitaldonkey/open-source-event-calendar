@@ -2866,13 +2866,18 @@ add_filter('osec_calendar_view_args_alter', $view_args);
 </details>
 
 
+---
+
+
+@file **../src/App/View/Calendar/CalendarSubscribeView.php**
+
 ### osec_subscribe_buttons_arguments <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Subscribe buttons alter
 
 ```php
-add_filter('osec_subscribe_buttons_arguments', $args $view_args);
+add_filter('osec_subscribe_buttons_arguments', $args);
 ```
 
 #### Description
@@ -2884,7 +2889,6 @@ Alter arguments for subscribe-buttons.twig template
 
 
  - **$args** <span style="color:crimson"> </span> Twig args
- - **$view_args** <span style="color:crimson"> </span> View arguments
 
 <details markdown="1">
 <summary>Source</summary>
@@ -2899,11 +2903,10 @@ Alter arguments for subscribe-buttons.twig template
  * @since 1.0
  *
  * @param  array  $args  Twig args
- * @param  array  $view_args  View arguments
  *
- * @file src/App/View/Calendar/CalendarPageView.php
+ * @file src/App/View/Calendar/CalendarSubscribeView.php
  */
-add_filter('osec_subscribe_buttons_arguments', $args $view_args);
+add_filter('osec_subscribe_buttons_arguments', $args);
 ```
 
 </details>
@@ -7876,13 +7879,18 @@ add_filter('osec_calendar_view_args_alter', $view_args);
 </details>
 
 
+---
+
+
+@file **../src/App/View/Calendar/CalendarSubscribeView.php**
+
 ### osec_subscribe_buttons_arguments <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Subscribe buttons alter
 
 ```php
-add_filter('osec_subscribe_buttons_arguments', $args $view_args);
+add_filter('osec_subscribe_buttons_arguments', $args);
 ```
 
 #### Description
@@ -7894,7 +7902,6 @@ Alter arguments for subscribe-buttons.twig template
 
 
  - **$args** <span style="color:crimson"> </span> Twig args
- - **$view_args** <span style="color:crimson"> </span> View arguments
 
 <details markdown="1">
 <summary>Source</summary>
@@ -7909,11 +7916,10 @@ Alter arguments for subscribe-buttons.twig template
  * @since 1.0
  *
  * @param  array  $args  Twig args
- * @param  array  $view_args  View arguments
  *
- * @file src/App/View/Calendar/CalendarPageView.php
+ * @file src/App/View/Calendar/CalendarSubscribeView.php
  */
-add_filter('osec_subscribe_buttons_arguments', $args $view_args);
+add_filter('osec_subscribe_buttons_arguments', $args);
 ```
 
 </details>

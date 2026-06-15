@@ -1,6 +1,6 @@
 === Open Source Event Calendar ===
 
-Tags: calendar, events, ics, ical importer
+Tags: iCal, ics, ical importer, events calendar, open-source-event-calendar, all-in-one-event-calendar
 Requires PHP: 8.2
 Requires at least: 6.7
 Tested up to: 7.0
@@ -13,8 +13,8 @@ Author URI: https://github.com/digitaldonkey
 Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 Text Domain: open-source-event-calendar
-Stable Tag: 1.1.7
-Version: 1.1.7
+Stable Tag: 1.1.8
+Version: 1.1.8
 
 An event calendar with native iCal / ICS import and export
 
@@ -205,6 +205,14 @@ I may also provide paid support.
 9. Schema.org/Event data validator
 
 == Changelog ==
+
+= 1.1.8 = 
+- Fix Location, GEO and Contact - Events from ICS feed lose their location #40
+- Weekly/Monthly view not respecting the "week starts on day" when set to Sunday #38
+- Add iCal ORGANIZER prop import/export
+- fix HTML display in iCal export
+- Unify how subscribe buttons are displayd and oepened in apps
+- Add image as attachment to ical export.
 
 = 1.1.7 =
 - plugin-check waste of time release only
