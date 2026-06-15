@@ -143,6 +143,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
             'cron_freq'        => $cron_freq->get_content(),
             'events_categories' => $select2_cats->get_content(),
             'event_tags'       => $select2_tags->get_content(),
+            'import_post_status' => HtmlFactory::factory($this->app)->create_publush_status(),
             'feeds_options_header_html' => apply_filters(
                 'osec_admin_ics_feeds_options_header_html',
                 null

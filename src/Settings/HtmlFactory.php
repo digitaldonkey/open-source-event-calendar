@@ -318,4 +318,17 @@ class HtmlFactory extends OsecBaseClass
 
         return $select2;
     }
+
+    public function create_publush_status($default_value = 'publish')
+    {
+        $data_attr = 'data-default_value="' . $default_value . '"';
+        $html = '<select name="osec_import_post_status" id="osec_import_post_status" ' . $data_attr . '>';
+        foreach (get_post_statuses() as $id => $name) {
+            $selected = ($default_value === $id) ? ' selected="selected"' : '';
+            $html .= '<option value="' . $id . '" ' . $selected . '>' . $name . '</option>';
+        }
+        $html .= '</select>';
+
+        return $html;
+    }
 }

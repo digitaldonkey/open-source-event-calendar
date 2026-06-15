@@ -37,6 +37,12 @@
         {% if ics_feeds_header_header_html %}
             {{ ics_feeds_header_header_html }}
         {% endif %}
+        <div class="ai1ec-import-post-status">
+            <label for="osec_import_post_status">
+                {{ import_post_status_label }}
+            </label>
+            {{ import_post_status|raw }}
+        </div>
         <div class="ai1ec-feed-comments-enabled">
             <label for="osec_comments_enabled">
                 <input type="checkbox" name="osec_comments_enabled" id="osec_comments_enabled" value="1">

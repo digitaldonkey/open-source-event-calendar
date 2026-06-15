@@ -166,6 +166,10 @@ class FeedsController extends OsecBaseClass
                     'On refresh, preserve previously imported events that are missing from the feed',
                     'open-source-event-calendar'
                 ),
+                'import_post_status_label' => esc_html__(
+                    'Post status for imported events',
+                    'open-source-event-calendar'
+                ),
                 'cancel_button_text' => esc_html__('Cancel', 'open-source-event-calendar'),
                 'data_loading_button_text' => __('Please wait&#8230;', 'open-source-event-calendar'),
                 'add_subscription_button_text' => esc_html__('Add new subscription', 'open-source-event-calendar'),
@@ -202,6 +206,7 @@ class FeedsController extends OsecBaseClass
             'keep_tags_categories',
             'keep_old_events',
             'import_timezone',
+            'import_post_status',
         ]);
 
         /**
@@ -286,6 +291,7 @@ class FeedsController extends OsecBaseClass
             'events'               => 0,
             'keep_tags_categories' => (int) $entry['keep_tags_categories'],
             'keep_old_events'      => (int) $entry['keep_old_events'],
+            'import_post_status'   => (string) $entry['import_post_status'],
             'feed_import_timezone' => (int) $entry['import_timezone'],
             /**
              * Add Html content above feeds options
@@ -784,6 +790,7 @@ class FeedsController extends OsecBaseClass
                 'map_display_enabled',
                 'keep_tags_categories',
                 'keep_old_events',
+                'import_post_status',
                 'import_timezone',
             ]
         );
@@ -817,6 +824,7 @@ class FeedsController extends OsecBaseClass
                 'map_display_enabled'  => (int) $row->map_display_enabled,
                 'keep_tags_categories' => (int) $row->keep_tags_categories,
                 'keep_old_events'      => (int) $row->keep_old_events,
+                'import_post_status'   => (string) $row->import_post_status,
                 'feed_import_timezone' => (int) $row->import_timezone,
             ]);
             $html .= ThemeLoader::factory($this->app)
@@ -877,6 +885,7 @@ class FeedsController extends OsecBaseClass
                 'keep_old_events'      => (int) RequestParser::get_param('keep_old_events', 0),
                 'import_timezone'      => (int) RequestParser::get_param('feed_import_timezone', 0),
                 'remove_events'        => (RequestParser::get_param('remove_events') === 'true'),
+                'import_post_status'   => (string) RequestParser::get_param('import_post_status', 'publish'),
             ];
         }
 

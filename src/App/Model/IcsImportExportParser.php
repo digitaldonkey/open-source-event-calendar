@@ -392,6 +392,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 // Default to name.
                 $data['contact_name'] = $organizer_name;
             }
+
             // Store yet-unsaved values to the $data array.
             $data += [
                 'recurrence_rules' => $rrule,
@@ -412,7 +413,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 'tags'             => array_keys($imported_tags[EventTaxonomy::TAGS]),
                 'feed'             => $feed,
                 'post'             => [
-                    'post_status'    => 'publish',
+                    'post_status'    => $feed->post_status,
                     'comment_status' => $comment_status,
                     'post_type'      => OSEC_POST_TYPE,
                     'post_author'    => 1,

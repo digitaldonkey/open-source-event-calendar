@@ -146,6 +146,7 @@ class DatabaseSchema extends OsecBaseClass
 					feed_category varchar(255) NOT NULL,
 					feed_tags varchar(255) NOT NULL,
 					comments_enabled tinyint(1) NOT NULL DEFAULT '1',
+					import_post_status varchar(255) NOT NULL DEFAULT 'publish',					
 					map_display_enabled tinyint(1) NOT NULL DEFAULT '0',
 					keep_tags_categories tinyint(1) NOT NULL DEFAULT '0',
 					keep_old_events tinyint(1) NOT NULL DEFAULT '0',

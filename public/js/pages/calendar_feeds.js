@@ -286,7 +286,7 @@ timely.define("domReady", [], function () {
             s = t.make_alert(n.message, i);
         e(".osec_update_ics", r).button("reset"), e("#ics-alerts").append(s)
     }, s = function () {
-        e("#osec_feed_url").val(" ").prop("readonly", !1), e('#ai1ec-feeds-after input[type="checkbox"]').prop("checked", !1), e("#osec_feed_id").remove(), e("#osec_feed_category").select2("val", ""), e("#osec_feed_tags").select2("val", ""), e('[id^="ai1ec_feed_cfg_"]').select2("val", ""), e("#osec_ics_add_new, #osec_add_new_ics > i").removeClass("ai1ec-hidden"), e("#osec_ics_update").addClass("ai1ec-hidden"), e("#ics .ai1ec-alert").remove()
+        e("#osec_feed_url").val(" ").prop("readonly", !1), e('#ai1ec-feeds-after input[type="checkbox"]').prop("checked", !1), e("#osec_feed_id").remove(), e("#osec_import_post_status").val(e("#osec_import_post_status").data('default_value')), e("#osec_feed_category").select2("val", ""), e("#osec_feed_tags").select2("val", ""), e('[id^="ai1ec_feed_cfg_"]').select2("val", ""), e("#osec_ics_add_new, #osec_add_new_ics > i").removeClass("ai1ec-hidden"), e("#osec_ics_update").addClass("ai1ec-hidden"), e("#ics .ai1ec-alert").remove()
     };
     return {handle_add_new_ics: n, handle_delete_ics: r, handle_update_ics: i, reset_form: s}
 }), timely.define("external_libs/select2", ["jquery_timely"], function (e) {
@@ -1351,6 +1351,7 @@ timely.define("scripts/calendar_feeds/ics/ics_event_handlers", ["jquery_timely",
                 p = $("#osec_add_tag_categories").is(":checked") ? 1 : 0,
                 d = $("#osec_keep_old_events").is(":checked") ? 1 : 0,
                 v = $("#osec_feed_import_timezone").is(":checked") ? 1 : 0,
+                import_post_status= $("#osec_import_post_status").val(),
                 m = {
                     action: "osec_add_ics",
                     nonce: r.calendar_feeds_nonce,
@@ -1361,7 +1362,8 @@ timely.define("scripts/calendar_feeds/ics/ics_event_handlers", ["jquery_timely",
                     map_display_enabled: h,
                     keep_tags_categories: p,
                     keep_old_events: d,
-                    feed_import_timezone: v
+                    feed_import_timezone: v,
+                    import_post_status
                 };
             $(".ai1ec-feed-field").each(function () {
                 var t = $(this).val();
@@ -1387,6 +1389,7 @@ timely.define("scripts/calendar_feeds/ics/ics_event_handlers", ["jquery_timely",
             $("#osec_map_display_enabled").prop("checked", $(".ai1ec-feed-map-display-enabled", n).data("state")),
             $("#osec_add_tag_categories").prop("checked", $(".ai1ec-feed-keep-tags-categories", n).data("state")),
             $("#osec_keep_old_events").prop("checked", $(".ai1ec-feed-keep-old-events", n).data("state")),
+            $("#osec_import_post_status").val($(".ai1ec-import-post-status", n).data("state")),
             $("#osec_feed_import_timezone").prop("checked", $(".ai1ec-feed-import-timezone", n).data("state")),
             i.addClass("ai1ec-hidden"), s.removeClass("ai1ec-hidden"),
             $('<input type="hidden" id="osec_feed_id" name="osec_feed_id">').val($(".ai1ec_feed_id", n).val()).appendTo(r),

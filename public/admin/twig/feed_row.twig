@@ -35,6 +35,13 @@
         {{ feeds_options_header_html|raw }}
 
         <div class="ai1ec-clearfix">
+            <div class="ai1ec-import-post-status"
+                 data-state="{{ import_post_status }}">
+                {{ import_post_status_label }}:
+                <strong>
+                    {{ import_post_status }}
+                </strong>
+            </div>
             <div class="ai1ec-feed-comments-enabled"
                  data-state="{{ comments_enabled }}">
                 {{ comments_label }}:
