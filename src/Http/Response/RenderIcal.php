@@ -16,10 +16,35 @@ class RenderIcal extends RenderStrategyAbstract
     {
         $this->cleanOutputBuffers();
         header('Content-type: text/calendar; charset=utf-8');
-        echo wp_kses(
-            $params['data'],
-            $this->app->kses->allowed_html_frontend()
-        );
+        $this->render_escped_with_doctype($params['data']);
         ResponseHelper::stop();
+    }
+
+    protected function render_escped_with_doctype(string $str): void {
+        // There is no way to escape the doctype so we use a static placeholder.
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        echo str_replace(
+            '###DOCTYPE_PLACEHOLDER###',
+            '<!DOCTYPE html>',
+            wp_kses(
+                $str,
+                [
+                    'html' => [
+                        'lang' => true,
+                    ],
+                    'head' => true,
+                    'title' => true,
+                    'body' => true,
+                    'p' => true,
+                    'strong' => true,
+                    'em' => true,
+                    'a' => [
+                        'href' => true,
+                        'title' => true,
+                    ],
+                    'br' => true,
+                ]
+            )
+        );
     }
 }

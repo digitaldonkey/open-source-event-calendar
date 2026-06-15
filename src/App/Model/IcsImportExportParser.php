@@ -351,12 +351,19 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // ===============================
             // = Contact name, phone, e-mail =
             // ===============================
-            $organizer = $e->getOrganizer();
+            // Organizer
+            $organizerParam = $e->getOrganizer(true);
+            $organizer_name = null;
+            $organizer_email = null;
+            if ($organizerParam) {
+                $organizer_name = $organizerParam->getParams('CN');
+            }
+            $organizer = (string) $e->getOrganizer();
             if (
-                str_starts_with((string)$organizer, 'MAILTO:') &&
-                ! str_contains((string)$organizer, '@')
+                str_starts_with($organizer, 'MAILTO:') &&
+                ! str_contains($organizer, '@')
             ) {
-                $organizer = substr((string)$organizer, 7);
+                $organizer = substr($organizer, 7);
             }
             $contact  = $e->getContact();
             $elements = explode(';', (string)$contact, 4);
@@ -377,9 +384,13 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     $data['contact_name'] = $el;
                 }
             }
-            if (! isset($data['contact_name']) || ! $data['contact_name']) {
+            if ($organizer && ! (isset($data['contact_name']) || empty($data['contact_name']))) {
                 // If no contact name, default to organizer property.
                 $data['contact_name'] = $organizer;
+            }
+            if ($organizer_name && ! (isset($data['contact_name']) || empty($data['contact_name']))) {
+                // Default to name.
+                $data['contact_name'] = $organizer_name;
             }
             // Store yet-unsaved values to the $data array.
             $data += [
@@ -1023,7 +1034,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $event->save(true);
         }
         $e->setUid($this->sanitizeValue($uid));
-        $e->setUrl(get_permalink($event->get('post_id')));
+        $event_url = get_permalink($event->get('post_id'));
+        $e->setUrl($event_url);
 
         // =========================
         // = Summary & description =
@@ -1043,9 +1055,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         );
 
         // Prepend Excerpt if in use.
-        $content_raw = $event->get('post')->post_content;
+        $post_excerpt = null;
         if ($this->app->settings->get('feature_use_excerpt')) {
-            $content_raw = $event->get('post')->post_excerpt . "\n\n" . $content_raw;
+            $post_excerpt = $event->get('post')->post_excerpt;
         }
 
         $content = apply_filters(
@@ -1053,7 +1065,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             apply_filters(
                 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                 'the_content',
-                $content_raw
+                $event->get('post')->post_content
             )
         );
         $content = str_replace(']]>', ']]&gt;', $content);
@@ -1080,28 +1092,43 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             );
         }
 
+        // ===============================
+        // = DESCRIPTION plain text
+        // ===============================
+        $description = $post_excerpt ? $post_excerpt . "\n\n" . $content : $content;
+        $e->setDescription(
+            $this->sanitizeValue(
+                wp_strip_all_tags(strip_shortcodes($description))
+            )
+        );
+
+        // ============================
+        // = X-ALT-DESC  HTML version of description
+        // ============================
         if ($use_html) {
-            $e->setDescription(
-                $this->sanitizeValue(
-                    wp_strip_all_tags(strip_shortcodes($content))
-                )
-            );
-            if (! empty($content)) {
-                $html_content = '<!DOCTYPE html>\n' .
-                                '<HTML>\n<HEAD>\n<TITLE></TITLE>\n</HEAD>\n<BODY>' . $html_image . $content .
-                                '</BODY></HTML>';
+            if (! empty($content) || !empty($post_excerpt)) {
+                // The akward newline and spacing is necessary to keep
+                // iclal 75 chars per line limit rendered correcctly.
+                $post_excerpt = $post_excerpt ? '<p><strong>' . $post_excerpt . '</strong></p>' : '';
+                $link = '<p><a href="' . esc_url($event_url) . '">' . esc_url($event_url) . '</a></p>';
+                // Doctype is added after escaping
+                //   @see RenderIcal->render_escped_with_doctype()
+                $html = "###DOCTYPE_PLACEHOLDER###\n"
+                        . '<html ' . get_language_attributes() . '>'
+                        . '<body>'
+                        . $post_excerpt
+                        . $content . $html_image
+                        . $link
+                        . '</body></html>';
                 $e->setXprop(
                     'X-ALT-DESC',
-                    $this->sanitizeValue($html_content),
+                    $this->sanitizeValue($html),
                     ['FMTTYPE' => 'text/html']
                 );
-                unset($html_content);
+                unset($html);
             }
-        } else {
-            $e->setDescription(
-                $this->sanitizeValue(wp_strip_all_tags($content))
-            );
         }
+
         $revision = (int)current(
             array_keys(
                 wp_get_post_revisions($event->get('post_id'))
@@ -1258,6 +1285,17 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $contact = array_filter($contact);
         $contact = implode('; ', $contact);
         $e->setContact($this->sanitizeValue($contact));
+
+        // Organizer
+        $contact_mail = $event->get('contact_email', null);
+        $contact_name = $event->get('contact_name', null);
+        if ($contact_mail) {
+            if ($contact_name) {
+                $e->setOrganizer($contact_mail, ['CN' => $contact_name]);
+            } else {
+                $e->setOrganizer($contact_mail);
+            }
+        }
 
         // ====================
         // = Recurrence rules =
@@ -1422,7 +1460,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 );
             }
         }
-
         return $calendar;
     }
 

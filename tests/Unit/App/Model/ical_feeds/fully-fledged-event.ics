@@ -33,6 +33,7 @@ UID:fully-fledged_event@ddev-wordpress.ddev.site
 DTSTAMP:20260612T084049Z
 ATTACH:https://ddev-wordpress.ddev.site/wp-content/uploads/2026/03/bauwagen
  03_3235.jpg
+ORGANIZER;CN=John Doe:MAILTO:john.doe@example.com
 CATEGORIES;LANGUAGE=en-US:Cat 1
 CONTACT:Marry Poppins\; +1586909808098\; fern@sehturm.de\; http://donkeymed
  ia.eu

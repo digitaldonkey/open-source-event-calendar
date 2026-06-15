@@ -151,8 +151,10 @@ class IcsImportExportParserFullyFledgedEventTest extends TestBase
             'end'
         );
 
-        // TODO DATE VERIFICATIONS
-        //   Regarding timezones, the "always_use_calendar_timezone" setting.
-        //   and the Feed->import_timezone setting.
+        // TODO
+        //   Export Event and Compare with Source?
+        //   Description contains excerpt. So there is no identity.
+        // https://ddev-wordpress.ddev.site/?plugin=open-source-event-calendar&controller=osec_exporter_controller&action=export_events&download_true&osec_post_ids=11504
+        // $XXX = file_get_contents('https://ddev-wordpress.ddev.site/?plugin=open-source-event-calendar&controller=osec_exporter_controller&action=export_events&download_true&osec_post_ids=11504');
     }
 }
