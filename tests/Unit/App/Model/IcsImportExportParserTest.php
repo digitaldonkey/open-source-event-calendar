@@ -40,6 +40,7 @@ class IcsImportExportParserTest extends TestBase
                     'keep_tags_categories' => '0',
                     'keep_old_events'      => '0',
                     'import_timezone'      => '1',
+                    'import_post_status'   => 'publish',
                 ],
             'comment_status' => 'closed',
             'do_show_map'    => 0,
