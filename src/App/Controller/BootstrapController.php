@@ -455,7 +455,6 @@ class BootstrapController
                 }
             );
 
-            FeedsController::add_actions($app, is_admin());
             // If AdminPageAllEvents.
             AdminPageAllEvents::add_actions($app, is_admin());
         } else {
@@ -484,6 +483,7 @@ class BootstrapController
             );
             EventSingleView::factory($app)->add_actions();
         }
+        FeedsController::add_actions($app, is_admin());
     }
 
     /**

@@ -65,8 +65,11 @@ class FeedsController extends OsecBaseClass
      */
     private function install_cron(): void
     {
-        Scheduler::factory($this->app)
-                 ->reschedule(self::CRON_HOOK_NAME, $this->app->settings->get('ics_cron_freq'), OSEC_VERSION);
+        Scheduler::factory($this->app)->reschedule(
+            self::CRON_HOOK_NAME,
+            $this->app->settings->get('ics_cron_freq'),
+            OSEC_VERSION
+        );
     }
 
     public static function add_actions(App $app, bool $is_admin)
@@ -90,17 +93,18 @@ class FeedsController extends OsecBaseClass
                     FeedsController::factory($app)->delete_ics();
                 }
             );
-            /**
-             * Update ICS feed by ajax.
-             */
-            add_action(
-                'wp_ajax_osec_update_ics',
-                function () use ($app) {
-                    FeedsController::factory($app)->update_ics();
-                }
-            );
         }
+        /**
+         * Update ICS feed by ajax.
+         */
+        add_action(
+            'wp_ajax_osec_update_ics',
+            function () use ($app) {
+                FeedsController::factory($app)->update_ics();
+            }
+        );
 
+        /* CRON JOB */
         add_action(
             self::CRON_HOOK_NAME,
             function () use ($app) {
