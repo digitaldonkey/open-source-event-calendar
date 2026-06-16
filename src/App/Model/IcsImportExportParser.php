@@ -413,7 +413,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 'tags'             => array_keys($imported_tags[EventTaxonomy::TAGS]),
                 'feed'             => $feed,
                 'post'             => [
-                    'post_status'    => $feed->post_status,
+                    'post_status'    => $feed->import_post_status,
                     'comment_status' => $comment_status,
                     'post_type'      => OSEC_POST_TYPE,
                     'post_author'    => 1,
