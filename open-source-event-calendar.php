@@ -8,7 +8,7 @@
  * Author URI: https://github.com/digitaldonkey
  * Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
  * Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
- * Tags: iCal, ics, ical importer, events calendar, open-source-event-calendar, all-in-one-event-calendar
+ * Tags: iCal, ics, ical importer, events calendar, open-source-event-calendar
  * Requires at least: 6.7
  * Tested up to: 7.0
  * Requires PHP: 8.2
