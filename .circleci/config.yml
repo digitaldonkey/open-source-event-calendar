@@ -593,7 +593,6 @@ jobs:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
-      - IS_TAGGED_RELEASE: $IS_TAGGED_RELEASE
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
