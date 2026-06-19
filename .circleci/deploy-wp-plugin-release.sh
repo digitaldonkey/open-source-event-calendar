@@ -13,17 +13,6 @@ if [[ -z "$CIRCLE_BRANCH" || "$CIRCLE_BRANCH" != "master" ]]; then
     exit 1
 fi
 
-if [[ -z "$CIRCLE_TAG" ]]; then
-    echo "Git tag is required. Stopping deployment." 1>&2
-    exit 1
-fi
-
-# Check if we have semantic number tag.
-if [[ ! $CIRCLE_TAG =~ ^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]; then
-    echo "CIRCLE_TAG:$CIRCLE_TAG is NOT a semantic tag. Stopping deployment." 1>&2
-    exit 1
-fi
-
 if [[ -z "$WP_ORG_SVN_PASSWORD" ]]; then
     echo "WordPress.org password not set. Aborting." 1>&2
     exit 1
@@ -51,21 +40,42 @@ fi
 PLUGIN_BUILD_PATH="/tmp/release_files/open-source-event-calendar"
 PLUGIN_SVN_PATH="/tmp/svn"
 
-# Tag of the latest tagged commit across all branches.
-LATEST_GIT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+# Decide if we do a Development Release or a tagged release
+# BOOL $IS_TAGGED_RELEASE
+if [ $IS_TAGGED_RELEASE ]
+then
+    echo "Tagged release"
 
-if [[ $CIRCLE_TAG != $LATEST_GIT_TAG ]]; then
-    echo "LATEST_GIT_TAG:$LATEST_GIT_TAG  is not matching this tag : $CIRCLE_TAG." 1>&2
-#    exit 1
-fi
+    if [[ -z "$CIRCLE_TAG" ]]; then
+        echo "Git tag is required. Stopping deployment." 1>&2
+        exit 1
+    fi
 
-# Check if the latest SVN tag exists already
-TAG=$(svn ls "https://plugins.svn.wordpress.org/$WP_ORG_PLUGIN_NAME/tags/$LATEST_GIT_TAG")
-error=$?
-if [ $error == 0 ]; then
-    # Tag exists, don't deploy
-    echo "Latest tag ($LATEST_GIT_TAG) already exists on the WordPress directory. No deployment needed!"
-    exit 0
+    # Check if we have semantic number tag.
+    if [[ ! $CIRCLE_TAG =~ ^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$ ]]; then
+        echo "CIRCLE_TAG:$CIRCLE_TAG is NOT a semantic tag. Stopping deployment." 1>&2
+        exit 1
+    fi
+
+
+    # Tag of the latest tagged commit across all branches.
+    LATEST_GIT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+
+    if [[ $CIRCLE_TAG != $LATEST_GIT_TAG ]]; then
+        echo "LATEST_GIT_TAG:$LATEST_GIT_TAG  is not matching this tag : $CIRCLE_TAG." 1>&2
+        exit 1
+    fi
+
+    # Check if the latest SVN tag exists already
+    TAG=$(svn ls "https://plugins.svn.wordpress.org/$WP_ORG_PLUGIN_NAME/tags/$LATEST_GIT_TAG")
+    error=$?
+    if [ $error == 0 ]; then
+        # Tag exists, don't deploy
+        echo "Latest tag ($LATEST_GIT_TAG) already exists on the WordPress directory. No deployment needed!"
+        exit 0
+    fi
+else
+    echo "Development release"
 fi
 
 # Checkout the SVN repo
@@ -83,8 +93,11 @@ rm -rf ./trunk
 # Copy our new version of the plugin as the new trunk directory
 cp -r $PLUGIN_BUILD_PATH ./trunk
 
-# copy for tags
-svn copy trunk tags/$LATEST_GIT_TAG
+if [ $IS_TAGGED_RELEASE ]
+then
+  # copy for tags
+  svn copy trunk tags/$LATEST_GIT_TAG
+fi
 
 # Add new files to SVN
 svn stat | grep '^?' | awk '{print $2}' | xargs -I x svn add x@

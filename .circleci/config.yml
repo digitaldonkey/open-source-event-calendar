@@ -529,7 +529,7 @@ jobs:
       - run:
           name: "Publish Release on GitHub"
           command: |
-            # Allow other branches, but only deploy on master 
+            # Allow other branches, but only deploy on master
             if [ "$CIRCLE_BRANCH" != "master" ]; then
                 circleci-agent step halt
             fi
@@ -549,6 +549,10 @@ jobs:
       - run:
           name: Deploy to wordpress.org variables
           command: |
+            # Allow other branches, but only deploy on master
+            if [ "$CIRCLE_BRANCH" != "master" ]; then
+                circleci-agent step halt
+            fi
             # WP_ORG_SVN_PASSWORD
             echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
             echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"
@@ -568,11 +572,19 @@ jobs:
       - run:
           name: Deploy to wordpress.org variables
           command: |
+            # Allow other branches, but only deploy on master
+            if [ "$CIRCLE_BRANCH" != "master" ]; then
+                circleci-agent step halt
+            fi
+            git describe --tags --exact-match > /dev/null 2>&1 && VERSION=$(git describe --tags) || VERSION="dev"
+            IS_TAGGED_RELEASE=$(( $VERSION == "dev" ? 1 : 0 ))
             # WP_ORG_SVN_PASSWORD
             echo "WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
             echo "WP_ORG_USERNAME: $WP_ORG_USERNAME"
             echo "WP_ORG_SVN_PASSWORD: ****"
             echo "CIRCLE_TAG: $CIRCLE_TAG"
+            echo "VERSION": $VERSION
+            echo "IS_TAGGED_RELEASE": $IS_TAGGED_RELEASE
             ls -alh /tmp/$OSEC_RELEASE_FILE
       - run:
           name: Deploy Plugin to WordPress plugin directory
@@ -581,6 +593,7 @@ jobs:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
       - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
+      - IS_TAGGED_RELEASE: $IS_TAGGED_RELEASE
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/workflows/
