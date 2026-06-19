@@ -303,6 +303,7 @@ class Event extends OsecBaseClass
     {
         // Defaults to 1.
         $instance_id = $this->get('instance_id') ? $this->get('instance_id') : 1;
+
         return admin_url(
             'post.php?post=' . $this->entity->get('post_id')
             . '&action=edit'
@@ -372,18 +373,6 @@ class Event extends OsecBaseClass
             AvatarFallbackModel::factory($this->app)->get_all(),
             '',
             $wrap_permalink
-        );
-    }
-    /**
-     * Retrieving avatar data
-     *
-     * @return string Avatar markup
-     */
-    public function get_avatar_data($wrap_permalink = true)
-    {
-        return EventAvatarView::factory($this->app)->get_event_avatar_data(
-            $this,
-            AvatarFallbackModel::factory($this->app)->get_all(),
         );
     }
 
@@ -483,12 +472,13 @@ class Event extends OsecBaseClass
     public function is_multiday()
     {
         if (null === $this->isMultiday) {
-            $start = $this->get('start');
-            $end = $this->get('end');
-            $diff = $end->diff_sec($start);
-            $dayDiff = ($start->format('Y-m-d') !== $end->format('Y-m-d'));
+            $start            = $this->get('start');
+            $end              = $this->get('end');
+            $diff             = $end->diff_sec($start);
+            $dayDiff          = ($start->format('Y-m-d') !== $end->format('Y-m-d'));
             $this->isMultiday = ($diff > 86400 && $dayDiff);
         }
+
         return $this->isMultiday;
     }
 
@@ -897,6 +887,7 @@ class Event extends OsecBaseClass
         if (self::is_geo_value($value)) {
             return $value;
         }
+
         return 'NULL';
     }
 
