@@ -38,12 +38,17 @@ class EventAvatarView extends OsecBaseClass
         Event $event,
         ?array $fallback_order = null,
         string $classes = '',
-        bool $wrap_permalink = true
+        bool $wrap_permalink = true,
+        bool $hide_featured_image = false
     ): string {
         $data = $this->get_event_avatar_data($event, $fallback_order);
 
         if (empty($data['url'])) {
             return '';
+        }
+
+        if ($hide_featured_image) {
+            return ' <meta itemprop="image" content="' . esc_url($data['url']) . '">';
         }
 
         $classes .= ' ai1ec-' . $data['image_source'];
@@ -69,7 +74,8 @@ class EventAvatarView extends OsecBaseClass
 
     public function get_event_avatar_data(Event $event, $fallback_order = null): ?array
     {
-        $source = $size = null;
+        $source = null;
+        $size = null;
         $url    = $this->get_event_avatar_url(
             $event,
             $fallback_order,
@@ -93,7 +99,10 @@ class EventAvatarView extends OsecBaseClass
         );
         $ratio = null;
         if ($size && isset($size[0]) && isset($size[1])) {
-            $size = ['width' => $size[0], 'height' => $size[1]];
+            $size = [
+                'width' => $size[0],
+                'height' => $size[1],
+            ];
             $ratio = ($size['width'] > $size['height']) ? 'landscape' : 'portrait';
         }
         return [
@@ -214,7 +223,7 @@ class EventAvatarView extends OsecBaseClass
      *
      * @return  string|null
      */
-    protected function getPostAttachmentUrl(
+    public function getPostAttachmentUrl(
         Event $event,
         array $ordered_img_sizes,
         &$size
@@ -300,7 +309,7 @@ class EventAvatarView extends OsecBaseClass
      *
      * @return array
      */
-    public function get_image_from_content($content)
+    public function get_image_from_content($content): array
     {
         preg_match(
             '/<img([^>]+)src=["\']?([^"\'\ >]+)([^>]*)>/i',
@@ -309,6 +318,16 @@ class EventAvatarView extends OsecBaseClass
         );
 
         return $matches;
+    }
+
+    public function get_image_uri_from_content($content): string
+    {
+        $uri = '';
+        $matches = $this->get_image_from_content($content);
+        if (isset($matches[2])) {
+            $uri = $matches[2];
+        }
+        return $uri;
     }
 
     /**
@@ -367,7 +386,7 @@ class EventAvatarView extends OsecBaseClass
         // Order term IDs by depth.
         asort($term_depths);
 
-        $url   = '';
+        $url = '';
         // Starting at deepest depth, find the first category that has an avatar.
         foreach ($term_depths as $term_id => $depth) {
             $term_image = TaxonomyAdapter::factory($this->app)->get_category_image($term_id);

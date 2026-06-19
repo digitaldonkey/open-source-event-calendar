@@ -17,13 +17,13 @@ class TaxonomyAdapter extends OsecBaseClass
      * @var array Map of taxonomy values.
      */
     protected $taxonomyMap = [
-        'events_categories' => [],
-        'events_tags'       => [],
+        'osec_events_categories' => [],
+        'osec_events_tags'       => [],
     ];
 
     /**
      * Callback to pre-populate taxonomies before exporting ics.
-     * All taxonomies which are not tags are exported as event_categories
+     * All taxonomies which are not tags are exported as osec_events_categories
      *
      * @param  array  $post_ids  List of Post IDs to inspect.
      *
@@ -34,8 +34,8 @@ class TaxonomyAdapter extends OsecBaseClass
         $taxonomies          = get_object_taxonomies(OSEC_POST_TYPE);
         $categories          = [];
         $excluded_categories = [
-            'events_tags'  => true,
-            'events_feeds' => true,
+            'osec_events_tags'  => true,
+            'osec_events_feeds' => true,
         ];
         foreach ($taxonomies as $taxonomy) {
             if (isset($excluded_categories[$taxonomy])) {
@@ -44,13 +44,13 @@ class TaxonomyAdapter extends OsecBaseClass
             $categories[] = $taxonomy;
         }
         foreach ($post_ids as $post_id) {
-            $post_id                                          = (int)$post_id;
-            $this->taxonomyMap['events_categories'][$post_id] = [];
-            $this->taxonomyMap['events_tags'][$post_id]       = [];
+            $post_id = (int)$post_id;
+            $this->taxonomyMap['osec_events_categories'][$post_id] = [];
+            $this->taxonomyMap['osec_events_tags'][$post_id]       = [];
         }
         $tags = wp_get_object_terms(
             $post_ids,
-            ['events_tags'],
+            ['osec_events_tags'],
             ['fields' => 'all_with_object_id']
         );
         foreach ($tags as $term) {
@@ -62,7 +62,7 @@ class TaxonomyAdapter extends OsecBaseClass
             ['fields' => 'all_with_object_id']
         );
         foreach ($category_terms as $term) {
-            $this->taxonomyMap['events_categories'][$term->object_id][] = $term;
+            $this->taxonomyMap['osec_events_categories'][$term->object_id][] = $term;
         }
     }
 
@@ -76,13 +76,13 @@ class TaxonomyAdapter extends OsecBaseClass
     public function update_meta(array $post_ids)
     {
         foreach ($post_ids as $post_id) {
-            $post_id                                          = (int)$post_id;
-            $this->taxonomyMap['events_categories'][$post_id] = [];
-            $this->taxonomyMap['events_tags'][$post_id]       = [];
+            $post_id = (int)$post_id;
+            $this->taxonomyMap['osec_events_categories'][$post_id] = [];
+            $this->taxonomyMap['osec_events_tags'][$post_id]       = [];
         }
         $terms = wp_get_object_terms(
             $post_ids,
-            ['events_categories', 'events_tags'],
+            ['osec_events_categories', 'osec_events_tags'],
             ['fields' => 'all_with_object_id']
         );
         foreach ($terms as $term) {
@@ -99,7 +99,7 @@ class TaxonomyAdapter extends OsecBaseClass
      */
     public function get_post_categories($post_id)
     {
-        return $this->get_post_taxonomy($post_id, 'events_categories');
+        return $this->get_post_taxonomy($post_id, 'osec_events_categories');
     }
 
     /**
@@ -133,7 +133,7 @@ class TaxonomyAdapter extends OsecBaseClass
      */
     public function get_post_tags($post_id)
     {
-        return $this->get_post_taxonomy($post_id, 'events_tags');
+        return $this->get_post_taxonomy($post_id, 'osec_events_tags');
     }
 
     /**
@@ -180,7 +180,8 @@ class TaxonomyAdapter extends OsecBaseClass
         $category_map = [];
         $records      = (array)$this->app->db->select(OSEC_DB__META, ['term_id', 'term_image', 'term_color']);
         foreach ($records as $row) {
-            $image = $color = null;
+            $image = null;
+            $color = null;
             if ($row->term_image) {
                 $image = $row->term_image;
             }

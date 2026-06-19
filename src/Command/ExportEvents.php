@@ -117,7 +117,7 @@ class ExportEvents extends CommandAbstract
          */
         $filter = apply_filters('osec_export_filter', $filter);
         // when exporting events by post_id, do not look up the event's start/end date/time
-        $start  = ($post_ids !== false)
+        $start = ($post_ids !== false)
             // TODO hidden constants foe default export Range is +-3 years.
             ? new DT('-3 years') // Include any events ending today
             : new DT(time() - 24 * 60 * 60); // Include any events ending today

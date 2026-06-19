@@ -38,13 +38,13 @@ class EventTimeView extends OsecBaseClass
     public function get_timespan_html(Event $event, string $start_date_display = 'long'): string
     {
         /* @var boolean $displayEndDate Wheather to show end Date and time (multiday events only) */
-        $displayEndDate = !$event->is_allday() && !$event->is_instant() && $event->is_multiday();
+        $displayEndDate = $event->is_multiday() && !$event->is_instant();
 
         /**
          * @var boolean $displayEndDate Display end time only as date would double.
          *                              If end is set (´not-instant´) and not multiday.
          */
-        $displayEndTime  = !$displayEndDate && !$event->is_allday() && !$event->is_instant();
+        $displayEndTime = !$event->is_allday() && !$event->is_instant();
 
         // Makes no sense to hide start date for all-day events, so fix argument
         if ('hidden' === $start_date_display && $event->is_allday()) {
@@ -52,8 +52,13 @@ class EventTimeView extends OsecBaseClass
         }
 
         // Localize time.
+        $end = $event->get('end', null);
+        if ($end && $event->is_allday()) {
+            // Prevent Allday events from showing up at 0:00 next day.
+            $end->adjust(-1, 'second');
+        }
         $start = new DT($event->get('start'));
-        $end   = new DT($event->get('end'));
+        $end   = new DT($end);
 
         $break_years = $start->format('Y') !== $end->format('Y');
         $date_string = '';
@@ -89,12 +94,10 @@ class EventTimeView extends OsecBaseClass
         if ($displayEndDate) {
             $date_string  .= self::timespanSeparator();
             $date_string  .= $end_date_string;
-            $date_string .= self::timeSeparator();
-            $date_string .= $this->format_time($end);
             unset($end_date_string);
         }
         if ($displayEndTime) {
-            $date_string  .= self::timespanSeparator();
+            $date_string  .= $displayEndDate ? self::timeSeparator() : self::timespanSeparator();
             $date_string .= $this->format_time($end);
         }
 

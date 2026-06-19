@@ -102,7 +102,7 @@ class CommandClone extends CommandAbstract
             'to_ping'        => $post->to_ping,
         ];
 
-        $new_post_id    = wp_insert_post($new_post);
+        $new_post_id = wp_insert_post($new_post);
         NotificationAdmin::factory($this->app)->store(
             '<p>' .
                 sprintf(
@@ -176,7 +176,7 @@ class CommandClone extends CommandAbstract
     {
         global $wpdb;
         if (!function_exists('wp_get_current_user')) {
-            include(ABSPATH . "wp-includes/pluggable.php");
+            include ABSPATH . 'wp-includes/pluggable.php';
         }
         return wp_get_current_user();
     }
@@ -340,8 +340,8 @@ class CommandClone extends CommandAbstract
             && ! empty($_REQUEST['_wpnonce'])
             && wp_verify_nonce(sanitize_key(wp_unslash($_REQUEST['_wpnonce'])), 'bulk-posts')
             && current_user_can('edit_osec_events')
-            && ! empty($_REQUEST['post'])
-            && is_array(empty($_REQUEST['post']))
+            && isset($_REQUEST['post']) && ! empty($_REQUEST['post'])
+            && is_array($_REQUEST['post'])
         ) {
             // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
             foreach ($_REQUEST['post'] as $post_id) {

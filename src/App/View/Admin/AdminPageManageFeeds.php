@@ -3,6 +3,8 @@
 namespace Osec\App\View\Admin;
 
 use Osec\App\Controller\FeedsController;
+use Osec\Settings\Elements\ModalQuestion;
+use Osec\Settings\HtmlFactory;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -15,6 +17,8 @@ use Osec\Theme\ThemeLoader;
  */
 class AdminPageManageFeeds extends AdminPageAbstract
 {
+    public const MENU_SLUG = 'osec-admin-feeds';
+
     /**
      * Adds page to the menu.
      *
@@ -32,7 +36,7 @@ class AdminPageManageFeeds extends AdminPageAbstract
             __('Calendar Feeds', 'open-source-event-calendar'),
             __('Calendar Feeds', 'open-source-event-calendar'),
             'manage_osec_feeds',
-            self::ADMIN_PAGE_PREFIX . 'feeds',
+            self::MENU_SLUG,
             $this->display_page(...)
         );
         $this->app->settings
@@ -50,11 +54,11 @@ class AdminPageManageFeeds extends AdminPageAbstract
     {
         // Add the 'ICS Import Settings' meta box.
         add_meta_box(
-            'ai1ec-feeds',
+            'osec_event_feeds',
             _x('Feed Subscriptions', 'meta box', 'open-source-event-calendar'),
             $this->display_meta_box(...),
             $this->app->settings->get('feeds_page'),
-            'left',
+            'normal',
             'default'
         );
     }
@@ -66,13 +70,22 @@ class AdminPageManageFeeds extends AdminPageAbstract
      */
     public function display_page(): void
     {
+        $settings_page = $this->app->settings->get('feeds_page');
         $args = [
             'title'             => __('OSEC: Calendar Feeds', 'open-source-event-calendar'),
-            'settings_page'     => $this->app->settings->get('feeds_page'),
-            'calendar_settings' => false,
+            'metabox_normal' => [
+                'screen' => $settings_page,
+                'action' => 'normal',
+                'data_object' => null,
+            ],
+            'metabox_side' => [
+                'screen' => $settings_page,
+                'action' => 'side',
+                'data_object' => null,
+            ],
         ];
         ThemeLoader::factory($this->app)
-                   ->get_file('calendar_feeds.php', $args, true)
+                   ->get_file('page_two_col.twig', $args, true)
                    ->render();
     }
 
@@ -81,22 +94,70 @@ class AdminPageManageFeeds extends AdminPageAbstract
      *
      * @return void
      */
-    public function display_meta_box($object, $box)
+    public function display_meta_box($obj, $box)
     {
-        /**
-         * Alter FeedsController.
-         *
-         * @since 1.0
-         *
-         * @param  FeedsController  $feed
-         */
-        $feed = apply_filters('osec_calendar_feeds', FeedsController::factory($this->app));
-        $args = [
-            'tab_headers' => $feed->get_tab_header(),
-            'tab_content' => $feed->get_tab_content(),
-        ];
+        $feedControler = FeedsController::factory($this->app);
+
+        $select2_cats = HtmlFactory::factory($this->app)->create_select2_multiselect(
+            [
+                'name'        => 'osec_feed_category[]',
+                'id'          => 'osec_feed_category',
+                'use_id'      => true,
+                'type'        => 'category',
+                'placeholder' => __('Categories (optional)', 'open-source-event-calendar'),
+            ],
+            get_terms([
+                'taxonomy' => 'osec_events_categories',
+                'hide_empty' => false,
+            ])
+        );
+        $select2_tags = HtmlFactory::factory($this->app)->create_select2_input(
+            ['id' => 'osec_feed_tags']
+        );
+
+        $modal = new ModalQuestion(
+            $this->app,
+            [
+                'id'                 => 'osec-ics-modal',
+                'header_text'        => esc_html__('Removing ICS Feed', 'open-source-event-calendar'),
+                'body_text'          => esc_html__(
+                    'Do you want to keep the events imported from the calendar or remove them?',
+                    'open-source-event-calendar'
+                ),
+                'keep_button_text'   => esc_html__('Keep Events', 'open-source-event-calendar'),
+                'delete_button_text' => esc_html__('Remove Events', 'open-source-event-calendar'),
+            ]
+        );
+
+        $cron_freq = ThemeLoader::factory($this->app)->get_file(
+            'feed_cron_freq.twig',
+            [
+                'options' => $feedControler->cron_options(),
+                'cron_freq' => $this->app->settings->get('ics_cron_freq'),
+            ],
+            true
+        );
+
+        $args = FeedsController::merge_commom_vars([
+            'id' => 'ics',
+            'cron_freq'        => $cron_freq->get_content(),
+            'events_categories' => $select2_cats->get_content(),
+            'event_tags'       => $select2_tags->get_content(),
+            'import_post_status' => HtmlFactory::factory($this->app)->create_publush_status(),
+            'feeds_options_header_html' => apply_filters(
+                'osec_admin_ics_feeds_options_header_html',
+                null
+            ),
+            'feeds_options_after_settings_html' => apply_filters(
+                'osec_admin_ics_feeds_options_after_settings_html',
+                null
+            ),
+            'feed_rows'        => $feedControler->getRows(),
+            'modal'            => $modal->render(),
+        ]);
+
         ThemeLoader::factory($this->app)
-                   ->get_file('box_feeds.php', $args, true)
+                   ->get_file('admin_page_feeds.twig', $args, true)
                    ->render();
     }
 }

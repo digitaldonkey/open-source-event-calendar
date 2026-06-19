@@ -167,7 +167,7 @@ class ElementHref
 
         if ($this->pretty_permalinks_enabled) {
             $href .= implode('/', $to_implode);
-            $href = empty($href) ? $href : $href . '/';
+            $href = empty($href) ? '/' : $href;
         } else {
             $href .= static::get_param_delimiter_char($this->calendar_page);
             $href .= 'ai1ec=' . implode('|', $to_implode);
@@ -175,7 +175,7 @@ class ElementHref
 
         $full_url = $this->calendar_page . $href;
         // persist the `lang` parameter if present
-        // phpcs:disable WordPress.Security.NonceVerification
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         if (isset($_REQUEST['lang'])) {
             $full_url = add_query_arg('lang', sanitize_text_field(wp_unslash($_REQUEST['lang'])), $full_url);
         }
@@ -202,7 +202,7 @@ class ElementHref
         if (isset($this->args[$array_key])) {
             $copy = (array)$this->args[$array_key];
         }
-        $key = array_search($this->term_id, $copy);
+        $key = array_search($this->term_id, $copy, true);
         // Let's check if we are already filtering for tags / categorys
         if (isset($to_implode[$array_key])) {
             if ($key !== false) {

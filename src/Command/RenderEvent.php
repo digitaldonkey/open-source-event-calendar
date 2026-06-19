@@ -45,8 +45,7 @@ class RenderEvent extends RenderCalendar
         }
 
         // Else proceed with rendering valid event. Fetch all relevant details.
-        // phpcs:ignore WordPress.Security.NonceVerification
-        $instance = isset($_REQUEST['instance_id']) ? (int) $_REQUEST['instance_id'] : -1;
+        $instance    = RequestParser::get_param('instance_id', -1);
         $event       = new Event($this->app, get_the_ID(), $instance);
         $view        = EventSingleView::factory($this->app);
         $footer_html = $view->get_footer($event);
@@ -65,7 +64,10 @@ class RenderEvent extends RenderCalendar
 
         // Else return event details as components.
         return [
-            'data'     => $view->get_content($event),
+            'data' => wp_kses(
+                $view->get_content($event),
+                $this->app->kses->allowed_html_frontend()
+            ),
             'is_event' => true,
             'footer'   => $footer_html,
         ];

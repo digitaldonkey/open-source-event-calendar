@@ -112,7 +112,7 @@ class HttpConditionalGet
         $scope = (isset($spec['isPublic']) && $spec['isPublic'])
             ? 'public'
             : 'private';
-        $maxAge = 0;
+        $max_age = 0;
         $requestTime = isset($_SERVER['REQUEST_TIME']) ? absint(wp_unslash($_SERVER['REQUEST_TIME'])) : 0;
         // backwards compatibility (can be removed later)
         if (isset($spec['setExpires'])
@@ -121,7 +121,7 @@ class HttpConditionalGet
             $spec['maxAge'] = $spec['setExpires'] - $requestTime;
         }
         if (isset($spec['maxAge'])) {
-            $maxAge = $spec['maxAge'];
+            $max_age = $spec['maxAge'];
             $this->headers['Expires'] = self::gmtDate(
                 $requestTime + $spec['maxAge']
             );
@@ -152,7 +152,7 @@ class HttpConditionalGet
         $privacy = ($scope === 'private')
             ? ', private'
             : '';
-        $this->headers['Cache-Control'] = "max-age={$maxAge}{$privacy}";
+        $this->headers['Cache-Control'] = "max-age={$max_age}{$privacy}";
         // invalidate cache if disabled, otherwise check
         $this->cacheIsValid = (isset($spec['invalidate']) && $spec['invalidate'])
             ? false
@@ -178,22 +178,6 @@ class HttpConditionalGet
     public function getHeaders()
     {
         return $this->headers;
-    }
-
-    /**
-     * Set the Content-Length header in bytes
-     *
-     * With most PHP configs, as long as you don't flush() output, this method
-     * is not needed and PHP will buffer all output and set Content-Length for
-     * you. Otherwise you'll want to call this to let the client know up front.
-     *
-     * @param int $bytes
-     *
-     * @return int copy of input $bytes
-     */
-    public function setContentLength($bytes)
-    {
-        return $this->headers['Content-Length'] = $bytes;
     }
 
     /**

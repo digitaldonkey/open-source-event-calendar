@@ -133,7 +133,7 @@ class FrontendCssController extends OsecBaseClass
 
             return $this->cache->get(self::COMPILED_CSS_KEY);
         } catch (CacheNotSetException $e) {
-            $recompiledCss = LessController::factory($this->app)->parse_less_files();
+            $recompiledCss = LessController::factory($this->app)->parse_less_files(null, false);
             try {
                 $this->update_persistence_layer($recompiledCss);
 
@@ -238,7 +238,7 @@ class FrontendCssController extends OsecBaseClass
              *
              * @param  string  $parsed_css  Css file path
              */
-                apply_filters('osec_frontend_standard_css_url', $theme['theme_url'] . '/css/ai1ec_parsed_css.css')
+                apply_filters('osec_frontend_standard_css_url', $theme['theme_url'] . '/css/osec_parsed.css')
             );
         }
         // if it's numeric, just consider it a new install
@@ -267,10 +267,14 @@ class FrontendCssController extends OsecBaseClass
 
     public function echo_css()
     {
-        echo '<style id="aliec">';
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        echo $this->get_compiled_css();
-        echo '</style>';
+        $handle = 'osec-frontend-css';
+        wp_register_style($handle, false, [], OSEC_VERSION);
+        $compiled = $this->get_compiled_css();
+        if ($compiled !== wp_strip_all_tags($compiled)) {
+            throw new Exception(esc_html__('Unexpected CSS content', 'open-source-event-calendar'));
+        }
+        wp_add_inline_style($handle, wp_strip_all_tags($compiled));
+        wp_enqueue_style($handle);
     }
 
     /**
@@ -353,7 +357,7 @@ class FrontendCssController extends OsecBaseClass
         }
         try {
             // Try to parse the css
-            $css = $lessCtrl->parse_less_files($variables);
+            $css = $lessCtrl->parse_less_files($variables, false);
             // Reset the parse time to force a browser reload of the CSS, whether we are
             // updating persistence or not. Do it here to be sure files compile ok.
             // TODO Verify that this is not necessary anymore.

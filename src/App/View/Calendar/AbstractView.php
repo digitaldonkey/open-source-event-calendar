@@ -117,12 +117,12 @@ abstract class AbstractView extends OsecBaseClass
     protected function create_link_for_day_view($exact_date)
     {
         $href = HtmlFactory::factory($this->app)
-                           ->create_href_helper_instance(
-                               [
-                                   'action'     => 'oneday',
-                                   'exact_date' => $exact_date,
-                               ]
-                           );
+                    ->create_href_helper_instance(
+                        [
+                            'action' => 'oneday',
+                            'exact_date' => $exact_date,
+                        ]
+                    );
 
         return $href->generate_href();
     }

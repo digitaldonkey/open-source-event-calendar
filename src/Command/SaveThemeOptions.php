@@ -4,7 +4,6 @@ namespace Osec\Command;
 
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\LessController;
-use Osec\App\View\Admin\AdminPageAbstract;
 use Osec\App\View\Admin\AdminPageThemeOptions;
 use Osec\Settings\Elements\ThemeVariableFont;
 
@@ -20,8 +19,14 @@ class SaveThemeOptions extends SaveAbstract
 {
     public function do_execute()
     {
-        // Nonce verification happens in SaveAbstract->is_this_to_execute().
-        // phpcs:disable WordPress.Security.NonceVerification.Missing
+        if (!isset($_POST[$this->nonceName])
+            || ! wp_verify_nonce(
+                sanitize_text_field(wp_unslash($_POST[$this->nonceName])),
+                key($this->action)
+            )
+        ) {
+            wp_die('Invalid nonce');
+        }
         $variables = [];
         $isReset = isset($_POST[AdminPageThemeOptions::RESET_ID]);
 
@@ -32,7 +37,12 @@ class SaveThemeOptions extends SaveAbstract
                 if (isset($_POST[$variable_name])) {
                     $var = sanitize_text_field(wp_unslash($_POST[$variable_name]));
                     if (ThemeVariableFont::CUSTOM_FONT === $var) {
-                        $var .= ThemeVariableFont::CUSTOM_FONT_ID_SUFFIX;
+                        $variable_custom = $variable_name . ThemeVariableFont::CUSTOM_FONT_ID_SUFFIX;
+                        if (isset($_POST[$variable_custom])) {
+                            $var = sanitize_text_field(
+                                wp_unslash($_POST[$variable_custom])
+                            );
+                        }
                     }
                     // update the original array
                     $variables[$variable_name]['value'] = $var;
@@ -49,15 +59,11 @@ class SaveThemeOptions extends SaveAbstract
         }
         // phpcs:enable
 
-        FrontendCssController::factory($this->app)
-                             ->update_variables_and_compile_css(
-                                 $variables,
-                                 $isReset
-                             );
+        FrontendCssController::factory($this->app)->update_variables_and_compile_css($variables, $isReset);
 
         return [
             'url' => admin_url(
-                OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'edit-css'
+                OSEC_ADMIN_BASE_URL . '&page=' . AdminPageThemeOptions::MENU_SLUG
             ),
             'query_args' => [],
         ];

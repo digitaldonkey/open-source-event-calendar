@@ -28,7 +28,7 @@ class EventParent extends OsecBaseClass
     public static function add_actions(App $app, bool $is_admin)
     {
         // If editing a child instance.
-        $script_name =  isset($_SERVER['SCRIPT_NAME']) ? sanitize_text_field(wp_unslash($_SERVER['SCRIPT_NAME'])) : '';
+        $script_name = isset($_SERVER['SCRIPT_NAME']) ? sanitize_text_field(wp_unslash($_SERVER['SCRIPT_NAME'])) : '';
         if ($script_name && basename($script_name) === 'post.php') {
             add_action(
                 // If $_POST updates. Gutenberg unsupported.
@@ -68,10 +68,16 @@ class EventParent extends OsecBaseClass
      */
     public function admin_init_post(): void
     {
-        // phpcs:disable WordPress.Security.NonceVerification
+        if (
+            !isset($_REQUEST[EventEditing::NONCE_NAME])
+            || !wp_verify_nonce(sanitize_key($_REQUEST[EventEditing::NONCE_NAME]), EventEditing::NONCE_ACTION)
+        ) {
+            return;
+        }
+
         /**
          * When Editing instance a hidden field "osec_instance_id" is added.
-         * Gien that we will clone the parent and turn the event into
+         * Given that we will clone the parent and turn the event into
          * its own instance, while keeping parent relation.
          */
         if (
@@ -79,19 +85,11 @@ class EventParent extends OsecBaseClass
             && isset($_POST['action'])
             && 'editpost' === sanitize_key($_POST['action'])
         ) {
-            // phpcs:enable
-            if (
-                !isset($_REQUEST[EventEditing::NONCE_NAME])
-                || !wp_verify_nonce(sanitize_key($_REQUEST[EventEditing::NONCE_NAME]), EventEditing::NONCE_ACTION)
-            ) {
-                return;
-            }
-            // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-            $old_post_id = absint($_POST['post_ID']);
+            $old_post_id = isset($_POST['post_ID']) ? absint($_POST['post_ID']) : null;
             $instance_id = absint($_POST['osec_instance_id']);
             // phpcs:enable
-            $post_id     = EventEditing::factory($this->app)->create_duplicate_post();
-            if (false !== $post_id) {
+            $post_id = EventEditing::factory($this->app)->create_duplicate_post();
+            if (!is_null($old_post_id) && false !== $post_id) {
                 $this->handleInstances(
                     new Event($this->app, $post_id),
                     new Event($this->app, $old_post_id),
@@ -305,11 +303,10 @@ class EventParent extends OsecBaseClass
     {
         if (AccessControl::is_our_post_type($post)) {
             $parent_post_id = $this->event_parent($post->ID);
-            if (
-                $parent_post_id &&
-                null !== ($parent_post = get_post($parent_post_id)) &&
-                isset($parent_post->post_status) &&
-                'trash' !== $parent_post->post_status
+            $parent_post = $parent_post_id && !is_null(get_post($parent_post_id)) ? get_post($parent_post_id) : null;
+            if ($parent_post
+                && isset($parent_post->post_status)
+                && 'trash' !== $parent_post->post_status
             ) {
                 $parent_link             = get_edit_post_link(
                     $parent_post_id,
@@ -372,33 +369,33 @@ class EventParent extends OsecBaseClass
      *
      * @return int|bool ID of parent event or bool(false)
      */
-    public function get_parent_event(?int $current_id)
+    public function get_parent_event(?int $current_id): ?int
     {
         static $parents = null;
         if (null === $parents) {
             $parents = CacheMemory::factory($this->app);
         }
-
-        if (null === ($parent_id = $parents->get($current_id))) {
+        $parent_id = $current_id ? $parents->get($current_id) : null;
+        if (is_null($parent_id)) {
             $db = $this->app->db;
             $parent = $db->get_row(
-                $db->prepare("
-                SELECT parent.ID, parent.post_status
-                FROM {$db->get_table_name('posts')} AS child
-                INNER JOIN {$db->get_table_name('posts')} AS parent
-                    ON ( parent.ID = child.post_parent )
-                WHERE child.ID = %d
-            ", $current_id)
+                $db->prepare(
+                    "
+                            SELECT parent.ID, parent.post_status
+                            FROM {$db->get_table_name('posts')} AS child
+                            INNER JOIN {$db->get_table_name('posts')} AS parent
+                                ON ( parent.ID = child.post_parent )
+                            WHERE child.ID = %d
+                        ",
+                    $current_id
+                )
             );
-            if (
-                empty($parent) ||
-                'trash' === $parent->post_status
-            ) {
-                $parent_id = false;
-            } else {
+            if (! empty($parent) && 'trash' !== $parent->post_status) {
                 $parent_id = (int) $parent->ID;
             }
-            $parents->set($current_id, $parent_id);
+            if ($current_id && ! is_null($parent_id)) { // Is null on Add new event.
+                $parents->set($current_id, $parent_id);
+            }
         }
         return $parent_id;
     }
@@ -415,6 +412,11 @@ class EventParent extends OsecBaseClass
         $parent_id,
         $include_trash = false
     ) {
+        $objects = [];
+        // Avoid getting all.
+        if (!$parent_id) {
+            return $objects;
+        }
         $db        = $this->app->db;
         $parent_id = (int)$parent_id;
         $children  = (array)$db->get_col(
@@ -423,7 +425,7 @@ class EventParent extends OsecBaseClass
                 $parent_id
             )
         );
-        $objects   = [];
+
         foreach ($children as $child_id) {
             // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
             try {

@@ -34,16 +34,13 @@ class RenderCalendar extends CommandAbstract
 
     public function is_this_to_execute()
     {
-        $settings         = $this->app->settings;
-        $calendar_page_id = $settings->get('calendar_page_id');
+        $calendar_page_id = $this->app->settings->get('calendar_page_id');
         if (empty($calendar_page_id)) {
             return false;
         }
 
-        $page_ids_to_match = [$calendar_page_id] +
-                             WpmlHelper::factory($this->app)->get_translations_of_page(
-                                 $calendar_page_id
-                             );
+        $page_ids_to_match = [$calendar_page_id]
+                             + WpmlHelper::factory($this->app)->get_translations_of_page($calendar_page_id);
         foreach ($page_ids_to_match as $page_id) {
             if (is_page($page_id)) {
                 $this->request->set_current_page($page_id);
@@ -52,7 +49,6 @@ class RenderCalendar extends CommandAbstract
                 }
             }
         }
-
         return false;
     }
 
@@ -61,10 +57,6 @@ class RenderCalendar extends CommandAbstract
         $this->requestType = $request->get('request_type');
         switch ($this->requestType) {
             case 'html':
-                FrontendCssController::factory($this->app)
-                                     ->add_link_to_html_for_frontend();
-                ScriptsFrontendController::factory($this->app)
-                                         ->load_frontend_js(true);
                 $this->renderStrategy = RenderHtml::factory($this->app);
                 break;
             case 'json':
@@ -99,6 +91,8 @@ class RenderCalendar extends CommandAbstract
 
     public function do_execute()
     {
+        FrontendCssController::factory($this->app)->add_link_to_html_for_frontend();
+        ScriptsFrontendController::factory($this->app)->load_frontend_js(true);
         return [
             'data'     => CalendarPageView::factory($this->app)->get_content($this->request),
             'callback' => RequestParser::get_param(

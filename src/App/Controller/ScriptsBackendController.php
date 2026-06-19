@@ -2,7 +2,6 @@
 
 namespace Osec\App\Controller;
 
-use Osec\App\View\Admin\AdminPageAbstract;
 use Osec\Bootstrap\OsecBaseClass;
 
 /**
@@ -46,33 +45,35 @@ class ScriptsBackendController extends OsecBaseClass
             // autogenerate the Urls and remove the DB saving stuff.
             // Meabe this was mainly made to conceal additional paes widget we don't have.
             //
-            OSEC_POST_TYPE . '_page_' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'widget-creator' => [
-                ['script', 'common'],
-                ['script', 'wp-lists'],
-                ['script', 'postbox'],
-                ['style', 'bootstrap.min.css'],
-                ['style', 'widget.css'],
-                ['style', 'super-widget.css'],
-            ],
             $settings->get('settings_page')                                                     => [
+                ['style', 'bootstrap.min.css'],
                 ['script', 'common'],
                 ['script', 'wp-lists'],
                 ['script', 'postbox'],
-                ['style', 'settings.css'],
-                ['style', 'bootstrap.min.css'],
+                ['script', 'post'],
+                ['style', 'osec-admin-pages.css'],
+                ['style', 'osec-admin-page-settings.css'],
             ],
             $settings->get('feeds_page')                                                        => [
                 ['script', 'common'],
                 ['script', 'wp-lists'],
                 ['script', 'postbox'],
-                ['style', 'settings.css'],
+                ['style', 'osec-admin-pages.css'],
+                ['style', 'osec-admin-page-manage-feeds.css'],
                 ['style', 'bootstrap.min.css'],
-                ['style', 'plugins/plugins-common.css'],
+                ['script', 'post'],
             ],
             $settings->get('less_variables_page')                                               => [
-                ['style', 'settings.css'],
+                ['style', 'osec-admin-pages.css'],
                 ['style', 'bootstrap.min.css'],
                 ['style', 'bootstrap_colorpicker.css'],
+                ['script', 'common'],
+                ['script', 'wp-lists'],
+                ['script', 'post'],
+            ],
+            'osec_event_page_osec-admin-themes' => [
+                ['style', 'osec-admin-page-manage-themes.css'],
+                ['style', 'osec-admin-pages.css'],
             ],
         ];
 
@@ -80,6 +81,7 @@ class ScriptsBackendController extends OsecBaseClass
             return $this->process_enqueue($enqueuables[$hook_suffix]);
         }
 
+        // Edit post type event.
         $post_pages = [
             'post.php'     => true,
             'post-new.php' => true,
@@ -90,10 +92,13 @@ class ScriptsBackendController extends OsecBaseClass
         ) {
             return $this->process_enqueue(
                 [
+                    ['style', 'box-event-location.css'],
                     ['style', 'bootstrap.min.css'],
-                    ['style', 'add_new_event.css'],
                     ['script', 'add_new_event.js'],
-                    // TODO ADD SCRIPTS TOO?
+                    ['script', 'leaflet'],
+                    ['script', 'admin-box-event-map.js'],
+                    ['style', 'osec-admin-page-edit-event.css'],
+                    ['style', 'box-event-time-and-date.css'],
                 ]
             );
         }

@@ -1,0 +1,10 @@
+<div class="">
+    <div class="ai1ec-form-horizontal">
+        {% for element in elements %}
+            {{ element.html | raw }}
+        {% endfor %}
+
+        {% block extra_html %}
+        {% endblock %}
+    </div>
+</div>

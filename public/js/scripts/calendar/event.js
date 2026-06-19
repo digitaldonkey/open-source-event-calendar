@@ -149,7 +149,7 @@ timely.define("external_libs/bootstrap/tab", ["jquery_timely"], function (e) {
                 }
                 return s
             }, get_ajax_url: function () {
-                return typeof window.ajaxurl == "undefined" ? "http://localhost/wordpress/wp-admin/admin-ajax.php" : window.ajaxurl
+                return window.ajaxurl
             }, isUrl: function (e) {
                 var t = /(http|https|webcal):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
                 return t.test(e)

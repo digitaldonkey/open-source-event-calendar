@@ -1,8 +1,9 @@
 <?php
 
-namespace Osec\Tests\Unit\App\Model;
+namespace Osec\Tests\Unit\App\Model\Date;
 
 use Osec\App\Model\Date\DT;
+use Osec\App\Model\Date\Timezones;
 use Osec\Tests\Utilities\TestBase;
 
 /**
@@ -55,8 +56,8 @@ class DTTest extends TestBase
     {
         global $osec_app;
 
-        /* @var int $weekStartInUTC Date and time (GMT): Monday, 11. November 2024 00:00:00 */
-        $weekStartInUTC = 1731283200;
+        /* @var int $weekStartInUTC Monday November 11, 2024 00:00:00 in time zone Europe/Berlin (CET) */
+        $weekStartInUTC = 1731279600;
 
         /* @var int $ranomDateInThisWeek Date and time (GMT): Thursday, 14. November 2024 17:45:00 */
         $ranomDateInThisWeek = 1731606300;
@@ -67,8 +68,10 @@ class DTTest extends TestBase
         $randomDateObject = new DT($ranomDateInThisWeek);
         $weekStart        = $randomDateObject->getWeekStart();
 
-        $siteTimezone = $randomDateObject->getSiteTimezone();
-        $offset       = $weekStart->utcOffsetInSeconds($siteTimezone);
+        $siteTimezone = Timezones::factory($osec_app)->get_default_timezone();
+        $this->assertEquals('Europe/Berlin', $siteTimezone);
+
+        $offset = $weekStart->utcOffsetInSeconds($siteTimezone);
 
          $weekStartReadable = date(DATE_RFC2822, $weekStartInUTC);
          $calculatedWeekStartReadable = date(DATE_RFC2822, $weekStart->format_to_gmt());

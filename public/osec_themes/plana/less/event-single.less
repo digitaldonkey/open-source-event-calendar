@@ -1,0 +1,191 @@
+//
+// @file
+//
+// Used for single event pages.
+//
+
+@breakpoint: 37.5rem;
+
+// EventSingleView page wrapper
+// single page only.
+.osec-plana-single-event {
+
+  // All sizes and breakpoints are based on:
+  font-size: var(--wp--preset--font-size--normal);
+  --main-max-width: 100%; // 35*16=560px
+  @media (min-width: 71.5em) {
+    --main-max-width: 35em; // 35*16=560px
+  }
+
+  .l-header,
+  .l-content-footer {
+    //background: lightsteelblue;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    line-height: 3;
+  }
+
+  .l-content-footer {
+    justify-content: flex-start;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    // Aligned with dl>dd
+    @media (min-width: @breakpoint) {
+      padding-left: calc(14% + 2em);
+    }
+  }
+
+  .l-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1em;
+
+    .l-main,
+    .l-aside {
+      max-width: var(--main-max-width); /*800px */
+      //margin: 0 auto;
+      width: auto;
+    }
+
+    .l-aside {
+      display: flex;
+      flex-grow: 1;
+      flex-wrap: wrap;
+      gap: 1em;
+      padding-top: 1em;
+
+      .l-aside--item {
+        flex: 1 1 18em;
+      }
+    }
+  }
+
+  .l-footer {
+    margin-top: 1em;
+  }
+
+  .ai1ec-event-avatar{
+    max-width: unset;
+  }
+}
+
+.osec-event-details {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  line-height: 2;
+  margin: 0; // Resets dl defaults.
+
+  // Left column.
+  .label {
+    //outline: 1px solid yellowgreen;
+    font-weight: bold;
+    min-width: 4em;
+    color: var(--wp--preset--color--contrast);
+
+    @media (min-width: @breakpoint) {
+      width: 14%;
+    }
+  }
+
+  // Right content column.
+  dd {
+    width: 100%;
+    margin-bottom: .25em;
+    margin-inline-start: 2em;
+
+    @media (min-width: @breakpoint) {
+      width: calc(86% - 2em);
+    }
+
+    &.incleased-line-height {
+      line-height: 3;
+    }
+  }
+
+  //
+  // Specifics
+  //
+
+  // Date
+  .event-date-time {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .dt-duration {
+      margin-right: 1em;
+      @media (min-width: 39em) {
+        white-space: nowrap;
+      }
+    }
+    .osec-timezone-info {
+      font-size: small;
+      line-height: 1.2;
+    }
+    .osec-timezone-info--gmt {
+      white-space: nowrap;
+    }
+
+    .osec-recurrence {}
+
+    strong {
+      font-weight: bold;
+    }
+  }
+
+  // Locations
+  .event-location {
+    margin-top: .25em;
+    line-height: 1.4;
+  }
+
+  // Tickets & Cost
+  .event-price {
+    font-weight: bold;
+    padding-right: 1em;
+  }
+  .tickets-url {
+    > i {
+      margin-left: .5em;
+      margin-top: .4em;
+    }
+  }
+
+
+  // Contact.
+  .ai1ec-contact span {
+    display: inline-block;
+    white-space: nowrap;
+
+    i:first-child:before {
+      text-align: center;
+      width: 1.7em;
+    }
+  }
+
+  // Categories & tags.
+  .event-categories,
+  .event-tags {
+    .label--categories i,
+    .label--tags i {
+      margin-right: .25em;
+    }
+
+    .tags-content,
+    .categories-content {
+      margin-left: .5em;
+
+      > a {
+        margin-left: .5em;
+        padding: .25em;
+        border: 1px solid ButtonFace;
+      }
+    }
+  }
+
+}

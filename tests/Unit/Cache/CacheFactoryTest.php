@@ -1,9 +1,8 @@
 <?php
 
-namespace Unit\Cache;
+namespace Osec\Tests\Unit\Cache;
 
 use Osec\Cache\CacheFactory;
-use Osec\Tests\Unit\Cache\CacheFileTestBase;
 
 /**
  * @group cacheFactory

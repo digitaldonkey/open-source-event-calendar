@@ -83,14 +83,16 @@ class CachePath
 
     public function getCacheData(?string $subDirectory = null): ?array
     {
+        static $webroot = null;
+        if (is_null($webroot)) {
+            $webroot = !empty($_SERVER['DOCUMENT_ROOT']) ? sanitize_text_field(wp_unslash($_SERVER['DOCUMENT_ROOT'])) : false;
+        }
         $path = $this->getCachePath($subDirectory);
         if ( ! $path) {
             return null;
         }
-        // phpcs:disable WordPress.Security.ValidatedSanitizedInput
-        $url = str_starts_with($path, $_SERVER['DOCUMENT_ROOT']) ?
-            get_bloginfo('wpurl') . substr($path, strlen(untrailingslashit($_SERVER['DOCUMENT_ROOT']))) : null;
-        // phpcs:enable WordPress.Security.ValidatedSanitizedInput
+        $url = ($webroot && str_starts_with($path, $webroot)) ?
+            get_bloginfo('wpurl') . substr($path, strlen(untrailingslashit($webroot))) : null;
         return [
             'path' => $path,
             'url'  => $url,

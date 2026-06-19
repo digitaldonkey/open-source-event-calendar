@@ -41,7 +41,9 @@ class CalendarShortcodeView extends OsecBaseClass
         }
 
         $view               = $default_view;
-        $_events_categories = $_events_tags = $post_ids = [];
+        $_events_categories = [];
+        $_events_tags = [];
+        $post_ids = [];
 
         if (isset($atts['view'])) {
             // Comes with some 'ly's attached.
@@ -56,12 +58,12 @@ class CalendarShortcodeView extends OsecBaseClass
         }
 
         $mappings          = [
-            'cat_name'     => 'events_categories',
-            'events_categories' => 'events_categories',
-            'cat_id'       => 'events_categories',
-            'events_tags'     => 'events_tags',
-            'tag_name'     => 'events_tags',
-            'tag_id'       => 'events_tags',
+            'cat_name'     => 'osec_events_categories',
+            'osec_events_categories' => 'osec_events_categories',
+            'cat_id'       => 'osec_events_categories',
+            'osec_events_tags'     => 'osec_events_tags',
+            'tag_name'     => 'osec_events_tags',
+            'tag_id'       => 'osec_events_tags',
             'post_id'      => 'post_ids',
             'events_limit' => 'events_limit',
         ];
@@ -94,7 +96,7 @@ class CalendarShortcodeView extends OsecBaseClass
             $raw_values = explode(',', (string)$atts[$att_name]);
             foreach ($raw_values as $argument) {
                 if ('post_id' === $att_name) {
-                    if (($argument = (int)$argument) > 0) {
+                    if (is_numeric($argument) && $argument > 0) {
                         $post_ids[] = $argument;
                     }
                 } else {
@@ -117,7 +119,7 @@ class CalendarShortcodeView extends OsecBaseClass
                             continue;
                         }
                         $argument = (int)$argument->term_id;
-                    } elseif (($argument = (int)$argument) <= 0) {
+                    } elseif ((int) $argument <= 0) {
                         continue;
                     }
                     ${'_' . $type}[] = $argument;

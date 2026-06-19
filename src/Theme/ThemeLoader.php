@@ -32,11 +32,6 @@ class ThemeLoader extends OsecBaseClass
     public const OPTION_FORCE_CLEAN = 'osec_clean_twig_cache';
 
     /**
-     * @const string Prefix for theme arguments filter name.
-     */
-    public const ARGS_FILTER_PREFIX = 'osecc_theme_args_';
-
-    /**
      * @var array contains the admin and theme paths.
      */
     protected array $paths = [
@@ -78,20 +73,20 @@ class ThemeLoader extends OsecBaseClass
         $theme = $this->app->options->get('osec_current_theme');
         // Find out if this is a core theme.
         $core_themes     = explode(',', OSEC_CORE_THEMES);
-        $this->coreTheme = in_array($theme['stylesheet'], $core_themes);
+        $this->coreTheme = in_array($theme['stylesheet'], $core_themes, true);
 
         // Default theme's path is always the last in the list of paths to check,
         // so add it first (path list is a stack).
         $this->add_path_theme(
-            OSEC_DEFAULT_THEME_PATH . DIRECTORY_SEPARATOR,
-            OSEC_THEMES_URL . '/' . OSEC_DEFAULT_THEME_NAME . '/'
+            OSEC_DEFAULT_THEME_ROOT . '/' . OSEC_ROOT_THEME_NAME . '/',
+            OSEC_THEMES_URL . '/' . OSEC_ROOT_THEME_NAME . '/'
         );
 
         // If using a child theme, set flag and push its path to top of stack.
-        if (OSEC_DEFAULT_THEME_NAME !== $theme['stylesheet']) {
+        if (OSEC_ROOT_THEME_NAME !== $theme['stylesheet']) {
             $this->childTheme = true;
             $this->add_path_theme(
-                $theme['theme_dir'] . DIRECTORY_SEPARATOR,
+                $theme['theme_dir'] . '/',
                 $theme['theme_url'] . '/'
             );
         }
@@ -191,8 +186,7 @@ class ThemeLoader extends OsecBaseClass
     public function apply_filters_to_args(array $args, string $filename, bool $is_admin): array
     {
         return apply_filters(
-            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
-            self::ARGS_FILTER_PREFIX . $filename,
+            'osecc_theme_args_' . $filename,
             $args,
             $is_admin
         );
@@ -224,8 +218,8 @@ class ThemeLoader extends OsecBaseClass
         // Default theme's path is always later in the list of paths to check,
         // so add it first (path list is a stack).
         $this->add_path_theme(
-            $path . '/public/' . OSEC_THEME_FOLDER . '/' . OSEC_DEFAULT_THEME_NAME . '/',
-            $url . '/public/' . OSEC_THEME_FOLDER . '/' . OSEC_DEFAULT_THEME_NAME . '/',
+            $path . '/public/' . OSEC_THEME_FOLDER . '/' . OSEC_ROOT_THEME_NAME . '/',
+            $url . '/public/' . OSEC_THEME_FOLDER . '/' . OSEC_ROOT_THEME_NAME . '/',
             true
         );
 
@@ -274,8 +268,9 @@ class ThemeLoader extends OsecBaseClass
         $args = [],
         $is_admin = false,
         $throw_exception = true,
-        array $paths = null
+        ?array $paths = null
     ): FileAbstract {
+
         $fileExt      = pathinfo($filename, PATHINFO_EXTENSION);
         $fileBasename = pathinfo($filename, PATHINFO_FILENAME);
         switch ($fileExt) {
@@ -292,9 +287,17 @@ class ThemeLoader extends OsecBaseClass
                 break;
 
             case 'php':
+                /**
+                 * Alter arguments before template file is processed.
+                 *
+                 * @since 1.0
+                 *
+                 * @param string $filename  Filename, prefixed with osecc_theme_args_.
+                 * @param array $args Variables to change.
+                 * @param bool $is_admin Admin template or not.
+                 */
                 $args = apply_filters(
-                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
-                    self::ARGS_FILTER_PREFIX . $filename,
+                    'osecc_theme_args_' . $filename,
                     $args,
                     $is_admin
                 );
@@ -306,9 +309,9 @@ class ThemeLoader extends OsecBaseClass
                 break;
 
             case 'twig':
+                // Hook doc see above.
                 $args = apply_filters(
-                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
-                    self::ARGS_FILTER_PREFIX . $filename,
+                    'osecc_theme_args_' . $filename,
                     $args,
                     $is_admin
                 );

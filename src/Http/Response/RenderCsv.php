@@ -40,13 +40,12 @@ class RenderCsv extends RenderStrategyAbstract
         );
         header('Content-Transfer-Encoding: binary');
 
-        // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
         $columns = $params['columns'];
         for ($i = 0, $iMax = count($columns); $i < $iMax; $i++) {
             if ($i > 0) {
                 echo(',');
             }
-            echo($columns[$i]);
+            echo esc_html($columns[$i]);
         }
         echo("\n");
 
@@ -57,7 +56,7 @@ class RenderCsv extends RenderStrategyAbstract
                 if ($j > 0) {
                     echo(',');
                 }
-                echo($jValue);
+                echo esc_html($jValue);
             }
             echo("\n");
         }

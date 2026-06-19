@@ -106,7 +106,7 @@ class HtmlFactory extends OsecBaseClass
         /**
          * Alter href arguments for datepicker
          *
-         * Rendered in datepicker_link.twig
+         * Rendered in datepicker-link.twig
          *
          * @since 1.00
          *
@@ -136,7 +136,7 @@ class HtmlFactory extends OsecBaseClass
             'title_short' => $title_short,
         ];
 
-        return $loader->get_file('datepicker_link.twig', $args);
+        return $loader->get_file('datepicker-link.twig', $args);
     }
 
     /**
@@ -181,7 +181,7 @@ class HtmlFactory extends OsecBaseClass
      * @staticvar $cached_flips    Maps of taxonomy identifiers.
      * @staticvar $checkable_types Map of types and taxonomy identifiers.
      */
-    public function create_select2_multiselect(array $args, array $options, array $view_args = null)
+    public function create_select2_multiselect(array $args, array $options, ?array $view_args = null)
     {
         // if no data is present and we are in the frontend, return a blank
         // element.
@@ -289,7 +289,7 @@ class HtmlFactory extends OsecBaseClass
         }
         // Get tags.
         $tags = get_terms([
-            'taxonomy'   => 'events_tags',
+            'taxonomy'   => 'osec_events_tags',
             'orderby'    => 'name',
             'hide_empty' => false,
         ]);
@@ -302,7 +302,7 @@ class HtmlFactory extends OsecBaseClass
         $tags_json    = wp_json_encode($tags_json);
         $tags_json    = _wp_specialchars($tags_json, 'single', 'UTF-8');
         $select2_args = [
-            'data-placeholder' => __('Tags (optional)', 'open-source-event-calendar'),
+            'placeholder' => __('Tags (optional)', 'open-source-event-calendar'),
             'class'            => 'ai1ec-tags-selector span12',
             'data-ai1ec-tags'  => $tags_json,
         ];
@@ -317,5 +317,18 @@ class HtmlFactory extends OsecBaseClass
         );
 
         return $select2;
+    }
+
+    public function create_publush_status($default_value = 'publish')
+    {
+        $data_attr = 'data-default_value="' . $default_value . '"';
+        $html = '<select name="osec_import_post_status" id="osec_import_post_status" ' . $data_attr . '>';
+        foreach (get_post_statuses() as $id => $name) {
+            $selected = ($default_value === $id) ? ' selected="selected"' : '';
+            $html .= '<option value="' . $id . '" ' . $selected . '>' . $name . '</option>';
+        }
+        $html .= '</select>';
+
+        return $html;
     }
 }

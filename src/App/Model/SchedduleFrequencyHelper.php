@@ -155,7 +155,8 @@ class SchedduleFrequencyHelper
     public function to_string(): string
     {
         $seconds = $this->to_seconds();
-        if ($wp_name = $this->match_wp_native_interval($seconds)) {
+        $wp_name = $this->match_wp_native_interval($seconds);
+        if ($wp_name) {
             return $wp_name;
         }
         $reverse_quant = array_flip($this->multipliers);

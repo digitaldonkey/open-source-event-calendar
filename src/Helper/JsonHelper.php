@@ -4,9 +4,9 @@ namespace Osec\Helper;
 
 class JsonHelper
 {
-    public static function isValidJson(string $string): bool
+    public static function isValidJson(string $str): bool
     {
-        json_decode($string);
+        json_decode($str);
 
         return json_last_error() === JSON_ERROR_NONE;
     }

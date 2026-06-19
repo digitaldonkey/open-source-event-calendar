@@ -190,7 +190,7 @@ class TrashController extends OsecBaseClass
         if (
             // phpcs:ignore WordPress.Security.NonceVerification
             isset($_GET['instance']) &&
-            in_array('delete_published_osec_events', $caps)
+            in_array('delete_published_osec_events', $caps, true)
         ) {
             return [];
         }

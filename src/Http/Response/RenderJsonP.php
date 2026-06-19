@@ -26,7 +26,7 @@ class RenderJsonP extends RenderStrategyAbstract
         $output = wp_json_encode($data);
         if ( ! empty($params['callback'])) {
             $output = $params['callback'] . '(' . $output . ')';
-        // phpcs:disable WordPress.Security.NonceVerification
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         } elseif (isset($_GET['callback'])) {
             $output = sanitize_key($_GET['callback']) . '(' . $output . ')';
         }

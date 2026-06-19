@@ -43,14 +43,16 @@ abstract class CommandAbstract extends OsecBaseClass
      */
     public function get_parameters()
     {
-        $plugin     = $controller = $action = null;
-        $plugin     = $this->request->get_param('plugin', $plugin);
-        $controller = $this->request->get_param('controller', $controller);
-        $action     = $this->request->get_param('action', $action);
+        $plugin     = $this->request->get_param('plugin', null);
+        $controller = $this->request->get_param('controller', null);
+        $action     = $this->request->get_param('action', null);
 
         if (
             is_scalar($plugin)
-            && OSEC_PLUGIN_NAME === (string)$plugin
+            && (
+                OSEC_PLUGIN_NAME === (string) $plugin
+                || (OSEC_LEGACY_FEED_URIS && 'all-in-one-event-calendar' === (string) $plugin)
+                )
             && $controller !== null
             && $action !== null
         ) {

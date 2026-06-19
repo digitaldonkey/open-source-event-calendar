@@ -12,7 +12,6 @@ use Osec\Exception\BootstrapException;
 use Osec\Exception\TimezoneException;
 use Osec\Http\Request\Request;
 use Osec\Settings\HtmlFactory;
-use Osec\Twig\TwigExtension;
 
 /**
  * The concrete class for day view.
@@ -122,7 +121,8 @@ class WeekView extends AbstractView
             'title_short'              => $title_short,
             'type'                     => 'week',
             'cell_array'               => $cell_array,
-            'show_location_in_title'   => $this->app->settings->get('show_location_in_title'),
+            'show_location_in_title'   => $this->app->settings->get('feature_event_location')
+                                                && $this->app->settings->get('show_location_in_title'),
             'now_top'                  => $now,
             'now_text'                 => $now_text,
             'show_now'                 => $show_now,
@@ -307,17 +307,8 @@ class WeekView extends AbstractView
                         'end_truncated'    => $evt->get('end_truncated'),
                         'popup_timespan'   => EventTimeView::factory($this->app)
                                                            ->get_timespan_html($evt->get('orig'), 'short'),
-                        'avatar'           => TwigExtension::avatar(
-                            $evt,
-                            [
-                                'post_thumbnail',
-                                'content_img',
-                                'location_avatar',
-                                'category_avatar',
-                            ],
-                            '',
-                            false
-                        ),
+                        'avatar'           => $evt->getavatar(true),
+                        'avatar_not_wrapped' => $evt->getavatar(false),
                     ];
 
                     if ('notallday' === $event_type) {
@@ -353,9 +344,9 @@ class WeekView extends AbstractView
 
             $days[$day_date] = [
                 'today'     =>
-                    $day_date_ob->format('Y') == $now->format('Y')
-                    && $day_date_ob->format('m') == $now->format('m')
-                    && $day_date_ob->format('j') == $now->format('j'),
+                    $day_date_ob->format('Y') === $now->format('Y')
+                    && $day_date_ob->format('m') === $now->format('m')
+                    && $day_date_ob->format('j') === $now->format('j'),
                 'allday'    => $all_events[$day_date]['allday'],
                 'notallday' => $all_events[$day_date]['notallday'],
                 'href'      => $href_for_date,
@@ -384,14 +375,13 @@ class WeekView extends AbstractView
      *
      * @return array List of start and and timestamps, 0-indexed array.
      */
-    protected function getDayStartAndEnd(
-        int $day,
-        DT $week_start
-    ) {
-        if (null === ($entry = $this->daysCache->get($day))) {
+    protected function getDayStartAndEnd(int $day, DT $week_start)
+    {
+        $entry = $this->daysCache->get($day);
+        if (is_null($entry)) {
             $day_start = (new DT($week_start))
                 ->adjust_day($day);
-            $entry     = [
+            $entry = [
                 $day_start->format(),
                 (new DT($day_start))->set_time(23, 59, 59)->format(),
                 $day_start,

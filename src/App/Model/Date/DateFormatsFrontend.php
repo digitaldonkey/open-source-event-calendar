@@ -2,7 +2,7 @@
 
 namespace Osec\App\Model\Date;
 
-use Osec\Bootstrap\OsecBaseClass;
+use Osec\Bootstrap\OsecBaseInitialized;
 use Osec\Exception\Exception;
 use Osec\Theme\ThemeLoader;
 
@@ -16,7 +16,7 @@ use Osec\Theme\ThemeLoader;
  * @package Date
  * @replaces Ai1ec_Date_System
  */
-class DateFormatsFrontend extends OsecBaseClass
+class DateFormatsFrontend extends OsecBaseInitialized
 {
     private const SECTION_ID = 'osec_date_format_section';
     public const FORMAT_SHORT = 'osec_date_format_short';
@@ -64,22 +64,22 @@ class DateFormatsFrontend extends OsecBaseClass
             __('Osec Frontend Date Formats', 'open-source-event-calendar'),
             function () {
                 echo '<p>'
-                     . esc_html__(
-                         'Osec calendar uses WordPress default "date_format" and "time_format" above and 
-                            provides additional <strong>frontend date formats</strong>.',
-                         'open-source-event-calendar'
-                     )
-                     . '<br />'
-                     . esc_html__(
-                         'Above WordPress default "date_format" is considered as "long" format.',
-                         'open-source-event-calendar'
-                     )
-                     . '<br />'
-                     . esc_html__(
-                         'Backend Formats are in Osec Settings -> Adding/Editing Events.',
-                         'open-source-event-calendar'
-                     )
-                     . '</p>';
+                . esc_html__(
+                    'Osec calendar uses WordPress default "date_format" and "time_format" above and 
+                        provides additional <strong>frontend date formats</strong>.',
+                    'open-source-event-calendar'
+                )
+                . '<br />'
+                . esc_html__(
+                    'Above WordPress default "date_format" is considered as "long" format.',
+                    'open-source-event-calendar'
+                )
+                . '<br />'
+                . esc_html__(
+                    'Backend Formats are in Osec Settings -> Adding/Editing Events.',
+                    'open-source-event-calendar'
+                )
+                . '</p>';
             },
             'general' // Page to add to.
         );
@@ -105,7 +105,7 @@ class DateFormatsFrontend extends OsecBaseClass
     {
         $defaults       = self::$default[self::FORMAT_NO_YEAR];
         $current_format = stripslashes(get_option(self::FORMAT_NO_YEAR, $defaults[0]));
-        $is_custom      = ! in_array($current_format, $defaults);
+        $is_custom      = ! in_array($current_format, $defaults, true);
         $args           = [
             'id'                         => self::FORMAT_NO_YEAR,
             'time_formats'               => $this->getFormat(self::FORMAT_NO_YEAR),
@@ -121,7 +121,7 @@ class DateFormatsFrontend extends OsecBaseClass
             'current_format_example'     => date_i18n($current_format),
         ];
         ThemeLoader::factory($this->app)
-                   ->get_file('settings-date-format.twig', $args, true)
+                   ->get_file('settings_date_format.twig', $args, true)
                    ->render();
     }
 
@@ -158,7 +158,7 @@ class DateFormatsFrontend extends OsecBaseClass
     {
         $defaults       = self::$default[self::FORMAT_SHORT];
         $current_format = stripslashes(get_option(self::FORMAT_SHORT, $defaults[0]));
-        $is_custom      = ! in_array($current_format, $defaults);
+        $is_custom      = ! in_array($current_format, $defaults, true);
         $args           = [
             'id'                         => self::FORMAT_SHORT,
             'time_formats'               => $this->getFormat(self::FORMAT_SHORT),
@@ -175,7 +175,7 @@ class DateFormatsFrontend extends OsecBaseClass
 
         ];
         ThemeLoader::factory($this->app)
-                   ->get_file('settings-date-format.twig', $args, true)
+                   ->get_file('settings_date_format.twig', $args, true)
                    ->render();
     }
 
@@ -190,14 +190,14 @@ class DateFormatsFrontend extends OsecBaseClass
     private function sanitize(string $value, string $format): string
     {
         $default = self::$default[$format];
-        if (in_array($value, $default)) {
+        if (in_array($value, $default, true)) {
             return $value;
         }
         $key = $format . '_custom';
         // phpcs:ignore WordPress.Security.NonceVerification
-        if ($value === 'custom' && isset($_POST[$key])) {
+        if ($value === 'custom' && isset($_REQUEST[$key])) {
             // phpcs:ignore WordPress.Security.NonceVerification
-            $customVal = sanitize_key($_POST[$key]);
+            $customVal = sanitize_text_field(wp_unslash($_REQUEST[$key]));
             // Check if it works.
             if ($customVal && (bool) strtotime(date_format(date_create(), $customVal))) {
                 return $customVal;

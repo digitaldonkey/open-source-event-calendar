@@ -15,5 +15,6 @@ module.exports = {
     AdminPageSettings: {
         weekDay: "1", // Monday.
         timeZone: 'Europe/Berlin'
-    }
+    },
+    currentThemeOnly: false
 };

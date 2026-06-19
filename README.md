@@ -1,210 +1,234 @@
-=== Open Source Event Calendar ===
-Tags: calendar, events, ics, ical importer  
-Requires at least: 6.6
-Requires PHP: 8.2  
-License: GPL-3.0-or-later
-License URI: https://www.gnu.org/licenses/gpl-3.0.html
-Text Domain: open-source-event-calendar
-Domain Path: /languages
-Contributors: digitaldonkey, hubrik, vtowel, yani.iliev nicolapeluchetti, jbutkus, lpawlik, bangelov  
-Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
-Tested up to: 6.9
-Stable Tag: 1.0.5
+# Open Source Event Calendar (OSEC)
 
-With Osec you can create, share and aggregate and import (ical, ics) Events in WordPress Based on All-in-one-event-calendar (v2.3.4).
+> A fully open-source WordPress event calendar with native iCal / ICS import and export.
 
-== Description ==
+![WordPress](https://img.shields.io/badge/WordPress-6.6%2B-blue)
+![PHP](https://img.shields.io/badge/PHP-8.2%2B-8892BF)
+![License](https://img.shields.io/badge/License-GPL--3.0--or--later-green)
 
-The [Open Source Event Calendar](https://github.com/digitaldonkey/open-source-event-calendar) is based on the Timely All-in-one-event-calendar version v2.3.4. by [Timely](http://time.ly/). The calendar system combines clean visual design with a basic set of features to create share and aggregate Events in WordPress. Ical import is possible.
+**Open Source Event Calendar (OSEC)** is a WordPress plugin for creating, managing, sharing, and aggregating events in a self-hosted and fully open-source manner.
+It is based on **All-in-One Event Calendar v2.3.4 by Timely**, but reintroduces removed core features and does not depend on proprietary services.
 
-This Plugin is open source software in traditional sense. I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features.
+This plugin is open source software in the traditional sense. I pledge this plugin will not urge you to connect to any proprietary/payed service to use described features. All source code is available on [GitHub](https://github.com/digitaldonkey/open-source-event-calendar).
 
-Osec calendar is most likely not compatible with any previous All-in-one-event-calendar release, but with some effort you might get it working.
+💖 **Donate:** [PayPal](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6)
 
-= Import and Export Events =
+---
 
-Osec offers **full ics/ical support**. You can import events from other calendars and offer users the ability to subscribe to your calendar.
+## Table of Contents
 
-Importing and exporting iCalendar (.ics) feeds is one of the strongest features of the Event Calendar system.  This allows you to manage your websites calendar by providing a public calendar from your Google, Apple or other calendar management software.    
+- [Features](#features)
+- [Import & Export (iCal / ICS)](#import--export-ical--ics)
+- [Blocks & Shortcodes](#blocks)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Fork Notice](#this-is-a-fork)
+- [Migration Notes](#migration-notes)
+- [Development & Support](#development--support)
+- [FAQ](#frequently-asked-questions)
+- [Future Plans](#future-plans)
+- [Screenshots](#screenshots)
 
-You can even send events from a specific category or tag (or combination of categories and tags).
+---
 
-= This is a fork = 
+## Features
+All features are provided in their entirety. **No features are locked behind any add-ons**.
 
-This is a fork of the GPL licensed plugin All-in-on-Event-Calendar by Timely.
-At it's time a great plugin with a solid but unmaintainable codebase (not all required developer tools where opensourced).
+- **Full iCal / ICS import & export**
+  - Automatically import external calendars
+  - Categorize and tag imported feeds
+- **Recurring events**, including complex recurrence rules [(RFC 5545)](https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html)
+- Filtering by category and tag
+- **Calendar sharing** with Google Calendar, Apple iCal, Outlook, and any other system that accepts iCalendar (.ics) feeds
+- Month, week, day, and agenda views
+- **Upcoming Events** Gutenberg block
+- Direct links to **filtered calendar views**
+- Color-coded events by category
+- Featured event images and category images
+- SEO-optimized event pages
+- Mobile-friendly and responsive layouts
+- Embedded **OpenStreetMap**
+- Theme options to customize your calendar appearence
+- Your calendar can be embedded into a WordPress page without needing to create template files or modify the theme.
 
-In later releases of the original softeware was deprived of core feature: Importing iCal feeds in favor of a service provided by Timely.
+**Import events from other calendars** and offer users the **ability to subscribe to your calendar**.
 
-If you need a professionally supported plugin you should consider using the [original all in one event calendar](https://wordpress.org/plugins/all-in-one-event-calendar/)
+Importing and exporting iCalendar (.ics) feeds is one of the strongest features of the Event Calendar system. This allows you to manage your websites calendar by providing a public calendar from your Google, Apple or other calendar management software.
 
-If you love truly open source software and don't mind to get your hands dirty you should join here. Free people need free software to manage and share events in a selfhosted manner.
+---
 
-Please do not ask for support at Time.ly for this Plugin.
+## Blocks
 
-Source and developer support you can find at [Plugin's github page](https://github.com/digitaldonkey/open-source-event-calendar). There is also a [public CircleCI build pipeline](https://app.circleci.com/pipelines/github/digitaldonkey/open-source-event-calendar?filter=all)
+You can embed the calendar by adding a **OSEC Calendar Block** to any page or post. Alternatively there is a shortcode available.
 
-== Features == 
+> [!WARNING] 
+> At this time, only **one calendar per page or post** is supported.
 
-* **Import and Exportof Ical feeds** without additional addons.
-  * Import other calendars automatically to display in your calendar.
-  * Categorize and tag imported calendar feeds automatically.
-* **Recurring events** including complex patterns.
-* **Filtering** by event category or tag.
-* Easy **sharing** with Google Calendar, Apple iCal, MS Outlook and
-any other system that accepts iCalendar (.ics) feeds.
-* Embedded Google Maps (may be outdated)
-* **Color-coded** events based on category.
-* Featured **event images** and **category images**.
-* **Month**, **week**, **day**, **agenda** views.
-* **Upcoming Events** block.
-* Direct links to **filtered calendar views**.
-* **Theme** options to customize your calendar appearence (based on bootstrap 3)
-* Each event is SEO-optimized.
-* Each event links to the original calendar.
-* Your calendar can be embedded into a WordPress page without needing
-to create template files or modify the theme.
-
-== Requirements ==
-
-* PHP >= 8.2 is currently required at least for development. PHP 8.1 may work too with release version (using `composer install --no-dev`).
-
-== Languages ==  
-
-This Plugin supports multiple languages. 
-
-
-== Blocks == 
-
-You can embed the calendar by adding a **Osec Calendar** Block to any page or post. Alternatively there is a schortcode available. 
-
-Please note that by this time (most likely) only one Calendar per page/post-List will work 
-
-On the long run its planed to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice old Bootstrap 3 stuff. 
+On the long run it's planned to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice old Bootstrap 3 stuff.
 
 ### Shortcodes
 
-* Monthly view: **[osec view="monthly"]**
-* Weekly view: **[osec view="weekly"]**
-* Agenda view: **[osec view="agenda"]**
-* Posterboard view: **[osec view="dayly"]**
-* Default view as per settings: **[osec]**
+#### Calendar Views
 
-* Filter by event category name: **[osec cat_name="Holidays"]**
-* Filter by event category names (separate names by comma):
-**[osec cat_name="Lunar Cycles,zodia-date-ranges"]**
-* Filter by event category id: **[osec cat_id="1"]**
-* Filter by event category ids (separate IDs by comma):
-**[osec cat_id="1, 2"]**
+    [osec]                       // Default view per settings
+    [osec view="monthly"]
+    [osec view="weekly"]
+    [osec view="agenda"]
+    [osec view="daily"]
 
-* Filter by event tag name: **[osec tag_name="tips-and-tricks"]**
-* Filter by event tag names (separate names by comma):
-**[osec tag_name="creative writing,performing arts"]**
-* Filter by event tag id: **[osec tag_id="1"]**
-* Filter by event tag ids (separate IDs by comma):
-**[osec tag_id="1, 2"]**
+#### Filtering
 
-* Filter by post id: **[osec post_id="1"]**
-* Filter by post ids (separate IDs by comma):
-**[osec post_id="1, 2"]**
+**By category**
 
-== Upgrade Notice ==
+    [osec cat_name="Holidays"]
+    [osec cat_name="Lunar Cycles,zodia-date-ranges"]
+    [osec cat_id="1"]
+    [osec cat_id="1,2"]
 
-Database structure is not fully compatible with All-in-one-event-calendar (v2.3.4). But it might be possible to upgrade with some effort. If there is demand and input a standardized upgrade path might be developed.
+**By tag**
 
-== Installation ==
+    [osec tag_name="tips-and-tricks"]
+    [osec tag_name="creative writing,performing arts"]
+    [osec tag_id="1"]
+    [osec tag_id="1,2"]
 
-Installation as usual
+**By post ID**
 
-* Make sure to verify the PHP version requirements.
-* After installing you need to save the plugin settings page once. Set Timezone, UI Date formats, WeekStart Day.
-* Make sure to also check settings-general.php to review output date formats.
-* You may add a constants-local.php file by copying constants-local.php.example. 
-* To purge all content on plugin uninstall set OSEC_UNINSTALL_PLUGIN_DATA to TRUE.
+    [osec post_id="1"]
+    [osec post_id="1,2"]
 
+---
 
-== Frequently Asked Questions ==
+## Requirements
 
-= How can I accelerate future development =
+- WordPress: 6.6 or newer
+- PHP:
+  - PHP 8.2+ required for development
+  - PHP 8.1 may work for production builds when installed with `composer install --no-dev`
 
-The principle behind this plugin is to be Open Source.
-So you might get in touch on github accelerate development.
+## Installation
+
+Install as any other plugin, or from GitHub.
+
+**Setup steps**
+
+1. Open the plugin settings page and save once
+2. Configure:
+    - Timezone
+    - UI date formats
+    - Week start day
+3. Review `WordPress → Settings → General` for output date formats.
+4. (Optional) Override constants file:
+Copy [constants-local.php.example](https://raw.githubusercontent.com/digitaldonkey/open-source-event-calendar/refs/heads/master/constants-local.php.example) and save as `constants-local.php`
+
+To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA', true);`
+
+---
+
+## Languages
+
+OSEC supports multiple languages
+
+## This Is a Fork
+
+OSEC is a fork of the GPL licensed plugin All-in-one-Event-Calendar by Timely. At it's time a great plugin with a solid but unmaintainable codebase (not all required developer tools where opensourced).
+
+If you love truly open source software and don't mind to get your hands dirty you should join here. Free people need free software to manage and share events in a selfhosted manner.
+
+## External services
+
+OSEC may connect to OpenStreetMap to render maps. If you using maps feature make sure you agree with [Terms of Service](https://operations.osmfoundation.org/policies/)
+
+OSEC may connect to OpenStreetMap Nominatim geocoding API. [Terms of Service](https://operations.osmfoundation.org/policies/nominatim/).
+You may need to switch the servive on a heavy traffic site as Nominatim allows an *absolute maximum of 1 request per second*.
+
+By default leaflet and leaflet-control-geocoder are loaded from unpkg.com. [Terms of Service](https://app.unpkg.com/policies@1.0.1).
+
+You can change using hooks: `osec_leaflet_library_alter`, `osec_leaflet_geocoder_library_alter`.
+
+## Migration Notes
+Database structure is not fully compatible with All-in-One Event Calendar v2.3.4
+
+Migration may be possible with manual effort
+
+A standardized upgrade path may be developed if there is demand and contributions
+
+See this [wiki](https://github.com/digitaldonkey/open-source-event-calendar/wiki/migration-from-all%E2%80%90in%E2%80%90one%E2%80%90event%E2%80%90calendar) for currently known information on migrating.
+
+---
+
+## Development & Support
+
+The principle behind this plugin is to be Open Source. Get in touch on [GitHub](https://github.com/digitaldonkey/open-source-event-calendar) to report issues, propose feature enhancements, and get general guidance for contributing.
 
 Writing this fork was [a huge effort](https://github.com/wp-plugins/all-in-one-event-calendar/compare/master...digitaldonkey:open-source-event-calendar:master).
 
 Digitaldonkey believes everybody should be able to set up and manage public calendars. 
 
-If you are implementing this plugin for others you should support ongoing development with a [donnation](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6) or [contribution](https://github.com/digitaldonkey/open-source-event-calendar/issues). 
+If you are implementing this plugin for others you should support ongoing development with a [donation](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6) or [contribution](https://github.com/digitaldonkey/open-source-event-calendar/issues). 
 
-[Be a maker](https://dri.es/solving-the-maker-taker-problem) &#128512;
+[Be a maker](https://dri.es/solving-the-maker-taker-problem)😀
 
-= I really need feature XYZ =
+Those wishing to contribute to the development of this project, please see the [Development Guide](https://github.com/digitaldonkey/open-source-event-calendar/blob/master/.github/CONTRIBUTORS.md) for more information.
 
-Let's draft it out on github. You could donnate/pay me development time to get it contributed. Invoices possible.
+## Upgrade Notice
 
+= 1.0.7 =
+
+Categories and Tags renamed
+Upgrading from pre 1.0.7 requires you to rename taxonomies due to prefix requirements.
+
+```
+# events_categories => osec_events_categories
+UPDATE  `wp_term_taxonomy` SET  `taxonomy` =  'osec_events_categories' WHERE  `taxonomy` = 'events_categories';
+# events_tags       => osec_events_tags
+UPDATE  `wp_term_taxonomy` SET  `taxonomy` =  'osec_events_tags' WHERE  `taxonomy` = 'events_tags';
+```
+
+## Frequently Asked Questions
+
+### "I really need feature XYZ"
+
+Let's draft it out on [GitHub](https://github.com/digitaldonkey/open-source-event-calendar). You could donnate/pay me development time to get it contributed. Invoices possible. Or feel free to implement the requested feature yourself and create a Pull Request for it.
 I may also provide paid support.
-  
-== Screenshots ==
-1. Month view with catergory colors set
-2. Week view
-3. Agenda view
-4. Calendar block UI
-5. Manage Ical feeds
-6. Reoccurring events UI (based on [iCalendar-RFC-5545](https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html))
-7. Cache settings
-8. Agenda view in mobile. All calendars are mobile friendly
 
-== Changelog ==
+---
 
-= 1.0.4 =
-- Fix: Move content display out of OSEC block
-- Fix: subscribe display settings inverted.
-- Disallow direct file access
-- Renaming capabilities consistently
-- composer upgrade
+## Screenshots
+![Month view](assets/screenshot-1.png)
+Month View
 
-= 1.0.3 =
-- Allow all data attributes in Ksess. Fixes persisten admin notices can not be dismissed.
-- fix overriding time/date-separators using i18n
+![Week view](assets/screenshot-2.png)
+Week View
 
-= 1.0.2 =
+![Agenda view](assets/screenshot-3.png)
+Agenda View
 
-- Rework translation at German example (I love Loco Translate)
-- Fixed: Category image will now be used as default featured image in single event view.
-- Fixed: Function _load_textdomain_just_in_time was called incorrectly. 
-- If toggle in Agenda view is disabled link to the single Event on title click.
-- Fixed: "Click on title toggles when toggler is disabled."
-- Fixed: OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST does not work but lead to undefined variables.
-- Enabled disabling the Print icon in settings.
-- Improve (responsive) Linebreaks in date views with non-breaking spaces.
-- Simplified Plana theme to apply more WP global styles.
-- Update Twi-js tooling enables updating Twig-JS based templates for frontend-rendering
-- Simplify plana singe page template
-- Fix Category image upload UI and add option to use fallback image if no post featured image is set.
+![Calendar Block UI](assets/screenshot-4.png)
+Calendar Block UI
 
-= 1.0.1 =
-- Add more integration tests
+![Manage iCal Feeds](assets/screenshot-5.png)
+Manage iCal Feeds
 
-= 1.0.0 =
+![Recurring Events](assets/screenshot-6.png)
+Recurring Events
 
-* Rework query params, fixed date pagers 
-* Reworked date display to be consistent for Single and multiday and Allday Events.
-* Add flexible width Gutenberg Calendar Block
-* Removed Widget and Agenda Widget. 
-* Reworked date display to be consistent.
+![Cache Settings](assets/screenshot-7.png)
+Cache Settings
 
-= 0.9.0 =
+![Mobile Agenda View](assets/screenshot-8.png)
+Mobile Agenda View
 
-* Added Sourcemaps for CSS (requires OSEC_DEBUG )
-* Documented hooks and actions (@see hooks-and-filters.md)
-* Added WP > 6 compatibility
-* Reworked plugin using PHP-Composer, Added PHP8 compatibility. Replaced Registry class loading with PHP use-statements
-* Removed tons of unused, service integration and legacy code.
-* Rewrote install/Uninstall/bootstrapping. You can purge all data on uninstallation by setting OSEC_UNINSTALL_PLUGIN_DATA to TRUE.
-* Cleand up unclear date formatter settings. Frontend Date formats are now defined/changed in WordPress settings-general page.
-* Removed legacy theme support, merged chains of purposeless inherited classes, renamed many things hopefully improving code clarity and maintainability.
-* Fixed Week-view date selection.
-* Fixed/rewrote caching system. Added APCU caching.
-* Added Test environment working well in ddev. Based on WP handbook standards [plugin-unit-tests](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/).
-* Upgrade strings to match current translation requirements. 
-* Solving WordPress "Plugin Check" minimum requirements. 
+![Schema.org/Event data validator](assets/screenshot-9.png)
+Schema.org/Event data validator
+
+## Contributors
+### WordPress:
+digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
+
+### GitHub:
+<a href="https://github.com/digitaldonkey/open-source-event-calendar/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=digitaldonkey/open-source-event-calendar" />
+</a>
+
+> Contributor list made with [contrib.rocks](https://contrib.rocks).

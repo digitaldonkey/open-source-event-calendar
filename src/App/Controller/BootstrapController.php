@@ -2,6 +2,7 @@
 
 namespace Osec\App\Controller;
 
+use Osec\App\Model\DatabaseSchema;
 use Osec\App\Model\Date\DateFormatsFrontend;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Notifications\NotificationAdmin;
@@ -16,16 +17,17 @@ use Osec\App\View\Admin\AdminDateRepeatBox;
 use Osec\App\View\Admin\AdminEventCategoryHooks;
 use Osec\App\View\Admin\AdminPageAddEvent;
 use Osec\App\View\Admin\AdminPageAllEvents;
+use Osec\App\View\Admin\AdminPageDebugCapabilities;
+use Osec\App\View\Admin\AdminPageDebugOptions;
 use Osec\App\View\Admin\AdminPageManageFeeds;
 use Osec\App\View\Admin\AdminPageManageTaxonomies;
 use Osec\App\View\Admin\AdminPageManageThemes;
 use Osec\App\View\Admin\AdminPageSettings;
 use Osec\App\View\Admin\AdminPageThemeOptions;
-use Osec\App\View\Admin\AdminPageViewCapabilities;
-use Osec\App\View\Admin\AdminPageViewThemeOptions;
 use Osec\App\View\Calendar\CalendarShortcodeView;
 use Osec\App\View\Event\EventContentView;
 use Osec\App\View\Event\EventPostView;
+use Osec\App\View\Event\EventSingleView;
 use Osec\App\View\WpPluginActonLinks;
 use Osec\App\WpmlHelper;
 use Osec\Bootstrap\App;
@@ -34,7 +36,6 @@ use Osec\Cache\CacheMemory;
 use Osec\Command\CommandResolver;
 use Osec\Exception\ConstantsNotSetException;
 use Osec\Exception\Exception;
-use Osec\Exception\ExceptionHandler;
 use Osec\Exception\ScheduleException;
 use Osec\Exception\TimezoneException;
 use Osec\Http\Request\Request;
@@ -86,12 +87,12 @@ class BootstrapController
             'theme_url'  => OSEC_THEMES_URL . '/' . OSEC_DEFAULT_THEME_NAME,
             'stylesheet' => OSEC_DEFAULT_THEME_NAME,
         ];
-        osec_output_buffering_start();
+        ob_start();
 
         $this->doBootstrap($app);
         $this->createWpActions();
 
-        ShutdownController::factory($this->app)->register('osec_output_buffering_finalize');
+        ShutdownController::factory($this->app)->register('ob_get_clean');
         add_action('init', $this->register_extensions(...), 1);
         add_action('after_setup_theme', $this->register_themes(...), 1);
         add_action('init', [$this, 'verifyCache'], 1);
@@ -209,33 +210,23 @@ class BootstrapController
         /**
          * Add date formats on Settings-general.php
          */
-        add_action(
-            'admin_init',
-            function () use ($app) {
-                DateFormatsFrontend::factory($app)->initialize();
+        add_action('admin_init', function () use ($app) {
+            EnvironmentCheck::factory($app);
+            // Add taxonomies.
+            AdminPageManageTaxonomies::factory($app)->add_taxonomy_actions();
+            DateFormatsFrontend::factory($app);
+        });
+
+        add_action('init', function () use ($app) {
+            EventType::factory($app)->register();
+        }, 10, 1);
+
+        add_filter('use_block_editor_for_post_type', function ($current_status, $post_type) {
+            if ($post_type === OSEC_POST_TYPE) {
+                return false;
             }
-        );
-
-        add_action(
-            'init',
-            function () use ($app) {
-                EventType::factory($app)->register();
-            },
-            10,
-            1
-        );
-        add_filter(
-            'use_block_editor_for_post_type',
-            function ($current_status, $post_type) {
-                if ($post_type === OSEC_POST_TYPE) {
-                    return false;
-                }
-                return $current_status;
-            },
-            10,
-            2
-        );
-
+            return $current_status;
+        }, 10, 2);
 
         // Initialize router
         add_action('init', $this->initialize_router(...), PHP_INT_MAX - 1);
@@ -250,65 +241,26 @@ class BootstrapController
         ScriptsFrontendController::add_actions($app, is_admin());
         TrashController::add_actions($app, is_admin());
 
-        add_action(
-            'pre_http_request',
-            function ($status, $output, $url) use ($app) {
+        add_action('pre_http_request', function ($status, $output, $url) use ($app) {
                 Request::factory($app)->pre_http_request($status, $output, $url);
-
                 return $status;
-            },
-            10,
-            3
-        );
+        }, 10, 3);
 
-        add_action(
-            'admin_init',
-            function () use ($app) {
-                AdminPageManageTaxonomies::factory($app)->add_taxonomy_actions();
-            },
-            1000
-        );
+        add_action('init', function () use ($app) {
+            ThemeLoader::factory($app)->clean_cache_on_upgrade();
+        }, PHP_INT_MAX);
 
-        add_action(
-            'init',
-            function () use ($app) {
-                ThemeLoader::factory($app)->clean_cache_on_upgrade();
-            },
-            PHP_INT_MAX
-        );
+        add_filter('get_the_excerpt', function (string $post_excerpt) use ($app) {
+            return EventContentView::factory($app)->get_the_excerpt($post_excerpt);
+        });
 
-        // Replcace core (non-HTML) excerpt for events.
-        add_filter(
-            'render_block',
-            function ($block_content, $block) use ($app) {
-                if ('core/post-excerpt' !== $block['blockName']) {
-                    return $block_content;
-                }
-                if (AccessControl::is_our_post_type()) {
-                    return EventContentView::factory($app)->get_the_excerpt();
-                }
+        add_filter('robots_txt', function (string $output, bool $is_public) use ($app) {
+             return RobotsTxt::factory($app)->rules($output, $is_public);
+        }, 10, 2);
 
-                return $block_content;
-            },
-            10,
-            2
-        );
-
-        add_filter(
-            'robots_txt',
-            function (string $public, string $output = '') use ($app) {
-                return RobotsTxt::factory($app)->rules($public, $output);
-            },
-            10,
-            2
-        );
-
-        add_filter(
-            'osec_dbi_debug',
-            function ($do_debug) use ($app) {
-                return Request::factory($app)->debug_filter($do_debug);
-            }
-        );
+        add_filter('osec_dbi_debug', function ($do_debug) use ($app) {
+            return Request::factory($app)->debug_filter($do_debug);
+        });
 
         // Child events are instances of a repeating Event.
         // They may be edited per instance, but are only
@@ -321,10 +273,19 @@ class BootstrapController
         add_shortcode(
             OSEC_SHORTCODE,
             function ($atts) use ($app) {
-                $this->request::set_current_page(get_queried_object_id());
-                return CalendarShortcodeView::factory($app)->shortcode($atts);
+                if ($this->app->settings->get('feature_shortcodes')) {
+                    $this->request::set_current_page(get_queried_object_id());
+                    return wp_kses(
+                        CalendarShortcodeView::factory($app)->shortcode($atts),
+                        $this->app->kses->allowed_html_frontend()
+                    );
+                }
+                // If disabled we will still replace any osec shortcodes
+                // to avoid them being printed as content.
+                return '';
             }
         );
+
 
         add_action(
             'updated_option',
@@ -347,7 +308,7 @@ class BootstrapController
             /**
              * Gets Ui Element Repeatbox
              *
-             * On Event editing you may add a reoccuring event.
+             * On Event editing you may add a recurring event.
              * Ui is loaded via admin-ajax.php... action=osec_get_repeat_box&repeat=1&post_id=1295
              */
             add_action(
@@ -372,7 +333,7 @@ class BootstrapController
             /**
              * save rrurle and convert it to text
              *
-             * On Event editing you may add a reoccurring event.
+             * On Event editing you may add a recurring event.
              * Ui is loaded via admin-ajax.php... action=osec_get_repeat_box&repeat=1&post_id=1295
              */
             add_action(
@@ -382,60 +343,36 @@ class BootstrapController
                 }
             );
 
-            add_action(
-                'admin_menu',
-                function () use ($app) {
-                    AdminPageManageFeeds::factory($app)->add_page();
-                }
-            );
-
-            add_action(
-                'current_screen',
-                function () use ($app) {
-                    AdminPageManageFeeds::factory($app)->add_meta_box();
-                }
-            );
-
-            add_action(
-                'admin_menu',
-                function () use ($app) {
-                    AdminPageManageThemes::factory($app)->add_page();
-                }
-            );
-
-            add_action(
-                'admin_menu',
-                function () use ($app) {
-                    AdminPageThemeOptions::factory($app)->add_page();
-                }
-            );
-
-            add_action(
-                'current_screen',
-                function () use ($app) {
-                    AdminPageThemeOptions::factory($app)->add_meta_box();
-                }
-            );
-
-            // Adding a Page to visualize DB saved options for devs.
-            if (is_admin() && OSEC_DEBUG) {
-                add_action(
-                    'admin_menu',
-                    function () use ($app) {
-                        AdminPageViewThemeOptions::factory($app)->add_page();
-                        AdminPageViewCapabilities::factory($app)->add_page();
+            add_action('current_screen', function (\WP_Screen $current_screen) use ($app) {
+                // Menu page Meta boxes.
+                if (str_starts_with($current_screen->id, 'osec_event_page_')) {
+                    $menu_slug = substr($current_screen->id, 16);
+                    if (AdminPageThemeOptions::MENU_SLUG === $menu_slug) {
+                        AdminPageThemeOptions::factory($app)->add_meta_box();
                     }
-                );
-            }
-
-            add_action(
-                'admin_menu',
-                function () use ($app) {
-                    $settingsPage = AdminPageSettings::factory($app);
-                    $settingsPage->add_page();
-                    $settingsPage->add_meta_box();
+                    if (AdminPageManageFeeds::MENU_SLUG === $menu_slug) {
+                        AdminPageManageFeeds::factory($app)->add_meta_box();
+                    }
+                    if (AdminPageSettings::MENU_SLUG === $menu_slug) {
+                        AdminPageSettings::factory($app)->add_meta_box();
+                    }
                 }
-            );
+                if ($current_screen->id === 'edit-osec_event') {
+                    EditPostActions::factory($app)->add_bulk_action_duplicate_event($current_screen);
+                }
+            });
+
+            add_action('admin_menu', function () use ($app) {
+                AdminPageManageFeeds::factory($app)->add_page();
+                AdminPageManageThemes::factory($app)->add_page();
+                AdminPageThemeOptions::factory($app)->add_page();
+                AdminPageSettings::factory($app)->add_page();
+
+                if (OSEC_DEBUG) {
+                    AdminPageDebugOptions::factory($app)->add_page();
+                    AdminPageDebugCapabilities::factory($app)->add_page();
+                }
+            });
 
             add_action(
                 'network_admin_notices',
@@ -451,28 +388,14 @@ class BootstrapController
                 }
             );
 
-            add_action(
-                'admin_footer-edit.php',
-                function () use ($app) {
-                    EditPostActions::factory($app)->duplicate_custom_bulk_admin_footer();
-                }
-            );
-
             add_filter('post_row_actions', function ($actions, $post) use ($app) {
-                    return EditPostActions::factory($app)->duplicate_post_make_duplicate_link_row($actions, $post);
+                return EditPostActions::factory($app)->duplicate_post_make_duplicate_link_row($actions, $post);
             }, 10, 2);
 
-            add_action(
-                'add_meta_boxes',
-                function () use ($app) {
-                    AdminPageAddEvent::factory($app)->event_meta_box_container();
-                }
-            );
+            add_action('add_meta_boxes', function () use ($app) {
+                AdminPageAddEvent::factory($app)->event_meta_box_container();
+            });
 
-            //
-            // add_action('quick_edit_custom_box', function () use ($app) {
-            // echo '<pre>Hello world</pre>';
-            // AdminPageAddEvent::factory($app)->meta_box_view();
             // TODO
             // Quickedit
             // Populate Values via Js:
@@ -528,19 +451,14 @@ class BootstrapController
             );
 
             add_action(
-                'admin_init',
-                function ($arg) use ($app) {
-                    EnvironmentCheck::factory($app)->run_checks($arg);
-                }
-            );
-
-            // TODO This seems to do nothing
-            add_action(
                 'admin_enqueue_scripts',
                 function ($hook_suffix) use ($app) {
                     ScriptsBackendController::factory($app)->admin_enqueue_scripts($hook_suffix);
                 }
             );
+
+            // If AdminPageAllEvents.
+            AdminPageAllEvents::add_actions($app, is_admin());
         } else {
             // Is not "is_admin()"
             add_action(
@@ -565,11 +483,9 @@ class BootstrapController
                     RequestRedirect::factory($app)->handle_categories_and_tags();
                 }
             );
+            EventSingleView::factory($app)->add_actions();
         }
-
         FeedsController::add_actions($app, is_admin());
-        // If AdminPageAllEvents.
-        AdminPageAllEvents::add_actions($app, is_admin());
     }
 
     /**
@@ -600,38 +516,11 @@ class BootstrapController
         }
         osec_initiate_constants($osec_base_dir, $osec_base_url);
 
-        // Error handler.
-        global $OsecExceptionHandler;
-        $OsecExceptionHandler = new ExceptionHandler(
-            'Exception',
-            'ErrorException'
-        );
-        // If the user clicked the link to reactivate the plugin.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        if (isset($_GET[ExceptionHandler::DB_REACTIVATE_PLUGIN])) {
-            $OsecExceptionHandler->reactivate_plugin();
-        }
-
-        // Displays message if soft_deactivate_plugin() added one.
-        $OsecExceptionHandler->display_disabled_message();
-
-        $OsecExceptionHandler->setPrevErrorHandler(
-            // phpcs:ignore WordPress.PHP.DevelopmentFunctions
-            set_error_handler($OsecExceptionHandler->handle_error(...))
-        );
-        $OsecExceptionHandler->setPrevExceptionHandler(
-            set_exception_handler(
-                $OsecExceptionHandler->handleException(...)
-            )
-        );
-
-        // Regular startup sequence starts here
-        require_once $osec_base_dir . '/global-functions.php'; // Sadly 2 are left.
-
         // Instantiate registry.
         /* @global $osec_app App Osec object Registry */
         global $osec_app;
         $osec_app = App::factory();
+        DatabaseSchema::factory($osec_app)->verifySqlSchema();
 
         return new self($osec_app);
     }
@@ -731,7 +620,7 @@ class BootstrapController
      **/
     protected function processRequest()
     {
-        $page_id  = $this->app->settings->get('calendar_page_id');
+        $page_id = $this->app->settings->get('calendar_page_id');
         if (
             ! is_admin()
             && $page_id

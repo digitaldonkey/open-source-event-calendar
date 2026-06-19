@@ -18,9 +18,10 @@ class BasePage {
         this.assert = assert;
         this.settings = settings;
         this.driver = driver;
-        this.driver.manage().window().maximize();
-        this.driver.manage().setTimeouts({implicit: (10000)});
         this.screenshotCount = 1;
+        this.driver.manage().window().maximize().then(()=>{
+            this.driver.manage().setTimeouts({implicit: (60000)});
+        })
     }
 
     static async build () {
@@ -33,10 +34,8 @@ class BasePage {
             settings = require('../settings.js');
         }
         const theClass = this;
-        return this.setupWebDriver(settings)
-            .then(function(driver){
-                return new theClass(settings, driver);
-            });
+        const driver = await this.setupWebDriver(settings);
+        return new theClass(settings, driver)
     }
 
     /**
@@ -46,19 +45,19 @@ class BasePage {
      * @returns {!ThenableWebDriver}
      */
     static setupWebDriver (settings) {
-        if (settings.isHeadless) {
+        if (settings.headless) {
             return new Builder()
                 .forBrowser(Browser.CHROME)
                 .setChromeOptions(
                     new chrome.Options()
-                    .addArguments('--headless').windowSize(settings.screen)
+                    .addArguments('--headless')
                     .addArguments('--disable-gpu')
                     .addArguments('--ignore-certificate-errors')
                 )
                 .setFirefoxOptions(
                     new firefox.Options()
                         .addArguments('--headless')
-                        .windowSize(this.settings.screen))
+                        .windowSize(settings.screen))
                         .setCapability('acceptInsecureCerts', true)
                 .build();
         }
@@ -71,8 +70,20 @@ class BasePage {
         .build();
     }
 
+    /**
+     * Helper functions from here.
+     */
+    async go_and_do_login(url){
+        await this.go_to_url(url);
+        // body.login-action-login
+        const isLoggedIn = await this.isLoggedIn();
+        if (!isLoggedIn) {
+            await this.doLogin();
+        }
+    }
+
     async go_to_url(url){
-        console.log('      get: ' + url);
+        console.info('      get: ' + url);
         return this.driver.get(url);
     }
 
@@ -107,14 +118,16 @@ class BasePage {
     /**
      *
      * @param findBy By
+     * @param timeout Timeout in ms
      * @returns {Promise<WebElement>}
      */
-    async getElement(findBy) {
+    async getElement(findBy, timeout = 6000) {
         if (!findBy instanceof By) {
             throw new Error('getElement requires instance of By as first param')
         }
         const element = await this.driver.findElement(findBy);
-        return this.driver.wait(until.elementIsVisible(element), 6000);
+        await this.driver.wait(until.elementIsVisible(element), timeout);
+        return element;
     }
 
     /**

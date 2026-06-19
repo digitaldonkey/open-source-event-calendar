@@ -60,11 +60,7 @@ class RequestRedirect extends OsecBaseClass
             return;
         }
         $href = HtmlFactory::factory($this->app)
-                           ->create_href_helper_instance(
-                               [
-                                   $url_ident => $term->term_id,
-                               ]
-                           );
+                   ->create_href_helper_instance([$url_ident => $term->term_id]);
         ResponseHelper::redirect($href->generate_href(), 301);
     }
 }

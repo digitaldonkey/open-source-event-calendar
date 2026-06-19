@@ -2,7 +2,6 @@
 
 namespace Osec\App\Model\PostTypeEvent;
 
-use Osec\App\Controller\AccessControl;
 use Osec\Bootstrap\OsecBaseClass;
 
 /**
@@ -20,21 +19,13 @@ class EditPostActions extends OsecBaseClass
      *
      * @wp_hook admin_footer-edit.php
      */
-    public function duplicate_custom_bulk_admin_footer()
+    public function add_bulk_action_duplicate_event($current_screen)
     {
-        if (AccessControl::are_we_editing_our_post() === true) {
-            ?>
-            <script type="text/javascript">
-                jQuery(document).ready(function () {
-                    jQuery('<option>').val('clone')
-                        .text('<?php esc_html_e('Clone', 'open-source-event-calendar'); ?>')
-                        .appendTo("select[name='action']");
-                    jQuery('<option>').val('clone')
-                        .text('<?php esc_html_e('Clone', 'open-source-event-calendar'); ?>')
-                        .appendTo("select[name='action2']");
-                });
-            </script>
-            <?php
+        if ($current_screen->post_type === OSEC_POST_TYPE && current_user_can('edit_osec_events')) {
+            add_filter('bulk_actions-edit-' . OSEC_POST_TYPE, function ($bulk_actions) {
+                $bulk_actions['clone'] = __('Clone', 'open-source-event-calendar');
+                return $bulk_actions;
+            });
         }
     }
 
@@ -46,18 +37,18 @@ class EditPostActions extends OsecBaseClass
     public function duplicate_post_make_duplicate_link_row($actions, $post)
     {
         if ($post->post_type === OSEC_POST_TYPE) {
-            $actions['clone']             = '<a href="' . $this->duplicate_post_get_clone_post_link(
+            $actions['clone'] = '<a href="' . $this->duplicate_post_get_clone_post_link(
                 $post->ID,
                 'display',
                 false
             ) . '" title="'
-                                            . esc_attr(__('Make new copy of event', 'open-source-event-calendar'))
-                                            . '">' . __('Clone', 'open-source-event-calendar') . '</a>';
+              . esc_attr(__('Make new copy of event', 'open-source-event-calendar'))
+              . '">' . __('Clone', 'open-source-event-calendar') . '</a>';
             $actions['edit_as_new_draft'] = '<a href="' . $this->duplicate_post_get_clone_post_link(
                 $post->ID
             ) . '" title="'
-                                            . esc_attr(__('Copy to a new draft', 'open-source-event-calendar'))
-                                            . '">' . __('Clone to Draft', 'open-source-event-calendar') . '</a>';
+              . esc_attr(__('Copy to a new draft', 'open-source-event-calendar'))
+              . '">' . __('Clone to Draft', 'open-source-event-calendar') . '</a>';
         }
 
         return $actions;
@@ -75,7 +66,8 @@ class EditPostActions extends OsecBaseClass
      */
     private function duplicate_post_get_clone_post_link($id = 0, $context = 'display', $draft = true)
     {
-        if ( ! $post = get_post($id)) {
+        $post = get_post($id);
+        if ( ! $post) {
             return;
         }
 
@@ -85,7 +77,7 @@ class EditPostActions extends OsecBaseClass
             $action_name = 'duplicate_post_save_as_new_post';
         }
 
-        if ('display' == $context) {
+        if ('display' === $context) {
             $action = '?action=' . $action_name . '&amp;post=' . $post->ID;
         } else {
             $action = '?action=' . $action_name . '&post=' . $post->ID;

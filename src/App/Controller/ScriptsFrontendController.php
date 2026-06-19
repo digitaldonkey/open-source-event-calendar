@@ -4,13 +4,16 @@ namespace Osec\App\Controller;
 
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\Settings;
-use Osec\App\View\Admin\AdminPageAbstract;
+use Osec\App\View\Admin\AdminPageManageFeeds;
+use Osec\App\View\Admin\AdminPageSettings;
+use Osec\App\View\Admin\AdminPageThemeOptions;
 use Osec\App\WpmlHelper;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
 use Osec\Http\Request\HttpConditionalGet;
 use Osec\Http\Request\HttpEncoder;
+use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\ResponseHelper;
 
 /**
@@ -137,7 +140,7 @@ class ScriptsFrontendController extends OsecBaseClass
     public function render_js()
     {
         $common_js = '';
-        // phpcs:disable WordPress.Security.NonceVerification
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
         if (! isset($_GET[self::LOAD_JS_PARAMETER])) {
             return null;
         }
@@ -166,7 +169,7 @@ class ScriptsFrontendController extends OsecBaseClass
                 $this->areFrontendScriptsloaded = true;
             }
         }
-        // phpcs:enable WordPress.Security.NonceVerification
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
         // phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
         // makes no sense on local files.
@@ -337,7 +340,7 @@ class ScriptsFrontendController extends OsecBaseClass
         $blog_timezone = $this->app->options->get('gmt_offset');
 
         $data = [
-            'calendar_feeds_nonce'           => wp_create_nonce('osec_ics_feed_nonce'),
+            'calendar_feeds_nonce'           => wp_create_nonce(FeedsController::NONCE_NAME),
             // ICS feed error messages
             'duplicate_feed_message'         => esc_html(
                 __('This feed is already being imported.', 'open-source-event-calendar')
@@ -431,6 +434,8 @@ class ScriptsFrontendController extends OsecBaseClass
                 'For week and day view, you must select an interval of at least 6 hours.',
                 'open-source-event-calendar'
             ),
+            'label_a_rsvp_url' => __('Registration URL:', 'open-source-event-calendar'),
+            'label_a_buy_tickets_url' => __('Buy Tickets URL:', 'open-source-event-calendar'),
         ];
 
         /**
@@ -468,7 +473,6 @@ class ScriptsFrontendController extends OsecBaseClass
                     'type'    => 'text/javascript',
                 ]
             );
-            $http_encoder->encode();
             $http_encoder->sendAll();
         }
         ResponseHelper::stop();
@@ -537,7 +541,7 @@ class ScriptsFrontendController extends OsecBaseClass
     {
         return $this->is_admin_page('edit.php')
                && $this->is_post_type(OSEC_POST_TYPE)
-               && $this->is_page(AdminPageAbstract::ADMIN_PAGE_PREFIX . 'feeds');
+               && $this->is_page(AdminPageManageFeeds::MENU_SLUG);
     }
 
     /**
@@ -564,7 +568,7 @@ class ScriptsFrontendController extends OsecBaseClass
     private function isPageLessVariables()
     {
         return $this->is_admin_page('edit.php')
-               && $this->is_page(AdminPageAbstract::ADMIN_PAGE_PREFIX . 'edit-css');
+               && $this->is_page(AdminPageThemeOptions::MENU_SLUG);
     }
 
     /**
@@ -585,11 +589,10 @@ class ScriptsFrontendController extends OsecBaseClass
      */
     private function isPageEditEvent()
     {
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended
-        $post_id      = isset($_GET['post']) ? (int) $_GET['post'] : false;
-        $action       = isset($_GET['action']) ? sanitize_key(wp_unslash($_GET['action'])) : false;
-        // phpcs:enable
-        if ($post_id === false || $action === false) {
+        $post_id = RequestParser::get_param('post', false);
+        $action = RequestParser::get_param('action', false);
+
+        if (!is_int($post_id) && $action !== 'edit') {
             return false;
         }
 
@@ -610,7 +613,7 @@ class ScriptsFrontendController extends OsecBaseClass
     private function isPageOsecSettings()
     {
         return $this->is_admin_page('edit.php')
-               && $this->is_page(AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings');
+               && $this->is_page(AdminPageSettings::MENU_SLUG);
     }
 
     /**

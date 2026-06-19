@@ -50,64 +50,105 @@ class EventTicketView extends OsecBaseClass
         return $output;
     }
 
+
+    /**
+     * Get the number value of the stored coast
+     */
+    public function get_cost_value(Event $event): ?float
+    {
+        $val = filter_var($event->get('cost'), FILTER_SANITIZE_NUMBER_FLOAT);
+        return $val ? (float)$val : null;
+    }
+
     /**
      * Contact info as HTML
      */
-    public function get_contact_html(Event $event)
+    public function get_cost_iso_4217_currency(Event $event): ?string
     {
-        $contact      = '<div class="h-card">';
-        $has_contents = false;
-        if ($event->get('contact_name')) {
-            $contact      .=
-                '<div class="ai1ec-contact-name p-name">' .
-                '<i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-user"></i> ' .
-                esc_html($event->get('contact_name')) .
-                '</div> ';
-            $has_contents = true;
-        }
-        if ($event->get('contact_phone')) {
-            $contact      .=
-                '<div class="ai1ec-contact-phone p-tel">' .
-                '<i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-phone"></i> ' .
-                esc_html($event->get('contact_phone')) .
-                '</div> ';
-            $has_contents = true;
-        }
-        if ($event->get('contact_email')) {
-            $contact      .=
-                '<div class="ai1ec-contact-email">' .
-                '<a class="u-email" href="mailto:' .
-                esc_attr($event->get('contact_email')) . '">' .
-                '<i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-envelope-o"></i> ' .
-                __('Email', 'open-source-event-calendar') . '</a></div> ';
-            $has_contents = true;
-        }
-        $contact_url = $event->get('contact_url');
-        if ($contact_url) {
-            $contact      .=
-                '<div class="ai1ec-contact-url">' .
-                '<a class="u-url" target="_blank" href="' .
-                esc_attr($contact_url) .
-                '"><i class="ai1ec-fa ai1ec-fa-fw ai1ec-fa-link"></i> ' .
+        $coast = $event->get('cost');
 
-                /**
-                 * Alter contact_url label
-                 *
-                 * Visible Event single if ´Organizer contact info´
-                 * -> Website URL is set.
-                 *
-                 * @since 1.0
-                 *
-                 * @param  string  $contact_url  Url in use.
-                 *
-                 * @param  string  $event_website_link  Multilingual label for the link.
-                 */
-                apply_filters('osec_contact_url_link', __('Event website', 'open-source-event-calendar'), $contact_url)
-                . ' <i class="ai1ec-fa ai1ec-fa-external-link"></i></a></div>';
-            $has_contents = true;
+        if (empty($coast)) {
+            return null;
         }
-        $contact .= '</div>';
 
-        return $has_contents ? $contact : '';
+        /**
+         *  UTF-8 Currency Symbol (Key) => ISO 4217 Code (Value)
+         */
+        $currencyMap = [
+            '$'    => 'USD', // US Dollar (Shared with AUD, CAD, NZD, etc.)
+            '€'    => 'EUR', // Euro
+            '£'    => 'GBP', // British Pound
+            '¥'    => 'JPY', // Japanese Yen / Chinese Yuan
+            '₹'    => 'INR', // Indian Rupee
+            '₽'    => 'RUB', // Russian Ruble
+            '₿'    => 'BTC', // Bitcoin (Commonly used, though not a standard ISO currency)
+            '₩'    => 'KRW', // South Korean Won
+            '₪'    => 'ILS', // Israeli New Shekel
+            '₫'    => 'VND', // Vietnamese Dong
+            '₭'    => 'LAK', // Lao Kip
+            '₮'    => 'MNT', // Mongolian Tugrik
+            '₱'    => 'PHP', // Philippine Peso
+            '฿'    => 'THB', // Thai Baht
+            '₺'    => 'TRY', // Turkish Lira
+            '₼'    => 'AZN', // Azerbaijani Manat
+            '₴'    => 'UAH', // Ukrainian Hryvnia
+            '₦'    => 'NGN', // Nigerian Naira
+            '₡'    => 'CRC', // Costa Rican Colón
+            '₵'    => 'GHS', // Ghanaian Cedi
+            '₸'    => 'KZT', // Kazakhstani Tenge
+            'SR'   => 'SAR', // Saudi Riyal
+            'zł'   => 'PLN', // Polish Zloty
+            'kr'   => 'SEK', // Swedish Krona (Shared with NOK, DKK)
+            'Fr'   => 'CHF', // Swiss Franc
+            'Ksh'  => 'KES', // Kenyan Shilling
+            'Ar'   => 'MGA', // Malagasy Ariary
+            'Rp'   => 'IDR', // Indonesian Rupiah
+            'RM'   => 'MYR', // Malaysian Ringgit
+            'Br'   => 'ETB', // Ethiopian Birr
+            'L'    => 'HNL', // Honduran Lempira
+            'Q'    => 'GTQ', // Guatemalan Quetzal
+            'kn'   => 'HRK', // Croatian Kuna
+            'm'    => 'TMT', // Turkmenistan Manat
+            'R$'   => 'BRL',  // Brazilian Real
+        ];
+        /**
+         * Add Currency symbols (UTF-8) => ISO 4217 Code
+         *
+         * <meta itemprop="priceCurrency" content="EUR">
+         * @see https://schema.org/priceCurrency
+         *
+         * @since 1.1
+         *
+         * @param  array  $currencyMap
+         * .
+         * @return array
+         */
+        $currencyMap = apply_filters('osec_currency_to_iso4217_map', $currencyMap);
+
+        /* @var String $letters get all unique lettses */
+        $letters = implode(array_unique(str_split(implode(array_keys($currencyMap)))));
+
+        $cost_currency = preg_replace(
+            '/[^a-z' . $letters . ']/i',
+            '',
+            $coast
+        );
+        if (in_array($cost_currency, array_keys($currencyMap), true)) {
+            $cost_currency = $currencyMap[$cost_currency];
+        }
+
+        /**
+         * Allows you to alter or provide a valid priceCurrency
+         *
+         * @see https://schema.org/priceCurrency
+         * @since 1.0
+         *
+         * @param  string  $cost_currency Assumed ISO 4217 value.
+         * @param  string  $coast Raw field value.
+         * @return string Must return ISO 4217 3 letter string as schema requires or null to hide.
+         */
+        $cost_currency = apply_filters('osec_currency_iso4217_value_alter', $cost_currency, $coast);
+
+        return $cost_currency ?: null;
     }
 }

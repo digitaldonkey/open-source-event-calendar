@@ -12,10 +12,10 @@ use Osec\Exception\BootstrapException;
 use Osec\Exception\EngineNotSetException;
 use Osec\Exception\ImportExportParseException;
 use Osec\Exception\InvalidArgumentException;
+use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderJson;
-use Osec\Settings\Elements\ModalQuestion;
-use Osec\Settings\HtmlFactory;
 use Osec\Theme\ThemeLoader;
+use WP_Term;
 
 /**
  * The class which handles ics feeds tab.
@@ -27,21 +27,12 @@ use Osec\Theme\ThemeLoader;
  */
 class FeedsController extends OsecBaseClass
 {
-    // Using ajax, which verifies nonces.
-    // @see $this->add_actions().
-    // phpcs:disable WordPress.Security.NonceVerification
-
     /**
      * @var string Name of cron hook.
      */
     public const CRON_HOOK_NAME = 'osec_cron';
 
-    /**
-     * @var array
-     *   title: The title of the tab and the title of the configuration section
-     *   id: The id used in the generation of the tab
-     */
-    protected array $variables = ['id' => 'ics'];
+    public const NONCE_NAME = 'calendar_feeds_nonce';
 
     /**
      * @var ?ExecutionLimitController Instance of execution guard.
@@ -74,8 +65,11 @@ class FeedsController extends OsecBaseClass
      */
     private function install_cron(): void
     {
-        Scheduler::factory($this->app)
-                 ->reschedule(self::CRON_HOOK_NAME, $this->app->settings->get('ics_cron_freq'), OSEC_VERSION);
+        Scheduler::factory($this->app)->reschedule(
+            self::CRON_HOOK_NAME,
+            $this->app->settings->get('ics_cron_freq'),
+            OSEC_VERSION
+        );
     }
 
     public static function add_actions(App $app, bool $is_admin)
@@ -99,23 +93,99 @@ class FeedsController extends OsecBaseClass
                     FeedsController::factory($app)->delete_ics();
                 }
             );
-            /**
-             * Update ICS feed by ajax.
-             */
-            add_action(
-                'wp_ajax_osec_update_ics',
-                function () use ($app) {
-                    FeedsController::factory($app)->update_ics();
-                }
-            );
         }
+        /**
+         * Update ICS feed by ajax.
+         */
+        add_action(
+            'wp_ajax_osec_update_ics',
+            function () use ($app) {
+                FeedsController::factory($app)->update_ics();
+            }
+        );
 
+        /* CRON JOB */
         add_action(
             self::CRON_HOOK_NAME,
             function () use ($app) {
                 FeedsController::factory($app)->cron();
             }
         );
+
+        add_action(
+            'wp_ajax_osec_feeds_page_post',
+            function () use ($app) {
+                FeedsController::factory($app)->handle_ajax_chron_change();
+            }
+        );
+    }
+
+    /**
+     * Merges common params.
+     *
+     * @param  array  $data Variable data
+     *
+     * @return array Static data merged with variable data.
+     */
+    public static function merge_commom_vars(array $data): array
+    {
+        static $common_data = null;
+        if (is_null($common_data)) {
+            $common_data = [
+                'description'      => esc_html__(
+                    'Configure which other calendars your own calendar subscribes to.
+                        You can add any calendar that provides an iCalendar (.ics) feed.
+                        Enter the feed URL(s) below and the events from those feeds will be
+                        imported periodically.',
+                    'open-source-event-calendar'
+                ),
+                'cron_freq_label'  => esc_html__('Check for new events', 'open-source-event-calendar'),
+                'allow_comments_label' => esc_html__('Allow comments on imported events', 'open-source-event-calendar'),
+                'enable_maps_label' => esc_html__('Show map on imported events', 'open-source-event-calendar'),
+                'feed_import_timezone_label' => esc_html__(
+                    'Assign default time zone to events in UTC',
+                    'open-source-event-calendar'
+                ),
+                'feed_import_timezone_info' => esc_html__(
+                    'Guesses the time zone of events that have none specified; recommended for Google Calendar feeds',
+                    'open-source-event-calendar'
+                ),
+                'add_tag_categories_label' => esc_html__(
+                    'Import any tags/categories provided by feed, in addition those selected above',
+                    'open-source-event-calendar'
+                ),
+                'feed_url_label'    => esc_html__('iCalendar/.ics Feed URL:', 'open-source-event-calendar'),
+                'feed_url_placeholder' => __('Feed url (required)', 'open-source-event-calendar'),
+                'categories_label'  => esc_html__('Event categories', 'open-source-event-calendar'),
+                'tags_label'        => esc_html__('Tag with', 'open-source-event-calendar'),
+                'comments_label'    => esc_html__('Allow comments', 'open-source-event-calendar'),
+                'yes'               => esc_html__('Yes', 'open-source-event-calendar'),
+                'no'                => esc_html__('No', 'open-source-event-calendar'),
+                'show_map_label'    => esc_html__('Show map', 'open-source-event-calendar'),
+                'keep_taxonomy_label' => esc_html__(
+                    'Keep original events categories and tags',
+                    'open-source-event-calendar'
+                ),
+                'keep_old_events_label' => esc_html__(
+                    'On refresh, preserve previously imported events that are missing from the feed',
+                    'open-source-event-calendar'
+                ),
+                'import_post_status_label' => esc_html__(
+                    'Post status for imported events',
+                    'open-source-event-calendar'
+                ),
+                'cancel_button_text' => esc_html__('Cancel', 'open-source-event-calendar'),
+                'data_loading_button_text' => __('Please wait&#8230;', 'open-source-event-calendar'),
+                'add_subscription_button_text' => esc_html__('Add new subscription', 'open-source-event-calendar'),
+                'update_subscription_button_text' => esc_html__('Update subscription', 'open-source-event-calendar'),
+                'reloading_button_loading_text' => esc_html__('Refreshing&#8230', 'open-source-event-calendar'),
+                'reloading_button_text' => esc_html__('Refresh', 'open-source-event-calendar'),
+                'edit_button_text' => esc_html__('Edit', 'open-source-event-calendar'),
+                'remove_button_loading_text' => esc_html__('Removing&#8230;', 'open-source-event-calendar'),
+                'remove_button_text' => esc_html__('Remove', 'open-source-event-calendar'),
+            ];
+        }
+        return array_merge($common_data, $data);
     }
 
     /**
@@ -131,16 +201,17 @@ class FeedsController extends OsecBaseClass
         $feedId = $this->get_request_params('feed_id');
 
         $entry = $this->get_request_params([
-                'feed_url',
-                'feed_name',
-                'feed_category',
-                'feed_tags',
-                'comments_enabled',
-                'map_display_enabled',
-                'keep_tags_categories',
-                'keep_old_events',
-                'import_timezone',
-            ]);
+            'feed_url',
+            'feed_name',
+            'feed_category',
+            'feed_tags',
+            'comments_enabled',
+            'map_display_enabled',
+            'keep_tags_categories',
+            'keep_old_events',
+            'import_timezone',
+            'import_post_status',
+        ]);
 
         /**
          * Alter feed item data before feed saved in database.
@@ -206,29 +277,54 @@ class FeedsController extends OsecBaseClass
         $categories = [];
         if (!empty($entry['feed_category'])) {
             foreach (explode(',', $entry['feed_category']) as $cat_id) {
-                $fcat = get_term($cat_id, 'events_categories');
+                $fcat = get_term($cat_id, 'osec_events_categories');
                 $categories[]  = $fcat->name;
             }
         }
 
-        $args = [
-            'feed_url'             => $entry['feed_url'],
+        $args = self::merge_commom_vars([
             'feed_name'            => $feed_name,
+            'feed_url'             => $entry['feed_url'],
             'event_category'       => implode(', ', $categories),
-            'categories_ids'       => $entry['feed_category'],
+            'events_categories_ids'       => $entry['feed_category'],
             'tags'                 => str_replace(',', ', ', $entry['feed_tags']),
             'tags_ids'             => $entry['feed_tags'],
             'feed_id'              => $feedId,
-            'comments_enabled'     => (bool) $entry['comments_enabled'],
-            'map_display_enabled'  => (bool) $entry['map_display_enabled'],
+            'comments_enabled'     => (int) $entry['comments_enabled'],
+            'map_display_enabled'  => (int) $entry['map_display_enabled'],
             'events'               => 0,
-            'keep_tags_categories' => (bool) $entry['keep_tags_categories'],
-            'keep_old_events'      => (bool) $entry['keep_old_events'],
-            'feed_import_timezone' => (bool) $entry['import_timezone'],
-        ];
+            'keep_tags_categories' => (int) $entry['keep_tags_categories'],
+            'keep_old_events'      => (int) $entry['keep_old_events'],
+            'import_post_status'   => (string) $entry['import_post_status'],
+            'feed_import_timezone' => (int) $entry['import_timezone'],
+            /**
+             * Add Html content above feeds options
+             *
+             * On Feeds admin page you can return any Html sting.
+             *
+             * @since 1.0
+             *
+             * @param ?int  $feedId  Feed ID. If not set it is printed above all feeds.
+             */
+            'feeds_options_header_html' => apply_filters('osec_admin_ics_feeds_options_header_html', '', $feedId),
+            /**
+             * Add Html content below feeds options
+             *
+             * On Feeds admin page you can echo/print any Html sting.
+             *
+             * @since 1.0
+             *
+             * @param ?int  $feedId  DB id of the feed or null for empty form.
+             */
+            'feeds_options_after_settings_html' => apply_filters(
+                'osec_admin_ics_feeds_options_after_settings_html',
+                '',
+                $feedId
+            ),
+        ]);
 
         // Display added feed row.
-        $file   = ThemeLoader::factory($this->app)->get_file('feed_row.php', $args, true);
+        $file   = ThemeLoader::factory($this->app)->get_file('feed_row.twig', $args, true);
         $output = $file->get_content();
         $output = [
             'error'   => false,
@@ -330,7 +426,7 @@ class FeedsController extends OsecBaseClass
                 ! is_wp_error($response) &&
                 isset($response['response']) &&
                 isset($response['response']['code']) &&
-                $response['response']['code'] == 200 &&
+                (int) $response['response']['code'] === 200 &&
                 isset($response['body']) &&
                 ! empty($response['body'])
             ) {
@@ -393,7 +489,7 @@ class FeedsController extends OsecBaseClass
                     $count     = $result['count'];
                     $feed_name = ! empty($result['name'][1]) ? $result['name'][1] : $feed->feed_url;
                     // we must flip again the array to iterate over it
-                    if (0 == $feed->keep_old_events) {
+                    if (0 === $feed->keep_old_events) {
                         $events_to_delete = array_flip($result['events_to_delete']);
                         foreach ($events_to_delete as $event_id) {
                             wp_delete_post($event_id, true);
@@ -472,8 +568,8 @@ class FeedsController extends OsecBaseClass
         $feedName = self::get_term_name_from_uri(
             $this->get_feed_uri_by_id($feed_id)
         );
-        $term = get_term_by('name', $feedName, 'events_feeds');
-        wp_delete_term($term->term_id, 'events_feeds');
+        $term = get_term_by('name', $feedName, 'osec_events_feeds');
+        wp_delete_term($term->term_id, 'osec_events_feeds');
 
         // Delete Table Entry.
         $this->app->db->query(
@@ -505,23 +601,18 @@ class FeedsController extends OsecBaseClass
         }
     }
 
-    // **
-    // * Renders the opening div of the tab and set the active status if this tab
-    // * is the active one
-    // *
-    // * @param string $active_feed the tab that should be active.
-    // */
-    // protected function render_opening_div_of_tab() : string {
-    // $args = ['id' => $this->variables['id']];
-    // $file = ThemeLoader::factory($this->app)->get_file('plugins/render_opening_div.php', $args, TRUE);
-    // return $file->get_content();
-    // }
-
     /**
      * Delete feeds and events
      */
     public function delete_ics(): never
     {
+        $action = RequestParser::get_param('action', null);
+        $nonce = RequestParser::get_param('nonce', null);
+        if (!$action || $action !== 'osec_delete_ics'
+            || !$nonce || wp_verify_nonce($nonce, self::NONCE_NAME) !== 1
+        ) {
+            exit('invalid nonce');
+        }
 
         $feed_id = $this->get_request_params('feed_id');
         if ($this->get_request_params('remove_events')) {
@@ -532,6 +623,7 @@ class FeedsController extends OsecBaseClass
             RenderJson::factory($this->app)
                       ->render(['data' => $output]);
         } else {
+            $this->detach_feed($feed_id);
             $this->delete_ics_feed(true, $feed_id);
         }
         exit(0);
@@ -548,6 +640,8 @@ class FeedsController extends OsecBaseClass
     public function flush_ics_feed($ajax = true, $feed_url = false): array
     {
         $feed_id = 0;
+        // Nonce checked before.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         if (isset($_REQUEST['feed_id'])) {
             $feed_id = $this->get_request_params('feed_id');
         }
@@ -556,9 +650,9 @@ class FeedsController extends OsecBaseClass
         }
         // Delete Events
         if ($feed_url) {
-            $eventsTable = $this->app->db->get_table_name(OSEC_DB__EVENTS);
+            $events_table = $this->app->db->get_table_name(OSEC_DB__EVENTS);
             $sql = $this->app->db->prepare(
-                "SELECT `post_id` FROM {$eventsTable} WHERE `ical_feed_url` = %s",
+                "SELECT `post_id` FROM {$events_table} WHERE `ical_feed_url` = %s",
                 $feed_url
             );
             $events      = $this->app->db->get_col($sql);
@@ -590,6 +684,63 @@ class FeedsController extends OsecBaseClass
         return $output;
     }
 
+    public function detach_feed(int $feed_id)
+    {
+        $feed_url = $this->get_feed_uri_by_id($feed_id);
+
+        // Disabled vars.
+        $changeTime = time();
+        $name_prefix = 'Feed removed@ ' . gmdate('Y-m-d H:i:s', $changeTime) . ' ';
+        $slug_suffix = '_disabeled_at_' . gmdate('U', $changeTime) . ': ';
+
+        // Rename term to reflect detaching.
+        $feedName = self::get_term_name_from_uri(
+            $this->get_feed_uri_by_id($feed_id)
+        );
+        $term = get_term_by('name', $feedName, 'osec_events_feeds');
+        if ($term instanceof WP_Term) {
+            wp_update_term($term->term_id, 'osec_events_feeds', [
+                'name' => $name_prefix . $term->name,
+                'slug' => $term->slug . $slug_suffix,
+            ]);
+        }
+
+        // Detach Event/Feed relation (prevents further updates).
+        $events_table = $this->app->db->get_table_name(OSEC_DB__EVENTS);
+        $sql = $this->app->db->prepare(
+            "UPDATE {$events_table} SET `ical_feed_url` = %s, `ical_uid` = '' WHERE `ical_feed_url` = %s",
+            $name_prefix . $feed_url,
+            $feed_url
+        );
+       $this->app->db->get_results($sql);
+    }
+
+    public static function cron_options(): array
+    {
+        return [
+            'hourly' => esc_html__('Hourly', 'open-source-event-calendar'),
+            'twicedaily' => esc_html__('Twice Daily', 'open-source-event-calendar'),
+            'daily' => esc_html__('Daily', 'open-source-event-calendar'),
+        ];
+    }
+
+    /**
+     * @return void
+     * handle_feeds_page_post
+     */
+    public function handle_ajax_chron_change()
+    {
+        if (
+            !check_ajax_referer(self::NONCE_NAME, 'nonce')
+            || !current_user_can('manage_osec_feeds')) {
+            /** @noinspection ForgottenDebugOutputInspection */
+            wp_die(esc_html__('Invalid nonce or permission', 'open-source-event-calendar'));
+        }
+        $val = RequestParser::get_param('cron_freq');
+        if (in_array($val, array_keys(self::cron_options()), true)) {
+            $this->app->settings->set('ics_cron_freq', $val);
+        }
+    }
     /**
      * Cron callback.
      *
@@ -622,102 +773,13 @@ class FeedsController extends OsecBaseClass
     }
 
     /**
-     * Renders the HTML for the tabbed navigation
-     *
-     * @return string Echoes the HTML string that act as tab header for the plugin
-     *   Echoes the HTML string that act as tab header for the plugin
-     * @throws BootstrapException
-     * @throws \Osec\Exception\Exception
-     */
-    public function get_tab_header(): string
-    {
-        // Use the standard view helper
-        $args = [
-            'title' => $this->get_tab_title(),
-            'id'    => $this->variables['id'],
-        ];
-
-        return ThemeLoader::factory($this->app)
-                          ->get_file('plugins/tab_header.php', $args, true)
-                          ->get_content();
-    }
-
-    public function get_tab_title()
-    {
-        return __('ICS', 'open-source-event-calendar');
-    }
-
-    public function get_tab_content(): string
-    {
-        // Render the opening div
-        $html = '<div class="ai1ec-tab-pane" id="' . $this->variables['id'] . '">';
-
-        $factory = HtmlFactory::factory($this->app);
-
-        $select2_cats = $factory->create_select2_multiselect(
-            [
-                'name'        => 'osec_feed_category[]',
-                'id'          => 'osec_feed_category',
-                'use_id'      => true,
-                'type'        => 'category',
-                'placeholder' => __('Categories (optional)', 'open-source-event-calendar'),
-            ],
-            get_terms([
-                'taxonomy' => 'events_categories',
-                'hide_empty' => false
-            ])
-        );
-        $select2_tags = $factory->create_select2_input(
-            ['id' => 'osec_feed_tags']
-        );
-
-        $modal = new ModalQuestion(
-            $this->app,
-            [
-                'id'                 => 'osec-ics-modal',
-                'header_text'        => esc_html__('Removing ICS Feed', 'open-source-event-calendar'),
-                'body_text'          => esc_html__(
-                    'Do you want to keep the events imported from the calendar or remove them?',
-                    'open-source-event-calendar'
-                ),
-                'keep_button_text'   => esc_html__('Keep Events', 'open-source-event-calendar'),
-                'delete_button_text' => esc_html__('Remove Events', 'open-source-event-calendar'),
-            ]
-        );
-
-        $cron_freq = ThemeLoader::factory($this->app)
-                                ->get_file(
-                                    'cron_freq.php',
-                                    [
-                                        'cron_freq' => $this->app->settings->get('ics_cron_freq'),
-                                    ],
-                                    true
-                                );
-
-        $args = [
-            'cron_freq'        => $cron_freq->get_content(),
-            'event_categories' => $select2_cats,
-            'event_tags'       => $select2_tags,
-            'feed_rows'        => $this->getRows(),
-            'modal'            => $modal->render(),
-        ];
-
-        $html .= ThemeLoader::factory($this->app)
-                            ->get_file('plugins/ics/display_feeds.php', $args, true)
-                            ->get_content();
-        $html .= '</div>';
-
-        return $html;
-    }
-
-    /**
      * get_feed_rows function
      *
      * Creates feed rows to display on settings page
      *
      * @return String feed rows
      **/
-    protected function getRows()
+    public function getRows()
     {
         // Select all added feeds
         $rows = $this->app->db->select(
@@ -732,12 +794,12 @@ class FeedsController extends OsecBaseClass
                 'map_display_enabled',
                 'keep_tags_categories',
                 'keep_old_events',
+                'import_post_status',
                 'import_timezone',
             ]
         );
 
         $html = '';
-
         foreach ($rows as $row) {
             $feed_categories = explode(',', $row->feed_category);
             $categories      = [];
@@ -745,38 +807,39 @@ class FeedsController extends OsecBaseClass
             foreach ($feed_categories as $cat_id) {
                 $feed_category = get_term(
                     $cat_id,
-                    'events_categories'
+                    'osec_events_categories'
                 );
                 if ($feed_category && ! is_wp_error($feed_category)) {
                     $categories[] = $feed_category->name;
                 }
             }
             unset($feed_categories);
-
-            $args = [
-                'feed_url'             => esc_attr($row->feed_url),
-                'feed_name'            => esc_attr(! empty($row->feed_name) ? $row->feed_name : $row->feed_url),
-                'event_category'       => implode(', ', $categories),
-                'categories_ids'       => esc_attr($row->feed_category),
-                'tags'                 => stripslashes(
+            $args = self::merge_commom_vars([
+                'feed_name' => esc_attr(! empty($row->feed_name) ? $row->feed_name : $row->feed_url),
+                'feed_url' => esc_attr($row->feed_url),
+                'event_category' => implode(', ', $categories),
+                'events_categories_ids' => esc_attr($row->feed_category),
+                'tags' => stripslashes(
                     str_replace(',', ', ', esc_attr($row->feed_tags))
                 ),
                 'tags_ids'             => esc_attr($row->feed_tags),
                 'feed_id'              => $row->feed_id,
-                'comments_enabled'     => (bool)(int)$row->comments_enabled,
-                'map_display_enabled'  => (bool)(int)$row->map_display_enabled,
-                'keep_tags_categories' => (bool)(int)$row->keep_tags_categories,
-                'keep_old_events'      => (bool)(int)$row->keep_old_events,
-                'feed_import_timezone' => (bool)(int)$row->import_timezone,
-            ];
-            $html .= ThemeLoader::factory($this->app)->get_file('feed_row.php', $args, true)
-                                ->get_content();
+                'comments_enabled'     => (int) $row->comments_enabled,
+                'map_display_enabled'  => (int) $row->map_display_enabled,
+                'keep_tags_categories' => (int) $row->keep_tags_categories,
+                'keep_old_events'      => (int) $row->keep_old_events,
+                'import_post_status'   => (string) $row->import_post_status,
+                'feed_import_timezone' => (int) $row->import_timezone,
+            ]);
+            $html .= ThemeLoader::factory($this->app)
+                        ->get_file('feed_row.twig', $args, true)
+                        ->get_content();
         }
 
         return $html;
     }
 
-    public function get_feed_uri_by_id(int $feed_id): string
+    public function get_feed_uri_by_id(int $feed_id): ?string
     {
         return $this->app->db->get_var(
             $this->app->db->prepare(
@@ -791,59 +854,42 @@ class FeedsController extends OsecBaseClass
         static $requestArgs = null;
         if (is_null($requestArgs)) {
             if (
-                !check_ajax_referer('osec_ics_feed_nonce', 'nonce')
+                !check_ajax_referer(self::NONCE_NAME, 'nonce')
                 || !current_user_can('manage_osec_feeds')) {
                 /** @noinspection ForgottenDebugOutputInspection */
                 wp_die(esc_html__('User not allowed to manage feeds.', 'open-source-event-calendar'));
             }
 
-            if (!empty($_REQUEST['feed_url'])) {
-                $url = wp_http_validate_url(sanitize_url(wp_unslash($_REQUEST['feed_url'])));
+            if (isset($_REQUEST['feed_url']) && ! empty($_REQUEST['feed_url'])) {
+                $url = esc_url_raw(wp_unslash($_REQUEST['feed_url']));
             }
 
-            // phpcs:disable WordPress.Security.ValidatedSanitizedInput
-            $feedId = (!empty($_REQUEST['feed_id'])
-                       && ctype_digit((string) $_REQUEST['feed_id'])) ? (int)$_REQUEST['feed_id'] : null;
-            // phpcs:enable
-
+            $feedId = RequestParser::get_param('feed_id', null);
+            if ($feedId) {
+                $feedId = (int) $feedId;
+            }
             $feed_categories = '';
             // Different from tags they are submitted as [](int).
             if (isset($_REQUEST['feed_category']) && is_array($_REQUEST['feed_category'])) {
-                $f_cats = [];
-                // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-                foreach ($_REQUEST['feed_category'] as $feedCategory) {
-                    $f_cats[] = (int) $feedCategory;
-                }
+                $f_cats = array_map('intval', $_REQUEST['feed_category']);
                 $feed_categories = implode(',', $f_cats);
             }
 
-            $feed_tags = '';
-            // Submitted as string of integers.
-            if (!empty($_REQUEST['feed_tags'])) {
-                $feed_tags = sanitize_text_field(wp_unslash($_REQUEST['feed_tags']));
-            }
-
-            $remove_events = false;
-            if (isset($_REQUEST['remove_events'])) {
-                $remove_events = sanitize_key(wp_unslash($_REQUEST['remove_events'])) === 'true' ? true : false;
-            }
-
             $requestArgs = [
-                'feed_url'             => $url,
-                'feed_name'            => $url,
+                'feed_url'             => $url ?? '',
+                'feed_name'            => $url ?? '',
                 // Update integer or New null.
                 'feed_id'              => $feedId,
                 'feed_category'        => $feed_categories,
-                'feed_tags'            => $feed_tags,
-                // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                // Booleans are integers in DB. Valiadted by typecasting.
-                'comments_enabled'     => (int)(bool)(int) $_REQUEST['comments_enabled'],
-                'map_display_enabled'  => (int)(bool)(int) $_REQUEST['map_display_enabled'],
-                'keep_tags_categories' => (int)(bool)(int) $_REQUEST['keep_tags_categories'],
-                'keep_old_events'      => (int)(bool)(int) $_REQUEST['keep_old_events'],
-                'import_timezone'      => (int)(bool)(int) $_REQUEST['feed_import_timezone'],
-                // phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-                'remove_events'        => $remove_events,
+                'feed_tags'            => RequestParser::get_param('feed_tags', ''),
+                // Booleans are integers in DB.
+                'comments_enabled'     => (int) RequestParser::get_param('comments_enabled', 0),
+                'map_display_enabled'  => (int) RequestParser::get_param('map_display_enabled', 0),
+                'keep_tags_categories' => (int) RequestParser::get_param('keep_tags_categories', 0),
+                'keep_old_events'      => (int) RequestParser::get_param('keep_old_events', 0),
+                'import_timezone'      => (int) RequestParser::get_param('feed_import_timezone', 0),
+                'remove_events'        => (RequestParser::get_param('remove_events') === 'true'),
+                'import_post_status'   => (string) RequestParser::get_param('import_post_status', 'publish'),
             ];
         }
 
@@ -852,7 +898,7 @@ class FeedsController extends OsecBaseClass
             if (is_array($param)) {
                 // TODO missing non existent check.
                 return array_filter($requestArgs, function ($key) use ($param) {
-                    return in_array($key, $param);
+                    return in_array($key, $param, true);
                 }, ARRAY_FILTER_USE_KEY);
             }
             // Case $param a string.
@@ -877,5 +923,4 @@ class FeedsController extends OsecBaseClass
         $url_components = wp_parse_url($url);
         return $url_components['host'];
     }
-    // phpcs:enable
 }

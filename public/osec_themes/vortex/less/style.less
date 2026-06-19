@@ -495,12 +495,14 @@ input.ai1ec-timepicker[readonly] {
 		max-width: var(--wp--style--global--wide-size);
 	}
 	.alignfull & {
-		padding-left: .5em;
-		padding-right: .5em;
+		margin-left:.5em;
+		margin-right: .5em;
 	}
 	// Applies for calendar page and Shortcode. Not in Blocks.
 	.wp-block-post-content > & {
 		.ai1ec-agenda-view {
+			max-width: var(--wp--style--global--content-size);
+			margin: 0 auto;
 			@media (min-width: @screen-sm) {
 				padding: 2em var(--wp--style--root--padding-right) 2em var(--wp--style--root--padding-left);
 			}
@@ -520,15 +522,12 @@ input.ai1ec-timepicker[readonly] {
 	// .timely, not body.
 	margin: 0;
 	font-family: @font-family-base;
-
 	font-size: @font-size-base;
-	font-size: var(--wp--preset--font-size--small);
-	//line-height: @line-height-base;
-	line-height: 1.55;
-
+	// font-size: var(--wp--preset--font-size--small);
+	// line-height: 1.55;
+	line-height: @line-height-base;
 	color: @text-color;
 	word-wrap: break-word;
-	//outline: 4px solid cyan;
 
 	a {
 		border: none;
@@ -646,57 +645,6 @@ input.ai1ec-timepicker[readonly] {
 	}
 }
 
-// Twenty Twelve/Twenty Thirteen fixes
-.entry-content,
-.comment-content,
-.site-footer .widget {
-	.timely {
-		a {
-			color: @link-color;
-			&:visited {
-				color: @link-color;
-			}
-			&:hover {
-				color: @link-hover-color;
-			}
-		}
-		.ai1ec-btn-default {
-			color: @btn-default-color !important;
-			&:hover {
-				color: @btn-default-color !important;
-			}
-		}
-		.ai1ec-dropdown-menu > li > a {
-			color: @dropdown-link-color;
-			&:hover,
-			&:focus {
-				color: @dropdown-link-hover-color;
-			}
-		}
-		.ai1ec-dropdown-menu > .ai1ec-active > a {
-			&,
-			&:hover,
-			&:focus {
-				color: @dropdown-link-active-color;
-			}
-		}
-		.ai1ec-dropdown-menu > .ai1ec-disabled > a {
-			&,
-			&:hover,
-			&:focus {
-				color: @dropdown-link-disabled-color;
-			}
-		}
-		.ai1ec-nav > li {
-			margin: 0;
-		}
-	}
-	.ai1ec-agenda-widget-view .ai1ec-date-title,
-	.ai1ec-agenda-view .ai1ec-date-title {
-		color: mix( @text-color, @agenda-date-title-bg, 85% );
-	}
-}
-
 // Field label styling.
 .ai1ec-field-label {
 	font-size: @event-font-size * 0.85em;
@@ -811,36 +759,40 @@ a.ai1ec-custom-filter {
 }
 
 // ======================
-// = Agenda widget view =
+// = Agenda view =
 // ======================
 
 // Elements in common with Agenda view
 .ai1ec-agenda-widget-view,
 .ai1ec-agenda-view {
 	.ai1ec-date-title {
-		border: 1px solid mix( @text-color, @agenda-date-title-bg, 30% );
-		border-top: none;
-		border-radius: 5px;
-		.ai1ec-box-shadow( 0 2px 2px rgba(0,0,0,0.08) );
-		.ai1ec-box-sizing( border-box );
-		color: mix( @text-color, @agenda-date-title-bg, 85% );
-		float: left;
-		font-weight: bold !important;
-		#gradient > .ai1ec-vertical-three-colors(
-			@agenda-date-title-bg,
-			@agenda-date-title-bg,
-			1em,
-			mix(@agenda-date-title-bg, @text-color, 88%)
-		);
-		filter: none; // IE8 doesn't get how to do this gradient for some reason
-		line-height: 1.2em;
-		margin: (@font-size-base / 2) 0.75em;
-		overflow: hidden;
-		text-align: center;
-		text-shadow: 0 1px 0 @text-emboss;
-		width: 4em;
-		&:hover {
-			color: @text-color !important;
+		display: none;
+		@media (min-width: 30rem) {
+			display: block;
+			border: 1px solid mix( @text-color, @agenda-date-title-bg, 30% );
+			border-top: none;
+			border-radius: 5px;
+			.ai1ec-box-shadow( 0 2px 2px rgba(0,0,0,0.08) );
+			.ai1ec-box-sizing( border-box );
+			color: mix( @text-color, @agenda-date-title-bg, 85% );
+			float: left;
+			font-weight: bold !important;
+			#gradient > .ai1ec-vertical-three-colors(
+							@agenda-date-title-bg,
+							@agenda-date-title-bg,
+							1em,
+							mix(@agenda-date-title-bg, @text-color, 88%)
+			);
+			filter: none; // IE8 doesn't get how to do this gradient for some reason
+			line-height: 1.2em;
+			margin: (@font-size-base / 2) 0.75em;
+			overflow: hidden;
+			text-align: center;
+			text-shadow: 0 1px 0 @text-emboss;
+			width: 4em;
+			&:hover {
+				color: @text-color !important;
+			}
 		}
 	}
 	.ai1ec-month {
@@ -970,10 +922,10 @@ a.ai1ec-custom-filter {
 		margin: 2px -8px 0;
 		padding: 1px 8px;
 	}
+
 	.ai1ec-event-avatar {
 		margin: @line-height-computed / 3 auto;
 		position: relative;
-		width: 85%;
 		img {
 			width: 100%;
 		}
@@ -1021,4 +973,16 @@ a.ai1ec-custom-filter {
 
 img[data-ai1ec-hidden] {
 	display: none;
+}
+
+.visually-hidden {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	border: 0 !important;
+	margin: -1px !important;
+	clip: rect(0, 0, 0, 0) !important;
+	overflow: hidden !important;
+	white-space: nowrap !important;
 }

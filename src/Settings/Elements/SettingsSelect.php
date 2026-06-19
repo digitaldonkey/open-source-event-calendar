@@ -44,7 +44,7 @@ class SettingsSelect extends SettingsAbstract
          *
          * @param  array  $options  Select options
          */
-        $options   = apply_filters('osec_settings_select_options', $options, $this->args['id']);
+        $options = apply_filters('osec_settings_select_options', $options, $this->args['id']);
 
         $hasFieldsets = isset($this->args['renderer']['fieldsets'])
                             && is_array($this->args['renderer']['fieldsets']);
@@ -67,6 +67,7 @@ class SettingsSelect extends SettingsAbstract
             'attributes' => $select_args,
             'options'    => $options,
             'fieldsets'  => $fieldsets,
+            'help'      => isset($this->args['renderer']['help']) ? $this->args['renderer']['help'] : null,
         ];
         $html .= ThemeLoader::factory($this->app)
                                   ->get_file('setting/select.twig', $args, true)

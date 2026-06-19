@@ -232,7 +232,7 @@ class NotificationAdmin extends NotificationAbstract
 
         return is_object($screen)
                && isset($screen->id)
-               && in_array($screen->id, $allow_on);
+               && in_array($screen->id, $allow_on, true);
     }
 
     /**

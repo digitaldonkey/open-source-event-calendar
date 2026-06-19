@@ -143,7 +143,7 @@ class DT implements Stringable
         if ('UTC' !== date_default_timezone_get()) {
             throw new TimezoneException(
                 esc_html__(
-                    'Wordpress requires PHP default timezone to be UTC.
+                    'WordPress requires PHP default timezone to be UTC.
                      This plugin assumes this too.
                      Ensure date_default_timezone_get() will return `UTC`',
                     'open-source-event-calendar'
@@ -266,7 +266,7 @@ class DT implements Stringable
     public function get_timezone(): ?string
     {
         $timezone = $this->date->getTimezone();
-        if (false === $timezone) {
+        if (! $timezone) {
             return null;
         }
 
@@ -327,7 +327,7 @@ class DT implements Stringable
     {
         $offset = $this->date->getOffset() / 3600;
 
-        return 'GMT' . ($offset > 0 ? '+' : '') . $offset;
+        return 'GMT' . ($offset >= 0 ? '+' : '') . $offset;
     }
 
     /**
@@ -359,7 +359,7 @@ class DT implements Stringable
      *
      * @return int Number of seconds between two dates.
      */
-    public function diff_sec(DT $comparable, bool $timezone = null): int
+    public function diff_sec(DT $comparable, ?bool $timezone = null): int
     {
         // NOTICE: `$this->isEmpty` is not touched here intentionally
         // because there is no meaningful difference to `empty` value.
@@ -499,13 +499,13 @@ class DT implements Stringable
             // Set to week start day.
             $tmp_day->modify('last ' . $this->get_week_start_day());
         }
-        // Set time to day beginning.
-        $tmp_day->modify('today');
 
         // Deliver week start in requested or sites timezone.
-        $timezone = $timezone ?: new DateTimeZone($this->getSiteTimezone());
+        $timezone = $timezone ?: Timezones::factory($this->app)->get_default_timezone_object();
         $weekStartDateAndTime = new DT((int) $tmp_day->format('U'), $timezone->getName());
         $weekStartDateAndTime->set_preferred_timezone($timezone);
+        // Set time to day beginning.
+        $weekStartDateAndTime->date->modify('today');
 
         // Convert into Osec Date.
         return $weekStartDateAndTime;
@@ -543,11 +543,6 @@ class DT implements Stringable
         }
 
         return $mapper[$dayInt];
-    }
-
-    public function getSiteTimezone(): string
-    {
-        return $this->app->options->get('timezone_string', date_default_timezone_get());
     }
 
     public function utcOffsetInSeconds(string $time_zone)

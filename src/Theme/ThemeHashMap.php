@@ -53,7 +53,7 @@ class ThemeHashMap extends OsecBaseClass
             array_keys(
                 $paths['theme']
             ),
-            ['ai1ec_parsed_css.css', 'less.sha1.map.php', 'index.php']
+            ['osec_parsed.css', 'less.sha1.map.php', 'index.php']
         );
     }
 

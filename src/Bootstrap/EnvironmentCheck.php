@@ -3,7 +3,7 @@
 namespace Osec\Bootstrap;
 
 use Osec\App\Model\Notifications\NotificationAdmin;
-use Osec\App\View\Admin\AdminPageAbstract;
+use Osec\App\View\Admin\AdminPageSettings;
 
 /**
  * Checks configurations and notifies admin.
@@ -13,14 +13,14 @@ use Osec\App\View\Admin\AdminPageAbstract;
  * @replaces Ai1ec_Environment_Checks
  * @author     Time.ly Network Inc.
  */
-class EnvironmentCheck extends OsecBaseClass
+class EnvironmentCheck extends OsecBaseInitialized
 {
     /**
      * Runs checks for necessary config options.
      *
      * @return void Method does not return.
      */
-    public function run_checks()
+    public function initialize()
     {
         global $plugin_page, $wp_rewrite;
 
@@ -54,10 +54,8 @@ class EnvironmentCheck extends OsecBaseClass
             );
             $notifications[] = $msg;
         }
-        if (
-            $plugin_page !== AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings'
-            && ! empty($notifications)
-        ) {
+        // Add Plugin configuration notice.
+        if ($plugin_page !== AdminPageSettings::MENU_SLUG && ! empty($notifications)) {
             if ($current_user->has_cap('manage_osec_options')) {
                 $msg = sprintf(
                 /* translators: Admin url */
@@ -66,7 +64,7 @@ class EnvironmentCheck extends OsecBaseClass
                          <a href="%s">Click here to set it up now &raquo;</a>',
                         'open-source-event-calendar'
                     ),
-                    admin_url(OSEC_SETTINGS_BASE_URL)
+                    admin_url(OSEC_ADMIN_BASE_URL . '&page=' . AdminPageSettings::MENU_SLUG)
                 );
                 $notificationApi->store(
                     $msg,

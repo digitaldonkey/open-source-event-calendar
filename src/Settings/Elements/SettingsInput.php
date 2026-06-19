@@ -18,7 +18,8 @@ class SettingsInput extends SettingsAbstract
     public function render($html = '', $wrap = true): string
     {
         $type       = $this->args['renderer']['type'];
-        $date       = $append = false;
+        $date = false;
+        $append = false;
         $class      = '';
         $input_type = 'text';
         switch ($type) {

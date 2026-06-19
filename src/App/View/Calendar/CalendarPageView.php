@@ -5,6 +5,7 @@ namespace Osec\App\View\Calendar;
 use Osec\App\Controller\Router;
 use Osec\App\Model\Date\DateValidator;
 use Osec\App\Model\Date\DT;
+use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\Model\SettingsView;
 use Osec\App\WpmlHelper;
@@ -82,13 +83,13 @@ class CalendarPageView extends OsecBaseClass
                                   ->get_configured($view_args['action']);
         } catch (SettingsException $exception) {
             // short-circuit and return error message
-            return '<div id="osec-container"><div class="timely"><p>' .
-                   __(
-                       'There was an error loading calendar. 
-                            Please contact site administrator and inform him to configure calendar views.',
-                       'open-source-event-calendar'
-                   ) .
-                   '</p></div></div>';
+            return '<div id="osec-container"><div class="timely"><p>'
+                . __(
+                    'There was an error loading calendar. 
+                        Please contact site administrator and inform him to configure calendar views.',
+                    'open-source-event-calendar'
+                )
+               . '</p></div></div>';
         }
         $type = $request->get('request_type');
 
@@ -168,6 +169,7 @@ class CalendarPageView extends OsecBaseClass
             $filter_args = [
                 'categories'           => $categories,
                 'tags'                 => $tags,
+                'label' => __('Filter by', 'open-source-event-calendar'),
                 /**
                  * @see Filter documentation 'osec_contribution_buttons' at AbstractView->getNavigation().
                  */
@@ -192,7 +194,7 @@ class CalendarPageView extends OsecBaseClass
              *
              * @param  array  $filter_args  Twig arguments for filter-menu.twig.
              */
-            $filter_args = apply_filters('osec_calendar_page_filter args', $filter_args);
+            $filter_args = apply_filters('osec_calendar_page_filter_args', $filter_args);
             // hide filters in the SW
             $filter_menu = '';
             if ('true' === $request->get('display_filters')) {
@@ -208,6 +210,8 @@ class CalendarPageView extends OsecBaseClass
                 'filter_menu'       => $filter_menu,
                 'view'              => $view,
                 'subscribe_buttons' => $subscribe_buttons,
+                'agenda_events_expanded' => $this->app->settings->get('agenda_events_expanded'),
+
                 /**
                  * Add Html above calendar
                  *
@@ -332,8 +336,7 @@ class CalendarPageView extends OsecBaseClass
          */
         $view_args = apply_filters('osec_calendar_view_args_alter', $view_args);
 
-        // TODO
-        //   What is this Case about???
+        // In case of an INVALID Date (NULL) we redirect.
         if (null === $exact_date) {
             $href = HtmlFactory::factory($this->app)
                                ->create_href_helper_instance($view_args)
@@ -370,32 +373,42 @@ class CalendarPageView extends OsecBaseClass
     {
         // Preprocess exact_date.
         // Check to see if a date has been specified.
-        $exact_date = $request->get('exact_date');
-        $use_key    = $exact_date;
-        if (null === ($exact_date = $this->datesCache->get($use_key))) {
-            $exact_date = $use_key;
-            // Let's check if we have a date
-            if (false !== $exact_date) {
-                // If it's not a timestamp
-                if (! DateValidator::is_valid_time_stamp($exact_date)) {
-                    // Try to parse it
-                    $exact_date = $this->return_gmtime_from_exact_date($exact_date);
-                    if (false === $exact_date) {
-                        return null;
-                    }
+        $cache_key = $request->get('exact_date');
+        $valid_date = false;
+
+        if ($cache_key) {
+            // Return from cache.
+            if (!is_null($this->datesCache->get($cache_key, null))) {
+                return $this->datesCache->get($cache_key);
+            }
+
+
+            // Some requests may not be timestamps.
+            if (DateValidator::is_valid_time_stamp($cache_key)) {
+                $valid_date = (int) $cache_key;
+            } else {
+                // Try to parse it
+                $parsed_date = $this->return_gmtime_from_exact_date($cache_key);
+                $valid_date = $parsed_date ? (int) $parsed_date : false;
+            }
+
+            // Last try, let's see if an exact date is set in settings.
+            if (!$valid_date) {
+                $default_date = $this->app->settings->get('exact_date');
+                if (!empty($default_date)) {
+                    $valid_date = (int) $this->return_gmtime_from_exact_date(
+                        $default_date
+                    );
                 }
             }
-            // Last try, let's see if an exact date is set in settings.
-            $date = $this->app->settings->get('exact_date');
-            if (false === $exact_date && $date !== '') {
-                $exact_date = $this->return_gmtime_from_exact_date(
-                    $date
-                );
+            // Save memory cache.
+            // Including wrong->default params.
+            if ($valid_date) {
+                $this->datesCache->set($cache_key, $valid_date);
             }
-            $this->datesCache->set($use_key, $exact_date);
+            return $valid_date;
         }
-
-        return $exact_date;
+        return false;
     }
 
     /**
@@ -420,7 +433,8 @@ class CalendarPageView extends OsecBaseClass
         if (false === $date) {
             $exact_date = false;
         } else {
-            $exact_date = (new DT($date, 'sys.default'))->format_to_gmt();
+            $tz = Timezones::factory($this->app)->get_default_timezone();
+            $exact_date = (new DT($date, $tz))->format_to_gmt();
             if ($exact_date < 0) {
                 return false;
             }
@@ -449,10 +463,7 @@ class CalendarPageView extends OsecBaseClass
         $mode            = wp_is_mobile() ? '_mobile' : '';
         foreach ($enabled_views as $key => $val) {
             /* $val['longname'] is a _n_noop. */
-            $view_names[$key] = translate_nooped_plural(
-                $val['longname'],
-                1
-            );
+            $view_names[$key] = translate_nooped_plural($val['longname'], 1, 'open-source-event-calendar');
             // Find out if view is enabled in requested mode (mobile or desktop). If
             // no mode-specific setting is available, fall back to desktop setting.
             $view_enabled = $enabled_views[$key]['enabled' . $mode] ?? $enabled_views[$key]['enabled'];
@@ -464,10 +475,7 @@ class CalendarPageView extends OsecBaseClass
                 unset($options['oneday_offset']);
                 $options['action'] = $key;
                 /* $val['longname'] is a _n_noop. */
-                $values['desc']    = translate_nooped_plural(
-                    $val['longname'],
-                    1
-                );
+                $values['desc'] = translate_nooped_plural($val['longname'], 1, 'open-source-event-calendar');
                 if ($this->app->settings->get('osec_use_frontend_rendering')) {
                     $options['request_format'] = 'json';
                 }
@@ -486,7 +494,7 @@ class CalendarPageView extends OsecBaseClass
         ];
 
         return ThemeLoader::factory($this->app)
-                  ->get_file('views_dropdown.twig', $args, false)
+                  ->get_file('views-dropdown.twig', $args, false)
                   ->get_content();
     }
 
@@ -503,53 +511,28 @@ class CalendarPageView extends OsecBaseClass
             return '';
         }
 
-        $args = [
-            'url_args'           => '',
-            'is_filtered'        => false,
-            'export_url'         => OSEC_EXPORT_URL,
-            'export_url_no_html' => OSEC_EXPORT_URL . '&no_html=true',
-            'text_filtered'      => __('Subscribe to filtered calendar', 'open-source-event-calendar'),
-            'text_subscribe'     => __('Subscribe', 'open-source-event-calendar'),
-            'text_get_calendar'  => __('Get a Timely Calendar', 'open-source-event-calendar'),
-            'text'               => CalendarSubscribeButtonView::factory($this->app)
-                                                               ->get_labels(),
-            'placement'          => 'up',
-        ];
+        $url_args = '';
+        $is_filterd = false;
+
+        $use_lang = WpmlHelper::factory($this->app)->get_language();
+        if (!is_null($use_lang)) {
+            $url_args = '&lang=' . $use_lang;
+        }
         if (! empty($view_args['cat_ids'])) {
-            $args['url_args']    .= '&osec_cat_ids=' . implode(',', $view_args['cat_ids']);
-            $args['is_filtered'] = true;
+            $url_args    .= '&osec_cat_ids=' . implode(',', $view_args['cat_ids']);
+            $is_filterd = true;
         }
         if (! empty($view_args['tag_ids'])) {
-            $args['url_args']    .= '&osec_tag_ids=' .
-                                    implode(',', $view_args['tag_ids']);
-            $args['is_filtered'] = true;
+            $url_args .= '&osec_tag_ids=' . implode(',', $view_args['tag_ids']);
+            $is_filterd = true;
         }
         if (! empty($view_args['post_ids'])) {
-            $args['url_args']    .= '&osec_post_ids=' .
-                                    implode(',', $view_args['post_ids']);
-            $args['is_filtered'] = true;
+            $url_args .= '&osec_post_ids=' . implode(',', $view_args['post_ids']);
+            $is_filterd = true;
         }
-
-        /**
-         * Subscribe buttons alter
-         *
-         * Alter arguments for subscribe-buttons.twig template
-         *
-         * @since 1.0
-         *
-         * @param  array  $args  Twig args
-         * @param  array  $view_args  View arguments
-         */
-        $args = apply_filters('osec_subscribe_buttons_arguments', $args, $view_args);
-        if (
-            null !== ($use_lang = WpmlHelper::factory($this->app)
-                                            ->get_language())
-        ) {
-            $args['url_args'] .= '&lang=' . $use_lang;
-        }
-
-        return ThemeLoader::factory($this->app)
-                          ->get_file('subscribe-buttons.twig', $args, false)
-                          ->get_content();
+        return CalendarSubscribeView::factory($this->app)->render_subscribe(
+            $url_args,
+            $is_filterd
+        );
     }
 }

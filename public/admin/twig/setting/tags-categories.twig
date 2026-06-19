@@ -1,22 +1,22 @@
 <div class="ai1ec-default-filters ai1ec-form-group">
 	<label class="ai1ec-control-label ai1ec-col-sm-3">
 		{{ label }}
-		<div class="ai1ec-help-block">
-		{{ help | raw }}
-		</div>
 	</label>
-	<div class="ai1ec-col-sm-9">
-		<div class="ai1ec-row">
+	<div>
+		<div class="osec-two-col">
 			{% if categories is defined %}
-				<div class="ai1ec-col-md-6">
+				<div class="select2-container select2-container-multi">
 					{{ categories | raw }}
 				</div>
 			{% endif %}
 			{% if tags is defined %}
-				<div class="ai1ec-col-md-6">
+				<div class="select2-container select2-container-multi">
 					{{ tags | raw }}
 				</div>
 			{% endif %}
+		</div>
+		<div class="ai1ec-help-block">
+			{{ help | raw }}
 		</div>
 	</div>
 </div>

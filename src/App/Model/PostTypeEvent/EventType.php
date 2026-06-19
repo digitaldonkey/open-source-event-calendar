@@ -46,7 +46,7 @@ class EventType extends OsecBaseClass
         // = register event categories taxonomy =
         // ======================================
         register_taxonomy(
-            'events_categories',
+            'osec_events_categories',
             [OSEC_POST_TYPE],
             [
                 'labels'       => [
@@ -82,7 +82,7 @@ class EventType extends OsecBaseClass
         // = register event tags taxonomy =
         // ================================
         register_taxonomy(
-            'events_tags',
+            'osec_events_tags',
             [OSEC_POST_TYPE],
             [
                 'labels'       => [
@@ -103,11 +103,11 @@ class EventType extends OsecBaseClass
         );
 
         /**
-         * Taxonomy events_feeds
+         * Taxonomy osec_events_feeds
          * is used to filter for Events added by a feed.
          */
         register_taxonomy(
-            'events_feeds',
+            'osec_events_feeds',
             [OSEC_POST_TYPE],
             [
                 'labels'       => [
@@ -129,8 +129,8 @@ class EventType extends OsecBaseClass
         // ========================================
         // = register custom post type for events =
         // ========================================
-        // phpcs:ignore WordPress.NamingConventions.ValidPostTypeSlug.NotStringLiteral
-        register_post_type(OSEC_POST_TYPE, [
+
+        $post_type_vars = [
             'labels'              => [
                 'name'               => _x('Events', 'Custom post type name', 'open-source-event-calendar'),
                 'singular_name'      => _x('Event', 'Custom post type name (singular)', 'open-source-event-calendar'),
@@ -164,17 +164,37 @@ class EventType extends OsecBaseClass
             'supports'            => [
                 'title',
                 'editor',
-                'comments',
                 'custom-fields',
                 'thumbnail',
                 'author',
-                // TDOD Add??
-                // https://stackoverflow.com/questions/45436051/how-to-add-excerpt-in-custom-post-type-in-wordpress
-                'excerpt',
             ],
             'exclude_from_search' => $this->app->settings->get('exclude_from_search'),
             'show_in_rest' => true,
-        ]);
+        ];
+
+        if ($this->app->settings->get('feature_allow_comments')) {
+            $post_type_vars['supports'][] = 'comments';
+        }
+
+        if ($this->app->settings->get('feature_use_excerpt')) {
+            $post_type_vars['supports'][] = 'excerpt';
+        }
+
+        /**
+         * Register post type Event
+         *
+         * Alter params before register_post_type()
+         *
+         * @wp_hook init
+         *
+         * @since 1.0
+         *
+         * @param  bool  $do_debug  Debug or not.
+         */
+        $post_type_vars = apply_filters('osec_pre_register_post_type', $post_type_vars);
+
+        // phpcs:ignore WordPress.NamingConventions.ValidPostTypeSlug.NotStringLiteral
+        register_post_type(OSEC_POST_TYPE, $post_type_vars);
 
         // get event contributor if saved in the db
         $contributor = get_role('osec_event_assistant');
@@ -206,10 +226,10 @@ class EventType extends OsecBaseClass
         }
 
         // Add event managing capabilities to administrator, editor, author.
-        // The last created capability is "manage_osec_feeds", so check for
+        // The last created capability is "manage_osec_events_categories", so check for
         // that one.
         $role = get_role('administrator');
-        if (is_object($role) && ! $role->has_cap('manage_osec_feeds')) {
+        if (is_object($role) && ! $role->has_cap('manage_osec_events_categories')) {
             $role_list = ['administrator', 'editor', 'author'];
             foreach ($role_list as $role_name) {
                 $role = get_role($role_name);
@@ -293,16 +313,16 @@ class EventType extends OsecBaseClass
     public function uninstall(bool $purge = false)
     {
         $taxonomies = [
-            'events_feeds',
-            'events_tags',
-            'events_categories'
+            'osec_events_feeds',
+            'osec_events_tags',
+            'osec_events_categories',
         ];
         if ($purge) {
             // Delete taxonomy terms.
             foreach ($taxonomies as $taxonomy) {
                 $terms = get_terms([
                     'taxonomy' => $taxonomy,
-                    'hide_empty' => false
+                    'hide_empty' => false,
                 ]);
                 foreach ($terms as $term) {
                     wp_delete_term($term->term_id, $taxonomy);
@@ -310,14 +330,14 @@ class EventType extends OsecBaseClass
             }
 
             // Constants only. DB prepare is not required.
-            $postType = OSEC_POST_TYPE;
+            $post_type = OSEC_POST_TYPE;
             $this->app->db->query(
                 "DELETE a,b,c FROM wp_posts a
                     LEFT JOIN wp_term_relationships b
                         ON (a.ID = b.object_id)
                     LEFT JOIN wp_postmeta c
                         ON (a.ID = c.post_id)
-                    WHERE a.post_type = '$postType';"
+                    WHERE a.post_type = '$post_type';"
             );
 
             // Remove role
@@ -335,6 +355,7 @@ class EventType extends OsecBaseClass
                 'switch_osec_themes',
                 'manage_osec_options',
                 'manage_osec_feeds',
+                'manage_osec_events_categories',
             ];
             foreach ($delete_caps as $cap) {
                 foreach (array_keys($wp_roles->roles) as $role) {

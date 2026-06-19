@@ -7,12 +7,6 @@ use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\DatabaseErrorException;
 
-// TODO
-// There was a very complicated Schema management.
-// Not really disabled but deactivated the $this->checkDelta() --> sucess ...
-// So far tested only against blank/new DB, so enabling works.
-// Needs review,
-
 /**
  * Event manage form backend view layer.
  *
@@ -52,19 +46,17 @@ class DatabaseSchema extends OsecBaseClass
         $schema_sql = $this->get_current_db_schema();
         $version    = sha1($schema_sql);
 
-        if ($this->app->options->get('osec_db_version') != $version) {
+        if ($this->app->options->get('osec_db_version') !== $version) {
+            $do_schema_update = true;
             if (
                 /**
                  * Define if Database schema upgrade should be executed
-                 *
-                 * Currently DatabaseSchema->apply_delta() is disabled.
-                 * TODO Decide to throw schema stuff out entirely or fix it.
                  *
                  * @since 1.0
                  *
                  * @param $do_schema_update
                  */
-                apply_filters('osec_perform_scheme_update', $do_schema_update = true)
+                apply_filters('osec_perform_scheme_update', $do_schema_update)
                 && $this->apply_delta($schema_sql)
             ) {
                 $this->app->options->set('osec_db_version', $version, true);
@@ -110,8 +102,8 @@ class DatabaseSchema extends OsecBaseClass
 				contact_url varchar(255),
 				cost varchar(255),
 				ticket_url varchar(255),
-				ical_feed_url varchar(255),
-				ical_source_url varchar(255),
+				ical_feed_url varchar(768),
+				ical_source_url varchar(768),
 				ical_organizer varchar(255),
 				ical_contact varchar(255),
 				ical_uid varchar(255),
@@ -135,18 +127,6 @@ class DatabaseSchema extends OsecBaseClass
 				UNIQUE KEY evt_instance (post_id,start)
 				) CHARACTER SET utf8;";
 
-        if (OSEC_DEBUG) {
-            $debug_view_name = $table_name . '_readable_date';
-            $sql             .= " CREATE VIEW `$debug_view_name` AS SELECT
-         id,
-         post_id,
-         `start`, 
-         DATE_FORMAT(FROM_UNIXTIME(`start`), '%Y-%m-%d %H:%i') AS 'start_formatted',
-        `end`,
-         DATE_FORMAT(FROM_UNIXTIME(`end`), '%Y-%m-%d %H:%i') AS 'end_formatted' 
-        FROM $table_name; ";
-        }
-
         // ================================
         // = Create table category colors =
         // ================================
@@ -161,11 +141,12 @@ class DatabaseSchema extends OsecBaseClass
         $table_name = $dbi->get_table_name(OSEC_DB__FEEDS);
         $sql        .= "CREATE TABLE $table_name (
 					feed_id bigint NOT NULL AUTO_INCREMENT,
-					feed_url varchar(255) NOT NULL,
-					feed_name varchar(255) NOT NULL,
+					feed_url varchar(768) NOT NULL,
+					feed_name varchar(768) NOT NULL,
 					feed_category varchar(255) NOT NULL,
 					feed_tags varchar(255) NOT NULL,
 					comments_enabled tinyint(1) NOT NULL DEFAULT '1',
+					import_post_status varchar(255) NOT NULL DEFAULT 'publish',					
 					map_display_enabled tinyint(1) NOT NULL DEFAULT '0',
 					keep_tags_categories tinyint(1) NOT NULL DEFAULT '0',
 					keep_old_events tinyint(1) NOT NULL DEFAULT '0',
@@ -295,7 +276,8 @@ class DatabaseSchema extends OsecBaseClass
                 $line = $line_new;
                 unset($line_new);
                 $type = 'indexes';
-                if (false === ($record = $this->parseIndex($line))) {
+                $record = $this->parseIndex($line);
+                if ($record === false) {
                     $type   = 'columns';
                     $record = $this->parseColumn($line);
                 }
@@ -418,8 +400,7 @@ class DatabaseSchema extends OsecBaseClass
                 )
             ) {
                 throw new DatabaseErrorException(
-                    esc_html('Invalid index (columns) description ' . $description .
-                             ' as per \'' . $column . '\'')
+                    esc_html('Invalid index (columns) description ' . $description . ' as per \'' . $column . '\'')
                 );
             }
             $matches[1]           = trim($matches[1]);
@@ -492,14 +473,7 @@ class DatabaseSchema extends OsecBaseClass
         );
         $column['create']          = $column['name'] . ' ' . $column['content']['type'];
         if (isset($matches[3])) {
-            $column['create'] .= ' ' .
-                                 implode(
-                                     ' ',
-                                     array_map(
-                                         'trim',
-                                         array_slice($matches, 3)
-                                     )
-                                 );
+            $column['create'] .= ' ' . implode(' ', array_map('trim', array_slice($matches, 3)));
         }
 
         return $column;
@@ -556,12 +530,13 @@ class DatabaseSchema extends OsecBaseClass
                 $type_db                         = $column->Type;
                 $collation                       = '';
                 if ($column->Collation) {
-                    $collation = ' CHARACTER SET ' .
-                                 substr(
-                                     $column->Collation,
-                                     0,
-                                     strpos($column->Collation, '_')
-                                 ) . ' COLLATE ' . $column->Collation;
+                    $collation = ' CHARACTER SET '
+                                    . substr(
+                                        $column->Collation,
+                                        0,
+                                        strpos($column->Collation, '_')
+                                    )
+                                    . ' COLLATE ' . $column->Collation;
                 }
                 $type_req = $description['columns'][$column->Field]
                 ['content']['type'];
@@ -572,7 +547,7 @@ class DatabaseSchema extends OsecBaseClass
                     )
                 ) {
                     // suspend collation checking
-                    // $type_db .= $collation;
+                    $type_db .= $collation;
                     $type_req = preg_replace(
                         '#^
 							(.+)
@@ -619,12 +594,11 @@ class DatabaseSchema extends OsecBaseClass
                     );
                 }
             }
-            if (
-                $missing = array_diff(
-                    array_keys($description['columns']),
-                    $db_column_names
-                )
-            ) {
+            $missing = array_diff(
+                array_keys($description['columns']),
+                $db_column_names
+            );
+            if ($missing) {
                 throw new DatabaseErrorException(
                     esc_html(
                         'In table `' . $table . '` fields are missing: '
@@ -643,12 +617,11 @@ class DatabaseSchema extends OsecBaseClass
                     // '` is defined for table `' . $table . '`'
                     // );
                 }
-                if (
-                    $missed = array_diff_assoc(
-                        $description['indexes'][$name]['content'],
-                        $definition['columns']
-                    )
-                ) {
+                $missed = array_diff_assoc(
+                    $description['indexes'][$name]['content'],
+                    $definition['columns']
+                );
+                if ($missed) {
                     throw new DatabaseErrorException(
                         esc_html(
                             'Index `' . $name
@@ -658,13 +631,11 @@ class DatabaseSchema extends OsecBaseClass
                     );
                 }
             }
-
-            if (
-                $missing = array_diff(
-                    array_keys($description['indexes']),
-                    array_keys($indexes)
-                )
-            ) {
+            $missing = array_diff(
+                array_keys($description['indexes']),
+                array_keys($indexes)
+            );
+            if ($missing) {
                 throw new DatabaseErrorException(
                     esc_html(
                         'In table `' . $table . '` indexes are missing: '
@@ -722,12 +693,6 @@ class DatabaseSchema extends OsecBaseClass
             $dbi->query(
                 "DROP TABLE IF EXISTS {$events},{$event_instances},{$event_feeds},{$event_category_meta}"
             );
-            // View
-            $debug_view_name = $event_instances . '_readable_date';
-            $dbi->query($dbi->prepare(
-                "DROP VIEW IF EXISTS %s;",
-                $debug_view_name
-            ));
         }
     }
 

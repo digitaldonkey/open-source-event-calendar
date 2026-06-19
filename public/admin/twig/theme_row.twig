@@ -1,0 +1,30 @@
+<div class="theme">
+    {% if screenshot_uri %}
+        <div class="theme-screenshot">
+            <img src="{{ screenshot_uri }}" class="theme-screenshot" />
+        </div>
+    {% endif %}
+    <h2 class="theme-name">
+        {{ title }} {{ version }}
+    </h2>
+    <div class="theme-info">
+        <div class="theme-description">
+            {{ description }}
+        </div>
+        {% if tags %}
+            <div class="theme-tags">
+                {{  tags_title }} {{ tags }}
+            </div>
+        {% endif %}
+        <div class='action-links'>
+            <a href="{{ activate_link }}" class="activatelink button activatelink-{{ theme_id }}" title="{{ activate_text  }}">
+                {{ activate_text  }} {{ title }}
+            </a>
+        </div>
+        <div class="theme-templates">
+            {{ template_dir_text }}:
+            <br />
+            <code>{{ template_dir }}</code>
+        </div>
+    </div>
+</div>

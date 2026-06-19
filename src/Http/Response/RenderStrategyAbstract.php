@@ -3,6 +3,7 @@
 namespace Osec\Http\Response;
 
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Exception\Exception;
 
 /**
  * Abstract strategy class to render the Request.
@@ -20,17 +21,29 @@ abstract class RenderStrategyAbstract extends OsecBaseClass
     abstract public function render(array $params);
 
     /**
-     * Dump output buffers before starting output
+     * Dump all output buffers before starting output.
      *
      * @return bool True unless an error occurs
+     * @throws Exception
      */
-    protected function cleanOutputBuffers()
+    protected function cleanOutputBuffers(): void
     {
         $this->app->db->disable_debug();
+        $level   = ob_get_level();
         $success = true;
-        while (ob_get_level()) {
-            $success = ob_end_flush();
+        while ( $level ) {
+            ob_end_clean();
+            $new_level = ob_get_level();
+            if ($new_level === $level) {
+                $success = false;
+                break;
+            }
+            $level = $new_level;
         }
-        return $success;
+        if (!$success) {
+            throw new Exception(
+                'Output buffer is not empty and can not be cleaned'
+            );
+        }
     }
 }

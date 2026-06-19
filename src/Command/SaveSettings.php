@@ -2,8 +2,9 @@
 
 namespace Osec\Command;
 
-use Osec\App\View\Admin\AdminPageAbstract;
+use Osec\App\View\Admin\AdminPageSettings;
 use Osec\Exception\Exception;
+use Osec\Http\Request\RequestParser;
 
 /**
  * The concrete command that save settings.
@@ -17,49 +18,41 @@ class SaveSettings extends SaveAbstract
 {
     public function do_execute()
     {
-        // Nonce verification happens in SaveAbstract->is_this_to_execute().
-        // phpcs:disable WordPress.Security.NonceVerification.Missing
+        $nonce = RequestParser::get_param($this->nonceName, null);
+        if (! $nonce || wp_verify_nonce($nonce, key($this->action)) !== 1) {
+            wp_die('Invalid nonce');
+        }
 
         $options = $this->app->settings->get_options();
-        $_POST['default_tags_categories'] = (
-            isset($_POST['default_tags_categories_default_categories']) ||
-            isset($_POST['default_tags_categories_default_tags'])
-        );
-        // set some a variable to true to trigger the saving.
-        $_POST['enabled_views'] = true;
 
-        /**
-         * Alter Settings before validation.
-         *
-         * Let other plugin modify the POST variables
-         * before validations of settings.
-         *
-         * @since 1.0
-         *
-         * @param  array  $_POST  Maybe unvalidated variables.
-         */
-        $_POST = apply_filters('osec_pre_validate_settings', $_POST);
+        // Add common handler for tags and categories
+        $_REQUEST['default_tags_categories'] = (
+            isset($_REQUEST['default_tags_categories_default_categories']) ||
+            isset($_REQUEST['default_tags_categories_default_tags'])
+        );
+        // Set some a variable to true to trigger the saving.
+        $_REQUEST['enabled_views'] = true;
+
         foreach ($options as $name => $data) {
             $value = null;
 
-            // Sanity check.
+            // Sanity checks.
             if ( ! isset($data['renderer']['validator']) && ! isset($data['type'])) {
                 throw new Exception(
                     esc_html('No validation defined for ' . $name)
                 );
             }
+            if (isset($data['renderer']['validator'])) {
+                throw new \Exception('Renderer->validattor is not supported anymore..');
+            }
 
-            if ( ! isset($_POST[$name]) && isset($data['type']) && 'bool' === $data['type']) {
-                // False booleans are not send by browser.
+            // False booleans are not send by browser.
+            if ( ! isset($_REQUEST[$name]) && isset($data['type']) && 'bool' === $data['type']) {
                 $value = false;
             }
 
-            if (isset($_POST[$name])) {
-                if (isset($data['renderer']['validator'])) {
-                    throw new \Exception('Renderer->validattor is not supported anymore..');
-                }
-                $post_field_value = sanitize_text_field(wp_unslash($_POST[$name]));
-
+            $post_field_value = RequestParser::get_param($name, null);
+            if (!is_null($post_field_value)) {
                 switch ($data['type']) {
                     case 'bool':
                         $value = true;
@@ -91,7 +84,7 @@ class SaveSettings extends SaveAbstract
                         break;
                     case 'wp_option':
                         // Save the corresponding WP option
-                        $this->app->options->set($name, $post_field_value, true);
+                        $this->app->options->set($name, $post_field_value);
                         $value = $post_field_value;
                         break;
                     default:
@@ -100,7 +93,6 @@ class SaveSettings extends SaveAbstract
                         );
                 }
             }
-            // phpcs:enable WordPress.Security.NonceVerification.Missing
 
             // Save
             if (null !== $value) {
@@ -112,7 +104,7 @@ class SaveSettings extends SaveAbstract
                  *
                  * @since 1.0
                  *
-                 * @param  array  $_POST  Maybe unvalidated variables.
+                 * @param  array  $value  Maybe unvalidated variables.
                  */
                 $value = apply_filters('osec_pre_save_settings', stripslashes_deep($value));
 
@@ -137,9 +129,7 @@ class SaveSettings extends SaveAbstract
         $this->app->settings->persist();
 
         return [
-            'url'        => admin_url(
-                OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings'
-            ),
+            'url' => admin_url(OSEC_ADMIN_BASE_URL . '&page=' . AdminPageSettings::MENU_SLUG),
             'query_args' => ['updated' => 1],
         ];
     }
@@ -151,22 +141,16 @@ class SaveSettings extends SaveAbstract
      */
     protected function handleSaving_enabled_views()
     {
-        // Nonce verification happens in SaveAbstract->is_this_to_execute().
-        // phpcs:disable WordPress.Security.NonceVerification.Missing
-
         $enabled_views = $this->app->settings->get('enabled_views');
         foreach ($enabled_views as $view => &$options) {
-            $options['enabled'] = isset($_POST['view_' . $view . '_enabled']);
-            $options['default'] = isset($_POST['default_calendar_view'])
-                ? $_POST['default_calendar_view'] === $view
-                : false;
-            $options['enabled_mobile'] =
-                isset($_POST['view_' . $view . '_enabled_mobile']);
-            $options['default_mobile'] =
-                isset($_POST['default_calendar_view_mobile']) &&
-                $_POST['default_calendar_view_mobile'] === $view;
+            $options['enabled'] = RequestParser::get_param('view_' . $view . '_enabled', 0);
+            $default_view = RequestParser::get_param('default_calendar_view', null);
+            $options['default'] = ($default_view === $view);
+            $options['enabled_mobile'] = RequestParser::get_param('view_' . $view . '_enabled_mobile', 0);
+            $default_mobile = RequestParser::get_param('default_calendar_view_mobile', null);
+            $options['default_mobile'] = ($default_mobile === $view);
         }
-
+        // phpcs:enable
         return $enabled_views;
     }
 
@@ -177,13 +161,13 @@ class SaveSettings extends SaveAbstract
      */
     protected function handleSaving_default_tags_categories()
     {
-        // phpcs:disable WordPress.Security.ValidatedSanitizedInput
-        $tags = isset($_POST['default_tags_categories_default_tags'])
-                    && is_array($_POST['default_tags_categories_default_tags']) ?
-                        $_POST['default_tags_categories_default_tags'] : [];
-        $categories = isset($_POST['default_tags_categories_default_categories'])
-                    && is_array($_POST['default_tags_categories_default_categories']) ?
-                        $_POST['default_tags_categories_default_categories'] : [];
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
+        $tags = isset($_REQUEST['default_tags_categories_default_tags'])
+                    && is_array($_REQUEST['default_tags_categories_default_tags']) ?
+                        array_map('absint', $_REQUEST['default_tags_categories_default_tags']) : [];
+        $categories = isset($_REQUEST['default_tags_categories_default_categories'])
+                    && is_array($_REQUEST['default_tags_categories_default_categories']) ?
+                        array_map('absint', $_REQUEST['default_tags_categories_default_categories']) : [];
         // phpcs:enable
         return [
             'tags'       => $tags,
@@ -198,15 +182,11 @@ class SaveSettings extends SaveAbstract
      */
     protected function handleSaving_calendar_page_id()
     {
-        // Nonce verification happens in SaveAbstract->is_this_to_execute().
-        // phpcs:disable WordPress.Security.NonceVerification.Missing
-        $calendar_page = isset($_POST['calendar_page_id']) ?
-            sanitize_text_field(wp_unslash($_POST['calendar_page_id'])) : null;
-        // phpcs:enable
-        if (
-            ! is_numeric($calendar_page) &&
-            preg_match('#^__auto_page:(.*?)$#', $calendar_page, $matches)
+        $calendar_page = RequestParser::get_param('calendar_page_id', null);
+        if (! is_numeric($calendar_page)
+            && preg_match('#^__auto_page:(.*?)$#', $calendar_page, $matches)
         ) {
+            // Provide required default.
             return wp_insert_post(
                 [
                     'post_title'     => $matches[1],
@@ -216,7 +196,6 @@ class SaveSettings extends SaveAbstract
                 ]
             );
         }
-
         return (int)$calendar_page;
     }
 }

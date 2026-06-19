@@ -333,14 +333,14 @@ class EventTaxonomyView extends OsecBaseClass
             $href  = HtmlFactory::factory($this->app)
                                 ->create_href_helper_instance(['cat_ids' => $category->term_id])
                                 ->generate_href();
-            $class = $data_type = $title = '';
+            $class = '';
+            $title = '';
             if ($category->description) {
-                $title = 'title="' .
-                         esc_attr($category->description) . '" ';
+                $title = 'title="' . esc_attr($category->description) . '" ';
             }
 
             $html        = '';
-            $class       .= ' ai1ec-category';
+            $class       .= 'ai1ec-category';
             $color_style = '';
             if ($format === 'inline') {
                 $taxonomy    = TaxonomyAdapter::factory($this->app);
@@ -353,7 +353,7 @@ class EventTaxonomyView extends OsecBaseClass
                 $class .= '-inline';
             }
 
-            $html .= '<a ' . $data_type . ' class="' . $class .
+            $html .= '<a class="' . $class .
                      ' ai1ec-term-id-' . $category->term_id . ' p-category" ' .
                      $title . $color_style . 'href="' . $href . '">';
 
@@ -367,7 +367,7 @@ class EventTaxonomyView extends OsecBaseClass
                     'class="ai1ec-fa ai1ec-fa-folder-open"></i>';
             }
 
-            $html     .= esc_html($category->name) . '</a>';
+            $html     .= '<span itemprop="keywords" >' . esc_html($category->name) . '</span></a>';
             $category = $html;
         }
 
@@ -391,16 +391,14 @@ class EventTaxonomyView extends OsecBaseClass
                                ->generate_href();
 
             $class     = '';
-            $data_type = '';
             $title     = '';
             if ($tag->description) {
                 $title = 'title="' . esc_attr($tag->description) . '" ';
             }
-            $tag = '<a ' . $data_type . ' class="ai1ec-tag ' . $class .
+            $tag = '<a class="ai1ec-tag' . $class .
                    ' ai1ec-term-id-' . $tag->term_id . '" ' . $title .
-                   'href="' . $href . '">' .
-                   '<i class="ai1ec-fa ai1ec-fa-tag"></i>' .
-                   esc_html($tag->name) . '</a>';
+                   'href="' . $href . '"><span itemprop="keywords">' .
+                   esc_html($tag->name) . '</span></a>';
         }
 
         return implode(' ', $tags);

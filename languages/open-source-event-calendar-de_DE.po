@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-3.0-or-later.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-05-20 08:35+0000\n"
+"PO-Revision-Date: 2026-03-27 08:40+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-04-27 10:26+0000\n"
 "Last-Translator: \n"
-"X-Loco-Version: 2.7.2; wp-6.8.1\n"
+"X-Loco-Version: 2.8.3; wp-6.9.4; php-8.3.30\n"
 "X-Loco-Fallback: de\n"
 "X-Loco-Template: ../../languages/plugins/open-source-event-calendar-de.po\n"
 "X-Loco-Template-Mode: PO,JSON"
@@ -38,6 +38,8 @@ msgid ""
 " <strong>Use featured image fallbacks</strong> if no featured image is set "
 "in event"
 msgstr ""
+"<strong>Verwende alternative Beitragsbildoptionen</strong>, falls im "
+"Ereignis kein Beitragsbild festgelegt ist"
 
 #: src/App/Model/Settings.php:591
 msgid " Hide <strong>Google Maps</strong> until clicked"
@@ -67,7 +69,6 @@ msgstr "<a href=\"%s\">Einstellungen</a>"
 
 #. translators: Error message
 #: src/App/Controller/FrontendCssController.php:381
-#, fuzzy
 #| msgid ""
 #| "<p><strong>There was an error while compiling CSS.</strong> The message "
 #| "returned was: <em>%s</em></p>"
@@ -80,7 +81,6 @@ msgstr ""
 
 #. translators: Url to cloned event
 #: src/Command/CommandClone.php:109
-#, fuzzy
 #| msgid ""
 #| "<p>The event <strong>%s</strong> was cloned succesfully. <a href=\"%s\">"
 #| "Edit cloned event</a></p>"
@@ -98,6 +98,9 @@ msgid ""
 "                                <a href=\"%1$s\">Download Zip</a> from <a "
 "href=\"%2$s\">GitHub</a>.</p>"
 msgstr ""
+"<p>Eine neuere Version des Open-Source-Veranstaltungskalenders ist verfügbar."
+" <a href=\"%1$s\">Laden Sie die ZIP-Datei</a> von <a href=\"%2$s\">GitHub</a>"
+" herunter.</p>"
 
 #: src/App/Model/Settings.php:759
 msgid "<strong>Disable address autocomplete</strong> function"
@@ -108,9 +111,11 @@ msgid ""
 "<strong>ERROR:</strong> There was an error connecting to the server, \n"
 "                            Please verify the settings are correct."
 msgstr ""
+"FEHLER: Es ist ein Fehler beim Verbinden mit dem Server aufgetreten.\n"
+"\n"
+"Bitte überprüfen Sie die Einstellungen."
 
 #: src/App/Model/PostTypeEvent/RobotsTxt.php:128
-#, fuzzy
 #| msgid ""
 #| "<strong>ERROR:</strong> There was an error storing <strong>robots."
 #| "txt</strong> to the server, the file could not be written."
@@ -132,6 +137,8 @@ msgid ""
 "<strong>Link CSS</strong> in <code>&lt;head&gt;</code>\n"
 "                            section when file cache is unavailable."
 msgstr ""
+"<strong>Verlinken Sie das CSS</strong> im <code>&lt;head&gt;</code> -Bereich,"
+" wenn der Dateicache nicht verfügbar ist."
 
 #: src/App/Model/Settings.php:554
 msgid "<strong>Show location in event titles</strong> in calendar views"
@@ -148,6 +155,8 @@ msgid ""
 "<strong>Skip <tt>in_the_loop()</tt> check </strong> \n"
 "                            that protects against multiple calendar output"
 msgstr ""
+"<strong>Überspringen Sie die <tt>in_the_loop()</tt>-Prüfung</strong> \n"
+"die vor mehrfacher Kalenderausgabe schützt."
 
 #: src/App/Model/Settings.php:507
 msgid "<strong>Word-wrap event stubs</strong> in Month view"
@@ -157,6 +166,8 @@ msgstr "In Monatsansicht <strong>Veranstaltungsauszüge umbrechen</strong>"
 msgid ""
 "Above WordPress default \"date_format\" is considered as \"long\" format."
 msgstr ""
+"Das oben genannte WordPress-Standardformat \"date_format\" wird als \"long\"-"
+"Format betrachtet."
 
 #: src/App/View/Admin/AdminThemeList.php:347
 msgid "Activate"
@@ -182,7 +193,7 @@ msgstr "Neue Veranstaltung hinzufügen"
 
 #: public/admin/plugins/ics/display_feeds.php:104
 msgid "Add new subscription"
-msgstr ""
+msgstr "Neues Abonnement hinzufügen"
 
 #: src/App/View/Calendar/CalendarSubscribeButtonView.php:29
 msgid "Add to Apple Calendar"
@@ -253,6 +264,8 @@ msgid ""
 "Events\">\n"
 "                            <span class=\"update-count\">%3$d</span></span>"
 msgstr ""
+"Alle Veranstaltungen <span class=\"update-plugins count-%1$d\" title=\"%2$d "
+"Anstehende Ereignisse\"><span class=\"update-count\">%3$d</span></span>"
 
 #: src/App/View/Calendar/OnedayView.php:106
 #: src/App/View/Calendar/WeekView.php:136
@@ -293,7 +306,7 @@ msgstr "Kommentare in importierten Veranstaltungen erlauben"
 #. translators: File name
 #: src/Cache/CacheFile.php:168
 msgid "An error occured while saving data to: %s"
-msgstr ""
+msgstr "Beim Speichern der Daten unter %s ist ein Fehler aufgetreten."
 
 #: src/App/View/RepeatRuleToText.php:203 src/App/View/RepeatRuleToText.php:240
 #: src/App/View/RepeatRuleToText.php:301
@@ -328,7 +341,7 @@ msgstr ""
 
 #: public/admin/feed_row.php:119 public/admin/plugins/ics/display_feeds.php:83
 msgid "Assign default time zone to events in UTC"
-msgstr ""
+msgstr "Weisen Sie Ereignissen die Standardzeitzone UTC zu."
 
 #: src/App/View/Admin/AdminPageAllEvents.php:213
 msgid "Author"
@@ -349,6 +362,8 @@ msgstr "Zurück zum Kalender"
 #: src/App/Model/Date/DateFormatsFrontend.php:78
 msgid "Backend Formats are in Osec Settings -> Adding/Editing Events."
 msgstr ""
+"Backend-Formate finden Sie unter Osec-Einstellungen -> Ereignisse "
+"hinzufügen/bearbeiten."
 
 #: src/App/Model/PostTypeEvent/EventParent.php:329
 msgid "Base Event"
@@ -371,12 +386,12 @@ msgstr "Basis-Wiederholungs-Veranstaltung"
 #: calendar_block/build/block.json calendar_block/src/block.json
 msgctxt "block description"
 msgid "Osec classic Bootstrap block."
-msgstr ""
+msgstr "Osec klassischer Bootstrap-Block."
 
 #: calendar_block/build/block.json calendar_block/src/block.json
 msgctxt "block title"
 msgid "Osec Calendar"
-msgstr ""
+msgstr "OSEC-Kalender"
 
 #: public/osec_themes/umbra/less/user_variables.php:6
 #: public/osec_themes/vortex/less/user_variables.php:6
@@ -407,7 +422,6 @@ msgid "Buy Tickets"
 msgstr "Tickets kaufen"
 
 #: public/admin/box_event_cost.php:48
-#, fuzzy
 #| msgid "Tickets URL:"
 msgid "Buy Tickets URL:"
 msgstr "Tickets-URL:"
@@ -423,11 +437,16 @@ msgid ""
 "                        this is likely the result of a temporary server "
 "error and time may resolve this issue"
 msgstr ""
+"Kalenderdaten konnten nicht abgerufen werden. Wenn Ihre URL gültig ist und "
+"eine iCalendar-Ressource enthält,\n"
+"\n"
+"handelt es sich wahrscheinlich um einen vorübergehenden Serverfehler, der "
+"sich mit der Zeit beheben lässt."
 
 #: src/App/View/Admin/AdminPageManageFeeds.php:32
 #: src/App/View/Admin/AdminPageManageFeeds.php:33
 msgid "Calendar Feeds"
-msgstr ""
+msgstr "Kalender-Feeds"
 
 #: src/App/View/Admin/AdminPageThemeOptions.php:144
 msgid "Calendar general"
@@ -450,7 +469,6 @@ msgstr "Kalender-Themes"
 
 #. translators: View Name
 #: src/App/View/Calendar/CalendarPageView.php:110
-#, fuzzy
 #| msgid ""
 #| "Calendar was unable to initialize %s view and has reverted to Agenda view."
 #| " Please check if you have installed the latest versions of calendar add-"
@@ -478,6 +496,14 @@ msgid ""
 "                        </code><br />or<br /><code>%4$</code><br /> are "
 "writable by php."
 msgstr ""
+"Die Methode WP_Filesystem() kann nicht zum Schreiben in die Datei %1$s "
+"verwendet werden.<br /><br /> Sie können OSEC_ENABLE_CACHE_FILE auf false "
+"setzen, um andere Cache-Methoden wie APCU oder DB zu verwenden und diese "
+"Meldung zu ignorieren.<br /><br /> <strong>ABER: Wenn wir keine Dateien "
+"schreiben können, ist der Twig-Cache deaktiviert.</strong><br /><br /> "
+"<strong>Stellen Sie sicher, dass</strong><br /> <code>%2$swp-"
+"content/uploads/%3$s</code><br /> oder<br /> <code>%4$</code><br /> sind von "
+"PHP beschreibbar."
 
 #: public/admin/plugins/ics/display_feeds.php:94
 #: src/App/View/Admin/AdminDateRepeatBox.php:116
@@ -517,7 +543,7 @@ msgstr "Erneut prüfen"
 
 #: public/admin/plugins/ics/display_feeds.php:19
 msgid "Check for new events"
-msgstr ""
+msgstr "Prüfen Sie, ob neue Ereignisse stattfinden"
 
 #: src/Settings/Elements/SettingsCache.php:88
 msgid "Checking..."
@@ -580,6 +606,13 @@ msgid ""
 "    Enter the feed URL(s) below and the events from those feeds will be\n"
 "    imported periodically."
 msgstr ""
+"Konfigurieren Sie, welche anderen Kalender Ihr eigener Kalender abonniert.\n"
+"\n"
+"Sie können jeden Kalender hinzufügen, der einen iCalendar-Feed (.ics) "
+"bereitstellt.\n"
+"\n"
+"Geben Sie die Feed-URL(s) unten ein. Die Ereignisse dieser Feeds werden dann "
+"regelmäßig importiert."
 
 #: public/admin/box_event_contact.php:22
 msgid "Contact name:"
@@ -613,11 +646,12 @@ msgstr "Preis:"
 #: src/App/Controller/LessController.php:169
 msgid "Could not map SASS import \"%1$s\" at theme \"%2$s\""
 msgstr ""
+"Der SASS-Import \"%1$s\" konnte dem Thema \"%2$s\" nicht zugeordnet werden."
 
 #. translators: filename
 #: src/Command/CompileCoreCss.php:83
 msgid "Could not write to file %s"
-msgstr ""
+msgstr "Datei %s konnte nicht geschrieben werden"
 
 #: src/Settings/Elements/SettingsShortcodesText.php:68
 msgid "creative writing"
@@ -631,6 +665,12 @@ msgid ""
 "render or function\n"
 "                      properly without CSS. Increase your PHP memory limit."
 msgstr ""
+"Die CSS-Kompilierung ist fehlgeschlagen, da nicht genügend freier Speicher "
+"vorhanden ist.\n"
+"\n"
+"(Mindestens %s erforderlich). Ihr Kalender wird ohne CSS nicht korrekt "
+"angezeigt oder funktioniert nicht.\n"
+"Erhöhen Sie das PHP-Speicherlimit."
 
 #: src/App/Model/Settings.php:870
 msgid "Current <strong>robots.txt</strong> on this site"
@@ -673,7 +713,7 @@ msgstr "Veranstaltung"
 #: src/App/Model/Date/DateFormatsFrontend.php:119
 #: src/App/Model/Date/DateFormatsFrontend.php:172
 msgid "Custom time format:"
-msgstr ""
+msgstr "Benutzerdefiniertes Zeitformat:"
 
 #: src/Settings/Elements/ThemeVariableFont.php:83
 msgid "Custom..."
@@ -682,7 +722,7 @@ msgstr "Individuell..."
 #: src/App/Model/Date/DateFormatsFrontend.php:114
 #: src/App/Model/Date/DateFormatsFrontend.php:167
 msgid "Custom:"
-msgstr ""
+msgstr "Brauch:"
 
 #: public/admin/cron_freq.php:13 src/App/View/Admin/AdminDateRepeatBox.php:77
 #: src/App/View/RepeatRuleToText.php:83
@@ -690,7 +730,6 @@ msgid "Daily"
 msgstr "Täglich"
 
 #: src/Exception/DatabaseErrorException.php:22
-#, fuzzy
 #| msgid ""
 #| "Database update has failed. Please make sure, that database user, defined "
 #| "in <em>wp-config.php</em> has permissions, to make changes (<strong>ALTER "
@@ -775,7 +814,7 @@ msgstr "Desktop"
 #. Author of the plugin
 #: open-source-event-calendar.php
 msgid "digitaldonkey, Time.ly Network Inc"
-msgstr ""
+msgstr "digitaldonkey, Time.ly Network Inc"
 
 #: src/App/Model/Settings.php:920
 msgid "Display events in <strong>calendar time zone</strong>"
@@ -787,7 +826,7 @@ msgstr "Anzeige Optionen"
 
 #: src/App/Model/Settings.php:904
 msgid "Display print icon"
-msgstr ""
+msgstr "Drucksymbol anzeigen"
 
 #: src/App/Controller/FeedsController.php:679
 msgid ""
@@ -867,7 +906,7 @@ msgstr "Endet nach"
 #: src/App/Model/Date/DateFormatsFrontend.php:115
 #: src/App/Model/Date/DateFormatsFrontend.php:168
 msgid "enter a custom time format in the following field:"
-msgstr ""
+msgstr "Geben Sie im folgenden Feld ein benutzerdefiniertes Zeitformat ein:"
 
 #: src/Settings/Elements/ThemeVariableFont.php:101
 msgid "Enter custom font(s)"
@@ -989,7 +1028,6 @@ msgstr "Veranstaltung gespeichert."
 
 #. translators: 1: Date 2: Url
 #: src/App/View/Event/EventPostView.php:66
-#, fuzzy
 #| msgid ""
 #| "Event scheduled for: <strong>%1$s</strong>. <a target=\"_blank\" "
 #| "href=\"%2$s\">Preview event</a>"
@@ -1054,7 +1092,7 @@ msgstr "Veranstaltung aktualisiert. <a href=\"%s\">Veranstaltung anzeigen</a>"
 #. translators: Timezone
 #: src/App/View/Event/EventSingleView.php:126
 msgid "Event was created in the %s time zone"
-msgstr ""
+msgstr "Das Ereignis wurde in der Zeitzone %s erstellt."
 
 #: src/App/View/Event/EventTicketView.php:105
 msgid "Event website"
@@ -1117,7 +1155,7 @@ msgstr "Ausschließen"
 
 #: src/App/View/Event/EventSingleView.php:172
 msgid "Excludes"
-msgstr ""
+msgstr "Ausgeschlossen"
 
 #: src/App/View/Calendar/AgendaView.php:170
 msgid "Expand All"
@@ -1135,7 +1173,7 @@ msgstr "Feld-Beschriftung"
 #. translators: File name
 #: src/Cache/CacheFile.php:296
 msgid "File %s does not exist"
-msgstr ""
+msgstr "Die Datei %s existiert nicht."
 
 #: src/Settings/Elements/SettingsShortcodesText.php:61
 msgid "Filter by event category ID:"
@@ -1185,7 +1223,7 @@ msgstr "Nach Beitrags-IDs filtern (IDs durch Komma trennen):"
 
 #: src/Settings/Elements/SettingsShortcodesText.php:51
 msgid "Filters"
-msgstr ""
+msgstr "Filter"
 
 #: src/App/View/Admin/AdminDateRepeatBox.php:510
 msgid "first"
@@ -1219,7 +1257,6 @@ msgid "Free"
 msgstr "Kostenlos"
 
 #: public/admin/box_event_cost.php:39
-#, fuzzy
 #| msgid "Free Event"
 msgid "Free event"
 msgstr "Kostenlose Veranstaltung"
@@ -1249,7 +1286,7 @@ msgstr "Einen Timely-Kalender erhalten"
 #. translators: 1: Offset hours 2: Offset minutes
 #: src/App/Model/Date/UIDateFormats.php:190
 msgid "GMT%1$s:%2$s"
-msgstr ""
+msgstr "GMT%1$s:%2$s"
 
 #: src/App/Model/Notifications/NotificationAdmin.php:186
 msgid "Got it – dismiss this"
@@ -1260,12 +1297,16 @@ msgid ""
 "Guesses the time zone of events that have none specified; recommended for "
 "Google Calendar feeds"
 msgstr ""
+"Ermittelt die Zeitzone von Ereignissen, für die keine Zeitzone angegeben ist;"
+" empfohlen für Google Kalender-Feeds."
 
 #: src/App/Model/Settings.php:578
 msgid ""
 "Hide <strong>Subscribe</strong>/<strong>Add to Calendar</strong> \n"
 "                            buttons in calendar and single event views "
 msgstr ""
+"Die Schaltflächen „Abonnieren“ und „Zum Kalender hinzufügen“ in der Kalender-"
+" und Einzelereignisansicht ausblenden"
 
 #: src/Settings/Elements/SettingsShortcodesText.php:54
 msgid "Holidays"
@@ -1278,23 +1319,22 @@ msgstr "Stündlich"
 #. Author URI of the plugin
 #: open-source-event-calendar.php
 msgid "https://github.com/digitaldonkey"
-msgstr ""
+msgstr "https://github.com/digitaldonkey"
 
 #. Plugin URI of the plugin
 #: open-source-event-calendar.php
 msgid "https://github.com/digitaldonkey/open-source-event-calendar"
-msgstr ""
+msgstr "https://github.com/digitaldonkey/open-source-event-calendar"
 
 #: public/admin/feed_row.php:17 public/admin/plugins/ics/display_feeds.php:31
 msgid "iCalendar/.ics Feed URL:"
-msgstr ""
+msgstr "iCalendar/.ics Feed-URL:"
 
 #: src/App/Controller/FeedsController.php:647
 msgid "ICS"
-msgstr ""
+msgstr "ICS"
 
 #: src/App/Model/Settings.php:924
-#, fuzzy
 #| msgid ""
 #| "If this box is checked events will appear in the calendar time zone with "
 #| "time zone information displayed on the event details page."
@@ -1330,6 +1370,8 @@ msgid ""
 "In Agenda-like views, <strong>include all events\n"
 "                            from last day shown</strong>"
 msgstr ""
+"In Agenda-ähnlichen Ansichten <strong>alle Ereignisse des letzten Tages "
+"anzeigen</strong>"
 
 #: public/admin/box_event_location.php:49
 msgid "Input Coordinates"
@@ -1337,7 +1379,7 @@ msgstr "Koordinaten eingeben"
 
 #: src/App/Model/Settings.php:720
 msgid "Input date format"
-msgstr ""
+msgstr "Datumsformat eingeben"
 
 #: public/osec_themes/umbra/less/user_variables.php:96
 #: public/osec_themes/vortex/less/user_variables.php:96
@@ -1376,14 +1418,13 @@ msgstr "Ungültige ICS-Feed-ID"
 
 #: src/App/Controller/FeedsController.php:860
 msgid "Invalid parameter"
-msgstr ""
+msgstr "Ungültiger Parameter"
 
 #: src/App/Model/Settings.php:731
 msgid "ISO 8601 (yyyy-m-d)"
 msgstr "ISO 8601 (yyyy-m-d)"
 
 #: src/Settings/Elements/SettingsShortcodesText.php:86
-#, fuzzy
 #| msgid ""
 #| "It is currently not supported to embed more than one calendar in the same "
 #| "page. Do not attempt to embed the calendar via shortcode in a page that "
@@ -1402,6 +1443,8 @@ msgstr ""
 msgid ""
 "Keep all events <strong>expanded</strong> in Agenda view (disables toggler)."
 msgstr ""
+"Alle Ereignisse in der Agenda-Ansicht <strong>erweitert</strong> anzeigen "
+"(Umschalter deaktiviert)."
 
 #: src/App/Controller/FeedsController.php:683
 msgid "Keep Events"
@@ -1578,10 +1621,9 @@ msgstr "Keine Veranstaltungen im Papierkorb gefunden"
 
 #: src/App/Controller/RestController.php:66
 msgid "Not allowed"
-msgstr ""
+msgstr "Nicht erlaubt"
 
 #: src/Settings/Elements/SettingsCache.php:46
-#, fuzzy
 #| msgid "Not available"
 msgid "Not Available"
 msgstr "Nicht verfügbar"
@@ -1645,19 +1687,20 @@ msgstr ""
 #: open-source-event-calendar.php
 #: src/App/Model/Notifications/NotificationAdmin.php:184
 msgid "Open Source Event Calendar"
-msgstr ""
+msgstr "Open-Source-Veranstaltungskalender"
 
 #: src/Exception/ExceptionHandler.php:475
 msgid "Open Source Event Calendar has been disabled due to an error:"
 msgstr ""
+"Der Open Source Event Calendar wurde aufgrund eines Fehlers deaktiviert:"
 
 #: src/App/View/Admin/AdminPageSettings.php:27
 msgid "Open Source Event Calendar: Settings"
-msgstr ""
+msgstr "Open Source Event Calendar: Einstellungen"
 
 #: src/App/View/Admin/AdminPageManageThemes.php:37
 msgid "Open Source Event Calendar: Themes"
-msgstr ""
+msgstr "Open-Source-Veranstaltungskalender: Themen"
 
 #: src/Settings/Elements/SettingsShortcodesText.php:52
 msgid "Optional."
@@ -1680,11 +1723,20 @@ msgid ""
 "                            calendar. Will only work if selector is <strong>"
 "outside</strong> the page content loop."
 msgstr ""
+"Optional. Verwenden Sie diese JavaScript-basierte Abkürzung, um den Kalender "
+"in einem anderen DOM-Element als dem üblichen Seiteninhaltscontainer zu "
+"platzieren, falls Sie keine geeignete Seitenvorlage für die Kalenderseite "
+"erstellen können. Geben Sie dazu einen <a target=\"_blank\" href=\"https:"
+"//api.jquery.com/category/selectors/\">jQuery-Selektor</a> ein, der auf ein "
+"einzelnes DOM-Element verweist. Jeglicher vorhandener Code innerhalb des "
+"Zielelements wird durch den Kalender ersetzt. Dies funktioniert nur, wenn "
+"sich der Selektor <strong>außerhalb</strong> der Seiteninhaltsschleife "
+"befindet."
 
 #: src/App/View/Admin/AdminPageViewThemeOptions.php:29
 #: src/App/View/Admin/AdminPageViewThemeOptions.php:30
 msgid "Options lookup"
-msgstr ""
+msgstr "Optionssuche"
 
 #: src/App/View/Admin/AdminPageManageTaxonomies.php:114
 msgid "Organize Events"
@@ -1701,18 +1753,21 @@ msgid ""
 "                            provides additional <strong>frontend date "
 "formats</strong>."
 msgstr ""
+"Der OSEC-Kalender verwendet die oben genannten WordPress-Standardformate "
+"„date_format“ und „time_format“ und bietet zusätzlich <strong>Frontend-"
+"Datumsformate</strong> an."
 
 #: src/App/Model/Date/DateFormatsFrontend.php:64
 msgid "Osec Frontend Date Formats"
-msgstr ""
+msgstr "OSEC-Frontend-Datumsformate"
 
 #: src/App/Controller/BlockController.php:54
 msgid "osec-editor-style"
-msgstr ""
+msgstr "osec-Editor-Stil"
 
 #: src/App/View/Admin/AdminPageManageFeeds.php:70
 msgid "OSEC: Calendar Feeds"
-msgstr ""
+msgstr "OSEC: Kalender-Feeds"
 
 #: src/App/Model/PostTypeEvent/EventType.php:145
 msgid "Parent Event"
@@ -1878,6 +1933,8 @@ msgid ""
 "Renders calendar views on the client rather than the server; \n"
 "                            significantly improves performance."
 msgstr ""
+"Rendert Kalenderansichten clientseitig statt serverseitig; \n"
+"verbessert die Leistung deutlich."
 
 #: public/admin/box_time_and_date.php:110
 msgid "Repeat"
@@ -1919,6 +1976,8 @@ msgstr "zweiten"
 #: src/Bootstrap/EnvironmentCheck.php:51
 msgid "Select an option in the <strong>Calendar page</strong> dropdown list."
 msgstr ""
+"Wählen Sie eine Option in der Dropdown-Liste auf der Seite <Kalender</strong>"
+" aus."
 
 #: src/App/Model/Settings.php:706
 msgid ""
@@ -1928,6 +1987,10 @@ msgid ""
 "osec_avatar_valid_callbacks.\n"
 "                        "
 msgstr ""
+"Wählen Sie aus, ob Kategoriebilder als Fallback für Beitragsbilder auf der "
+"Veranstaltungsseite verwendet werden sollen. Die Fallbacks können über den "
+"Hook `osec_avatar_valid_callbacks` gesteuert werden.\n"
+"\n"
 
 #: src/App/View/Admin/AdminDateRepeatBox.php:76
 msgid "Select recurrence pattern:"
@@ -1951,6 +2014,8 @@ msgid ""
 "Serve CSS as a link if file cache is not enabled rather than have  \n"
 "                            it output inline (recommended)."
 msgstr ""
+"CSS als Link bereitstellen, wenn der Dateicache nicht aktiviert ist, anstatt "
+"es inline auszugeben (empfohlen)."
 
 #: src/App/Model/Date/Timezones.php:442
 #: src/App/View/Admin/AdminPageSettings.php:67
@@ -1987,7 +2052,6 @@ msgid "Some Other view:"
 msgstr "Eine andere Ansicht:"
 
 #: src/App/Controller/ScriptsFrontendController.php:419
-#, fuzzy
 #| msgid ""
 #| "Something went wrong while fetching events.<br>The request status is: "
 #| "#STATUS# <br>The error thrown was: #ERROR#"
@@ -2105,7 +2169,6 @@ msgid "The end date can't be earlier than the start date."
 msgstr "Das Enddatum kann nicht vor dem Anfangsdatum liegen."
 
 #: src/App/Controller/FrontendCssController.php:369
-#, fuzzy
 #| msgid ""
 #| "The LESS file compiled correctly but there was an error while saving the "
 #| "generated CSS to persistence."
@@ -2117,7 +2180,6 @@ msgstr ""
 "dauerhaften Speichern des erzeugten CSS auf."
 
 #: src/Bootstrap/EnvironmentCheck.php:78
-#, fuzzy
 #| msgid ""
 #| "The plugin is installed, but has not been configured. Please log in as an "
 #| "Administrator to set it up."
@@ -2135,6 +2197,8 @@ msgid ""
 "                         <a href=\"%s\">Click here to set it up now &raquo;"
 "</a>"
 msgstr ""
+"Das Plugin ist installiert, aber noch nicht konfiguriert. <a href=\"%s\">"
+"Klicken Sie hier, um es jetzt einzurichten »</a>"
 
 #: src/App/Model/Settings.php:874
 msgid ""
@@ -2149,11 +2213,18 @@ msgid ""
 "\t\t\t\t\t\tYou can change it manually by editing <code>robots.txt</code> \n"
 "\t\t\t\t\t\tin your root WordPress directory."
 msgstr ""
+"Der Robot Exclusion Standard (auch bekannt als Robots Exclusion Protocol "
+"oder <code><a href=\"https://en.wikipedia.org/wiki/Robots.txt\" "
+"target=\"_blank\">robots.txt</a></code> -Protokoll) ist eine Konvention für "
+"Webcrawler und andere Web-Roboter, die den Zugriff auf öffentlich "
+"zugängliche Webseiten regeln. Sie können diese Konvention manuell ändern, "
+"indem Sie <code>robots.txt</code> in Ihrem WordPress-Stammverzeichnis "
+"bearbeiten."
 
 #. translators: 1: template dir
 #: src/App/View/Admin/AdminThemeList.php:383
 msgid "The template files are located in %s."
-msgstr ""
+msgstr "Die Vorlagendateien befinden sich in %s."
 
 #: src/App/Controller/ScriptsFrontendController.php:353
 msgid "The value you have entered is not a valid CSS length."
@@ -2165,6 +2236,8 @@ msgid ""
 "Theme CSS compiled succesfully and written in %1$s. and classmap stored in "
 "%2$s."
 msgstr ""
+"Das Theme-CSS wurde erfolgreich kompiliert und in %1$s geschrieben. Die "
+"Klassenzuordnung ist in %2$s gespeichert."
 
 #: public/admin/themes.php:18
 msgid "Theme deleted."
@@ -2196,7 +2269,6 @@ msgid "There are no upcoming events to display at this time."
 msgstr "Zurzeit gibt es keine bevorstehenden Veranstaltungen."
 
 #: src/App/View/Calendar/CalendarPageView.php:86
-#, fuzzy
 #| msgid ""
 #| "There was an error loading calendar. Please contact site administrator "
 #| "and inform him to configure calendar views."
@@ -2221,10 +2293,11 @@ msgid ""
 "This is an alias to wp-settings timezone and could also be \n"
 "                            changed on /wp-admin/options-general.php."
 msgstr ""
+"Dies ist ein Alias für wp-settings timezone und kann auch in der Datei /wp-"
+"admin/options-general.php geändert werden."
 
 #. translators: Url
 #: src/App/View/Event/EventSingleView.php:29
-#, fuzzy
 #| msgid ""
 #| "This post was replicated from another site's <a href=\"%s\" "
 #| "title=\"iCalendar feed\"><i class=\"ai1ec-fa ai1ec-fa-calendar\"></i> "
@@ -2261,7 +2334,6 @@ msgstr "Zeitzone"
 
 #. translators: 1: Timezone offset 2: LinkOpen 3: 2: LinkClose
 #: src/App/Model/Date/Timezones.php:573
-#, fuzzy
 #| msgid ""
 #| "Timezone \"UTC%+d\" is not recognized. Please %suse valid%s timezone name,"
 #| " until then events will be created in UTC timezone."
@@ -2308,6 +2380,12 @@ msgid ""
 "                            <code>the_content()</code> from outside of The "
 "Loop. Leave disabled otherwise."
 msgstr ""
+"Aktivieren Sie diese Option, falls Ihr Kalender nicht auf der Kalenderseite "
+"angezeigt wird. Sie ist für die Kompatibilität mit einigen wenigen Themes "
+"erforderlich, die\n"
+"\n"
+"<code>the_content()</code> außerhalb von The Loop aufrufen. Lassen Sie die "
+"Option ansonsten deaktiviert."
 
 #: src/Exception/ExceptionHandler.php:484
 msgid "Try reactivating plugin"
@@ -2323,7 +2401,7 @@ msgstr "Zweimal täglich"
 
 #: src/Settings/Elements/SettingsCache.php:87
 msgid "Twig cache is writable (FileCache(\"twig\"))"
-msgstr ""
+msgstr "Der Twig-Cache ist beschreibbar (FileCache(\"twig\"))"
 
 #. translators: Date
 #: src/App/View/RepeatRuleToText.php:155
@@ -2336,19 +2414,23 @@ msgstr "Einstellungen aktualisieren"
 
 #: public/admin/plugins/ics/display_feeds.php:107
 msgid "Update subscription"
-msgstr ""
+msgstr "Abonnement aktualisieren"
 
 #: src/App/Controller/ScriptsFrontendController.php:381
 msgid ""
 "URL in <b>Event Cost and Tickets</b> &gt; <b>Buy Tickets URL</b> seems to be "
 "invalid."
 msgstr ""
+"Die URL unter <b>„Veranstaltungskosten und Tickets</b> &gt; <b>Tickets "
+"kaufen“</b> scheint ungültig zu sein."
 
 #: src/App/Controller/ScriptsFrontendController.php:377
 msgid ""
 "URL in <b>Organizer Contact Info</b> &gt; <b>Website URL</b> seems to be "
 "invalid."
 msgstr ""
+"Die URL unter <b>„Kontaktinformationen des Veranstalters</b> &gt; <b>Website-"
+"URL“</b> scheint ungültig zu sein."
 
 #: src/App/Model/Settings.php:727
 msgid "US (m/d/yyyy)"
@@ -2363,9 +2445,11 @@ msgid ""
 "Use the configured <strong>region</strong> (WordPress locale) \n"
 "                            to bias the address autocomplete function "
 msgstr ""
+"Verwenden Sie die konfigurierte <strong>Region</strong> (WordPress-"
+"Gebietsschema) \n"
+"um die Adressvervollständigungsfunktion zu beeinflussen"
 
 #: src/Settings/Elements/SettingsShortcodesText.php:39
-#, fuzzy
 #| msgid ""
 #| "Insert one of these shortcodes into your page body to embed the calendar "
 #| "into any arbitrary WordPress Page:"
@@ -2378,7 +2462,7 @@ msgstr ""
 
 #: src/App/Controller/FeedsController.php:797
 msgid "User not allowed to manage feeds."
-msgstr ""
+msgstr "Dieser Benutzer hat keine Berechtigung, Feeds zu verwalten."
 
 #: public/admin/box_event_location.php:23
 msgid "Venue name:"
@@ -2410,13 +2494,13 @@ msgstr "Veranstaltungen anzeigen"
 
 #: src/Settings/Elements/SettingsShortcodesText.php:43
 msgid "Views"
-msgstr ""
+msgstr "Ansichten"
 
 # Short week name or number
 #. translators: Short week name or number
 #: src/App/View/Calendar/WeekView.php:65
 msgid "W%s"
-msgstr ""
+msgstr "W%s"
 
 #: src/Settings/Elements/SettingsShortcodesText.php:85
 msgid "Warning:"
@@ -2443,7 +2527,6 @@ msgstr[1] "Wochen"
 
 #. translators: Long week name or number
 #: src/App/View/Calendar/WeekView.php:57
-#, fuzzy
 #| msgid "Week of %s"
 msgid "Week %s"
 msgstr "Woche vom %s"
@@ -2520,6 +2603,8 @@ msgstr "Nur große Bildschirme (&#8805; 1200px)"
 #: open-source-event-calendar.php
 msgid "With Osec you can create, share and aggregate and import (ical, ics)"
 msgstr ""
+"Mit Osec können Sie Dateien erstellen, freigeben, aggregieren und "
+"importieren (ical, ics)."
 
 #: src/App/Model/Date/DT.php:145
 msgid ""
@@ -2527,11 +2612,14 @@ msgid ""
 "                     This plugin assumes this too.\n"
 "                     Ensure date_default_timezone_get() will return `UTC`"
 msgstr ""
+"WordPress benötigt die PHP-Standardzeitzone UTC.\n"
+"Dieses Plugin setzt dies ebenfalls voraus. Stellen Sie sicher, dass "
+"`date_default_timezone_get()` den Wert `UTC` zurückgibt."
 
 #. translators: WP error message
 #: src/App/Controller/FeedsController.php:412
 msgid "WP error trying to fetch. Error message: %s"
-msgstr ""
+msgstr "WP-Fehler beim Abrufen. Fehlermeldung: %s"
 
 #: src/App/View/Admin/AdminDateRepeatBox.php:465
 msgid "year(s)"
@@ -2550,17 +2638,18 @@ msgstr "Ja"
 
 #: src/App/Model/Settings.php:908
 msgid "You may re-add the oldschool print icon."
-msgstr ""
+msgstr "Sie können das altmodische Drucksymbol wieder hinzufügen."
 
 #: src/Twig/TwigDebugExtension.php:37
 msgid ""
 "You need to enable xdebug or run `composer install` to use Twig debug() in "
 "twig files."
 msgstr ""
+"Um Twig debug() in Twig-Dateien verwenden zu können, müssen Sie xdebug "
+"aktivieren oder `composer install` ausführen."
 
 #. translators: Url
 #: src/App/View/Admin/AdminThemeList.php:241
-#, fuzzy
 #| msgid ""
 #| "You only have one theme enabled for this site right now. Visit the "
 #| "Network Admin to <a href=\"%1$s\">enable</a> more themes."
@@ -2574,7 +2663,6 @@ msgstr ""
 
 #. translators: 1: Url 2: Url
 #: src/App/View/Admin/AdminThemeList.php:222
-#, fuzzy
 #| msgid ""
 #| "You only have one theme enabled for this site right now. Visit the "
 #| "Network Admin to <a href=\"%1$s\">enable</a> or <a href=\"%2$s\">"
@@ -2591,7 +2679,7 @@ msgstr ""
 
 #: src/App/View/Admin/AdminThemeList.php:259
 msgid "You only have one theme installed right now."
-msgstr ""
+msgstr "Sie haben derzeit nur ein Theme installiert."
 
 #: src/Theme/ThemeLoader.php:529
 msgid ""
@@ -2602,6 +2690,14 @@ msgid ""
 "                        </code> file:<pre>define( \"OSEC_DEBUG\", true );"
 "</pre>"
 msgstr ""
+"Ihr Kalender-Theme wurde aufgrund eines Darstellungsproblems auf Vortex "
+"umgestellt. Weitere Informationen finden Sie in der Datei `wp-config.php` "
+"von WordPress.\n"
+"\n"
+"Bitte aktivieren Sie den Debug-Modus, indem Sie die folgende Zeile "
+"hinzufügen: `<code>wp-config.php</code>`\n"
+"\n"
+"`<pre>define( \"OSEC_DEBUG\", true );</pre>`"
 
 #. translators: Compile error
 #: src/App/Controller/FrontendCssController.php:146
@@ -2610,6 +2706,9 @@ msgid ""
 "                                    which causes your calendar to perform "
 "slowly. The following error occurred: %s"
 msgstr ""
+"Ihr CSS wird bei jeder Anfrage neu kompiliert,\n"
+"was die Leistung Ihres Kalenders beeinträchtigt. Es ist folgender Fehler "
+"aufgetreten: %s"
 
 #: src/Settings/Elements/SettingsShortcodesText.php:56
 msgid "zodiac-date-ranges"

@@ -26,11 +26,11 @@ class TwigLoader extends FilesystemLoader
      */
     public function getCacheKey(string $name): string
     {
-        // namespace style separators avoid OS colisions.
+        // Namespace style separators avoid OS collisions.
         $cache_key = str_replace('/', '\\', $this->findTemplate($name));
         // make path relative
         $cache_key = str_replace(
-            str_replace('/', '\\', WP_PLUGIN_DIR . '/'),
+            str_replace('/', '\\', OSEC_PATH),
             '',
             $cache_key
         );

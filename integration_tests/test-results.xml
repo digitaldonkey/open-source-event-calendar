@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="70.943" tests="12" failures="0">
+  <testsuite name="Root Suite" timestamp="2026-05-31T05:21:22" tests="0" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Plugin install &amp; Setup" timestamp="2026-05-31T05:21:22" tests="3" file="/Users/tho/htdocs/ddev-wordpress/wp-content/plugins/open-source-event-calendar/integration_tests/test/01_OsecPluginInstall.spec.js" time="13.651" failures="0">
+    <testcase name="Plugin install &amp; Setup WordPress activate Osec plugin" time="4.401" classname="WordPress activate Osec plugin">
+    </testcase>
+    <testcase name="Plugin install &amp; Setup Update osec settings" time="2.213" classname="Update osec settings">
+    </testcase>
+    <testcase name="Plugin install &amp; Setup Check for OSEC_UNINSTALL_PLUGIN_DATA to be TRUE by re-enabling." time="3.704" classname="Check for OSEC_UNINSTALL_PLUGIN_DATA to be TRUE by re-enabling.">
+    </testcase>
+  </testsuite>
+  <testsuite name="Backend tests" timestamp="2026-05-31T05:21:36" tests="4" file="/Users/tho/htdocs/ddev-wordpress/wp-content/plugins/open-source-event-calendar/integration_tests/test/02_OsecPluginBackend.spec.js" time="14.305" failures="0">
+    <testcase name="Backend tests View osec cache settings" time="2.276" classname="View osec cache settings">
+    </testcase>
+    <testcase name="Backend tests View and save osec theme settings" time="3.271" classname="View and save osec theme settings">
+    </testcase>
+    <testcase name="Backend tests Add ICS calendar feed" time="3.075" classname="Add ICS calendar feed">
+    </testcase>
+    <testcase name="Backend tests Delete ICS calendar feed" time="1.688" classname="Delete ICS calendar feed">
+    </testcase>
+  </testsuite>
+  <testsuite name="Frontend tests" timestamp="2026-05-31T05:21:50" tests="0" file="/Users/tho/htdocs/ddev-wordpress/wp-content/plugins/open-source-event-calendar/integration_tests/test/03_OsecPluginFrontend.spec.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Test theme: plana?" timestamp="2026-05-31T05:21:51" tests="0" file="/Users/tho/htdocs/ddev-wordpress/wp-content/plugins/open-source-event-calendar/integration_tests/test/03_OsecPluginFrontend.spec.js" time="0.000" failures="0">
+  </testsuite>
+  <testsuite name="Run tests for: plana" timestamp="2026-05-31T05:21:58" tests="5" file="/Users/tho/htdocs/ddev-wordpress/wp-content/plugins/open-source-event-calendar/integration_tests/test/03_OsecPluginFrontend.spec.js" time="35.491" failures="0">
+    <testcase name="Frontend tests Test theme: plana? Run tests for: plana Set up theme" time="1.011" classname="Set up theme">
+    </testcase>
+    <testcase name="Frontend tests Test theme: plana? Run tests for: plana Add daily repeating event" time="10.511" classname="Add daily repeating event">
+    </testcase>
+    <testcase name="Frontend tests Test theme: plana? Run tests for: plana Delete daily repeating event" time="4.743" classname="Delete daily repeating event">
+    </testcase>
+    <testcase name="Frontend tests Test theme: plana? Run tests for: plana Verify Event with map" time="8.518" classname="Verify Event with map">
+    </testcase>
+    <testcase name="Frontend tests Test theme: plana? Run tests for: plana Verify Excerpt" time="7.048" classname="Verify Excerpt">
+    </testcase>
+  </testsuite>
+</testsuites>

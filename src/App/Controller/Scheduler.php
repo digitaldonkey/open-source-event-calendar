@@ -57,7 +57,7 @@ class Scheduler extends OsecBaseClass
             $this->shutdown(...)
         );
         add_filter(
-            'ai1ec_settings_initiated',
+            'osec_settings_initiated',
             $this->settings_initiated_hook(...)
         );
     }

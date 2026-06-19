@@ -64,7 +64,7 @@ class MetaAdapterUser extends MetaAdapterAbstract
             null
         );
         if (null !== $new_value) {
-            if ( ! in_array($new_value, timezone_identifiers_list())) {
+            if ( ! in_array($new_value, timezone_identifiers_list(), true)) {
                 return false;
             }
             $success = false;

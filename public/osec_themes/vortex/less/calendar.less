@@ -152,6 +152,7 @@
 // Overhead nav buttons.
 .ai1ec-pagination {
 	> .ai1ec-btn {
+		min-width: 3.5em;
 		text-transform: uppercase;
 	}
 }
@@ -189,7 +190,7 @@ table.ai1ec-month-view,
 .ai1ec-oneday-view table {
 	border-collapse: collapse;
 	border: 1px solid @table-border-color !important;
-	margin: 0 !important;
+	margin: 0;
 	background: @table-bg;
 	table-layout: fixed !important;
 	clear: both;
@@ -199,7 +200,7 @@ table.ai1ec-month-view,
 	}
 }
 table.ai1ec-month-view {
-	margin-bottom: 6px !important;
+	margin-bottom: 6px;
 }
 table.ai1ec-week-view-original,
 table.ai1ec-oneday-view-original {
@@ -484,7 +485,8 @@ table.ai1ec-oneday-view-original {
 		margin: 0 0 1px;
 	}
 	// Apply word wrapping if enabled.
-	.ai1ec-word-wrap& {
+	&.ai1ec-word-wrap {
+
 		.ai1ec-event {
 			border-bottom: 1px dotted @table-border-color;
 			height: auto;
@@ -688,7 +690,6 @@ table.ai1ec-oneday-view-original {
 			}
 		}
 		.ai1ec-event-header {
-			cursor: pointer;
 			&:hover .ai1ec-event-toggle {
 				color: mix( @text-color, @agenda-date-title-bg, 85% );
 			}
@@ -696,7 +697,6 @@ table.ai1ec-oneday-view-original {
 		.ai1ec-event-title {
 			color: @event-default-color;
 			font-weight: bold;
-			font-size: 10.5pt;
 			margin: 0 0 0.4em;
 			.ai1ec-transition( color 0.1s );
 		}

@@ -43,9 +43,8 @@ class Request extends OsecBaseClass
      */
     public function is_ajax()
     {
-
-        // phpcs:disable WordPress.Security.NonceVerification
-        if (defined('DOING_AJAX') && DOING_AJAX) {
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
+        if (defined('DOING_AJAX')) {
             return true;
         }
         if (
@@ -131,14 +130,34 @@ class Request extends OsecBaseClass
      */
     public function get_current_action()
     {
-        // phpcs:disable WordPress.Security.NonceVerification
-        if (isset($_REQUEST['action']) && -1 != $_REQUEST['action']) {
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended
+        if (isset($_REQUEST['action']) && (int) $_REQUEST['action'] !== -1) {
             return sanitize_key($_REQUEST['action']);
         }
-        if (isset($_REQUEST['action2']) && -1 != $_REQUEST['action2']) {
+        if (isset($_REQUEST['action2']) && (int)$_REQUEST['action2'] !== -1) {
             return sanitize_key($_REQUEST['action2']);
         }
         // phpcs: enable
         return null;
+    }
+
+    public static function get_protocoll()
+    {
+        $isSecure = false;
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+            $isSecure = true;
+        } elseif (
+            (
+                ! empty($_SERVER['HTTP_X_FORWARDED_PROTO'])
+                && sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_PROTO'])) === 'https'
+            )
+            || (
+                ! empty($_SERVER['HTTP_X_FORWARDED_SSL'])
+                && sanitize_text_field(wp_unslash($_SERVER['HTTP_X_FORWARDED_SSL'])) === 'on'
+            )
+        ) {
+            $isSecure = true;
+        }
+        return $isSecure ? 'https' : 'http';
     }
 }

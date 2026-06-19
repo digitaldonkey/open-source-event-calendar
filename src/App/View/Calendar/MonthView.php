@@ -72,7 +72,8 @@ class MonthView extends AbstractView
             'type'                     => 'month',
             'weekdays'                 => $this->get_weekdays(),
             'cell_array'               => $cell_array,
-            'show_location_in_title'   => $settings->get('show_location_in_title'),
+            'show_location_in_title'   => $this->app->settings->get('feature_event_location')
+                                            && $this->app->settings->get('show_location_in_title'),
             'month_word_wrap'          => $settings->get('month_word_wrap'),
             'post_ids'                 => implode(',', $args['post_ids']),
             'data_type'                => $args['data_type'],
@@ -315,30 +316,21 @@ class MonthView extends AbstractView
                     'start_truncated'  => $evt->get('start_truncated'),
                     'end_truncated'    => $evt->get('end_truncated'),
                     'popup_timespan'   => TwigExtension::timespan($evt, 'short'),
-                    'avatar'           => TwigExtension::avatar(
-                        $evt,
-                        [
-                            'post_thumbnail',
-                            'content_img',
-                            'location_avatar',
-                            'category_avatar',
-                        ],
-                        '',
-                        false
-                    ),
+                    'avatar'           => $evt->getavatar(true),
+                    'avatar_not_wrapped' => $evt->getavatar(false),
                 ];
             }
             $weeks[$week][] = [
                 'date'      => $i,
                 'date_link' => $this->create_link_for_day_view($exact_date),
                 'today'     =>
-                    $timestamp->format('Y') == $today->format('Y') &&
-                    $timestamp->format('m') == $today->format('m') &&
-                    $i == $today->format('j'),
+                    $timestamp->format('Y') === $today->format('Y') &&
+                    $timestamp->format('m') === $today->format('m') &&
+                    (string) $i === $today->format('j'),
                 'events'    => $events,
             ];
             // If reached the end of the week, increment week
-            if (count($weeks[$week]) == 7) {
+            if (count($weeks[$week]) === 7) {
                 ++$week;
             }
         }

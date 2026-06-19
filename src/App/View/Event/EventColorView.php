@@ -41,7 +41,7 @@ class EventColorView extends OsecBaseClass
 
         if ( ! empty($categories)) {
             if ( ! isset($categories_cache[$type][$categories[0]->term_id])) {
-                $method                                           = $methods[$type];
+                $method = $methods[$type];
                 $categories_cache[$type][$categories[0]->term_id] = $this->$method($categories[0]->term_id);
             }
 

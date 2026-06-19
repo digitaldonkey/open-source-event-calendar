@@ -36,7 +36,7 @@ class ExecutionLimitController extends OsecBaseClass
         ];
         $table = $dbi->get_table_name('options');
         $dbi->query('START TRANSACTION');
-        $prev  = $dbi->get_var(
+        $prev = $dbi->get_var(
             $dbi->prepare(
                 'SELECT option_value FROM ' . $table .
                 ' WHERE option_name = %s',

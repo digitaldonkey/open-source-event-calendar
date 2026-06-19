@@ -50,16 +50,10 @@ abstract class SaveAbstract extends CommandAbstract
             && isset($this->action[$params['action']])
             && isset($_POST[$this->nonceName])
         ) {
-            $pass = wp_verify_nonce(
-                sanitize_text_field(wp_unslash($_POST[$this->nonceName])),
-                key($this->action)
-            );
-            if ( ! $pass) {
-                /** @noinspection ForgottenDebugOutputInspection */
-                wp_die('Failed security check');
+            $nonce = RequestParser::get_param($this->nonceName, null);
+            if ($nonce && wp_verify_nonce($nonce, key($this->action)) === 1) {
+                return true;
             }
-
-            return true;
         }
 
         return false;

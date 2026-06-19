@@ -263,12 +263,12 @@ class Event extends OsecBaseClass
 				LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttc
 					ON (
 						tr.term_taxonomy_id = ttc.term_taxonomy_id AND
-						ttc.taxonomy = \'events_categories\'
+						ttc.taxonomy = \'osec_events_categories\'
 					)
 				LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttt
 					ON (
 						tr.term_taxonomy_id = ttt.term_taxonomy_id AND
-						ttt.taxonomy = \'events_tags\'
+						ttt.taxonomy = \'osec_events_tags\'
 					)
 				' . $left_join . '
 			WHERE e.post_id = ' . absint($post_id) . '
@@ -309,6 +309,14 @@ class Event extends OsecBaseClass
             . '&instance=' . $instance_id
         );
     }
+
+    public function get_edit_link()
+    {
+        return admin_url(
+            'post.php?post=' . $this->entity->get('post_id') . '&action=edit'
+        );
+    }
+
     /**
      * Wrapper to get property value.
      *
@@ -364,6 +372,18 @@ class Event extends OsecBaseClass
             AvatarFallbackModel::factory($this->app)->get_all(),
             '',
             $wrap_permalink
+        );
+    }
+    /**
+     * Retrieving avatar data
+     *
+     * @return string Avatar markup
+     */
+    public function get_avatar_data($wrap_permalink = true)
+    {
+        return EventAvatarView::factory($this->app)->get_event_avatar_data(
+            $this,
+            AvatarFallbackModel::factory($this->app)->get_all(),
         );
     }
 
@@ -463,9 +483,11 @@ class Event extends OsecBaseClass
     public function is_multiday()
     {
         if (null === $this->isMultiday) {
-            $start            = $this->get('start');
-            $end              = $this->get('end');
-            $this->isMultiday = ($start->format('Y-m-d') !== $end->format('Y-m-d'));
+            $start = $this->get('start');
+            $end = $this->get('end');
+            $diff = $end->diff_sec($start);
+            $dayDiff = ($start->format('Y-m-d') !== $end->format('Y-m-d'));
+            $this->isMultiday = ($diff > 86400 && $dayDiff);
         }
         return $this->isMultiday;
     }
@@ -803,17 +825,16 @@ class Event extends OsecBaseClass
 
     /**
      * Set the event as if it has no end time
+     *
+     * Instant Start-End: Because no DTEND property is included,
+     * RFC 5545 dictates the event ends exactly at
+     * the same date and time it begins.
      */
     public function set_no_end_time()
     {
         $this->set('instant_event', true);
         $start = $this->get('start');
-        $end   = new DT($start);
-        $end->set_time(
-            $start->format('H'),
-            $start->format('i') + 30,
-            $start->format('s')
-        );
+        $end   = clone $start;
         $this->set('end', $end);
     }
 
@@ -959,8 +980,12 @@ class Event extends OsecBaseClass
         if ($date instanceof DT) {
             return $date;
         }
-
-        return new DT($date);
+        $date = new DT($date);
+        $tz = $this->entity->get('timezone_name', false);
+        if ($tz) {
+            $date->set_timezone($this->entity->get('timezone_name'));
+        }
+        return $date;
     }
 
     protected function handlePropertyConstruct_timezone_name($value)

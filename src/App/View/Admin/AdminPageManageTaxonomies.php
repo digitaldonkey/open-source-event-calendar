@@ -27,8 +27,8 @@ class AdminPageManageTaxonomies extends OsecBaseClass
     {
         $taxonomies        = get_object_taxonomies(OSEC_POST_TYPE, 'object');
         $taxonomy_metadata = [
-            'events_categories' => ['icon' => 'ai1ec-fa ai1ec-fa-folder-open'],
-            'events_tags'       => ['icon' => 'ai1ec-fa ai1ec-fa-tags'],
+            'osec_events_categories' => ['icon' => 'ai1ec-fa ai1ec-fa-folder-open'],
+            'osec_events_tags'       => ['icon' => 'ai1ec-fa ai1ec-fa-tags'],
         ];
         /**
          * Extend taxonomies or tags for Post type Event
@@ -48,12 +48,13 @@ class AdminPageManageTaxonomies extends OsecBaseClass
 
         foreach ($taxonomies as $taxonomy => $data) {
             if (true === $data->public) {
-                // phpcs:disable WordPress.Security.NonceVerification
+                // phpcs:disable WordPress.Security.NonceVerification.Recommended
                 $active_taxonomy =
                     isset($_GET['taxonomy']) &&
                     $taxonomy === sanitize_key($_GET['taxonomy']);
                 // phpcs:enable
-                $edit_url        = $edit_label = '';
+                $edit_url = '';
+                $edit_label = '';
                 if (isset($taxonomy_metadata[$taxonomy]['url'])) {
                     $edit_url   = $taxonomy_metadata[$taxonomy]['url'];
                     $edit_label = $taxonomy_metadata[$taxonomy]['edit_label'];

@@ -27,44 +27,44 @@ class AdminEventCategoryHooks extends OsecBaseClass
         $categoryHooks = self::factory($app);
 
         add_action(
-            'events_categories_add_form_fields',
+            'osec_events_categories_add_form_fields',
             function () use ($categoryHooks) {
                 $categoryHooks->events_categories_add_form_fields();
             }
         );
 
         add_action(
-            'events_categories_edit_form_fields',
+            'osec_events_categories_edit_form_fields',
             function ($term) use ($categoryHooks) {
                 $categoryHooks->events_categories_edit_form_fields($term);
             }
         );
 
         add_action(
-            'created_events_categories',
+            'created_osec_events_categories',
             function ($term_id) use ($categoryHooks) {
                 $categoryHooks->created_events_categories($term_id);
             }
         );
 
         add_action(
-            'edited_events_categories',
+            'edited_osec_events_categories',
             function ($term_id) use ($categoryHooks) {
                 $categoryHooks->edited_events_categories($term_id);
             }
         );
 
         add_action(
-            'manage_edit-events_categories_columns',
+            'manage_edit-osec_events_categories_columns',
             function ($columns) use ($categoryHooks) {
                 return $categoryHooks->manage_events_categories_columns($columns);
             }
         );
 
         add_action(
-            'manage_events_categories_custom_column',
-            function (string $string, string $column_name, int $term_id) use ($categoryHooks) {
-                return $categoryHooks->manage_events_categories_custom_column($string, $column_name, $term_id);
+            'manage_osec_events_categories_custom_column',
+            function (string $str, string $column_name, int $term_id) use ($categoryHooks) {
+                return $categoryHooks->manage_events_categories_custom_column($str, $column_name, $term_id);
             },
             10,
             3
@@ -74,14 +74,11 @@ class AdminEventCategoryHooks extends OsecBaseClass
         // "Use Event fallback images as image as featured-image-fallback for Events."
         if ($app->settings->get('featured_image_fallback')) {
             add_filter(
-                "get_post_metadata",
-                function ($null, $post_id, $meta_key, $single, $meta_type) use ($app) {
+                'get_post_metadata',
+                function ($filter_value, $post_id, $meta_key, $single, $meta_type) use ($app) {
                     // Check Posty type?
 
-                    if (
-                        $null === null &&
-                        $meta_key === '_thumbnail_id'
-                    ) {
+                    if (is_null($filter_value) && $meta_key === '_thumbnail_id') {
                         $meta_cache = wp_cache_get($post_id, $meta_type . '_meta');
 
                         if ( ! $meta_cache) {
@@ -111,7 +108,7 @@ class AdminEventCategoryHooks extends OsecBaseClass
                                 array_keys(EventAvatarView::getValidFallbacks()),
                                 function ($k) {
                                     // Prevents infinite loop.
-                                    return !in_array($k, ['post_image', 'post_thumbnail']);
+                                    return !in_array($k, ['post_image', 'post_thumbnail'], true);
                                 }
                             );
 
@@ -129,7 +126,7 @@ class AdminEventCategoryHooks extends OsecBaseClass
                         }
                         return $val;
                     }
-                    return $null;
+                    return $filter_value;
                 },
                 99,
                 5
@@ -247,7 +244,7 @@ class AdminEventCategoryHooks extends OsecBaseClass
     }
 
     /**
-     * A callback method, triggered when `event_categories' are being edited.
+     * A callback method, triggered when `osec_events_categories' are being edited.
      *
      * @param  int  $term_id  ID of term (category) being edited.
      *
@@ -337,7 +334,7 @@ class AdminEventCategoryHooks extends OsecBaseClass
      *
      * That will be displayed on event category lists page in the backend.
      *
-     * @param  string  $string
+     * @param  string  $str
      * @param  string  $column_name
      * @param  int  $term_id
      *
@@ -346,7 +343,7 @@ class AdminEventCategoryHooks extends OsecBaseClass
      * @throws BootstrapException
      * @internal param array $columns Array with event_category columns
      */
-    public function manage_events_categories_custom_column(string $string, string $column_name, int $term_id)
+    public function manage_events_categories_custom_column(string $str, string $column_name, int $term_id)
     {
         switch ($column_name) {
             case 'cat_color':

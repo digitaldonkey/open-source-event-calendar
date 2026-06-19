@@ -289,6 +289,88 @@ do_action('osec_ics_feed_added', $feedId $entry);
 </details>
 
 
+### osec_admin_ics_feeds_options_header_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Add Html content above feeds options
+
+```php
+add_filter('osec_admin_ics_feeds_options_header_html', $feedId);
+```
+
+#### Description
+
+
+On Feeds admin page you can return any Html sting.
+
+#### Parameters
+
+
+ - **$feedId** <span style="color:crimson"> </span> Feed ID. If not set it is printed above all feeds.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Add Html content above feeds options
+ *
+ * On Feeds admin page you can return any Html sting.
+ *
+ * @since 1.0
+ *
+ * @param ?int  $feedId  Feed ID. If not set it is printed above all feeds.
+ *
+ * @file src/App/Controller/FeedsController.php
+ */
+add_filter('osec_admin_ics_feeds_options_header_html', $feedId);
+```
+
+</details>
+
+
+### osec_admin_ics_feeds_options_after_settings_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Add Html content below feeds options
+
+```php
+add_filter('osec_admin_ics_feeds_options_after_settings_html', $feedId);
+```
+
+#### Description
+
+
+On Feeds admin page you can echo/print any Html sting.
+
+#### Parameters
+
+
+ - **$feedId** <span style="color:crimson"> </span> DB id of the feed or null for empty form.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Add Html content below feeds options
+ *
+ * On Feeds admin page you can echo/print any Html sting.
+ *
+ * @since 1.0
+ *
+ * @param ?int  $feedId  DB id of the feed or null for empty form.
+ *
+ * @file src/App/Controller/FeedsController.php
+ */
+add_filter('osec_admin_ics_feeds_options_after_settings_html', $feedId);
+```
+
+</details>
+
+
 ### osec_ics_before_import <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
@@ -722,6 +804,175 @@ add_filter('osec_font_dirs', $variables);
 ---
 
 
+@file **../src/App/Controller/MapsController.php**
+
+### osec_maps_backend_options_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Leaflet map options
+
+```php
+add_filter('osec_maps_backend_options_alter', $maps_backend_options);
+```
+
+#### Description
+
+
+Lets you alter Leaflet map options on Event Edit. You may change zoom levels, limit address search by changing geocodingQueryParams and how address is converted from search result to Wp-form (address_template). Check out console.log(osec_leaflet_admin) at Event edit page. @see: https://www.liedman.net/leaflet-control-geocoder/docs/interfaces/geocoders.NominatimOptions.html
+
+#### Parameters
+
+
+ - **$maps_backend_options** <span style="color:crimson"> </span> Javascript options for admin-box-event-map.js.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Leaflet map options
+ *
+ * Lets you alter Leaflet map options on Event Edit.
+ * You may change zoom levels, limit address search
+ * by changing geocodingQueryParams and how address is converted from search result to Wp-form
+ * (address_template).
+ * Check out console.log(osec_leaflet_admin) at Event edit page.
+ * @see: https://www.liedman.net/leaflet-control-geocoder/docs/interfaces/geocoders.NominatimOptions.html
+ *
+ * @since 1.1
+ *
+ * @param  array  $maps_backend_options  Javascript options for admin-box-event-map.js.
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_maps_backend_options_alter', $maps_backend_options);
+```
+
+</details>
+
+
+### osec_maps_public_options_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter public Leaflet map options
+
+```php
+add_filter('osec_maps_public_options_alter', $maps_backend_options);
+```
+
+#### Description
+
+
+Lets you alter Leaflet map options on Event view.
+
+#### Parameters
+
+
+ - **$maps_backend_options** <span style="color:crimson"> </span> Javascript options event-map-public.js.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter public Leaflet map options
+ *
+ * Lets you alter Leaflet map options on Event view.
+ *
+ * @since 1.1
+ *
+ * @param  array  $maps_backend_options  Javascript options event-map-public.js.
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_maps_public_options_alter', $maps_backend_options);
+```
+
+</details>
+
+
+### osec_leaflet_library_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Leaflet Library.
+
+```php
+add_filter('osec_leaflet_library_alter', $leaflet);
+```
+
+#### Description
+
+
+Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+
+#### Parameters
+
+
+ - **$leaflet** <span style="color:crimson"> </span> Osec leaflet urls.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Leaflet Library.
+ *
+ * Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+ *
+ * @since 1.1
+ *
+ * @param  array  $leaflet Osec leaflet urls.
+ *
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_leaflet_library_alter', $leaflet);
+```
+
+</details>
+
+
+### osec_leaflet_geocoder_library_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Leaflet geocoder library (leaflet-control-geocoder)
+
+```php
+add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
+```
+
+#### Parameters
+
+
+ - **$leaflet** <span style="color:crimson"> </span> Osec leaflet urls.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Leaflet geocoder library (leaflet-control-geocoder)
+ *
+ * @since 1.1
+ *
+ * @param  array  $leaflet Osec leaflet urls.
+ *
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/Controller/Router.php**
 
 ### osec_request_filter_types <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -999,11 +1250,6 @@ Define if Database schema upgrade should be executed
 add_filter('osec_perform_scheme_update', $do_schema_update);
 ```
 
-#### Description
-
-
-Currently DatabaseSchema->apply_delta() is disabled. TODO Decide to throw schema stuff out entirely or fix it.
-
 #### Parameters
 
 
@@ -1016,9 +1262,6 @@ Currently DatabaseSchema->apply_delta() is disabled. TODO Decide to throw schema
 ```php
 /**
  * Define if Database schema upgrade should be executed
- *
- * Currently DatabaseSchema->apply_delta() is disabled.
- * TODO Decide to throw schema stuff out entirely or fix it.
  *
  * @since 1.0
  *
@@ -1036,6 +1279,53 @@ add_filter('osec_perform_scheme_update', $do_schema_update);
 
 
 @file **../src/App/Model/IcsImportExportParser.php**
+
+### osec_feed_timezone_override <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Change override timzone for feed
+
+```php
+add_filter('osec_feed_timezone_override', $override_timezone $feed $x_wr_timezone $local_timezone);
+```
+
+#### Description
+
+
+Alter time zone of a feed. Effecting UTC and DATE (only) Floating local time events.
+
+#### Parameters
+
+
+ - **$override_timezone** <span style="color:crimson"> string</span> Currently calculated value
+ - **$feed** <span style="color:crimson"> </span> Ical feed
+ - **$x_wr_timezone** <span style="color:crimson"> </span> X_WR_TIMEZONE if available
+ - **$local_timezone** <span style="color:crimson"> </span> Default Timezone
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Change override timzone for feed
+ *
+ * Alter time zone of a feed. Effecting UTC and DATE (only) Floating local time events.
+ *
+ * @since 1.5
+ *
+ * @param string $override_timezone Currently calculated value
+ * @param  object  $feed  Ical feed
+ * @param  ?string  $x_wr_timezone  X_WR_TIMEZONE if available
+ * @param  string  $local_timezone  Default Timezone
+ *
+ * @file src/App/Model/IcsImportExportParser.php
+ */
+add_filter('osec_feed_timezone_override', $override_timezone $feed $x_wr_timezone $local_timezone);
+```
+
+</details>
+
 
 ### osec_ics_import_pre_init_event <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
@@ -1482,7 +1772,97 @@ add_filter('osec_ics_import_alias', $term);
 ---
 
 
+@file **../src/App/Model/PostTypeEvent/EventType.php**
+
+### osec_pre_register_post_type <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Register post type Event
+
+```php
+add_filter('osec_pre_register_post_type', $do_debug);
+```
+
+#### Description
+
+
+Alter params before register_post_type()
+
+#### Parameters
+
+
+ - **$do_debug** <span style="color:crimson"> </span> Debug or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Register post type Event
+ *
+ * Alter params before register_post_type()
+ *
+ * @wp_hook init
+ *
+ * @since 1.0
+ *
+ * @param  bool  $do_debug  Debug or not.
+ *
+ * @file src/App/Model/PostTypeEvent/EventType.php
+ */
+add_filter('osec_pre_register_post_type', $do_debug);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/View/Admin/AdminPageAddEvent.php**
+
+### osec_admin_edit_event_input_panels_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter content boxes in Event Edit
+
+```php
+add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
+```
+
+#### Description
+
+
+Like Date-and-time, Location, Tickets... Allows you to add or limit Event information options.
+
+#### Parameters
+
+
+ - **$boxes** <span style="color:crimson"> </span> Array of HTML output (bootstrap3 panels).
+ - **$event** <span style="color:crimson"> </span> Event instance.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter content boxes in Event Edit
+ *
+ * Like Date-and-time, Location, Tickets...
+ * Allows you to add or limit Event information options.
+ *
+ * @param  array  $boxes  Array of HTML output (bootstrap3 panels).
+ * @param  Event  $event  Event instance.
+ *
+ * @file src/App/View/Admin/AdminPageAddEvent.php
+ */
+add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
+```
+
+</details>
+
 
 ### osec_post_form_before_venue_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
@@ -1561,87 +1941,6 @@ Content must be a table row aka wrapped in in tr-Html-Tags.
  * @file src/App/View/Admin/AdminPageAddEvent.php
  */
 add_filter('osec_post_form_after_venue_html', $html);
-```
-
-</details>
-
-
-### osec_admin_edit_event_input_panels_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter content boxes in Event Edit
-
-```php
-add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
-```
-
-#### Description
-
-
-Like Date-and-time, Location, Tickets... Allows you to add or limit Event information options.
-
-#### Parameters
-
-
- - **$boxes** <span style="color:crimson"> </span> Array of HTML output (bootstrap3 panels).
- - **$event** <span style="color:crimson"> </span> Event instance.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter content boxes in Event Edit
- *
- * Like Date-and-time, Location, Tickets...
- * Allows you to add or limit Event information options.
- *
- * @param  array  $boxes  Array of HTML output (bootstrap3 panels).
- * @param  Event  $event  Event instance.
- *
- * @file src/App/View/Admin/AdminPageAddEvent.php
- */
-add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
-```
-
-</details>
-
-
----
-
-
-@file **../src/App/View/Admin/AdminPageManageFeeds.php**
-
-### osec_calendar_feeds <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter FeedsController.
-
-```php
-add_filter('osec_calendar_feeds', $feed);
-```
-
-#### Parameters
-
-
- - **$feed** <span style="color:crimson"> </span> 
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter FeedsController.
- *
- * @since 1.0
- *
- * @param  FeedsController  $feed
- *
- * @file src/App/View/Admin/AdminPageManageFeeds.php
- */
-add_filter('osec_calendar_feeds', $feed);
 ```
 
 </details>
@@ -1802,13 +2101,55 @@ add_filter('osec_robots_install', $bool);
 </details>
 
 
-### osec_admin_setting_tabs_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_admin_page_metaboxes_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter admin page settings metaboxes.
+
+```php
+add_filter('osec_admin_page_metaboxes_alter', $theme);
+```
+
+#### Description
+
+
+Allows to change which Elements you see on admin page settings. you may also alter the default order.
+
+#### Parameters
+
+
+ - **$theme** <span style="color:crimson"> </span> Array of Less variables
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter admin page settings metaboxes.
+ *
+ * Allows to change which Elements you see on admin page settings.
+ * you may also alter the default order.
+ *
+ * @since 1.0
+ *
+ * @param  array  $theme  Array of Less variables
+ *
+ * @file src/App/View/Admin/AdminPageSettings.php
+ */
+add_filter('osec_admin_page_metaboxes_alter', $theme);
+```
+
+</details>
+
+
+### osec_admin_setting_sections_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter or add tabs on AdminPageSettings
 
 ```php
-add_filter('osec_admin_setting_tabs_alter', $tabs);
+add_filter('osec_admin_setting_sections_alter', $tabs);
 ```
 
 #### Parameters
@@ -1830,7 +2171,7 @@ add_filter('osec_admin_setting_tabs_alter', $tabs);
  *
  * @file src/App/View/Admin/AdminPageSettings.php
  */
-add_filter('osec_admin_setting_tabs_alter', $tabs);
+add_filter('osec_admin_setting_sections_alter', $tabs);
 ```
 
 </details>
@@ -2355,13 +2696,13 @@ add_filter('osec_additional_buttons', $html $view_args);
 </details>
 
 
-### osec_calendar_page_filterargs <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_calendar_page_filter_args <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter or add arguments to calendar page filters
 
 ```php
-add_filter('osec_calendar_page_filterargs', $filter_args);
+add_filter('osec_calendar_page_filter_args', $filter_args);
 ```
 
 #### Parameters
@@ -2383,7 +2724,7 @@ add_filter('osec_calendar_page_filterargs', $filter_args);
  *
  * @file src/App/View/Calendar/CalendarPageView.php
  */
-add_filter('osec_calendar_page_filterargs', $filter_args);
+add_filter('osec_calendar_page_filter_args', $filter_args);
 ```
 
 </details>
@@ -2525,13 +2866,18 @@ add_filter('osec_calendar_view_args_alter', $view_args);
 </details>
 
 
+---
+
+
+@file **../src/App/View/Calendar/CalendarSubscribeView.php**
+
 ### osec_subscribe_buttons_arguments <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Subscribe buttons alter
 
 ```php
-add_filter('osec_subscribe_buttons_arguments', $args $view_args);
+add_filter('osec_subscribe_buttons_arguments', $args);
 ```
 
 #### Description
@@ -2543,7 +2889,6 @@ Alter arguments for subscribe-buttons.twig template
 
 
  - **$args** <span style="color:crimson"> </span> Twig args
- - **$view_args** <span style="color:crimson"> </span> View arguments
 
 <details markdown="1">
 <summary>Source</summary>
@@ -2558,11 +2903,10 @@ Alter arguments for subscribe-buttons.twig template
  * @since 1.0
  *
  * @param  array  $args  Twig args
- * @param  array  $view_args  View arguments
  *
- * @file src/App/View/Calendar/CalendarPageView.php
+ * @file src/App/View/Calendar/CalendarSubscribeView.php
  */
-add_filter('osec_subscribe_buttons_arguments', $args $view_args);
+add_filter('osec_subscribe_buttons_arguments', $args);
 ```
 
 </details>
@@ -2928,6 +3272,58 @@ add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
 ---
 
 
+@file **../src/App/View/Event/EventContactView.php**
+
+### osec_contact_url_link <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter or add contact data before render
+
+```php
+add_filter('osec_contact_url_link', $args $has_data $event);
+```
+
+#### Description
+
+
+Visible Event single ´Organizer contact info´
+
+#### Parameters
+
+
+ - **$args** <span style="color:crimson"> </span> Args in use.
+ - **$has_data** <span style="color:crimson"> bool</span> Must be true to render
+ - **$event** <span style="color:crimson"> Event</span> 
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter or add contact data before render
+ *
+ * Visible Event single ´Organizer contact info´
+ *
+ * @since 1.0
+ *
+ * @param string  $args  Args in use.
+ * @param bool $has_data Must be true to render
+ * @param Event $event
+ *
+ * @return array
+ *
+ * @file src/App/View/Event/EventContactView.php
+ */
+add_filter('osec_contact_url_link', $args $has_data $event);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/View/Event/EventContentView.php**
 
 ### osec_back_to_calendar_button_html_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -2959,6 +3355,119 @@ add_filter('osec_back_to_calendar_button_html_alter', $args);
  * @file src/App/View/Event/EventContentView.php
  */
 add_filter('osec_back_to_calendar_button_html_alter', $args);
+```
+
+</details>
+
+
+---
+
+
+@file **../src/App/View/Event/EventLocationView.php**
+
+### osec_event_map_public_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter maps data before rendering.
+
+```php
+add_filter('osec_event_map_public_alter', $args);
+```
+
+#### Parameters
+
+
+ - **$args** <span style="color:crimson"> </span> Debug or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter maps data before rendering.
+ *
+ * @since 1.0
+ *
+ * @param  array  $args  Debug or not.
+ *
+ * @file src/App/View/Event/EventLocationView.php
+ */
+add_filter('osec_event_map_public_alter', $args);
+```
+
+</details>
+
+
+### osec_gmaps_link_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter google maps link
+
+```php
+add_filter('osec_gmaps_link_alter', $url $event);
+```
+
+#### Parameters
+
+
+ - **$url** <span style="color:crimson"> </span> Url.
+ - **$event** <span style="color:crimson"> </span> Event.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter google maps link
+ *
+ * @since 1.1
+ *
+ * @param  string  $url  Url.
+ *
+ * @param  array  $event  Event.
+ *
+ * @file src/App/View/Event/EventLocationView.php
+ */
+add_filter('osec_gmaps_link_alter', $url $event);
+```
+
+</details>
+
+
+### osec_osm_link_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter OpenStreetMaps link
+
+```php
+add_filter('osec_osm_link_alter', $url $event);
+```
+
+#### Parameters
+
+
+ - **$url** <span style="color:crimson"> </span> Url.
+ - **$event** <span style="color:crimson"> </span> Event.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter OpenStreetMaps link
+ *
+ * @since 1.1
+ *
+ * @param  string  $url  Url.
+ *
+ * @param  array  $event  Event.
+ *
+ * @file src/App/View/Event/EventLocationView.php
+ */
+add_filter('osec_osm_link_alter', $url $event);
 ```
 
 </details>
@@ -3006,6 +3515,40 @@ add_filter('osec_rendering_single_event_actions', $event $html);
 </details>
 
 
+### osec_alter_single_event_page_before_render <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Alter Event before rendering on a single Event page.
+
+```php
+do_action('osec_alter_single_event_page_before_render', $event);
+```
+
+#### Parameters
+
+
+ - **$event** <span style="color:crimson"> </span> passed by reference. So can be modified.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Event before rendering on a single Event page.
+ *
+ * @since 1.0
+ *
+ * @param  Event  $event  passed by reference. So can be modified.
+ *
+ * @file src/App/View/Event/EventSingleView.php
+ */
+do_action('osec_alter_single_event_page_before_render', $event);
+```
+
+</details>
+
+
 ### osec_rendering_single_event_venues <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -3038,40 +3581,6 @@ add_filter('osec_rendering_single_event_venues', $event $html);
  * @file src/App/View/Event/EventSingleView.php
  */
 add_filter('osec_rendering_single_event_venues', $event $html);
-```
-
-</details>
-
-
-### osec_alter_single_event_page_before_render <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Alter Event before rendering on a single Event page.
-
-```php
-do_action('osec_alter_single_event_page_before_render', $event);
-```
-
-#### Parameters
-
-
- - **$event** <span style="color:crimson"> </span> passed by reference. So can be modified.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter Event before rendering on a single Event page.
- *
- * @since 1.0
- *
- * @param  Event  $event  passed by reference. So can be modified.
- *
- * @file src/App/View/Event/EventSingleView.php
- */
-do_action('osec_alter_single_event_page_before_render', $event);
 ```
 
 </details>
@@ -3210,6 +3719,43 @@ add_filter('osec_event_color_squares', $event $squares);
 </details>
 
 
+### osec_event_rest_categories <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Allow add-ons to modify/add to category data, category image/image size for REST API..
+
+```php
+add_filter('osec_event_rest_categories', $event $categories);
+```
+
+#### Parameters
+
+
+ - **$event** <span style="color:crimson"> </span> event being processed
+ - **$categories** <span style="color:crimson"> </span> Event category data
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Allow add-ons to modify/add to category data, category image/image size  for REST API..
+ *
+ * @since 1.0.5
+ *
+ * @param  Event  $event  event being processed
+ *
+ * @param  array  $categories  Event category data
+ *
+ * @file src/App/View/Event/EventTaxonomyView.php
+ */
+add_filter('osec_event_rest_categories', $event $categories);
+```
+
+</details>
+
+
 ---
 
 
@@ -3249,25 +3795,24 @@ add_filter('osec_buy_tickets_url_icon', $html);
 </details>
 
 
-### osec_contact_url_link <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_currency_to_iso4217_map <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter contact_url label
+Add Currency symbols (UTF-8) => ISO 4217 Code
 
 ```php
-add_filter('osec_contact_url_link', $contact_url $event_website_link);
+add_filter('osec_currency_to_iso4217_map', $currencyMap);
 ```
 
 #### Description
 
 
-Visible Event single if ´Organizer contact info´ -> Website URL is set.
+<meta itemprop="priceCurrency" content="EUR"> @see https://schema.org/priceCurrency
 
 #### Parameters
 
 
- - **$contact_url** <span style="color:crimson"> </span> Url in use.
- - **$event_website_link** <span style="color:crimson"> </span> Multilingual label for the link.
+ - **$currencyMap** <span style="color:crimson"> </span> 
 
 <details markdown="1">
 <summary>Source</summary>
@@ -3275,20 +3820,58 @@ Visible Event single if ´Organizer contact info´ -> Website URL is set.
 
 ```php
 /**
- * Alter contact_url label
+ * Add Currency symbols (UTF-8) => ISO 4217 Code
  *
- * Visible Event single if ´Organizer contact info´
- * -> Website URL is set.
+ * <meta itemprop="priceCurrency" content="EUR">
+ * @see https://schema.org/priceCurrency
  *
- * @since 1.0
+ * @since 1.1
  *
- * @param  string  $contact_url  Url in use.
- *
- * @param  string  $event_website_link  Multilingual label for the link.
+ * @param  array  $currencyMap
+ * .
+ * @return array
  *
  * @file src/App/View/Event/EventTicketView.php
  */
-add_filter('osec_contact_url_link', $contact_url $event_website_link);
+add_filter('osec_currency_to_iso4217_map', $currencyMap);
+```
+
+</details>
+
+
+### osec_currency_iso4217_value_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Allows you to alter or provide a valid priceCurrency
+
+```php
+add_filter('osec_currency_iso4217_value_alter', $cost_currency $coast);
+```
+
+#### Parameters
+
+
+ - **$cost_currency** <span style="color:crimson"> </span> Assumed ISO 4217 value.
+ - **$coast** <span style="color:crimson"> </span> Raw field value.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Allows you to alter or provide a valid priceCurrency
+ *
+ * @see https://schema.org/priceCurrency
+ * @since 1.0
+ *
+ * @param  string  $cost_currency Assumed ISO 4217 value.
+ * @param  string  $coast Raw field value.
+ * @return string Must return ISO 4217 3 letter string as schema requires or null to hide.
+ *
+ * @file src/App/View/Event/EventTicketView.php
+ */
+add_filter('osec_currency_iso4217_value_alter', $cost_currency $coast);
 ```
 
 </details>
@@ -3623,13 +4206,13 @@ add_filter('osec_kses_allowed_html_inline', $frontend);
 </details>
 
 
-### osec_ksess_allowed_html_frontend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_kses_allowed_html_frontend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter allowed HTML tags and properties on frontend rendering.
 
 ```php
-add_filter('osec_ksess_allowed_html_frontend', $frontend);
+add_filter('osec_kses_allowed_html_frontend', $frontend);
 ```
 
 #### Parameters
@@ -3651,7 +4234,7 @@ add_filter('osec_ksess_allowed_html_frontend', $frontend);
  *
  * @file src/App/View/KsesHelper.php
  */
-add_filter('osec_ksess_allowed_html_frontend', $frontend);
+add_filter('osec_kses_allowed_html_frontend', $frontend);
 ```
 
 </details>
@@ -3814,48 +4397,6 @@ add_filter('osec_export_filter', $filter);
 
 @file **../src/Command/SaveSettings.php**
 
-### osec_pre_validate_settings <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter Settings before validation.
-
-```php
-add_filter('osec_pre_validate_settings', $_POST);
-```
-
-#### Description
-
-
-Let other plugin modify the POST variables before validations of settings.
-
-#### Parameters
-
-
- - **$_POST** <span style="color:crimson"> </span> Maybe unvalidated variables.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter Settings before validation.
- *
- * Let other plugin modify the POST variables
- * before validations of settings.
- *
- * @since 1.0
- *
- * @param  array  $_POST  Maybe unvalidated variables.
- *
- * @file src/Command/SaveSettings.php
- */
-add_filter('osec_pre_validate_settings', $_POST);
-```
-
-</details>
-
-
 ### osec{$method} <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -3905,7 +4446,7 @@ add_filter('osec{$method}', $method $value);
 Alter Settings before save.
 
 ```php
-add_filter('osec_pre_save_settings', $_POST);
+add_filter('osec_pre_save_settings', $value);
 ```
 
 #### Description
@@ -3916,7 +4457,7 @@ Let other plugin modify the POST variables before saving settings.
 #### Parameters
 
 
- - **$_POST** <span style="color:crimson"> </span> Maybe unvalidated variables.
+ - **$value** <span style="color:crimson"> </span> Maybe unvalidated variables.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -3931,11 +4472,11 @@ Let other plugin modify the POST variables before saving settings.
  *
  * @since 1.0
  *
- * @param  array  $_POST  Maybe unvalidated variables.
+ * @param  array  $value  Maybe unvalidated variables.
  *
  * @file src/Command/SaveSettings.php
  */
-add_filter('osec_pre_save_settings', $_POST);
+add_filter('osec_pre_save_settings', $value);
 ```
 
 </details>
@@ -4293,7 +4834,7 @@ add_filter('osec_date_picker_href_args', $href_args $args);
 #### Description
 
 
-Rendered in datepicker_link.twig
+Rendered in datepicker-link.twig
 
 #### Parameters
 
@@ -4309,7 +4850,7 @@ Rendered in datepicker_link.twig
 /**
  * Alter href arguments for datepicker
  *
- * Rendered in datepicker_link.twig
+ * Rendered in datepicker-link.twig
  *
  * @since 1.00
  *
@@ -4332,7 +4873,7 @@ add_filter('osec_date_picker_href_args', $href_args $args);
 ### osec_register_theme <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter theme paths.
+Add or alter theme paths.
 
 ```php
 add_filter('osec_register_theme', $theme_dirs);
@@ -4349,7 +4890,7 @@ add_filter('osec_register_theme', $theme_dirs);
 
 ```php
 /**
- * Alter theme paths.
+ * Add or alter theme paths.
  *
  * @since 1.0
  *
@@ -4399,6 +4940,44 @@ add_filter('osec_theme_loader_path_alter', $path_data $target $is_extension);
  * @file src/Theme/ThemeLoader.php
  */
 add_filter('osec_theme_loader_path_alter', $path_data $target $is_extension);
+```
+
+</details>
+
+
+### osecc_theme_args_{$filename} <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter arguments before template file is processed.
+
+```php
+add_filter('osecc_theme_args_{$filename}', $filename $args $is_admin);
+```
+
+#### Parameters
+
+
+ - **$filename** <span style="color:crimson"> string</span> Filename, prefixed with osecc_theme_args_.
+ - **$args** <span style="color:crimson"> array</span> Variables to change.
+ - **$is_admin** <span style="color:crimson"> bool</span> Admin template or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter arguments before template file is processed.
+ *
+ * @since 1.0
+ *
+ * @param string $filename  Filename, prefixed with osecc_theme_args_.
+ * @param array $args Variables to change.
+ * @param bool $is_admin Admin template or not.
+ *
+ * @file src/Theme/ThemeLoader.php
+ */
+add_filter('osecc_theme_args_{$filename}', $filename $args $is_admin);
 ```
 
 </details>
@@ -4723,6 +5302,88 @@ do_action('osec_ics_feed_added', $feedId $entry);
 </details>
 
 
+### osec_admin_ics_feeds_options_header_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Add Html content above feeds options
+
+```php
+add_filter('osec_admin_ics_feeds_options_header_html', $feedId);
+```
+
+#### Description
+
+
+On Feeds admin page you can return any Html sting.
+
+#### Parameters
+
+
+ - **$feedId** <span style="color:crimson"> </span> Feed ID. If not set it is printed above all feeds.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Add Html content above feeds options
+ *
+ * On Feeds admin page you can return any Html sting.
+ *
+ * @since 1.0
+ *
+ * @param ?int  $feedId  Feed ID. If not set it is printed above all feeds.
+ *
+ * @file src/App/Controller/FeedsController.php
+ */
+add_filter('osec_admin_ics_feeds_options_header_html', $feedId);
+```
+
+</details>
+
+
+### osec_admin_ics_feeds_options_after_settings_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Add Html content below feeds options
+
+```php
+add_filter('osec_admin_ics_feeds_options_after_settings_html', $feedId);
+```
+
+#### Description
+
+
+On Feeds admin page you can echo/print any Html sting.
+
+#### Parameters
+
+
+ - **$feedId** <span style="color:crimson"> </span> DB id of the feed or null for empty form.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Add Html content below feeds options
+ *
+ * On Feeds admin page you can echo/print any Html sting.
+ *
+ * @since 1.0
+ *
+ * @param ?int  $feedId  DB id of the feed or null for empty form.
+ *
+ * @file src/App/Controller/FeedsController.php
+ */
+add_filter('osec_admin_ics_feeds_options_after_settings_html', $feedId);
+```
+
+</details>
+
+
 ### osec_ics_before_import <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
 
 
@@ -5156,6 +5817,175 @@ add_filter('osec_font_dirs', $variables);
 ---
 
 
+@file **../src/App/Controller/MapsController.php**
+
+### osec_maps_backend_options_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Leaflet map options
+
+```php
+add_filter('osec_maps_backend_options_alter', $maps_backend_options);
+```
+
+#### Description
+
+
+Lets you alter Leaflet map options on Event Edit. You may change zoom levels, limit address search by changing geocodingQueryParams and how address is converted from search result to Wp-form (address_template). Check out console.log(osec_leaflet_admin) at Event edit page. @see: https://www.liedman.net/leaflet-control-geocoder/docs/interfaces/geocoders.NominatimOptions.html
+
+#### Parameters
+
+
+ - **$maps_backend_options** <span style="color:crimson"> </span> Javascript options for admin-box-event-map.js.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Leaflet map options
+ *
+ * Lets you alter Leaflet map options on Event Edit.
+ * You may change zoom levels, limit address search
+ * by changing geocodingQueryParams and how address is converted from search result to Wp-form
+ * (address_template).
+ * Check out console.log(osec_leaflet_admin) at Event edit page.
+ * @see: https://www.liedman.net/leaflet-control-geocoder/docs/interfaces/geocoders.NominatimOptions.html
+ *
+ * @since 1.1
+ *
+ * @param  array  $maps_backend_options  Javascript options for admin-box-event-map.js.
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_maps_backend_options_alter', $maps_backend_options);
+```
+
+</details>
+
+
+### osec_maps_public_options_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter public Leaflet map options
+
+```php
+add_filter('osec_maps_public_options_alter', $maps_backend_options);
+```
+
+#### Description
+
+
+Lets you alter Leaflet map options on Event view.
+
+#### Parameters
+
+
+ - **$maps_backend_options** <span style="color:crimson"> </span> Javascript options event-map-public.js.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter public Leaflet map options
+ *
+ * Lets you alter Leaflet map options on Event view.
+ *
+ * @since 1.1
+ *
+ * @param  array  $maps_backend_options  Javascript options event-map-public.js.
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_maps_public_options_alter', $maps_backend_options);
+```
+
+</details>
+
+
+### osec_leaflet_library_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Leaflet Library.
+
+```php
+add_filter('osec_leaflet_library_alter', $leaflet);
+```
+
+#### Description
+
+
+Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+
+#### Parameters
+
+
+ - **$leaflet** <span style="color:crimson"> </span> Osec leaflet urls.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Leaflet Library.
+ *
+ * Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+ *
+ * @since 1.1
+ *
+ * @param  array  $leaflet Osec leaflet urls.
+ *
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_leaflet_library_alter', $leaflet);
+```
+
+</details>
+
+
+### osec_leaflet_geocoder_library_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Leaflet geocoder library (leaflet-control-geocoder)
+
+```php
+add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
+```
+
+#### Parameters
+
+
+ - **$leaflet** <span style="color:crimson"> </span> Osec leaflet urls.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Leaflet geocoder library (leaflet-control-geocoder)
+ *
+ * @since 1.1
+ *
+ * @param  array  $leaflet Osec leaflet urls.
+ *
+ *
+ * @file src/App/Controller/MapsController.php
+ */
+add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/Controller/Router.php**
 
 ### osec_request_filter_types <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -5433,11 +6263,6 @@ Define if Database schema upgrade should be executed
 add_filter('osec_perform_scheme_update', $do_schema_update);
 ```
 
-#### Description
-
-
-Currently DatabaseSchema->apply_delta() is disabled. TODO Decide to throw schema stuff out entirely or fix it.
-
 #### Parameters
 
 
@@ -5450,9 +6275,6 @@ Currently DatabaseSchema->apply_delta() is disabled. TODO Decide to throw schema
 ```php
 /**
  * Define if Database schema upgrade should be executed
- *
- * Currently DatabaseSchema->apply_delta() is disabled.
- * TODO Decide to throw schema stuff out entirely or fix it.
  *
  * @since 1.0
  *
@@ -5470,6 +6292,53 @@ add_filter('osec_perform_scheme_update', $do_schema_update);
 
 
 @file **../src/App/Model/IcsImportExportParser.php**
+
+### osec_feed_timezone_override <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Change override timzone for feed
+
+```php
+add_filter('osec_feed_timezone_override', $override_timezone $feed $x_wr_timezone $local_timezone);
+```
+
+#### Description
+
+
+Alter time zone of a feed. Effecting UTC and DATE (only) Floating local time events.
+
+#### Parameters
+
+
+ - **$override_timezone** <span style="color:crimson"> string</span> Currently calculated value
+ - **$feed** <span style="color:crimson"> </span> Ical feed
+ - **$x_wr_timezone** <span style="color:crimson"> </span> X_WR_TIMEZONE if available
+ - **$local_timezone** <span style="color:crimson"> </span> Default Timezone
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Change override timzone for feed
+ *
+ * Alter time zone of a feed. Effecting UTC and DATE (only) Floating local time events.
+ *
+ * @since 1.5
+ *
+ * @param string $override_timezone Currently calculated value
+ * @param  object  $feed  Ical feed
+ * @param  ?string  $x_wr_timezone  X_WR_TIMEZONE if available
+ * @param  string  $local_timezone  Default Timezone
+ *
+ * @file src/App/Model/IcsImportExportParser.php
+ */
+add_filter('osec_feed_timezone_override', $override_timezone $feed $x_wr_timezone $local_timezone);
+```
+
+</details>
+
 
 ### osec_ics_import_pre_init_event <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
@@ -5916,7 +6785,97 @@ add_filter('osec_ics_import_alias', $term);
 ---
 
 
+@file **../src/App/Model/PostTypeEvent/EventType.php**
+
+### osec_pre_register_post_type <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Register post type Event
+
+```php
+add_filter('osec_pre_register_post_type', $do_debug);
+```
+
+#### Description
+
+
+Alter params before register_post_type()
+
+#### Parameters
+
+
+ - **$do_debug** <span style="color:crimson"> </span> Debug or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Register post type Event
+ *
+ * Alter params before register_post_type()
+ *
+ * @wp_hook init
+ *
+ * @since 1.0
+ *
+ * @param  bool  $do_debug  Debug or not.
+ *
+ * @file src/App/Model/PostTypeEvent/EventType.php
+ */
+add_filter('osec_pre_register_post_type', $do_debug);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/View/Admin/AdminPageAddEvent.php**
+
+### osec_admin_edit_event_input_panels_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter content boxes in Event Edit
+
+```php
+add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
+```
+
+#### Description
+
+
+Like Date-and-time, Location, Tickets... Allows you to add or limit Event information options.
+
+#### Parameters
+
+
+ - **$boxes** <span style="color:crimson"> </span> Array of HTML output (bootstrap3 panels).
+ - **$event** <span style="color:crimson"> </span> Event instance.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter content boxes in Event Edit
+ *
+ * Like Date-and-time, Location, Tickets...
+ * Allows you to add or limit Event information options.
+ *
+ * @param  array  $boxes  Array of HTML output (bootstrap3 panels).
+ * @param  Event  $event  Event instance.
+ *
+ * @file src/App/View/Admin/AdminPageAddEvent.php
+ */
+add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
+```
+
+</details>
+
 
 ### osec_post_form_before_venue_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
@@ -5995,87 +6954,6 @@ Content must be a table row aka wrapped in in tr-Html-Tags.
  * @file src/App/View/Admin/AdminPageAddEvent.php
  */
 add_filter('osec_post_form_after_venue_html', $html);
-```
-
-</details>
-
-
-### osec_admin_edit_event_input_panels_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter content boxes in Event Edit
-
-```php
-add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
-```
-
-#### Description
-
-
-Like Date-and-time, Location, Tickets... Allows you to add or limit Event information options.
-
-#### Parameters
-
-
- - **$boxes** <span style="color:crimson"> </span> Array of HTML output (bootstrap3 panels).
- - **$event** <span style="color:crimson"> </span> Event instance.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter content boxes in Event Edit
- *
- * Like Date-and-time, Location, Tickets...
- * Allows you to add or limit Event information options.
- *
- * @param  array  $boxes  Array of HTML output (bootstrap3 panels).
- * @param  Event  $event  Event instance.
- *
- * @file src/App/View/Admin/AdminPageAddEvent.php
- */
-add_filter('osec_admin_edit_event_input_panels_alter', $boxes $event);
-```
-
-</details>
-
-
----
-
-
-@file **../src/App/View/Admin/AdminPageManageFeeds.php**
-
-### osec_calendar_feeds <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter FeedsController.
-
-```php
-add_filter('osec_calendar_feeds', $feed);
-```
-
-#### Parameters
-
-
- - **$feed** <span style="color:crimson"> </span> 
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter FeedsController.
- *
- * @since 1.0
- *
- * @param  FeedsController  $feed
- *
- * @file src/App/View/Admin/AdminPageManageFeeds.php
- */
-add_filter('osec_calendar_feeds', $feed);
 ```
 
 </details>
@@ -6236,13 +7114,55 @@ add_filter('osec_robots_install', $bool);
 </details>
 
 
-### osec_admin_setting_tabs_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_admin_page_metaboxes_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter admin page settings metaboxes.
+
+```php
+add_filter('osec_admin_page_metaboxes_alter', $theme);
+```
+
+#### Description
+
+
+Allows to change which Elements you see on admin page settings. you may also alter the default order.
+
+#### Parameters
+
+
+ - **$theme** <span style="color:crimson"> </span> Array of Less variables
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter admin page settings metaboxes.
+ *
+ * Allows to change which Elements you see on admin page settings.
+ * you may also alter the default order.
+ *
+ * @since 1.0
+ *
+ * @param  array  $theme  Array of Less variables
+ *
+ * @file src/App/View/Admin/AdminPageSettings.php
+ */
+add_filter('osec_admin_page_metaboxes_alter', $theme);
+```
+
+</details>
+
+
+### osec_admin_setting_sections_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter or add tabs on AdminPageSettings
 
 ```php
-add_filter('osec_admin_setting_tabs_alter', $tabs);
+add_filter('osec_admin_setting_sections_alter', $tabs);
 ```
 
 #### Parameters
@@ -6264,7 +7184,7 @@ add_filter('osec_admin_setting_tabs_alter', $tabs);
  *
  * @file src/App/View/Admin/AdminPageSettings.php
  */
-add_filter('osec_admin_setting_tabs_alter', $tabs);
+add_filter('osec_admin_setting_sections_alter', $tabs);
 ```
 
 </details>
@@ -6789,13 +7709,13 @@ add_filter('osec_additional_buttons', $html $view_args);
 </details>
 
 
-### osec_calendar_page_filterargs <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_calendar_page_filter_args <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter or add arguments to calendar page filters
 
 ```php
-add_filter('osec_calendar_page_filterargs', $filter_args);
+add_filter('osec_calendar_page_filter_args', $filter_args);
 ```
 
 #### Parameters
@@ -6817,7 +7737,7 @@ add_filter('osec_calendar_page_filterargs', $filter_args);
  *
  * @file src/App/View/Calendar/CalendarPageView.php
  */
-add_filter('osec_calendar_page_filterargs', $filter_args);
+add_filter('osec_calendar_page_filter_args', $filter_args);
 ```
 
 </details>
@@ -6959,13 +7879,18 @@ add_filter('osec_calendar_view_args_alter', $view_args);
 </details>
 
 
+---
+
+
+@file **../src/App/View/Calendar/CalendarSubscribeView.php**
+
 ### osec_subscribe_buttons_arguments <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Subscribe buttons alter
 
 ```php
-add_filter('osec_subscribe_buttons_arguments', $args $view_args);
+add_filter('osec_subscribe_buttons_arguments', $args);
 ```
 
 #### Description
@@ -6977,7 +7902,6 @@ Alter arguments for subscribe-buttons.twig template
 
 
  - **$args** <span style="color:crimson"> </span> Twig args
- - **$view_args** <span style="color:crimson"> </span> View arguments
 
 <details markdown="1">
 <summary>Source</summary>
@@ -6992,11 +7916,10 @@ Alter arguments for subscribe-buttons.twig template
  * @since 1.0
  *
  * @param  array  $args  Twig args
- * @param  array  $view_args  View arguments
  *
- * @file src/App/View/Calendar/CalendarPageView.php
+ * @file src/App/View/Calendar/CalendarSubscribeView.php
  */
-add_filter('osec_subscribe_buttons_arguments', $args $view_args);
+add_filter('osec_subscribe_buttons_arguments', $args);
 ```
 
 </details>
@@ -7362,6 +8285,58 @@ add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
 ---
 
 
+@file **../src/App/View/Event/EventContactView.php**
+
+### osec_contact_url_link <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter or add contact data before render
+
+```php
+add_filter('osec_contact_url_link', $args $has_data $event);
+```
+
+#### Description
+
+
+Visible Event single ´Organizer contact info´
+
+#### Parameters
+
+
+ - **$args** <span style="color:crimson"> </span> Args in use.
+ - **$has_data** <span style="color:crimson"> bool</span> Must be true to render
+ - **$event** <span style="color:crimson"> Event</span> 
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter or add contact data before render
+ *
+ * Visible Event single ´Organizer contact info´
+ *
+ * @since 1.0
+ *
+ * @param string  $args  Args in use.
+ * @param bool $has_data Must be true to render
+ * @param Event $event
+ *
+ * @return array
+ *
+ * @file src/App/View/Event/EventContactView.php
+ */
+add_filter('osec_contact_url_link', $args $has_data $event);
+```
+
+</details>
+
+
+---
+
+
 @file **../src/App/View/Event/EventContentView.php**
 
 ### osec_back_to_calendar_button_html_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -7393,6 +8368,119 @@ add_filter('osec_back_to_calendar_button_html_alter', $args);
  * @file src/App/View/Event/EventContentView.php
  */
 add_filter('osec_back_to_calendar_button_html_alter', $args);
+```
+
+</details>
+
+
+---
+
+
+@file **../src/App/View/Event/EventLocationView.php**
+
+### osec_event_map_public_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter maps data before rendering.
+
+```php
+add_filter('osec_event_map_public_alter', $args);
+```
+
+#### Parameters
+
+
+ - **$args** <span style="color:crimson"> </span> Debug or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter maps data before rendering.
+ *
+ * @since 1.0
+ *
+ * @param  array  $args  Debug or not.
+ *
+ * @file src/App/View/Event/EventLocationView.php
+ */
+add_filter('osec_event_map_public_alter', $args);
+```
+
+</details>
+
+
+### osec_gmaps_link_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter google maps link
+
+```php
+add_filter('osec_gmaps_link_alter', $url $event);
+```
+
+#### Parameters
+
+
+ - **$url** <span style="color:crimson"> </span> Url.
+ - **$event** <span style="color:crimson"> </span> Event.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter google maps link
+ *
+ * @since 1.1
+ *
+ * @param  string  $url  Url.
+ *
+ * @param  array  $event  Event.
+ *
+ * @file src/App/View/Event/EventLocationView.php
+ */
+add_filter('osec_gmaps_link_alter', $url $event);
+```
+
+</details>
+
+
+### osec_osm_link_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter OpenStreetMaps link
+
+```php
+add_filter('osec_osm_link_alter', $url $event);
+```
+
+#### Parameters
+
+
+ - **$url** <span style="color:crimson"> </span> Url.
+ - **$event** <span style="color:crimson"> </span> Event.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter OpenStreetMaps link
+ *
+ * @since 1.1
+ *
+ * @param  string  $url  Url.
+ *
+ * @param  array  $event  Event.
+ *
+ * @file src/App/View/Event/EventLocationView.php
+ */
+add_filter('osec_osm_link_alter', $url $event);
 ```
 
 </details>
@@ -7440,6 +8528,40 @@ add_filter('osec_rendering_single_event_actions', $event $html);
 </details>
 
 
+### osec_alter_single_event_page_before_render <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Alter Event before rendering on a single Event page.
+
+```php
+do_action('osec_alter_single_event_page_before_render', $event);
+```
+
+#### Parameters
+
+
+ - **$event** <span style="color:crimson"> </span> passed by reference. So can be modified.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Event before rendering on a single Event page.
+ *
+ * @since 1.0
+ *
+ * @param  Event  $event  passed by reference. So can be modified.
+ *
+ * @file src/App/View/Event/EventSingleView.php
+ */
+do_action('osec_alter_single_event_page_before_render', $event);
+```
+
+</details>
+
+
 ### osec_rendering_single_event_venues <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -7472,40 +8594,6 @@ add_filter('osec_rendering_single_event_venues', $event $html);
  * @file src/App/View/Event/EventSingleView.php
  */
 add_filter('osec_rendering_single_event_venues', $event $html);
-```
-
-</details>
-
-
-### osec_alter_single_event_page_before_render <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Alter Event before rendering on a single Event page.
-
-```php
-do_action('osec_alter_single_event_page_before_render', $event);
-```
-
-#### Parameters
-
-
- - **$event** <span style="color:crimson"> </span> passed by reference. So can be modified.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter Event before rendering on a single Event page.
- *
- * @since 1.0
- *
- * @param  Event  $event  passed by reference. So can be modified.
- *
- * @file src/App/View/Event/EventSingleView.php
- */
-do_action('osec_alter_single_event_page_before_render', $event);
 ```
 
 </details>
@@ -7644,6 +8732,43 @@ add_filter('osec_event_color_squares', $event $squares);
 </details>
 
 
+### osec_event_rest_categories <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Allow add-ons to modify/add to category data, category image/image size for REST API..
+
+```php
+add_filter('osec_event_rest_categories', $event $categories);
+```
+
+#### Parameters
+
+
+ - **$event** <span style="color:crimson"> </span> event being processed
+ - **$categories** <span style="color:crimson"> </span> Event category data
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Allow add-ons to modify/add to category data, category image/image size  for REST API..
+ *
+ * @since 1.0.5
+ *
+ * @param  Event  $event  event being processed
+ *
+ * @param  array  $categories  Event category data
+ *
+ * @file src/App/View/Event/EventTaxonomyView.php
+ */
+add_filter('osec_event_rest_categories', $event $categories);
+```
+
+</details>
+
+
 ---
 
 
@@ -7683,25 +8808,24 @@ add_filter('osec_buy_tickets_url_icon', $html);
 </details>
 
 
-### osec_contact_url_link <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_currency_to_iso4217_map <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter contact_url label
+Add Currency symbols (UTF-8) => ISO 4217 Code
 
 ```php
-add_filter('osec_contact_url_link', $contact_url $event_website_link);
+add_filter('osec_currency_to_iso4217_map', $currencyMap);
 ```
 
 #### Description
 
 
-Visible Event single if ´Organizer contact info´ -> Website URL is set.
+<meta itemprop="priceCurrency" content="EUR"> @see https://schema.org/priceCurrency
 
 #### Parameters
 
 
- - **$contact_url** <span style="color:crimson"> </span> Url in use.
- - **$event_website_link** <span style="color:crimson"> </span> Multilingual label for the link.
+ - **$currencyMap** <span style="color:crimson"> </span> 
 
 <details markdown="1">
 <summary>Source</summary>
@@ -7709,20 +8833,58 @@ Visible Event single if ´Organizer contact info´ -> Website URL is set.
 
 ```php
 /**
- * Alter contact_url label
+ * Add Currency symbols (UTF-8) => ISO 4217 Code
  *
- * Visible Event single if ´Organizer contact info´
- * -> Website URL is set.
+ * <meta itemprop="priceCurrency" content="EUR">
+ * @see https://schema.org/priceCurrency
  *
- * @since 1.0
+ * @since 1.1
  *
- * @param  string  $contact_url  Url in use.
- *
- * @param  string  $event_website_link  Multilingual label for the link.
+ * @param  array  $currencyMap
+ * .
+ * @return array
  *
  * @file src/App/View/Event/EventTicketView.php
  */
-add_filter('osec_contact_url_link', $contact_url $event_website_link);
+add_filter('osec_currency_to_iso4217_map', $currencyMap);
+```
+
+</details>
+
+
+### osec_currency_iso4217_value_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Allows you to alter or provide a valid priceCurrency
+
+```php
+add_filter('osec_currency_iso4217_value_alter', $cost_currency $coast);
+```
+
+#### Parameters
+
+
+ - **$cost_currency** <span style="color:crimson"> </span> Assumed ISO 4217 value.
+ - **$coast** <span style="color:crimson"> </span> Raw field value.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Allows you to alter or provide a valid priceCurrency
+ *
+ * @see https://schema.org/priceCurrency
+ * @since 1.0
+ *
+ * @param  string  $cost_currency Assumed ISO 4217 value.
+ * @param  string  $coast Raw field value.
+ * @return string Must return ISO 4217 3 letter string as schema requires or null to hide.
+ *
+ * @file src/App/View/Event/EventTicketView.php
+ */
+add_filter('osec_currency_iso4217_value_alter', $cost_currency $coast);
 ```
 
 </details>
@@ -8057,13 +9219,13 @@ add_filter('osec_kses_allowed_html_inline', $frontend);
 </details>
 
 
-### osec_ksess_allowed_html_frontend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_kses_allowed_html_frontend <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter allowed HTML tags and properties on frontend rendering.
 
 ```php
-add_filter('osec_ksess_allowed_html_frontend', $frontend);
+add_filter('osec_kses_allowed_html_frontend', $frontend);
 ```
 
 #### Parameters
@@ -8085,7 +9247,7 @@ add_filter('osec_ksess_allowed_html_frontend', $frontend);
  *
  * @file src/App/View/KsesHelper.php
  */
-add_filter('osec_ksess_allowed_html_frontend', $frontend);
+add_filter('osec_kses_allowed_html_frontend', $frontend);
 ```
 
 </details>
@@ -8248,48 +9410,6 @@ add_filter('osec_export_filter', $filter);
 
 @file **../src/Command/SaveSettings.php**
 
-### osec_pre_validate_settings <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter Settings before validation.
-
-```php
-add_filter('osec_pre_validate_settings', $_POST);
-```
-
-#### Description
-
-
-Let other plugin modify the POST variables before validations of settings.
-
-#### Parameters
-
-
- - **$_POST** <span style="color:crimson"> </span> Maybe unvalidated variables.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter Settings before validation.
- *
- * Let other plugin modify the POST variables
- * before validations of settings.
- *
- * @since 1.0
- *
- * @param  array  $_POST  Maybe unvalidated variables.
- *
- * @file src/Command/SaveSettings.php
- */
-add_filter('osec_pre_validate_settings', $_POST);
-```
-
-</details>
-
-
 ### osec{$method} <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -8339,7 +9459,7 @@ add_filter('osec{$method}', $method $value);
 Alter Settings before save.
 
 ```php
-add_filter('osec_pre_save_settings', $_POST);
+add_filter('osec_pre_save_settings', $value);
 ```
 
 #### Description
@@ -8350,7 +9470,7 @@ Let other plugin modify the POST variables before saving settings.
 #### Parameters
 
 
- - **$_POST** <span style="color:crimson"> </span> Maybe unvalidated variables.
+ - **$value** <span style="color:crimson"> </span> Maybe unvalidated variables.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -8365,11 +9485,11 @@ Let other plugin modify the POST variables before saving settings.
  *
  * @since 1.0
  *
- * @param  array  $_POST  Maybe unvalidated variables.
+ * @param  array  $value  Maybe unvalidated variables.
  *
  * @file src/Command/SaveSettings.php
  */
-add_filter('osec_pre_save_settings', $_POST);
+add_filter('osec_pre_save_settings', $value);
 ```
 
 </details>
@@ -8727,7 +9847,7 @@ add_filter('osec_date_picker_href_args', $href_args $args);
 #### Description
 
 
-Rendered in datepicker_link.twig
+Rendered in datepicker-link.twig
 
 #### Parameters
 
@@ -8743,7 +9863,7 @@ Rendered in datepicker_link.twig
 /**
  * Alter href arguments for datepicker
  *
- * Rendered in datepicker_link.twig
+ * Rendered in datepicker-link.twig
  *
  * @since 1.00
  *
@@ -8766,7 +9886,7 @@ add_filter('osec_date_picker_href_args', $href_args $args);
 ### osec_register_theme <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter theme paths.
+Add or alter theme paths.
 
 ```php
 add_filter('osec_register_theme', $theme_dirs);
@@ -8783,7 +9903,7 @@ add_filter('osec_register_theme', $theme_dirs);
 
 ```php
 /**
- * Alter theme paths.
+ * Add or alter theme paths.
  *
  * @since 1.0
  *
@@ -8838,6 +9958,44 @@ add_filter('osec_theme_loader_path_alter', $path_data $target $is_extension);
 </details>
 
 
+### osecc_theme_args_{$filename} <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter arguments before template file is processed.
+
+```php
+add_filter('osecc_theme_args_{$filename}', $filename $args $is_admin);
+```
+
+#### Parameters
+
+
+ - **$filename** <span style="color:crimson"> string</span> Filename, prefixed with osecc_theme_args_.
+ - **$args** <span style="color:crimson"> array</span> Variables to change.
+ - **$is_admin** <span style="color:crimson"> bool</span> Admin template or not.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter arguments before template file is processed.
+ *
+ * @since 1.0
+ *
+ * @param string $filename  Filename, prefixed with osecc_theme_args_.
+ * @param array $args Variables to change.
+ * @param bool $is_admin Admin template or not.
+ *
+ * @file src/Theme/ThemeLoader.php
+ */
+add_filter('osecc_theme_args_{$filename}', $filename $args $is_admin);
+```
+
+</details>
+
+
 ### osec_twig_environment_settings_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -8875,134 +10033,6 @@ Alter variables beforeinitalisation of Twig\Environment($twigLoader, $environmen
  * @file src/Theme/ThemeLoader.php
  */
 add_filter('osec_twig_environment_settings_alter', $environment);
-```
-
-</details>
-
-
----
-
-
-@file **../public/admin/feed_row.php**
-
-### osec_admin_ics_feeds_options_header_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Add Html content above feeds options
-
-```php
-do_action('osec_admin_ics_feeds_options_header_html', $feed_id);
-```
-
-#### Description
-
-
-On Feeds admin page you can echo/print any Html sting.
-
-#### Parameters
-
-
- - **$feed_id** <span style="color:crimson"> </span> DB id of the feed.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Add Html content above feeds options
- *
- * On Feeds admin page you can echo/print any Html sting.
- *
- * @since 1.0
- *
- * @param ?int  $feed_id  DB id of the feed.
- *
- * @file public/admin/feed_row.php
- */
-do_action('osec_admin_ics_feeds_options_header_html', $feed_id);
-```
-
-</details>
-
-
-### osec_admin_ics_feeds_options_before_keep_original_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Add Html content above keep-options
-
-```php
-do_action('osec_admin_ics_feeds_options_before_keep_original_html', $feed_id);
-```
-
-#### Description
-
-
-On Feeds admin page you can echo/print any Html sting.
-
-#### Parameters
-
-
- - **$feed_id** <span style="color:crimson"> </span> DB id of the feed if in feed context.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Add Html content above keep-options
- *
- * On Feeds admin page you can echo/print any Html sting.
- *
- * @since 1.0
- *
- * @param ?int  $feed_id  DB id of the feed if in feed context.
- *
- * @file public/admin/feed_row.php
- */
-do_action('osec_admin_ics_feeds_options_before_keep_original_html', $feed_id);
-```
-
-</details>
-
-
-### osec_admin_ics_feeds_options_after_settings_html <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Add Html content below feeds options
-
-```php
-do_action('osec_admin_ics_feeds_options_after_settings_html', $feed_id);
-```
-
-#### Description
-
-
-On Feeds admin page you can echo/print any Html sting.
-
-#### Parameters
-
-
- - **$feed_id** <span style="color:crimson"> </span> DB id of the feed.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Add Html content below feeds options
- *
- * On Feeds admin page you can echo/print any Html sting.
- *
- * @since 1.0
- *
- * @param ?int  $feed_id  DB id of the feed.
- *
- * @file public/admin/feed_row.php
- */
-do_action('osec_admin_ics_feeds_options_after_settings_html', $feed_id);
 ```
 
 </details>

@@ -2,6 +2,7 @@
 
 namespace Osec\App\View;
 
+use Osec\App\View\Admin\AdminPageSettings;
 use Osec\Bootstrap\OsecBaseClass;
 
 /**
@@ -25,7 +26,7 @@ class WpPluginActonLinks extends OsecBaseClass
         $settings_link = sprintf(
             /* translators: Admin url */
             __('<a href="%s">Settings</a>', 'open-source-event-calendar'),
-            admin_url(OSEC_SETTINGS_BASE_URL)
+            admin_url(OSEC_ADMIN_BASE_URL . '&page=' . AdminPageSettings::MENU_SLUG)
         );
         array_unshift($links, $settings_link);
 

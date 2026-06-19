@@ -4,7 +4,12 @@ namespace Osec\App\View\Admin;
 
 use Osec\Bootstrap\App;
 use Osec\Theme\ThemeFinder;
+use Osec\Theme\ThemeLoader;
 use WP_List_Table;
+
+if (! defined('ABSPATH')) {
+    exit;
+}
 
 // phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols
 if (! class_exists('WP_List_Table')) {
@@ -124,7 +129,6 @@ class AdminThemeList extends WP_List_Table
             'name'           => $current_theme,
             'title'          => $themes[$current_theme]['Title'],
             'version'        => $themes[$current_theme]['Version'],
-            'parent_theme'   => $themes[$current_theme]['Parent Theme'],
             'template_dir'   => $themes[$current_theme]['Template Dir'],
             'stylesheet_dir' => $themes[$current_theme]['Stylesheet Dir'],
             'template'       => $themes[$current_theme]['Template'],
@@ -164,10 +168,17 @@ class AdminThemeList extends WP_List_Table
     public function display(): void
     {
         $this->tablenav('top');
-        echo '<div id="availablethemes">';
+        echo '<div id="availablethemes" class="theme-browser">';
         $this->display_rows_or_placeholder();
         echo '</div>';
         $this->tablenav('bottom');
+    }
+
+    public function get_display(): string
+    {
+        ob_start();
+        $this->display();
+        return ob_get_clean();
     }
 
     /**
@@ -184,10 +195,11 @@ class AdminThemeList extends WP_List_Table
         <div class="tablenav themes <?php echo esc_attr($which); ?>">
             <?php
             $this->pagination($which); ?>
-            <img src="<?php
-            echo esc_url(admin_url('images/wpspin_light.gif')); ?>"
+            <img
+                src="<?php echo esc_url(admin_url('images/wpspin_light.gif')); ?>"
                  class="ajax-loading list-ajax-loading"
-                 alt=""/>
+                 alt=""
+            />
             <br class="clear"/>
         </div>
         <?php
@@ -296,105 +308,41 @@ class AdminThemeList extends WP_List_Table
         $theme_names = array_keys($themes);
         natcasesort($theme_names);
 
-        foreach ($theme_names as $theme_name) {
-            $class = ['available-theme'];
-            ?>
-            <div class="<?php echo esc_attr(implode(' ', $class)); ?>">
-                <?php if (! empty($theme_name)) :
-                    $template = $themes[$theme_name]['Template'];
-                    $stylesheet = $themes[$theme_name]['Stylesheet'];
-                    $title = $themes[$theme_name]['Title'];
-                    $version = $themes[$theme_name]['Version'];
-                    $description = $themes[$theme_name]['Description'];
-                    $author = $themes[$theme_name]['Author'];
-                    $screenshot = $themes[$theme_name]['Screenshot'];
-                    $stylesheet_dir = $themes[$theme_name]['Stylesheet Dir'];
-                    $template_dir = $themes[$theme_name]['Template Dir'];
-                    $parent_theme = $themes[$theme_name]['Parent Theme'];
-                    $theme_root = $themes[$theme_name]['Theme Root'];
-                    $theme_dir = $themes[$theme_name]->get_stylesheet_directory();
-                    $theme_root_uri = esc_url($themes[$theme_name]['Theme Root URI']);
-                    $tags = $themes[$theme_name]['Tags'];
+        $nonce = wp_create_nonce(AdminPageManageThemes::$NONCE['action']);
 
-                    // Generate theme activation link.
-                    $activate_link = admin_url(OSEC_THEME_SELECTION_BASE_URL);
-                    $activate_link = add_query_arg(
-                        [
-                            'osec_action'     => AdminPageManageThemes::$NONCE['action'],
-                            'osec_theme_dir'  => $theme_dir,
-                            // hardcoded for 2.2
-                            'osec_theme'       => $stylesheet,
-                            'osec_theme_root' => $theme_root,
-                            'ai1ec_theme_url'  => $theme_root_uri . '/' . $stylesheet,
-                        ],
-                        $activate_link
-                    );
-                    $activate_link = wp_nonce_url(
-                        $activate_link,
-                        'switch-osec_theme_' . $template
-                    );
+        foreach ($theme_names as $theme_id => $theme_name) {
+            $theme = $themes[$theme_name];
+            $theme_dir = esc_attr($theme->get_stylesheet_directory());
+            $theme_root = $themes[$theme_name]['Theme Root'];
 
-                    $activate_text = esc_attr(
-                        sprintf(
-                        /* translators: Theme Name */
-                            __('Activate &#8220;%s&#8221;', 'open-source-event-calendar'),
-                            $title
-                        )
-                    );
-                    $actions       = [];
-                    $actions[]     = '<a href="' . $activate_link .
-                                     '" class="activatelink" title="' . $activate_text . '">' .
-                                     __('Activate', 'open-source-event-calendar') . '</a>';
+            $theme_root_uri = esc_url($theme['Theme Root URI']);
 
-                    $actions = apply_filters(
-                        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                        'theme_action_links',
-                        $actions,
-                        $themes[$theme_name]
-                    );
-
-                    $actions = implode(' | ', $actions);
-                    ?>
-                    <?php if ($screenshot) : ?>
-                    <img src="<?php echo esc_url($theme_root_uri . '/' . $stylesheet . '/' . $screenshot); ?>" alt=""/>
-                    <?php endif; ?>
-                    <h3>
-                        <?php
-                        printf(
-                        /* translators: 1: theme title, 2: theme version */
-                            esc_html__('%1$s %2$s', 'open-source-event-calendar'),
-                            esc_html($title),
-                            esc_html($version),
-                        );
-                        ?>
-                    </h3>
-                    <p class="description">
-                        <?php wp_kses($description, $this->app->kses->allowed_html_frontend()); ?>
-                    </p>
-                    <span class='action-links'>
-                        <?php echo wp_kses(
-                            $actions,
-                            $this->app->kses->allowed_html_frontend()
-                        ); ?>
-                    </span>
-                    <p>
-                        <?php printf(
-                        /* translators: 1: template dir */
-                            esc_html__('The template files are located in %s.', 'open-source-event-calendar'),
-                            '<code>' . esc_html(str_replace(WP_CONTENT_DIR, '', $template_dir)) . '</code>',
-                        );?>
-                    </p>
-                    <?php
-                    if ($tags) : ?>
-                        <p>
-                            <?php
-                            echo esc_html__('Tags:', 'open-source-event-calendar'); ?><?php
-                            echo esc_html(implode(', ', $tags)); ?>
-                        </p>
-                    <?php endif; ?>
-                <?php endif; // end if not empty theme_name ?>
-            </div>
-            <?php
-        } // end foreach $theme_names
+            $args = [
+                'title' => $theme->display('Name'),
+                'description' => $theme->display('Description'),
+                'version' => esc_html($theme->display('Version')),
+                'template_dir_text' => esc_html__('The template files are located in', 'open-source-event-calendar'),
+                'template_dir' => $theme_dir,
+                'tags_title' => esc_html__('Tags:', 'open-source-event-calendar'),
+                'tags' => esc_html(implode(', ', $theme['Tags'])),
+                'activate_text' => esc_attr__('Activate', 'open-source-event-calendar'),
+                'theme_id' => $theme_name,
+                'activate_link' => add_query_arg(
+                    [
+                            'osec_action' => AdminPageManageThemes::$NONCE['action'],
+                            'osec_theme_dir' => rawurlencode($theme_dir),
+                            'osec_theme' => $theme_name,
+                            'osec_theme_root' => rawurlencode(esc_url($theme_root)),
+                            'ai1ec_theme_url' => rawurlencode(esc_url($theme_root_uri . '/' . $theme_name)),
+                            AdminPageManageThemes::$NONCE['nonce_name'] => $nonce,
+                    ],
+                    admin_url(OSEC_ADMIN_BASE_URL . '&page=' . AdminPageManageThemes::MENU_SLUG)
+                ),
+                'screenshot_uri' => esc_url($theme_root_uri . '/' . $theme['Stylesheet'] . '/' . $theme['Screenshot']),
+            ];
+            ThemeLoader::factory($this->app)
+                       ->get_file('theme_row.twig', $args, true)
+                       ->render();
+        }
     }
 }

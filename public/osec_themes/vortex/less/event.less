@@ -27,6 +27,14 @@
 		line-height: 25px;
 	}
 
+	.osec-timezone-info {
+		font-size: small;
+		line-height: 1.2;
+	}
+	.osec-timezone-info--gmt {
+		white-space: nowrap;
+	}
+
 	// Date/time & recurrence.
 	.ai1ec-time .ai1ec-field-value {
 		font-size: 1.2em;
@@ -52,36 +60,36 @@
 		font-size: 0.85em;
 	}
 
-	// Location & Google map.
-	.ai1ec-gmap-container {
-		border: 1px solid @table-border-color;
+	// Location & map.
+	.osec-map-container {
 		border-radius: @border-radius-base;
 		position: relative;
+		padding-bottom: 3px;
+		padding-top: 3px;
+		z-index: 1;
 	}
-	#osec-gmap-canvas {
-		width: 100%;
-		height: 200px;
+	.osec-map-link {
+		vertical-align: middle;
+		white-space: nowrap;
+		.dashicons {
+			vertical-align: middle;
+			font-size: 1.1rem;
+		}
 	}
-	.ai1ec-gmap-link {
-		bottom: -1px;
-		display: none;
-		margin: 0;
-		position: absolute;
-		right: -1px;
+	.leaflet-control-attribution {
+		svg {
+			/* No borders, no nations, no wars. */
+			display: none !important;
+		}
 	}
-	.ai1ec-gmap-container:hover .ai1ec-gmap-link {
-		display: block;
-	}
-	#osec-gmap-canvas input {
-		margin: 0 !important;
-	}
-	.ai1ec-gmap-placeholder {
+
+
+	.osec-map-placeholder {
 		border-radius: 4px;
 		color: @link-color;
 		cursor: pointer;
 		height: 12em;
 		border: 1px dashed @table-border-color;
-		min-width: 18em;
 		margin-bottom: 0.3em;
 		text-align: center;
 		width: 100%;
@@ -94,9 +102,8 @@
 			top: 45%;
 		}
 	}
-	.ai1ec-gmap-container-hidden {
-		position: absolute !important;
-		visibility: hidden;
+	.osec-map-container-hidden {
+		display: none;
 	}
 	.ai1ec-contact span {
 		display: inline-block;
@@ -140,6 +147,10 @@
 		.ai1ec-fa-fw {
 			width: 20px;
 		}
+	}
+
+	.osec-location {
+		line-height: 1.4;
 	}
 }
 

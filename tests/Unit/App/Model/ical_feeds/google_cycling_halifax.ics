@@ -1,0 +1,1616 @@
+BEGIN:VCALENDAR
+PRODID:-//Google Inc//Google Calendar 70.9054//EN
+VERSION:2.0
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Halifax Cycling Events Calendar
+X-WR-TIMEZONE:America/Halifax
+X-WR-CALDESC:Cycling events organized by various groups throughout Halifax.
+  To get your event displayed here contact calendar@cyclehalifax.ca.
+BEGIN:VTIMEZONE
+TZID:America/Halifax
+X-LIC-LOCATION:America/Halifax
+BEGIN:DAYLIGHT
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0300
+TZNAME:ADT
+DTSTART:19700308T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:-0300
+TZOFFSETTO:-0400
+TZNAME:AST
+DTSTART:19701101T020000
+RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTART:20240714T123000Z
+DTEND:20240714T150000Z
+DTSTAMP:20260601T230038Z
+UID:1el5ucafq0h8d0jugus6gu6ebb@google.com
+CREATED:20240625T191219Z
+DESCRIPTION:Epic Cycling Challenge at the ride destination:\nTime to gear u
+ p for an awesome cycling challenge! Calling all kids to come and join our s
+ uper fun cycling obstacle course!
+LAST-MODIFIED:20240817T134707Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Kidical Mass & Epic Cycling Challenge
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250508
+DTEND;VALUE=DATE:20250509
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250507
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20250831T110000Z
+DTEND:20250831T133000Z
+DTSTAMP:20260601T230038Z
+UID:1pavsmdda8vto4f28somkstj3i@google.com
+CREATED:20250825T142631Z
+DESCRIPTION:Join us for a scenic 9KM waterfront ride featuring harbour view
+ s\, historic neighbourhoods\, and a unique ferry crossing experience. 🚴‍♀️
+ ⛴️<br><br>We will depart from the Emera Oval to Halifax Ferry Terminal\, wh
+ ere we'll board the ferry for a relaxing harbour crossing to Alderney Termi
+ nal\, ride within Dartmouth and head back to Halifax. ⛴️<br><br>This is a f
+ riendly\, moderate-paced ride with sweeps provided to ensure no one is left
+  behind but please note that we will encounter some fairly steep hills alon
+ g the way.<br><br><b>Requirements:</b><br><br>All participants must complet
+ e a <a href="https://cyclehalifax.ca/waiver">waiver</a> before the ride  📝
+ <br>Ferry tickets must be purchased individually 🎫<br><br><b>Details: </b>
+ <br><br>Distance: 9KM 📏<br>Estimated Elevation: 131 m<br>Start: 8:00 AM at
+  Emera Oval (8:15 AM departure) ⏰<br>Pace: Moderate\, with sweeps provided
+ 🚴‍♂️
+LAST-MODIFIED:20250825T145502Z
+LOCATION:Emera Oval\, 5775 Cogswell St\, Halifax\, NS B3K 4B2\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:The Ferry Loop Ride
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250608
+DTEND;VALUE=DATE:20250609
+DTSTAMP:20260601T230038Z
+UID:1go0770ua6lpj299d3upn51ns6@google.com
+CREATED:20250413T150639Z
+DESCRIPTION:Take the Long Way Home <br>Loco Loop (200km)Meet at the Halifax
+  Oval at 5:45am <br> <br><br>More info: <br><a href="https://www.instagram.
+ com/p/DHV2ak1RYE8/?img_index=4" target="_blank">https://www.instagram.com/p
+ /DHV2ak1RYE8/?img_index=4</a><br> <br><span dir="auto"><span>TMC &amp\; <a
+ href="https://www.instagram.com/tip2tip_ns/">@tip2tip_ns</a> creator <a hre
+ f="https://www.instagram.com/ashleigh.myles/">@ashleigh.myles</a> will be h
+ osting four fun and challenging rides around HRM designed to give you a tas
+ te of what riding longer\, faster and farther feels like. <br><br>Starting
+ on April 5th\, we’ll be riding consecutively longer rides until the last on
+ e in June. To make it to the end of each ride\, we’ll be riding an average
+ of 20-22km/h with breaks for snacks. We’ll be in close communication throug
+ hout the rides on WhatsApp to ensure everyone’s feeling good and will chat
+ through some bail options at the start of each ride in case you need to dip
+  early. <br><br>As always\, this is a safe space to test your limits! We en
+ courage you to regularly check in with yourself and to be open about how yo
+ u’re making out.<br><br>These rides ARE NOT our typical no-drop monthly soc
+ ial rides\, so keep an eye out for our first social ride happening in late
+ April!<br><br>⚡️⚡️ These rides ARE for women\, trans\, and gender diverse f
+ olks ⚡️⚡️<br><br>Check out our linktree for the ride routes!<br><br>If you
+ have any questions\, concerns\, or accessibility needs that affect your par
+ ticipation please let us know\, however you’re comfortable. We want these r
+ ides to help us all gain confidence on bikes! Let us know how we can make t
+ hat happen. <br><br>Check yer brakes and we’ll see you soon! <br></span></s
+ pan>
+LAST-MODIFIED:20260404T092425Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:5:45am: Monthly Cycle (200km)
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20250804T133000Z
+DTEND:20250804T150000Z
+DTSTAMP:20260601T230038Z
+UID:2a9e6q3o1hgqo7b7vuoh1n1ibo@google.com
+CREATED:20250702T174251Z
+DESCRIPTION:TBD
+LAST-MODIFIED:20250702T174251Z
+LOCATION:Downtown Dartmouth\, Dartmouth\, NS\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Natal Day Parade: HCC Float
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20240811T123000Z
+DTEND:20240811T150000Z
+DTSTAMP:20260601T230038Z
+UID:17rc3b96un47j21h9nkfgjm9s2@google.com
+CREATED:20240625T191237Z
+DESCRIPTION:📅 Date: August 11\n🕐 Time: 9:30 am at St. Stephen's school\,
+ Normandy Dr. entrance (more details on Kidical Mass event page)\n📍 Ride De
+ stination: Isleville Park\n\nCheck out the linktree on our profile:\n- Kidi
+ cal Mass Event Page\n- Waiver\n- Ride Route\n\nHalifax Cycling Coalition is
+  gearing up for an epic community bash at the finish line of the Kidical Ma
+ ss event!
+LAST-MODIFIED:20240817T133739Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Kidical Mass
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260425T130000Z
+DTEND:20260425T160000Z
+DTSTAMP:20260601T230038Z
+UID:505lc31ol2l53445o1gpnhuesu@google.com
+CREATED:20260403T172643Z
+DESCRIPTION:<b>Saturday\, April 25th\, 10am</b> departure at the Armdale Ro
+ undabout.  Refreshments and sociables at the Armview Restaurant upon our re
+ turn.<br><br>60km group ride departing from the Armdale Roundabout and head
+ ing out St. Margarets Bay Road to Tantallon where we will turn up the 213 t
+ o Hammonds Plains Road and back in toward the city along Kearney Lake Road\
+ , Dunbrack St and we'll add in a final loop through Spryfield to arrive bac
+ k in Armdale.<br><br><b>Current membership in Cycling Nova Scotia is requir
+ ed.</b>  Membership in Randonneurs NS is optional for first timers.  We exp
+ ect riders to be self-sufficient\, have some experience road riding\, and t
+ o be comfortable with vehicle traffic.  We can tell you all about the club
+ over post-ride refreshments.
+LAST-MODIFIED:20260403T172839Z
+LOCATION:Armdale Roundabout\, Halifax\, NS\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Randonneurs Nova Scotia: 60km ride
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20240823T210000Z
+DTEND:20240823T230000Z
+DTSTAMP:20260601T230038Z
+UID:61p62ahs2mdmm0esi9p30jcsb2@google.com
+CREATED:20240717T172818Z
+DESCRIPTION:🕐 Time: 6-8 pm<br>📍 Meet-up location: At the waterfront gazeb
+ o behind the Discovery Centre (44°38'33.8"N 63°34'01.8"W)<br>🚲 Distance: 1
+ 1.3 km<br><br>📖 Topic:<br>- Road signs and hand signals recap from last ti
+ me<br><br>✏️ Time Table:<br>6-6:30 pm: Mini Urban Course<br>6:30-7:30 pm: P
+ ractice Ride<br>7:30-8 pm: Extra Time for questions and feedback<br><a href
+ ="goog_764846435"><br></a><br><a href="https://linktr.ee/cyclehalifax">Chec
+ k out the linktree for:</a><br>- Waiver<br>- Detailed ride route<br><br>Get
+  ready to explore the city on two wheels in this fun and interactive event.
+  Whether you're a beginner or a seasoned cyclist\, this course is perfect f
+ or anyone looking to enhance their urban biking skills. Join us for an even
+ ing filled with tips on navigating urban roads\, bike handling techniques\,
+  and safety guidelines. Don't miss this opportunity to boost your cycling c
+ onfidence and enjoy a ride through the city with fellow biking enthusiasts.
+  See you there!<br><br>*If we need to cancel due to weather conditions\, we
+  will post a notice on this website at least 3 hours before the day of the
+ ride.
+LAST-MODIFIED:20240817T133407Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Mini Urban Cycling Course
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260205T220000Z
+DTEND:20260206T000000Z
+DTSTAMP:20260601T230038Z
+UID:5ju2ckilr9u0oq1rfssf0b53pc@google.com
+CREATED:20260120T183446Z
+DESCRIPTION:We’re inviting you to <b>Meet the Board</b> of HCC. It's going
+ to be a casual\, unstructured get-together with board members\, volunteers\
+ , and folks from the cycling community. <br><br>There’s no agenda\, no pres
+ entations\, and no commitments. Just relaxed conversation and a chance to c
+ onnect. <br><br>🗓 Thursday\, February 5<br>📍 Oxford Tap Room (same spot a
+ s last year) <br>⏰ 6PM - 8PM<br><br>Everyone is welcome. Drop in for a bit
+ or stay longer\, grab a drink if you like\, and say hello. Hope to see you
+ there.
+LAST-MODIFIED:20260120T191444Z
+LOCATION:The Oxford Taproom\, 6418 Quinpool Rd\, Halifax\, NS B3L 1A8\, Can
+ ada
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:Meet the Board
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260516
+DTEND;VALUE=DATE:20260519
+DTSTAMP:20260601T230038Z
+UID:2aojc5oj3tq2oj783jek2pcs8b@google.com
+CREATED:20260513T233152Z
+DESCRIPTION:<ul><li><br><b>Where:</b> 2806 Greenfield Road\, Wolfville\, NS
+  B4P 2R1. The goal is to ride up and down the Greenfield Road (South Mounta
+ in) 92 times. <br></li><li><br><b>When:</b> 6:00 AM on May 16 to 6:00 AM on
+  May 18 (48 hours)<br></li><li><br><b>Drop in</b>: everyone’s welcome to be
+  part of this event! Hike the hill or ride a few laps with me! Suggested am
+ ount: $10 per person or bring a Breakfast Program approved food item.<br></
+ li><li><br><b>Drop off physical supplies</b>: Donations do not always need
+ to be monetary - see attached <b>Canva Poster on example eligible Breakfast
+  Program items</b> that can be brought on site to the Gaspereau Community C
+ entre! Please note that I will not be able to handle cash donations on the
+ site. </li></ul>
+LAST-MODIFIED:20260513T233152Z
+LOCATION:2806 Greenfield Rd\, Wolfville\, NS B4P 2R1\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Everesting Cycling Challenge
+TRANSP:TRANSPARENT
+ATTACH;FILENAME=Ride for Breakfast Poster.pdf;FMTTYPE=application/pdf:https
+ ://drive.google.com/open?id=1rD6ZvXystXUz6gCC4kqyolDMGMfaIM-w
+ATTACH;FILENAME=Breakfast Program Donations.pdf;FMTTYPE=application/pdf:htt
+ ps://drive.google.com/open?id=18CJSuO4T7Fhe-kfMWF6voxzXFMINRkda
+ATTACH;FILENAME=Drumlin Heights Breakfast Program Donation QR Code.png;FMTT
+ YPE=image/png:https://drive.google.com/open?id=1MbbOwp7iXGdouQkti2NAmJ3PRfn
+ PlFk-
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20250807T200000Z
+DTEND:20250807T213000Z
+DTSTAMP:20260601T230038Z
+UID:136refia7fu8titrb10lk9a5eq@google.com
+X-GOOGLE-CONFERENCE:https://meet.google.com/kmo-tqyk-sov
+CREATED:20250807T155752Z
+DESCRIPTION:<p>Know your rights\, ride with confidence! This essential work
+ shop provides cyclists with crucial legal knowledge to navigate the roads s
+ afely and handle incidents effectively.</p><p><strong>When:</strong> Thursd
+ ay\, August 7th | 5PM to 6:30PM<br><strong>Facilitator:</strong> Wagners La
+ w Firm</p><p><strong>Workshop Topics:</strong></p><ul><li><strong>Road Righ
+ ts &amp\; Responsibilities</strong> - Understanding your legal rights as a
+ cyclist</li><li><strong>Motorist Interactions</strong> - How to navigate ch
+ allenging situations with drivers</li><li><strong>Accident Protocols</stron
+ g> - Essential steps to take immediately following an incident</li><li><str
+ ong>Evidence Collection</strong> - What to document and how to protect your
+ self</li><li><strong>Insurance Claims</strong> - Understanding the claims p
+ rocess and your coverage</li><li><strong>Legal Representation</strong> - Wh
+ en and how to seek professional help</li><li><strong>Traffic Laws</strong>
+ - Cyclist-specific regulations and liability issues</li><li><strong>Prevent
+ ion &amp\; Protection</strong> - Strategies to safeguard yourself before in
+ cidents occur</li></ul><p><strong>Perfect For:</strong></p><ul><li>Daily co
+ mmuters and recreational cyclists</li><li>Anyone wanting to understand thei
+ r legal rights on the road</li><li>Cyclists seeking confidence in traffic s
+ ituations</li><li>Those who want to be prepared for potential incidents</li
+ ></ul><p><strong>What You'll Gain:</strong></p><ul><li>Clear understanding
+ of cyclist rights and responsibilities</li><li>Practical knowledge for hand
+ ling accidents and insurance claims</li><li>Confidence to navigate complex
+ traffic situations</li><li>Professional insights from experienced legal pra
+ ctitioners</li></ul><p><b>Register: </b><a href="http://cyclehalifax.ca/leg
+ al-workshop" target="_blank">http://cyclehalifax.ca/legal-workshop</a></p>\
+ n\nÜber Google Meet teilnehmen: https://meet.google.com/kmo-tqyk-sov\nOder
+ telefonisch: (CA) +1 587-688-0182 PIN: 748656711#\nWeitere Telefonnummern:
+ https://tel.meet/kmo-tqyk-sov?pin=1484156759873&hs=7\n\nWeitere Information
+ en zu Meet: https://support.google.com/a/users/answer/9282720
+LAST-MODIFIED:20250807T195438Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Cyclist Legal Education Workshop
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20240817T180000Z
+DTEND:20240817T200000Z
+DTSTAMP:20260601T230038Z
+UID:4n09gccjgqrhrs9ol5p85rmipj@google.com
+CREATED:20240806T135122Z
+DESCRIPTION:📅 Date: August 17\n🕐 Time: 3-5 pm\n📍 Location: Emera Oval (5
+ 775 Cogswell St\, Halifax\, NS B3K 4B2)\n\nCome out\, all new cyclists eage
+ r to learn the art of riding on two wheels! Our experienced bicycle mentor
+ is ready to share the magical techniques and skills tailored just for you.
+ Get ready for an exciting and fun first cycling experience! Don't let this
+ opportunity pass you by!\n\n*If we need to cancel due to weather conditions
+ \, we will post a notice on Instagram at least 3 hours before the day of th
+ e ride.
+LAST-MODIFIED:20240817T133019Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:New Cyclists Session
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250717
+DTEND;VALUE=DATE:20250718
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250716
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250517
+DTEND;VALUE=DATE:20250518
+RRULE:FREQ=DAILY;COUNT=2
+DTSTAMP:20260601T230038Z
+UID:48am5bhc4gkmjt6q2cvd7kkl4t@google.com
+CREATED:20250413T154247Z
+DESCRIPTION:<br><p>The annual Bluenose Marathon is May 18th and 19th. We’ll
+  be running an expanded <span>Bike</span> Valet and will be looking for vol
+ unteers. If you can help out by filling a two-hour shift\, <a href="https:/
+ /cyclehalifax.us5.list-manage.com/track/click?u=17dcf1fd4f5c6998288f8aec7&a
+ mp\;id=60c79eb76d&amp\;e=e19709ad70" target="_blank">signup here</a>. Volun
+ teers in previous years have remarked on how much fun it was. No experience
+  is necessary!</p><p><br></p><p>Bluenose Marathon is also looking for volun
+ teers for all sorts of roles\, but particularly for <strong><span>Bike</spa
+ n> Marshals</strong>. You can register <a href="https://cyclehalifax.us5.li
+ st-manage.com/track/click?u=17dcf1fd4f5c6998288f8aec7&amp\;id=67be0c7a5d&am
+ p\;e=e19709ad70" target="_blank">here</a>.</p>
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:HCC Bike Valet at Bluenose Marathon
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/Halifax:20240710T180000
+DTEND;TZID=America/Halifax:20240710T210000
+RRULE:FREQ=WEEKLY;UNTIL=20240904T025959Z;BYDAY=WE
+EXDATE;TZID=America/Halifax:20240807T180000
+EXDATE;TZID=America/Halifax:20240828T180000
+DTSTAMP:20260601T230038Z
+UID:4v8u0bjo5fph90hcgf9i3ofrne@google.com
+CREATED:20240626T150744Z
+DESCRIPTION:📅 Date: August 14 & 21\n🕐 Time: 6-9 pm\n📍 Location: Dal&King
+ ’s Bike Centre (6185 South St.\, Halifax)\n\nWhat you need to bring:\n- Pen
+  and paper (if you want to write notes)\n- A mat to sit on (if you want to
+ sit on the ground in the shade under the trees)
+LAST-MODIFIED:20240819T143245Z
+SEQUENCE:3
+STATUS:CONFIRMED
+SUMMARY:Bike Maintenance Session
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250424
+DTEND;VALUE=DATE:20250425
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250423
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250713
+DTEND;VALUE=DATE:20250714
+DTSTAMP:20260601T230038Z
+UID:37da3kl2mdoo4kgl26mroq2flg@google.com
+CREATED:20250413T145022Z
+DESCRIPTION:<a href="https://hfx.bike/kidical-mass/rides/2025/ride-jul-13/"
+ >https://hfx.bike/kidical-mass/rides/2025/ride-jul-13/</a>
+LAST-MODIFIED:20250413T155140Z
+LOCATION:TBD
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:9:30am: Kidical Mass
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20251019T123000Z
+DTEND:20251019T143000Z
+DTSTAMP:20260601T230038Z
+UID:09h0d22t5oaj3g0abo03rkkvpt@google.com
+CREATED:20251008T070355Z
+DESCRIPTION:<p><a href="https://hfx.bike/kidical-mass/" target="_blank"><u>
+ Kidical Mass</u></a> will be holding their next ride in Bedford for the fir
+ st time. If you’ve never been to a Kidical Mass ride\, you should know that
+  they are a lot of fun and you don’t need to have a kid. They’re usually lo
+ oking for volunteer marshals too.</p><p>When 📅: October 19\, 2025 @9:30am<
+ /p><p>Where📍: Fort Sackville School Playground\, Camden St Entrance</p><p>
+ Check the <a href="https://hfx.bike/kidical-mass/rides/2025/ride-oct-19/" t
+ arget="_blank"><u>event page</u></a> for full details.</p>
+LAST-MODIFIED:20251008T070508Z
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:Kidical Mass in Bedford
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20240804T153000Z
+DTEND:20240804T170000Z
+DTSTAMP:20260601T230038Z
+UID:3es9p01fmm9ucq7pbhqs0c07rs@google.com
+CREATED:20240817T134512Z
+DESCRIPTION:📅 Date: August 4\n🕐 Time: 12:30-2 pm\n🏁 Ride start time: 1 p
+ m\n🚲 Distance: 9.2 km\n📍 Meet-Up Location: Halifax Commons by the fountai
+ n (1075 North Park St\, Halifax\, NS B3K 4B2)\n🏁 Destination: Sullivan's P
+ ond\, Dartmouth\n\nEnjoy a ride to a FREE concert featuring The Dartmouth C
+ oncert Band at the Bandshell Stage at Sullivan's Pond on Sunday\, August 4\
+ , 2024 beginning at 2-4 pm.
+LAST-MODIFIED:20240817T134542Z
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:Rock & Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250501
+DTEND;VALUE=DATE:20250502
+DTSTAMP:20260601T230038Z
+UID:1sqn2bggqgdrl5cp91ch672i8h@google.com
+CREATED:20250413T154610Z
+DESCRIPTION:<p><br></p><p><span>Halifax</span> Active Transportation Planni
+ ng staff will present the current state of the <span>cycling</span> network
+  as well as upcoming plans to complete not only the Centre Region AAA Netwo
+ rk but also projects beyond that vision. There will be lots of time for que
+ stions.</p><p><br></p><p><span><span><span><span>📅 Date: </span></span></s
+ pan></span><strong><span><span><span><span>Thursday</span></span></span></s
+ pan></strong><span><span><span><span>\, May 1</span></span></span></span></
+ p><p><span><span><span><span>🕕 Time: </span></span></span></span><strong><
+ span><span><span><span>6:00pm to 8:00pm</span></span></span></span></strong
+ ></p><p><span><span><span><span>📍 Where: Alderney Gate Library</span></spa
+ n></span></span></p>
+LAST-MODIFIED:20260404T092425Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:6pm: HCC State of the Network
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/Halifax:20240731T180000
+DTEND;TZID=America/Halifax:20240731T210000
+DTSTAMP:20260601T230038Z
+UID:4v8u0bjo5fph90hcgf9i3ofrne@google.com
+X-GOOGLE-CONFERENCE:https://meet.google.com/kvv-oeiy-izu
+RECURRENCE-ID;TZID=America/Halifax:20240731T180000
+CREATED:20240626T150744Z
+DESCRIPTION:📅 Date: August 14 & 21\n🕐 Time: 6-9 pm\n📍 Location: Dal&King
+ ’s Bike Centre (6185 South St.\, Halifax)\n\nWhat you need to bring:\n- Pen
+  and paper (if you want to write notes)\n- A mat to sit on (if you want to
+ sit on the ground in the shade under the trees)\n\nÜber Google Meet teilneh
+ men: https://meet.google.com/kvv-oeiy-izu\nOder telefonisch: (CA) +1 226-21
+ 4-5333 PIN: 996880601#\nWeitere Telefonnummern: https://tel.meet/kvv-oeiy-i
+ zu?pin=8570412863945&hs=7\n\nWeitere Informationen zu Meet: https://support
+ .google.com/a/users/answer/9282720
+LAST-MODIFIED:20240819T143245Z
+SEQUENCE:3
+STATUS:CONFIRMED
+SUMMARY:Bike Maintenance Session
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260201T150000Z
+DTEND:20260201T153000Z
+DTSTAMP:20260601T230038Z
+UID:6b31pu4evdniehhrruu2lahlp7@google.com
+CREATED:20260129T183117Z
+DESCRIPTION:<p>Join a collaborative community meetup featuring <b>Bike Part
+ y</b>\, <b>Coffee Outside Halifax</b>\, <b>Halifax Cycles</b>\, and the <b>
+ Halifax Cycling Coalition (HCC)</b>! This Sunday morning gathering brings t
+ ogether several local cycling groups for a casual ride and social.</p><p>Th
+ e event kicks off at 10:00 AM with a 30-minute\, party-pace group ride that
+  starts and ends at the Oval. Following the ride at 10:30 AM\, we’ll transi
+ tion into a special weekend edition of Coffee Outside. Jenna from Halifax C
+ ycles will be there with demo bikes to try out\, along with prizes and hot
+ chocolate for everyone to enjoy. We’ll be doing a prize draw at 10:45 AM fo
+ r anyone joining the ride or the meetup. Bring your bike and a mug\, and co
+ me hang out!</p>
+LAST-MODIFIED:20260129T183118Z
+LOCATION:Emera Oval\, 5775 Cogswell St\, Halifax\, NS B3K 4B2\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Halifax Cycling Community Social
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250605
+DTEND;VALUE=DATE:20250606
+DTSTAMP:20260601T230038Z
+UID:7qlffq7ded2373690665eugp8o@google.com
+CREATED:20250413T154649Z
+LAST-MODIFIED:20260404T092425Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:7pm: HCC: Annual General Meeting
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260607T113000Z
+DTEND:20260607T131500Z
+DTSTAMP:20260601T230038Z
+UID:4qepg96tcagrkg1b6qgqodqaek@google.com
+CREATED:20260601T190950Z
+DESCRIPTION:Join us for a relaxed weekend ride down to the tip of the Halif
+ ax peninsula with our Breathe the Ocean on the Wheels event! We’re heading
+ to Halifax’s iconic Point Pleasant Park to feel the fresh ocean breeze.<br>
+ <br><p>When: Sunday\, June 7 at 8:30 AM<br>Ride Start: 9:00 AM<br>Duration:
+  Approximately 1 - 1.5 hours</p><p>Route Details:</p><p>Distance: 10KM tota
+ l<br>Starting/Ending Point: <b>Emera Oval at Halifax Commons<br></b>Route:
+ Mostly easy ride between downtown Halifax and Point Pleasant Park via the p
+ eninsula’s cycling paths and Point Pleasant’s bike trails.</p><p>Waiver req
+ uired. Link in Bio or kindly visit <a href="https://cyclehalifax.ca/waiver"
+  target="_blank"><u>https://cyclehalifax.ca/waiver</u></a></p>
+LAST-MODIFIED:20260601T192610Z
+LOCATION:Emera Oval\, 5775 Cogswell St\, Halifax\, NS B3K 4B2\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Cycle Ride: Breathe the Ocean on the Wheels!
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20240802T210000Z
+DTEND:20240802T230000Z
+DTSTAMP:20260601T230038Z
+UID:18ahier1fpa6l5k388ish0j86f@google.com
+X-GOOGLE-CONFERENCE:https://meet.google.com/qxh-grzg-iqp
+CREATED:20240626T004143Z
+DESCRIPTION:📅 Date: August 2\n🕐 Time: 5:30-8 pm\n🏁 Ride start time: 6 pm
+ \n🚲 Distance: 14.5 km\n📍 Meet-Up Location: Halifax Commons by the fountai
+ n (1075 North Park St\, Halifax\, NS B3K 4B2)\n\n📸 Halifax Mural Festival
+ Website to check out the map and download the app! (You will be able to use
+  the camera function to get artists' information during our ride!)\n\nWe'll
+  be embarking on an artsy adventure following the Halifax Mural Festival an
+ d uncovering some secret mural gems!\n\nÜber Google Meet teilnehmen: https:
+ //meet.google.com/qxh-grzg-iqp\nOder telefonisch: (CA) +1 778-732-8255 PIN:
+  698967082#\nWeitere Telefonnummern: https://tel.meet/qxh-grzg-iqp?pin=3651
+ 025530986&hs=7\n\nWeitere Informationen zu Meet: https://support.google.com
+ /a/users/answer/9282720
+LAST-MODIFIED:20240817T133944Z
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:Urban Art Journey
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250427
+DTEND;VALUE=DATE:20250428
+DTSTAMP:20260601T230038Z
+UID:0dtki5v10lfjhvuqtqktdfo4ol@google.com
+CREATED:20250413T150009Z
+DESCRIPTION:Monthly Cycle: Take the Long Way Home <br>100km Ride: Porters L
+ ake Loop <br>Meet at Halifax Oval at 7:45am<br><br>More info: <br><a href="
+ https://www.instagram.com/p/DHV2ak1RYE8/?img_index=1" target="_blank">https
+ ://www.instagram.com/p/DHV2ak1RYE8/?img_index=1</a><br> <br><span dir="auto
+ "><span>TMC &amp\; <a href="https://www.instagram.com/tip2tip_ns/">@tip2tip
+ _ns</a> creator <a href="https://www.instagram.com/ashleigh.myles/">@ashlei
+ gh.myles</a> will be hosting four fun and challenging rides around HRM desi
+ gned to give you a taste of what riding longer\, faster and farther feels l
+ ike. <br><br>Starting on April 5th\, we’ll be riding consecutively longer r
+ ides until the last one in June. To make it to the end of each ride\, we’ll
+  be riding an average of 20-22km/h with breaks for snacks. We’ll be in clos
+ e communication throughout the rides on WhatsApp to ensure everyone’s feeli
+ ng good and will chat through some bail options at the start of each ride i
+ n case you need to dip early. <br><br>As always\, this is a safe space to t
+ est your limits! We encourage you to regularly check in with yourself and t
+ o be open about how you’re making out.<br><br>These rides ARE NOT our typic
+ al no-drop monthly social rides\, so keep an eye out for our first social r
+ ide happening in late April!<br><br>⚡️⚡️ These rides ARE for women\, trans\
+ , and gender diverse folks ⚡️⚡️<br><br>Check out our linktree for the ride
+ routes!<br><br>If you have any questions\, concerns\, or accessibility need
+ s that affect your participation please let us know\, however you’re comfor
+ table. We want these rides to help us all gain confidence on bikes! Let us
+ know how we can make that happen. <br><br>Check yer brakes and we’ll see yo
+ u soon! <br></span></span>
+LAST-MODIFIED:20260404T092425Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:7:45am: Monthly Cycle (100km)
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250925
+DTEND;VALUE=DATE:20250926
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250924
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250828
+DTEND;VALUE=DATE:20250829
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250827
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20251019
+DTEND;VALUE=DATE:20251020
+DTSTAMP:20260601T230038Z
+UID:1uvbk9f7p0u1q7ekcqrj4iqr9d@google.com
+CREATED:20250413T145205Z
+DESCRIPTION:<a href="https://hfx.bike/kidical-mass/rides/2025/ride-oct-19/"
+ >https://hfx.bike/kidical-mass/rides/2025/ride-oct-19/</a>
+LAST-MODIFIED:20251008T070744Z
+LOCATION:TBD
+SEQUENCE:3
+STATUS:CONFIRMED
+SUMMARY:9:30am: Kidical Mass
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250522
+DTEND;VALUE=DATE:20250523
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250521
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250511
+DTEND;VALUE=DATE:20250512
+DTSTAMP:20260601T230038Z
+UID:5cuvp9dilisvh0gbmurba9lbgh@google.com
+CREATED:20250413T150303Z
+DESCRIPTION:Take the Long Way Home <br>Aspotogan Loop (150km)<br>Meet at th
+ e Halifax Oval at 5:45am <br> <br><br>More info: <br><a href="https://www.i
+ nstagram.com/p/DHV2ak1RYE8/?img_index=4" target="_blank">https://www.instag
+ ram.com/p/DHV2ak1RYE8/?img_index=4</a><br> <br><span dir="auto"><span>TMC &
+ amp\; <a href="https://www.instagram.com/tip2tip_ns/">@tip2tip_ns</a> creat
+ or <a href="https://www.instagram.com/ashleigh.myles/">@ashleigh.myles</a>
+ will be hosting four fun and challenging rides around HRM designed to give
+ you a taste of what riding longer\, faster and farther feels like. <br><br>
+ Starting on April 5th\, we’ll be riding consecutively longer rides until th
+ e last one in June. To make it to the end of each ride\, we’ll be riding an
+  average of 20-22km/h with breaks for snacks. We’ll be in close communicati
+ on throughout the rides on WhatsApp to ensure everyone’s feeling good and w
+ ill chat through some bail options at the start of each ride in case you ne
+ ed to dip early. <br><br>As always\, this is a safe space to test your limi
+ ts! We encourage you to regularly check in with yourself and to be open abo
+ ut how you’re making out.<br><br>These rides ARE NOT our typical no-drop mo
+ nthly social rides\, so keep an eye out for our first social ride happening
+  in late April!<br><br>⚡️⚡️ These rides ARE for women\, trans\, and gender
+ diverse folks ⚡️⚡️<br><br>Check out our linktree for the ride routes!<br><b
+ r>If you have any questions\, concerns\, or accessibility needs that affect
+  your participation please let us know\, however you’re comfortable. We wan
+ t these rides to help us all gain confidence on bikes! Let us know how we c
+ an make that happen. <br><br>Check yer brakes and we’ll see you soon! <br><
+ /span></span>
+LAST-MODIFIED:20260404T092425Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:5:45am: Monthly Cycle (150km)
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20240825T130000Z
+DTEND:20240825T150000Z
+DTSTAMP:20260601T230038Z
+UID:3jq57dc96h16hdi6hcdm95dth6@google.com
+CREATED:20240625T190231Z
+DESCRIPTION:📅 Date: August 25<br>🕐 Time: 10-12 pm<br>🏁 Ride start time:
+ 10:30 am<br>🚲 Distance: 10 km round trip<br>📍 Meet-Up Location: Halifax C
+ ommons by the fountain (1075 North Park St\, Halifax\, NS B3K 4B2)<br>🏁 Mi
+ dway Point: Africville Park (2R9\, 5795 Africville Rd\, Halifax\, NS B3K 2R
+ 9)<br><br><a href="https://linktr.ee/cyclehalifax" target="_blank">Check ou
+ t the linktree:</a><br><br>- Waiver<br>- Ride Route<br><br>Join me on a mag
+ ical journey to Africville Park\, where we'll blend our energies with natur
+ e and unwind with peaceful yoga sessions by the seaside! Get ready for an h
+ our of pure zen and blissful connection. Yoga mats are optional to bring.<b
+ r><br>*If we need to cancel due to weather conditions\, we will post a noti
+ ce on this website at least 3 hours before the day of the ride.
+LAST-MODIFIED:20240817T133437Z
+SEQUENCE:10
+STATUS:CONFIRMED
+SUMMARY:Zen Cycle
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20240726T210000Z
+DTEND:20240726T230000Z
+DTSTAMP:20260601T230038Z
+UID:5o8mqnhe8hvtpg9v3227a090jv@google.com
+CREATED:20240630T213150Z
+DESCRIPTION:📅 Date: July 26\n🕐 Time: 6-8 pm\n📍 Meet-up location: At the
+ waterfront gazebo behind the Discovery Centre (44°38'33.8"N 63°34'01.8"W)\n
+ 🚲 Distance: 11.3 km\n\n📖 Topic:\n- Hand-Signs\n- Road Signs\n- How to Cro
+ ss the MacDonald Bridge\n- How to bring your bike onto the ferry\n*Please b
+ ring your own bus pass\, but we also have 10 tickets for those who don't ha
+ ve a bus pass.\n\n✏️ Time Table:\n6-6:30 pm: Mini Urban Course\n6:30-7:30 p
+ m: Practice Ride\n7:30-8 pm: Extra Time for questions and feedback\n\nGet r
+ eady to explore the city on two wheels in this fun and interactive event. W
+ hether you're a beginner or a seasoned cyclist\, this course is perfect for
+  anyone looking to enhance their urban biking skills. Join us for an evenin
+ g filled with tips on navigating urban roads\, bike handling techniques\, a
+ nd safety guidelines. Don't miss this opportunity to boost your cycling con
+ fidence and enjoy a ride through the city with fellow biking enthusiasts. S
+ ee you there!\n\n*If we need to cancel due to weather conditions\, we will
+ post a notice on this website at least 3 hours before the day of the ride.
+LAST-MODIFIED:20240817T134354Z
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:Mini Urban Cycling Course
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20251108T220000Z
+DTEND:20251109T010000Z
+DTSTAMP:20260601T230038Z
+UID:0jsqprjabjric401pbaj1bfi5r@google.com
+CREATED:20251008T070217Z
+DESCRIPTION:I Light HFX is our premiere event of the year. So many people l
+ ook forward to it. We usually have over 200 riders. We’ll have refreshments
+  and prizes\, and music.<br><br>This is a family-friendly\, joyous event —
+ don’t miss it!<br><br><b>When</b> 📅: Saturday\, November 8 at 6 PM<br><br>
+ <b>Where📍: </b>Dal Bike Centre (Regroup at Halifax Commons Oval)<br><br><b
+ >Route</b>: Find route map <a href="https://ridewithgps.com/routes/53035919
+ ?privacy_code=2a43LpBf0WVKSirMNQejjx8LtG5cPaLx" target="_blank">here</a> (D
+ istance 7.4 KM)<br><br><b>Highlights</b>:  Prize for the most decorated bik
+ e • Refreshments provided<br><br>⚠️ Details will be posted on our <a href="
+ https://www.instagram.com/cyclehalifax/" target="_blank"><u><u>Instagram</u
+ ></u></a> and <a href="https://bsky.app/profile/cyclehalifax.ca" target="_b
+ lank"><u><u>Bluesky</u></u></a> and the <a href="https://cyclehalifax.ca/ev
+ ents/" target="_blank"><u><u>HCC Calendar.</u></u></a><br><br><b>NB: A <a h
+ ref="https://cyclehalifax.ca/waiver/" target="_blank">waiver</a> (required
+ once per year) must be completed to participate in this event.</b><br><b>Da
+ lhousie also requires a separate <a href="https://www.bouncelife.com/events
+ /68f65fbf88ea7f13628898df" target="_blank">waiver</a> signed because we are
+  using their premises. </b>
+LAST-MODIFIED:20251108T011328Z
+LOCATION:Dal Quad by Dal/Kings Bike Centre
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:I Light HFX
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250914
+DTEND;VALUE=DATE:20250915
+DTSTAMP:20260601T230038Z
+UID:2bu93s2kcp01r0dpcokh80a3gr@google.com
+CREATED:20250413T145142Z
+DESCRIPTION:<a href="https://hfx.bike/kidical-mass/rides/2025/ride-sep-14/"
+ >https://hfx.bike/kidical-mass/rides/2025/ride-sep-14/</a>
+LAST-MODIFIED:20250413T155204Z
+LOCATION:TBD
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:9:30am: Kidical Mass
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20241031T143000Z
+DTEND:20241031T150000Z
+DTSTAMP:20260601T230038Z
+ORGANIZER;CN=worklife@inkblottherapy.com:mailto:worklife@inkblottherapy.com
+UID:843nder7n9nhnma5osr7a1b63k@google.com
+ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=DECLINED;CN=Halifa
+ x Cycling Events Calendar;X-NUM-GUESTS=0:mailto:c_32ee5c03fefd576cd7c161179
+ 2fb09259cecc2095dd4f099c9f4c7afa2e77345@group.calendar.google.com
+CREATED:20241022T024242Z
+DESCRIPTION:Event Name: Nurse Consultation\n\nWe have received your request
+  for Health/Life coaching and look forward to supporting you. Please feel f
+ ree to share any additional information that will help prepare for our meet
+ ing.\n\nLocation: This is a Zoom web conference.\n\nYou can join this meeti
+ ng from your computer\, tablet\, or smartphone.\nhttps://inkblottherapy.zoo
+ m.us/j/68267274301\n\nOne tap mobile:\n+1 778 907 2071\,\,68267274301#\n+1
+ 204 272 7920\,\,68267274301#\n\nYou can also dial in using your phone.\nCA:
+  +1 778 907 2071\, +1 204 272 7920\, +1 438 809 7799\, +1 587 328 1099\, +1
+  647 374 4685\, +1 647 558 0588\nMeeting ID: 682-672-74301\n\nFind your loc
+ al number: https://inkblottherapy.zoom.us/u/gbXV1lLTUy\n\nNeed to make chan
+ ges to this event?\nCancel: https://calendly.com/cancellations/9168002d-021
+ d-40cd-89e7-3e4b9753b4f4\nReschedule: https://calendly.com/reschedulings/91
+ 68002d-021d-40cd-89e7-3e4b9753b4f4\n\nPowered by Calendly.com\n
+LAST-MODIFIED:20241022T024318Z
+LOCATION:https://inkblottherapy.zoom.us/j/68267274301
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Madoka Imamura and Work/Life Health Assessment
+TRANSP:TRANSPARENT
+X-MICROSOFT-CDO-OWNERAPPTID:1426468152
+BEGIN:VALARM
+ACTION:NONE
+TRIGGER;VALUE=DATE-TIME:19760401T005545Z
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20241019T210000Z
+DTEND:20241020T025900Z
+DTSTAMP:20260601T230038Z
+UID:7tf69fmef20nk617n7dsmolfih@google.com
+CREATED:20241017T162441Z
+DESCRIPTION:Bike Valet is like a coat check for bikes. Drop off your bike f
+ or free and then enjoy Nocturne knowing that your bike is safe with us. We'
+ ll be on the front patio of the library.<br><br>Also\, check out the <a hre
+ f="https://cyclehalifax.ca/elementor-97054/">group rides from multiple star
+ ting points</a> to get to Nocturne.
+LAST-MODIFIED:20241017T201933Z
+LOCATION:Halifax Central Library\, 5440 Spring Garden Rd\, Halifax\, NS B3J
+  1E9\, Canada
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:Nocturne Bike Valet and Group Rides
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250810
+DTEND;VALUE=DATE:20250811
+DTSTAMP:20260601T230038Z
+UID:20tfm825fran1v7jt9e8r0snl6@google.com
+CREATED:20250413T145112Z
+DESCRIPTION:<a href="https://hfx.bike/kidical-mass/rides/2025/ride-aug-10/"
+ >https://hfx.bike/kidical-mass/rides/2025/ride-aug-10/</a>
+LAST-MODIFIED:20250413T155148Z
+LOCATION:TBD
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:9:30am: Kidical Mass
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20251009
+DTEND;VALUE=DATE:20251010
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20251008
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20250705T113000Z
+DTEND:20250705T140000Z
+DTSTAMP:20260601T230038Z
+UID:2sa6526vn7pklk4pnttnnva0ee@google.com
+CREATED:20250627T162000Z
+DESCRIPTION:<p>Kick off your summer cycling season with our Ride Into Summe
+ r! event - a beautiful journey along the Chain of Lakes Trail that's perfec
+ t for cyclists of all abilities.</p><br><p><b>When</b>: Saturday\, July 5 a
+ t 8:30 AM</p><p><b>Ride Start</b>: 9:00 AM</p><p><b>Duration</b>: Approxima
+ tely 2 hours (including cafe stop)</p><br><p><b>Route Details:</b></p><p><b
+ >Distance</b>: 9KM total (4.5KM each way)</p><p><b>Starting Point</b>: Entr
+ ance of Ashburn Golf Club</p><p><b>Destination</b>: 5K Cafe and back</p><p>
+ <b>Terrain</b>: Scenic trail suitable for all skill levels</p><p><b>What's
+ Included:</b></p><p></p><ul><li>🚴‍♂️ Guided group ride with experienced le
+ aders</li><li>☕ Refreshment break at the popular 5K Cafe</li><li>🏃‍♀️ Grou
+ p stretch exercises to start and finish</li><li>👥 Volunteer sweeps to ensu
+ re no one gets left behind</li><li>🌟 Community atmosphere with fellow cycl
+ ing enthusiasts</li></ul><p></p><p><b>Perfect For:</b></p><p></p><ul><li>Re
+ creational cyclists looking for a fun group ride</li><li>Anyone wanting to
+ explore the beautiful Chain of Lakes Trail</li><li>Cyclists seeking a suppo
+ rtive\, no-drop group experience</li><li>Those looking to meet fellow cycli
+ ng enthusiasts</li></ul><p></p><p><b>What to Bring:</b></p><p></p><ul><li>Y
+ our bike and helmet (mandatory)</li><li>Water bottle</li><li>Comfortable cy
+ cling clothes</li><li>Positive attitude and ready to have fun!</li></ul><p>
+ </p><p>No Registration Required </p><br><p><i>Weather permitting. Event upd
+ ates will be posted 24 hours prior if conditions require changes.</i></p>
+LAST-MODIFIED:20250703T230944Z
+LOCATION:Ashburn Golf Club\, 3250 Joseph Howe Dr\, Halifax\, NS B3L 4G1\, C
+ anada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Ride Into Summer!
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250504
+DTEND;VALUE=DATE:20250505
+DTSTAMP:20260601T230038Z
+UID:3t7n9h74ocd0vl435j3hgdlsr2@google.com
+CREATED:20250413T144552Z
+DESCRIPTION:<a href="https://hfx.bike/kidical-mass/rides/2025/ride-may-04/"
+ >https://hfx.bike/kidical-mass/rides/2025/ride-may-04/</a>
+LAST-MODIFIED:20250413T155123Z
+LOCATION:Waterfront\, Halifax\, NS\, Canada
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:9:30am: Kidical Mass
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20251023
+DTEND;VALUE=DATE:20251024
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20251022
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20240719T210000Z
+DTEND:20240720T010000Z
+DTSTAMP:20260601T230038Z
+UID:2ttft2cu23t7hhc9hhpi4jto31@google.com
+CREATED:20240612T011047Z
+DESCRIPTION:Halifax Cycling Coalition is eagerly taking part in Nova Multif
+ est with a vibrant community table. Our primary aim is to enthusiastically
+ advocate for cycling as a sustainable and healthy transportation choice in
+ Halifax. We are excited to share valuable information about cycling infrast
+ ructure\, safety tips\, and our ongoing advocacy efforts to inspire more in
+ dividuals to embrace cycling in our city. Moreover\, we are dedicated to of
+ fering resources and exciting opportunities for community members to active
+ ly engage in local cycling initiatives and events!
+LAST-MODIFIED:20240817T134629Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Nova Multifest 2024
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250501
+DTEND;VALUE=DATE:20250502
+RRULE:FREQ=WEEKLY;BYDAY=TH
+DTSTAMP:20260601T230038Z
+UID:3kfhtocges1r4q52htpq8gm5qo_R20250501@google.com
+CREATED:20250413T151523Z
+DESCRIPTION:Typically at 7am on Thursdays\, but subject to change due to we
+ ather. <br><br>Check their instagram for location and more details:<br><a h
+ ref="https://www.instagram.com/coffeeoutsidehfx/">https://www.instagram.com
+ /coffeeoutsidehfx/</a>
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:7am: Coffee Outside
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250416
+DTEND;VALUE=DATE:20250417
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250416
+CREATED:20250413T151946Z
+DESCRIPTION:<span><br>First Ride: <br>- Apr 16th<br>- Meet 6pm Halifax Oval
+  (at the shoelaces)<br>- 30 km loop around Herring Cove and Purcell's Cove
+ (<a href="https://ridewithgps.com/routes/49606011?fbclid=PAZXh0bgNhZW0CMTEA
+ AadSrWBlEJFYQDOKWB_ajN9L-JBOelGKlEirWZYLHiRY4uNC4H9PX4OZR7eh0Q_aem_kXBExspl
+ 9mrA0iuLo3VTLA">route</a>)</span><br><span> </span><br><b>General Info:</b>
+  <br>These rides are a little longer and faster than our typical monthly ri
+ des. They typically last a couple hours and range between 25 and 50 km. Pac
+ e is generally 18-20 km/hr. <br>These rides will alternate between Wednesda
+ y and Thursdays at 6pm departing from a central spot on the Halifax peninsu
+ la or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260416T210000Z
+DTEND:20260416T220000Z
+DTSTAMP:20260601T230038Z
+UID:2j2n67ig67tr94cr38bf25tpo9@google.com
+CREATED:20260409T064452Z
+DESCRIPTION:<br><p>Dust off your bike and get ready to ride! Join us for th
+ e first workshop of the cycling season\, where you'll learn the essential m
+ aintenance skills to keep your bike running smoothly all spring and summer.
+ </p><p>This session will walk you through fixing a flat\, adjusting brakes\
+ , and cleaning and lubricating your chain. No experience necessary\, just b
+ ring your bike and a willingness to get your hands a little greasy.</p><p>S
+ paces are limited\, so <a href="https://www.eventbrite.ca/e/spring-into-gea
+ r-bike-maintenance-workshop-tickets-1987036149613?aff=oddtdtcreator">RSVP</
+ a> to reserve your spot.</p>
+LAST-MODIFIED:20260409T064633Z
+LOCATION:Halifax Common\, 5816 Cogswell St\, Halifax\, NS B3K 4B2\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Roll into Spring | Bike Maintenance Workshop
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250417
+DTEND;VALUE=DATE:20250418
+RRULE:FREQ=WEEKLY;UNTIL=20250430;BYDAY=TH
+DTSTAMP:20260601T230038Z
+UID:3kfhtocges1r4q52htpq8gm5qo@google.com
+CREATED:20250413T151523Z
+DESCRIPTION:Typically at 7am on Thursdays\, but subject to change due to we
+ ather. <br><br>Check their instagram for location and more details:<br><a h
+ ref="https://www.instagram.com/coffeeoutsidehfx/">https://www.instagram.com
+ /coffeeoutsidehfx/</a>
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:7am: Coffee Outside
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250619
+DTEND;VALUE=DATE:20250620
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250618
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20240721T140000Z
+DTEND:20240721T210000Z
+DTSTAMP:20260601T230038Z
+UID:36jh5q7g9a10gas1nb2tpi0hri@google.com
+CREATED:20240612T011146Z
+DESCRIPTION:Halifax Cycling Coalition is eagerly taking part in Nova Multif
+ est with a vibrant community table. Our primary aim is to enthusiastically
+ advocate for cycling as a sustainable and healthy transportation choice in
+ Halifax. We are excited to share valuable information about cycling infrast
+ ructure\, safety tips\, and our ongoing advocacy efforts to inspire more in
+ dividuals to embrace cycling in our city. Moreover\, we are dedicated to of
+ fering resources and exciting opportunities for community members to active
+ ly engage in local cycling initiatives and events!
+LAST-MODIFIED:20240817T134645Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Nova Multifest 2024
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20241102T210000Z
+DTEND:20241102T233000Z
+DTSTAMP:20260601T230038Z
+UID:7aulirq2plfi9l60slhim7169o@google.com
+CREATED:20241017T202501Z
+DESCRIPTION:<a href="https://cyclehalifax.ca/i-light-hfx-2024/">I Light HFX
+ </a> is HCC's biggest event of the year. This is a very family friendly eve
+ nt. Everyone is encouraged to decorate your bike with lights and join this
+ joyful ride. There will be refreshments and lots of prizes and giveaways\,
+ including free high-quality bike lights.
+LAST-MODIFIED:20241019T141615Z
+LOCATION:Dal & Kings Bike Centre\, 6185 South St. Halifax\, NS
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:I Light HFX
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260418T180000Z
+DTEND:20260418T200000Z
+DTSTAMP:20260601T230038Z
+UID:2jppqsl0p3qlrfjd3vnk2v6ht2@google.com
+CREATED:20260325T183346Z
+DESCRIPTION:<br>Join us at the Oval for a pre-season gathering: our second
+ annual Spring Social! We’ll have hot cocoa\, snacks and ride laps on the ov
+ al to help keep us warm. We’ve invited so many of our bike friends along fo
+ r some great activities:<br><ul><li>cargo bike show &amp\; tell</li><li>e-b
+ ike test rides with Halifax Cycles</li><li>stuff-a-bike with Bike Brigade H
+ alifax: bring food items for our community fridges</li><li>bike checks and
+ minor repairs with the Ecology Action Centre's pop-up bike hub</li></ul>Ple
+ ase note\, the oval is not officially open for the season until June\, so t
+ here will be no rentals or washrooms available on site for this event.<br>F
+ ull details at: <a href="https://hfx.bike/kidical-mass/rides/2026/ride-apri
+ l-18/" target="_blank">https://hfx.bike/kidical-mass/<wbr />rides/2026/ride
+ -april-18/</a><br>Rain date: Sunday April 19 at 3:00pm
+LAST-MODIFIED:20260326T144541Z
+LOCATION:Emera Oval\, 5775 Cogswell St\, Halifax\, NS B3K 4B2\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Kidical Mass Halifax Spring Social
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250605
+DTEND;VALUE=DATE:20250606
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250604
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260412T190000Z
+DTEND:20260412T210000Z
+DTSTAMP:20260601T230038Z
+UID:22kf2pb04qtddb31fi64e9q9m5@google.com
+CREATED:20260403T172822Z
+DESCRIPTION:<br>Spring "Snack &amp\; Swap" Social<br>4-6pm at Bike Again - 
+ 5664 Charles St\, Halifax<br><br><i>New to TMC or riding in Kjipuktuk? </i>
+ <i>Come hang out at @bikeagainhfx from 4–6pm on Sunday the 12th and get to
+ know TMC's programs and pals! We’ll swap snacks (we’ll have lots\, but feel
+  free to bring a favourite to share)\, winter adventure stories\, clothes\,
+  and bike gear or parts (anything goes). We’ll also share a bit about what
+ TMC has in store for 2025. </i><i><b>TMC is a space is for women\, trans\,
+ and gender-diverse folks. </b>We think whatever bike and experience level y
+ ou have are awesome. See you there!</i>
+LAST-MODIFIED:20260403T172822Z
+LOCATION:Bike Again!\, 5664 Charles St\, Halifax\, NS B3K 1K4\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Spring "Snack & Swap" Social by The Monthly Cycle
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260514T180000Z
+DTEND:20260514T190000Z
+DTSTAMP:20260601T230038Z
+UID:0sduhl7q5gejc03i06sj47vbu9@google.com
+CREATED:20260511T173302Z
+DESCRIPTION:<p>Kick off cycling season with a hands-on tune-up session. Lea
+ rn the basics and be ride-ready this spring.</p><p>Dust off your bike and g
+ et ready to ride! Join us for our second workshop of the cycling season\, w
+ here you'll learn about the essential maintenance skills to keep your bike
+ running smoothly all spring and summer.</p><p>This session will walk you th
+ rough fixing a flat tire\, adjusting brakes\, and cleaning and lubricating
+ your chain - all on your own bike! No experience necessary\, just bring you
+ r bike and a willingness to get your hands a little greasy.</p><p>Expect to
+  leave this workshop with the confidence to fix a flat tire &amp\; an appet
+ ite to keep learning.</p><p>Spaces are limited\, so <a href="https://www.ev
+ entbrite.ca/e/bike-maintenance-workshop-may-edition-tickets-1988623445257?a
+ ff=oddtdtcreator" target="_blank">RSVP</a> to reserve your spot.</p><p><a h
+ ref="https://www.eventbrite.ca/e/bike-maintenance-workshop-may-edition-tick
+ ets-1988623445257?aff=oddtdtcreator" target="_blank">https://www.eventbrite
+ .ca/e/bike-maintenance-workshop-may-edition-tickets-1988623445257?aff=oddtd
+ tcreator<br></a></p>
+LAST-MODIFIED:20260511T173732Z
+LOCATION:Halifax Common\, 5816 Cogswell St\, Halifax\, NS B3K 4B2\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Bike Maintenance Workshop | May Edition
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20240720T150000Z
+DTEND:20240721T011500Z
+DTSTAMP:20260601T230038Z
+UID:0gpeeg8tnm2c1b8p1mt6mscfol@google.com
+CREATED:20240612T011104Z
+DESCRIPTION:Halifax Cycling Coalition is eagerly taking part in Nova Multif
+ est with a vibrant community table. Our primary aim is to enthusiastically
+ advocate for cycling as a sustainable and healthy transportation choice in
+ Halifax. We are excited to share valuable information about cycling infrast
+ ructure\, safety tips\, and our ongoing advocacy efforts to inspire more in
+ dividuals to embrace cycling in our city. Moreover\, we are dedicated to of
+ fering resources and exciting opportunities for community members to active
+ ly engage in local cycling initiatives and events!
+LAST-MODIFIED:20240817T134638Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:Nova Multifest 2024
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250608
+DTEND;VALUE=DATE:20250609
+DTSTAMP:20260601T230038Z
+UID:6q5f2tnlg9ia00b5q1upk5endp@google.com
+CREATED:20250413T144906Z
+DESCRIPTION:<a href="https://hfx.bike/kidical-mass/rides/2025/ride-jun-08/"
+ >https://hfx.bike/kidical-mass/rides/2025/ride-jun-08/</a>
+LAST-MODIFIED:20250413T155132Z
+LOCATION:TBD:
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:9:30am: Kidical Mass
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250416
+DTEND;VALUE=DATE:20250417
+RRULE:FREQ=WEEKLY;WKST=SU;UNTIL=20251031;BYDAY=WE
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250814
+DTEND;VALUE=DATE:20250815
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250813
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20250720T113000Z
+DTEND:20250720T140000Z
+DTSTAMP:20260601T230038Z
+UID:3rb8gbm1rto5tjub15ss1jvjjl@google.com
+CREATED:20250702T130801Z
+DESCRIPTION:<p>Start your Sunday with a relaxing Sunday Morning Cruise - a
+ gentle 8KM neighborhood tour that's perfect for cyclists of all abilities</
+ p><p>When: Sunday\, July 20 at 8:30 AM<br>Ride Start: 9:00 AM<br>Duration:
+ Approximately 2 hours</p><p><b>Route Details:</b></p><ul><li><p>Distance: 8
+ KM total</p></li><li><p>Difficulty: Easy - suitable for all skill levels</p
+ ></li><li><p>Starting/Ending Point: Emera Oval</p></li><li><p>Route: Neighb
+ orhood tour via Halifax Common\, Almon Street\, Geldert Street\, Coburg Roa
+ d\, Vernon Street and back to the Oval</p></li><li><p>Terrain:  HRM's desig
+ nated cycling roads</p></li></ul><p><b>What's Included:</b></p><ul><li><p>
+ 🚴‍♀️ Guided easy-paced ride perfect for new cyclists</p></li><li><p>👥 Vol
+ unteer sweeps ensuring no one gets left behind</p></li><li><p>🌟 Supportive
+ \, no-drop group atmosphere</p></li></ul><p><b>Perfect For:</b></p><ul><li>
+ <p>New cyclists building confidence</p></li><li><p>Anyone wanting a relaxed
+  Sunday morning activity</p></li><li><p>Families with older children/teens<
+ /p></li><li><p>Social cyclists looking to explore neighborhoods</p></li><li
+ ><p>Those seeking a supportive\, beginner-friendly group</p></li></ul><p><b
+ >What to Bring:</b></p><ul><li><p>Your bike and helmet (mandatory)</p></li>
+ <li><p>Water bottle</p></li><li><p>Comfortable cycling clothes</p></li><li>
+ <p>Camera for neighborhood photo opportunities</p></li><li><p>Positive atti
+ tude and ready to have fun!</p></li></ul><p><b>Route Map</b>: <a href="http
+ s://ridewithgps.com/routes/51390712" target="_blank"><u>https://ridewithgps
+ .com/routes/51390712</u></a></p><p>Registration and waiver required. Kindly
+  visit <a href="https://cyclehalifax.ca/summer-rides" target="_blank"><u>ht
+ tps://cyclehalifax.ca/summer-rides</u></a></p><br><p><i>Weather permitting.
+  Event updates will be posted 24 hours prior if conditions require changes.
+ </i></p>
+LAST-MODIFIED:20250703T135019Z
+LOCATION:Emera Oval\, 5775 Cogswell St\, Halifax\, NS B3K 4B2\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Sunday Morning Cruise
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20260426
+DTEND;VALUE=DATE:20260427
+DTSTAMP:20260601T230038Z
+UID:4frn5cj1jh804ti0qvi08chv4o@google.com
+CREATED:20260408T143918Z
+DESCRIPTION:Counter Points is a citywide event to see what the Halifax bike
+  counter statistics would look like if there was a coordinated effort to ru
+ n up the numbers. Participants are encouraged to cross as many bike counter
+ s as possible in one day\, to share their strategies and to have fun. Wheth
+ er you do this as a group ride around the city hitting as many counters as
+ you can or as an individual riding circles around a block is up to you.
+LAST-MODIFIED:20260410T231004Z
+LOCATION:Halifax and Dartmouth at every bike counter
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Counter Points by Halifax Bike Mayor
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260502T140000Z
+DTEND:20260502T190000Z
+DTSTAMP:20260601T230038Z
+UID:0b3hpj6qg4r0dtfb05kqpe5473@google.com
+CREATED:20260430T151307Z
+DESCRIPTION:Biking season is here! <b>Swing by Bike Again at 5664 Charles S
+ t\, Saturday May 2nd from 11am to 4pm for our spring bike sale. </b>Whether
+  you're in the market for a new ride or know someone who is\, this is the p
+ erfect opportunity to find the perfect fit - for a great deal!
+LAST-MODIFIED:20260430T151350Z
+LOCATION:5664 Charles St\, Halifax\, NS B3K 1K4\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Spring Bike Sale at Bike Again
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20240712T203000Z
+DTEND:20240712T220000Z
+DTSTAMP:20260601T230038Z
+UID:22m8tc7sk2lgu5qu7qnmb6s6i7@google.com
+CREATED:20240626T151324Z
+DESCRIPTION:Grab your bike\, wear your brightest outfit\, and get ready to
+ pedal through a spectrum of hues. Let's have a celebration of 2SLGBTQIA+ an
+ d the Rainbow Community pride as we cruise together under the open sky. Don
+ 't miss out on this vibrant experience!
+LAST-MODIFIED:20240817T134747Z
+LOCATION:Halifax Common\, 5816 Cogswell St\, Halifax\, NS B3H 2Z4\, Canada
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:Rainbow Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250703
+DTEND;VALUE=DATE:20250704
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250702
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20250715T200000Z
+DTEND:20250715T213000Z
+DTSTAMP:20260601T230038Z
+UID:125df2hup7lml4addofl65un2h@google.com
+X-GOOGLE-CONFERENCE:https://meet.google.com/kmo-tqyk-sov
+CREATED:20250702T174321Z
+DESCRIPTION:<p>Know your rights\, ride with confidence! This essential work
+ shop provides cyclists with crucial legal knowledge to navigate the roads s
+ afely and handle incidents effectively.</p><p><strong>When:</strong> Tuesda
+ y\, July 15th | 5PM to 6:30PM<br><strong>Facilitator:</strong> Wagners Law
+ Firm</p><p><strong>Workshop Topics:</strong></p><ul><li><strong>Road Rights
+  &amp\; Responsibilities</strong> - Understanding your legal rights as a cy
+ clist</li><li><strong>Motorist Interactions</strong> - How to navigate chal
+ lenging situations with drivers</li><li><strong>Accident Protocols</strong>
+  - Essential steps to take immediately following an incident</li><li><stron
+ g>Evidence Collection</strong> - What to document and how to protect yourse
+ lf</li><li><strong>Insurance Claims</strong> - Understanding the claims pro
+ cess and your coverage</li><li><strong>Legal Representation</strong> - When
+  and how to seek professional help</li><li><strong>Traffic Laws</strong> -
+ Cyclist-specific regulations and liability issues</li><li><strong>Preventio
+ n &amp\; Protection</strong> - Strategies to safeguard yourself before inci
+ dents occur</li></ul><p><strong>Perfect For:</strong></p><ul><li>Daily comm
+ uters and recreational cyclists</li><li>Anyone wanting to understand their
+ legal rights on the road</li><li>Cyclists seeking confidence in traffic sit
+ uations</li><li>Those who want to be prepared for potential incidents</li><
+ /ul><p><strong>What You'll Gain:</strong></p><ul><li>Clear understanding of
+  cyclist rights and responsibilities</li><li>Practical knowledge for handli
+ ng accidents and insurance claims</li><li>Confidence to navigate complex tr
+ affic situations</li><li>Professional insights from experienced legal pract
+ itioners</li></ul><p><b>Register: </b><a href="http://cyclehalifax.ca/legal
+ -workshop" target="_blank">http://cyclehalifax.ca/legal-workshop</a></p>\n\
+ nÜber Google Meet teilnehmen: https://meet.google.com/kmo-tqyk-sov\nOder te
+ lefonisch: (CA) +1 587-688-0182 PIN: 748656711#\nWeitere Telefonnummern: ht
+ tps://tel.meet/kmo-tqyk-sov?pin=1484156759873&hs=7\n\nWeitere Informationen
+  zu Meet: https://support.google.com/a/users/answer/9282720
+LAST-MODIFIED:20250715T103254Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Cyclist Legal Education Workshop
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20251005T160000Z
+DTEND:20251005T180000Z
+DTSTAMP:20260601T230038Z
+UID:3en0kbms60r2fp9v689tarrl1g@google.com
+CREATED:20251001T125356Z
+DESCRIPTION:Learn to do simple maintenance on your bike with hands-on instr
+ uction. It&#39\;s free but registration is necessary: <a href="https://www.
+ google.com/url?q=https://forms.gle/r8mvR9mnLd2Bfs4E6&amp\;sa=D&amp\;source=
+ calendar&amp\;ust=1759755199562932&amp\;usg=AOvVaw2sCW4v3qO4BiaTJJSBIdM6" t
+ arget="_blank">https://forms.gle/r8mvR9mnLd2Bfs4E6</a>
+LAST-MODIFIED:20251001T125356Z
+LOCATION:Halifax Commons\, corner of North Park and Cogswell
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Bike Maintenance Workshop
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20240916T133000Z
+DTEND:20240916T163000Z
+DTSTAMP:20260601T230038Z
+UID:4fvqsa7ak0ca9ihqrn710tnbad@google.com
+CREATED:20240827T182558Z
+DESCRIPTION:<a href="https://drive.google.com/file/d/1ED8wSPKgmiNc4ytnIus59
+ z7W2SoepMDI/view?usp=drive_link"><b>Attachments</b></a><br><br>Dear support
+ er of healthy communities:<br><br>The Halifax Regional Municipality and CAA
+  Atlantic invite you to join Mayor Mike Savage and Regional Councillors for
+  the 11th annual Mayor’s Bike Ride on Monday\, September 16\, 2024 (11:30 a
+ .m. to 1:30 p.m.). The Mayor’s Ride aims to promote cycling and celebrate t
+ he contributions to active transportation in the municipality by supporters
+  of healthy and active communities (like you!).<br><br>This year’s ride beg
+ ins at the Dartmouth side of the Angus L. Macdonald Bridge (30 Faulkner St\
+ , Dartmouth\, NS). The route will explore Dartmouth by bike via the Wyse Ro
+ ad bike lanes\, Dartmouth Common Greenway\, Dahlia local street bikeway\, S
+ hubie Canal Greenway past Sullivan’s Pond Park and along Lake Banook. The r
+ ide will end with a reception and lunch at the Kiwanis Graham’s Grove Park.
+ <br><br>Spread the word — everyone’s invited!<br><br><b>Details</b><br>• Da
+ te: Monday\, September 16\, 2024<br>• Time: 11:30 a.m. to 1:30 p.m.<br>• St
+ arting location: 30 Faulkner St\, Dartmouth\, NS B3A 3A5 (Halifax Harbour B
+ ridges)<br>• Ending location: Kiwanis Graham’s Grove Park with reception an
+ d lunch provided.<br>• All are welcome<br><br><b>Tips</b><br>• Please arriv
+ e before 11:30 a.m.<br>• Bikes and helmets are required for the ride<br>• H
+ alifax Regional Police will be providing an escort<br>• The route is approx
+ imately 3 kilometers<br>• Accessible washrooms are available at the Kiwanis
+  Graham’s Grove Park<br>• Bring water for the ride<br><br>Rain Date: Friday
+ \, September 20\, 2024 (11:30 a.m. to 1:30 p.m.)<br>Note: Attendees are enc
+ ouraged to bike or bus to the event. Parking is not available on the Halifa
+ x Harbour<br>Bridges property. There is some on-street parking on Lyle Stre
+ et\, and on surrounding streets.
+LAST-MODIFIED:20240827T182558Z
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Mayor's Bike Ride
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20251018T210000Z
+DTEND:20251019T020000Z
+DTSTAMP:20260601T230038Z
+UID:2tqekp43a7lnk8lrjqvvlbr5mb@google.com
+CREATED:20251008T070022Z
+DESCRIPTION:<p>Nocturne is HRM’s Art-at-Night Festival.</p><p>HCC will be o
+ ffering Bike Valet service again this year but at three (!) locations.</p><
+ p>When 📅: October 18\, 2025 6-11 PM</p><p>Where📍: Halifax Central Library
+ \, Alderney Ferry and one other location TBA</p><p>We need volunteers to he
+ lp us staff this service. Please sign up for a two-hour shift — no experien
+ ce needed.<br><br><a href="https://signup.com/go/ukQkGtQ">VOLUNTEER HERE</a
+ ></p>
+LAST-MODIFIED:20251008T070022Z
+LOCATION:Halifax Central Library\, 5440 Spring Garden Rd\, Halifax\, NS B3J
+  1E9\, Canada
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:Nocturne Bike Valet
+TRANSP:OPAQUE
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250911
+DTEND;VALUE=DATE:20250912
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250910
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;VALUE=DATE:20250731
+DTEND;VALUE=DATE:20250801
+DTSTAMP:20260601T230038Z
+UID:76vqundlk5ncctjh5lmq05g43i@google.com
+RECURRENCE-ID;VALUE=DATE:20250730
+CREATED:20250413T151946Z
+DESCRIPTION:<span>See <a href="https://www.instagram.com/themonthlycyclehfx
+ /">instagram</a> for details of the week. </span><br><span> </span><br><b>G
+ eneral Info:</b> <br>These rides are a little longer and faster than our ty
+ pical monthly rides. They typically last a couple hours and range between 2
+ 5 and 50 km. Pace is generally 18-20 km/hr. <br>These rides will alternate
+ between Wednesday and Thursdays at 6pm departing from a central spot on the
+  Halifax peninsula or on the Dartmouth side.
+LAST-MODIFIED:20260429T213031Z
+SEQUENCE:2
+STATUS:CONFIRMED
+SUMMARY:6pm: Monthly Cycle: Weekly Ride
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260602T213000Z
+DTEND:20260602T233000Z
+DTSTAMP:20260601T230038Z
+UID:378mj87vcdfdahm5mhg5b0ill7@google.com
+X-GOOGLE-CONFERENCE:https://meet.google.com/uyh-xchq-cow
+CREATED:20260501T095947Z
+DESCRIPTION:<p>The Halifax Cycling Coalition invites you to our <strong>Ann
+ ual General Meeting</strong> on <strong>June 2\, 2026 from 6:30 to 8:45 PM<
+ /strong> at the <strong>Halifax Central Library\, BMO Community Room</stron
+ g>\, with a virtual attendance option available via Google Meet.</p><p>This
+  is your opportunity to hear from our team\, elect our incoming board\, and
+  have a say in the direction of cycling advocacy in Halifax. Refreshments w
+ ill be provided.</p><p><br></p><p>We hope to see you there. Please RSVP so
+ we know to expect you.</p>\n\nÜber Google Meet teilnehmen: https://meet.goo
+ gle.com/uyh-xchq-cow\nOder telefonisch: (CA) +1 613-778-4053 PIN: 583785106
+ #\nWeitere Telefonnummern: https://tel.meet/uyh-xchq-cow?pin=2706364404094&
+ hs=7\n\nWeitere Informationen zu Meet: https://support.google.com/a/users/a
+ nswer/9282720
+LAST-MODIFIED:20260601T144236Z
+LOCATION:Halifax Central Library\, 5440 Spring Garden Rd\, Halifax\, NS B3J
+  1E9\, Canada
+SEQUENCE:1
+STATUS:CONFIRMED
+SUMMARY:HCC Annual General Meeting
+TRANSP:OPAQUE
+END:VEVENT
+END:VCALENDAR

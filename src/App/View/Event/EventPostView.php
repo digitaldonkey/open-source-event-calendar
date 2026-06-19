@@ -3,7 +3,6 @@
 namespace Osec\App\View\Event;
 
 use Osec\App\Model\Date\DT;
-use Osec\App\Model\PostTypeEvent\Event;
 use Osec\Bootstrap\OsecBaseClass;
 
 /**
@@ -40,7 +39,7 @@ class EventPostView extends OsecBaseClass
             2  => __('Custom field updated.', 'open-source-event-calendar'),
             3  => __('Custom field deleted.', 'open-source-event-calendar'),
             4  => __('Event updated.', 'open-source-event-calendar'),
-            // phpcs:disable WordPress.Security.NonceVerification
+            // phpcs:disable WordPress.Security.NonceVerification.Recommended
             /* translators: %s: date and time of the revision */
             5  => isset($_GET['revision'])
                 ? sprintf(
@@ -78,66 +77,5 @@ class EventPostView extends OsecBaseClass
         ];
 
         return $messages;
-    }
-
-    /**
-     * Generates an excerpt from the given content string.
-     *
-     * Adapted from WordPress's `wp_trim_excerpt' function that is not useful
-     * for applying to custom content.
-     *
-     * @param  Event  $event
-     * @param  int  $length
-     * @param  string  $more
-     *
-     * @return string The excerpt.
-     */
-    public function trim_excerpt(Event $event, $length = 35, $more = '[...]'): string
-    {
-        $raw_excerpt = $event->get('post')->post_content;
-        if ( ! isset($raw_excerpt[0])) {
-            $raw_excerpt = '&nbsp;';
-        }
-
-        $text =  wp_strip_all_tags(
-            apply_filters(
-                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                'the_excerpt',
-                $raw_excerpt
-            )
-        );
-        $text = strip_shortcodes($text);
-        $text = str_replace(']]>', ']]&gt;', $text);
-        $text = wp_strip_all_tags($text);
-
-        $excerpt_length = apply_filters(
-            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-            'excerpt_length',
-            $length
-        );
-        $excerpt_more   = apply_filters(
-            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-            'excerpt_more',
-            $more
-        );
-        $words          = preg_split(
-            '/\s+/',
-            $text,
-            $excerpt_length + 1,
-            PREG_SPLIT_NO_EMPTY
-        );
-        if (count($words) > $excerpt_length) {
-            array_pop($words);
-            $text = implode(' ', $words);
-            $text = $text . $excerpt_more;
-        } else {
-            $text = implode(' ', $words);
-        }
-        return apply_filters(
-            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-            'wp_trim_excerpt',
-            $text,
-            $raw_excerpt
-        );
     }
 }

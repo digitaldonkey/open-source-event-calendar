@@ -113,7 +113,7 @@ class Cache implements CacheInterface
     /**
      * @inheritDoc
      */
-    public function delete(string $key = null): bool
+    public function delete(?string $key = null): bool
     {
         if ( ! $key) {
             $key = $this->key_for_persistance;

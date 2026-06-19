@@ -41,7 +41,7 @@ class LessController extends OsecBaseClass
      */
     public function __construct(
         App $app,
-        string $default_theme_url = OSEC_DEFAULT_THEME_URL
+        string $default_theme_url = OSEC_THEMES_URL . '/' . OSEC_ROOT_THEME_NAME . '/'
     ) {
         parent::__construct($app);
 
@@ -86,6 +86,7 @@ class LessController extends OsecBaseClass
     /**
      * Parse all the Less files resolving the dependencies.
      *
+     * @param ?array $variables
      * @param  bool  $compile_core  If set to true, it forces compilation of core
      *  CSS only, suitable for shipping.
      *
@@ -93,7 +94,7 @@ class LessController extends OsecBaseClass
      * @throws Exception
      * @throws FileNotFoundException|Exception
      */
-    public function parse_less_files(array $variables = null, $compile_core = true): string
+    public function parse_less_files(?array $variables = null, $compile_core = true): string
     {
         // If no variables are passed, initialize from DB, config file, and
         // extension injections in one call.
@@ -327,8 +328,8 @@ class LessController extends OsecBaseClass
     private function abs_path_to_url($path = '')
     {
         $url = str_replace(
-            wp_normalize_path(untrailingslashit(ABSPATH)),
-            site_url(),
+            wp_normalize_path(untrailingslashit(OSEC_PATH)),
+            wp_make_link_relative(OSEC_URL),
             wp_normalize_path($path)
         );
 
@@ -509,8 +510,8 @@ class LessController extends OsecBaseClass
             'osec_font_dirs',
             [
                 'AI1EC' => [
-                    $theme['theme_dir'] . DIRECTORY_SEPARATOR . 'font',
-                    OSEC_DEFAULT_THEME_PATH . DIRECTORY_SEPARATOR . 'font',
+                    $theme['theme_dir'] . '/font',
+                    OSEC_DEFAULT_THEME_ROOT . '/' . OSEC_ROOT_THEME_NAME . '/font',
                 ],
             ]
         );

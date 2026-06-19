@@ -1,7 +1,11 @@
 <?php
 
-use Osec\App\View\Admin\AdminPageAbstract;
 use Osec\Command\ExportEvents;
+
+/* phpcs:disable PSR1.Files.SideEffects.FoundWithSymbols */
+if (! defined('ABSPATH')) {
+    exit;
+}
 
 /**
  * Define required constants, if these have not been defined already.
@@ -41,7 +45,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = Plugin Version =
     // ==================
     if (! defined('OSEC_VERSION')) {
-        define('OSEC_VERSION', '1.0.5');
+        define('OSEC_VERSION', '1.1.8');
     }
 
     // =================
@@ -82,7 +86,14 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = Default theme name =
     // ======================
     if (! defined('OSEC_DEFAULT_THEME_NAME')) {
-        define('OSEC_DEFAULT_THEME_NAME', 'vortex');
+        define('OSEC_DEFAULT_THEME_NAME', 'plana');
+    }
+
+    // ======================
+    // = Root theme name =
+    // ======================
+    if (! defined('OSEC_ROOT_THEME_NAME')) {
+        define('OSEC_ROOT_THEME_NAME', 'vortex');
     }
 
     // ================
@@ -181,46 +192,6 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         define('OSEC_ADMIN_BASE_URL', 'edit.php?post_type=' . OSEC_POST_TYPE);
     }
 
-    // =====================================================
-    // = THEME OPTIONS PAGE BASE URL (wrap in admin_url()) =
-    // =====================================================
-    if (! defined('OSEC_THEME_OPTIONS_BASE_URL')) {
-        define(
-            'OSEC_THEME_OPTIONS_BASE_URL',
-            OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'edit-css'
-        );
-    }
-
-    // =======================================================
-    // = THEME SELECTION PAGE BASE URL (wrap in admin_url()) =
-    // =======================================================
-    if (! defined('OSEC_THEME_SELECTION_BASE_URL')) {
-        define(
-            'OSEC_THEME_SELECTION_BASE_URL',
-            OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'themes'
-        );
-    }
-
-    // =====================================================
-    // = FEED SETTINGS PAGE BASE URL (wrap in admin_url()) =
-    // =====================================================
-    if (! defined('OSEC_FEED_SETTINGS_BASE_URL')) {
-        define(
-            'OSEC_FEED_SETTINGS_BASE_URL',
-            OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'feeds'
-        );
-    }
-
-    // ================================================
-    // = SETTINGS PAGE BASE URL (wrap in admin_url()) =
-    // ================================================
-    if (! defined('OSEC_SETTINGS_BASE_URL')) {
-        define(
-            'OSEC_SETTINGS_BASE_URL',
-            OSEC_ADMIN_BASE_URL . '&page=' . AdminPageAbstract::ADMIN_PAGE_PREFIX . 'settings'
-        );
-    }
-
     // ==============
     // = EXPORT URL =
     // ==============
@@ -229,7 +200,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         // = Convert http:// to webcal:// in OSEC_SCRIPT_URL =
         // =  (webcal:// protocol does not support https://)  =
         // ====================================================
-        $webcal_url = str_replace('http://', 'webcal://', OSEC_SCRIPT_URL);
+        $webcal_url = str_replace(['http://', 'https://'], 'webcal://', OSEC_SCRIPT_URL);
         define(
             'OSEC_EXPORT_URL',
             $webcal_url . '&controller=' . ExportEvents::EXPORT_CONTROLLER . '&action=export_events'
@@ -294,9 +265,9 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = DEBUG MODE  =
     // ===============
     //
-    // Enable debug mode,
-    // which means, that extra output may appear at places.
-    //
+    // Enable debug mode, Including TWIG debug
+    // which means, that extra output may appear at places
+    // and you can use {{ dump() }} in twig files.
     // Do set to "FALSE" on production sites!
     //
     if (! defined('OSEC_DEBUG')) {
@@ -421,7 +392,6 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
             'osec'
         );
     }
-
     // Lets globalize Table names for now.
     if (! defined('OSEC_DB__EVENTS')) {
         define(
@@ -445,6 +415,85 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         define(
             'OSEC_DB__META',
             'osec_event_category_meta'
+        );
+    }
+
+    /**
+     * Define the timeframe for recurring events.
+     *
+     * Relative time frame.
+     * Don't get excessive, it affects performance,
+     * @see https://www.php.net/manual/en/datetime.formats.php#datetime.formats.relative
+     */
+    if (! defined('OSEC_REOCCURRENCE_TIMEFRAME')) {
+        define(
+            'OSEC_REOCCURRENCE_TIMEFRAME',
+            '+ 3years'
+        );
+    }
+
+    /**
+     * Define Excerpt length in words
+     *
+     * Applies to autogenerated, pre-more-tag-text and custom excerpts (when enabled).
+     */
+    if (! defined('OSEC_EXCERPT_LENGTH_WORDS')) {
+        define(
+            'OSEC_EXCERPT_LENGTH_WORDS',
+            35
+        );
+    }
+
+    /**
+     * Leaflet version
+     *
+     * @see osec_leaflet_library_alter.
+     */
+    if (! defined('OSEC_LEAFLET_VERSION')) {
+        define(
+            'OSEC_LEAFLET_VERSION',
+            '1.9.4'
+        );
+    }
+
+
+    /**
+     * Experimental.
+     *
+     * Define how address is saved/displayed after location search.
+     * @see https://nominatim.org/release-docs/develop/api/Lookup/
+     *
+     * E.g:
+     *   separator, translating into a comma.
+     *   ISO3166-2-lvl4: "DE-BE"
+     *   amenity: "Berghain"
+     *   road: "Am Wriezener Bahnhof"
+     *   house_number: "65"
+     *   postcode: "10243"
+     *   city: "Berlin"
+     *   quarter: "Andreasviertel"
+     *   suburb: "Friedrichshain"
+     *   state: "Bayern"
+     *   borough: "Friedrichshain-Kreuzberg"
+     *   country: "Deutschland"
+     *   country_code: "de"
+     */
+    if (! defined('OSEC_GEOCODE_TO_ADDRESS_TEMPLATE')) {
+        define(
+            'OSEC_GEOCODE_TO_ADDRESS_TEMPLATE',
+            'road,house_number,separator,borough|suburb,separator,postcode,city,separator,state,separator,country'
+        );
+    }
+
+    //
+    // Allow your users to keep te old calendar feed uri
+    //
+    // e.g. ?plugin=all-in-one-event-calendar&controller=ai1ec_exporter_controller&action=export_events&no_html=true
+    //
+    if (! defined('OSEC_LEGACY_FEED_URIS')) {
+        define(
+            'OSEC_LEGACY_FEED_URIS',
+            false
         );
     }
 

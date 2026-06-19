@@ -1,0 +1,178 @@
+.plana-flyout-menu {
+  @lineheight: 2.5;
+  @foregroundColor: var(--wp--preset--color--contrast, buttontext);
+  @backgroundColor: var(--wp--preset--color--accent, buttonFace);
+
+
+  //margin-bottom: .25em;
+  position: relative;
+  display: inline-block;
+  font-size: var(--wp--preset--font-size--normal);
+
+  min-width: 7rem;
+  &.plana-flyout-menu--wide {
+    min-width: 14rem;
+  }
+
+  .ai1ec-view-icon {
+    //outline: 1px solid red;
+    font-size: 2em;
+    line-height: .7em;
+    //width: 28px;
+    padding-right: .4rem;
+    display: inline-flex;
+  }
+
+  .plana-flyout-menu--button {
+    min-width: inherit;
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    line-height: @lineheight;
+    text-align: left;
+    font-size: var(--wp--preset--font-size--normal);
+    border: 0;
+    cursor: pointer;
+    background: @backgroundColor;
+    color: @foregroundColor;
+    padding-left: .6em;
+    width: 100%;
+
+    &:hover {
+      border-bottom: 0;
+      background: @foregroundColor;
+      color: @backgroundColor;
+      cursor: revert;
+    }
+
+    .caret {
+      margin-left: .3rem;
+      margin-right: .25rem;
+
+      flex-grow: 1;
+      text-align: right;
+    }
+  }
+
+  .plana-flyout-menu--menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: none;
+    position: absolute;
+    min-width: inherit;
+    z-index: 10;
+    font-size: .95em;
+    background: @backgroundColor;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .link {
+    width: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: baseline;
+    line-height: @lineheight;
+    white-space: normal;
+    padding-left: .6em;
+    padding-right: .6em;
+    font-size: .9em;
+
+    &,
+    &:visited { // Visited overrides timely default.
+      color: @foregroundColor;
+      background: @backgroundColor;
+    }
+
+    &:hover {
+      color: @backgroundColor;
+      background: @foregroundColor;
+    }
+
+    i {
+      padding-right: .6em;
+    }
+  }
+
+  &:focus-within .plana-flyout-menu--menu,
+  &:hover .plana-flyout-menu--menu {
+    display: block;
+  }
+}
+
+.plana-flyout-menu--taxonomy {
+  min-width: 12em;
+  margin-left: .6em;
+  margin-right: 1.2em;
+
+  .plana-flyout-menu--button {
+    > .ai1ec-clear-filter {
+      margin-right: .6em;
+    }
+  }
+
+  .plana-flyout-menu--menu {
+    border: 1px solid @foregroundColor;
+  }
+
+  .link-wrapper {
+    padding: .4em 0 .4em .4em;
+    display: block;
+    float: left;
+  }
+
+  .link {
+    line-height: 1.6;
+    display: inline-flex;
+    border-radius: 4px;
+    border: 1px solid @foregroundColor;
+    >i {
+      padding-left: .6rem;
+      padding-right: 0;
+    }
+    .ai1ec-color-swatch {
+      margin-right: .6em;
+    }
+  }
+
+  .term-is-selected .link {
+    color: @backgroundColor;
+    background: @foregroundColor;
+  }
+
+  // Keep button hover-colored whaile selecting tags.
+  &:focus-within ,
+  &:hover {
+    .plana-flyout-menu--button {
+      color: @backgroundColor;
+      background: @foregroundColor;
+    }
+  }
+}
+
+.osec-taxonomy-filters {
+  margin-bottom: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  .osec-taxonomy-filters--label {
+    margin-right: .5em;
+  }
+  .osec-taxonomy-filters--filters {
+  }
+  .osec-taxonomy-filters--item {
+    white-space: nowrap;
+  }
+
+  .ai1ec-color-swatch-empty {
+    display: none;
+  }
+}
+
+.plana-views-dropdown {
+  .link {
+    align-items: center;
+  }
+}

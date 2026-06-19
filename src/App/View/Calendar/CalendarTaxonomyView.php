@@ -37,19 +37,19 @@ class CalendarTaxonomyView extends OsecBaseClass
      */
     protected function get_html_for_taxonomy($view_args, $tag = false)
     {
-        $taxonomy_name      = 'events_categories';
+        $taxonomy_name      = 'osec_events_categories';
         $type               = 'category';
         $type_for_filter    = 'cat_ids';
         $type_for_view_args = 'categories';
         if (true === $tag) {
-            $taxonomy_name      = 'events_tags';
+            $taxonomy_name      = 'osec_events_tags';
             $type               = 'tag';
             $type_for_filter    = 'tag_ids';
             $type_for_view_args = 'tags';
         }
         $terms = get_terms([
-            'taxonomy'   => $taxonomy_name,
-            'orderby' => 'name'
+            'taxonomy' => $taxonomy_name,
+            'orderby'  => 'name',
         ]);
         if (empty($terms)) {
             return '';

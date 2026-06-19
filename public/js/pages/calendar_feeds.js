@@ -230,7 +230,7 @@ timely.define("domReady", [], function () {
                 }
                 return s
             }, get_ajax_url: function () {
-                return typeof window.ajaxurl == "undefined" ? "http://localhost/wordpress/wp-admin/admin-ajax.php" : window.ajaxurl
+                return window.ajaxurl
             }, isUrl: function (e) {
                 var t = /(http|https|webcal):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
                 return t.test(e)
@@ -270,23 +270,23 @@ timely.define("domReady", [], function () {
             var u = t.make_alert(n.message, "error");
             e("#ics-alerts").append(u)
         } else {
-            s(), e("#ai1ec-feeds-after").addClass("ai1ec-well ai1ec-well-sm").insertAfter("#ics .ai1ec-form-horizontal");
+            s(), e("#ai1ec-feeds-after").addClass("osec-well").insertAfter("#ics .ai1ec-form-horizontal");
             var a = n.update.data.feed_id, f = e(n.message),
-                l = e('.ai1ec_feed_id[value="' + a + '"] ').closest(".ai1ec-feed-container");
+                l = e('.ai1ec_feed_id[value="' + a + '"] ').closest(".osec-feed-container");
             f.find(".ai1ec-collapse").removeClass("ai1ec-collapse");
-            var l = e('.ai1ec_feed_id[value="' + a + '"] ').closest(".ai1ec-feed-container");
+            var l = e('.ai1ec_feed_id[value="' + a + '"] ').closest(".osec-feed-container");
             l.length ? l.replaceWith(f) : e("#ai1ec-feeds-after").after(f), n.update && n.update.data && !n.update.data.error && i(n.update.data)
         }
     }, r = function (n) {
-        var r = e("input[value=" + n.feed_id + "]").closest(".ai1ec-feed-container"), i = n.error ? "error" : "success",
+        var r = e("input[value=" + n.feed_id + "]").closest(".osec-feed-container"), i = n.error ? "error" : "success",
             s = t.make_alert(n.message, i);
         n.error ? e(".osec_update_ics", r).button("reset") : r.remove(), e("#ics-alerts").append(s)
     }, i = function (n) {
-        var r = e("input[value=" + n.feed_id + "]").closest(".ai1ec-feed-container"), i = n.error ? "error" : "success",
+        var r = e("input[value=" + n.feed_id + "]").closest(".osec-feed-container"), i = n.error ? "error" : "success",
             s = t.make_alert(n.message, i);
         e(".osec_update_ics", r).button("reset"), e("#ics-alerts").append(s)
     }, s = function () {
-        e("#osec_feed_url").val(" ").prop("readonly", !1), e('#ai1ec-feeds-after input[type="checkbox"]').prop("checked", !1), e("#osec_feed_id").remove(), e("#osec_feed_category").select2("val", ""), e("#osec_feed_tags").select2("val", ""), e('[id^="ai1ec_feed_cfg_"]').select2("val", ""), e("#osec_ics_add_new, #osec_add_new_ics > i").removeClass("ai1ec-hidden"), e("#osec_ics_update").addClass("ai1ec-hidden"), e("#ics .ai1ec-alert").remove()
+        e("#osec_feed_url").val(" ").prop("readonly", !1), e('#ai1ec-feeds-after input[type="checkbox"]').prop("checked", !1), e("#osec_feed_id").remove(), e("#osec_import_post_status").val(e("#osec_import_post_status").data('default_value')), e("#osec_feed_category").select2("val", ""), e("#osec_feed_tags").select2("val", ""), e('[id^="ai1ec_feed_cfg_"]').select2("val", ""), e("#osec_ics_add_new, #osec_add_new_ics > i").removeClass("ai1ec-hidden"), e("#osec_ics_update").addClass("ai1ec-hidden"), e("#ics .ai1ec-alert").remove()
     };
     return {handle_add_new_ics: n, handle_delete_ics: r, handle_update_ics: i, reset_form: s}
 }), timely.define("external_libs/select2", ["jquery_timely"], function (e) {
@@ -1328,20 +1328,31 @@ timely.define("domReady", [], function () {
             }
         }
     }(e)
-}), timely.define("scripts/calendar_feeds/ics/ics_event_handlers", ["jquery_timely", "scripts/calendar_feeds/ics/ics_ajax_handlers", "libs/utils", "ai1ec_config", "external_libs/select2"], function ($, t, n, r) {
-    var i = n.get_ajax_url(), s = function () {
-        var s = $(this), o = $("#osec_feed_url"), u = o.val().replace("webcal://", "http://"),
-            a = $("#osec_feed_id").val(), f = !1, l;
-        $(".ai1ec-feed-url, #osec_feed_url").css("border-color", "#DFDFDF"), $("#ai1ec-feed-error").remove(), a || $(".ai1ec-feed-url").each(function () {
+}),
+timely.define("scripts/calendar_feeds/ics/ics_event_handlers", ["jquery_timely", "scripts/calendar_feeds/ics/ics_ajax_handlers", "libs/utils", "ai1ec_config", "external_libs/select2"], function ($, t, n, r) {
+    var i = n.get_ajax_url(),
+        // Add new feed
+        s = function () {
+            var s = $(this),
+                o = $("#osec_feed_url"),
+                u = o.val().trim().replace("webcal://", "http://"),
+                a = $("#osec_feed_id").val(), // Update feed if not null.
+                f = !1,
+                l;
+        $(".ai1ec-feed-url, #osec_feed_url").css("border-color", "#DFDFDF"),
+        $(".ai1ec-alert.ai1ec-alert-danger").remove(), a || $(".saved-feed-url").each(function () {
             this.value === u && ($(this).css("border-color", "#FF0000"), f = !0, l = r.duplicate_feed_message)
         }), n.isUrl(u) || (f = !0, l = r.invalid_url_message);
+
         if (f) o.addClass("input-error").focus().before(n.make_alert(l, "error")); else {
             s.button("loading");
             var c = $("#osec_comments_enabled").is(":checked") ? 1 : 0,
                 h = $("#osec_map_display_enabled").is(":checked") ? 1 : 0,
                 p = $("#osec_add_tag_categories").is(":checked") ? 1 : 0,
                 d = $("#osec_keep_old_events").is(":checked") ? 1 : 0,
-                v = $("#osec_feed_import_timezone").is(":checked") ? 1 : 0, m = {
+                v = $("#osec_feed_import_timezone").is(":checked") ? 1 : 0,
+                import_post_status= $("#osec_import_post_status").val(),
+                m = {
                     action: "osec_add_ics",
                     nonce: r.calendar_feeds_nonce,
                     feed_url: u,
@@ -1351,7 +1362,8 @@ timely.define("domReady", [], function () {
                     map_display_enabled: h,
                     keep_tags_categories: p,
                     keep_old_events: d,
-                    feed_import_timezone: v
+                    feed_import_timezone: v,
+                    import_post_status
                 };
             $(".ai1ec-feed-field").each(function () {
                 var t = $(this).val();
@@ -1359,8 +1371,9 @@ timely.define("domReady", [], function () {
             }), a && (m.feed_id = a), $.post(i, m, t.handle_add_new_ics, "json")
         }
     }, o = function () {
+        // Edit feed
         var t = $(this),
-            n = t.closest(".ai1ec-feed-container"),
+            n = t.closest(".osec-feed-container"),
             r = $("#ai1ec-feeds-after"),
             i = $("#osec_ics_add_new, #osec_add_new_ics > i"),
             s = $("#osec_ics_update"),
@@ -1376,6 +1389,7 @@ timely.define("domReady", [], function () {
             $("#osec_map_display_enabled").prop("checked", $(".ai1ec-feed-map-display-enabled", n).data("state")),
             $("#osec_add_tag_categories").prop("checked", $(".ai1ec-feed-keep-tags-categories", n).data("state")),
             $("#osec_keep_old_events").prop("checked", $(".ai1ec-feed-keep-old-events", n).data("state")),
+            $("#osec_import_post_status").val($(".ai1ec-import-post-status", n).data("state")),
             $("#osec_feed_import_timezone").prop("checked", $(".ai1ec-feed-import-timezone", n).data("state")),
             i.addClass("ai1ec-hidden"), s.removeClass("ai1ec-hidden"),
             $('<input type="hidden" id="osec_feed_id" name="osec_feed_id">').val($(".ai1ec_feed_id", n).val()).appendTo(r),
@@ -1383,12 +1397,12 @@ timely.define("domReady", [], function () {
             $("#osec_feed_tags").select2("val", u.split(","));
         for (var l in f) $('[id="ai1ec_feed_cfg_' + l.toLowerCase() + '"]').select2("val", f[l].split(",") || f[l]);
         var c = $(".ai1ec-feed-content", n);
-        c.hide(), $("#osec_cancel_ics").show(), $("#ai1ec-feeds-after").removeClass("ai1ec-well ai1ec-well-sm").insertAfter(c), $("#ics .ai1ec-alert").remove()
+        c.hide(), $("#osec_cancel_ics").css('display', 'inline-flex'), $("#ai1ec-feeds-after").removeClass("osec-well").insertAfter(c), $("#ics .ai1ec-alert").remove()
     }, u = function (n) {
-        return $("#ai1ec-feeds-after").addClass("ai1ec-well ai1ec-well-sm").insertAfter("#ics .ai1ec-form-horizontal"), $(".ai1ec-feed-content").show(), t.reset_form(), $("#osec_cancel_ics").hide(), !1
+        return $("#ai1ec-feeds-after").addClass("osec-well").insertAfter("#ics .ai1ec-form-horizontal"), $(".ai1ec-feed-content").show(), t.reset_form(), $("#osec_cancel_ics").hide(), !1
     }, a = function (n) {
         n.preventDefault();
-        var r = $(this).hasClass("remove") ? !0 : !1, s = $($(this).data("el")), o = s.closest(".ai1ec-feed-container"),
+        var r = $(this).hasClass("remove") ? !0 : !1, s = $($(this).data("el")), o = s.closest(".osec-feed-container"),
             u = $(".ai1ec_feed_id", o).val(), a = {
                 action: "osec_delete_ics",
                 feed_id: u,
@@ -1399,7 +1413,7 @@ timely.define("domReady", [], function () {
     }, f = function () {
         $("#osec-ics-modal .ai1ec-btn").data("el", this), $("#osec-ics-modal").modal({backdrop: "static"})
     }, l = function () {
-        var n = $(this), r = n.closest(".ai1ec-feed-container"), s = $(".ai1ec_feed_id", r).val(),
+        var n = $(this), r = n.closest(".osec-feed-container"), s = $(".ai1ec_feed_id", r).val(),
             o = {action: "osec_update_ics", feed_id: s, nonce: timely.requirejs.config('ai1ec_config').calendar_feeds_nonce};
         n.button("loading"), $.post(i, o, t.handle_update_ics, "json")
     }, c = function () {
@@ -1687,7 +1701,7 @@ timely.define("domReady", [], function () {
     }, a = function () {
         var t = e("#ai1ec-feeds-after"), s = e(".ai1ec_submit_wrapper"), a = e(".ai1ec_file_upload_tags_categories");
         r.init(t), i.init(t), r.init(s), i.init(s), r.init(a), i.init(a), e("ul.ai1ec-nav a").on("click", u), e("ul.ai1ec-nav a").on("shown", o), e('select[name="cron_freq"]').on("change", function () {
-            e.ajax({url: ajaxurl, type: "POST", data: {action: "ai1ec_feeds_page_post", cron_freq: this.value}})
+            e.ajax({url: ajaxurl, type: "POST", data: {action: "osec_feeds_page_post", cron_freq: this.value, nonce: timely.requirejs.config('ai1ec_config').calendar_feeds_nonce}})
         }), e("#osec-ics-modal").on("click", ".remove, .keep", n.submit_delete_modal), e(document).on("click", "#osec_add_new_ics", n.add_new_feed).on("click", ".osec_delete_ics", n.open_delete_modal).on("click", ".osec_update_ics", n.update_feed).on("click", ".ai1ec_edit_ics", n.edit_feed).on("click", "#osec_cancel_ics", n.edit_cancel).on("click", ".ai1ec-panel-heading > a", n.edit_cancel).on("blur", "#osec_feed_url", n.feed_url_change)
     }, f = function () {
         t(function () {
