@@ -1,3 +1,9 @@
+= 1.1.9 =
+- Reword Subscribe button text  on single, fix subscribe buttons display and JS loading
+- deploy development releases to WP.org
+- Fixed ICS feed not refreshing #43
+- Allow to select a post status for feed imports
+
 = 1.1.8 = 
 - Fix Location, GEO and Contact - Events from ICS feed lose their location #40
 - Weekly/Monthly view not respecting the "week starts on day" when set to Sunday #38
