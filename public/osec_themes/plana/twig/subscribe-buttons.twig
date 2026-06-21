@@ -2,14 +2,12 @@
 	<i class="ai1ec-fa ai1ec-icon-rss ai1ec-fa-fw"></i>
 	<div class="plana-flyout-menu plana-flyout-menu--wide">
 		<button class="plana-flyout-menu--button">
-			{% if subscribe_label is not empty %}
-				{{ subscribe_label }}
+			{% if is_single_event %}
+				{{ subscribe_text.single_event }}
+			{% elseif is_filtered %}
+				{{ subscribe_text.filtered }}
 			{% else %}
-				{% if is_filtered %}
-					{{ subscribe_text.filtered }}
-				{% else %}
-					{{ subscribe_text.unfiltered }}
-				{% endif %}
+				{{ subscribe_text.unfiltered }}
 			{% endif %}
 			<span class="caret">▾</span>
 		</button>

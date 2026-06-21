@@ -108,7 +108,8 @@ class EventSingleView extends OsecBaseClass
 
         $subscribe_buttons = CalendarSubscribeView::factory($this->app)->render_subscribe(
             '&osec_post_ids=' . $event->get('post_id'),
-            false
+            false,
+            true
         );
 
         $event->set_runtime(

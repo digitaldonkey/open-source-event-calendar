@@ -25,7 +25,7 @@ class CalendarSubscribeView extends OsecBaseClass
      *
      * @return string Rendered HTML to include in output.
      */
-    public function render_subscribe(string $url_args, $is_filtered)
+    public function render_subscribe(string $url_args, $is_filtered, $is_single_event = false)
     {
         if (! RequestParser::factory($this->app)->get('display_subscribe')) {
             return '';
@@ -50,6 +50,7 @@ class CalendarSubscribeView extends OsecBaseClass
             $this->get_labels(),
             [
                 'is_filtered'             => $is_filtered,
+                'is_single_event'        => $is_single_event,
                 'url_webcal'              => esc_url_raw(OSEC_EXPORT_URL . $url_args),
                 'url_webcal_no_html'      => esc_url_raw(OSEC_EXPORT_URL . '&no_html=true' . $url_args),
                 'url_httx'                => esc_url_raw($httx_url . $url_args),
@@ -83,6 +84,7 @@ class CalendarSubscribeView extends OsecBaseClass
         return [
             'subscribe_text' => [
                 'filtered'  => __('Subscribe to filtered calendar', 'open-source-event-calendar'),
+                'single_event'  => __('Add event to...', 'open-source-event-calendar'),
                 'unfiltered' => __('Subscribe', 'open-source-event-calendar'),
             ],
             'label' => [

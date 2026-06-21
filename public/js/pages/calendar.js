@@ -5658,7 +5658,10 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
                     var s = t.find("li.ai1ec-custom-filter").parent();
                     t.find("li.ai1ec-custom-filter").remove(), s.append(i.custom_filters)
                 }
-                typeof i.subscribe_buttons == "string" && t.find(".ai1ec-subscribe-container").empty().append(i.subscribe_buttons), typeof i.save_view_btngroup == "string" && t.find("#save_filtered_views").closest(".ai1ec-btn-group").replaceWith(i.save_view_btngroup), v = i.are_filters_set;
+                typeof i.subscribe_buttons == "string"
+                    && t.find(".subscribe-container").empty().append(i.subscribe_buttons),
+                    typeof i.save_view_btngroup == "string" && t.find("#save_filtered_views").closest(".ai1ec-btn-group").replaceWith(i.save_view_btngroup),
+                    v = i.are_filters_set;
                 var o;
                 if (i.is_json) {
                     var u = i.html.type;

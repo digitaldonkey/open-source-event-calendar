@@ -8,16 +8,14 @@
 			data-toggle="ai1ec-dropdown">
 		<i class="ai1ec-fa ai1ec-icon-rss  ai1ec-fa-fw"></i>
 		<span class="ai1ec-hidden-xs">
-			{% if subscribe_label is not empty %}
-				{{ subscribe_label }}
+			{% if is_single_event %}
+				{{ subscribe_text.single_event }}
+			{% elseif is_filtered %}
+				{{ subscribe_text.filtered }}
 			{% else %}
-				{% if is_filtered %}
-					{{ subscribe_text.filtered }}
-				{% else %}
-					{{ subscribe_text.unfiltered }}
-				{% endif %}
+				{{ subscribe_text.unfiltered }}
 			{% endif %}
-			<span class="ai1ec-caret"></span>
+			<span class="caret">▾</span>
 		</span>
 	</span>
 	<ul class="ai1ec-dropdown-menu ai1ec-pull-{{ alignment2 }}" role="menu">
