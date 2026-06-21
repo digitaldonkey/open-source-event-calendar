@@ -24,6 +24,16 @@
                     <label for="osec_is_free_event">
                         {{ is_free_event_label }}
                     </label>
+                    <input class="checkbox"
+                           type="checkbox"
+                           name="osec_hide_cost"
+                           id="osec_hide_cost"
+                           value="1"
+                           {% if osec_hide_cost %}checked="checked"{% endif %}
+                    />
+                    <label for="osec_hide_cost">
+                        {{ hide_cost_label }}
+                    </label>
                 </p>
             </td>
         </tr>

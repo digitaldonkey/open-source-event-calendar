@@ -145,6 +145,10 @@ class EventEditing extends OsecBaseClass
             $event->set('is_free', true);
             $event->set('cost', '');
         }
+        $event->set(
+            'hide_cost',
+            (bool)RequestParser::get_param('osec_hide_cost', false)
+        );
 
         $osec_ticket_url = RequestParser::get_param('osec_ticket_url', '');
         if ($osec_ticket_url) {

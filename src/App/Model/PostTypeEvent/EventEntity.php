@@ -146,6 +146,12 @@ class EventEntity extends OsecBaseClass
      * @var string Defines event cost.
      */
     private $cost;
+
+    /**
+     * @var string Defines event cost should be hidden.
+     */
+    private $hide_cost;
+
     /**
      * @var bool Indicates, whereas event is free.
      */

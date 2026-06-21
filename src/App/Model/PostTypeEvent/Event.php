@@ -1016,12 +1016,14 @@ class Event extends OsecBaseClass
     {
         $cost    = '';
         $is_free = true;
+        $hide_cost = false;
 
         // Aggregated value from DB.
         if (JsonHelper::isValidJson($value)) {
-            $data    = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
-            $is_free = (bool)$data['is_free'];
-            $cost    = $data['cost'];
+            $data      = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+            $is_free   = (bool)$data['is_free'];
+            $cost      = $data['cost'];
+            $hide_cost = isset($data['hide_cost']) ? $data['hide_cost'] : false;
         } else {
             // Plain value submitted.
             $cost = sanitize_text_field($value);
@@ -1030,7 +1032,7 @@ class Event extends OsecBaseClass
             }
         }
         $this->entity->set('is_free', $is_free);
-
+        $this->entity->set('hide_cost', $hide_cost);
         return $cost;
     }
 
@@ -1046,6 +1048,7 @@ class Event extends OsecBaseClass
         $data = [
             'cost'    => $cost,
             'is_free' => true,
+            'hide_cost' => $this->entity->get('hide_cost'),
         ];
         if ($cost) {
             $data['is_free'] = false;
