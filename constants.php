@@ -109,7 +109,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     if (! defined('OSEC_DEFAULT_THEME_ROOT')) {
         define(
             'OSEC_DEFAULT_THEME_ROOT',
-            OSEC_PATH . 'public' . DIRECTORY_SEPARATOR . OSEC_THEME_FOLDER
+            OSEC_PATH . 'public/' . OSEC_THEME_FOLDER
         );
     }
 
@@ -120,6 +120,16 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         define(
             'OSEC_DEFAULT_THEME_PATH',
             OSEC_DEFAULT_THEME_ROOT . '/' . OSEC_DEFAULT_THEME_NAME
+        );
+    }
+
+    // ==========================
+    // = DEFAULT fallback image =
+    // ==========================
+    if (! defined('OSEC_DEFAULT_IMAGE')) {
+        define(
+            'OSEC_DEFAULT_IMAGE',
+            OSEC_PATH . 'public/osec-fallback-image.png'
         );
     }
 

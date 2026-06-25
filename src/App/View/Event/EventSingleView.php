@@ -203,8 +203,6 @@ class EventSingleView extends OsecBaseClass
             'subscribe_buttons' => $subscribe_buttons,
             'edit_instance_url'      => null,
             'edit_instance_text'     => null,
-            // Has image??
-            'has_any_image'          => !is_null(EventAvatarView::factory($this->app)->get_event_avatar_url($event)),
             'hide_featured_image'    => $settings->get('hide_featured_image'),
             'extra_buttons'          => $extra_buttons,
             'text_add_calendar'      => __('Add to Calendar', 'open-source-event-calendar'),

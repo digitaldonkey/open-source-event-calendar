@@ -132,16 +132,17 @@
         {% if hide_featured_image %}
             {#  Only print schema.org/Image metatag  #}
             {{ event | avatar( [
+                'post_image',
                 'post_thumbnail',
-                'location_avatar',
+                'content_img',
                 'category_avatar'
             ], 'block--image', false, true ) | raw }}
             {% set avatar = null %}
         {% else %}
             {#  Get image  #}
             {% set avatar = event | avatar( [
+                'post_image',
                 'post_thumbnail',
-                'location_avatar',
                 'category_avatar'
             ], 'block--image', false, false ) %}
         {% endif %}

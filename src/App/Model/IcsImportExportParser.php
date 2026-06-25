@@ -1087,7 +1087,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // Set image with ATTACH
         if ($img_url || $content_image_uri) {
             // Use featured image if available or fall back to content image if exists.
-            $img_url = $img_url ? $avatar_view->getPostAttachmentUrl($event, ['full'], $size) : $content_image_uri;
+            $img_url = $img_url ? $avatar_view->get_post_attachment_url($event, ['full'], $size) : $content_image_uri;
             $e->setAttach(
                 $this->sanitizeValue($img_url),
             );

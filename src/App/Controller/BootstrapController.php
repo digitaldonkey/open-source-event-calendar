@@ -25,6 +25,7 @@ use Osec\App\View\Admin\AdminPageManageThemes;
 use Osec\App\View\Admin\AdminPageSettings;
 use Osec\App\View\Admin\AdminPageThemeOptions;
 use Osec\App\View\Calendar\CalendarShortcodeView;
+use Osec\App\View\Event\EventAvatarView;
 use Osec\App\View\Event\EventContentView;
 use Osec\App\View\Event\EventPostView;
 use Osec\App\View\Event\EventSingleView;
@@ -267,6 +268,9 @@ class BootstrapController
 
         // Category colors
         AdminEventCategoryHooks::add_actions($app, is_admin());
+        // Image fallbacks
+        EventAvatarView::add_actions($app, is_admin());
+
 
         add_shortcode(
             OSEC_SHORTCODE,
