@@ -7,7 +7,7 @@
   "login": true,
   "siteOptions": {
     "blogname": "OSEC Open Source Event Calendar Demo",
-    "timezone_string":"Europe/Berlin"
+    "timezone_string": "Europe/Berlin"
   },
   "phpExtensionBundles": [
     "kitchen-sink"
