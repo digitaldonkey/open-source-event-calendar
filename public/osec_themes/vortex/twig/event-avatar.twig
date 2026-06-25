@@ -2,7 +2,14 @@
     {% if link %}
         <a href="{{ link }}">
     {% endif %}
-            <img itemprop="image" src="{{ src }}" alt="{{ alt }}" {% if width %} width="{{ width }}"{% endif %} {% if height %} height="{{ height }}"{% endif %} />
+            <img
+                itemprop="image"
+                src="{{ src }}"
+                alt="{{ alt }}"
+                {% if width %} width="{{ width }}"{% endif %}
+                {% if height %} height="{{ height }}"{% endif %}
+                {% if aspect_ratio %}style="aspect-ratio: {{ aspect_ratio }};"{% endif %}
+            />
     {% if link %}
         </a>
     {% endif %}

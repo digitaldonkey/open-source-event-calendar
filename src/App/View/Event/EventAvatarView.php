@@ -438,6 +438,7 @@ class EventAvatarView extends OsecBaseClass
         if (isset($data['size'])) {
             $args['width'] = $data['size']['width'];
             $args['height'] = $data['size']['height'];
+            $args['aspect_ratio'] = $data['size']['width'] . ' / ' . $data['size']['height'];
         }
         return ThemeLoader::factory($this->app)
                    ->get_file('event-avatar.twig', $args)

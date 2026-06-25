@@ -3,7 +3,6 @@
 namespace Osec\App\Model\PostTypeEvent;
 
 use Exception;
-use Osec\App\Model\AvatarFallbackModel;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\View\Event\EventAvatarView;
@@ -369,7 +368,7 @@ class Event extends OsecBaseClass
     {
         return EventAvatarView::factory($this->app)->get_event_avatar(
             $this,
-            AvatarFallbackModel::factory($this->app)->get_all(),
+            null,
             '',
             $wrap_permalink
         );
@@ -381,10 +380,7 @@ class Event extends OsecBaseClass
      */
     public function get_avatar_data($wrap_permalink = true)
     {
-        return EventAvatarView::factory($this->app)->get_event_avatar_data(
-            $this,
-            AvatarFallbackModel::factory($this->app)->get_all(),
-        );
+        return EventAvatarView::factory($this->app)->get_event_avatar_data($this);
     }
 
     /**
