@@ -1,0 +1,39 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "preferredVersions": {
+    "php": "8.4",
+    "wp": "7.0"
+  },
+  "login": true,
+  "siteOptions": {
+    "blogname": "OSEC Open Source Event Calendar Demo",
+    "timezone_string":"Europe/Berlin"
+  },
+  "phpExtensionBundles": [
+    "kitchen-sink"
+  ],
+  "landingPage": "/wp-admin/",
+  "steps": [
+    {
+      "step": "installTheme",
+      "themeData": {
+        "resource": "wordpress.org/themes",
+        "slug": "twentytwentyfive"
+      }
+    },
+    {
+      "step": "installPlugin",
+      "pluginZipFile": {
+        "resource": "wordpress.org/plugins",
+        "slug": "open-source-event-calendar"
+      },
+      "pluginData": {
+        "resource": "wordpress.org/themes",
+        "slug": "twentytwentyfive"
+      },
+      "options": {
+        "activate": true
+      }
+    }
+  ]
+}
