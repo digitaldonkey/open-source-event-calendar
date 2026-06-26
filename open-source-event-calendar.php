@@ -67,7 +67,6 @@ function osec_plugin_activate()
     }
     DatabaseSchema::factory($osec_app)->verifySqlSchema();
     $osec_app->options->set('osec_force_flush_rewrite_rules', true);
-    FrontendCssController::factory($osec_app)->invalidate_cache(null, true);
 }
 
 register_activation_hook(__FILE__, 'osec_plugin_activate');
