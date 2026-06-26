@@ -69,10 +69,37 @@ class SaveThemeOptions extends SaveAbstract
         ];
     }
 
-    public static function initialCompile($osec_app) {
-        FrontendCssController::factory($osec_app)->update_variables_and_compile_css(
-            LessController::factory($osec_app)->get_saved_variables(),
-            true
-        );
-    }
+//    public static function initialCompile($osec_app) {
+//
+////        FrontendCssController::factory($osec_app)->update_variables_and_compile_css(
+////            LessController::factory($osec_app)->get_saved_variables(),
+////            true
+////        );
+//        FrontendCssController::factory($osec_app)
+//                             ->invalidate_cache(null, true);
+//
+//
+////        require_once ABSPATH . 'wp-includes/pluggable.php';
+////        $nonce = wp_create_nonce(AdminPageThemeOptions::$NONCE['nonce_action']);
+////        $url = admin_url() . '/edit.php?plugin=open-source-event-calendar'
+////               . '&controller=front&action=osec_theme_options_save'
+////               . '&osec_reset_themes_options="true"&osec_theme_options_nonce='
+////               . $nonce;
+////        foreach ($_COOKIE as $name => $value) {
+////            $cookies[] = new WP_Http_Cookie([
+////                'name' => $name,
+////                'value' => $value,
+////            ]);
+////        }
+////        $request = wp_remote_get(
+////            $url,
+////            [
+////                'cookies' => $cookies,
+////                'sslverify' => false,
+////            ]
+////        );
+////        $body    = wp_remote_retrieve_body($request);
+////
+//
+//    }
 }
