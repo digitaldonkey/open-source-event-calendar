@@ -30,6 +30,7 @@ use Osec\App\Controller\Scheduler;
 use Osec\App\Model\DatabaseSchema;
 use Osec\App\Model\PostTypeEvent\EventType;
 use Osec\App\Model\Settings;
+use Osec\Command\SaveThemeOptions;
 use Osec\Exception\BootstrapException;
 use Osec\Exception\DatabaseSchemaException;
 use Osec\Exception\DatabaseUpdateException;
@@ -46,7 +47,6 @@ if (
         BootstrapController::createApp(__DIR__);
     }, -100);
 }
-
 
 /**
  * Activate plugin.
@@ -68,6 +68,7 @@ function osec_plugin_activate()
     }
     DatabaseSchema::factory($osec_app)->verifySqlSchema();
     $osec_app->options->set('osec_force_flush_rewrite_rules', true);
+    SaveThemeOptions::backend_compile($osec_app);
 }
 
 register_activation_hook(__FILE__, 'osec_plugin_activate');

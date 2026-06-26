@@ -68,4 +68,11 @@ class SaveThemeOptions extends SaveAbstract
             'query_args' => [],
         ];
     }
+
+    public static function initialCompile($osec_app) {
+        FrontendCssController::factory($osec_app)->update_variables_and_compile_css(
+            LessController::factory($osec_app)->get_saved_variables(),
+            true
+        );
+    }
 }
