@@ -230,7 +230,7 @@ class EventSingleView extends OsecBaseClass
                 'text_cost'              => __('Cost:', 'open-source-event-calendar'),
                 'text_free'              => __('Free', 'open-source-event-calendar'),
                 'tickets_url_label'      => $event->get_runtime('tickets_url_label'),
-                'ticket_url'             => $event->get('ticket_url'),
+                'ticket_url'             => esc_url($event->get('ticket_url')),
                 'cost_number'   => $event->get_runtime('cost_number'),
                 'cost_iso_4217_currency' => $event->get_runtime('cost_iso_4217_currency'),
             ]);

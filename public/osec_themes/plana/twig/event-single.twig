@@ -106,7 +106,7 @@
                         {% if edit_serries_url is not empty %}
                             <a class="action-link edit-link"
                                title="{{ edit_serries_text | e('html_attr') }}"
-                               href="{{ edit_serries_url }}">
+                               href="{{ edit_serries_url|raw }}">
                                 {{ edit_serries_text | e('html_attr') }}
                             </a>
                         {% endif %}
@@ -114,7 +114,7 @@
                         {% if edit_instance_url is not empty %}
                             <a class="action-link edit-link"
                                title="{{ edit_instance_text | e('html_attr') }}"
-                               href="{{ edit_instance_url }}">
+                               href="{{ edit_instance_url|raw }}">
                                 {{ edit_instance_text | e('html_attr') }}
                             </a>
                         {% endif %}

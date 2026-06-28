@@ -15,7 +15,7 @@
 			<a class="ai1ec-btn ai1ec-btn-default ai1ec-btn-sm ai1ec-tooltip-trigger
 				ai1ec-text-muted"
 				title="{{ edit_instance_text | e('html_attr') }}"
-				href="{{ edit_instance_url }}">
+				href="{{ edit_instance_url|raw }}">
 				<i class="ai1ec-fa ai1ec-fa-pencil"></i>
 			</a>
 		{% endif %}

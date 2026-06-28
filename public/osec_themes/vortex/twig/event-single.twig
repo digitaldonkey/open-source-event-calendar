@@ -8,7 +8,7 @@
 
         <div class="ai1ec-btn-group-vertical ai1ec-clearfix">
             {% if ticket_url is not empty %}
-                <a href="{{ ticket_url | e( 'html_attr' ) }}" target="_blank"
+                <a href="{{ ticket_url|raw }}" target="_blank"
                    class="ai1ec-tickets ai1ec-btn ai1ec-btn-sm ai1ec-btn-primary
 					ai1ec-tooltip-trigger"
                    title="{{ tickets_url_label | e( 'html_attr' ) }}"
