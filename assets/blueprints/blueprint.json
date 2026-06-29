@@ -52,5 +52,7 @@
     }
 
   ],
-  "features": {}
+  "features": {
+    "networking": true
+  }
 }
