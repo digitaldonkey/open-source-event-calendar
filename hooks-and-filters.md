@@ -1151,45 +1151,6 @@ add_filter('osec_backend_js', $identifier);
 ---
 
 
-@file **../src/App/Model/AvatarFallbackModel.php**
-
-### osec_avatar_fallbacks <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter avatar image fallbach suggestions.
-
-```php
-add_filter('osec_avatar_fallbacks', $fallbacks);
-```
-
-#### Parameters
-
-
- - **$fallbacks** <span style="color:crimson"> </span> Avatar image fallback
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter avatar image fallbach suggestions.
- *
- * @since 1.0
- *
- * @param  array  $fallbacks  Avatar image fallback
- *
- * @file src/App/Model/AvatarFallbackModel.php
- */
-add_filter('osec_avatar_fallbacks', $fallbacks);
-```
-
-</details>
-
-
----
-
-
 @file **../src/App/Model/ContentFilterBypassHelper.php**
 
 ### osec_event_the_content_strict_filters <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -3234,13 +3195,46 @@ add_filter('osec_get_events_for_week_alter', $days_events $time $filter);
 
 @file **../src/App/View/Event/EventAvatarView.php**
 
-### osec_avatar_valid_callbacks <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_avatar_fallback_order <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter the order in which media or url fallbacks are evaluated.
+
+```php
+add_filter('osec_avatar_fallback_order', $fallback_order);
+```
+
+#### Parameters
+
+
+ - **$fallback_order** <span style="color:crimson"> </span> Osec default fallback order.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter the order in which media or url fallbacks are evaluated.
+ *
+ * @param  array  $fallback_order  Osec default fallback order.
+ *
+ *
+ * @file src/App/View/Event/EventAvatarView.php
+ */
+add_filter('osec_avatar_fallback_order', $fallback_order);
+```
+
+</details>
+
+
+### osec_avatar_valid_media_callbacks <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter or add to availabe callback to get Event (avatar) image.
 
 ```php
-add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
+add_filter('osec_avatar_valid_media_callbacks', $default_fallbacks);
 ```
 
 #### Parameters
@@ -3263,7 +3257,74 @@ add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
  *
  * @file src/App/View/Event/EventAvatarView.php
  */
-add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
+add_filter('osec_avatar_valid_media_callbacks', $default_fallbacks);
+```
+
+</details>
+
+
+### osec_avatar_valid_url_callbacks <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter or add to availabe callback to get Event (avatar) image.
+
+```php
+add_filter('osec_avatar_valid_url_callbacks', $default_url_fallbacks);
+```
+
+#### Parameters
+
+
+ - **$default_url_fallbacks** <span style="color:crimson"> </span> Osec core provided image fallbacks.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter or add to availabe callback to get Event (avatar) image.
+ *
+ * @param  array  $default_url_fallbacks  Osec core provided image fallbacks.
+ *
+ * @see $this->get_event_avatar_url(). This allows to configure
+ * the order in which image will be used.
+ *
+ * @file src/App/View/Event/EventAvatarView.php
+ */
+add_filter('osec_avatar_valid_url_callbacks', $default_url_fallbacks);
+```
+
+</details>
+
+
+### osec_default_avatar_image_path <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter default fallback image.
+
+```php
+add_filter('osec_default_avatar_image_path', $file);
+```
+
+#### Parameters
+
+
+ - **$file** <span style="color:crimson"> string</span> Absolute file path
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter default fallback image.
+ *
+ * @param  string $file Absolute file path
+ *
+ * @file src/App/View/Event/EventAvatarView.php
+ */
+add_filter('osec_default_avatar_image_path', $file);
 ```
 
 </details>
@@ -6164,45 +6225,6 @@ add_filter('osec_backend_js', $identifier);
 ---
 
 
-@file **../src/App/Model/AvatarFallbackModel.php**
-
-### osec_avatar_fallbacks <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter avatar image fallbach suggestions.
-
-```php
-add_filter('osec_avatar_fallbacks', $fallbacks);
-```
-
-#### Parameters
-
-
- - **$fallbacks** <span style="color:crimson"> </span> Avatar image fallback
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter avatar image fallbach suggestions.
- *
- * @since 1.0
- *
- * @param  array  $fallbacks  Avatar image fallback
- *
- * @file src/App/Model/AvatarFallbackModel.php
- */
-add_filter('osec_avatar_fallbacks', $fallbacks);
-```
-
-</details>
-
-
----
-
-
 @file **../src/App/Model/ContentFilterBypassHelper.php**
 
 ### osec_event_the_content_strict_filters <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -8247,13 +8269,46 @@ add_filter('osec_get_events_for_week_alter', $days_events $time $filter);
 
 @file **../src/App/View/Event/EventAvatarView.php**
 
-### osec_avatar_valid_callbacks <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_avatar_fallback_order <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter the order in which media or url fallbacks are evaluated.
+
+```php
+add_filter('osec_avatar_fallback_order', $fallback_order);
+```
+
+#### Parameters
+
+
+ - **$fallback_order** <span style="color:crimson"> </span> Osec default fallback order.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter the order in which media or url fallbacks are evaluated.
+ *
+ * @param  array  $fallback_order  Osec default fallback order.
+ *
+ *
+ * @file src/App/View/Event/EventAvatarView.php
+ */
+add_filter('osec_avatar_fallback_order', $fallback_order);
+```
+
+</details>
+
+
+### osec_avatar_valid_media_callbacks <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
 Alter or add to availabe callback to get Event (avatar) image.
 
 ```php
-add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
+add_filter('osec_avatar_valid_media_callbacks', $default_fallbacks);
 ```
 
 #### Parameters
@@ -8276,7 +8331,74 @@ add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
  *
  * @file src/App/View/Event/EventAvatarView.php
  */
-add_filter('osec_avatar_valid_callbacks', $default_fallbacks);
+add_filter('osec_avatar_valid_media_callbacks', $default_fallbacks);
+```
+
+</details>
+
+
+### osec_avatar_valid_url_callbacks <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter or add to availabe callback to get Event (avatar) image.
+
+```php
+add_filter('osec_avatar_valid_url_callbacks', $default_url_fallbacks);
+```
+
+#### Parameters
+
+
+ - **$default_url_fallbacks** <span style="color:crimson"> </span> Osec core provided image fallbacks.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter or add to availabe callback to get Event (avatar) image.
+ *
+ * @param  array  $default_url_fallbacks  Osec core provided image fallbacks.
+ *
+ * @see $this->get_event_avatar_url(). This allows to configure
+ * the order in which image will be used.
+ *
+ * @file src/App/View/Event/EventAvatarView.php
+ */
+add_filter('osec_avatar_valid_url_callbacks', $default_url_fallbacks);
+```
+
+</details>
+
+
+### osec_default_avatar_image_path <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter default fallback image.
+
+```php
+add_filter('osec_default_avatar_image_path', $file);
+```
+
+#### Parameters
+
+
+ - **$file** <span style="color:crimson"> string</span> Absolute file path
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter default fallback image.
+ *
+ * @param  string $file Absolute file path
+ *
+ * @file src/App/View/Event/EventAvatarView.php
+ */
+add_filter('osec_default_avatar_image_path', $file);
 ```
 
 </details>

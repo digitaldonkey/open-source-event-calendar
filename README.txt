@@ -13,8 +13,8 @@ Author URI: https://github.com/digitaldonkey
 Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 Text Domain: open-source-event-calendar
-Stable Tag: 1.1.8
-Version: 1.1.8
+Stable Tag: 1.1.9
+Version: 1.1.9
 
 An event calendar with native iCal / ICS import and export
 
@@ -211,6 +211,10 @@ I may also provide paid support.
 - deploy development releases to WP.org
 - Fixed ICS feed not refreshing #43
 - Allow to select a post status for feed imports
+- add blueprint
+- Fix some Url/ampersans issues around edit instance
+-  fix Aspect ratio in Event Popups
+- Rework image fallback mechanisms. Add option for default fallback image
 
 = 1.1.8 = 
 - Fix Location, GEO and Contact - Events from ICS feed lose their location #40
