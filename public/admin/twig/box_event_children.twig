@@ -2,7 +2,7 @@
     {% if parent %}
         <a href="{{ parent.view_url }}">{{ parent.title }}</a>
         ({{ parent.time }})
-        <a href="{{ parent.edit_url }}">{{ action }}</a>
+        <a href="{{ parent.edit_url|raw }}">{{ action }}</a>
     {% endif %}
 
     {% if children %}
@@ -11,7 +11,7 @@
                 <li>
                     <a href="{{ item.view_url }}">{{ item.title }}</a>
                     ({{ item.time }})
-                    <a href="{{ item.edit_url }}">{{ action }}</a>
+                    <a href="{{ item.edit_url|raw }}">{{ action }}</a>
                 </li>
             {% endfor %}
         </ul>
