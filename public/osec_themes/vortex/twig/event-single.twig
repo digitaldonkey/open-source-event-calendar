@@ -69,7 +69,7 @@
                     </div>
                 {% endif %}
 
-                {% if cost is not empty or is_free_event %}
+                {% if not hide_cost and (cost is not empty or is_free_event) %}
                     <div class="ai1ec-cost ai1ec-row">
                         <div class="ai1ec-field-label {{ col1 }}">{{ text_cost }}</div>
                         <div class="ai1ec-field-value {{ col2 }}">

@@ -218,6 +218,7 @@ class EventSingleView extends OsecBaseClass
             'start'                  => $event->get('start'),
             'end'                    => $event->get('end'),
             'instance_id'            => $event->get('instance_id'),
+            'hide_cost'              => $event->get('hide_cost'),
         ];
 
         /**

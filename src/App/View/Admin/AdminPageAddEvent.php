@@ -413,6 +413,7 @@ class AdminPageAddEvent extends OsecBaseClass
             'is_free_event_label' => esc_html__('Free event', 'open-source-event-calendar'),
             'hide_cost_label' => esc_html__('Hide event cost', 'open-source-event-calendar'),
             'is_free' => $event->is_free(),
+            'hide_cost' => $event->get('hide_cost'),
             'ticket_url_label' => (!$event->is_free()) ?
                 esc_html__('Buy Tickets URL:', 'open-source-event-calendar')
                 : esc_html__('Registration URL:', 'open-source-event-calendar'),

@@ -38,7 +38,7 @@
                             </dd>
                         {% endif %}
 
-                        {% if cost is not empty or is_free_event %}
+                        {% if not hide_cost and (cost is not empty or is_free_event) %}
                             <dt class="label label--cost">{{ text_cost }}</dt>
                             <dd class="cost" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
                                 {% if is_free_event %}
