@@ -151,6 +151,7 @@ class DatabaseSchema extends OsecBaseClass
 					keep_tags_categories tinyint(1) NOT NULL DEFAULT '0',
 					keep_old_events tinyint(1) NOT NULL DEFAULT '0',
 					import_timezone tinyint(1) NOT NULL DEFAULT '0',
+					hide_cost tinyint(1) NOT NULL DEFAULT '1',
 					PRIMARY KEY  (feed_id),
 					UNIQUE KEY feed (feed_url)
 					) CHARACTER SET utf8;";

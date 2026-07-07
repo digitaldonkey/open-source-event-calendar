@@ -402,6 +402,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 'venue'            => $venue,
                 'address'          => $address,
                 'cost'             => $cost,
+                'hide_cost'        => (bool) $feed->hide_cost,
                 'ticket_url'       => $ticket_url,
                 'show_map'         => $event_do_show_map,
                 'ical_feed_url'    => $feed->feed_url,

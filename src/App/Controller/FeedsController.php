@@ -141,6 +141,7 @@ class FeedsController extends OsecBaseClass
                 ),
                 'cron_freq_label'  => esc_html__('Check for new events', 'open-source-event-calendar'),
                 'allow_comments_label' => esc_html__('Allow comments on imported events', 'open-source-event-calendar'),
+                'hide_cost_label' => esc_html__('Hide cost/free on imported events', 'open-source-event-calendar'),
                 'enable_maps_label' => esc_html__('Show map on imported events', 'open-source-event-calendar'),
                 'feed_import_timezone_label' => esc_html__(
                     'Assign default time zone to events in UTC',
@@ -211,6 +212,7 @@ class FeedsController extends OsecBaseClass
             'keep_old_events',
             'import_timezone',
             'import_post_status',
+            'hide_cost',
         ]);
 
         /**
@@ -296,6 +298,7 @@ class FeedsController extends OsecBaseClass
             'keep_tags_categories' => (int) $entry['keep_tags_categories'],
             'keep_old_events'      => (int) $entry['keep_old_events'],
             'import_post_status'   => (string) $entry['import_post_status'],
+            'hide_cost'         => (int) $entry['hide_cost'],
             'feed_import_timezone' => (int) $entry['import_timezone'],
             /**
              * Add Html content above feeds options
@@ -883,6 +886,7 @@ class FeedsController extends OsecBaseClass
                 'feed_category'        => $feed_categories,
                 'feed_tags'            => RequestParser::get_param('feed_tags', ''),
                 // Booleans are integers in DB.
+                'hide_cost'            => (int) RequestParser::get_param('hide_cost', 1),
                 'comments_enabled'     => (int) RequestParser::get_param('comments_enabled', 0),
                 'map_display_enabled'  => (int) RequestParser::get_param('map_display_enabled', 0),
                 'keep_tags_categories' => (int) RequestParser::get_param('keep_tags_categories', 0),
