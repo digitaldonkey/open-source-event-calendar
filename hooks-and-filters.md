@@ -1556,6 +1556,49 @@ do_action('osec_event_saved', $post_id $event $update);
 </details>
 
 
+### osec_sanitize_unserialize_cost_regex <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter security regex used to sanitize values before unserialize when OSEC_LEGACY_COST_SERIALIZED is active. Shoud allow DB records like:
+
+```php
+add_filter('osec_sanitize_unserialize_cost_regex', $regex);
+```
+
+#### Description
+
+
+a:2:{s:4:"cost";s:6:"999€";s:7:"is_free";b:0;}
+
+#### Parameters
+
+
+ - **$regex** <span style="color:crimson"> </span> String Regex.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter security regex used to sanitize values before
+ * unserialize when OSEC_LEGACY_COST_SERIALIZED is active.
+ * Shoud allow DB records like:
+ *
+ *   a:2:{s:4:"cost";s:6:"999€";s:7:"is_free";b:0;}
+ *
+ * @since 1.1.10
+ *
+ * @param  array  $regex  String Regex.
+ *
+ * @file src/App/Model/PostTypeEvent/Event.php
+ */
+add_filter('osec_sanitize_unserialize_cost_regex', $regex);
+```
+
+</details>
+
+
 ---
 
 
@@ -6625,6 +6668,49 @@ do_action('osec_event_saved', $post_id $event $update);
  * @file src/App/Model/PostTypeEvent/Event.php
  */
 do_action('osec_event_saved', $post_id $event $update);
+```
+
+</details>
+
+
+### osec_sanitize_unserialize_cost_regex <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter security regex used to sanitize values before unserialize when OSEC_LEGACY_COST_SERIALIZED is active. Shoud allow DB records like:
+
+```php
+add_filter('osec_sanitize_unserialize_cost_regex', $regex);
+```
+
+#### Description
+
+
+a:2:{s:4:"cost";s:6:"999€";s:7:"is_free";b:0;}
+
+#### Parameters
+
+
+ - **$regex** <span style="color:crimson"> </span> String Regex.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter security regex used to sanitize values before
+ * unserialize when OSEC_LEGACY_COST_SERIALIZED is active.
+ * Shoud allow DB records like:
+ *
+ *   a:2:{s:4:"cost";s:6:"999€";s:7:"is_free";b:0;}
+ *
+ * @since 1.1.10
+ *
+ * @param  array  $regex  String Regex.
+ *
+ * @file src/App/Model/PostTypeEvent/Event.php
+ */
+add_filter('osec_sanitize_unserialize_cost_regex', $regex);
 ```
 
 </details>

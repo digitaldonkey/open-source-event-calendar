@@ -507,6 +507,17 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         );
     }
 
+    //
+    // Fallback on serialized cost format.
+    //
+    // All in one used php serialize to store the cost fields in DB.
+    // This has been migrated to Json for security considerations.
+    // Enabling OSEC_LEGACY_COST_SERIALIZED will support the old data
+    // format.
+    //
+    if (! defined('OSEC_LEGACY_COST_SERIALIZED')) {
+        define('OSEC_LEGACY_COST_SERIALIZED', false);
+    }
     // Defines if backward (<= 2.1.5) theme compatibility is enabled or not.
     if (defined('AI1EC_THEME_COMPATIBILITY_FER')) {
         throw new Exception('Backward compatibility to ali1ec (<= 2.1.5) is not supported.');

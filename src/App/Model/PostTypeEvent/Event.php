@@ -1010,7 +1010,7 @@ class Event extends OsecBaseClass
      */
     protected function handlePropertyConstruct_cost(string $value)
     {
-        $cost    = '';
+        $cost    = null;
         $is_free = true;
         $hide_cost = false;
 
@@ -1020,7 +1020,36 @@ class Event extends OsecBaseClass
             $is_free   = (bool)$data['is_free'];
             $cost      = $data['cost'];
             $hide_cost = isset($data['hide_cost']) ? $data['hide_cost'] : false;
-        } else {
+        } elseif (OSEC_LEGACY_COST_SERIALIZED) {
+            // Serialized array requirements and hopefully all currency symbols.
+            $regex = '/^[a-zA-Z\d\s\-;":{}_€$¢£¥ƒ₠₡₢₣₤₥₦₧₨₩₪₫₭₮₯₰₱₲₳₴₵₶₷₸₹₺₻₼₽₾₿$]*$/';
+            /**
+             * Alter security regex used to sanitize values before
+             * unserialize when OSEC_LEGACY_COST_SERIALIZED is active.
+             * Shoud allow DB records like:
+             *
+             *   a:2:{s:4:"cost";s:6:"999€";s:7:"is_free";b:0;}
+             *
+             * @since 1.1.10
+             *
+             * @param  array  $regex  String Regex.
+             */
+            $regex = apply_filters('osec_sanitize_unserialize_cost_regex', $regex);
+            if (preg_match($regex, $value)) {
+                // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+                $data = unserialize($value, ['allowed_classes' => false]);
+            } else {
+                // Invalid input
+                throw new Exception(esc_html('Invalid serialized data.'));
+            }
+            if (is_array($data)) {
+                $cost = isset($data['cost']) ? $data['cost'] : '';
+                if ($cost) {
+                    $is_free = false;
+                }
+            }
+        }
+        if (is_null($cost)) {
             // Plain value submitted.
             $cost = sanitize_text_field($value);
             if ($cost) {
