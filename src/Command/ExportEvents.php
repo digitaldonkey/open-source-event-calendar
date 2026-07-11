@@ -128,7 +128,7 @@ class ExportEvents extends CommandAbstract
         $export_controller = new ImportExportController($this->app, ['ics'], $params);
 
         $args['events'] = $this->unique_events(
-            $search->get_events_between($start, $end, $filter)
+            $search->get_events_between($start, $end, $filter, true)
         );
         $ics            = $export_controller->export_events('ics', $args);
 
