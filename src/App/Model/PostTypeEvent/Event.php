@@ -1022,7 +1022,7 @@ class Event extends OsecBaseClass
             $hide_cost = isset($data['hide_cost']) ? $data['hide_cost'] : false;
         } elseif (OSEC_LEGACY_COST_SERIALIZED) {
             // Serialized array requirements and hopefully all currency symbols.
-            $regex = '/^[a-zA-Z\d\s\-;":{}_€$¢£¥ƒ₠₡₢₣₤₥₦₧₨₩₪₫₭₮₯₰₱₲₳₴₵₶₷₸₹₺₻₼₽₾₿$]*$/';
+            $regex = '/^[a-zA-Z\d\s\-,;":{}_€$¢£¥ƒ₠₡₢₣₤₥₦₧₨₩₪₫₭₮₯₰₱₲₳₴₵₶₷₸₹₺₻₼₽₾₿$]*$/';
             /**
              * Alter security regex used to sanitize values before
              * unserialize when OSEC_LEGACY_COST_SERIALIZED is active.
