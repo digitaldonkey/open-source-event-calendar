@@ -1037,7 +1037,7 @@ class Event extends OsecBaseClass
             $regex = apply_filters('osec_sanitize_unserialize_cost_regex', $regex);
             if (preg_match($regex, $value)) {
                 // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
-                $data = unserialize($value, ['allowed_classes' => false]);
+                $data = unserialize(trim($value), ['allowed_classes' => false]);
             } else {
                 // Invalid input
                 throw new Exception(esc_html('Invalid serialized data.'));
