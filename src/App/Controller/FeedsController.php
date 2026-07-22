@@ -352,7 +352,7 @@ class FeedsController extends OsecBaseClass
             $feed_id = $this->get_request_params('feed_id');
         }
         $cron_name = $this->importLockName($feed_id);
-        $data    = [
+        $data = [
             'data' => [
                 'feed_id'  => $feed_id,
                 'error'   => true,

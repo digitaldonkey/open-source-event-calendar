@@ -70,6 +70,19 @@ class AdminPageAllEvents extends OsecBaseClass
                 10,
                 2
             );
+
+            /**
+             * Autosaving Event Data does not currently work.
+             * Only post data is saved.
+             * If editing a Event Instance autosave is disabled when calling get_instance_id().
+             * EventEditing->save_post() is not receiving Event Data.
+             */
+            add_action('admin_enqueue_scripts', function () {
+                $type = get_post_type();
+                if ($type && $type === OSEC_POST_TYPE) {
+                    wp_dequeue_script('autosave');
+                }
+            });
         }
     }
 

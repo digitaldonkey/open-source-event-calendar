@@ -95,16 +95,3 @@ if (defined('WP_CLI') && WP_CLI) {
     require_once __DIR__ . '/src/WpCli/MakeReadme.php';
     WP_CLI::add_command('osec', '\Osec\WpCli\MakeReadme');
 }
-
-/**
- * Autosaving Event Data does not currently work.
- * Only post data is saved.
- * If editing a Event Instance autosave is disabled when calling get_instance_id().
- * EventEditing->save_post() is not receiving Event Data.
- */
-add_action('admin_enqueue_scripts', function () {
-    $type = get_post_type();
-    if ($type && $type === OSEC_POST_TYPE) {
-        wp_dequeue_script('autosave');
-    }
-});
