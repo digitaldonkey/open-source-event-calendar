@@ -206,6 +206,12 @@ I may also provide paid support.
 
 == Changelog ==
 
+= 1.1.10 = 
+- Include ongoing events in ical export #47
+- Display hide cost, enable to hide cost when importing events via feed #42
+- Fix double escaped Urls in some links
+- Introduce OSEC_LEGACY_COST_SERIALIZED and to support fallback on Ai1ec serialized DB cost format #46
+
 = 1.1.9 =
 - Reword Subscribe button text  on single, fix subscribe buttons display and JS loading
 - deploy development releases to WP.org
