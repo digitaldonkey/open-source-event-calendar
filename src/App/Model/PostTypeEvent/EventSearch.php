@@ -130,7 +130,7 @@ class EventSearch extends OsecBaseClass
             ->get_wpml_table_where();
 
         $filter_date_clause = ($page_offset >= 0)
-            ? 'i.end >= %d '
+            ? 'i.end > %d '
             : 'i.start < %d ';
         $order_direction    = ($page_offset >= 0) ? 'ASC' : 'DESC';
         if (false !== $last_day) {
