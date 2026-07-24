@@ -1395,7 +1395,22 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 if ($k === 'BYDAY') {
                     $v = [];
                     foreach ($exploded as $day) {
-                        $v[] = ['DAY' => $day];
+                        // Handle intervals
+                        if (! ctype_alpha($day)) {
+                            $matches = [];
+                            preg_match(
+                                '/^(?<interval>-?[0-9]){0,1}(?<day>[a-zA-Z]{2})$/',
+                                $day,
+                                $matches
+                            );
+                            if (isset($matches['interval']) && is_int($matches['interval'])) {
+                                $v['INTERVAL'] = (int) $matches['interval'];
+                            }
+                            $v[] = ['DAY' => $matches['day']];
+                        } else {
+                            // No interval.
+                            $v[] = ['DAY' => $day];
+                        }
                     }
                 } else {
                     $v = $exploded;
