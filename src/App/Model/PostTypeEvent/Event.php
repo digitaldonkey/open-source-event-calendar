@@ -1018,7 +1018,7 @@ class Event extends OsecBaseClass
         if (JsonHelper::isValidJson($value)) {
             $data      = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
             $is_free   = (bool)$data['is_free'];
-            $cost      = $data['cost'];
+            $cost      = is_null($data['cost']) ? '' : $data['cost'];
             $hide_cost = isset($data['hide_cost']) ? $data['hide_cost'] : false;
         } elseif (OSEC_LEGACY_COST_SERIALIZED) {
             // Serialized array requirements and hopefully all currency symbols.
