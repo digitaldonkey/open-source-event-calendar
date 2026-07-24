@@ -1,3 +1,6 @@
+= 1.1.11 =
+Fix: Json displayed instead of coast #52
+
 = 1.1.10 = 
 - Include ongoing events in ical export #47
 - Display hide cost, enable to hide cost when importing events via feed #42
