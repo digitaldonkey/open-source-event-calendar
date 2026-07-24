@@ -160,12 +160,21 @@ class EventAvatarView extends OsecBaseClass
 
     public function get_default_avatar_media_id(): ?int
     {
+        // Enabled settings?
+        if (
+            !$this->app->settings->get('featured_image_fallback', false)
+            || !$this->app->settings->get('featured_image_fallback_to_default', false)) {
+            return null;
+        }
+        // Get saved media.
         $media_id = $this->app->options->get('osec_falllback_media', null);
 
-        // Ensure validity.
-        // Maybe cache transient?
-        $media_id = is_string(get_post_status($media_id)) ? (int) $media_id : null;
+        // Ensure valid media and publish status.
+        if (is_int($media_id) && $media_id > 0) {
+            $media_id = is_string(get_post_status($media_id)) ? (int) $media_id : null;
+        }
 
+        // Store media item and store id for fallback image.
         if (is_null($media_id)) {
             $src_file_path = $this->get_default_avatar_image_path();
             $filename = basename($src_file_path);
