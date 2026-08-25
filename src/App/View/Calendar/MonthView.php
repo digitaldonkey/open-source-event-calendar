@@ -11,6 +11,7 @@ use Osec\Exception\BootstrapException;
 use Osec\Exception\TimezoneException;
 use Osec\Http\Request\Request;
 use Osec\Settings\HtmlFactory;
+use Osec\Theme\ThemeLoader;
 use Osec\Twig\TwigExtension;
 
 /**
@@ -82,13 +83,29 @@ class MonthView extends AbstractView
             'pagination_links'         => $pagination_links,
         ];
 
+        // Add the existing OSEC print button to month view when enabled in settings.
+        // OSEC already wires #ai1ec-print-button to its built-in print handler.
+        $after_pagination = '';
+        if ($this->app->settings->get('display_print_button')) {
+            $button_args      = [
+                'text_collapse_all'    => __('Collapse All', 'open-source-event-calendar'),
+                'text_expand_all'      => __('Expand All', 'open-source-event-calendar'),
+                'no_toggle'            => true,
+                'display_print_button' => true,
+            ];
+            $after_pagination = ThemeLoader::factory($this->app)
+                ->get_file('agenda-buttons.twig', $button_args, false)
+                ->get_content();
+        }
+
         // Add navigation if requested.
         $view_args['navigation'] = $this->getNavigation(
             [
                 'display_date_navigation' => $args['display_date_navigation'],
-                'pagination_links' => $pagination_links,
-                'views_dropdown'   => $args['views_dropdown'],
-                'below_toolbar'    => $this->getBelowToolbarHtml($this->get_name(), $view_args),
+                'pagination_links'        => $pagination_links,
+                'views_dropdown'          => $args['views_dropdown'],
+                'after_pagination'        => $after_pagination,
+                'below_toolbar'           => $this->getBelowToolbarHtml($this->get_name(), $view_args),
             ]
         );
 
