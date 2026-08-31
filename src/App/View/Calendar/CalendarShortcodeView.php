@@ -93,6 +93,10 @@ class CalendarShortcodeView extends OsecBaseClass
             if ( ! isset($atts[$att_name])) {
                 continue;
             }
+            if ('events_limit' === $att_name) {
+                // Not a taxonomy. Value is read directly from $atts when the query is built.
+                continue;
+            }
             $raw_values = explode(',', (string)$atts[$att_name]);
             foreach ($raw_values as $argument) {
                 if ('post_id' === $att_name) {
@@ -114,12 +118,33 @@ class CalendarShortcodeView extends OsecBaseClass
                                 break;
                             }
                         }
-                        unset($search_val, $record, $field);
+                        unset($record, $field);
                         if (false === $argument) {
+                            _doing_it_wrong(
+                                __METHOD__,
+                                esc_html(sprintf(
+                                    '[%s] shortcode: %s "%s" does not match any %s term. The filter value was ignored.',
+                                    OSEC_SHORTCODE,
+                                    $att_name,
+                                    $search_val,
+                                    $type
+                                )),
+                                'OSEC 1.1.15'
+                            );
                             continue;
                         }
                         $argument = (int)$argument->term_id;
                     } elseif ((int) $argument <= 0) {
+                        _doing_it_wrong(
+                            __METHOD__,
+                            esc_html(sprintf(
+                                '[%s] shortcode: %s "%s" is not a valid term id. The filter value was ignored.',
+                                OSEC_SHORTCODE,
+                                $att_name,
+                                $argument
+                            )),
+                            'OSEC 1.1.15'
+                        );
                         continue;
                     }
                     ${'_' . $type}[] = $argument;
