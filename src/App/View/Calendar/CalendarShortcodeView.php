@@ -77,8 +77,8 @@ class CalendarShortcodeView extends OsecBaseClass
                 ) {
                     continue;
                 }
-                ${'_' . $matches[1] . '_ids'} = [];
-                $custom_taxonomies[]          = $matches[1];
+                ${'_' . $matches[1]} = [];
+                $custom_taxonomies[] = $matches[1];
 
                 if ( ! isset($mappings[$matches[1] . '_id'])) {
                     $mappings[$matches[1] . '_id'] = $matches[1];
