@@ -2,7 +2,7 @@
 
 > A fully open-source WordPress event calendar with native iCal / ICS import and export.
 
-![WordPress](https://img.shields.io/badge/WordPress-6.6%2B-blue)
+![WordPress](https://img.shields.io/badge/WordPress-6.7%2B-blue)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-8892BF)
 ![License](https://img.shields.io/badge/License-GPL--3.0--or--later-green)
 
