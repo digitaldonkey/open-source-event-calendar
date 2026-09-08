@@ -2,6 +2,7 @@
 cache/*
 /vendor/
 /hookster_markdown
+.claude/settings.local.json
 
 # From Block Editor gitignore.
 *.log
