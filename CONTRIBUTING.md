@@ -246,7 +246,7 @@ npm run build-twig-frontend
 * full test matrix
 * creates github dev release
 * Creates github tag release if tagged
-* Creates wordpress org tag release if tagged (soon).
+* Creates wordpress org tag release if tagged.
 * branch name derives from history - sorry.
 * Contains latest bugfixes
 
@@ -289,10 +289,10 @@ SELECT id, post_id, `start`, DATE_FORMAT(FROM_UNIXTIME(`start`), '%Y-%m-%d %H:%i
 
 # Feeds
 
-Feeds got a huge update. To improve RFC5445 support `kigkonsult/icalcreator` was updated and
+Feeds got a huge update comparet to all-in-one: To improve RFC5445 support `kigkonsult/icalcreator` was updated and
 rlanvin/php-rrule added. 
 
-We have test feeds in tests/Unit/App/Model/ical_feeds/*.ics 
+There are test feeds in tests/Unit/App/Model/ical_feeds/*.ics 
 
 You can "Subscribe" to them for testing using localhost. e.g:
 
