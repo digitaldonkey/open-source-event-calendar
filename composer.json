@@ -13,7 +13,7 @@
         "php": ">=8.2",
         "twig/twig": "^3.23",
         "wikimedia/less.php": "^5.5",
-        "rlanvin/php-rrule": "^2.6"
+        "rlanvin/php-rrule": "^3.0"
     },
     "license": "GPL-3.0-or-later",
     "autoload": {
@@ -46,13 +46,13 @@
         "phpro/grumphp": "^2.18",
         "phpunit/phpunit": "^9.6",
         "roave/security-advisories": "dev-latest",
-        "symfony/debug-bundle": "^7.3",
+        "symfony/debug-bundle": "8.1.0",
         "wp-cli/wp-cli-bundle": "^2.12",
         "yoast/phpunit-polyfills": "^4.0.0",
         "phpcompatibility/php-compatibility": "*",
         "phpcsstandards/phpcsextra": "*",
         "phpcsstandards/phpcsutils": "*",
-        "wpackagist-plugin/plugin-check": "^1.8",
+        "wpackagist-plugin/plugin-check": "2.1.0",
         "wp-coding-standards/wpcs": "^3.3"
     },
     "config": {
