@@ -10,7 +10,7 @@
         "ext-json": "*",
         "kigkonsult/icalcreator": "^2.41",
         "louis1021/sg-i-calendar": "dev-master",
-        "php": ">=8.2",
+        "php": "~8.2",
         "twig/twig": "^3.23",
         "wikimedia/less.php": "^5.5",
         "rlanvin/php-rrule": "^3.0"
@@ -45,6 +45,7 @@
         "phpcompatibility/phpcompatibility-wp": "^3.0.0@dev",
         "phpro/grumphp": "^2.18",
         "doctrine/collections": "^2.6",
+        "doctrine/instantiator": "^1.5",
         "phpunit/phpunit": "^9.6",
         "roave/security-advisories": "dev-latest",
         "symfony/debug-bundle": "8.1.0",
