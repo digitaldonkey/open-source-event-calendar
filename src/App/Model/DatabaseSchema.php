@@ -58,6 +58,12 @@ class DatabaseSchema extends OsecBaseClass
                  */
                 apply_filters('osec_perform_scheme_update', $do_schema_update)
                 && $this->apply_delta($schema_sql)
+                // TODO: dbDelta() returns an empty array (falsy) when the schema already
+                // matches, which apply_delta() casts to false. That makes this throw even
+                // when nothing is actually wrong (e.g. osec_db_version option missing/reset
+                // while the tables already match, as happens on a reinstalled WP test DB
+                // with leftover plugin tables). Needs a real "did it fail" check instead of
+                // relying on dbDelta()'s return value being non-empty.
             ) {
                 $this->app->options->set('osec_db_version', $version, true);
             } else {
