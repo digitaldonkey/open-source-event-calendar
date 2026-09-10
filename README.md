@@ -101,7 +101,7 @@ On the long run it's planned to have a Rest API to allow the calendar being rend
 
 ## Requirements
 
-- WordPress: 6.6 or newer
+- WordPress: 6.7 or newer
 - PHP:
   - PHP 8.2+ required for development
   - PHP 8.1 may work for production builds when installed with `composer install --no-dev`
