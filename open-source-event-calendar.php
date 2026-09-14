@@ -94,4 +94,7 @@ register_deactivation_hook(
 if (defined('WP_CLI') && WP_CLI) {
     require_once __DIR__ . '/src/WpCli/MakeReadme.php';
     WP_CLI::add_command('osec', '\Osec\WpCli\MakeReadme');
+
+    require_once __DIR__ . '/src/WpCli/PrepareRelease.php';
+    WP_CLI::add_command('osec', '\Osec\WpCli\PrepareRelease');
 }
