@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Calendar;
 
-use Osec\App\Controller\StrictContentFilterController;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\EventSearch;
@@ -209,7 +208,6 @@ class WeekView extends AbstractView
         // Split up events on a per-day basis
         $all_events      = [];
         $this->daysCache = new CacheMemory($this->app);
-        StrictContentFilterController::factory($this->app)->clear_the_content_filters();
 
         // Iterate over found Events.
         foreach ($week_events as $nthEvent => $evt) {
@@ -256,8 +254,6 @@ class WeekView extends AbstractView
                 }
             }
         }
-        StrictContentFilterController::factory($this->app)
-                                     ->restore_the_content_filters();
         // This will store the returned array
         $days = [];
         $now  = new DT('now', $start_of_week->get_timezone());

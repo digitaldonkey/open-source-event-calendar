@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Calendar;
 
-use Osec\App\Controller\StrictContentFilterController;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\Event;
@@ -189,8 +188,6 @@ class OnedayView extends AbstractView
 
         $day_start_ts = $loc_start_time->format();
         $day_end_ts   = $loc_end_time->format();
-        StrictContentFilterController::factory($this->app)
-                                     ->clear_the_content_filters();
         foreach ($day_events as $evt) {
             [$evt_start, $evt_end] = $this->getView_specific_timestamps($evt);
 
@@ -219,8 +216,6 @@ class OnedayView extends AbstractView
                 }
             }
         }
-        StrictContentFilterController::factory($this->app)
-                                     ->restore_the_content_filters();
 
         // This will store the returned array
         $days = [];

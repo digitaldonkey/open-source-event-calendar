@@ -339,11 +339,7 @@ class EventSingleView extends OsecBaseClass
         $theContent = apply_filters(
             'osec_the_content',
             wpautop(
-                apply_filters(
-                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                    'the_content',
-                    $event->get('post')->post_content
-                )
+                EventContentView::factory($this->app)->get_filtered_content($event->get('post'), false)
             )
         );
         $args = [

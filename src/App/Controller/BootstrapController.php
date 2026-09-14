@@ -277,6 +277,10 @@ class BootstrapController
         add_shortcode(
             OSEC_SHORTCODE,
             function ($atts) use ($app) {
+                if (EventContentView::factory($app)->is_filtering_content()) {
+                    // No calendars inside event content, see EventContentView::is_filtering_content().
+                    return '';
+                }
                 if ($this->app->settings->get('feature_shortcodes')) {
                     $this->request::set_current_page(get_queried_object_id());
                     return wp_kses(

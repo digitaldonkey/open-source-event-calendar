@@ -8,13 +8,13 @@ use Kigkonsult\Icalcreator\CalendarComponent;
 use Kigkonsult\Icalcreator\IcalInterface;
 use Kigkonsult\Icalcreator\Vcalendar;
 use Kigkonsult\Icalcreator\Vevent;
-use Osec\App\Controller\StrictContentFilterController;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\Model\PostTypeEvent\EventTaxonomy;
 use Osec\App\View\Event\EventAvatarView;
+use Osec\App\View\Event\EventContentView;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
@@ -990,8 +990,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $post_ids[] = $event->get('post_id');
         }
         $this->taxonomyAdapter->prepare_meta_for_ics($post_ids);
-        StrictContentFilterController::factory($this->app)
-                                     ->clear_the_content_filters();
         foreach ($arguments['events'] as $event) {
             $c = $this->insertEventInCalendar(
                 $event,
@@ -1000,8 +998,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $params
             );
         }
-        StrictContentFilterController::factory($this->app)
-                                     ->restore_the_content_filters();
         return ltrim((string)$c->createCalendar());
     }
 
@@ -1064,11 +1060,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
 
         $content = apply_filters(
             'osec_the_content',
-            apply_filters(
-                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                'the_content',
-                $event->get('post')->post_content
-            )
+            EventContentView::factory($this->app)->get_filtered_content($event->get('post'))
         );
         $content = str_replace(']]>', ']]&gt;', $content);
         $content = html_entity_decode($content, ENT_QUOTES, 'UTF-8');
