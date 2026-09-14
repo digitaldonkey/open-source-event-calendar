@@ -19,6 +19,14 @@ use Osec\Exception\DatabaseErrorException;
  */
 class DatabaseSchema extends OsecBaseClass
 {
+    private const SCHEMA_UPDATE_LOCK = 'osec_schema_update_lock';
+
+    /**
+     * Transient set after a failed repair, holding the error message. While
+     * present, only privileged requests retry the repair.
+     */
+    public const SCHEMA_UPDATE_BACKOFF = 'osec_schema_update_failed';
+
     protected ?array $schemaDelta;
 
     protected array $prefixes;
@@ -37,17 +45,58 @@ class DatabaseSchema extends OsecBaseClass
     /**
      * Check if the schema is up to date.
      *
-     * @return void
+     * Any request attempts a repair when the schema is outdated, so sites heal
+     * on first traffic after an update (auto-updates, deploys, multisite
+     * subsites). After a failed repair, a backoff blocks retries from
+     * non-privileged requests for a while.
+     *
+     * @param  bool  $force  Ignore the failure backoff (e.g. from plugin
+     *                        activation, where a repair attempt is the
+     *                        deliberate point of the call). Users who can
+     *                        manage options and WP-CLI ignore it as well.
+     *
+     * @return bool True if the tables match the current schema. False if the
+     *              schema is outdated and the repair was skipped for this
+     *              request (failure backoff, lock held or filtered off) -
+     *              OSEC must not run on outdated tables then.
      * @throws DatabaseErrorException
      * @throws ErrorException
      */
-    public function verifySqlSchema()
+    public function verifySqlSchema(bool $force = false): bool
+    {
+        $notifier = DatabaseSchemaFailureNotifier::factory($this->app);
+        try {
+            $ready = $this->updateSchema($force, $notifier);
+        } catch (DatabaseErrorException | ErrorException $error) {
+            $notifier->register(false);
+            throw $error;
+        }
+        $notifier->register($ready);
+
+        return $ready;
+    }
+
+    /**
+     * @see verifySqlSchema()
+     */
+    private function updateSchema(bool $force, DatabaseSchemaFailureNotifier $notifier): bool
     {
         $schema_sql = $this->get_current_db_schema();
         $version    = sha1($schema_sql);
 
         if ($this->app->options->get('osec_db_version') !== $version) {
-            $do_schema_update = true;
+            // A persistently failing repair must not re-run DDL on every
+            // anonymous request, so after a failure only privileged requests
+            // retry until the backoff expires. current_user_can(), not
+            // is_admin(): is_admin() is true for anonymous admin-ajax.php
+            // requests. wp_get_current_user() is pluggable and not loaded yet
+            // when this runs on 'muplugins_loaded' (test bootstrap).
+            $privileged = $force
+                || (function_exists('wp_get_current_user') && current_user_can('manage_options'))
+                || (defined('WP_CLI') && WP_CLI);
+
+            $do_schema_update = $privileged || false === get_transient(self::SCHEMA_UPDATE_BACKOFF);
+
             if (
                 /**
                  * Define if Database schema upgrade should be executed
@@ -56,14 +105,43 @@ class DatabaseSchema extends OsecBaseClass
                  *
                  * @param $do_schema_update
                  */
-                apply_filters('osec_perform_scheme_update', $do_schema_update)
-                && $this->apply_delta($schema_sql)
+                ! apply_filters('osec_perform_scheme_update', $do_schema_update)
             ) {
+                // Deliberately skipped for this request - leave osec_db_version
+                // stale so the next eligible request retries, rather than
+                // treating a deliberate skip as failure.
+                return false;
+            }
+
+            if (get_transient(self::SCHEMA_UPDATE_LOCK)) {
+                // Another concurrent request is already repairing this same
+                // mismatch - skip rather than race it with overlapping DDL; the
+                // next eligible request retries. Best-effort: a small
+                // get/set race window remains, this isn't a hard guarantee.
+                return false;
+            }
+            // Released in `finally`; the TTL only matters if the request dies
+            // mid-repair, and must outlast a slow ALTER on a large table.
+            set_transient(self::SCHEMA_UPDATE_LOCK, true, 5 * MINUTE_IN_SECONDS);
+
+            try {
+                global $wpdb;
+                if (! $this->apply_delta($schema_sql)) {
+                    throw new ErrorException('osec: database schema update failed: ' . $wpdb->last_error);
+                }
                 $this->app->options->set('osec_db_version', $version, true);
-            } else {
-                throw new ErrorException();
+                delete_transient(self::SCHEMA_UPDATE_BACKOFF);
+                $notifier->clearFailure();
+            } catch (DatabaseErrorException | ErrorException $error) {
+                set_transient(self::SCHEMA_UPDATE_BACKOFF, $error->getMessage(), 10 * MINUTE_IN_SECONDS);
+                $notifier->recordFailure($error->getMessage());
+                throw $error;
+            } finally {
+                delete_transient(self::SCHEMA_UPDATE_LOCK);
             }
         }
+
+        return true;
     }
 
     /**
@@ -182,7 +260,28 @@ class DatabaseSchema extends OsecBaseClass
         }
 
         $this->schemaDelta = [];
-        return (bool) dbDelta($this->prepareDelta($query));
+        $changes = dbDelta($this->prepareDelta($query));
+
+        // dbDelta() reports the changes it queued, computed before any query runs -
+        // it never checks whether those queries actually succeeded. An empty result
+        // means nothing needed changing (schema already matches), not a failure.
+        if (empty($changes)) {
+            return true;
+        }
+
+        global $wpdb;
+
+        // $wpdb->last_error (reset by wpdb::query() on every call) only reflects
+        // the LAST query dbDelta() ran. If multiple queries were queued and an
+        // earlier one failed while a later one succeeded, that earlier failure
+        // is masked here. Log every queued change plus the final error state
+        // unconditionally (this only fires when there's actually something to
+        // report - not on every request) so a masked failure is still grep-able
+        // even though the boolean return below can't fully distinguish it.
+        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- deliberate production logging of a rare schema-repair event, not leftover debug code.
+        error_log('osec: dbDelta() changes: ' . wp_json_encode($changes) . '; last_error: ' . $wpdb->last_error);
+
+        return '' === $wpdb->last_error;
     }
 
     /**

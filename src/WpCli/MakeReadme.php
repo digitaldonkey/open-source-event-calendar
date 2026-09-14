@@ -36,10 +36,11 @@ class MakeReadme
      * ## EXAMPLES
      *
      *     wp osec make_readme
+     *     wp osec make_readme --check
      *
      * @when before_wp_load
      */
-    public function make_readme()
+    public function make_readme($args = [], $assoc_args = [])
     {
         try {
             require_once self::PLUGIN_DIR . '/constants.php';
@@ -108,6 +109,17 @@ class MakeReadme
             // Make the file.
             $output_file = trailingslashit(realpath(OSEC_PATH)) . 'README.txt';
             $lines = implode('', $this->lines);
+
+            if (! empty($assoc_args['check'])) {
+                $current = file_exists($output_file) ? file_get_contents($output_file) : '';
+                if ($current === $lines) {
+                    \WP_CLI::success('README.txt is up to date.');
+                } else {
+                    \WP_CLI::error('README.txt is out of date. Run `wp osec make_readme` to fix it.');
+                }
+                return;
+            }
+
             if (file_put_contents($output_file, $lines)) {
                 \WP_CLI::success('Sucessfully created readme file:' . $output_file);
                 if (self::DEBUG) {

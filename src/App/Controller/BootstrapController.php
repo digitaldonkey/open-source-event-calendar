@@ -36,6 +36,7 @@ use Osec\Bootstrap\EnvironmentCheck;
 use Osec\Cache\CacheMemory;
 use Osec\Command\CommandResolver;
 use Osec\Exception\ConstantsNotSetException;
+use Osec\Exception\DatabaseErrorException;
 use Osec\Exception\Exception;
 use Osec\Exception\ScheduleException;
 use Osec\Exception\TimezoneException;
@@ -43,6 +44,7 @@ use Osec\Http\Request\Request;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Request\RequestRedirect;
 use Osec\Theme\ThemeLoader;
+use ErrorException;
 use WP_Post;
 
 /**
@@ -275,6 +277,10 @@ class BootstrapController
         add_shortcode(
             OSEC_SHORTCODE,
             function ($atts) use ($app) {
+                if (EventContentView::factory($app)->is_filtering_content()) {
+                    // No calendars inside event content, see EventContentView::is_filtering_content().
+                    return '';
+                }
                 if ($this->app->settings->get('feature_shortcodes')) {
                     $this->request::set_current_page(get_queried_object_id());
                     return wp_kses(
@@ -494,8 +500,13 @@ class BootstrapController
      * Initialize osec Environment
      *
      * @param  string  $osec_base_dir  Absolute path to this plugin root directory.
+     *
+     * @return static|null Null if the database schema is outdated and could not
+     *                       be repaired in this request (failed or skipped) -
+     *                       OSEC is not bootstrapped, but the rest of the site
+     *                       is unaffected.
      */
-    public static function createApp($osec_base_dir): self
+    public static function createApp($osec_base_dir): ?self
     {
         /* @global $osec_base_url static Url pointing to plugin directory */
         global $osec_base_url;
@@ -522,7 +533,26 @@ class BootstrapController
         /* @global $osec_app App Osec object Registry */
         global $osec_app;
         $osec_app = App::factory();
-        DatabaseSchema::factory($osec_app)->verifySqlSchema();
+
+        try {
+            if (! DatabaseSchema::factory($osec_app)->verifySqlSchema()) {
+                // Outdated tables and no repair this request: don't run on them.
+                return null;
+            }
+        } catch (DatabaseErrorException | ErrorException $error) {
+            // This runs on every 'init' (not just activation), with no
+            // caller-side try/catch - a genuine schema-repair failure must
+            // not fatal every request. Skip bootstrapping OSEC for this
+            // request (the rest of the site is unaffected) rather than
+            // letting the exception propagate. Privileged requests retry
+            // immediately, others after DatabaseSchema's failure backoff.
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- deliberate production logging of a rare schema-repair failure, not leftover debug code.
+            error_log(
+                'osec: schema verification failed, OSEC not bootstrapped for this request: ' . $error->getMessage()
+            );
+
+            return null;
+        }
 
         return new self($osec_app);
     }
@@ -739,20 +769,4 @@ class BootstrapController
         $post = get_post($cal_page);
         Router::factory($this->app)->asset_base($post->post_name)->register_rewrite($page_link);
     }
-
-    //    /**
-    //     * Check if the schema is up to date.
-    //     *
-    //     * Keep it for now as a reminder why we have this schema vars.
-    //     */
-    //    protected function _initialize_schema()
-    //    {
-    //        // If existing DB version is not consistent with current plugin's version,
-    //        // or does not exist, then create/update table structure using dbDelta().
-    //        //
-    //        // Disabled schema updating for simplicity.
-    //         $schema_sql = $this->get_current_db_schema();
-    //         $version    = sha1( $schema_sql );
-    //         if ($option->get('osec_db_version') != $version) { ...  }
-    //    }
 }

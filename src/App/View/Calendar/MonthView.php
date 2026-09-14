@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Calendar;
 
-use Osec\App\Controller\StrictContentFilterController;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\Event;
@@ -161,7 +160,6 @@ class MonthView extends AbstractView
         $start_time   = $start_time->format();
         $end_time     = $end_time->format();
         $this->updateMeta($month_events);
-        StrictContentFilterController::factory($this->app)->clear_the_content_filters();
         foreach ($month_events as $event) {
             $event_start = $event->get('start')->format();
             $event_end   = $event->get('end')->format();
@@ -204,8 +202,6 @@ class MonthView extends AbstractView
             $this->addRuntimeProperties($event);
             $days_events[$day][$priority][] = $event;
         }
-        StrictContentFilterController::factory($this->app)
-                                     ->restore_the_content_filters();
         for ($day = 1; $day <= $last_day; $day++) {
             $days_events[$day] = array_merge(
                 $days_events[$day]['multi'],

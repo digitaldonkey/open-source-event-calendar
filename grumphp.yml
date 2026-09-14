@@ -8,7 +8,9 @@ grumphp:
         # requires Reinit ddev exec grumphp git:init
         EXEC_GRUMPHP_COMMAND: ddev exec -d  "/var/www/html/wp-content/plugins/open-source-event-calendar"
 parameters:
-    process_timeout: 120
+    # 120s is too short for the integration_tests (Selenium) task, which
+    # can take ~3 minutes on its own.
+    process_timeout: 600
     tasks:
         composer: ~
 #        gherkin: ~
@@ -28,11 +30,58 @@ parameters:
         phpcs:
             standard: ['./phpcs.xml']
 #            warning_severity: 0
-#        phpunit:
-#            config_file: './phpunit.xml'
+        phpunit:
+            config_file: './phpunit.xml'
+            # Run regardless of which files changed - see TESTING.md.
+            always_execute: true
+        # Runs the Mocha/Selenium integration_tests suite.
+        # Requires the ddev/ddev-selenium-standalone-chrome add-on (or a reachable
+        # Selenium server) and constants-local.php - see TESTING.md.
+        integration_tests:
+            triggered_by: ['php']
+            scripts:
+                - ["-c", "cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test"]
+            metadata:
+                task: shell
+        # Release-readiness checks - all pure checks, none of them write to
+        # the working tree. See TESTING.md / .claude/plans for design notes.
+        release_check:
+            triggered_by: ['php']
+            scripts:
+                - ["-c", "wp osec prepare_release"]
+            metadata:
+                task: shell
+        make_readme:
+            triggered_by: ['php']
+            scripts:
+                - ["-c", "wp osec make_readme --check"]
+            metadata:
+                task: shell
+        hooks_and_filters:
+            triggered_by: ['php']
+            scripts:
+                - ["-c", "cd hookster_markdown && node build.js check"]
+            metadata:
+                task: shell
 
     testsuites:
-        code_quality:
+        git_pre_commit:
             tasks:
                 - composer
                 - phpcs
+                - phpunit
+        # Everything from the TESTING.md checklist in one go.
+        # Run explicitly: vendor/bin/grumphp run --testsuite=all_tests
+        all_tests:
+            tasks:
+                - composer
+                - phpcs
+                - phpunit
+                - integration_tests
+        # Release-readiness checks. Run after all_tests:
+        #   vendor/bin/grumphp run --testsuite=all_tests && vendor/bin/grumphp run --testsuite=prepare_release
+        prepare_release:
+            tasks:
+                - release_check
+                - make_readme
+                - hooks_and_filters

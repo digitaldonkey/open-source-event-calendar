@@ -119,7 +119,7 @@ jobs:
       - *copy_vendor
       - run:
           name: Run code quality tests
-          command: vendor/bin/wp
+          command: vendor/bin/grumphp run --tasks=composer,phpcs --no-interaction
 
 # Default configuration Database testing jobs
   db_job: &db_job
@@ -297,6 +297,19 @@ jobs:
               source "$BASH_ENV";
             fi
       - run:
+          name: Verify WordPress version metadata is consistent
+          command: |
+            set -Eeuxo pipefail
+            $WP_CLI --path="$WP_CORE_DIR" osec prepare_release
+            if output=$(git status --porcelain) && [ -z "$output" ]; then
+              echo "No changes detected"
+              exit 0;
+            else
+              echo "wp osec prepare_release unexpectedly left uncommitted changes"
+              git diff
+              exit 1;
+            fi
+      - run:
           name: Verify Readme.txt is up to date
           command: |
             set -Eeuxo pipefail
@@ -304,7 +317,7 @@ jobs:
             if output=$(git status --porcelain) && [ -z "$output" ]; then
               echo "No changes detected"
               exit 0;
-            else              
+            else
               echo "wp osec make_readme revealed uncomitted changes"
               git diff README.txt
               exit 1;

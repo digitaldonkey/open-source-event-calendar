@@ -3,12 +3,12 @@
 namespace Osec\App\View\Calendar;
 
 use DateTime;
-use Osec\App\Controller\StrictContentFilterController;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\View\Event\EventAvatarView;
+use Osec\App\View\Event\EventContentView;
 use Osec\App\View\Event\EventTaxonomyView;
 use Osec\App\View\Event\EventTimeView;
 use Osec\Exception\BootstrapException;
@@ -251,8 +251,6 @@ class AgendaView extends AbstractView
     public function get_agenda_like_date_array(array $events, RequestParser $request)
     {
         $dates = [];
-        StrictContentFilterController::factory($this->app)
-                                     ->clear_the_content_filters();
         // Classify each event into a date/allday category
         foreach ($events as $event) {
             $start_time    = new DT($event->get('start')->format('Y-m-d\T00:00:00'), 'sys.default');
@@ -285,8 +283,12 @@ class AgendaView extends AbstractView
             $event_props['filtered_title']            = $event->get_runtime('filtered_title');
             $event_props['edit_post_link']            = $event->get_runtime('edit_post_link');
             $event_props['content_img_url']           = $event->get_runtime('content_img_url');
-            $event_props['filtered_content']          = $this->app->settings->get('feature_use_excerpt') ?
-                         $event->get_runtime('post_excerpt') : $event->get_runtime('filtered_content');
+            $event_props['filtered_content']          = $this->app->settings->get('feature_use_excerpt')
+                ? $event->get_runtime('post_excerpt')
+                : apply_filters(
+                    'osec_the_content',
+                    EventContentView::factory($this->app)->get_filtered_content($event->get('post'))
+                );
             $event_props['ticket_url_label']          = $event->get_runtime('ticket_url_label');
             $event_props['permalink']                 = $event->get_runtime('instance_permalink');
             $event_props['categories_html']           = $event->get_runtime('categories_html');
@@ -324,8 +326,6 @@ class AgendaView extends AbstractView
             $dates[$exact_date]['full_weekday']        = $timeObj->format_i18n('l');
             $dates[$exact_date]['year']                = $timeObj->format_i18n('Y');
         }
-        StrictContentFilterController::factory($this->app)
-                                     ->restore_the_content_filters();
         // Flag today
         $today = (new DT('now', 'sys.default'))->set_time(0, 0, 0)->format();
         if (isset($dates[$today])) {

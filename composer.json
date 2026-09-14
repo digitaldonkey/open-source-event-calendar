@@ -10,10 +10,10 @@
         "ext-json": "*",
         "kigkonsult/icalcreator": "^2.41",
         "louis1021/sg-i-calendar": "dev-master",
-        "php": ">=8.2",
+        "php": "~8.2",
         "twig/twig": "^3.23",
         "wikimedia/less.php": "^5.5",
-        "rlanvin/php-rrule": "^2.6"
+        "rlanvin/php-rrule": "^3.0"
     },
     "license": "GPL-3.0-or-later",
     "autoload": {
@@ -52,7 +52,7 @@
         "phpcompatibility/php-compatibility": "*",
         "phpcsstandards/phpcsextra": "*",
         "phpcsstandards/phpcsutils": "*",
-        "wpackagist-plugin/plugin-check": "^1.8",
+        "wpackagist-plugin/plugin-check": "2.1.0",
         "wp-coding-standards/wpcs": "^3.3"
     },
     "config": {

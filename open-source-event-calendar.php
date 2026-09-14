@@ -65,7 +65,7 @@ function osec_plugin_activate()
     if (is_null($osec_app)) {
         BootstrapController::createApp(__DIR__);
     }
-    DatabaseSchema::factory($osec_app)->verifySqlSchema();
+    DatabaseSchema::factory($osec_app)->verifySqlSchema(true);
     $osec_app->options->set('osec_force_flush_rewrite_rules', true);
     $osec_app->options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true);
 }
@@ -94,4 +94,7 @@ register_deactivation_hook(
 if (defined('WP_CLI') && WP_CLI) {
     require_once __DIR__ . '/src/WpCli/MakeReadme.php';
     WP_CLI::add_command('osec', '\Osec\WpCli\MakeReadme');
+
+    require_once __DIR__ . '/src/WpCli/PrepareRelease.php';
+    WP_CLI::add_command('osec', '\Osec\WpCli\PrepareRelease');
 }

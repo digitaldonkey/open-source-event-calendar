@@ -92,7 +92,7 @@ On the long run it's planned to have a Rest API to allow the calendar being rend
 == Requirements ==
 
 
-- WordPress: 6.6 or newer
+- WordPress: 6.7 or newer
 - PHP:
   - PHP 8.2+ required for development
   - PHP 8.1 may work for production builds when installed with `composer install --no-dev`
@@ -190,6 +190,12 @@ UPDATE  `wp_term_taxonomy` SET  `taxonomy` =  'osec_events_tags' WHERE  `taxonom
 
 Let's draft it out on [GitHub](https://github.com/digitaldonkey/open-source-event-calendar). You could donnate/pay me development time to get it contributed. Invoices possible. Or feel free to implement the requested feature yourself and create a Pull Request for it.
 I may also provide paid support.
+
+### Event descriptions show other content (page builders, share buttons, related posts)
+
+Event descriptions in the agenda view and the ICS feed are passed through WordPress' `the_content` filter, in the context of the event, so plugins hooking into it behave as on the event itself. Most of them can be switched off per post type in their own settings.
+
+If a plugin still adds unwanted content, enable *OSEC Settings → Advanced → Strict compatibility content filtering*. Event descriptions in agenda view and the ICS feed then only get basic formatting (`wptexturize`, `convert_smilies`, `convert_chars`, `wpautop`); developers can change that list with the `osec_event_the_content_strict_filters` filter.
 
 ---
 

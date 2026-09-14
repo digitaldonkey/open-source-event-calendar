@@ -67,7 +67,8 @@ function osec_manually_load_plugin()
     // Avoid problems in case tearDown() didn't run.
     // @see CacheFileTestBase.
     CachePath::clean_and_check_dir(OSEC_FILE_CACHE_DEFAULT_PATH);
-    WP_Filesystem();
+    // Loads wp-admin/includes/file.php; clean_and_check_dir() may throw before doing so.
+    CachePath::get_wpfs();
     $wp_upload = wp_upload_dir();
     if ($wp_upload['error']) {
         throw new Exception('Error WP upload Error');

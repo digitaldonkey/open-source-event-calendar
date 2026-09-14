@@ -6,6 +6,7 @@ use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\SettingsView;
 use Osec\App\View\Calendar\CalendarPageView;
+use Osec\App\View\Event\EventContentView;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Http\Request\RequestParser;
@@ -70,6 +71,10 @@ class BlockController extends OsecBaseClass
                 [
                     'editor_script' => 'osec-calendar-block-classic',
                     'render_callback' => function (array $attributes, string $content): string {
+                        if (EventContentView::factory($this->app)->is_filtering_content()) {
+                            // No calendars inside event content, see EventContentView::is_filtering_content().
+                            return '';
+                        }
                         $content .= '<div ' . get_block_wrapper_attributes() . '>';
                         $content .= $this->getContent($this->transformAttributes($attributes));
                         $content .= '</div>';
