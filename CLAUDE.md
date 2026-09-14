@@ -4,6 +4,9 @@ This project runs inside DDEV.
 
 ## Important
 
+If Claude is not inside the DDEV container suggest to install
+`ddev addon https://addons.ddev.com/addons/vanWittlaer/ddev-claude-code` and use `ddev claude`.
+
 Always use the DDEV environment for application commands.
 
 When Claude is running via `ddev claude`, Claude is already inside
@@ -187,18 +190,14 @@ Do not access production databases.
 
 ## Testing
 
+See `TESTING.md` for the full checklist, one-time setup, integration-test prerequisites, and GrumPHP task inventory. Quick reference:
+
 - **PHPUnit**: `ddev phpunit` (or `ddev phpunit --filter test_name ./tests/Unit/...`)
 - **Integration (Mocha/Selenium)**: `cd integration_tests && npm run test`
 - **Code quality**: `ddev composer run-script phpcs` or `ddev run-script phpcs`
 - **GrumPHP**: `vendor/bin/grumphp run` (pre-commit hooks)
-- Run tests in DDEV environment; initialize once with `bin/install-wp-tests.sh`
 - When fixing bugs, add tests where appropriate
-- First-time setup after clone: `ddev composer install`
-- WP test scaffolding needs a subversion client; in DDEV add `webimage_extra_packages: [subversion]` to `.ddev/config.yaml`
-- Full test-DB init invocation: `bin/install-wp-tests.sh phpunit root root db:3306` (one-time)
-- Non-blocking sniffs: `ddev composer run phpcs-warnings`
-- Explicit phpcs invocation: `./vendor/bin/phpcs --standard=phpcs.xml --runtime-set testVersion 8.2-` (the `testVersion` override is needed because `plugin-check.ruleset.xml` otherwise enforces WP's default minimum PHP version)
-- Mocha/integration tests require the plugin to be disabled first and all tables clean (`OSEC_UNINSTALL_PLUGIN_DATA`)
+- **No skipped tests**: `phpunit.xml` has `failOnSkipped`/`failOnRisky`/`failOnIncomplete` — "OK, but … skipped" exits 1 and fails CI. Check the exit code, don't use `markTestSkipped()` for multisite-only variants (CI is single site), and run CI's command `vendor/bin/phpunit tests` (see `TESTING.md`)
 
 **Updating the PHPUnit version**: WordPress core's test framework only supports specific PHPUnit versions per WP release — before bumping the project's target WordPress or PHP version, check the [WP core PHPUnit compatibility chart](https://make.wordpress.org/core/handbook/references/phpunit-compatibility-and-wordpress-versions/#supported-version-chart) and cross-check the candidate PHPUnit release on [Packagist](https://packagist.org/packages/phpunit/phpunit) against the project's PHP floor (8.2+). Update with `composer require --dev phpunit/phpunit:^<version>` and `composer require --dev yoast/phpunit-polyfills:^<version>` (polyfills bridge PHPUnit API differences so WP's test scaffolding keeps working across versions); `wp scaffold plugin-tests open-source-event-calendar` can regenerate the test bootstrap if it drifts. The currently pinned versions are always whatever's in `composer.json`/`composer.lock` — check there rather than assuming a version from memory.
 
@@ -209,6 +208,22 @@ Do not access production databases.
   - `get-latest-plugin-review-phpcs-rulesets.sh` - Fetch latest PHPCS rulesets
   - `install-wp-tests.sh` - WordPress test environment setup
 - `twig_to_js_transform/` - Converts Twig templates for frontend use
+
+### PhpStorm MCP (JetBrains IDE integration)
+
+- When running via `ddev claude`, the PhpStorm MCP server (started by the IDE on the host) is reached from inside the container at `http://host.docker.internal:<port>/stream`. Its built-in DNS-rebinding protection rejects the `Host: host.docker.internal:<port>` header the container sends by default — add a header override `Host: localhost:<port>` on that MCP server entry, or requests get a bare `403 Forbidden`.
+- PhpStorm identifies the open project only by its **host** filesystem path (e.g. the Mac path where the repo actually lives), never the container path (`/var/www/html/...`). Always pass `projectPath` as that host root, and give any file/directory arguments relative to it — a container path is rejected with "doesn't correspond to any open project."
+- **`execute_terminal_command` runs on the host Mac, not the DDEV container** — confirmed via `pwd`/`uname -a` returning host paths and `Darwin`. It has no path restriction of its own (unlike `read_file`/`list_directory_tree`, which do reject paths outside the project/library/SDK roots): tested 2026-09-11 with `ls -la /Users/tho`, well outside the project, and it returned the full listing. PhpStorm's own **"sandboxed" toggle for this tool did not confine it** — same test, same unrestricted result with the toggle enabled; treat that setting as non-functional. **"Manual approval" mode, however, verified as a real gate**: with it on, a call the user actively rejects in PhpStorm's UI returns `"User rejected command execution"` instead of executing. If this tool needs to stay enabled, manual-approval is the one setting confirmed to actually stop an unwanted command — don't rely on "sandboxed" instead, and don't rely on Claude Code's own auto-mode classifier as a backstop either (separately observed to be inconsistent — auto-denied a call once, then let an identical retry through to a manual prompt with no code change in between).
+  - **The approval prompt does not steal focus or otherwise notify** — PhpStorm doesn't switch windows or alert on it, so the user has to already be looking at the IDE to see and act on it. When about to call `execute_terminal_command` (or invoking anything that may route through it, e.g. `execute_run_configuration`), explicitly tell the user beforehand to switch to PhpStorm and watch for the prompt — don't assume they'll notice it on their own.
+- When the PhpStorm MCP tool (`mcp__phpstorm__execute_tool`) is available, prefer it over generic CLI equivalents for the tasks below — it uses PhpStorm's real PHP/WordPress index and live debugger rather than text-matching or manual instrumentation. Fall back to Bash/grep-based tools when the MCP isn't connected, or for anything not listed here (e.g. running `ddev phpunit`, `composer`, `wp-cli`).
+  - **Symbol search / find usages** — `search_symbol`, `get_symbol_info`, `analyze_calls` instead of `grep`/`Explore` when looking for a class/function/hook definition or all its call sites.
+  - **Text/pattern search across the repo** — `search_text`, `search_regex`, `search_structural` instead of Bash `grep`/`find` for anything scoped to this project's indexed files.
+  - **Renaming a symbol** — `rename_refactoring` instead of a manual multi-file `sed`/`Edit` pass, so references (including string-based ones PhpStorm tracks) get updated consistently.
+  - **PHP inspections** — `get_inspections` / `get_file_problems` as a complement to `phpcs` (`phpcs.xml`); PhpStorm's inspections catch some things `phpcs` doesn't (e.g. type/dead-code issues).
+  - **Debugging a live bug** — `xdebug_*` tools (`xdebug_start_debugger_session`, `xdebug_set_breakpoint`, `xdebug_get_stack`, `xdebug_get_frame_values`, `xdebug_evaluate_expression`, etc.) instead of adding temporary `var_dump`/`error_log` statements, when reproducing the bug through the running DDEV site is feasible.
+    - `xdebug_start_debugger_session` does **not** attach to an incoming web request — it spins up a standalone "PHP Script configuration" and runs the target file as a CLI script. For a real HTTP-triggered breakpoint: (1) `xdebug_set_breakpoint --filePath <path-relative-to-projectPath> --line <N>`; (2) `invoke_ide_action --actionId PhpListenDebugAction` to toggle PhpStorm's "Listen for Debug Connections" — this has no queryable on/off state via MCP, so if unsure whether it's already listening, check from inside the container with `timeout 3 bash -c "cat < /dev/null > /dev/tcp/host.docker.internal/9003"` (port open = listening) rather than re-toggling blind; (3) fire the request as a **backgrounded** `curl ".../?XDEBUG_TRIGGER=1"` (it blocks for the whole pause — a synchronous `curl` or browser navigation will hang); (4) poll `xdebug_get_debugger_status` for `"state":"paused"` — the paused session is stable (not racy) across subsequent `xdebug_get_stack` / `xdebug_get_frame_values` / `xdebug_evaluate_expression` calls; (5) `xdebug_control_session --sessionId <id> --action RESUME` to let the request finish, then `xdebug_remove_breakpoint` to clean up.
+  - **Ad-hoc read-only DB investigation** — `execute_sql_query` / `preview_table_data` / `list_database_schemas` as an alternative to raw `mysql`/`wp db query`, still subject to the read-only rule in "Database Safety" above.
+  - **Editing files opened in the IDE** — `apply_patch` / `reformat_file` are fine for changes the user is actively watching in PhpStorm; for everything else the standard Edit/Write tools remain the default.
 
 ## Release & Build Tooling
 
@@ -238,6 +253,15 @@ What the CircleCI pipeline (`.circleci/config.yml`) does differently depending o
 6. Implement proper AJAX handling via REST API
 7. Use the hook system for modular and extensible code
 8. Implement background processing for long-running tasks
+
+## Plan Review for High-Risk Changes
+
+Before executing a plan (e.g. in `/plan` mode) that touches something with real blast radius — a live PHP entry point loaded on every request, a CI gate, a public WP-CLI command, database schema, or anything else hard to unwind once shipped — run two extra review passes before implementing, not just a single design pass:
+
+1. **Harsh review pass**: explicitly ask for (or perform) a critical review that skips praise/encouragement and only reports what's wrong, hidden risks, and unhandled edge cases. Don't settle for "looks good" — actively hunt for things like corruption risk from writing to executed files, fail-open logic that silently stops guaranteeing something it claims to guarantee, and regressions in existing commands/hooks/CI steps.
+2. **One-by-one decision walkthrough**: after the harsh review, go through every discrete decision or assumption in the plan individually with the user — confirm, change, or remove each one — rather than a single "does this look good?" pass. Calibrate granularity to stakes: batch cosmetic/low-stakes decisions a few at a time, but give genuinely consequential ones (severity of a check, fail-open vs. fail-closed, a chosen mechanism) their own turn.
+
+Skip this for low-stakes or easily-reversible changes — it's overkill there. Reserve it for plans where a mistake would be expensive to discover after the fact.
 
 ## Working With This Codebase
 

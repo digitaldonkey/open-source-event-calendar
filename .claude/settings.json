@@ -1,5 +1,6 @@
 {
   "context": [
     "./CLAUDE.md"
-  ]
+  ],
+  "plansDirectory": ".claude/plans"
 }

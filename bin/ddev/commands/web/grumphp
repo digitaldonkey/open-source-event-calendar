@@ -1,0 +1,24 @@
+#!/bin/bash
+
+## Description: Run Osec GrumPHP testsuites (default: git_pre_commit).
+## Usage: grumphp [all|release|<grumphp arguments>]
+## Example: ddev grumphp\nddev grumphp all\nddev grumphp release\nddev grumphp run --tasks=phpcs
+
+cd /var/www/html/wp-content/plugins/open-source-event-calendar || exit 1
+
+case "$1" in
+  "")
+    exec vendor/bin/grumphp run --testsuite=git_pre_commit
+    ;;
+  all)
+    shift
+    exec vendor/bin/grumphp run --testsuite=all_tests "$@"
+    ;;
+  release)
+    shift
+    exec vendor/bin/grumphp run --testsuite=prepare_release "$@"
+    ;;
+  *)
+    exec vendor/bin/grumphp "$@"
+    ;;
+esac
