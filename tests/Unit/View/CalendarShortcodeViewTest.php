@@ -16,6 +16,8 @@ use Osec\Tests\Utilities\TestBase;
  */
 class CalendarShortcodeViewTest extends TestBase
 {
+    private const CUSTOM_TAXONOMY = 'osec_test_tax';
+
     private array $captured_view_args = [];
 
     protected function setUp(): void
@@ -26,6 +28,14 @@ class CalendarShortcodeViewTest extends TestBase
             $this->captured_view_args = $view_args;
             return $view_args;
         });
+    }
+
+    protected function tearDown(): void
+    {
+        if (taxonomy_exists(self::CUSTOM_TAXONOMY)) {
+            unregister_taxonomy(self::CUSTOM_TAXONOMY);
+        }
+        parent::tearDown();
     }
 
     /**
@@ -48,11 +58,11 @@ class CalendarShortcodeViewTest extends TestBase
      * Register a custom event taxonomy plus the request parser rule an
      * add-on would provide for it.
      */
-    private function register_venue_taxonomy(): void
+    private function register_custom_taxonomy(): void
     {
-        register_taxonomy('venue', [OSEC_POST_TYPE]);
+        register_taxonomy(self::CUSTOM_TAXONOMY, [OSEC_POST_TYPE]);
         add_action('osec_request_parser_rules_added', function ($parser) {
-            $parser->add_rule('osec_venue_ids', false, 'int', null, ',');
+            $parser->add_rule('osec_' . self::CUSTOM_TAXONOMY . '_ids', false, 'int', null, ',');
         });
     }
 
@@ -153,27 +163,48 @@ class CalendarShortcodeViewTest extends TestBase
 
     public function test_custom_taxonomy_filter_lands_in_request()
     {
-        $this->register_venue_taxonomy();
-        $venue_id = self::factory()->term->create(
+        $this->register_custom_taxonomy();
+        $term_id = self::factory()->term->create(
             [
-            'taxonomy' => 'venue',
+            'taxonomy' => self::CUSTOM_TAXONOMY,
             'name' => 'Grand Hall',
             ]
         );
 
-        $view_args = $this->render_shortcode(['venue_name' => 'Grand Hall']);
+        $view_args = $this->render_shortcode([self::CUSTOM_TAXONOMY . '_name' => 'Grand Hall']);
 
-        $this->assertSame([$venue_id], $view_args['request']->get('osec_venue_ids'));
+        $this->assertSame([$term_id], $view_args['request']->get('osec_' . self::CUSTOM_TAXONOMY . '_ids'));
     }
 
     public function test_unresolvable_custom_taxonomy_warns_without_fatal()
     {
-        $this->register_venue_taxonomy();
+        $this->register_custom_taxonomy();
         $this->setExpectedIncorrectUsage(CalendarShortcodeView::class . '::shortcode');
 
-        $view_args = $this->render_shortcode(['venue_name' => 'Nowhere']);
+        $view_args = $this->render_shortcode([self::CUSTOM_TAXONOMY . '_name' => 'Nowhere']);
 
-        $this->assertSame([], $view_args['request']->get('osec_venue_ids'));
+        $this->assertSame([], $view_args['request']->get('osec_' . self::CUSTOM_TAXONOMY . '_ids'));
+    }
+
+    public function test_trailing_comma_is_ignored_silently()
+    {
+        $cat_id = self::factory()->term->create(
+            [
+            'taxonomy' => 'osec_events_categories',
+            'name' => 'Aktivitet',
+            ]
+        );
+
+        $view_args = $this->render_shortcode(['cat_name' => 'Aktivitet,']);
+
+        $this->assertSame([$cat_id], $view_args['cat_ids']);
+    }
+
+    public function test_empty_value_is_ignored_silently()
+    {
+        $view_args = $this->render_shortcode(['tag_name' => '']);
+
+        $this->assertSame([], $view_args['tag_ids']);
     }
 
     public function test_events_limit_passes_through_without_warning()
