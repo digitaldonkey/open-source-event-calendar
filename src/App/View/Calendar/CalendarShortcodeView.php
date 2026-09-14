@@ -99,13 +99,17 @@ class CalendarShortcodeView extends OsecBaseClass
             }
             $raw_values = explode(',', (string)$atts[$att_name]);
             foreach ($raw_values as $argument) {
+                $argument = trim($argument);
+                if ('' === $argument) {
+                    continue;
+                }
                 if ('post_id' === $att_name) {
                     if (is_numeric($argument) && $argument > 0) {
                         $post_ids[] = $argument;
                     }
                 } else {
                     if ( ! is_numeric($argument)) {
-                        $search_val = trim($argument);
+                        $search_val = $argument;
                         $argument   = false;
                         foreach (['name', 'slug'] as $field) {
                             $record = get_term_by(
@@ -129,7 +133,7 @@ class CalendarShortcodeView extends OsecBaseClass
                                     $search_val,
                                     $type
                                 )),
-                                'OSEC 1.1.15'
+                                '1.1.15'
                             );
                             continue;
                         }
@@ -143,7 +147,7 @@ class CalendarShortcodeView extends OsecBaseClass
                                 $att_name,
                                 $argument
                             )),
-                            'OSEC 1.1.15'
+                            '1.1.15'
                         );
                         continue;
                     }
