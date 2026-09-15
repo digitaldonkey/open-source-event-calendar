@@ -163,13 +163,12 @@ class AgendaView extends AbstractView
             'views_dropdown'          => $view_args['views_dropdown'],
             'below_toolbar'           => $this->getBelowToolbarHtml($type, $view_args),
         ];
-        // Add extra buttons to Agenda view's nav bar if events were returned.
+        // Add collapse/expand buttons to Agenda view's nav bar if events were returned.
         if ($type === 'agenda' && $dates) {
             $button_args                  = [
                 'text_collapse_all' => __('Collapse All', 'open-source-event-calendar'),
                 'text_expand_all'   => __('Expand All', 'open-source-event-calendar'),
                 'no_toggle'         => $view_args['agenda_toggle'] !== 'false',
-                'display_print_button' => $this->app->settings->get('display_print_button'),
             ];
             $nav_args['after_pagination'] = ThemeLoader::factory($this->app)
                 ->get_file('agenda-buttons.twig', $button_args, false)

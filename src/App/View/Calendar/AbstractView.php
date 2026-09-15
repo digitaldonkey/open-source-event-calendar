@@ -232,9 +232,29 @@ abstract class AbstractView extends OsecBaseClass
          * @param  array  $html  Event location.
          */
         $nav_args['contribution_buttons'] = apply_filters('osec_contribution_buttons', '', 'html', 'render-command');
+        // Appended: both button groups float right, so the print button renders left of existing buttons.
+        $nav_args['after_pagination'] = ($nav_args['after_pagination'] ?? '') . $this->getPrintButtonHtml();
 
         return ThemeLoader::factory($this->app)
                           ->get_file('navigation.twig', $nav_args, false)
+                          ->get_content();
+    }
+
+    /**
+     * Gets the print button HTML if enabled in settings.
+     *
+     * @return string
+     */
+    protected function getPrintButtonHtml(): string
+    {
+        if (! $this->app->settings->get('display_print_button')) {
+            return '';
+        }
+
+        $args = ['text_print' => __('Print', 'open-source-event-calendar')];
+
+        return ThemeLoader::factory($this->app)
+                          ->get_file('print-button.twig', $args, false)
                           ->get_content();
     }
 
