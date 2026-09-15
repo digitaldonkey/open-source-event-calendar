@@ -41,12 +41,17 @@ environment first.
 
 ## Database Safety
 
-The DDEV database is a development database.
+The DDEV database is a development database and usually contains
+nothing important.
 
-Do not perform destructive database operations unless explicitly
-requested.
+Any change to the dev database is allowed, including destructive ones
+(altering settings/data, dropping, truncating, resetting). Ask once
+per session, the first time a change is needed: "Can I drop (or
+alter) the database?" After a yes, no further asking in that session.
 
-Never drop, truncate, or reset the database without asking first.
+When a DB change is the straightforward route, ask for it instead of
+building workarounds to avoid the write (temporary mu-plugins, option
+filters, cookie or query-param overrides).
 
 Prefer read-only queries when investigating problems.
 
