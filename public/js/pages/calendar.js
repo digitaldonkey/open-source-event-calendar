@@ -397,19 +397,161 @@ timely.define("domReady", [], function () {
     return c.version = "2.0.0", c.load = function (e, t, n, r) {
         r.isBuild ? n(null) : c(n)
     }, c
-}), timely.define("scripts/calendar/print", ["jquery_timely"], function (e) {
-    var t = function (t) {
-        t.preventDefault();
-        var n = e("body"), r = e("html"), i = e(this).closest(".ai1ec-calendar").html(), s = n.html();
-        s = s.replace(/<script.*?>([\s\S]*?)<\/script>/gmi, ""), n.empty(), n.addClass("timely"), r.addClass("ai1ec-print"), n.html(i), e("span").click(function () {
-            return !1
-        }), e(".ai1ec-agenda-view a").each(function () {
-            e(this).data("href", e(this).attr("href")), e(this).attr("href", "#")
-        }), window.print(), e(".ai1ec-agenda-view a").each(function () {
-            e(this).attr("href", e(this).data("href")), e(this).data("href", "")
-        }), n.removeClass("timely"), r.removeClass("ai1ec-print"), n.html(s)
+}), timely.define("scripts/calendar/print", ["jquery_timely"], function ($) {
+    // Week/day grids are scaled to one page: page height minus print header and margins (px, 96 dpi).
+    // Week prints landscape, day portrait; the smaller of A4 and Letter.
+    var PAGE_HEIGHT = {week: 660, oneday: 860},
+        PRINT_HEADER_HEIGHT = 80,
+        MIN_GRID_HEIGHT = 300,
+        // Events are at least this high, so the time and a title line stay readable.
+        MIN_EVENT_HEIGHT = 28,
+        // Week view: keeps the hour labels in the first day column free of events.
+        WEEK_LABEL_GUTTER = 46;
+
+    // Places overlapping events of one day side by side in equal columns.
+    var layout_overlaps = function (events, base) {
+        var cluster = [], columns = [], cluster_end = -1;
+        var finish_cluster = function () {
+            var count = columns.length;
+            $.each(cluster, function (i, ev) {
+                ev.el.style.left = 'calc(' + base + 'px + (100% - ' + base + 'px) * ' + ev.column + ' / ' + count + ')';
+                ev.el.style.width = 'calc((100% - ' + base + 'px) / ' + count + ')';
+                ev.el.style.right = 'auto';
+            });
+            cluster = [];
+            columns = [];
+        };
+        events.sort(function (a, b) {
+            return a.top - b.top || b.bottom - a.bottom;
+        });
+        $.each(events, function (i, ev) {
+            if (ev.top >= cluster_end) {
+                finish_cluster();
+            }
+            var column = 0;
+            while (column < columns.length && columns[column] > ev.top) {
+                column++;
+            }
+            columns[column] = ev.bottom;
+            ev.column = column;
+            cluster.push(ev);
+            cluster_end = Math.max(cluster_end, ev.bottom);
+        });
+        finish_cluster();
     };
-    return {handle_click_on_print_button: t}
+
+    // Returns a copy of a week/day grid wrapper showing the hours visible on screen, scaled to one page.
+    var build_print_grid = function ($wrapper) {
+        var $view = $wrapper.closest('.ai1ec-week-view, .ai1ec-oneday-view'),
+            type = $view.hasClass('ai1ec-week-view') ? 'week' : 'oneday',
+            start = $wrapper.scrollTop(),
+            visible = $wrapper.height(),
+            head = $view.find('.tablescroll_head').outerHeight() || 0,
+            height = Math.max(MIN_GRID_HEIGHT, PAGE_HEIGHT[type] - PRINT_HEADER_HEIGHT - head),
+            factor = height / visible,
+            $grid = $wrapper.clone();
+
+        $grid.find('.ai1ec-popup, .ai1ec-popover, .ai1ec-tooltip, .ai1ec-now-marker').remove();
+        $grid.addClass('osec-print-grid').css({width: '', height: height + 'px'});
+        $grid.find('.ai1ec-day').css('height', height + 'px');
+        $grid.find('.ai1ec-hour-marker').css('height', (60 * factor) + 'px');
+        if (15 * factor < 6) {
+            $grid.find('.ai1ec-quarter-marker').remove();
+        }
+        $grid.find('.ai1ec-hour-marker, .ai1ec-quarter-marker').each(function () {
+            var top = (parseFloat(this.style.top) - start) * factor;
+            if (top < 0 || top >= height) {
+                $(this).remove();
+            } else {
+                this.style.top = top + 'px';
+            }
+        });
+        $grid.find('.ai1ec-day').each(function (day) {
+            var events = [], base = null;
+            $(this).children('.ai1ec-event-container').each(function () {
+                var top = parseFloat(this.style.top) - start,
+                    bottom = top + parseFloat(this.style.height),
+                    left = parseFloat(this.style.left) || 0;
+                if (bottom <= 0 || top >= visible) {
+                    $(this).remove();
+                    return;
+                }
+                // Day view keeps its gutter for the hour labels (smallest left offset).
+                base = base === null ? left : Math.min(base, left);
+                top = Math.max(top, 0) * factor;
+                bottom = Math.max(Math.min(bottom, visible) * factor, top + MIN_EVENT_HEIGHT);
+                if (bottom > height) {
+                    top = Math.max(0, top - (bottom - height));
+                    bottom = height;
+                }
+                this.style.top = top + 'px';
+                this.style.height = (bottom - top) + 'px';
+                events.push({el: this, top: top, bottom: bottom});
+            });
+            if (type === 'week' && day === 0) {
+                base = Math.max(base || 0, WEEK_LABEL_GUTTER);
+            }
+            layout_overlaps(events, base || 0);
+        });
+        return $grid;
+    };
+
+    var handle_click_on_print_button = function (event) {
+        event.preventDefault();
+        var $body = $('body'),
+            $html = $('html'),
+            $calendar = $(this).closest('.ai1ec-calendar'),
+            $print = $calendar.clone(),
+            body_was_timely = $body.hasClass('timely'),
+            // Detaching resets scroll positions.
+            window_scroll = $(window).scrollTop(),
+            grid_scroll = $calendar.find('.tablescroll_wrapper').map(function () {
+                return this.scrollTop;
+            }).get(),
+            $page;
+
+        $print.find('script, .ai1ec-popup, .ai1ec-popover, .ai1ec-tooltip').remove();
+        $calendar.find('.tablescroll_wrapper').each(function (i) {
+            $print.find('.tablescroll_wrapper').eq(i).replaceWith(build_print_grid($(this)));
+        });
+        // Detach instead of re-rendering the page HTML, so event handlers and state survive.
+        $page = $body.children().detach();
+        $body.addClass('timely').append($print);
+        $html.addClass('ai1ec-print');
+        window.print();
+        $print.remove();
+        $html.removeClass('ai1ec-print');
+        body_was_timely || $body.removeClass('timely');
+        $body.append($page);
+        $calendar.find('.tablescroll_wrapper').each(function (i) {
+            this.scrollTop = grid_scroll[i];
+        });
+        $(window).scrollTop(window_scroll);
+    };
+
+    // Browser print (Ctrl+P): print scaled grid copies instead of the clipped screen grids.
+    var before_print = function () {
+        if ($('html').hasClass('ai1ec-print')) {
+            return;
+        }
+        $('.tablescroll_wrapper:visible').not('.osec-print-grid').each(function () {
+            var $wrapper = $(this);
+            $wrapper.after(build_print_grid($wrapper)).addClass('osec-print-source');
+        });
+    };
+    var after_print = function () {
+        if ($('html').hasClass('ai1ec-print')) {
+            return;
+        }
+        $('.osec-print-grid').remove();
+        $('.osec-print-source').removeClass('osec-print-source');
+    };
+
+    return {
+        handle_click_on_print_button: handle_click_on_print_button,
+        before_print: before_print,
+        after_print: after_print
+    }
 }), timely.define("scripts/calendar/agenda_view", ["jquery_timely"], function (e) {
     var t = function () {
         e(this).closest(".ai1ec-event").toggleClass("ai1ec-expanded").find(".ai1ec-event-summary").slideToggle(300)
@@ -5907,7 +6049,7 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
         }, ".ai1ec-event-container.ai1ec-multiday"), e(document).on({
             mouseenter: v,
             mouseleave: m
-        }, ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container"), e(document).on("click", ".ai1ec-agenda-view .ai1ec-event-header--toggle", i.toggle_event), e(document).on("click", "#ai1ec-agenda-expand-all", i.expand_all), e(document).on("click", "#ai1ec-agenda-collapse-all", i.collapse_all), e(document).on("click", "a.ai1ec-load-view", n.handle_click_on_link_to_load_view), e(document).on("click", ".ai1ec-minical-trigger", n.handle_minical_trigger), e(document).on("click", ".ai1ec-clear-filter", n.clear_filters), e(document).on("click", "#ai1ec-print-button", r.handle_click_on_print_button), e(document).on("click", ".ai1ec-reveal-full-day button", function () {
+        }, ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container"), e(document).on("click", ".ai1ec-agenda-view .ai1ec-event-header--toggle", i.toggle_event), e(document).on("click", "#ai1ec-agenda-expand-all", i.expand_all), e(document).on("click", "#ai1ec-agenda-collapse-all", i.collapse_all), e(document).on("click", "a.ai1ec-load-view", n.handle_click_on_link_to_load_view), e(document).on("click", ".ai1ec-minical-trigger", n.handle_minical_trigger), e(document).on("click", ".ai1ec-clear-filter", n.clear_filters), e(document).on("click", "#ai1ec-print-button", r.handle_click_on_print_button), window.addEventListener("beforeprint", r.before_print), window.addEventListener("afterprint", r.after_print), e(document).on("click", ".ai1ec-reveal-full-day button", function () {
             var t = e(this).closest(".ai1ec-calendar");
             e(this).fadeOut();
             var n = t.find(".ai1ec-oneday-view-original, .ai1ec-week-view-original"),

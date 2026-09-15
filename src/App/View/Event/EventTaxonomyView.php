@@ -56,11 +56,12 @@ class EventTaxonomyView extends OsecBaseClass
     {
         $color = $this->get_color_for_event($event);
 
-        // Convert to style attribute.
+        // Convert to style attribute. The variable is used by print CSS.
         if ($color) {
-            $color = $event->is_allday() || $event->is_multiday()
+            $color = ($event->is_allday() || $event->is_multiday()
                 ? 'background-color: ' . $color . ';'
-                : 'color: ' . $color . ' !important;';
+                : 'color: ' . $color . ' !important;')
+                . ' --osec-event-color: ' . $color . ';';
         } else {
             $color = '';
         }

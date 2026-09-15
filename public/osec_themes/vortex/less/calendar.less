@@ -762,8 +762,219 @@ table.ai1ec-oneday-view-original {
 	}
 }
 
-// Printed agenda view overrides
+// Print rules shared by the print button (html.ai1ec-print) and browser print.
+// Not scoped to .ai1ec-calendar: the print button replaces the body with the calendar's inner HTML.
+.osec-print-calendar() {
+	.osec-print-header,
+	.osec-print-header[hidden] {
+		display: block !important;
+		margin: 0 0 1em;
+	}
+	.osec-print-title {
+		margin: 0 0 0.25em;
+		font-size: 1.5em;
+	}
+	.osec-print-url {
+		margin: 0;
+		font-size: 0.85em;
+		word-break: break-all;
+	}
+	// Bootstrap print styles append the URL to every link.
+	.timely a[href]:after,
+	.ai1ec-calendar a[href]:after {
+		content: none !important;
+	}
+	.plana-toolbar,
+	.ai1ec-btn-toolbar,
+	.ai1ec-views-dropdown,
+	.ai1ec-pagination,
+	.plana-pagination,
+	.ai1ec-calendar-toolbar,
+	.osec-taxonomy-filters,
+	.ai1ec-subscribe-container,
+	.osec-subscribe-container,
+	.ai1ec-reveal-full-day,
+	.ai1ec-now-marker,
+	.ai1ec-popup,
+	.ai1ec-popover,
+	.ai1ec-tooltip,
+	.ai1ec-agenda-view .ai1ec-event-expand,
+	.ai1ec-read-more,
+	.ai1ec-color-swatch,
+	.post-edit-link,
+	.ai1ec-event-toggle {
+		display: none !important;
+	}
+	// Hidden overflow clips the right table border in print.
+	.osec-calendar-view,
+	.osec-calendar-view-container {
+		overflow: visible !important;
+	}
+	// No backgrounds, black text.
+	.osec-calendar-view,
+	.osec-calendar-view * {
+		background: transparent !important;
+		box-shadow: none !important;
+	}
+	.ai1ec-event,
+	.ai1ec-event-title,
+	.ai1ec-event-time,
+	.ai1ec-event-location {
+		color: #000 !important;
+	}
+	// Month/week/day: the category color (--osec-event-color) is a left border on timed events
+	// and a thin border on all four sides of all-day events. Borders print without "background graphics".
+	.ai1ec-month-view .ai1ec-event-container,
+	.ai1ec-allday-events .ai1ec-event-container {
+		border: none !important;
+	}
+	.ai1ec-month-view .ai1ec-event,
+	.ai1ec-week-view .ai1ec-week .ai1ec-event-container,
+	.ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
+		border: none !important;
+		border-left: 4px solid var(--osec-event-color, #999) !important;
+		padding-left: 3px !important;
+	}
+	.ai1ec-month-view .ai1ec-allday .ai1ec-event,
+	.ai1ec-month-view .ai1ec-multiday .ai1ec-event,
+	.ai1ec-allday-events .ai1ec-event {
+		border: 1px solid var(--osec-event-color, #999) !important;
+	}
+	// Month/week/day: full titles and times instead of one truncated line.
+	.ai1ec-month-view .ai1ec-event,
+	.ai1ec-month-view .ai1ec-multiday .ai1ec-event,
+	.ai1ec-week-view .ai1ec-event,
+	.ai1ec-oneday-view .ai1ec-event {
+		height: auto !important;
+		max-height: none !important;
+		overflow: visible !important;
+		white-space: normal !important;
+	}
+	.ai1ec-week-view .ai1ec-week .ai1ec-event-container,
+	.ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
+		overflow: visible !important;
+	}
+	// Month/week/day are sized for one page: with Ctrl+P, move them below the site header as a whole
+	// instead of splitting them (dates and all-day events would not repeat on the next page).
+	.osec-calendar-view:has(.ai1ec-month-view, .osec-print-grid) {
+		break-inside: avoid;
+	}
+	// Week/day: the print JS adds a grid copy scaled to one page (.osec-print-grid) and hides the screen grid.
+	.osec-print-source {
+		display: none !important;
+	}
+	.tablescroll_head,
+	.tablescroll_body {
+		width: 100% !important;
+	}
+	.tablescroll_head th,
+	.tablescroll_body td,
+	.osec-print-grid {
+		width: auto !important;
+	}
+	.osec-print-grid {
+		overflow: hidden !important;
+		.ai1ec-event-container {
+			box-sizing: border-box;
+			min-height: 0 !important;
+			font-size: 9px;
+			line-height: 11px;
+		}
+		.ai1ec-event-time {
+			font-size: 8px;
+		}
+		.ai1ec-hour-marker div {
+			font-size: 9px;
+		}
+	}
+	// Month: lower minimum row height, so wrapped titles still fit one page in most months.
+	.ai1ec-month-view .ai1ec-day-stretcher {
+		height: 3.5em;
+	}
+	// Agenda: dates never split; events only split with enough lines on both pages.
+	.ai1ec-agenda-view {
+		// Flex instead of float with overflow:hidden, which clips events continued on the next page.
+		&,
+		.ai1ec-date,
+		.ai1ec-date-events,
+		.ai1ec-event {
+			overflow: visible !important;
+		}
+		.ai1ec-date {
+			display: flex;
+			align-items: flex-start;
+		}
+		.ai1ec-date-title {
+			flex: none;
+			float: none;
+		}
+		.ai1ec-date-events {
+			flex: 1 1 auto;
+			min-width: 0;
+		}
+		.ai1ec-date-title,
+		.ai1ec-date-title * {
+			color: #000 !important;
+		}
+		// On screen the top edge and the month/year separators are background colors.
+		@date-title-border: 1px solid mix( @text-color, @agenda-date-title-bg, 30% );
+		.ai1ec-date-title {
+			border: @date-title-border !important;
+		}
+		.ai1ec-month {
+			border-bottom: @date-title-border;
+		}
+		.ai1ec-year {
+			border-top: @date-title-border;
+		}
+		// The separator line above today is in the "today" color on screen.
+		.ai1ec-date {
+			border-top-color: #ccc !important;
+		}
+		// No break-after on the date title: Chrome then moves the whole date to the next page.
+		.ai1ec-date-title {
+			break-inside: avoid;
+		}
+		.ai1ec-event-header,
+		.ai1ec-event-time {
+			break-inside: avoid;
+			break-after: avoid;
+		}
+		.ai1ec-event {
+			orphans: 5;
+			widows: 5;
+			-webkit-box-decoration-break: clone;
+			box-decoration-break: clone;
+		}
+		.ai1ec-event-summary-footer,
+		.ai1ec-categories,
+		.ai1ec-tags {
+			break-before: avoid;
+			break-inside: avoid;
+		}
+	}
+}
+
+@media screen {
+	.osec-print-grid {
+		display: none;
+	}
+}
+
+@page osec-landscape {
+	size: landscape;
+}
+
+@media print {
+	.osec-print-calendar();
+	body:has(.ai1ec-month-view, .ai1ec-week-view-original) {
+		page: osec-landscape;
+	}
+}
+
+// Printed via print button.
 .ai1ec-print {
+	.osec-print-calendar();
 	* {
 		background: white !important;
 		color: black !important;
@@ -771,17 +982,6 @@ table.ai1ec-oneday-view-original {
 	body {
 		margin: 0;
 		text-align: left;
-	}
-	#wpadminbar,
-	#comments,
-	#page > header {
-		display: none;
-	}
-	#osec-container {
-		position: absolute;
-		left: 0;
-		top: 0;
-		width: 100%;
 	}
 	.ai1ec-agenda-view .ai1ec-event.ai1ec-expanded {
 		box-shadow: none;
@@ -792,7 +992,6 @@ table.ai1ec-oneday-view-original {
 			display: none;
 		}
 		.ai1ec-date-title {
-			border-color: #cacaca;
 			&:after {
 				display: none;
 			}
@@ -818,16 +1017,7 @@ table.ai1ec-oneday-view-original {
 	}
 	.timely .entry-meta,
 	.timely .ai1ec-subscribe,
-	.timely .ai1ec-subscribe-google,
-	.ai1ec-agenda-view .ai1ec-event-expand,
-	.ai1ec-btn-toolbar,
-	.ai1ec-pagination,
-	.ai1ec-calendar-toolbar,
-	.ai1ec-read-more,
-	.ai1ec-color-swatch,
-	.post-edit-link,
-	.ai1ec-event-toggle,
-	.ai1ec-views-dropdown {
+	.timely .ai1ec-subscribe-google {
 		display: none !important;
 	}
 	.ai1ec-event-header {

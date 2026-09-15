@@ -162,6 +162,9 @@ class AgendaView extends AbstractView
             'pagination_links'        => $pagination_links,
             'views_dropdown'          => $view_args['views_dropdown'],
             'below_toolbar'           => $this->getBelowToolbarHtml($type, $view_args),
+            'print_title'             => $titles->long,
+            'print_date'              => $results['date_first'],
+            'print_args'              => $view_args,
         ];
         // Add collapse/expand buttons to Agenda view's nav bar if events were returned.
         if ($type === 'agenda' && $dates) {

@@ -120,6 +120,9 @@ class OnedayView extends AbstractView
                 'pagination_links' => $pagination_links,
                 'views_dropdown'   => $args['views_dropdown'],
                 'below_toolbar'    => $this->getBelowToolbarHtml($this->get_name(), $view_args),
+                'print_title'      => $title,
+                'print_date'       => $local_date,
+                'print_args'       => $args,
             ]
         );
 

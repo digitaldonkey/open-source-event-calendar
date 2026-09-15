@@ -3,6 +3,7 @@
 namespace Osec\App\View\Calendar;
 
 use Osec\App\Model\Date\DT;
+use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\TaxonomyAdapter;
 use Osec\Bootstrap\App;
@@ -211,15 +212,26 @@ abstract class AbstractView extends OsecBaseClass
     }
 
     /**
-     * Gets the navigation bar HTML.
+     * Gets the navigation bar HTML, prepended by the print header.
      *
      * @param  array  $nav_args  Args for the navigation bar template, including
-     *                       'display_date_navigation' which determines whether to show it
+     *                       'display_date_navigation' which determines whether to show it.
+     *                       Keys 'print_title' (string), 'print_date' (DT) and 'print_args'
+     *                       (current view args) are used for the print header.
      *
      * @return string
      */
     protected function getNavigation(array $nav_args)
     {
+        $print_header = '';
+        if (isset($nav_args['print_title'], $nav_args['print_date'])) {
+            $print_header = $this->getPrintHeaderHtml(
+                $nav_args['print_title'],
+                $nav_args['print_date'],
+                $nav_args['print_args'] ?? []
+            );
+        }
+
         /**
          * Add Html at calendar navigarion header.
          *
@@ -235,8 +247,49 @@ abstract class AbstractView extends OsecBaseClass
         // Appended: both button groups float right, so the print button renders left of existing buttons.
         $nav_args['after_pagination'] = ($nav_args['after_pagination'] ?? '') . $this->getPrintButtonHtml();
 
-        return ThemeLoader::factory($this->app)
+        return $print_header . ThemeLoader::factory($this->app)
                           ->get_file('navigation.twig', $nav_args, false)
+                          ->get_content();
+    }
+
+    /**
+     * Gets the print header HTML: title, view name and the URL of the printed view.
+     *
+     * Hidden on screen, shown by print CSS.
+     *
+     * @param  string  $title  View title, e.g. "September 2026".
+     * @param  DT  $date  Date the view link points to.
+     * @param  array  $args  Current view args; category, tag and author filters are kept in the URL.
+     *
+     * @return string
+     */
+    protected function getPrintHeaderHtml(string $title, DT $date, array $args): string
+    {
+        $href_args               = array_intersect_key($args, array_flip(['cat_ids', 'tag_ids', 'auth_ids']));
+        $href_args['action']     = $this->get_name();
+        $href_args['exact_date'] = UIDateFormats::factory($this->app)->format_datetime_for_url($date);
+
+        $enabled_views = (array) $this->app->settings->get('enabled_views', []);
+        $view_name     = '';
+        if (isset($enabled_views[$this->get_name()]['longname'])) {
+            /* The longname is a _n_noop. */
+            $view_name = translate_nooped_plural(
+                $enabled_views[$this->get_name()]['longname'],
+                1,
+                'open-source-event-calendar'
+            );
+        }
+
+        $args = [
+            'title'     => $title,
+            'view_name' => $view_name,
+            'view_url'  => HtmlFactory::factory($this->app)
+                                      ->create_href_helper_instance($href_args)
+                                      ->generate_href(),
+        ];
+
+        return ThemeLoader::factory($this->app)
+                          ->get_file('print-header.twig', $args, false)
                           ->get_content();
     }
 
