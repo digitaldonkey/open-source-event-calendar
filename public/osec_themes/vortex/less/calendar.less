@@ -569,7 +569,8 @@ table.ai1ec-oneday-view-original {
 	.ai1ec-multiday-bar {
 		background: @event-default-color;
 		border-radius: 3px;
-		height: 14px;
+		// Continuation bars carry the title only, but the height follows the content.
+		min-height: 14px;
 		left: 0;
 		position: absolute;
 		top: 0;
