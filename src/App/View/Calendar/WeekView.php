@@ -136,7 +136,6 @@ class WeekView extends AbstractView
             'text_now_label'           => __('Now:', 'open-source-event-calendar'),
             'text_venue_separator'     => self::get_venue_separator_text(),
             'hours'                    => $hours,
-            'indent_multiplier'        => 32,
             'indent_offset'            => 0,
             'pagination_links'         => $pagination_links,
         ];
@@ -176,9 +175,6 @@ class WeekView extends AbstractView
      *                    array like so:
      *   ['top']       => how many minutes offset from the start of the day
      *   ['height']    => how many minutes this event spans
-     *   ['indent']    => how much to indent this event to accommodate multiple
-     *                    events occurring at the same time (0, 1, 2, etc., to
-     *                    be multiplied by whatever desired px/em amount)
      *   ['column']    => column of this event among overlapping events (0, 1, 2, etc.)
      *   ['columns']   => number of columns of its group of overlapping events
      *   ['event']     => event data object
@@ -280,12 +276,6 @@ class WeekView extends AbstractView
                 $all_events[$day_date]['notallday'] = [];
             }
 
-            // Stack to keep track of indentation
-            // Very confusing, but ensures, that the earliest start time
-            // in overlapping events is "at the bottom of the visual stack"
-            // and later starting ones are not hidden under.
-            $evt_stack = [0];
-
             foreach ($all_events[$day_date] as $event_type => &$events) {
                 foreach ($events as &$evt) {
                     $event = [
@@ -317,24 +307,9 @@ class WeekView extends AbstractView
                         // Calculate top and bottom edges of current event
                         $top    = $start->format('G') * 60 + $start->format('i');
                         $bottom = min($top + $evt->get_duration() / 60, 1440);
-                        // While there's more than one event in the stack and this event's top
-                        // position is beyond the last event's bottom, pop the stack
-                        $stackcount = count($evt_stack);
-                        while ($stackcount > 1 && $top >= end($evt_stack)) {
-                            if (count($evt_stack) > 1) {
-                                array_pop($evt_stack);
-                            } else {
-                                break;
-                            }
-                        }
-                        // Indentation is number of stacked events minus 1
-                        $indent = count($evt_stack) - 1;
-                        // Push this event onto the top of the stack
-                        array_push($evt_stack, $bottom);
                         $evt = [
                             'top'    => $top,
                             'height' => $bottom - $top,
-                            'indent' => $indent,
                             'event'  => $event,
                         ];
                     } else {

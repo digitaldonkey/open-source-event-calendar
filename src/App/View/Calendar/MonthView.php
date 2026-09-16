@@ -307,7 +307,6 @@ class MonthView extends AbstractView
                     'timespan'         => TwigExtension::timespan($evt, 'hidden'),
                     'multiday_end_day' => $evt->get_runtime('multiday_end_day'),
                     'start_day'        => $evt->get_runtime('start_day'),
-                    'short'            => $evt->get_runtime('short_start_time'),
                     'instance_id'      => $evt->get('instance_id'),
                     'post_id'          => $evt->get('post_id'),
                     'is_allday'        => $evt->is_allday(),
