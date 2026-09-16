@@ -179,6 +179,8 @@ class WeekView extends AbstractView
      *   ['indent']    => how much to indent this event to accommodate multiple
      *                    events occurring at the same time (0, 1, 2, etc., to
      *                    be multiplied by whatever desired px/em amount)
+     *   ['column']    => column of this event among overlapping events (0, 1, 2, etc.)
+     *   ['columns']   => number of columns of its group of overlapping events
      *   ['event']     => event data object
      *
      * @param  DT  $start_of_week  the UNIX timestamp of the first day of the week
@@ -340,6 +342,8 @@ class WeekView extends AbstractView
                     }
                 }
             }
+            unset($events, $evt);
+            $all_events[$day_date]['notallday'] = static::addOverlapColumns($all_events[$day_date]['notallday'], 2);
 
             $days[$day_date] = [
                 'today'     =>

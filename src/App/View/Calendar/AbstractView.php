@@ -294,6 +294,76 @@ abstract class AbstractView extends OsecBaseClass
     }
 
     /**
+     * Minimum height of a timed event in the week/day grid, in minutes (1px per minute).
+     *
+     * Matches the min-height of .ai1ec-event-container in the week/day grid CSS, so short
+     * events that visually overlap get their own column.
+     */
+    protected const GRID_MIN_EVENT_MINUTES = 34;
+
+    /**
+     * Adds side-by-side columns to overlapping timed events of one day.
+     *
+     * Each event gets 'column' (0-based) and 'columns' (the number of columns of its group of
+     * overlapping events), so templates can place it at column / columns of the day width.
+     * With more overlapping events than $max_columns, the rest share the last column and
+     * get 'stack' (1, 2, ...) to offset them there; 'stack' is 0 otherwise.
+     *
+     * @param  array  $events  Timed events of one day with 'top' and 'height' in minutes.
+     * @param  int  $max_columns  Maximum number of columns, 0 for no limit.
+     *
+     * @return array The events with 'column', 'columns' and 'stack' added, in the given order.
+     */
+    protected static function addOverlapColumns(array $events, int $max_columns = 0): array
+    {
+        $bottoms = [];
+        foreach ($events as $key => $event) {
+            $bottoms[$key] = $event['top'] + max($event['height'], static::GRID_MIN_EVENT_MINUTES);
+        }
+        $order = array_keys($events);
+        usort(
+            $order,
+            fn($a, $b) => [$events[$a]['top'], $bottoms[$b]] <=> [$events[$b]['top'], $bottoms[$a]]
+        );
+
+        $group       = [];
+        $column_ends = [];
+        $group_end   = -1;
+        foreach ($order as $key) {
+            $top = $events[$key]['top'];
+            if ($top >= $group_end) {
+                foreach ($group as $member) {
+                    $events[$member]['columns'] = count($column_ends);
+                }
+                $group       = [];
+                $column_ends = [];
+            }
+            $column = 0;
+            while (isset($column_ends[$column]) && $column_ends[$column] > $top) {
+                ++$column;
+            }
+            $column_ends[$column]    = $bottoms[$key];
+            $events[$key]['column'] = $column;
+            $group[]                = $key;
+            $group_end              = max($group_end, $bottoms[$key]);
+        }
+        foreach ($group as $member) {
+            $events[$member]['columns'] = count($column_ends);
+        }
+
+        foreach ($events as &$event) {
+            $event['stack'] = 0;
+            if ($max_columns > 0 && $event['columns'] > $max_columns) {
+                $event['stack']   = max(0, $event['column'] - $max_columns + 1);
+                $event['column']  = min($event['column'], $max_columns - 1);
+                $event['columns'] = $max_columns;
+            }
+        }
+
+        return $events;
+    }
+
+    /**
      * Gets the print button HTML if enabled in settings.
      *
      * @return string

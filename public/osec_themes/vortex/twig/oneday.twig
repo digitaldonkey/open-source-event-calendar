@@ -149,7 +149,15 @@
 									{% if event.is_multiday %}ai1ec-multiday{% endif %}"
 								style="top: {{ day_array.top }}px;
 									height: {{ day_array.height }}px;
-									left: {{ day_array.indent * indent_multiplier + indent_offset }}px;
+									{% if day_array.stack %}
+										{# More overlapping events than columns: offset within the last column, keeping 3em visible. #}
+										left: calc({{ indent_offset }}px + (100% - {{ indent_offset }}px) * {{ day_array.column }} / {{ day_array.columns }} + min({{ day_array.stack * 8 }}px, (100% - {{ indent_offset }}px) / {{ day_array.columns }} - 3em));
+										width: calc((100% - {{ indent_offset }}px) / {{ day_array.columns }} - min({{ day_array.stack * 8 }}px, (100% - {{ indent_offset }}px) / {{ day_array.columns }} - 3em));
+									{% else %}
+										left: calc({{ indent_offset }}px + (100% - {{ indent_offset }}px) * {{ day_array.column }} / {{ day_array.columns }});
+										width: calc((100% - {{ indent_offset }}px) / {{ day_array.columns }});
+									{% endif %}
+									right: auto;
 									{{ event.color_style }}
 									{% set faded_color = event.faded_color %}
 									{% set rgba_color  = event.rgba_color %}

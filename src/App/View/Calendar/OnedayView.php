@@ -154,6 +154,8 @@ class OnedayView extends AbstractView
      *     ['indent']    => how much to indent this event to accommodate multiple
      *                      events occurring at the same time (0, 1, 2, etc., to
      *                      be multiplied by whatever desired px/em amount)
+     *     ['column']    => column of this event among overlapping events (0, 1, 2, etc.)
+     *     ['columns']   => number of columns of its group of overlapping events
      *     ['event']     => event data object
      *
      * @param  DT  $start_time
@@ -299,6 +301,9 @@ class OnedayView extends AbstractView
                 }
             }
         }
+        unset($events, $evt);
+        $all_events[$day_start_ts]['notallday'] = static::addOverlapColumns($all_events[$day_start_ts]['notallday'], 4);
+
         $days[$day_start_ts] = [
             'today'     => 0 === strcmp(
                 (string)$today_ymd,
