@@ -1,3 +1,13 @@
+= 1.1.14 =
+- Print support for all calendar views: print button in month, week, day and agenda #55
+- Printouts show a header with title, view name and a link to the printed view, and leave out navigation, filters, subscribe buttons and link addresses
+- Week and day print the hours shown on screen scaled to one page; days with many parallel events print as a list
+- Agenda print: dates are never split, events only where at least five lines fit on each page
+- Category colors print as event borders, so they survive black and white printing
+- Overlapping events in week and day view are placed side by side instead of covering each other (a custom week/day template positioning events by 'indent' must switch to 'column', 'columns' and 'stack')
+- Week and day grid now follows the window width instead of the width at page load
+- Month view shows start and end time above the event title
+
 = 1.1.13 =
 WP 7.1 compatibility
 
