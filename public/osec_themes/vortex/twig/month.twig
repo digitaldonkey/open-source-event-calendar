@@ -50,7 +50,8 @@
 
 										<div class="ai1ec-event"
 											 style="{{ event.color_style | e( 'html_attr' ) }}">
-											{% if not event.is_allday %}
+											{# Multi-day events are bars laid out by JS with a fixed height, so they stay on one line. #}
+											{% if not event.is_allday and not event.is_multiday %}
 												<span class="ai1ec-event-time">
 													{{ event.timespan | raw }}
 												</span>
