@@ -101,3 +101,26 @@
 .osec-all-events-expanded #ai1ec-agenda-expand-all {
   display: none;
 }
+
+// Print button
+.ai1ec-print-buttons {
+  display: inline-flex;
+
+  .osec-print-link {
+    white-space: nowrap;
+    font-size: var(--wp--preset--font-size--normal);
+
+    > i {
+      padding-right: .35em;
+    }
+  }
+
+  // The label needs room; on narrow screens the icon and its title have to do.
+  .osec-print-link--label {
+    display: none;
+
+    @media (min-width: 36.25rem) {
+      display: inline;
+    }
+  }
+}
