@@ -303,6 +303,11 @@ class MonthView extends AbstractView
                     'ticket_url_label' => $evt->get_runtime('ticket_url_label'),
                     'edit_post_link'   => $evt->get_runtime('edit_post_link'),
                     'short_start_time' => $evt->get_runtime('short_start_time'),
+                    // Start and end time without the date, as in the popup. Multi-day events span
+                    // several cells, so they keep the start time only; the popup has their dates.
+                    'timespan'         => $evt->is_multiday()
+                        ? $evt->get_runtime('short_start_time')
+                        : TwigExtension::timespan($evt, 'hidden'),
                     'multiday_end_day' => $evt->get_runtime('multiday_end_day'),
                     'start_day'        => $evt->get_runtime('start_day'),
                     'short'            => $evt->get_runtime('short_start_time'),

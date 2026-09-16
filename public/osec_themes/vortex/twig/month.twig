@@ -52,7 +52,7 @@
 											 style="{{ event.color_style | e( 'html_attr' ) }}">
 											{% if not event.is_allday %}
 												<span class="ai1ec-event-time">
-													{{ event.short_start_time }}
+													{{ event.timespan | raw }}
 												</span>
 											{% endif %}
 											<span class="ai1ec-event-title">
