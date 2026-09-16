@@ -479,10 +479,19 @@ table.ai1ec-oneday-view-original {
 
 // Month view multi-day bars and dropdowns.
 .ai1ec-month-view {
+	// One line for all-day events, two for timed ones: start time above the title.
 	.ai1ec-event {
-		height: 14px;
+		height: auto;
 		line-height: 14px;
 		margin: 0 0 1px;
+	}
+	.ai1ec-event-time {
+		display: block;
+	}
+	.ai1ec-event-title {
+		display: block;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	// Apply word wrapping if enabled.
 	&.ai1ec-word-wrap {
@@ -904,6 +913,16 @@ table.ai1ec-oneday-view-original {
 				font-size: 9px;
 				font-style: italic;
 			}
+		}
+	}
+	// Month: time and title share a wrapping line, which is shorter than the two lines used on screen.
+	.ai1ec-month-view {
+		.ai1ec-event-time {
+			display: inline !important;
+			margin-right: 0.3em;
+		}
+		.ai1ec-event-title {
+			display: inline !important;
 		}
 	}
 	// Month: lower minimum row height, so wrapped titles still fit one page in most months.

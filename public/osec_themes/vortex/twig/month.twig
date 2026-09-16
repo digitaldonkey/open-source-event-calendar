@@ -50,6 +50,11 @@
 
 										<div class="ai1ec-event"
 											 style="{{ event.color_style | e( 'html_attr' ) }}">
+											{% if not event.is_allday %}
+												<span class="ai1ec-event-time">
+													{{ event.short_start_time }}
+												</span>
+											{% endif %}
 											<span class="ai1ec-event-title">
 												{{ event.filtered_title | raw }}
 												{% if show_location_in_title and event.venue %}
@@ -57,11 +62,6 @@
 													>{{ text_venue_separator}}{{ event.venue }}</span>
 												{% endif %}
 											</span>
-											{% if not event.is_allday %}
-												<span class="ai1ec-event-time">
-													{{ event.short_start_time }}
-												</span>
-											{% endif %}
 										</div>
 									</a>
 
