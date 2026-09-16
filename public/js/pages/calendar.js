@@ -5780,7 +5780,7 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
             height: i,
             containerClass: "ai1ec-oneday-view ai1ec-popover-boundary",
             scroll: !1
-        });
+        }), e.find(".tablescroll_wrapper, .tablescroll_head, .tablescroll_body").css("width", ""), e.find(".tablescroll_head th, .tablescroll_body > tbody > tr > td").css("width", "");
         if (e.find(".ai1ec-week-view").length || e.find(".ai1ec-oneday-view").length) e.find(".ai1ec-oneday-view .tablescroll_wrapper, .ai1ec-week-view .tablescroll_wrapper").scrollTo(e.find(".ai1ec-hour-marker:eq(" + u.week_view_starts_at + ")")), e.find(".ai1ec-hour-marker:eq(" + u.week_view_starts_at + ")").addClass("ai1ec-first-visible");
         e.find(".ai1ec-month-view .ai1ec-multiday").length && r.extend_multiday_events(e), e.find(".osec-calendar-view-container").data("ai1ec-inited", !0).trigger("initialize_view.ai1ec"), e.find(".ai1ec-calendar-toolbar").trigger("ai1ec-affix.reinit")
     }, g = function (t) {
