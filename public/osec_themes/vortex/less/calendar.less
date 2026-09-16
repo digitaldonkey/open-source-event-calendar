@@ -491,6 +491,27 @@ table.ai1ec-oneday-view-original {
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
+	.ai1ec-event-time-short {
+		display: none;
+	}
+	// Day cells are about 40px wide on phones: smaller type, and the start time without the end.
+	@media screen and ( max-width: (@screen-xs - 1) ) {
+		.ai1ec-event {
+			line-height: 11px;
+			padding-left: 1px;
+			padding-right: 1px;
+		}
+		.ai1ec-event-time,
+		.ai1ec-event-title {
+			font-size: 8px;
+		}
+		.ai1ec-event-time {
+			display: none;
+		}
+		.ai1ec-event-time-short {
+			display: block;
+		}
+	}
 	// Apply word wrapping if enabled.
 	&.ai1ec-word-wrap {
 

@@ -55,6 +55,10 @@
 												<span class="ai1ec-event-time">
 													{{ event.timespan | raw }}
 												</span>
+												{# Day cells are too narrow for the end time on phones. #}
+												<span class="ai1ec-event-time ai1ec-event-time-short">
+													{{ event.short_start_time }}
+												</span>
 											{% endif %}
 											<span class="ai1ec-event-title">
 												{{ event.filtered_title | raw }}
