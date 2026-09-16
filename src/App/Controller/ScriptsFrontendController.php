@@ -393,6 +393,11 @@ class ScriptsFrontendController extends OsecBaseClass
                 'Loading&hellip;',
                 'open-source-event-calendar'
             ),
+            /* translators: Number of events not printed */
+            'print_more_events'              => __(
+                '+%d more',
+                'open-source-event-calendar'
+            ),
             'language'                       => WpmlHelper::factory($this->app)->get_lang(),
             'ajax_url'                       => $ajax_url,
             // 24h time format for time pickers

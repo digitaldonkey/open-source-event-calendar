@@ -397,7 +397,7 @@ timely.define("domReady", [], function () {
     return c.version = "2.0.0", c.load = function (e, t, n, r) {
         r.isBuild ? n(null) : c(n)
     }, c
-}), timely.define("scripts/calendar/print", ["jquery_timely"], function ($) {
+}), timely.define("scripts/calendar/print", ["jquery_timely", "ai1ec_config"], function ($, config) {
     // Week/day grids are scaled to one page: page height minus print header and margins (px, 96 dpi).
     // Week prints landscape, day portrait; the smaller of A4 and Letter.
     var PAGE_HEIGHT = {week: 660, oneday: 860},
@@ -406,7 +406,12 @@ timely.define("domReady", [], function () {
         // Events are at least this high, so the time and a title line stay readable.
         MIN_EVENT_HEIGHT = 28,
         // Space for hour labels: day view (indent_offset in OnedayView), and the first day column in week view.
-        LABEL_GUTTER = {oneday: 54, week: 46};
+        LABEL_GUTTER = {oneday: 54, week: 46},
+        // A day with more parallel events than this prints as a list instead of grid columns,
+        // because the columns would be too narrow to read.
+        LIST_THRESHOLD = {oneday: 10, week: 3},
+        // Height budget of one list entry: time line plus up to two title lines.
+        LIST_ENTRY_HEIGHT = 30;
 
     // Places overlapping events of one day side by side in equal columns. The server does the same
     // for the screen grid, but the print grid needs it again: scaled events keep a minimum height.
@@ -422,6 +427,7 @@ timely.define("domReady", [], function () {
             cluster = [];
             columns = [];
         };
+        var used = 0;
         events.sort(function (a, b) {
             return a.top - b.top || b.bottom - a.bottom;
         });
@@ -434,11 +440,39 @@ timely.define("domReady", [], function () {
                 column++;
             }
             columns[column] = ev.bottom;
+            used = Math.max(used, columns.length);
             ev.column = column;
             cluster.push(ev);
             cluster_end = Math.max(cluster_end, ev.bottom);
         });
         finish_cluster();
+
+        return used;
+    };
+
+    // Prints a day with too many parallel events as a list of "time title" lines.
+    var render_day_list = function ($day, height, base) {
+        var $events = $day.children('.ai1ec-event-container'),
+            capacity = Math.max(1, Math.floor(height / LIST_ENTRY_HEIGHT)),
+            hidden = $events.length - capacity;
+
+        $day.addClass('osec-print-list').css('padding-left', base + 'px');
+        $events.each(function () {
+            this.style.top = '';
+            this.style.height = '';
+            this.style.left = '';
+            this.style.width = '';
+            this.style.right = '';
+        });
+        if (hidden > 0) {
+            // One more entry makes room for the "+N more" line.
+            $events.slice(capacity - 1).remove();
+            $day.append(
+                $('<div class="osec-print-more"></div>').text(
+                    (config.print_more_events || '+%d more').replace('%d', hidden + 1)
+                )
+            );
+        }
     };
 
     // Returns a copy of a week/day grid wrapper showing the hours visible on screen, scaled to one page.
@@ -487,7 +521,9 @@ timely.define("domReady", [], function () {
                 this.style.height = (bottom - top) + 'px';
                 events.push({el: this, top: top, bottom: bottom});
             });
-            layout_overlaps(events, base);
+            if (layout_overlaps(events, base) > LIST_THRESHOLD[type]) {
+                render_day_list($(this), height, base);
+            }
         });
         return $grid;
     };

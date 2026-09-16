@@ -886,6 +886,25 @@ table.ai1ec-oneday-view-original {
 		.ai1ec-hour-marker div {
 			font-size: 9px;
 		}
+		// Days with too many parallel events print as a list of "time title" lines.
+		.osec-print-list {
+			overflow: hidden;
+			.ai1ec-event-container,
+			.ai1ec-event {
+				position: static !important;
+				display: block;
+				height: auto !important;
+				margin: 0 0 2px;
+				width: auto !important;
+			}
+			.ai1ec-event-time {
+				margin-right: 0.3em;
+			}
+			.osec-print-more {
+				font-size: 9px;
+				font-style: italic;
+			}
+		}
 	}
 	// Month: lower minimum row height, so wrapped titles still fit one page in most months.
 	.ai1ec-month-view .ai1ec-day-stretcher {
