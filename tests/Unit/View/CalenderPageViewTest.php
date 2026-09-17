@@ -45,6 +45,13 @@ class CalenderPageViewTest extends TestBase
             [-2177452800, $expect_fail], // Invalid
             [-1, $expect_fail], // Invalid
             [0, 0], // GMT Thursday, 1. January 1970 00:00:00
+            // --- calendrically-invalid date-shaped exact_date values (regression for HTTP 500 fix) ---
+            ['32-13-2024', $expect_fail], // day 32, month 13 - out of range for any calendar
+            ['99-99-9999', $expect_fail], // day 99, month 99 - out of range
+            ['30-2-2024', $expect_fail], // Feb 30 - does not exist even in a leap year
+            ['29-2-2023', $expect_fail], // Feb 29 in a non-leap year - does not exist
+            ['31-4-2026', $expect_fail], // April has only 30 days
+            ['abc-def-ghij', $expect_fail], // non-numeric garbage - fails regex, pre-existing behavior
         ];
     }
 

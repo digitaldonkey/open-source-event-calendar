@@ -28,6 +28,10 @@ class DateValidator
             return false;
         }
 
+        if ( ! checkdate((int) $matches['m'], (int) $matches['d'], (int) $matches['y'])) {
+            return false;
+        }
+
         return sprintf(
             '%04d-%02d-%02d',
             $matches['y'],
