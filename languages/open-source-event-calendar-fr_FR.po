@@ -2210,9 +2210,9 @@ msgid ", and "
 msgstr ", et "
 
 #: src/App/View/Event/EventTimeView.php:241
-msgctxt "Event time-time separator (nbsp,mdash,nbsp)"
-msgid " — "
-msgstr "—"
+msgctxt "Event time-time separator (nbsp, hyphen, narrow nbsp)"
+msgid " - "
+msgstr " - "
 
 #: src/App/View/Event/EventTimeView.php:264
 msgctxt "Event date-time separator (nbsp)"

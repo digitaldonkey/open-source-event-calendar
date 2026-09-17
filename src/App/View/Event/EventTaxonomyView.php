@@ -8,6 +8,7 @@ use Osec\App\Model\TaxonomyAdapter;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Settings\HtmlFactory;
+use Osec\Theme\ThemeLoader;
 
 /**
  * This class renders the html for the event taxonomy.
@@ -56,11 +57,12 @@ class EventTaxonomyView extends OsecBaseClass
     {
         $color = $this->get_color_for_event($event);
 
-        // Convert to style attribute.
+        // Convert to style attribute. The variable is used by print CSS.
         if ($color) {
-            $color = $event->is_allday() || $event->is_multiday()
+            $color = ($event->is_allday() || $event->is_multiday()
                 ? 'background-color: ' . $color . ';'
-                : 'color: ' . $color . ' !important;';
+                : 'color: ' . $color . ' !important;')
+                . ' --osec-event-color: ' . $color . ';';
         } else {
             $color = '';
         }
@@ -218,18 +220,20 @@ class EventTaxonomyView extends OsecBaseClass
      */
     public function get_category_color_square($term_id)
     {
-        $color          = $this->taxonomyModel->get_category_color($term_id);
-        $event_taxonomy = EventTaxonomy::factory($this->app);
-        if (null !== $color) {
-            $taxonomy = $event_taxonomy->get_taxonomy_for_term_id($term_id);
-            $cat      = get_term($term_id, $taxonomy->taxonomy);
-
-            return '<span class="ai1ec-color-swatch ai1ec-tooltip-trigger" ' .
-                   'style="background:' . $color . '" title="' .
-                   esc_attr($cat->name) . '"></span>';
+        $color = $this->taxonomyModel->get_category_color($term_id);
+        if (null === $color) {
+            return '';
         }
+        $taxonomy = EventTaxonomy::factory($this->app)->get_taxonomy_for_term_id($term_id);
+        $category = get_term($term_id, $taxonomy->taxonomy);
 
-        return '';
+        return $this->render(
+            'category-color-swatch.twig',
+            [
+                'color' => $color,
+                'name'  => $category->name,
+            ]
+        );
     }
 
     /**
@@ -242,13 +246,32 @@ class EventTaxonomyView extends OsecBaseClass
     public function get_category_image_square($term_id)
     {
         $image = $this->taxonomyModel->get_category_image($term_id);
-        if (null !== $image) {
-            return '<img src="' . $image . '" alt="' .
-                   __('Category image', 'open-source-event-calendar') .
-                   '" class="osec_category_small_image_preview" />';
+        if (null === $image) {
+            return '';
         }
 
-        return '';
+        return $this->render(
+            'category-image.twig',
+            [
+                'image'              => $image,
+                'text_category_image' => __('Category image', 'open-source-event-calendar'),
+            ]
+        );
+    }
+
+    /**
+     * Renders a theme template.
+     *
+     * @param  string  $template  Template file name.
+     * @param  array  $args  Template arguments.
+     *
+     * @return string
+     */
+    protected function render(string $template, array $args): string
+    {
+        return ThemeLoader::factory($this->app)
+                          ->get_file($template, $args, false)
+                          ->get_content();
     }
 
     /**
@@ -329,49 +352,31 @@ class EventTaxonomyView extends OsecBaseClass
         $categories = $this->taxonomyModel->get_post_categories(
             $event->get('post_id')
         );
-        foreach ($categories as &$category) {
-            $href  = HtmlFactory::factory($this->app)
-                                ->create_href_helper_instance(['cat_ids' => $category->term_id])
-                                ->generate_href();
-            $class = '';
-            $title = '';
-            if ($category->description) {
-                $title = 'title="' . esc_attr($category->description) . '" ';
-            }
-
-            $html        = '';
-            $class       .= 'ai1ec-category';
-            $color_style = '';
-            if ($format === 'inline') {
-                $taxonomy    = TaxonomyAdapter::factory($this->app);
-                $color_style = $taxonomy->get_category_color(
-                    $category->term_id
-                );
-                if ($color_style !== '') {
-                    $color_style = 'style="color: ' . $color_style . ';" ';
-                }
-                $class .= '-inline';
-            }
-
-            $html .= '<a class="' . $class .
-                     ' ai1ec-term-id-' . $category->term_id . ' p-category" ' .
-                     $title . $color_style . 'href="' . $href . '">';
-
-            if ($format === 'blocks') {
-                $html .= $this->get_category_color_square(
-                    $category->term_id
-                ) . ' ';
-            } else {
-                $html .=
-                    '<i ' . $color_style .
-                    'class="ai1ec-fa ai1ec-fa-folder-open"></i>';
-            }
-
-            $html     .= '<span itemprop="keywords" >' . esc_html($category->name) . '</span></a>';
-            $category = $html;
+        $args = [];
+        foreach ($categories as $category) {
+            $args[] = [
+                'term_id'      => $category->term_id,
+                'name'         => $category->name,
+                'description'  => $category->description,
+                'href'         => HtmlFactory::factory($this->app)
+                                             ->create_href_helper_instance(['cat_ids' => $category->term_id])
+                                             ->generate_href(),
+                'color'        => $format === 'inline'
+                    ? $this->taxonomyModel->get_category_color($category->term_id)
+                    : '',
+                'color_swatch' => $format === 'blocks'
+                    ? $this->get_category_color_square($category->term_id)
+                    : '',
+            ];
         }
 
-        return implode(' ', $categories);
+        return $this->render(
+            'event-categories.twig',
+            [
+                'categories' => $args,
+                'format'     => $format,
+            ]
+        );
     }
 
     /**
@@ -385,22 +390,18 @@ class EventTaxonomyView extends OsecBaseClass
         if ( ! $tags) {
             $tags = [];
         }
-        foreach ($tags as &$tag) {
-            $href = HtmlFactory::factory($this->app)
-                               ->create_href_helper_instance(['tag_ids' => $tag->term_id])
-                               ->generate_href();
-
-            $class     = '';
-            $title     = '';
-            if ($tag->description) {
-                $title = 'title="' . esc_attr($tag->description) . '" ';
-            }
-            $tag = '<a class="ai1ec-tag' . $class .
-                   ' ai1ec-term-id-' . $tag->term_id . '" ' . $title .
-                   'href="' . $href . '"><span itemprop="keywords">' .
-                   esc_html($tag->name) . '</span></a>';
+        $args = [];
+        foreach ($tags as $tag) {
+            $args[] = [
+                'term_id'     => $tag->term_id,
+                'name'        => $tag->name,
+                'description' => $tag->description,
+                'href'        => HtmlFactory::factory($this->app)
+                                            ->create_href_helper_instance(['tag_ids' => $tag->term_id])
+                                            ->generate_href(),
+            ];
         }
 
-        return implode(' ', $tags);
+        return $this->render('event-tags.twig', ['tags' => $args]);
     }
 }

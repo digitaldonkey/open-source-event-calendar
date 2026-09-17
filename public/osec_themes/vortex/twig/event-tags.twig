@@ -1,0 +1,6 @@
+{%- for tag in tags -%}
+	{%- if not loop.first %} {% endif -%}
+	<a class="ai1ec-tag ai1ec-term-id-{{ tag.term_id }}"
+		{%- if tag.description %} title="{{ tag.description }}"{% endif %}
+		href="{{ tag.href }}"><span itemprop="keywords">{{ tag.name }}</span></a>
+{%- endfor -%}

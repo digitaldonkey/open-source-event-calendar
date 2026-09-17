@@ -24,8 +24,12 @@ class MemoryCheck extends OsecBaseClass
         if (0 === $required_limit) {
             return true;
         }
+        $limit = self::stringToBytes(ini_get('memory_limit'));
+        // -1 means unlimited memory, so there is always enough.
+        if ($limit < 0) {
+            return true;
+        }
         $required = self::stringToBytes($required_limit);
-        $limit    = self::stringToBytes(ini_get('memory_limit'));
         $used     = self::get_usage();
 
         return ($limit - $used) >= $required;

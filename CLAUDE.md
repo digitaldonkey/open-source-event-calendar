@@ -24,6 +24,21 @@ Examples when running inside `ddev claude`:
 - npm: `npm`
 - PHPUnit: `vendor/bin/phpunit`
 - MySQL: `mysql`
+- WP-CLI: **`/usr/local/bin/wp`, not a bare `wp`** - see below
+
+**Always call WP-CLI by its absolute path `/usr/local/bin/wp`.** From inside the plugin
+directory a bare `wp` resolves to the plugin's *own* composer-installed WP-CLI
+(`vendor/bin/wp`), and under that binary **the plugin never bootstraps**: its entry point only
+loads `vendor/autoload.php` and registers `BootstrapController::createApp()` on `init` when
+`\Osec\App\Controller\BootstrapController` is *not* already declared
+(`open-source-event-calendar.php`), but that vendor WP-CLI has already pulled in the plugin's
+composer autoloader, so the class exists, the guard skips the whole block, and the `init` hook
+is never added. WordPress loads, the plugin file is included, `wp plugin list` still says
+*active* - yet `OSEC_VERSION` is undefined and `global $osec_app` is `null`, so any
+`Something::factory($osec_app)` fatals with "Argument #1 ($app) must be of type
+Osec\Bootstrap\App, null given". With `/usr/local/bin/wp` (DDEV's own) `$osec_app` is a proper
+`Osec\Bootstrap\App` regardless of the current directory. `--path=/var/www/html` is unrelated
+and does *not* fix it.
 
 If you need to execute a command from the host, use the appropriate
 DDEV command, for example:
@@ -41,12 +56,17 @@ environment first.
 
 ## Database Safety
 
-The DDEV database is a development database.
+The DDEV database is a development database and usually contains
+nothing important.
 
-Do not perform destructive database operations unless explicitly
-requested.
+Any change to the dev database is allowed, including destructive ones
+(altering settings/data, dropping, truncating, resetting). Ask once
+per session, the first time a change is needed: "Can I drop (or
+alter) the database?" After a yes, no further asking in that session.
 
-Never drop, truncate, or reset the database without asking first.
+When a DB change is the straightforward route, ask for it instead of
+building workarounds to avoid the write (temporary mu-plugins, option
+filters, cookie or query-param overrides).
 
 Prefer read-only queries when investigating problems.
 
@@ -160,6 +180,152 @@ Do not access production databases.
 - Gutenberg blocks in `calendar_block/` use WordPress scripts
 - Legacy code may exist from original all-in-one-event-calendar
 
+## Frontend CSS Delivery
+
+The compiled theme CSS reaches the page in one of **four** ways, decided per request by
+`FrontendCssController::get_css_url()` (`src/App/Controller/FrontendCssController.php`). Which one is active
+changes *where in the DOM the stylesheet lives*, so never assume it is a `<link>` in `<head>`:
+
+| Condition | Result | Where |
+|---|---|---|
+| `OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST` (debug constant, usually in `constants-local.php`) | `echo_css()` on `wp_head` | inline `<style id="osec-frontend-css-inline-css">` **in `<body>`** |
+| Option `osec_compiled.css` (`COMPILED_CSS_KEY`) is a string | that URL | `<link>` in `<head>` |
+| Option is numeric **and** setting `render_css_as_link` is on (default) | site URL with `?osec-css-cache=<timestamp>` | `<link>` in `<head>` |
+| Option is numeric and `render_css_as_link` is off | `echo_css()` on `wp_head` | inline `<style>` **in `<body>`** |
+| Option is `null` (new install) | `<theme_url>/css/osec_parsed.css` | `<link>` in `<head>`, and the file is usually absent - see `.claude/plans/less-sha1-map-and-precompiled-css.md` |
+
+**Why the inline variant lands in the body:** `echo_css()` does not echo. It is hooked to `wp_head` but calls
+`wp_register_style()` + `wp_add_inline_style()` + `wp_enqueue_style()`, and by then `wp_print_styles` has already
+run for the head, so WordPress prints the handle with the footer styles - as a direct child of `<body>`, carrying
+the whole compiled stylesheet (~390 KB).
+
+**Consequences to keep in mind:**
+
+- **Any JS that clears, replaces or detaches the body can destroy the calendar's styling.** This is what made the
+  print button produce an unstyled page (`handle_click_on_print_button` in `public/js/pages/calendar.js`; fixed by
+  detaching everything *except* `style, link, script, noscript, template`). Exclude non-rendered elements, or work
+  on a container instead of `<body>`.
+- **A local `OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST` flips the dev site to the inline variant**, so behaviour
+  differs from a default production site. When a CSS-related bug reproduces in one place and not the other, check
+  this first: `curl -s <url> | grep -c 'id="osec-frontend-css-inline-css"'` (1 = inline in body, 0 = link in head;
+  grep without the `id=` also matches the comment WordPress appends after the style, so it counts 2).
+- That constant also makes `tests/Unit/ConstantsTest.php::test_is_less_debug_disabled` fail locally. Expected;
+  `constants-local.php` is gitignored, CI is unaffected.
+
+## CSS Compile Caching (Dev Staleness)
+
+**If a LESS/theme-CSS edit doesn't seem to take effect, it is essentially never PHP opcache** -
+`.less` files are read as plain text (`file_get_contents()`), not compiled PHP, so opcache
+cannot cache them. Two different caches actually sit between a LESS edit and the browser:
+
+1. **`FrontendCssController::get_compiled_css()` has `static $recompiledCss = null;`.** A PHP
+   `static` local variable is scoped to the **process**, not the request - a php-fpm worker is
+   reused across many requests, so once one worker computes this, that worker returns the same
+   value forever (ignoring source changes and cache-busting) until it recycles.
+2. **`CacheFactory::createCache()` tries three engines in order** (`src/Cache/CacheFactory.php`):
+   `CacheApcu` → `CacheFile` → `CacheDb` (DB-option-backed), first one available/enabled wins.
+   With `OSEC_ENABLE_CACHE_APCU` at its default `true`, `CacheApcu` always wins first, so
+   compiled CSS lives in APCu's shared memory - which every worker in the pool shares, and
+   which (like the static above) only clears on a full php-fpm restart, not per-request or via
+   the `?osec-css-cache=` cache-bust.
+
+**For local dev/debugging, disable APCu via `constants-local.php`** (gitignored - copy from
+`constants-local.php.example`, never edit the tracked `constants.php` for this):
+```php
+if (!defined('OSEC_ENABLE_CACHE_APCU')) {
+    define('OSEC_ENABLE_CACHE_APCU', FALSE);
+}
+```
+With APCu out of the way, `CacheFactory` falls through to `CacheFile` (`OSEC_ENABLE_CACHE_FILE`
+is already `true` by default), so `FrontendCssController::update_persistence_layer($css)` - the
+save step run once right after a successful compile, inside `get_compiled_css()`'s cache-miss
+branch - takes the `CacheFile` path instead of the generic one:
+
+- **File cache** (`$this->cache->is_file_cache()` true): `CacheFile::setWithFileInfo()` writes
+  the CSS to `cache/css/<prefix>_osec_compiled.css`. The `<prefix>` is
+  `substr(md5(site_url()), 0, 8)` - constant per site, **not a content hash** - so the same file
+  is overwritten in place on every recompile; diff it directly to see what actually compiled,
+  no request round-trip or cache-timing guesswork. The returned file URL (a string) is written
+  into the plain `osec_compiled.css` WP option via `store_css_cache()`. From then on
+  `get_css_url()` (a separate code path, consulted on every page `<head>`) sees a string and
+  links straight to that static file - nginx serves it, no PHP involved, no second request
+  needed once it exists.
+- **Any other engine (APCu/DB)**: `$this->cache->set()` stores the CSS *inside that engine*,
+  but `store_css_cache(time())` writes a **timestamp**, not the CSS, into the same
+  `osec_compiled.css` option. `get_css_url()` then sees a number and can only embed
+  `<link href="?osec-css-cache=<timestamp>">` - a URL that routes back through WordPress
+  (`render_css()` → `get_compiled_css()` again) rather than ever containing CSS inline. This is
+  *why* a second request is structurally required for non-file caches, not a bug: the page HTML
+  can never carry the actual CSS in this branch, only a pointer back to WordPress.
+- If the file write itself fails (`CacheWriteException` from a permissions/disk issue),
+  `update_persistence_layer()` doesn't catch it - it propagates to `get_compiled_css()`'s outer
+  catch, which notifies an admin (unless already in per-request-recompile debug mode) but still
+  returns the freshly-compiled CSS for the current request. Degraded (recompiles every request
+  until fixed) but never broken.
+
+**Reliable verification loop after any LESS/PHP change affecting compiled CSS:**
+1. `supervisorctl restart php-fpm` (inside the container) - clears both the per-worker `static`
+   and APCu's shared memory in one step; a `wp eval 'opcache_reset();'` does **not** do this,
+   since that runs in its own throwaway CLI process, not the FPM pool serving real requests.
+2. **Delete `cache/css/*_osec_compiled.css`, then** hit `?osec-css-cache=<timestamp>`. Deleting
+   the file is the part that actually forces the recompile: in file-cache mode the route still
+   goes through `get_compiled_css()`, whose cache lookup finds that file and returns it, so a
+   LESS edit can sit unreflected through any number of cache-bust requests *and* a php-fpm
+   restart. Pair it with `wp option update osec_compiled.css "$(date +%s)"` - the option holds
+   the file's URL once written, and `null` is worse than a number here, since that is the
+   "new install" branch (see the table above), which links a static `osec_parsed.css` that
+   usually does not exist and never triggers a compile at all.
+3. A LESS→CSS compile can need a second request to be fully reflected (per maintainer note) -
+   don't conclude a change "didn't take" from a single request's response.
+4. With APCu disabled per above, read the actual file in `cache/css/` rather than re-parsing
+   HTML output.
+
+## Base Font Size (Theme Setting)
+
+The "Base font size" option (Calendar Theme Options) compiles to `@font-size-base`
+(`@baseFontSize`, set in `public/osec_themes/vortex/less/user_variables.php` /
+`user-variable-map.less`) and is applied as a literal, LESS-compiled px value on the
+plugin's own wrapper element (`.timely`, via `bootstrap/scaffolding.less` imported inside
+`.timely { }` in `style.less`) - not on `<html>`.
+
+**Each theme ships its own default for it** (`user_variables.php`: vortex `13px`, plana `1rem`,
+umbra `0.8rem`), so *switching theme changes the base font size* unless a value is saved in
+`osec_less_variables`. Rendered box heights then shift - don't read that as a LESS edit having
+broken something. **Check the base font size after every theme switch**, and when comparing two
+themes, pin them to the same value so only one variable moves
+(`integration_tests/responsive_compare/responsive-compare.sh` takes `BASE_FONT=13px` for this
+and prints the effective value after each switch).
+
+Note that switching theme *deletes* `osec_less_variables`, discarding any tuned theme options -
+capture and restore them around anything that switches themes.
+
+**All font sizes in the plugin's LESS/CSS must be relative to that wrapper, using `em` or
+`%` - never `rem`, and never a hardcoded `px` value.** `rem` is always relative to the root
+`<html>` element's font-size, which belongs to the surrounding theme/site, not to
+`.timely`. A hardcoded `px` value doesn't move with the setting at all. Either one silently
+breaks "Base font size" for that element.
+
+Note: `@font-size-base * <factor>` is a LESS-side exception, not a third unit - it still
+compiles down to a `px` value in the output CSS, but that value is derived from the setting
+at compile time, so it moves when the setting changes. Use it in LESS source for a
+size that should track the base but not equal it; the rule above is about hand-written
+`px`/`rem` literals in the CSS.
+
+**Exception: print styles** (`@media print`, `.osec-print-calendar()`, `.ai1ec-print` in
+`calendar.less`) may use fixed `px`/`pt` sizes - physical paper output isn't meant to track
+a screen font-size setting.
+
+When adding or reviewing CSS/LESS outside print styles, check every `font-size:` for a bare
+`px`/`rem` value.
+
+**Never add two LESS values of different units.** `less.php` keeps the *first* operand's unit
+and silently discards the second's, with no warning: `@a: .5em; @b: 1px; (@a + @b)` compiles to
+`1.5em`, not `calc(.5em + 1px)`. Mixing `em` with `px` is easy to hit here precisely because the
+rule above pushes everything towards `em` while borders and hairlines stay `px`. Use
+`calc( ~"@{a} + @{b}" )` (the `~""` escape keeps LESS from evaluating it) and check the compiled
+output in `cache/css/*_osec_compiled.css` - a plausible-looking wrong number is the normal
+failure mode, not a compile error.
+
 ## Twig → JS Frontend Templates
 
 - Three Twig templates double as the **frontend-rendering** (client-side JS) templates: `public/osec_themes/vortex/twig/{agenda,oneday,month}.twig`. Frontend rendering only applies when the OSEC Settings option `use_frontend_rendering` is enabled — otherwise only their backend (PHP) rendering matters.
@@ -188,6 +354,17 @@ Do not access production databases.
 - Translation files in `languages/` directory
 - All user-facing strings must be translatable
 
+## Commits
+
+- **The maintainer commits and pushes.** Default workflow: prepare the changes, run the checks, report what changed and let the maintainer commit. Commit only when asked to in that session (as during the print work), and never push.
+- **Commit identity is `digitaldonkey <tho@donkeymedia.eu>`**, set repo-locally in `.git/config`. The container's `~/.gitconfig` says `DDEV User <nobody@example.com>`, which is what commits get if the local setting is missing. Before committing, check `git var GIT_AUTHOR_IDENT`; if it isn't that identity, stop and tell the maintainer instead of committing.
+- **GrumPHP hooks do not run inside the container.** `.git/hooks/pre-commit` and `commit-msg` call `ddev exec`, and `/usr/local/bin/ddev` in the web container is a stub that prints a hint and exits 0. So commits made from `ddev claude` silently skip phpcs and the other GrumPHP tasks — the hook is there for the maintainer on the host.
+- **Therefore run the checks manually**, before committing and before handing work back:
+  - `vendor/bin/phpunit tests` and check the exit code (see the no-skipped-tests rule below)
+  - `vendor/bin/phpcs --standard=phpcs.xml <changed paths>`
+  - after editing `agenda.twig`, `oneday.twig` or `month.twig`: re-run the twig→JS transform
+  - or `vendor/bin/grumphp run` for everything at once
+
 ## Testing
 
 See `TESTING.md` for the full checklist, one-time setup, integration-test prerequisites, and GrumPHP task inventory. Quick reference:
@@ -198,6 +375,9 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
 - **GrumPHP**: `vendor/bin/grumphp run` (pre-commit hooks)
 - When fixing bugs, add tests where appropriate
 - **No skipped tests**: `phpunit.xml` has `failOnSkipped`/`failOnRisky`/`failOnIncomplete` — "OK, but … skipped" exits 1 and fails CI. Check the exit code, don't use `markTestSkipped()` for multisite-only variants (CI is single site), and run CI's command `vendor/bin/phpunit tests` (see `TESTING.md`)
+- **A calendar page must be set for any testing**: "no calendar page set" (`calendar_page_id` empty or pointing to a missing page) is a setup error, not a code bug. wp-admin shows the "installed, but has not been configured" notice (`EnvironmentCheck`). Don't fix or work around problems that only derive from that state; check the setup first when links, URLs or routing look wrong.
+  - **PHPUnit**: `TestBase::set_up()` creates a published page per test and sets `calendar_page_id` plus the `CacheMemory` `calendar_base_page`. It can't be created once in the bootstrap, because the WP test lib's `_delete_all_data()` deletes all posts after each test class. Tests not extending `TestBase` must do the same.
+  - **Dev site / Selenium**: verify `calendar_page_id` points to a published page before judging calendar output.
 
 **Updating the PHPUnit version**: WordPress core's test framework only supports specific PHPUnit versions per WP release — before bumping the project's target WordPress or PHP version, check the [WP core PHPUnit compatibility chart](https://make.wordpress.org/core/handbook/references/phpunit-compatibility-and-wordpress-versions/#supported-version-chart) and cross-check the candidate PHPUnit release on [Packagist](https://packagist.org/packages/phpunit/phpunit) against the project's PHP floor (8.2+). Update with `composer require --dev phpunit/phpunit:^<version>` and `composer require --dev yoast/phpunit-polyfills:^<version>` (polyfills bridge PHPUnit API differences so WP's test scaffolding keeps working across versions); `wp scaffold plugin-tests open-source-event-calendar` can regenerate the test bootstrap if it drifts. The currently pinned versions are always whatever's in `composer.json`/`composer.lock` — check there rather than assuming a version from memory.
 

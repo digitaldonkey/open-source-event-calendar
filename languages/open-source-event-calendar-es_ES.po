@@ -1315,7 +1315,7 @@ msgstr ""
 "Seleccione si desea usar imágenes de categoría como imagen destacada "
 "alternativa en la página del evento.\n"
 "Las imágenes alternativas pueden verse afectadas por el hook "
-"osec_avatar_valid_callbacks.\n"
+"osec_avatar_valid_callbacks."
 
 #: src/App/Model/Settings.php:720
 msgid "Input date format"
@@ -2186,9 +2186,9 @@ msgid ", and "
 msgstr ", y "
 
 #: src/App/View/Event/EventTimeView.php:241
-msgctxt "Event time-time separator (nbsp,mdash,nbsp)"
-msgid " — "
-msgstr "—"
+msgctxt "Event time-time separator (nbsp, hyphen, narrow nbsp)"
+msgid " - "
+msgstr " - "
 
 #: src/App/View/Event/EventTimeView.php:264
 msgctxt "Event date-time separator (nbsp)"

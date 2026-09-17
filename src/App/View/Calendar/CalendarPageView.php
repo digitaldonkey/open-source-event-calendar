@@ -5,7 +5,6 @@ namespace Osec\App\View\Calendar;
 use Osec\App\Controller\Router;
 use Osec\App\Model\Date\DateValidator;
 use Osec\App\Model\Date\DT;
-use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\Model\SettingsView;
 use Osec\App\WpmlHelper;
@@ -18,7 +17,6 @@ use Osec\Exception\SettingsException;
 use Osec\Http\Request\Request;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderHtml;
-use Osec\Http\Response\ResponseHelper;
 use Osec\Settings\HtmlFactory;
 use Osec\Theme\ThemeLoader;
 
@@ -336,14 +334,6 @@ class CalendarPageView extends OsecBaseClass
          */
         $view_args = apply_filters('osec_calendar_view_args_alter', $view_args);
 
-        // In case of an INVALID Date (NULL) we redirect.
-        if (null === $exact_date) {
-            $href = HtmlFactory::factory($this->app)
-                               ->create_href_helper_instance($view_args)
-                               ->generate_href();
-            ResponseHelper::redirect($href, 307);
-        }
-
         return $view_args;
     }
 
@@ -374,47 +364,58 @@ class CalendarPageView extends OsecBaseClass
         // Preprocess exact_date.
         // Check to see if a date has been specified.
         $cache_key = $request->get('exact_date');
-        $valid_date = false;
 
-        if ($cache_key) {
-            // Return from cache.
-            if (!is_null($this->datesCache->get($cache_key, null))) {
-                return $this->datesCache->get($cache_key);
-            }
-
-
-            // Some requests may not be timestamps.
-            if (DateValidator::is_valid_time_stamp($cache_key)) {
-                $valid_date = (int) $cache_key;
-            } else {
-                // Try to parse it
-                $parsed_date = $this->return_gmtime_from_exact_date($cache_key);
-                $valid_date = $parsed_date ? (int) $parsed_date : false;
-            }
-
-            // Last try, let's see if an exact date is set in settings.
-            if (!$valid_date) {
-                $default_date = $this->app->settings->get('exact_date');
-                if (!empty($default_date)) {
-                    $valid_date = (int) $this->return_gmtime_from_exact_date(
-                        $default_date
-                    );
-                }
-            }
-            // Save memory cache.
-            // Including wrong->default params.
-            if ($valid_date) {
-                $this->datesCache->set($cache_key, $valid_date);
-            }
-            return $valid_date;
+        // No exact_date on the URL at all: honour the "Default calendar start date" setting,
+        // if one is configured, instead of always falling back to today.
+        if (!$cache_key) {
+            return $this->get_default_date_from_settings();
         }
-        return false;
+
+        // Return from cache.
+        if (!is_null($this->datesCache->get($cache_key, null))) {
+            return $this->datesCache->get($cache_key);
+        }
+
+        // Some requests may not be timestamps.
+        if (DateValidator::is_exact_date_timestamp($cache_key)) {
+            $valid_date = (int) $cache_key;
+        } else {
+            // Try to parse it
+            $parsed_date = $this->return_gmtime_from_exact_date($cache_key);
+            $valid_date = $parsed_date ? (int) $parsed_date : false;
+        }
+
+        // Last try, let's see if an exact date is set in settings.
+        if (!$valid_date) {
+            $valid_date = $this->get_default_date_from_settings();
+        }
+        // Save memory cache.
+        // Including wrong->default params.
+        if ($valid_date) {
+            $this->datesCache->set($cache_key, $valid_date);
+        }
+        return $valid_date;
     }
 
     /**
-     * Decomposes an 'exact_date' parameter into month, day, year components based
-     * on date pattern defined in settings (assumed to be in local time zone),
-     * then returns a timestamp in GMT.
+     * Get the "Default calendar start date" setting as a GMT timestamp.
+     *
+     * @return bool|int False if the setting is empty or unparsable.
+     */
+    private function get_default_date_from_settings()
+    {
+        $default_date = $this->app->settings->get('exact_date');
+        if (empty($default_date)) {
+            return false;
+        }
+        return (int) $this->return_gmtime_from_exact_date($default_date);
+    }
+
+    /**
+     * Decomposes an 'exact_date' parameter into month, day, year components -
+     * ISO (`yyyy-m-d`, what the plugin now emits in URLs) or, for backward
+     * compatibility with existing bookmarks, the `input_date_format` setting
+     * (assumed to be in local time zone) - then returns a timestamp in GMT.
      *
      * @param  string  $exact_date  'exact_date' parameter passed to a view
      *
@@ -423,18 +424,19 @@ class CalendarPageView extends OsecBaseClass
      */
     private function return_gmtime_from_exact_date($exact_date)
     {
-        $input_format = $this->app->settings
-            ->get('input_date_format');
-
-        $date = DateValidator::format_as_iso(
-            $exact_date,
-            $input_format
-        );
+        $date = DateValidator::format_as_iso($exact_date, 'iso');
+        if (false === $date) {
+            $input_format = $this->app->settings->get('input_date_format');
+            $date         = DateValidator::format_as_iso($exact_date, $input_format);
+        }
         if (false === $date) {
             $exact_date = false;
         } else {
-            $tz = Timezones::factory($this->app)->get_default_timezone();
-            $exact_date = (new DT($date, $tz))->format_to_gmt();
+            try {
+                $exact_date = (new DT($date, 'sys.default'))->format_to_gmt();
+            } catch (\Exception $e) {
+                return false;
+            }
             if ($exact_date < 0) {
                 return false;
             }

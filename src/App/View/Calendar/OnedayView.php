@@ -120,6 +120,9 @@ class OnedayView extends AbstractView
                 'pagination_links' => $pagination_links,
                 'views_dropdown'   => $args['views_dropdown'],
                 'below_toolbar'    => $this->getBelowToolbarHtml($this->get_name(), $view_args),
+                'print_title'      => $title,
+                'print_date'       => $local_date,
+                'print_args'       => $args,
             ]
         );
 
@@ -151,6 +154,7 @@ class OnedayView extends AbstractView
      *     ['indent']    => how much to indent this event to accommodate multiple
      *                      events occurring at the same time (0, 1, 2, etc., to
      *                      be multiplied by whatever desired px/em amount)
+     *     ['indent_depth']=> deepest indent in this event's group of overlapping events
      *     ['event']     => event data object
      *
      * @param  DT  $start_time
@@ -296,6 +300,9 @@ class OnedayView extends AbstractView
                 }
             }
         }
+        unset($events, $evt);
+        $all_events[$day_start_ts]['notallday'] = static::addIndentDepth($all_events[$day_start_ts]['notallday']);
+
         $days[$day_start_ts] = [
             'today'     => 0 === strcmp(
                 (string)$today_ymd,

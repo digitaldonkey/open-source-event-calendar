@@ -1946,8 +1946,8 @@ msgid ", and "
 msgstr ""
 
 #: src/App/View/Event/EventTimeView.php:241
-msgctxt "Event time-time separator (nbsp,mdash,nbsp)"
-msgid " — "
+msgctxt "Event time-time separator (nbsp, hyphen, narrow nbsp)"
+msgid " - "
 msgstr ""
 
 #: src/App/View/Event/EventTimeView.php:264
