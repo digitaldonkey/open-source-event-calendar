@@ -373,41 +373,51 @@ class CalendarPageView extends OsecBaseClass
         // Preprocess exact_date.
         // Check to see if a date has been specified.
         $cache_key = $request->get('exact_date');
-        $valid_date = false;
 
-        if ($cache_key) {
-            // Return from cache.
-            if (!is_null($this->datesCache->get($cache_key, null))) {
-                return $this->datesCache->get($cache_key);
-            }
-
-
-            // Some requests may not be timestamps.
-            if (DateValidator::is_valid_time_stamp($cache_key)) {
-                $valid_date = (int) $cache_key;
-            } else {
-                // Try to parse it
-                $parsed_date = $this->return_gmtime_from_exact_date($cache_key);
-                $valid_date = $parsed_date ? (int) $parsed_date : false;
-            }
-
-            // Last try, let's see if an exact date is set in settings.
-            if (!$valid_date) {
-                $default_date = $this->app->settings->get('exact_date');
-                if (!empty($default_date)) {
-                    $valid_date = (int) $this->return_gmtime_from_exact_date(
-                        $default_date
-                    );
-                }
-            }
-            // Save memory cache.
-            // Including wrong->default params.
-            if ($valid_date) {
-                $this->datesCache->set($cache_key, $valid_date);
-            }
-            return $valid_date;
+        // No exact_date on the URL at all: honour the "Default calendar start date" setting,
+        // if one is configured, instead of always falling back to today.
+        if (!$cache_key) {
+            return $this->get_default_date_from_settings();
         }
-        return false;
+
+        // Return from cache.
+        if (!is_null($this->datesCache->get($cache_key, null))) {
+            return $this->datesCache->get($cache_key);
+        }
+
+        // Some requests may not be timestamps.
+        if (DateValidator::is_valid_time_stamp($cache_key)) {
+            $valid_date = (int) $cache_key;
+        } else {
+            // Try to parse it
+            $parsed_date = $this->return_gmtime_from_exact_date($cache_key);
+            $valid_date = $parsed_date ? (int) $parsed_date : false;
+        }
+
+        // Last try, let's see if an exact date is set in settings.
+        if (!$valid_date) {
+            $valid_date = $this->get_default_date_from_settings();
+        }
+        // Save memory cache.
+        // Including wrong->default params.
+        if ($valid_date) {
+            $this->datesCache->set($cache_key, $valid_date);
+        }
+        return $valid_date;
+    }
+
+    /**
+     * Get the "Default calendar start date" setting as a GMT timestamp.
+     *
+     * @return bool|int False if the setting is empty or unparsable.
+     */
+    private function get_default_date_from_settings()
+    {
+        $default_date = $this->app->settings->get('exact_date');
+        if (empty($default_date)) {
+            return false;
+        }
+        return (int) $this->return_gmtime_from_exact_date($default_date);
     }
 
     /**
