@@ -5586,7 +5586,7 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
     u.defaults = {}, e.removeCookie = function (t, n) {
         return e.cookie(t) === undefined ? !1 : (e.cookie(t, "", e.extend({}, n, {expires: -1})), !e.cookie(t))
     }
-}), timely.define("scripts/calendar/load_views", ["jquery_timely", "scripts/calendar/print", "scripts/calendar/agenda_view", "scripts/calendar/month_view", "libs/frontend_utils", "libs/utils", "ai1ec_calendar", "ai1ec_config", "scripts/common_scripts/frontend/common_frontend", "libs/select2_multiselect_helper", "external_libs/twig", "agenda", "oneday", "month", "external_libs/jquery_history", "external_libs/jquery.tablescroller", "external_libs/jquery.scrollTo", "external_libs/bootstrap_datepicker", "external_libs/bootstrap/alert", "external_libs/jquery_cookie"], function (e, t, n, r, i, s, o, u, a, f, l, c, h, p) {
+}), timely.define("scripts/calendar/load_views", ["jquery_timely", "scripts/calendar/print", "scripts/calendar/agenda_view", "scripts/calendar/month_view", "libs/frontend_utils", "libs/utils", "ai1ec_calendar", "ai1ec_config", "scripts/common_scripts/frontend/common_frontend", "libs/select2_multiselect_helper", "external_libs/twig", "agenda", "oneday", "month", "external_libs/jquery_history", "external_libs/jquery.tablescroller", "external_libs/jquery.scrollTo", "external_libs/bootstrap_datepicker", "external_libs/bootstrap/alert", "external_libs/jquery_cookie"], function (e, t, n, r, i, s, o, config, a, f, l, c, h, p) {
     e.cookie.json = !0;
     var d = "ai1ec_saved_filter", v = !e("#save_filtered_views").hasClass("ai1ec-hide");
     timely.renderer_map || (timely.renderer_map = {}), e.extend(timely.renderer_map, {
@@ -5597,7 +5597,7 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
     });
     var m = function (e) {
         var t = e.find("#ai1ec-view-dropdown .ai1ec-dropdown-menu .ai1ec-active a"),
-            n = u.week_view_ends_at - u.week_view_starts_at, i = n * 60;
+            n = config.week_view_ends_at - config.week_view_starts_at, i = n * 60;
         e.find("table.ai1ec-week-view-original").tableScroll({
             height: i,
             containerClass: "ai1ec-week-view ai1ec-popover-boundary",
@@ -5606,8 +5606,13 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
             height: i,
             containerClass: "ai1ec-oneday-view ai1ec-popover-boundary",
             scroll: !1
+<<<<<<< Updated upstream
         });
         if (e.find(".ai1ec-week-view").length || e.find(".ai1ec-oneday-view").length) e.find(".ai1ec-oneday-view .tablescroll_wrapper, .ai1ec-week-view .tablescroll_wrapper").scrollTo(e.find(".ai1ec-hour-marker:eq(" + u.week_view_starts_at + ")")), e.find(".ai1ec-hour-marker:eq(" + u.week_view_starts_at + ")").addClass("ai1ec-first-visible");
+=======
+        }), e.find(".tablescroll_wrapper, .tablescroll_head, .tablescroll_body").css("width", ""), e.find(".tablescroll_head th, .tablescroll_body > tbody > tr > td").css("width", "");
+        if (e.find(".ai1ec-week-view").length || e.find(".ai1ec-oneday-view").length) e.find(".ai1ec-oneday-view .tablescroll_wrapper, .ai1ec-week-view .tablescroll_wrapper").scrollTo(e.find(".ai1ec-hour-marker:eq(" + config.week_view_starts_at + ")")), e.find(".ai1ec-hour-marker:eq(" + config.week_view_starts_at + ")").addClass("ai1ec-first-visible");
+>>>>>>> Stashed changes
         e.find(".ai1ec-month-view .ai1ec-multiday").length && r.extend_multiday_events(e), e.find(".osec-calendar-view-container").data("ai1ec-inited", !0).trigger("initialize_view.ai1ec"), e.find(".ai1ec-calendar-toolbar").trigger("ai1ec-affix.reinit")
     }, g = function (t) {
         t.find(".osec-calendar-view-container").trigger("destroy_view.ai1ec");
@@ -5628,24 +5633,24 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
         var t = History.getState(), n = e.cookie(d);
         if (null === n || undefined === n) n = {};
         var r = y();
-        u.is_calendar_page ? n.calendar_page = r : n[t.url] = r, e.cookie(d, n, {
+        config.is_calendar_page ? n.calendar_page = r : n[t.url] = r, e.cookie(d, n, {
             path: "/",
             expires: 365
-        }), e("#save_filtered_views").addClass("ai1ec-active").attr("data-original-title", u.clear_saved_filter_text);
-        var i = s.make_alert(u.save_filter_text_ok, "success");
+        }), e("#save_filtered_views").addClass("ai1ec-active").attr("data-original-title", config.clear_saved_filter_text);
+        var i = s.make_alert(config.save_filter_text_ok, "success");
         e("#ai1ec-calendar").prepend(i)
     }, w = function (t) {
         t.stopImmediatePropagation();
         var n = e.cookie(d);
-        if (u.is_calendar_page) delete n.calendar_page; else {
+        if (config.is_calendar_page) delete n.calendar_page; else {
             var r = History.getState();
             delete n[r.url]
         }
         e.cookie(d, n, {
             path: "/",
             expires: 365
-        }), e("#save_filtered_views").removeClass("ai1ec-active").attr("data-original-title", u.reset_saved_filter_text), v || e("#save_filtered_views").addClass("ai1ec-hide");
-        var i = s.make_alert(u.remove_filter_text_ok, "success");
+        }), e("#save_filtered_views").removeClass("ai1ec-active").attr("data-original-title", config.reset_saved_filter_text), v || e("#save_filtered_views").addClass("ai1ec-hide");
+        var i = s.make_alert(config.remove_filter_text_ok, "success");
         e("#ai1ec-calendar").prepend(i)
     }, E = function (t, n, r) {
         t.find(".osec-calendar-view-loading").fadeIn("fast").end().find(".osec-calendar-view").fadeTo("fast", .3, function () {
@@ -5673,7 +5678,7 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
                 }
                 t.find(".osec-calendar-view").html(o ? o.render(i.html) : e(i.html).find(".osec-calendar-view").length ? e(i.html).find(".osec-calendar-view").html() : i.html), m(t)
             }), o.fail(function (n, r, i) {
-                var o = u.load_views_error;
+                var o = config.load_views_error;
                 o = o.replace("#STATUS#", n.status), o = o.replace("#ERROR#", i);
                 var a = s.make_alert(o, "error", !0);
                 e("#osec-container").prepend(a), g(t), m(t)
@@ -5692,11 +5697,16 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
     }, N = function (t) {
         var n = e(this), r = n.closest(".ai1ec-calendar");
         t.preventDefault(), T(r, n.data("type"), n.attr("href"))
-    }, C = function (t) {
+    }, handle_minical_trigger = function (t) {
         var n = e(this);
         t.preventDefault();
         if (typeof n.data("datepicker") == "undefined") {
-            n.datepicker({todayBtn: "linked", todayHighlight: !0, language: n.data("lang")});
+            n.datepicker({
+                todayBtn: "linked",
+                todayHighlight: !0,
+                language: n.data("lang"),
+                weekStart: config.week_start_day
+            });
             var r = n.data("datepicker");
             if (n.closest(".ai1ec-pull-right").length > 0) {
                 r.picker.addClass("ai1ec-right-aligned");
@@ -5723,7 +5733,7 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
     return {
         initialize_view: m,
         handle_click_on_link_to_load_view: N,
-        handle_minical_trigger: C,
+        handle_minical_trigger,
         handle_minical_change_date: k,
         clear_filters: A,
         handle_state_change: x,
