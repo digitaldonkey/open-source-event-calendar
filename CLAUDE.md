@@ -165,6 +165,38 @@ Do not access production databases.
 - Gutenberg blocks in `calendar_block/` use WordPress scripts
 - Legacy code may exist from original all-in-one-event-calendar
 
+## Frontend CSS Delivery
+
+The compiled theme CSS reaches the page in one of **four** ways, decided per request by
+`FrontendCssController::get_css_url()` (`src/App/Controller/FrontendCssController.php`). Which one is active
+changes *where in the DOM the stylesheet lives*, so never assume it is a `<link>` in `<head>`:
+
+| Condition | Result | Where |
+|---|---|---|
+| `OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST` (debug constant, usually in `constants-local.php`) | `echo_css()` on `wp_head` | inline `<style id="osec-frontend-css-inline-css">` **in `<body>`** |
+| Option `osec_compiled.css` (`COMPILED_CSS_KEY`) is a string | that URL | `<link>` in `<head>` |
+| Option is numeric **and** setting `render_css_as_link` is on (default) | site URL with `?osec-css-cache=<timestamp>` | `<link>` in `<head>` |
+| Option is numeric and `render_css_as_link` is off | `echo_css()` on `wp_head` | inline `<style>` **in `<body>`** |
+| Option is `null` (new install) | `<theme_url>/css/osec_parsed.css` | `<link>` in `<head>`, and the file is usually absent - see `.claude/plans/less-sha1-map-and-precompiled-css.md` |
+
+**Why the inline variant lands in the body:** `echo_css()` does not echo. It is hooked to `wp_head` but calls
+`wp_register_style()` + `wp_add_inline_style()` + `wp_enqueue_style()`, and by then `wp_print_styles` has already
+run for the head, so WordPress prints the handle with the footer styles - as a direct child of `<body>`, carrying
+the whole compiled stylesheet (~390 KB).
+
+**Consequences to keep in mind:**
+
+- **Any JS that clears, replaces or detaches the body can destroy the calendar's styling.** This is what made the
+  print button produce an unstyled page (`handle_click_on_print_button` in `public/js/pages/calendar.js`; fixed by
+  detaching everything *except* `style, link, script, noscript, template`). Exclude non-rendered elements, or work
+  on a container instead of `<body>`.
+- **A local `OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST` flips the dev site to the inline variant**, so behaviour
+  differs from a default production site. When a CSS-related bug reproduces in one place and not the other, check
+  this first: `curl -s <url> | grep -c 'id="osec-frontend-css-inline-css"'` (1 = inline in body, 0 = link in head;
+  grep without the `id=` also matches the comment WordPress appends after the style, so it counts 2).
+- That constant also makes `tests/Unit/ConstantsTest.php::test_is_less_debug_disabled` fail locally. Expected;
+  `constants-local.php` is gitignored, CI is unaffected.
+
 ## Twig → JS Frontend Templates
 
 - Three Twig templates double as the **frontend-rendering** (client-side JS) templates: `public/osec_themes/vortex/twig/{agenda,oneday,month}.twig`. Frontend rendering only applies when the OSEC Settings option `use_frontend_rendering` is enabled — otherwise only their backend (PHP) rendering matters.
@@ -192,6 +224,16 @@ Do not access production databases.
 - Implement i18n using WordPress functions: `__()`, `_e()`, `esc_html__()`, etc.
 - Translation files in `languages/` directory
 - All user-facing strings must be translatable
+
+## Commits
+
+- **The maintainer commits and pushes.** Default workflow: prepare the changes, run the checks, report what changed and let the maintainer commit. Commit only when asked to in that session (as during the print work), and never push.
+- **GrumPHP hooks do not run inside the container.** `.git/hooks/pre-commit` and `commit-msg` call `ddev exec`, and `/usr/local/bin/ddev` in the web container is a stub that prints a hint and exits 0. So commits made from `ddev claude` silently skip phpcs and the other GrumPHP tasks — the hook is there for the maintainer on the host.
+- **Therefore run the checks manually**, before committing and before handing work back:
+  - `vendor/bin/phpunit tests` and check the exit code (see the no-skipped-tests rule below)
+  - `vendor/bin/phpcs --standard=phpcs.xml <changed paths>`
+  - after editing `agenda.twig`, `oneday.twig` or `month.twig`: re-run the twig→JS transform
+  - or `vendor/bin/grumphp run` for everything at once
 
 ## Testing
 
