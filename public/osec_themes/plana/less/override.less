@@ -10,6 +10,10 @@
 @import "event-single";
 
 @lineheight: 2.5;
+// Height of the toolbar controls on the right (print button, view switcher). Set as a
+// height instead of leaving it to line height and padding, because a link and a button
+// do not end up the same size otherwise - Safari differs from Chrome and Firefox.
+@toolbarControlHeight: 2.625em; // 42px, the height of the pagination links
 @foregroundColor: var(--wp--preset--color--contrast, buttontext);
 @backgroundColor: var(--wp--preset--color--accent, buttonFace);
 

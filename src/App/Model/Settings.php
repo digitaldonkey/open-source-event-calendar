@@ -450,7 +450,7 @@ class Settings extends OsecBaseInitialized
                     'label'   => __('Timezone', 'open-source-event-calendar'),
                     'options' => 'Osec\App\Model\Date\Timezones::get_timezones',
                     'help'    => __(
-                        'This is an alias to wp-settings timezone and could also be 
+                        'This is an alias to wp-settings timezone and could also be
                             changed on <a href="/wp-admin/options-general.php">Settings&nbsp;>&nbsp;general</a>.',
                         'open-source-event-calendar'
                     ),
@@ -589,7 +589,7 @@ class Settings extends OsecBaseInitialized
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
                     'label' => __(
-                        'Hide Subscribe/Add to Calendar 
+                        'Hide Subscribe/Add to Calendar
                             buttons in calendar and single event views ',
                         'open-source-event-calendar'
                     ),
@@ -711,8 +711,8 @@ class Settings extends OsecBaseInitialized
                         'open-source-event-calendar'
                     ),
                     'help'  => __(
-                        'Use osec-fallback-image.png, provided by OSEC_DEFAULT_IMAGE constant 
-                         or osec-fallback-image.[png|jpg] from upload directory. Delete Item in 
+                        'Use osec-fallback-image.png, provided by OSEC_DEFAULT_IMAGE constant
+                         or osec-fallback-image.[png|jpg] from upload directory. Delete Item in
                          media gallery to pick up new image from upload dir. Only applied if "Use
                           featured image fallbacks" is active.',
                         'open-source-event-calendar'
@@ -878,11 +878,11 @@ class Settings extends OsecBaseInitialized
                         'open-source-event-calendar'
                     ),
                     'help'  => __(
-                        'You may re-add the oldschool print icon.',
+                        'Display print icon to print calendar without site header or footer.',
                         'open-source-event-calendar'
                     ),
                 ],
-                'default'  => false,
+                'default'  => true,
             ],
             'always_use_calendar_timezone' => [
                 'type'     => 'bool',
@@ -1040,7 +1040,7 @@ class Settings extends OsecBaseInitialized
                     'type'   => 'append',
                     'append'   => '[CSS length units]',
                     'help'  => __(
-                        'It is recommended to use absolute values like rem or px. 
+                        'It is recommended to use absolute values like rem or px.
                         Leaflet sets its own font-size, placeholder- and map-height may vary using em.',
                         'open-source-event-calendar'
                     ),

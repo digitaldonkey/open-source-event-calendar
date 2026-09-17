@@ -107,11 +107,23 @@
   display: inline-flex;
 
   .osec-print-link {
+    // Same height as .plana-flyout-menu--button (the view switcher next to it): both take it
+    // from @toolbarControlHeight, not from line height and padding, which a link and a
+    // button do not resolve the same way (Safari differs from Chrome and Firefox).
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: @toolbarControlHeight;
+    line-height: 1;
+    padding-top: 0;
+    padding-bottom: 0;
     white-space: nowrap;
     font-size: var(--wp--preset--font-size--normal);
+    margin: 0 1px 0 0;
 
     > i {
       padding-right: .35em;
+      line-height: 1;
     }
   }
 

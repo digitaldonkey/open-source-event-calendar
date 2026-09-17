@@ -411,7 +411,9 @@ timely.define("domReady", [], function () {
         // because the columns would be too narrow to read.
         LIST_THRESHOLD = {oneday: 10, week: 3},
         // Height budget of one list entry: time line plus up to two title lines.
-        LIST_ENTRY_HEIGHT = 30;
+        LIST_ENTRY_HEIGHT = 30,
+        // One line of a week event: the 6pt/1.2 of the print stylesheet, in px at 96 dpi.
+        PRINT_LINE_HEIGHT = 9.6;
 
     // Places overlapping events of one day side by side in equal columns. The server does the same
     // for the screen grid, but the print grid needs it again: scaled events keep a minimum height.
@@ -519,6 +521,18 @@ timely.define("domReady", [], function () {
                 }
                 this.style.top = top + 'px';
                 this.style.height = (bottom - top) + 'px';
+                if (type === 'week') {
+                    // Week columns are too narrow for every title: clamp to the lines the box
+                    // can show, so the last one ends in an ellipsis instead of a cut letter.
+                    // Measuring is not possible here - a print grid is display:none on screen.
+                    var event_box = $(this).children('.ai1ec-event')[0];
+                    if (event_box) {
+                        event_box.style.setProperty(
+                            '-webkit-line-clamp',
+                            String(Math.max(1, Math.floor((bottom - top - 2) / PRINT_LINE_HEIGHT)))
+                        );
+                    }
+                }
                 events.push({el: this, top: top, bottom: bottom});
             });
             if (layout_overlaps(events, base) > LIST_THRESHOLD[type]) {
@@ -547,7 +561,9 @@ timely.define("domReady", [], function () {
             $print.find('.tablescroll_wrapper').eq(i).replaceWith(build_print_grid($(this)));
         });
         // Detach instead of re-rendering the page HTML, so event handlers and state survive.
-        $page = $body.children().detach();
+        // Styles and scripts stay where they are: WordPress prints the calendar CSS in the body
+        // (wp_add_inline_style in the footer), and re-appending a script element runs it again.
+        $page = $body.children().not('style, link, script, noscript, template').detach();
         $body.addClass('timely').append($print);
         $html.addClass('ai1ec-print');
         window.print();

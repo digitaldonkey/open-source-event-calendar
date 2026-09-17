@@ -407,6 +407,10 @@ table.ai1ec-oneday-view-original {
 		margin: 1px 0 0;
 		padding: 0 3px 1px;
 		white-space: nowrap;
+
+    //outline: 1px solid lightgray;
+    //outline-offset: -2px;
+    //border-radius: 3px;
 	}
 	.ai1ec-event-time {
 		font-weight: bold;
@@ -479,18 +483,26 @@ table.ai1ec-oneday-view-original {
 
 // Month view multi-day bars and dropdowns.
 .ai1ec-month-view {
-	// One line for all-day events, two for timed ones: start time above the title.
+	// Time and title share one flow, as they do in print: a short event stays on one line,
+	// a longer one wraps and is cut after the second.
 	.ai1ec-event {
 		height: auto;
 		line-height: 14px;
 		margin: 0 0 1px;
+		white-space: normal;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
 	}
 	.ai1ec-event-time,
 	.ai1ec-event-title {
-		display: block;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		display: inline;
 	}
+	.ai1ec-event-time {
+		margin-right: 0.3em;
+	}
+	// Carries .ai1ec-event-time as well, so this has to come after the rule above.
 	.ai1ec-event-time-short {
 		display: none;
 	}
@@ -509,7 +521,7 @@ table.ai1ec-oneday-view-original {
 			display: none;
 		}
 		.ai1ec-event-time-short {
-			display: block;
+			display: inline;
 		}
 	}
 	// Apply word wrapping if enabled.
@@ -829,6 +841,10 @@ table.ai1ec-oneday-view-original {
 	.ai1ec-popover,
 	.ai1ec-tooltip,
 	.ai1ec-agenda-view .ai1ec-event-expand,
+	// Continuation arrows are border triangles filled with the event and page colors.
+	// Without those backgrounds only a stray wedge is left.
+	.ai1ec-multiday-arrow1,
+	.ai1ec-multiday-arrow2,
 	.ai1ec-read-more,
 	.ai1ec-color-swatch,
 	.post-edit-link,
@@ -861,14 +877,23 @@ table.ai1ec-oneday-view-original {
 	.ai1ec-month-view .ai1ec-event,
 	.ai1ec-week-view .ai1ec-week .ai1ec-event-container,
 	.ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
-		border: none !important;
-		border-left: 4px solid var(--osec-event-color, #999) !important;
+		border: 1px solid var(--osec-event-color, #999) !important;
+		border-left-width: 4px !important;
 		padding-left: 3px !important;
+		// White, so the event covers the table and hour lines behind it. Marked exact,
+		// or the browser drops it when "background graphics" is off in the print dialog.
+		background: #fff !important;
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
 	}
 	.ai1ec-month-view .ai1ec-allday .ai1ec-event,
 	.ai1ec-month-view .ai1ec-multiday .ai1ec-event,
 	.ai1ec-allday-events .ai1ec-event {
 		border: 1px solid var(--osec-event-color, #999) !important;
+		border-left-width: 1px !important;
+		background: #fff !important;
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
 	}
 	// Month/week/day: full titles and times instead of one truncated line.
 	.ai1ec-month-view .ai1ec-event,
@@ -879,6 +904,12 @@ table.ai1ec-oneday-view-original {
 		max-height: none !important;
 		overflow: visible !important;
 		white-space: normal !important;
+	}
+	// On screen month events are cut after two lines; on paper they print in full. Only month:
+	// in week view the print JS sets a clamp per event, which this would override.
+	.ai1ec-month-view .ai1ec-event {
+		display: block !important;
+		-webkit-line-clamp: none !important;
 	}
 	.ai1ec-week-view .ai1ec-week .ai1ec-event-container,
 	.ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
@@ -936,6 +967,43 @@ table.ai1ec-oneday-view-original {
 			}
 		}
 	}
+	// A week column is about a seventh of the page, and narrower still where events overlap,
+	// so the whole week prints at 6pt - the smallest size that stays readable - and is clipped
+	// at the event box instead of running into the neighbouring day. The all-day row sits in
+	// the head table, outside the print grid, and needs the same size or its titles print
+	// noticeably larger than the ones in the grid.
+	.ai1ec-week-view {
+		.osec-print-grid,
+		.ai1ec-allday-events {
+			.ai1ec-event-container,
+			.ai1ec-event,
+			.ai1ec-event-time,
+			.ai1ec-event-title,
+			.osec-print-more {
+				font-size: 6pt;
+				line-height: 1.2;
+			}
+			.ai1ec-event-container {
+				overflow: hidden !important;
+			}
+		}
+		// The print JS sets -webkit-line-clamp per event, from the height its box got, so a
+		// title too long for the box ends in an ellipsis.
+		.osec-print-grid .ai1ec-event {
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+		// All-day events are a single line, where the plain ellipsis works.
+		.ai1ec-allday-events .ai1ec-event {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		.osec-print-grid .ai1ec-hour-marker div {
+			font-size: 6pt;
+		}
+	}
 	// Month: time and title share a wrapping line, which is shorter than the two lines used on screen.
 	.ai1ec-month-view {
 		.ai1ec-event-time {
@@ -949,6 +1017,29 @@ table.ai1ec-oneday-view-original {
 		.ai1ec-event-title {
 			display: inline !important;
 		}
+	}
+	// With border-collapse the cell borders are painted below the cell content, so the white
+	// event boxes would cover the column lines. Keep them off the border.
+	.ai1ec-month-view td {
+		padding: 0 2px 2px !important;
+	}
+	// Firefox does not paint the vertical borders of a collapsed-border table that is split
+	// across pages (verified 2026-09-16: a one page month keeps them, a three page month
+	// loses them), so print with separated borders. Each cell draws its top and right line
+	// and the table closes the left and bottom edge, which keeps every line 1px.
+	// The screen border color (#ddd) is also too light to print reliably.
+	.ai1ec-month-view {
+		border-collapse: separate !important;
+		border-spacing: 0 !important;
+		border-color: #999 !important;
+		border-top-width: 0 !important;
+		border-right-width: 0 !important;
+	}
+	.ai1ec-month-view td,
+	.ai1ec-month-view th {
+		border-width: 1px 1px 0 0 !important;
+		border-style: solid !important;
+		border-color: #999 !important;
 	}
 	// Month: lower minimum row height, so wrapped titles still fit one page in most months.
 	.ai1ec-month-view .ai1ec-day-stretcher {
@@ -1028,10 +1119,20 @@ table.ai1ec-oneday-view-original {
 	size: landscape;
 }
 
+// Day and agenda are sized for portrait: in landscape the day grid is taller than the page,
+// so it would move to a second page and leave the first one empty. Naming the page
+// overrides an orientation the print dialog remembers from a month or week print.
+@page osec-portrait {
+	size: portrait;
+}
+
 @media print {
 	.osec-print-calendar();
 	body:has(.ai1ec-month-view, .ai1ec-week-view-original) {
 		page: osec-landscape;
+	}
+	body:has(.ai1ec-oneday-view, .ai1ec-agenda-view) {
+		page: osec-portrait;
 	}
 }
 
