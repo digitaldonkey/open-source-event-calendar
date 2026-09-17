@@ -42,7 +42,7 @@ class AgendaView extends AbstractView
         if (isset($view_args['exact_date']) && DT::is_timestamp($view_args['exact_date'])) {
             $exact_date = $view_args['exact_date'];
         } else {
-            //  This should not happen, but it does.
+            // No exact_date was requested; default to today.
             $exact_date = UIDateFormats::factory($this->app)->currentDay();
         }
 
@@ -440,7 +440,6 @@ class AgendaView extends AbstractView
     {
         $view_args += $this->request->get_dict([
             'page_offset',
-            'exact_date',
             'time_limit',
             'display_filters',
             'display_subscribe',
@@ -449,6 +448,9 @@ class AgendaView extends AbstractView
             'display_date_navigation',
 
         ]);
+        if (false !== $exact_date) {
+            $view_args['exact_date'] = $exact_date;
+        }
         return $view_args;
     }
 
