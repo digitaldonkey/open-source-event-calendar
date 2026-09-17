@@ -9,6 +9,7 @@
 	<exclude-pattern>/hookster_markdown/</exclude-pattern>
 	<exclude-pattern>/cache/</exclude-pattern>
 	<exclude-pattern>/node_modules/</exclude-pattern>
+    <exclude-pattern>/tests/</exclude-pattern>
 	<exclude-pattern>*.map.php</exclude-pattern>
 
 
