@@ -262,10 +262,7 @@ class WeekView extends AbstractView
         for ($day = 0; $day < 7; $day++) {
             [$day_date, , $day_date_ob] = $this->getDayStartAndEnd($day, $start_of_week);
 
-            $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url(
-                $day_date_ob,
-                $this->app->settings->get('input_date_format')
-            );
+            $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url($day_date_ob);
             $href_for_date = $this->create_link_for_day_view($exact_date);
 
             // Initialize empty arrays for this day if no events to minimize warnings

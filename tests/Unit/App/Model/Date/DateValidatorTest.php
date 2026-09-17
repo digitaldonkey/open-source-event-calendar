@@ -51,4 +51,29 @@ class DateValidatorTest extends TestBase
     {
         $this->assertFalse(DateValidator::format_as_iso('not-a-date', 'def'));
     }
+
+    public function test_format_as_iso_accepts_iso_pattern()
+    {
+        $this->assertSame('2026-09-21', DateValidator::format_as_iso('2026-9-21', 'iso'));
+    }
+
+    public static function exact_date_timestamp_cases(): array
+    {
+        return [
+            'truncated day fragment is rejected'      => ['21', false],
+            'exactly one day past epoch is accepted'  => [86400, true],
+            'one second short of a day is rejected'   => [86399, false],
+            'a real calendar timestamp is accepted'   => [1789941600, true],
+            'non-numeric input is rejected'           => ['garbage', false],
+            'negative input is rejected'               => [-1, false],
+        ];
+    }
+
+    /**
+     * @dataProvider exact_date_timestamp_cases
+     */
+    public function test_is_exact_date_timestamp(mixed $timestamp, bool $expected)
+    {
+        $this->assertSame($expected, DateValidator::is_exact_date_timestamp($timestamp));
+    }
 }

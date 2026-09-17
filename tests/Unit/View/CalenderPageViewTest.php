@@ -37,7 +37,11 @@ class CalenderPageViewTest extends TestBase
     {
         return [
             ['18-6-2026', 1781733600], // Donnerstag, 18. Juni 2026 00:00:00 Europe/Berlin GMT+02:00
+            ['2026-6-18', 1781733600], // same date, ISO - accepted regardless of input_date_format='def' (B5 fix)
             ['13-4-2026', 1776031200], // Montag, 13. April 2026 00:00:00 Europe/Berlin GMT+02:00
+            // `21/9/2026` split on the URL's '/' path separator arrives here as just '21' - must
+            // not be misread as a raw UNIX timestamp (epoch + 21s = 1970-01-01), regression for B5.
+            ['21', $expect_fail],
             ['1785621600', 1785621600], // GMT Saturday, 1. August 2026 22:00:00
             ['5-1-1984', 442105200], // // Relative To calendar TZ
             ['0001785621600', $expect_fail], // invalid timestamp

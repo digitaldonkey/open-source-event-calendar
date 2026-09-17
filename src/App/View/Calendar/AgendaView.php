@@ -256,10 +256,7 @@ class AgendaView extends AbstractView
         // Classify each event into a date/allday category
         foreach ($events as $event) {
             $start_time    = new DT($event->get('start')->format('Y-m-d\T00:00:00'), 'sys.default');
-            $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url(
-                $start_time,
-                $this->app->settings->get('input_date_format')
-            );
+            $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url($start_time);
             $href_for_date = $this->create_link_for_day_view($exact_date);
             // timestamp is used to have correctly sorted array as UNIX
             // timestamp never goes in decreasing order for increasing dates.

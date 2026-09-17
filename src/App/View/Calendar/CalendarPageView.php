@@ -386,7 +386,7 @@ class CalendarPageView extends OsecBaseClass
         }
 
         // Some requests may not be timestamps.
-        if (DateValidator::is_valid_time_stamp($cache_key)) {
+        if (DateValidator::is_exact_date_timestamp($cache_key)) {
             $valid_date = (int) $cache_key;
         } else {
             // Try to parse it
@@ -421,9 +421,10 @@ class CalendarPageView extends OsecBaseClass
     }
 
     /**
-     * Decomposes an 'exact_date' parameter into month, day, year components based
-     * on date pattern defined in settings (assumed to be in local time zone),
-     * then returns a timestamp in GMT.
+     * Decomposes an 'exact_date' parameter into month, day, year components -
+     * ISO (`yyyy-m-d`, what the plugin now emits in URLs) or, for backward
+     * compatibility with existing bookmarks, the `input_date_format` setting
+     * (assumed to be in local time zone) - then returns a timestamp in GMT.
      *
      * @param  string  $exact_date  'exact_date' parameter passed to a view
      *
@@ -432,13 +433,11 @@ class CalendarPageView extends OsecBaseClass
      */
     private function return_gmtime_from_exact_date($exact_date)
     {
-        $input_format = $this->app->settings
-            ->get('input_date_format');
-
-        $date = DateValidator::format_as_iso(
-            $exact_date,
-            $input_format
-        );
+        $date = DateValidator::format_as_iso($exact_date, 'iso');
+        if (false === $date) {
+            $input_format = $this->app->settings->get('input_date_format');
+            $date         = DateValidator::format_as_iso($exact_date, $input_format);
+        }
         if (false === $date) {
             $exact_date = false;
         } else {

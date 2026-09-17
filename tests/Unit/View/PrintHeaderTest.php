@@ -18,9 +18,9 @@ class PrintHeaderTest extends TestBase
     public static function viewProvider(): array
     {
         return [
-            'month'  => ['monthly', 'September 2026 · Month', 'action~month', 'exact_date~1-9-2026'],
-            'week'   => ['weekly', 'Week 38 / September 2026 · Week', 'action~week', 'exact_date~14-9-2026'],
-            'oneday' => ['oneday', 'September 16, 2026 · Day', 'action~oneday', 'exact_date~16-9-2026'],
+            'month'  => ['monthly', 'September 2026 · Month', 'action~month', 'exact_date~2026-9-1'],
+            'week'   => ['weekly', 'Week 38 / September 2026 · Week', 'action~week', 'exact_date~2026-9-14'],
+            'oneday' => ['oneday', 'September 16, 2026 · Day', 'action~oneday', 'exact_date~2026-9-16'],
             'agenda' => ['agenda', 'September 2026 · Agenda', 'action~agenda', 'exact_date~'],
         ];
     }

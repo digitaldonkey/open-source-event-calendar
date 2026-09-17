@@ -66,26 +66,19 @@ class UIDateFormats extends OsecBaseClass
     }
 
     /**
-     * Format timestamp into URL safe, user selected representation.
+     * Format timestamp into a URL safe, ISO date.
      *
-     * Returns a formatted date given a timestamp, based on the given date
-     * format, with any '/' characters replaced with URL-friendly '-'
-     * characters.
+     * Calendar URLs always carry ISO dates regardless of `input_date_format`
+     * (which is the display/admin format only) - see DateValidator::is_exact_date_timestamp()
+     * for why the '/' path separator makes any other format ambiguous on its own.
      *
      * @param  int  $timestamp  UNIX timestamp representing a date.
-     * @param  string  $pattern  Key of date pattern (@see
-     *                         self::get_date_format_patter()) to
-     *                         format date with
      *
-     * @return string Formatted date string.
-     * @see UIDateFormats::get_date_patterns() for supported date formats.
+     * @return string Formatted date string, e.g. '2026-09-21'.
      */
-    public function format_date_for_url($timestamp, $pattern = 'def')
+    public function format_date_for_url($timestamp)
     {
-        $date = $this->format_date($timestamp, $pattern);
-        $date = str_replace('/', '-', $date);
-
-        return $date;
+        return $this->format_date($timestamp, 'iso');
     }
 
     /**
@@ -167,15 +160,12 @@ class UIDateFormats extends OsecBaseClass
      * Similar to {@see format_date_for_url} just using new DateTime interface.
      *
      * @param  DT  $datetime  Instance of datetime to format.
-     * @param  string  $pattern  Target format to use.
      *
-     * @return string Formatted datetime string.
+     * @return string Formatted datetime string, e.g. '2026-09-21'.
      */
-    public function format_datetime_for_url(DT $datetime, string $pattern = 'def'): string
+    public function format_datetime_for_url(DT $datetime): string
     {
-        $date = $datetime->format($this->get_date_format_patter($pattern));
-
-        return str_replace('/', '-', $date);
+        return $datetime->format($this->get_date_format_patter('iso'));
     }
 
     /**

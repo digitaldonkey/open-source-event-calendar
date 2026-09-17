@@ -288,10 +288,7 @@ class MonthView extends AbstractView
                 )
                 ->set_time(0, 0, 0)
                 ->format();
-            $exact_date = UIDateFormats::factory($this->app)->format_date_for_url(
-                $day,
-                $settings->get('input_date_format')
-            );
+            $exact_date = UIDateFormats::factory($this->app)->format_date_for_url($day);
             $events     = [];
             foreach ($days_events[$i] as $evt) {
                 $events[] = [
