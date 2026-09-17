@@ -1071,9 +1071,9 @@ msgid " "
 msgstr " Uhr"
 
 #: src/App/View/Event/EventTimeView.php:241
-msgctxt "Event time-time separator (nbsp,mdash,nbsp)"
-msgid " — "
-msgstr " — "
+msgctxt "Event time-time separator (nbsp, hyphen, narrow nbsp)"
+msgid " - "
+msgstr " - "
 
 #: src/App/View/Calendar/AbstractView.php:52
 msgctxt "Event title-location separator(@&nbsp;"
@@ -1989,8 +1989,7 @@ msgid ""
 msgstr ""
 "Wählen Sie aus, ob Kategoriebilder als Fallback für Beitragsbilder auf der "
 "Veranstaltungsseite verwendet werden sollen. Die Fallbacks können über den "
-"Hook `osec_avatar_valid_callbacks` gesteuert werden.\n"
-"\n"
+"Hook `osec_avatar_valid_callbacks` gesteuert werden."
 
 #: src/App/View/Admin/AdminDateRepeatBox.php:76
 msgid "Select recurrence pattern:"
