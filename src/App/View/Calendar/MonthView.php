@@ -360,17 +360,14 @@ class MonthView extends AbstractView
     protected function get_weekdays()
     {
         $settings = $this->app->settings;
-        static $weekdays;
 
-        if ( ! isset($weekdays)) {
-            $time = new DT('next Sunday', 'sys.default');
-            $time->adjust_day($settings->get('week_start_day'));
+        $time = new DT('next Sunday', 'sys.default');
+        $time->adjust_day($settings->get('week_start_day'));
 
-            $weekdays = [];
-            for ($i = 0; $i < 7; $i++) {
-                $weekdays[] = $time->format_i18n('D');
-                $time->adjust_day(1);// Add a day
-            }
+        $weekdays = [];
+        for ($i = 0; $i < 7; $i++) {
+            $weekdays[] = $time->format_i18n('D');
+            $time->adjust_day(1);// Add a day
         }
 
         return $weekdays;

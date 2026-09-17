@@ -42,7 +42,7 @@ class WeekView extends AbstractView
         $args     = wp_parse_args($view_args, $defaults);
 
         // Localize requested date and get components.
-        $weekStart = (new DT($args['exact_date']))->getWeekStart();
+        $weekStart = (new DT($args['exact_date'], 'sys.default'))->getWeekStart();
 
         $cell_array = $this->get_week_cell_array(
             $weekStart,
