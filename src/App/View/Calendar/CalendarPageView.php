@@ -17,7 +17,6 @@ use Osec\Exception\SettingsException;
 use Osec\Http\Request\Request;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderHtml;
-use Osec\Http\Response\ResponseHelper;
 use Osec\Settings\HtmlFactory;
 use Osec\Theme\ThemeLoader;
 
@@ -334,14 +333,6 @@ class CalendarPageView extends OsecBaseClass
          * @param  array  $view_args  View Arguments
          */
         $view_args = apply_filters('osec_calendar_view_args_alter', $view_args);
-
-        // In case of an INVALID Date (NULL) we redirect.
-        if (null === $exact_date) {
-            $href = HtmlFactory::factory($this->app)
-                               ->create_href_helper_instance($view_args)
-                               ->generate_href();
-            ResponseHelper::redirect($href, 307);
-        }
 
         return $view_args;
     }
