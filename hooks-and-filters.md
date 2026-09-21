@@ -611,42 +611,6 @@ add_filter('osec_less_constants', $variables);
 </details>
 
 
-### osec_less_files <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Allow extensions to add their own LESS files
-
-```php
-add_filter('osec_less_files', $variables);
-```
-
-#### Parameters
-
-
- - **$variables** <span style="color:crimson"> </span> Array of Less variables.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Allow extensions to add their own LESS files
- *
- * @since 1.0
- *
- * @param  array  $variables  Array of Less variables.
- *
- * @return array
- *
- * @file src/App/Controller/LessController.php
- */
-add_filter('osec_less_files', $variables);
-```
-
-</details>
-
-
 ### osec_less_variables <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -1143,55 +1107,6 @@ if no other is set. @since 1.0
  * @file src/App/Controller/ScriptsFrontendController.php
  */
 add_filter('osec_backend_js', $identifier);
-```
-
-</details>
-
-
----
-
-
-@file **../src/App/Model/ContentFilterBypassHelper.php**
-
-### osec_event_the_content_strict_filters <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter Event content strict-filters in use.
-
-```php
-add_filter('osec_event_the_content_strict_filters', $entry);
-```
-
-#### Description
-
-
-By default, content filters for post type Event are dripped/replaced by the following set. Only applies if "Strict compatibility content filtering" is activated on settings page.
-
-#### Parameters
-
-
- - **$entry** <span style="color:crimson"> </span> Debug or not.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter Event content strict-filters in use.
- *
- * By default, content filters for post type Event are
- * dripped/replaced by the following set.
- * Only applies if "Strict compatibility content filtering"
- * is activated on settings page.
- *
- * @since 1.0
- *
- * @param  array  $entry  Debug or not.
- *
- * @file src/App/Model/ContentFilterBypassHelper.php
- */
-add_filter('osec_event_the_content_strict_filters', $entry);
 ```
 
 </details>
@@ -3430,6 +3345,49 @@ add_filter('osec_contact_url_link', $args $has_data $event);
 
 @file **../src/App/View/Event/EventContentView.php**
 
+### osec_event_the_content_strict_filters <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Event content strict-filters in use.
+
+```php
+add_filter('osec_event_the_content_strict_filters', $filters);
+```
+
+#### Description
+
+
+If "Strict compatibility content filtering" is activated on settings page, event content in calendar views and ICS export is not passed through the_content, but only through the following callbacks, in order.
+
+#### Parameters
+
+
+ - **$filters** <span style="color:crimson"> </span> Callbacks receiving and returning the content.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Event content strict-filters in use.
+ *
+ * If "Strict compatibility content filtering" is activated on settings page,
+ * event content in calendar views and ICS export is not passed through
+ * the_content, but only through the following callbacks, in order.
+ *
+ * @since 1.0
+ *
+ * @param  callable[]  $filters  Callbacks receiving and returning the content.
+ *
+ * @file src/App/View/Event/EventContentView.php
+ */
+add_filter('osec_event_the_content_strict_filters', $filters);
+```
+
+</details>
+
+
 ### osec_back_to_calendar_button_html_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -4164,7 +4122,7 @@ add_filter('osec_timespan_time_separator_html', $separator);
 #### Description
 
 
-Separates from to time and to time values. if they are not all-day. Defaults to &mdash;
+Separates from to time and to time values. if they are not all-day. Defaults to a hyphen between a no-break space and a narrow no-break space, so the timespan stays narrow and unbreakable.
 
 #### Parameters
 
@@ -4180,7 +4138,8 @@ Separates from to time and to time values. if they are not all-day. Defaults to 
  * Timespan separator string/html
  *
  * Separates from to time and to time values.
- * if they are not all-day. Defaults to &mdash;
+ * if they are not all-day. Defaults to a hyphen between a no-break space
+ * and a narrow no-break space, so the timespan stays narrow and unbreakable.
  *
  * @since 1.0
  *
@@ -5728,42 +5687,6 @@ add_filter('osec_less_constants', $variables);
 </details>
 
 
-### osec_less_files <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Allow extensions to add their own LESS files
-
-```php
-add_filter('osec_less_files', $variables);
-```
-
-#### Parameters
-
-
- - **$variables** <span style="color:crimson"> </span> Array of Less variables.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Allow extensions to add their own LESS files
- *
- * @since 1.0
- *
- * @param  array  $variables  Array of Less variables.
- *
- * @return array
- *
- * @file src/App/Controller/LessController.php
- */
-add_filter('osec_less_files', $variables);
-```
-
-</details>
-
-
 ### osec_less_variables <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -6260,55 +6183,6 @@ if no other is set. @since 1.0
  * @file src/App/Controller/ScriptsFrontendController.php
  */
 add_filter('osec_backend_js', $identifier);
-```
-
-</details>
-
-
----
-
-
-@file **../src/App/Model/ContentFilterBypassHelper.php**
-
-### osec_event_the_content_strict_filters <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter Event content strict-filters in use.
-
-```php
-add_filter('osec_event_the_content_strict_filters', $entry);
-```
-
-#### Description
-
-
-By default, content filters for post type Event are dripped/replaced by the following set. Only applies if "Strict compatibility content filtering" is activated on settings page.
-
-#### Parameters
-
-
- - **$entry** <span style="color:crimson"> </span> Debug or not.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter Event content strict-filters in use.
- *
- * By default, content filters for post type Event are
- * dripped/replaced by the following set.
- * Only applies if "Strict compatibility content filtering"
- * is activated on settings page.
- *
- * @since 1.0
- *
- * @param  array  $entry  Debug or not.
- *
- * @file src/App/Model/ContentFilterBypassHelper.php
- */
-add_filter('osec_event_the_content_strict_filters', $entry);
 ```
 
 </details>
@@ -8547,6 +8421,49 @@ add_filter('osec_contact_url_link', $args $has_data $event);
 
 @file **../src/App/View/Event/EventContentView.php**
 
+### osec_event_the_content_strict_filters <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Alter Event content strict-filters in use.
+
+```php
+add_filter('osec_event_the_content_strict_filters', $filters);
+```
+
+#### Description
+
+
+If "Strict compatibility content filtering" is activated on settings page, event content in calendar views and ICS export is not passed through the_content, but only through the following callbacks, in order.
+
+#### Parameters
+
+
+ - **$filters** <span style="color:crimson"> </span> Callbacks receiving and returning the content.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Alter Event content strict-filters in use.
+ *
+ * If "Strict compatibility content filtering" is activated on settings page,
+ * event content in calendar views and ICS export is not passed through
+ * the_content, but only through the following callbacks, in order.
+ *
+ * @since 1.0
+ *
+ * @param  callable[]  $filters  Callbacks receiving and returning the content.
+ *
+ * @file src/App/View/Event/EventContentView.php
+ */
+add_filter('osec_event_the_content_strict_filters', $filters);
+```
+
+</details>
+
+
 ### osec_back_to_calendar_button_html_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -9281,7 +9198,7 @@ add_filter('osec_timespan_time_separator_html', $separator);
 #### Description
 
 
-Separates from to time and to time values. if they are not all-day. Defaults to &mdash;
+Separates from to time and to time values. if they are not all-day. Defaults to a hyphen between a no-break space and a narrow no-break space, so the timespan stays narrow and unbreakable.
 
 #### Parameters
 
@@ -9297,7 +9214,8 @@ Separates from to time and to time values. if they are not all-day. Defaults to 
  * Timespan separator string/html
  *
  * Separates from to time and to time values.
- * if they are not all-day. Defaults to &mdash;
+ * if they are not all-day. Defaults to a hyphen between a no-break space
+ * and a narrow no-break space, so the timespan stays narrow and unbreakable.
  *
  * @since 1.0
  *

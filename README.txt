@@ -221,6 +221,7 @@ If a plugin still adds unwanted content, enable *OSEC Settings → Advanced → 
 - Overlapping events in week and day view are placed side by side instead of covering each other (a custom week/day template positioning events by 'indent' must switch to 'column', 'columns' and 'stack')
 - Week and day grid now follows the window width instead of the width at page load
 - Month view shows start and end time above the event title
+- Fixed "Default calendar start date" setting is not applied
 
 = 1.1.13 =
 WP 7.1 compatibility
