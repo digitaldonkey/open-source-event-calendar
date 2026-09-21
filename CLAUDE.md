@@ -26,19 +26,10 @@ Examples when running inside `ddev claude`:
 - MySQL: `mysql`
 - WP-CLI: **`/usr/local/bin/wp`, not a bare `wp`** - see below
 
-**Always call WP-CLI by its absolute path `/usr/local/bin/wp`.** From inside the plugin
-directory a bare `wp` resolves to the plugin's *own* composer-installed WP-CLI
-(`vendor/bin/wp`), and under that binary **the plugin never bootstraps**: its entry point only
-loads `vendor/autoload.php` and registers `BootstrapController::createApp()` on `init` when
-`\Osec\App\Controller\BootstrapController` is *not* already declared
-(`open-source-event-calendar.php`), but that vendor WP-CLI has already pulled in the plugin's
-composer autoloader, so the class exists, the guard skips the whole block, and the `init` hook
-is never added. WordPress loads, the plugin file is included, `wp plugin list` still says
-*active* - yet `OSEC_VERSION` is undefined and `global $osec_app` is `null`, so any
-`Something::factory($osec_app)` fatals with "Argument #1 ($app) must be of type
-Osec\Bootstrap\App, null given". With `/usr/local/bin/wp` (DDEV's own) `$osec_app` is a proper
-`Osec\Bootstrap\App` regardless of the current directory. `--path=/var/www/html` is unrelated
-and does *not* fix it.
+**Always call WP-CLI by its absolute path `/usr/local/bin/wp`** (DDEV's stable WP-CLI, the same as
+`ddev wp`). A bare `wp` resolves to the plugin's composer-installed `vendor/bin/wp`, currently an
+unreleased WP-CLI 3.0 dev build (Composer resolves `wp-cli/wp-cli-bundle` to `dev-main`), which also
+disappears whenever `vendor/` is swapped.
 
 If you need to execute a command from the host, use the appropriate
 DDEV command, for example:

@@ -36,7 +36,7 @@ BASE_URL=${BASE_URL:-${DDEV_PRIMARY_URL:-https://ddev-wordpress.ddev.site}}
 DATE=${DATE:-15-9-2026}
 BUSY_DATE=${BUSY_DATE:-23-9-2026}
 QUIET_DATE=${QUIET_DATE:-15-10-2026}
-# The plugin ships its own wp-cli in vendor/bin, which does not bootstrap $osec_app (side finding H1).
+# DDEV's stable WP-CLI; a bare `wp` is the plugin's vendor/bin/wp dev build (see CLAUDE.md).
 WP=${WP:-/usr/local/bin/wp}
 
 export BASE_URL

@@ -60,6 +60,16 @@ function osec_manually_load_plugin()
     }
 
     require_once $plugin_file;
+
+    // The plugin creates the app on 'init' (-100), as in production. Activate right after it.
+    add_action('init', 'osec_activate_test_plugin', -99);
+}
+
+/**
+ * Activate the plugin once the app exists.
+ */
+function osec_activate_test_plugin()
+{
     osec_plugin_activate();
     // Now constants like OSEC_PLUGIN_NAME, OSEC_XYZ are available.
 

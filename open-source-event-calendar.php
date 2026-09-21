@@ -38,14 +38,15 @@ use Osec\Theme\ThemeLoader;
 // phpcs:disable PSR1.Files.SideEffects
 
 // PHP Composer @see package.json.
-if (
-    // Try fixing a bug where
-    ! class_exists('\Osec\App\Controller\BootstrapController')) {
+// Load the Composer autoloader unless it already ran
+// (vendor/bin/wp and vendor/bin/phpunit load it before WordPress includes the plugin).
+if (! class_exists('\Osec\App\Controller\BootstrapController')) {
     require_once __DIR__ . '/vendor/autoload.php';
-    add_action('init', function () {
-        BootstrapController::createApp(__DIR__);
-    }, -100);
 }
+
+add_action('init', function () {
+    BootstrapController::createApp(__DIR__);
+}, -100);
 
 /**
  * Activate plugin.
