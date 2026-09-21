@@ -179,6 +179,47 @@ Confirmed working (2026-09-11): 1 passing in 3s vs. the full suite's ~5 minutes.
 
 **Known flakiness**: the `afterEach` hook in `test/01_OsecPluginInstall.spec.js` (`doLogout()` in `page_objects/WpLogin.js`, which hovers the admin bar then clicks Log Out) can intermittently hit a `TimeoutError: Waiting until element is visible` right after the very first plugin activation in a run — most likely first-page-load timing rather than a real regression. It hasn't reproduced on a re-run in practice; if it fails, re-run just that spec (`npx mocha test/01_OsecPluginInstall.spec.js --timeout 60000`) before assuming a real break.
 
+## Firefox (second browser)
+
+The Chrome add-on's service is Chrome only. `.ddev/docker-compose.selenium-firefox.yaml` adds a second node -
+`selenium/standalone-firefox`, reachable at `http://selenium-firefox:4444/wd/hub`, noVNC on host ports 7901/7911 so
+it does not collide with Chrome's 7900/7910. It is a plain compose file, deliberately **not** marked
+`#ddev-generated`, so `ddev get ddev/ddev-selenium-standalone-chrome` will not overwrite or remove it.
+
+```
+ddev restart          # starts the container; note this also restarts the web container
+```
+
+Starting it without restarting the web container (useful when a session runs inside it):
+
+```
+docker run -d --name ddev-${DDEV_SITENAME}-selenium-firefox --network ddev_default \
+  --network-alias selenium-firefox -e SE_NODE_MAX_SESSIONS=12 -e SE_NODE_OVERRIDE_MAX_SESSIONS=true \
+  selenium/standalone-firefox:155.0.1
+```
+
+Firefox has no CDP, so anything driving Chrome through `sendAndGetDevToolsCommand` needs a Firefox branch:
+PDFs come from the WebDriver *Print Page* command (`driver.printPage()`), screenshots from
+`driver.takeScreenshot()` instead of `Emulation.setDeviceMetricsOverride`.
+
+## Print output review
+
+`integration_tests/print_review/print-all.sh` regenerates every print PDF and prints a summary table
+(file, orientation, page count). It prints each view with the print button **and** with Ctrl+P, plus a busy
+day/week/month and a quiet month - the two cases that decide the page count.
+
+```
+integration_tests/print_review/print-all.sh
+THEMES=plana BROWSERS=chrome,firefox integration_tests/print_review/print-all.sh
+```
+
+Options: `THEMES`, `BROWSERS`, `OUT`, `BASE_URL`, `DATE`, `BUSY_DATE`, `QUIET_DATE`, `KEEP=1`. The script switches
+the OSEC theme in the **dev database** and restores the original on exit. `LONG_TEXT=1` (on `print-pdfs.js`
+directly) inflates agenda descriptions to test page breaks inside events.
+
+Neither browser fires `beforeprint` for a programmatic print, so the script dispatches it by hand for the Ctrl+P
+path and stubs `window.print` for the button path.
+
 ## Manual/UI feed testing
 
 `tests/Unit/App/Model/ical_feeds/*.ics` doubles as sample feed data — subscribe to it from a real calendar client (Google Calendar, Apple Calendar, etc.) to eyeball feed output end-to-end:

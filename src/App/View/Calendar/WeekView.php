@@ -42,7 +42,7 @@ class WeekView extends AbstractView
         $args     = wp_parse_args($view_args, $defaults);
 
         // Localize requested date and get components.
-        $weekStart = (new DT($args['exact_date']))->getWeekStart();
+        $weekStart = (new DT($args['exact_date'], 'sys.default'))->getWeekStart();
 
         $cell_array = $this->get_week_cell_array(
             $weekStart,
@@ -148,6 +148,9 @@ class WeekView extends AbstractView
                 'pagination_links' => $pagination_links,
                 'views_dropdown'   => $args['views_dropdown'],
                 'below_toolbar'    => $this->getBelowToolbarHtml($this->get_name(), $view_args),
+                'print_title'      => $title,
+                'print_date'       => $weekStart,
+                'print_args'       => $args,
             ]
         );
 
@@ -176,6 +179,7 @@ class WeekView extends AbstractView
      *   ['indent']    => how much to indent this event to accommodate multiple
      *                    events occurring at the same time (0, 1, 2, etc., to
      *                    be multiplied by whatever desired px/em amount)
+     *   ['indent_depth']=> deepest indent in this event's group of overlapping events
      *   ['event']     => event data object
      *
      * @param  DT  $start_of_week  the UNIX timestamp of the first day of the week
@@ -261,10 +265,7 @@ class WeekView extends AbstractView
         for ($day = 0; $day < 7; $day++) {
             [$day_date, , $day_date_ob] = $this->getDayStartAndEnd($day, $start_of_week);
 
-            $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url(
-                $day_date_ob,
-                $this->app->settings->get('input_date_format')
-            );
+            $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url($day_date_ob);
             $href_for_date = $this->create_link_for_day_view($exact_date);
 
             // Initialize empty arrays for this day if no events to minimize warnings
@@ -337,6 +338,9 @@ class WeekView extends AbstractView
                     }
                 }
             }
+
+            unset($events, $evt);
+            $all_events[$day_date]['notallday'] = static::addIndentDepth($all_events[$day_date]['notallday']);
 
             $days[$day_date] = [
                 'today'     =>

@@ -10,6 +10,10 @@
 @import "event-single";
 
 @lineheight: 2.5;
+// Height of the toolbar controls on the right (print button, view switcher). Set as a
+// height instead of leaving it to line height and padding, because a link and a button
+// do not end up the same size otherwise - Safari differs from Chrome and Firefox.
+@toolbarControlHeight: 2.625em; // 42px, the height of the pagination links
 @foregroundColor: var(--wp--preset--color--contrast, buttontext);
 @backgroundColor: var(--wp--preset--color--accent, buttonFace);
 
@@ -59,10 +63,24 @@
 	background: rgba(0,0,0,0.05);
 }
 
-.ai1ec-month-view .ai1ec-event-time,
-.ai1ec-week-view .ai1ec-event-time,
-.ai1ec-oneday-view .ai1ec-event-time {
-	font-size: .75em;
+.ai1ec-month-view,
+.ai1ec-week-view,
+.ai1ec-oneday-view {
+
+  .ai1ec-event-time {
+    font-size: .65em;
+    letter-spacing: -.04em;
+    @media screen and ( max-width: (@screen-sm - 1) ) {
+      font-size: .55em;
+    }
+  }
+  .ai1ec-event-title {
+    font-size: .7em;
+    @media screen and ( max-width: (@screen-sm - 1) ) {
+      font-size: .6em;
+      letter-spacing: -.04em;
+    }
+  }
 }
 
 .action-link {
@@ -83,7 +101,6 @@
 	background: @backgroundColor;
 	&[disabled] {
 		color: @mutedColor;
-		//border: 0;
 	}
 
 	min-width: 2em;
@@ -124,19 +141,6 @@
 		width: 20px;
 	}
 }
-
-
-
-//.alignfull {
-//	outline: 2px dashed deeppink;
-//}
-
-
-//.is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
-//	max-width: var(--wp--style--global--content-size);
-//	margin-left: auto !important;
-//	margin-right: auto !important;
-//}
 
 table.ai1ec-month-view {
 	margin-bottom: .25rem;

@@ -3,7 +3,6 @@
 namespace Osec\App\Controller;
 
 use Osec\App\Model\Date\DT;
-use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\SettingsView;
 use Osec\App\View\Calendar\CalendarPageView;
 use Osec\App\View\Event\EventContentView;
@@ -138,7 +137,7 @@ class BlockController extends OsecBaseClass
         if (isset($atts['fixedDate']) && DT::isValidTimeStamp($atts['fixedDate'])) {
             $query['exact_date'] = $atts['fixedDate'];
         } else {
-            $today = new DT('now', Timezones::factory($this->app)->get_default_timezone());
+            $today = new DT('now', 'sys.default');
             $today->set_time(0, 0, 0);
             $query['exact_date'] = $today->format();
         }
@@ -156,7 +155,7 @@ class BlockController extends OsecBaseClass
                     // Add a day on fixed date to match UI.
                     $dateLimit->adjust_day(1);
                 } else {
-                    $dateLimit = new DT('now', Timezones::factory($this->app)->get_default_timezone());
+                    $dateLimit = new DT('now', 'sys.default');
                 }
                 $dateLimit->adjust_day($number);
                 $dateLimit->set_time(0, 0, 0);

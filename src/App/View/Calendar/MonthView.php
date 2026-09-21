@@ -74,6 +74,7 @@ class MonthView extends AbstractView
             'show_location_in_title'   => $this->app->settings->get('feature_event_location')
                                             && $this->app->settings->get('show_location_in_title'),
             'month_word_wrap'          => $settings->get('month_word_wrap'),
+            'month_show_times'         => $settings->get('month_show_times'),
             'post_ids'                 => implode(',', $args['post_ids']),
             'data_type'                => $args['data_type'],
             'is_ticket_button_enabled' => $is_ticket_button_enabled,
@@ -88,6 +89,9 @@ class MonthView extends AbstractView
                 'pagination_links' => $pagination_links,
                 'views_dropdown'   => $args['views_dropdown'],
                 'below_toolbar'    => $this->getBelowToolbarHtml($this->get_name(), $view_args),
+                'print_title'      => $title,
+                'print_date'       => $local_date,
+                'print_args'       => $args,
             ]
         );
 
@@ -285,10 +289,7 @@ class MonthView extends AbstractView
                 )
                 ->set_time(0, 0, 0)
                 ->format();
-            $exact_date = UIDateFormats::factory($this->app)->format_date_for_url(
-                $day,
-                $settings->get('input_date_format')
-            );
+            $exact_date = UIDateFormats::factory($this->app)->format_date_for_url($day);
             $events     = [];
             foreach ($days_events[$i] as $evt) {
                 $events[] = [
@@ -300,9 +301,13 @@ class MonthView extends AbstractView
                     'ticket_url_label' => $evt->get_runtime('ticket_url_label'),
                     'edit_post_link'   => $evt->get_runtime('edit_post_link'),
                     'short_start_time' => $evt->get_runtime('short_start_time'),
+                    // Start and end time without the date, as in the popup. Multi-day events span several
+                    // cells as a bar, so they show their start time only; the popup has their dates.
+                    'timespan'         => $evt->is_multiday()
+                        ? $evt->get_runtime('short_start_time')
+                        : TwigExtension::timespan($evt, 'hidden'),
                     'multiday_end_day' => $evt->get_runtime('multiday_end_day'),
                     'start_day'        => $evt->get_runtime('start_day'),
-                    'short'            => $evt->get_runtime('short_start_time'),
                     'instance_id'      => $evt->get('instance_id'),
                     'post_id'          => $evt->get('post_id'),
                     'is_allday'        => $evt->is_allday(),
@@ -353,17 +358,14 @@ class MonthView extends AbstractView
     protected function get_weekdays()
     {
         $settings = $this->app->settings;
-        static $weekdays;
 
-        if ( ! isset($weekdays)) {
-            $time = new DT('next Sunday', 'sys.default');
-            $time->adjust_day($settings->get('week_start_day'));
+        $time = new DT('next Sunday', 'sys.default');
+        $time->adjust_day($settings->get('week_start_day'));
 
-            $weekdays = [];
-            for ($i = 0; $i < 7; $i++) {
-                $weekdays[] = $time->format_i18n('D');
-                $time->adjust_day(1);// Add a day
-            }
+        $weekdays = [];
+        for ($i = 0; $i < 7; $i++) {
+            $weekdays[] = $time->format_i18n('D');
+            $time->adjust_day(1);// Add a day
         }
 
         return $weekdays;

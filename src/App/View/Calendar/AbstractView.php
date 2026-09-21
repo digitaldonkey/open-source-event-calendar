@@ -3,6 +3,7 @@
 namespace Osec\App\View\Calendar;
 
 use Osec\App\Model\Date\DT;
+use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\TaxonomyAdapter;
 use Osec\Bootstrap\App;
@@ -211,15 +212,26 @@ abstract class AbstractView extends OsecBaseClass
     }
 
     /**
-     * Gets the navigation bar HTML.
+     * Gets the navigation bar HTML, prepended by the print header.
      *
      * @param  array  $nav_args  Args for the navigation bar template, including
-     *                       'display_date_navigation' which determines whether to show it
+     *                       'display_date_navigation' which determines whether to show it.
+     *                       Keys 'print_title' (string), 'print_date' (DT) and 'print_args'
+     *                       (current view args) are used for the print header.
      *
      * @return string
      */
     protected function getNavigation(array $nav_args)
     {
+        $print_header = '';
+        if (isset($nav_args['print_title'], $nav_args['print_date'])) {
+            $print_header = $this->getPrintHeaderHtml(
+                $nav_args['print_title'],
+                $nav_args['print_date'],
+                $nav_args['print_args'] ?? []
+            );
+        }
+
         /**
          * Add Html at calendar navigarion header.
          *
@@ -232,9 +244,103 @@ abstract class AbstractView extends OsecBaseClass
          * @param  array  $html  Event location.
          */
         $nav_args['contribution_buttons'] = apply_filters('osec_contribution_buttons', '', 'html', 'render-command');
+        // Appended: both button groups float right, so the print button renders left of existing buttons.
+        $nav_args['after_pagination'] = ($nav_args['after_pagination'] ?? '') . $this->getPrintButtonHtml();
+
+        return $print_header . ThemeLoader::factory($this->app)
+                          ->get_file('navigation.twig', $nav_args, false)
+                          ->get_content();
+    }
+
+    /**
+     * Gets the print header HTML: title, view name and the URL of the printed view.
+     *
+     * Hidden on screen, shown by print CSS.
+     *
+     * @param  string  $title  View title, e.g. "September 2026".
+     * @param  DT  $date  Date the view link points to.
+     * @param  array  $args  Current view args; category, tag and author filters are kept in the URL.
+     *
+     * @return string
+     */
+    protected function getPrintHeaderHtml(string $title, DT $date, array $args): string
+    {
+        $href_args               = array_intersect_key($args, array_flip(['cat_ids', 'tag_ids', 'auth_ids']));
+        $href_args['action']     = $this->get_name();
+        $href_args['exact_date'] = UIDateFormats::factory($this->app)->format_datetime_for_url($date);
+
+        $enabled_views = (array) $this->app->settings->get('enabled_views', []);
+        $view_name     = '';
+        if (isset($enabled_views[$this->get_name()]['longname'])) {
+            /* The longname is a _n_noop. */
+            $view_name = translate_nooped_plural(
+                $enabled_views[$this->get_name()]['longname'],
+                1,
+                'open-source-event-calendar'
+            );
+        }
+
+        $args = [
+            'title'     => $title,
+            'view_name' => $view_name,
+            'view_url'  => HtmlFactory::factory($this->app)
+                                      ->create_href_helper_instance($href_args)
+                                      ->generate_href(),
+        ];
 
         return ThemeLoader::factory($this->app)
-                          ->get_file('navigation.twig', $nav_args, false)
+                          ->get_file('print-header.twig', $args, false)
+                          ->get_content();
+    }
+
+    /**
+     * Adds 'indent_depth' to the timed events of one day: the deepest 'indent' within the
+     * event's group of overlapping events.
+     *
+     * Templates shrink the indent step by it, so a deep stack stays inside its day column
+     * instead of running into the next day. A group ends where an event gets indent 0 again:
+     * the indent stack only empties once every earlier event has ended.
+     *
+     * @param  array  $events  Timed events of one day, in start order, each with 'indent'.
+     *
+     * @return array The events with 'indent_depth' added.
+     */
+    protected static function addIndentDepth(array $events): array
+    {
+        $group = [];
+        $keys  = array_keys($events);
+        $keys[] = null;
+        foreach ($keys as $key) {
+            if ($group && (null === $key || 0 === $events[$key]['indent'])) {
+                $depth = max(array_map(fn($k) => $events[$k]['indent'], $group));
+                foreach ($group as $k) {
+                    $events[$k]['indent_depth'] = $depth;
+                }
+                $group = [];
+            }
+            if (null !== $key) {
+                $group[] = $key;
+            }
+        }
+
+        return $events;
+    }
+
+    /**
+     * Gets the print button HTML if enabled in settings.
+     *
+     * @return string
+     */
+    protected function getPrintButtonHtml(): string
+    {
+        if (! $this->app->settings->get('display_print_button')) {
+            return '';
+        }
+
+        $args = ['text_print' => __('Print', 'open-source-event-calendar')];
+
+        return ThemeLoader::factory($this->app)
+                          ->get_file('print-button.twig', $args, false)
                           ->get_content();
     }
 

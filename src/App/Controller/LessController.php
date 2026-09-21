@@ -45,8 +45,28 @@ class LessController extends OsecBaseClass
     ) {
         parent::__construct($app);
 
-        // @see https://lesscss.org/usage/#less-options-lint;
-        $this->lessc = new Less_Parser(
+        $this->lessc = $this->create_parser();
+
+        $this->default_theme_url = $this->sanitize_default_theme_url($default_theme_url);
+        $this->parsed_css        = '';
+        $this->variables         = [];
+        $this->files             = ['style.less', 'event.less', 'calendar.less'];
+    }
+
+    /**
+     * A parser instance is good for one compilation.
+     *
+     * Parsing the same files into a parser that already holds them corrupts the variable
+     * scope: the second compilation in a process fails with "variable @text-color is
+     * undefined", the third with "Recursive variable definition". That only shows when a
+     * process compiles more than once, which OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST and an
+     * unavailable CSS cache both cause.
+     *
+     * @see https://lesscss.org/usage/#less-options-lint
+     */
+    private function create_parser(): Less_Parser
+    {
+        return new Less_Parser(
             [
                 'compress'     => ! OSEC_DEBUG_CSS,
                 'sourceMap'    => OSEC_DEBUG_CSS,
@@ -54,11 +74,6 @@ class LessController extends OsecBaseClass
                 'math'         => 'always',
             ]
         );
-
-        $this->default_theme_url = $this->sanitize_default_theme_url($default_theme_url);
-        $this->parsed_css        = '';
-        $this->variables         = [];
-        $this->files             = ['style.less', 'event.less', 'calendar.less'];
     }
 
     /**
@@ -96,6 +111,9 @@ class LessController extends OsecBaseClass
      */
     public function parse_less_files(?array $variables = null, $compile_core = true): string
     {
+        // Start from an empty parser: see create_parser().
+        $this->lessc = $this->create_parser();
+
         // If no variables are passed, initialize from DB, config file, and
         // extension injections in one call.
         if (empty($variables)) {
@@ -134,8 +152,10 @@ class LessController extends OsecBaseClass
          *
          * @return array
          */
-        $this->files   = apply_filters('osec_less_files', $this->files);
-        $this->files[] = 'override.less';
+        // Filter a copy: appending to $this->files would add override.less again on every
+        // compilation in the same process, and its rules would be duplicated in the output.
+        $files   = apply_filters('osec_less_files', $this->files);
+        $files[] = 'override.less';
 
         // Find out the active theme URL.
         $theme = $this->app->options->get('osec_current_theme');
@@ -179,7 +199,7 @@ class LessController extends OsecBaseClass
             ]
         );
         $import_dirs = [];
-        foreach ($this->files as $file) {
+        foreach ($files as $file) {
             $file_to_parse = null;
             try {
                 // Get the filename following our fallback convention

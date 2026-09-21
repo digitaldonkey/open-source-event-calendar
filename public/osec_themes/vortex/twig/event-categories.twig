@@ -1,0 +1,13 @@
+{%- for category in categories -%}
+	{%- if not loop.first %} {% endif -%}
+	<a class="ai1ec-category{% if format == 'inline' %}-inline{% endif %} ai1ec-term-id-{{ category.term_id }} p-category"
+		{%- if category.description %} title="{{ category.description }}"{% endif -%}
+		{%- if format == 'inline' and category.color %} style="color: {{ category.color }};"{% endif %}
+		href="{{ category.href }}">
+		{%- if format == 'blocks' -%}
+			{{ category.color_swatch | raw }}
+		{%- else -%}
+			<i{% if category.color %} style="color: {{ category.color }};"{% endif %} class="ai1ec-fa ai1ec-fa-folder-open"></i>
+		{%- endif -%}
+		<span itemprop="keywords">{{ category.name }}</span></a>
+{%- endfor -%}

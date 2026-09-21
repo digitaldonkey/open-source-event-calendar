@@ -488,24 +488,35 @@ class DT implements Stringable
      *
      * Respects Osec settings week_start_day.
      *
-     * @return DT The day weeks starts in visitors timezone (?).
+     * Contract: `$this` represents an instant (not a wall-clock date/time in a
+     * particular zone), so this instance's own timezone is irrelevant to the
+     * result - all weekday arithmetic is done in the target (requested, or
+     * site default) timezone. The return is local midnight of the most
+     * recent `week_start_day` on or before that local day, with its
+     * preferred timezone set to the target timezone.
+     *
+     * @return DT The day the week starts in the target timezone.
      */
     public function getWeekStart(?DateTimeZone $timezone = null): DT
     {
-        $tmp_day = clone $this->date;
+        // Resolve the target timezone first, then rebuild the working
+        // instance from the instant alone (`format('U')`), so the receiver's
+        // own timezone - which may differ, e.g. DT::__construct() defaults to
+        // UTC - cannot leak into the weekday calculation below.
+        $timezone = $timezone ?: Timezones::factory($this->app)->get_default_timezone_object();
+        $tmp_day  = new DateTime('@' . $this->date->format('U'));
+        $tmp_day->setTimezone($timezone);
+        $tmp_day->setTime(0, 0, 0);
 
         // If day is a weekstart day, it's the weekstart.
-        if ((int)$this->date->format('w') !== $this->get_week_start_day(true)) {
+        if ((int)$tmp_day->format('w') !== $this->get_week_start_day(true)) {
             // Set to week start day.
             $tmp_day->modify('last ' . $this->get_week_start_day());
         }
 
         // Deliver week start in requested or sites timezone.
-        $timezone = $timezone ?: Timezones::factory($this->app)->get_default_timezone_object();
         $weekStartDateAndTime = new DT((int) $tmp_day->format('U'), $timezone->getName());
         $weekStartDateAndTime->set_preferred_timezone($timezone);
-        // Set time to day beginning.
-        $weekStartDateAndTime->date->modify('today');
 
         // Convert into Osec Date.
         return $weekStartDateAndTime;
@@ -522,10 +533,7 @@ class DT implements Stringable
      */
     protected function get_week_start_day(bool $returnNumeric = false): string|int
     {
-        static $dayInt = null;
-        if (is_null($dayInt)) {
-            $dayInt = (int)$this->app->settings->get('week_start_day');
-        }
+        $dayInt = (int)$this->app->settings->get('week_start_day');
         if ($returnNumeric) {
             return (int) $dayInt;
         }
@@ -538,7 +546,7 @@ class DT implements Stringable
             5 => 'friday',
             6 => 'saturday',
         ];
-        if ( ! isset($dayInt)) {
+        if ( ! isset($mapper[$dayInt])) {
             throw new Exception(esc_html('Weekday integer should be [0-6]. Got: ' . $dayInt));
         }
 

@@ -4,8 +4,7 @@
 	<thead>
 		<tr>
 			{% for date, day in cell_array %}
-				<th class="ai1ec-weekday
-					{% if day.today is not empty %}ai1ec-today{% endif %}">
+				<th class="ai1ec-weekday {% if day.today is not empty %}ai1ec-today{% endif %}">
 					{# Display Reveal button in last cell only #}
 					{% if show_reveal_button and loop.last %}
 						<div class="ai1ec-reveal-full-day">
@@ -149,7 +148,12 @@
 									{% if event.is_multiday %}ai1ec-multiday{% endif %}"
 								style="top: {{ day_array.top }}px;
 									height: {{ day_array.height }}px;
-									left: {{ day_array.indent * indent_multiplier + indent_offset }}px;
+									{% if day_array.indent_depth %}
+										{# Deep stacks shrink the indent step so the whole group stays in its day column, the top event keeping 3em. #}
+										left: calc({{ indent_offset }}px + {{ day_array.indent }} * max(0px, min({{ indent_multiplier }}px, (100% - {{ indent_offset }}px - 3em) / {{ day_array.indent_depth }})));
+									{% else %}
+										left: {{ indent_offset }}px;
+									{% endif %}
 									{{ event.color_style }}
 									{% set faded_color = event.faded_color %}
 									{% set rgba_color  = event.rgba_color %}

@@ -212,13 +212,24 @@ If a plugin still adds unwanted content, enable *OSEC Settings → Advanced → 
 
 == Changelog ==
 
+= 1.1.14 =
+- Print support for all calendar views: print button in month, week, day and agenda #55
+- Printouts show a header with title, view name and a link to the printed view, and leave out navigation, filters, subscribe buttons and link addresses
+- Week and day print the hours shown on screen scaled to one page; days with many parallel events print as a list
+- Agenda print: dates are never split, events only where at least five lines fit on each page
+- Category colors print as event borders, so they survive black and white printing
+- Overlapping events in week and day view are placed side by side instead of covering each other (a custom week/day template positioning events by 'indent' must switch to 'column', 'columns' and 'stack')
+- Week and day grid now follows the window width instead of the width at page load
+- Month view shows start and end time above the event title
+- Fixed "Default calendar start date" setting is not applied
+
 = 1.1.13 =
 WP 7.1 compatibility
 
 = 1.1.11 =
 Fix: Json displayed instead of coast #52
 
-= 1.1.10 = 
+= 1.1.10 =
 - Include ongoing events in ical export #47
 - Display hide cost, enable to hide cost when importing events via feed #42
 - Fix double escaped Urls in some links
@@ -234,7 +245,7 @@ Fix: Json displayed instead of coast #52
 -  fix Aspect ratio in Event Popups
 - Rework image fallback mechanisms. Add option for default fallback image
 
-= 1.1.8 = 
+= 1.1.8 =
 - Fix Location, GEO and Contact - Events from ICS feed lose their location #40
 - Weekly/Monthly view not respecting the "week starts on day" when set to Sunday #38
 - Add iCal ORGANIZER prop import/export
@@ -279,7 +290,7 @@ Fix: Json displayed instead of coast #52
 = 1.1.1 =
 - Change default theme to plana
 - Reworking Plana theme
- 
+
 = 1.1.0 =
 - OpenStreetMap support including Geocoding in Edit form.
 - Added full schema.org/Event support for single Event page using plana theme. Check [search engine readability](https://validator.schema.org).
@@ -302,7 +313,7 @@ Fix: Json displayed instead of coast #52
 = 1.0.10 =
 - Beautified Admin Theme admin page
 - Twigify Admin Theme theme-row.
-- Add more plugin-check fixes, escape shortcodes, 
+- Add more plugin-check fixes, escape shortcodes,
 
 = 1.0.7 =
 - Fix additional redirect happening due to trailing slash in Link
@@ -311,7 +322,7 @@ More WP plugin check work.
 - Renaming capabilities with prefix
 - Rename Taxonomies: events_categories, events_tags, events_feeds to osec_events_categories,  osec_events_...
 - Fix some default value issues, timezone default
-- clean up translations, nonces, prefixes 
+- clean up translations, nonces, prefixes
 - migrate php templates to twig
 - Rework/fix: robots.txt generation, exact_date, get_exact_date, variable variants,
 - Updates: WP phpcs config, tools (npm) and composer updates
@@ -332,7 +343,7 @@ More WP plugin check work.
 
 - Rework translation at German example (I love Loco Translate)
 - Fixed: Category image will now be used as default featured image in single event view.
-- Fixed: Function _load_textdomain_just_in_time was called incorrectly. 
+- Fixed: Function _load_textdomain_just_in_time was called incorrectly.
 - If toggle in Agenda view is disabled link to the single Event on title click.
 - Fixed: "Click on title toggles when toggler is disabled."
 - Fixed: OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST does not work but lead to undefined variables.
@@ -348,10 +359,10 @@ More WP plugin check work.
 
 = 1.0.0 =
 
-* Rework query params, fixed date pagers 
+* Rework query params, fixed date pagers
 * Reworked date display to be consistent for Single and multiday and Allday Events.
 * Add flexible width Gutenberg Calendar Block
-* Removed Widget and Agenda Widget. 
+* Removed Widget and Agenda Widget.
 * Reworked date display to be consistent.
 
 = 0.9.0 =
@@ -367,5 +378,5 @@ More WP plugin check work.
 * Fixed Week-view date selection.
 * Fixed/rewrote caching system. Added APCU caching.
 * Added Test environment working well in ddev. Based on WP handbook standards [plugin-unit-tests](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/).
-* Upgrade strings to match current translation requirements. 
-* Solving WordPress "Plugin Check" minimum requirements. 
+* Upgrade strings to match current translation requirements.
+* Solving WordPress "Plugin Check" minimum requirements.

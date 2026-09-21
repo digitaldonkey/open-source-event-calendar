@@ -1,7 +1,8 @@
 {{ navigation | raw }}
 
-<table class="timely ai1ec-month-view ai1ec-popover-boundary
-	{% if month_word_wrap %}ai1ec-word-wrap{% endif %}">
+<table class="ai1ec-month-view ai1ec-popover-boundary
+	{% if month_word_wrap %}ai1ec-word-wrap{% endif %}
+	{% if not month_show_times %}ai1ec-no-times{% endif %}">
 	<thead>
 		<tr>
 			{% for weekday in weekdays %}
@@ -50,6 +51,15 @@
 
 										<div class="ai1ec-event"
 											 style="{{ event.color_style | e( 'html_attr' ) }}">
+											{% if month_show_times and not event.is_allday %}
+												<span class="ai1ec-event-time">
+													{{ event.timespan | raw }}
+												</span>
+												{# Day cells are too narrow for the end time on phones. #}
+												<span class="ai1ec-event-time ai1ec-event-time-short">
+													{{ event.short_start_time }}
+												</span>
+											{% endif %}
 											<span class="ai1ec-event-title">
 												{{ event.filtered_title | raw }}
 												{% if show_location_in_title and event.venue %}
@@ -57,11 +67,6 @@
 													>{{ text_venue_separator}}{{ event.venue }}</span>
 												{% endif %}
 											</span>
-											{% if not event.is_allday %}
-												<span class="ai1ec-event-time">
-													{{ event.short_start_time }}
-												</span>
-											{% endif %}
 										</div>
 									</a>
 

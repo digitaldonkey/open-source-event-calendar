@@ -7,6 +7,14 @@
 @import "bootstrap/mixins.less";
 @import "timely-mixins.less";
 
+// How deep the month view's multi-day continuation arrows bite into the bar, and the indent
+// that clears the left-hand one. In em so it follows the base font size; it has to stay one
+// value, since a title starting inside the left notch would collide with it. Applied to
+// .ai1ec-event rather than .ai1ec-event-title because only the former shares the arrows' own
+// font-size - themes scale the title down (plana: .7em), which would shrink the indent alone.
+// Their height is not set here - see .ai1ec-multiday-arrow1.
+@multiday-arrow-depth: .5em;
+
 // =================
 // = Calendar page =
 // =================
@@ -227,25 +235,43 @@ table.ai1ec-oneday-view-original {
 		border-bottom: none !important;
 		& th {
 			border-bottom: none !important;
-			padding: 2.48px !important;
+      padding: .5em;
 		}
 	}
 	.ai1ec-reveal-full-day {
-		float: right;
-		margin: 3px 3px 3px -3em;
-		position: relative;
+		position: absolute;
+    right: .2em;
+    top:.2em;
 	}
 	.ai1ec-day {
 		height: 1440px;
 	}
 	th {
-		position: relative;
-		.ai1ec-weekday-date {
-			font-size: 15px;
+    .ai1ec-clearfix();
+
+    position: relative;
+    .ai1ec-load-view {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-content: center;
+      align-items: center;
+      justify-content: center;
+      line-height: 2em;
+      gap: .5em;
+
+      @media screen and ( max-width: (@screen-xs - 1) ) {
+        flex-direction: column-reverse;
+        gap: 0;
+      }
+    }
+
+    .ai1ec-weekday-date {
+      font-size: .95em;
 			font-weight: normal;
 		}
 		.ai1ec-weekday-day {
-			font-size: 12px;
+			font-size: .8em;
 			font-weight: normal;
 		}
 	}
@@ -263,9 +289,25 @@ table.ai1ec-oneday-view-original {
 	th {
 		border: none !important;
 		background: @table-header-bg !important;
-		padding: 0.2em !important;
 	}
+
+  .ai1ec-event-time{
+    font-size: .7em;
+    letter-spacing: -.04em;
+
+    @media screen and ( max-width: (@screen-xs - 1) ) {
+      font-size: .6em;
+    }
+  }
+  .ai1ec-event-title {
+    font-size: .9em;
+    @media screen and ( max-width: (@screen-xs - 1) ) {
+      font-size: .7em;
+      letter-spacing: -.04em;
+    }
+  }
 }
+
 .ai1ec-month-view td.ai1ec-empty {
 	background: @table-header-bg !important;
 }
@@ -391,15 +433,15 @@ table.ai1ec-oneday-view-original {
 .ai1ec-month-view,
 .ai1ec-week-view,
 .ai1ec-oneday-view {
-	a.ai1ec-event-container {
-		border: none;
-		display: block;
-		font-size: 12px;
-		.ai1ec-opacity( 0.85 );
-		&:hover,
-		&.ai1ec-hover {
+	 .ai1ec-event-container {
+		 border: none;
+		 display: block;
+		 //font-size: .75em;
+		 .ai1ec-opacity( 0.85 );
+		 &:hover,
+		 &.ai1ec-hover {
 			.ai1ec-opacity( 1 );
-		}
+		 }
 	}
 	.ai1ec-event {
 		max-height: 100%;
@@ -407,10 +449,6 @@ table.ai1ec-oneday-view-original {
 		margin: 1px 0 0;
 		padding: 0 3px 1px;
 		white-space: nowrap;
-	}
-	.ai1ec-event-time {
-		font-weight: bold;
-		font-size: 11px;
 	}
 }
 .ai1ec-month-view,
@@ -479,10 +517,53 @@ table.ai1ec-oneday-view-original {
 
 // Month view multi-day bars and dropdowns.
 .ai1ec-month-view {
+	// Time and title share one flow, as they do in print: a short event stays on one line,
+	// a longer one wraps and is cut after the second.
 	.ai1ec-event {
-		height: 14px;
+		height: auto;
 		line-height: 14px;
 		margin: 0 0 1px;
+		white-space: normal;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
+	}
+	.ai1ec-event-time,
+	.ai1ec-event-title {
+		display: inline;
+  }
+
+	.ai1ec-event-time {
+		margin-right: 0.3em;
+	}
+	// Carries .ai1ec-event-time as well, so this has to come after the rule above.
+	.ai1ec-event-time-short {
+		display: none;
+	}
+	// Day cells are about 40px wide on phones: smaller type, and the start time without the end.
+	@media screen and ( max-width: (@screen-xs - 1) ) {
+		.ai1ec-event {
+			line-height: 11px;
+			padding-left: 1px;
+			padding-right: 1px;
+		}
+
+    .ai1ec-event-time {
+			display: none;
+		}
+		.ai1ec-event-time-short {
+			display: inline;
+		}
+	}
+	// Without times ("Show times in Month view" off) the title has the line to itself: keep
+	// every event to one line and ellipsize, like the multi-day bars below. Before the word-wrap
+	// block on purpose - that setting is an explicit request to wrap, so it wins.
+	&.ai1ec-no-times .ai1ec-event {
+		display: block;
+		-webkit-line-clamp: unset;
+		white-space: nowrap;
+		text-overflow: ellipsis;
 	}
 	// Apply word wrapping if enabled.
 	&.ai1ec-word-wrap {
@@ -516,40 +597,65 @@ table.ai1ec-oneday-view-original {
 	}
 	.ai1ec-multiday {
 		z-index: 1;
+		// The continuation arrows are positioned by month_view (calendar.js) assuming a
+		// single-line box - they don't move if the box grows, so a 2-line wrap (allowed for
+		// ordinary events above) would leave them floating over just the first line instead
+		// of centered on the bar. Clip to one line and ellipsize instead.
+		.ai1ec-event {
+			display: block;
+			-webkit-line-clamp: unset;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+		}
+	}
+	// Continuation arrows. Each one is a mask painted in the page background colour over the
+	// end of the bar: arrow1 cuts the right end down to a point, arrow2 cuts a V-notch into
+	// the left end. The event colour is whatever shows through - the bar's own background -
+	// so these never need to know it (calendar.js still sets border colours on them inline;
+	// with no border-width left, that is inert).
+	//
+	// Two half-height layers, each a gradient split diagonally at 50%: the split of a
+	// `to <corner>` gradient always runs corner to corner whatever the box's aspect ratio, so
+	// the triangles stay true at any height. Stretched with top/bottom instead of the former
+	// fixed-height border triangle, the pair follows the bar's real height - base font size,
+	// theme and viewport included - with no measuring and nothing to re-run after a reflow.
+	// Technique: https://jsfiddle.net/webtiki/yJkzu/12/
+	.ai1ec-multiday-arrow1,
+	.ai1ec-multiday-arrow2 {
+		background-repeat: no-repeat;
+		background-size: 100% 50%;
+		bottom: 0;
+		position: absolute;
+		top: 0;
+		width: @multiday-arrow-depth;
 	}
 	.ai1ec-multiday-arrow1 {
-		background: @event-default-color;
-		border: 7px solid @body-bg;
-		border-left-color: @event-default-color;
-		border-right-width: 0;
-		height: 1px;
-		position: absolute;
+		background-image:
+			linear-gradient( to top right, transparent 50%, @body-bg 50% ),
+			linear-gradient( to bottom right, transparent 50%, @body-bg 50% );
+		background-position: top right, bottom right;
 		right: 0;
-		top: 0;
-		width: 0;
 	}
 	.ai1ec-multiday-arrow2 {
-		border: 7px solid @event-default-color;
-		border-left-color: @body-bg;
-		border-right-width: 2px;
-		height: 1px;
+		background-image:
+			linear-gradient( to top right, @body-bg 50%, transparent 50% ),
+			linear-gradient( to bottom right, @body-bg 50%, transparent 50% );
+		background-position: top left, bottom left;
 		left: 0;
-		position: absolute;
-		top: 0;
-		width: 0;
 	}
 	.ai1ec-multiday-bar {
 		background: @event-default-color;
 		border-radius: 3px;
-		height: 14px;
+		// Continuation bars carry the title only, but the height follows the content.
+		min-height: 14px;
 		left: 0;
 		position: absolute;
 		top: 0;
-		.ai1ec-event-title {
-			margin-left: 7px;
-		}
 		.ai1ec-event {
 			margin: 0;
+			// Clears the left notch, plus a sliver of air, replacing the 1px this element
+			// gets elsewhere. The class is only ever set on bars that carry that notch.
+			padding-left: (@multiday-arrow-depth + .1em);
 		}
 		.ai1ec-event-time {
 			display: none;
@@ -762,8 +868,401 @@ table.ai1ec-oneday-view-original {
 	}
 }
 
-// Printed agenda view overrides
+// Print rules shared by the print button (html.ai1ec-print) and browser print.
+// Not scoped to .ai1ec-calendar: the print button replaces the body with the calendar's inner HTML.
+.osec-print-calendar() {
+	// Events print as outlines rather than filled blocks. The continuation arrows are aligned
+	// against this, so keep the two in step.
+	@print-event-border: 1px;
+
+	.osec-print-header,
+	.osec-print-header[hidden] {
+		display: block !important;
+		margin: 0 0 1em;
+	}
+	.osec-print-title {
+		margin: 0 0 0.25em;
+		font-size: 1.5em;
+	}
+	.osec-print-url {
+		margin: 0;
+		font-size: 0.85em;
+		word-break: break-all;
+	}
+	// Bootstrap print styles append the URL to every link.
+	.timely a[href]:after,
+	.ai1ec-calendar a[href]:after {
+		content: none !important;
+	}
+	.plana-toolbar,
+	.ai1ec-btn-toolbar,
+	.ai1ec-print-buttons,
+	.ai1ec-views-dropdown,
+	.ai1ec-pagination,
+	.plana-pagination,
+	.ai1ec-calendar-toolbar,
+	.osec-taxonomy-filters,
+	.ai1ec-subscribe-container,
+	.osec-subscribe-container,
+	.ai1ec-reveal-full-day,
+	.ai1ec-now-marker,
+	.ai1ec-popup,
+	.ai1ec-popover,
+	.ai1ec-tooltip,
+	.ai1ec-agenda-view .ai1ec-event-expand,
+	// The screen arrows mask the bar's ends in the page background color, which is invisible
+	// once the bar itself prints as a white box. Redrawn below as positive shapes instead.
+	.ai1ec-multiday-arrow1,
+	.ai1ec-multiday-arrow2,
+	.ai1ec-read-more,
+	.ai1ec-color-swatch,
+	.post-edit-link,
+	.ai1ec-event-toggle {
+		display: none !important;
+	}
+	// Hidden overflow clips the right table border in print.
+	.osec-calendar-view,
+	.osec-calendar-view-container {
+		overflow: visible !important;
+	}
+	// No backgrounds, black text.
+	.osec-calendar-view,
+	.osec-calendar-view * {
+		background: transparent !important;
+		box-shadow: none !important;
+	}
+	.ai1ec-event,
+	.ai1ec-event-title,
+	.ai1ec-event-time,
+	.ai1ec-event-location {
+		color: #000 !important;
+	}
+	// Month/week/day: the category color (--osec-event-color) is a left border on timed events
+	// and a thin border on all four sides of all-day events. Borders print without "background graphics".
+	.ai1ec-month-view .ai1ec-event-container,
+	.ai1ec-allday-events .ai1ec-event-container {
+		border: none !important;
+	}
+	.ai1ec-month-view .ai1ec-event,
+	.ai1ec-week-view .ai1ec-week .ai1ec-event-container,
+	.ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
+		border: 1px solid var(--osec-event-color, #999) !important;
+		border-left-width: 4px !important;
+		padding-left: 3px !important;
+		// White, so the event covers the table and hour lines behind it. Marked exact,
+		// or the browser drops it when "background graphics" is off in the print dialog.
+		background: #fff !important;
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+	.ai1ec-month-view .ai1ec-allday .ai1ec-event,
+	.ai1ec-month-view .ai1ec-multiday .ai1ec-event,
+	.ai1ec-allday-events .ai1ec-event {
+		border: @print-event-border solid var(--osec-event-color, #999) !important;
+		border-left-width: @print-event-border !important;
+		background: #fff !important;
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+	// Multi-day continuation markers, the same construction as on screen - two half-height
+	// gradient triangles stretched with top/bottom, so they still follow the printed bar's
+	// height, which print grows to fit the full title. Inverted, though: on paper the shape
+	// is drawn in the category colour instead of masked out of the bar.
+	//
+	// They hang off .ai1ec-event rather than the .ai1ec-multiday-arrow* divs (hidden above)
+	// because only .ai1ec-event carries --osec-event-color - the arrow divs are its siblings,
+	// and a custom property only inherits downward. :has() is what reads across to them, so
+	// each end is drawn only where calendar.js actually put an arrow.
+	//
+	// The title has to clear them, and print overrides this element's padding with its own
+	// `padding-left: 3px !important` above, so both sides are re-stated here - !important and
+	// all - rather than left to the screen rule.
+	.ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow1 ) .ai1ec-event {
+		padding-right: (@multiday-arrow-depth + .2em) !important;
+		position: relative;
+	}
+	.ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow2 ) .ai1ec-event {
+		padding-left: (@multiday-arrow-depth + .2em) !important;
+		position: relative;
+	}
+	// Offsets: top/right/bottom/left on an absolutely positioned child resolve against the
+	// *padding* box, so a plain 0 would leave the triangle sitting a border-width inside the
+	// outline - a white hairline along the top and bottom and an apex stopping short of the
+	// end. Pulling it out by @print-event-border lands its edges on the outline itself.
+	.ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow1 ) .ai1ec-event:after,
+	.ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow2 ) .ai1ec-event:before {
+		background-repeat: no-repeat;
+		background-size: 100% 50%;
+		bottom: -@print-event-border;
+		content: '';
+		position: absolute;
+		top: -@print-event-border;
+		// calc(), not LESS arithmetic: LESS adds mixed units by discarding the second one, so
+		// `.5em + 1px` would silently compile to `1.5em`.
+		width: calc( ~"@{multiday-arrow-depth} + @{print-event-border}" );
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+	// Points right, out of the last printed day - the event carries on past it.
+	.ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow1 ) .ai1ec-event:after {
+		background-image:
+			linear-gradient( to top right, var(--osec-event-color, #999) 50%, transparent 50% ),
+			linear-gradient( to bottom right, var(--osec-event-color, #999) 50%, transparent 50% );
+		background-position: top right, bottom right;
+		right: -@print-event-border;
+	}
+	// Points left, into the first printed day - the event started before it.
+	.ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow2 ) .ai1ec-event:before {
+		background-image:
+			linear-gradient( to top left, var(--osec-event-color, #999) 50%, transparent 50% ),
+			linear-gradient( to bottom left, var(--osec-event-color, #999) 50%, transparent 50% );
+		background-position: top left, bottom left;
+		left: -@print-event-border;
+	}
+	// Month/week/day: full titles and times instead of one truncated line.
+	.ai1ec-month-view .ai1ec-event,
+	.ai1ec-month-view .ai1ec-multiday .ai1ec-event,
+	.ai1ec-week-view .ai1ec-event,
+	.ai1ec-oneday-view .ai1ec-event {
+		height: auto !important;
+		max-height: none !important;
+		overflow: visible !important;
+		white-space: normal !important;
+	}
+	// On screen month events are cut after two lines; on paper they print in full. Only month:
+	// in week view the print JS sets a clamp per event, which this would override.
+	.ai1ec-month-view .ai1ec-event {
+		display: block !important;
+		-webkit-line-clamp: none !important;
+	}
+	.ai1ec-week-view .ai1ec-week .ai1ec-event-container,
+	.ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
+		overflow: visible !important;
+	}
+	// Month/week/day are sized for one page: with Ctrl+P, move them below the site header as a whole
+	// instead of splitting them (dates and all-day events would not repeat on the next page).
+	.osec-calendar-view:has(.ai1ec-month-view, .osec-print-grid) {
+		break-inside: avoid;
+	}
+	// Week/day: the print JS adds a grid copy scaled to one page (.osec-print-grid) and hides the screen grid.
+	.osec-print-source {
+		display: none !important;
+	}
+	.tablescroll_head,
+	.tablescroll_body {
+		width: 100% !important;
+	}
+	.tablescroll_head th,
+	.tablescroll_body td,
+	.osec-print-grid {
+		width: auto !important;
+	}
+	.osec-print-grid {
+		overflow: hidden !important;
+		.ai1ec-event-container {
+			box-sizing: border-box;
+			min-height: 0 !important;
+			font-size: 9px;
+			line-height: 11px;
+		}
+		.ai1ec-event-time {
+			font-size: 8px;
+		}
+		.ai1ec-hour-marker div {
+			font-size: 9px;
+		}
+		// Days with too many parallel events print as a list of "time title" lines.
+		.osec-print-list {
+			overflow: hidden;
+			.ai1ec-event-container,
+			.ai1ec-event {
+				position: static !important;
+				display: block;
+				height: auto !important;
+				margin: 0 0 2px;
+				width: auto !important;
+			}
+			.ai1ec-event-time {
+				margin-right: 0.3em;
+			}
+			.osec-print-more {
+				font-size: 9px;
+				font-style: italic;
+			}
+		}
+	}
+	// A week column is about a seventh of the page, and narrower still where events overlap,
+	// so the whole week prints at 6pt - the smallest size that stays readable - and is clipped
+	// at the event box instead of running into the neighbouring day. The all-day row sits in
+	// the head table, outside the print grid, and needs the same size or its titles print
+	// noticeably larger than the ones in the grid.
+	.ai1ec-week-view {
+		.osec-print-grid,
+		.ai1ec-allday-events {
+			.ai1ec-event-container,
+			.ai1ec-event,
+			.ai1ec-event-time,
+			.ai1ec-event-title,
+			.osec-print-more {
+				font-size: 6pt;
+				line-height: 1.2;
+			}
+			.ai1ec-event-container {
+				overflow: hidden !important;
+			}
+		}
+		// The print JS sets -webkit-line-clamp per event, from the height its box got, so a
+		// title too long for the box ends in an ellipsis.
+		.osec-print-grid .ai1ec-event {
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+		// All-day events are a single line, where the plain ellipsis works.
+		.ai1ec-allday-events .ai1ec-event {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		.osec-print-grid .ai1ec-hour-marker div {
+			font-size: 6pt;
+		}
+	}
+	// Month: time and title share a wrapping line, which is shorter than the two lines used on screen.
+	.ai1ec-month-view {
+		.ai1ec-event-time {
+			display: inline !important;
+			margin-right: 0.3em;
+		}
+		// The start time alone is for narrow screens, not for paper.
+		.ai1ec-event-time-short {
+			display: none !important;
+		}
+		.ai1ec-event-title {
+			display: inline !important;
+		}
+	}
+	// With border-collapse the cell borders are painted below the cell content, so the white
+	// event boxes would cover the column lines. Keep them off the border.
+	.ai1ec-month-view td {
+		padding: 0 2px 2px !important;
+	}
+	// Firefox does not paint the vertical borders of a collapsed-border table that is split
+	// across pages (verified 2026-09-16: a one page month keeps them, a three page month
+	// loses them), so print with separated borders. Each cell draws its top and right line
+	// and the table closes the left and bottom edge, which keeps every line 1px.
+	// The screen border color (#ddd) is also too light to print reliably.
+	.ai1ec-month-view {
+		border-collapse: separate !important;
+		border-spacing: 0 !important;
+		border-color: #999 !important;
+		border-top-width: 0 !important;
+		border-right-width: 0 !important;
+	}
+	.ai1ec-month-view td,
+	.ai1ec-month-view th {
+		border-width: 1px 1px 0 0 !important;
+		border-style: solid !important;
+		border-color: #999 !important;
+	}
+	// Month: lower minimum row height, so wrapped titles still fit one page in most months.
+	.ai1ec-month-view .ai1ec-day-stretcher {
+		height: 3.5em;
+	}
+	// Agenda: dates never split; events only split with enough lines on both pages.
+	.ai1ec-agenda-view {
+		// Flex instead of float with overflow:hidden, which clips events continued on the next page.
+		&,
+		.ai1ec-date,
+		.ai1ec-date-events,
+		.ai1ec-event {
+			overflow: visible !important;
+		}
+		.ai1ec-date {
+			display: flex;
+			align-items: flex-start;
+		}
+		.ai1ec-date-title {
+			flex: none;
+			float: none;
+		}
+		.ai1ec-date-events {
+			flex: 1 1 auto;
+			min-width: 0;
+		}
+		.ai1ec-date-title,
+		.ai1ec-date-title * {
+			color: #000 !important;
+		}
+		// On screen the top edge and the month/year separators are background colors.
+		@date-title-border: 1px solid mix( @text-color, @agenda-date-title-bg, 30% );
+		.ai1ec-date-title {
+			border: @date-title-border !important;
+		}
+		.ai1ec-month {
+			border-bottom: @date-title-border;
+		}
+		.ai1ec-year {
+			border-top: @date-title-border;
+		}
+		// The separator line above today is in the "today" color on screen.
+		.ai1ec-date {
+			border-top-color: #ccc !important;
+		}
+		// No break-after on the date title: Chrome then moves the whole date to the next page.
+		.ai1ec-date-title {
+			break-inside: avoid;
+		}
+		.ai1ec-event-header,
+		.ai1ec-event-time {
+			break-inside: avoid;
+			break-after: avoid;
+		}
+		.ai1ec-event {
+			orphans: 5;
+			widows: 5;
+			-webkit-box-decoration-break: clone;
+			box-decoration-break: clone;
+		}
+		.ai1ec-event-summary-footer,
+		.ai1ec-categories,
+		.ai1ec-tags {
+			break-before: avoid;
+			break-inside: avoid;
+		}
+	}
+}
+
+@media screen {
+	.osec-print-grid {
+		display: none;
+	}
+}
+
+@page osec-landscape {
+	size: landscape;
+}
+
+// Day and agenda are sized for portrait: in landscape the day grid is taller than the page,
+// so it would move to a second page and leave the first one empty. Naming the page
+// overrides an orientation the print dialog remembers from a month or week print.
+@page osec-portrait {
+	size: portrait;
+}
+
+@media print {
+	.osec-print-calendar();
+	body:has(.ai1ec-month-view, .ai1ec-week-view-original) {
+		page: osec-landscape;
+	}
+	body:has(.ai1ec-oneday-view, .ai1ec-agenda-view) {
+		page: osec-portrait;
+	}
+}
+
+// Printed via print button.
 .ai1ec-print {
+	.osec-print-calendar();
 	* {
 		background: white !important;
 		color: black !important;
@@ -772,27 +1271,11 @@ table.ai1ec-oneday-view-original {
 		margin: 0;
 		text-align: left;
 	}
-	#wpadminbar,
-	#comments,
-	#page > header {
-		display: none;
-	}
-	#osec-container {
-		position: absolute;
-		left: 0;
-		top: 0;
-		width: 100%;
-	}
-	.ai1ec-agenda-view .ai1ec-event.ai1ec-expanded {
-		box-shadow: none;
-		border: 2px solid gray !important;
-	}
 	.ai1ec-agenda-view {
 		.ai1ec-event-summary-footer {
 			display: none;
 		}
 		.ai1ec-date-title {
-			border-color: #cacaca;
 			&:after {
 				display: none;
 			}
@@ -815,23 +1298,6 @@ table.ai1ec-oneday-view-original {
 			box-shadow: none !important;
 			padding-left: 0.2em !important;
 		}
-	}
-	.timely .entry-meta,
-	.timely .ai1ec-subscribe,
-	.timely .ai1ec-subscribe-google,
-	.ai1ec-agenda-view .ai1ec-event-expand,
-	.ai1ec-btn-toolbar,
-	.ai1ec-pagination,
-	.ai1ec-calendar-toolbar,
-	.ai1ec-read-more,
-	.ai1ec-color-swatch,
-	.post-edit-link,
-	.ai1ec-event-toggle,
-	.ai1ec-views-dropdown {
-		display: none !important;
-	}
-	.ai1ec-event-header {
-		cursor: text !important;
 	}
 }
 

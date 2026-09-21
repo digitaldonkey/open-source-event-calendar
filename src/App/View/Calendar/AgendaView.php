@@ -42,7 +42,7 @@ class AgendaView extends AbstractView
         if (isset($view_args['exact_date']) && DT::is_timestamp($view_args['exact_date'])) {
             $exact_date = $view_args['exact_date'];
         } else {
-            //  This should not happen, but it does.
+            // No exact_date was requested; default to today.
             $exact_date = UIDateFormats::factory($this->app)->currentDay();
         }
 
@@ -162,14 +162,16 @@ class AgendaView extends AbstractView
             'pagination_links'        => $pagination_links,
             'views_dropdown'          => $view_args['views_dropdown'],
             'below_toolbar'           => $this->getBelowToolbarHtml($type, $view_args),
+            'print_title'             => $titles->long,
+            'print_date'              => $results['date_first'],
+            'print_args'              => $view_args,
         ];
-        // Add extra buttons to Agenda view's nav bar if events were returned.
+        // Add collapse/expand buttons to Agenda view's nav bar if events were returned.
         if ($type === 'agenda' && $dates) {
             $button_args                  = [
                 'text_collapse_all' => __('Collapse All', 'open-source-event-calendar'),
                 'text_expand_all'   => __('Expand All', 'open-source-event-calendar'),
                 'no_toggle'         => $view_args['agenda_toggle'] !== 'false',
-                'display_print_button' => $this->app->settings->get('display_print_button'),
             ];
             $nav_args['after_pagination'] = ThemeLoader::factory($this->app)
                 ->get_file('agenda-buttons.twig', $button_args, false)
@@ -254,10 +256,7 @@ class AgendaView extends AbstractView
         // Classify each event into a date/allday category
         foreach ($events as $event) {
             $start_time    = new DT($event->get('start')->format('Y-m-d\T00:00:00'), 'sys.default');
-            $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url(
-                $start_time,
-                $this->app->settings->get('input_date_format')
-            );
+            $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url($start_time);
             $href_for_date = $this->create_link_for_day_view($exact_date);
             // timestamp is used to have correctly sorted array as UNIX
             // timestamp never goes in decreasing order for increasing dates.
@@ -438,7 +437,6 @@ class AgendaView extends AbstractView
     {
         $view_args += $this->request->get_dict([
             'page_offset',
-            'exact_date',
             'time_limit',
             'display_filters',
             'display_subscribe',
@@ -447,6 +445,9 @@ class AgendaView extends AbstractView
             'display_date_navigation',
 
         ]);
+        if (false !== $exact_date) {
+            $view_args['exact_date'] = $exact_date;
+        }
         return $view_args;
     }
 
