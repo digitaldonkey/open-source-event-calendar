@@ -543,7 +543,7 @@ class Settings extends OsecBaseInitialized
                     'tab'   => 'viewing-events',
                     'label' => __('Show times in Month view', 'open-source-event-calendar'),
                 ],
-                'default'  => true,
+                'default'  => false,
             ],
             'month_word_wrap' => [
                 'type'     => 'bool',
