@@ -125,40 +125,6 @@ do_action('osec_loaded', $app);
 </details>
 
 
-### osec_after_themes_setup <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Do something after Osec Theme setup
-
-```php
-do_action('osec_after_themes_setup', $app);
-```
-
-#### Parameters
-
-
- - **$app** <span style="color:crimson"> </span> Osec global app.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Do something after Osec Theme setup
- *
- * @since 1.0
- *
- * @param  App  $app  Osec global app.
- *
- * @file src/App/Controller/BootstrapController.php
- */
-do_action('osec_after_themes_setup', $app);
-```
-
-</details>
-
-
 ---
 
 
@@ -5196,40 +5162,6 @@ do_action('osec_loaded', $app);
  * @file src/App/Controller/BootstrapController.php
  */
 do_action('osec_loaded', $app);
-```
-
-</details>
-
-
-### osec_after_themes_setup <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Do something after Osec Theme setup
-
-```php
-do_action('osec_after_themes_setup', $app);
-```
-
-#### Parameters
-
-
- - **$app** <span style="color:crimson"> </span> Osec global app.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Do something after Osec Theme setup
- *
- * @since 1.0
- *
- * @param  App  $app  Osec global app.
- *
- * @file src/App/Controller/BootstrapController.php
- */
-do_action('osec_after_themes_setup', $app);
 ```
 
 </details>

@@ -97,7 +97,6 @@ class BootstrapController
 
         ShutdownController::factory($this->app)->register('ob_get_clean');
         add_action('init', $this->register_extensions(...), 1);
-        add_action('after_setup_theme', $this->register_themes(...), 1);
         add_action('init', [$this, 'verifyCache'], 1);
     }
 
@@ -470,13 +469,6 @@ class BootstrapController
         } else {
             // Is not "is_admin()"
             add_action(
-                'after_setup_theme',
-                function () use ($app) {
-                    ThemeLoader::factory($app)->execute_theme_functions();
-                }
-            );
-
-            add_action(
                 'the_post',
                 function (WP_Post $post) use ($app) {
                     // Ensure that the Content area of Calendar page is not empty.
@@ -597,23 +589,6 @@ class BootstrapController
          * @param  App  $app  Osec global app.
          */
         do_action('osec_loaded', $this->app);
-    }
-
-    /**
-     * Notify themes and pass them instance of objects registry.
-     *
-     * @return void
-     */
-    public function register_themes()
-    {
-        /**
-         * Do something after Osec Theme setup
-         *
-         * @since 1.0
-         *
-         * @param  App  $app  Osec global app.
-         */
-        do_action('osec_after_themes_setup', $this->app);
     }
 
     /**

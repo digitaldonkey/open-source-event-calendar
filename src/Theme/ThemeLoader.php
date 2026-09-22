@@ -498,21 +498,6 @@ class ThemeLoader extends OsecBaseClass
     }
 
     /**
-     * Called during 'after_setup_theme' action. Runs theme's special
-     * functions.php file, if present.
-     */
-    public function execute_theme_functions(): void
-    {
-        $theme     = $this->app->options->get('osec_current_theme');
-        $functions = $theme['theme_dir'] . '/functions.php';
-
-        if (file_exists($functions)) {
-            include $functions;
-        }
-    }
-
-
-    /**
      * Switches to default Vortex theme.
      *
      * @param  bool  $silent  Whether notify admin or not.
