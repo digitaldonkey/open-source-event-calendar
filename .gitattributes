@@ -3,5 +3,4 @@
 # normalise their CRLF line endings and the committed bytes would no longer
 # match the release archive bin/update-leaflet.sh downloads, producing spurious
 # diffs on every re-run.
-public/js/external_libs/leaflet/** -text
-public/js/external_libs/leaflet-control-geocoder/** -text
+public/js/external_libs/** -text
