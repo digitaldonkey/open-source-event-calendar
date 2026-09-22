@@ -1,0 +1,15 @@
+Third-party library - DO NOT EDIT.
+
+Unmodified files as published by the project. Local changes would be
+silently discarded: bin/update-leaflet.sh replaces this directory.
+Customised adaptations are marked as such and live elsewhere; see
+public/admin/less/admin-pages/control-geocoder.less for an example.
+
+release: perliedman/leaflet-control-geocoder 4.0.0
+asset:   https://github.com/perliedman/leaflet-control-geocoder/releases/download/4.0.0/leaflet-control-geocoder-4.0.0.tgz
+sha256:  d3e7696cf33420ab5d42678305bf63ec3d2cf9ccd9f887a26e9621a075c06d3f  (of the asset, computed locally)
+updated: 2026-09-22
+script:  bin/update-leaflet.sh (version from constants.php)
+
+files:
+  dist/Control.Geocoder.js

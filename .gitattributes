@@ -1,0 +1,7 @@
+# Vendored third-party libraries are committed exactly as published upstream
+# (see public/js/external_libs/*/osec-vendor.txt). Without this, Git would
+# normalise their CRLF line endings and the committed bytes would no longer
+# match the release archive bin/update-leaflet.sh downloads, producing spurious
+# diffs on every re-run.
+public/js/external_libs/leaflet/** -text
+public/js/external_libs/leaflet-control-geocoder/** -text

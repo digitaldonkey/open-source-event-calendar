@@ -457,12 +457,30 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     /**
      * Leaflet version
      *
+     * Bundled in public/js/external_libs/leaflet. Bump this, then run
+     * bin/update-leaflet.sh to refresh the files.
+     *
      * @see osec_leaflet_library_alter.
      */
     if (! defined('OSEC_LEAFLET_VERSION')) {
         define(
             'OSEC_LEAFLET_VERSION',
             '1.9.4'
+        );
+    }
+
+    /**
+     * Leaflet control geocoder version
+     *
+     * Bundled in public/js/external_libs/leaflet-control-geocoder. Bump this,
+     * then run bin/update-leaflet.sh to refresh the files.
+     *
+     * @see osec_leaflet_geocoder_library_alter.
+     */
+    if (! defined('OSEC_LEAFLET_GEOCODER_VERSION')) {
+        define(
+            'OSEC_LEAFLET_GEOCODER_VERSION',
+            '4.0.0'
         );
     }
 

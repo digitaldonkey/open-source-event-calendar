@@ -137,9 +137,11 @@ OSEC may connect to OpenStreetMap to render maps. If you using maps feature make
 OSEC may connect to OpenStreetMap Nominatim geocoding API. [Terms of Service](https://operations.osmfoundation.org/policies/nominatim/).
 You may need to switch the servive on a heavy traffic site as Nominatim allows an *absolute maximum of 1 request per second*.
 
-By default leaflet and leaflet-control-geocoder are loaded from unpkg.com. [Terms of Service](https://app.unpkg.com/policies@1.0.1).
+Leaflet and leaflet-control-geocoder are bundled with the plugin, so rendering a map does not request
+them from a third party.
 
-You can change using hooks: `osec_leaflet_library_alter`, `osec_leaflet_geocoder_library_alter`.
+You can load them from elsewhere, for example a CDN, using the hooks `osec_leaflet_library_alter` and
+`osec_leaflet_geocoder_library_alter`.
 
 == Migration Notes ==
 

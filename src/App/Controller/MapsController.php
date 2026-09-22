@@ -120,13 +120,18 @@ class MapsController extends OsecBaseClass
     protected function register_leaflet(): void
     {
         $leaflet = [
-            'script' => 'https://unpkg.com/leaflet@' . OSEC_LEAFLET_VERSION . '/dist/leaflet.js',
-            'style'  => 'https://unpkg.com/leaflet@' . OSEC_LEAFLET_VERSION . '/dist/leaflet.css',
+            'script' => OSEC_ADMIN_THEME_JS_URL . 'external_libs/leaflet/leaflet.js',
+            'style'  => OSEC_ADMIN_THEME_JS_URL . 'external_libs/leaflet/leaflet.css',
         ];
         /**
          * Alter Leaflet Library.
          *
-         * Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+         * Leaflet is bundled in public/js/external_libs/leaflet; the version is
+         * defined in OSEC_LEAFLET_VERSION. Use this filter to load it from a CDN
+         * instead.
+         *
+         * Note: leaflet.css resolves the default marker icons relative to itself,
+         * so a custom style URL needs a sibling images/ directory.
          *
          * @since 1.1
          *
@@ -137,26 +142,30 @@ class MapsController extends OsecBaseClass
         wp_register_script(
             'leaflet',
             $leaflet['script'],
-            null,
-            OSEC_VERSION,
+            [],
+            OSEC_LEAFLET_VERSION,
             ['in_footer' => true]
         );
         wp_register_style(
             'leaflet-css',
             $leaflet['style'],
             [],
-            OSEC_VERSION
+            OSEC_LEAFLET_VERSION
         );
     }
 
     protected function register_leaflet_geocoder(): void
     {
         $leaflet_geocoder = [
-            'script' => 'https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js',
+            'script' => OSEC_ADMIN_THEME_JS_URL
+                . 'external_libs/leaflet-control-geocoder/Control.Geocoder.js',
             'style'  => OSEC_ADMIN_THEME_CSS_URL . 'control-geocoder.css',
         ];
         /**
          * Alter Leaflet geocoder library (leaflet-control-geocoder)
+         *
+         * The library is bundled in public/js/external_libs/leaflet-control-geocoder;
+         * the version is defined in OSEC_LEAFLET_GEOCODER_VERSION.
          *
          * @since 1.1
          *
@@ -168,17 +177,17 @@ class MapsController extends OsecBaseClass
         wp_register_script(
             'leaflet-control-geocoder',
             $leaflet_geocoder['script'],
-            null,
-            OSEC_VERSION,
+            ['leaflet'],
+            OSEC_LEAFLET_GEOCODER_VERSION,
             ['in_footer' => true]
         );
 
         // Adopted custom styles
-        // @see https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css
+        // @see https://unpkg.com/leaflet-control-geocoder@4.0.0/dist/Control.Geocoder.css
         wp_enqueue_style(
             'control-geocoder.css',
             $leaflet_geocoder['style'],
-            null,
+            [],
             OSEC_VERSION,
         );
     }
