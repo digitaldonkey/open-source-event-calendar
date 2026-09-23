@@ -63,6 +63,15 @@ parameters:
                 - ["-c", "cd hookster_markdown && node build.js check"]
             metadata:
                 task: shell
+        # WordPress plugin-check gate. `wp plugin check` always exits 0 even
+        # with errors, so bin/plugin-check.php parses its output, keeps only
+        # findings in files the release actually ships and fails on ERROR.
+        plugin_check:
+            triggered_by: ['php']
+            scripts:
+                - ["-c", "php bin/plugin-check.php"]
+            metadata:
+                task: shell
 
     testsuites:
         git_pre_commit:
@@ -77,6 +86,7 @@ parameters:
                 - composer
                 - phpcs
                 - phpunit
+                - plugin_check
                 - integration_tests
         # Release-readiness checks. Run after all_tests:
         #   vendor/bin/grumphp run --testsuite=all_tests && vendor/bin/grumphp run --testsuite=prepare_release
@@ -85,3 +95,4 @@ parameters:
                 - release_check
                 - make_readme
                 - hooks_and_filters
+                - plugin_check

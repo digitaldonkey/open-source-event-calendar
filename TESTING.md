@@ -13,6 +13,7 @@ Run before pushing:
 [ ] vendor/bin/phpcs --standard=phpcs.xml --runtime-set testVersion 8.2-    # coding standards
 [ ] vendor/bin/phpunit                                                      # unit + integration tests
 [ ] cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test  # Mocha/Selenium (~5 min)
+[ ] php bin/plugin-check.php                                                 # WordPress plugin-check gate (~13 s)
 [ ] vendor/bin/grumphp run --testsuite=all_tests                           # everything above, in one command
 ```
 
@@ -126,15 +127,50 @@ Unlike the git hook, which only checks staged files, these commands check the wh
 
 Task inventory as currently configured:
 
-- **Active**: `composer` (validates `composer.json`/`composer.lock`), `phpcs` (standard `./phpcs.xml`), `phpunit` (config file `./phpunit.xml`, `always_execute: true` so it runs regardless of which files changed), `integration_tests` (a named `shell` task instance — `metadata.task: shell` — running `cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test`; needs the `ddev-selenium-standalone-chrome` add-on and `constants-local.php`, see [Integration tests](#integration-tests-mochaselenium) above)
+- **Active**: `composer` (validates `composer.json`/`composer.lock`), `phpcs` (standard `./phpcs.xml`), `phpunit` (config file `./phpunit.xml`, `always_execute: true` so it runs regardless of which files changed), `integration_tests` (a named `shell` task instance — `metadata.task: shell` — running `cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test`; needs the `ddev-selenium-standalone-chrome` add-on and `constants-local.php`, see [Integration tests](#integration-tests-mochaselenium) above), `plugin_check` (a named `shell` task running `php bin/plugin-check.php`, the WordPress plugin-check gate — see [WordPress plugin-check](#wordpress-plugin-check) below)
 - **Present but commented out** (not run): `gherkin`, `git_commit_message`, `phpcpd` (would exclude `lib`/`tests`/`vendor`), `phplint`, `phpmd` (ruleset `codesize, design, naming, unusedcode`, would exclude `tests`/`vendor`)
 
 Testsuites:
 - `git_pre_commit` — matched by name to GrumPHP's git hook (`PreCommitCommand` looks up a testsuite literally named `git_pre_commit`), so this is what actually runs on every commit: `composer`, `phpcs`, `phpunit`. Without this testsuite the hook would run every configured task, including `integration_tests` and the release checks. CI's "Run code quality tests" step deliberately does not use this testsuite (it runs `--tasks=composer,phpcs`, as that job has no database for `phpunit`).
-- `all_tests` — not hook-bound, for running everything on demand: `composer`, `phpcs`, `phpunit`, `integration_tests`.
-- `prepare_release` — `release_check` (`wp osec prepare_release`), `make_readme` (`wp osec make_readme --check`), `hooks_and_filters` (`hookster_markdown` check). Run after `all_tests`.
+- `all_tests` — not hook-bound, for running everything on demand: `composer`, `phpcs`, `phpunit`, `plugin_check`, `integration_tests`.
+- `prepare_release` — `release_check` (`wp osec prepare_release`), `make_readme` (`wp osec make_readme --check`), `hooks_and_filters` (`hookster_markdown` check), `plugin_check` (`php bin/plugin-check.php`). Run after `all_tests`.
 
 The git pre-commit hook already runs inside DDEV — `git_hook_variables.EXEC_GRUMPHP_COMMAND` wraps it in `ddev exec -d "/var/www/html/wp-content/plugins/open-source-event-calendar"`. No extra setup needed; only reinit (`ddev exec grumphp git:init`) if the hook itself isn't installed.
+
+## WordPress plugin-check
+
+`wp plugin check` is what wordpress.org reviews run. It **always exits 0**, even with errors, so it cannot
+be a gate on its own. `bin/plugin-check.php` wraps it:
+
+```bash
+php bin/plugin-check.php            # working tree, fails on ERROR
+php bin/plugin-check.php --strict   # also fails on WARNING
+```
+
+Exit codes: `0` clean, `1` blocking findings, `2` the check could not be run or its output could not be
+trusted (fail closed — unparseable output is never read as "nothing found").
+
+What it does beyond running the command:
+
+- **Only findings in shipped files count.** The working tree carries ~78 findings that never reach a
+  release (`cache/twig/`, `tests/`, `bin/`, `.circleci/`, dotfiles, `*.md`). The wrapper decides per path
+  using `OSEC_RELEASE_WHITE_LIST` from `.circleci/config.yml` plus `.distignore` plus the `*.sh`/`*.cmd`
+  removal of `create_release_job` — the same recipe that builds the zip, read from those files rather than
+  restated, so it cannot drift. A hidden file or stray `.md` that *does* ship still fails the gate.
+- **The pinned plugin-check is enforced.** WP-CLI loads `wp-content/plugins/plugin-check`, not
+  `vendor/plugin-check`, so the wrapper compares the installed version against the
+  `wpackagist-plugin/plugin-check` pin in `composer.lock` and aborts on a mismatch. Otherwise a
+  `wp plugin update` would silently change what the gate enforces.
+- `--mode=new` (the strictest rule set) and the wordpress.org slug are passed explicitly, so the result
+  does not depend on the checkout directory's name.
+
+Known non-blocking finding: `src/App/View/Event/EventContentView.php:155`
+`PrefixAllGlobals.NonPrefixedVariableFound`, a false positive on the dynamic `$GLOBALS[$name]` restore in a
+`finally` block. It is a WARNING, so it only fails under `--strict`.
+
+In CI the check runs in `release_test_job` against the **unzipped release**, before `constants-local.php`
+is written, with plugin-check copied from the workspace `vendor/` (the pinned version) and removed again
+afterwards so it cannot affect the integration tests that follow.
 
 ## Integration tests (Mocha/Selenium)
 

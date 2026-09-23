@@ -460,6 +460,18 @@ jobs:
             echo "ls -al $WP_CORE_DIR/wp-content/uploads" && ls -al $WP_CORE_DIR/wp-content/uploads
             echo "ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache" && ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
       - run:
+          name: WordPress plugin-check (release build)
+          command: |
+            set -Eeuxo pipefail
+            # Runs before constants-local.php is written, so only files that
+            # are actually released are checked. plugin-check comes from the
+            # workspace vendor directory, i.e. the version composer.lock pins.
+            cp -R /tmp/vendor/plugin-check $WP_CORE_DIR/wp-content/plugins/plugin-check
+            $WP_CLI --path=$WP_CORE_DIR plugin activate plugin-check
+            php bin/plugin-check.php --release --wp=$WP_CLI --path=$WP_CORE_DIR --slug=$WP_ORG_PLUGIN_NAME
+            $WP_CLI --path=$WP_CORE_DIR plugin deactivate plugin-check
+            rm -rf $WP_CORE_DIR/wp-content/plugins/plugin-check
+      - run:
           name: Add constants-local.php
           command: |
             echo "<?php define('OSEC_UNINSTALL_PLUGIN_DATA', true);" > /var/www/html/wp-content/plugins/open-source-event-calendar/constants-local.php
