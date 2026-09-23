@@ -66,6 +66,103 @@ class IcsImportExportParserTest extends TestBase
     }
 
     /**
+     * One event with a rule the generator rejects must not stop the feed.
+     *
+     * Before the rule was dropped instead of thrown, php-rrule's exception left
+     * add_vcalendar_events_to_db() through Event::save(), so every event after
+     * the broken one was lost.
+     */
+    public function test_invalid_recurrence_rule_does_not_abort_the_import()
+    {
+        global $osec_app;
+        $DATA = [
+            'events_in_db'   => [],
+            'feed'           =>
+                (object)[
+                    'feed_id'              => '9',
+                    'feed_url'             => 'https://ddev-wordpress.ddev.site/wp-content/plugins/open-source-event-calendar/tests/Unit/App/Model/ical_feeds/invalid_recurrence_rule.ics',
+                    'feed_name'            => 'invalid_recurrence_rule.ics',
+                    'feed_category'        => '',
+                    'feed_tags'            => '',
+                    'hide_cost'            => '0',
+                    'comments_enabled'     => '0',
+                    'map_display_enabled'  => '0',
+                    'keep_tags_categories' => '0',
+                    'keep_old_events'      => '0',
+                    'import_timezone'      => '1',
+                    'import_post_status'   => 'publish',
+                ],
+            'comment_status' => 'closed',
+            'do_show_map'    => 0,
+            'source'         => file_get_contents(__DIR__ . '/ical_feeds/invalid_recurrence_rule.ics'),
+        ];
+
+        $value = IcsImportExportParser::factory($osec_app)->import($DATA);
+
+        $this->assertEquals(2, $value['count'], 'Both events import.');
+        $this->assertCount(1, $value['messages'], 'The dropped rule is reported.');
+        $this->assertStringContainsString('not valid', $value['messages'][0]);
+
+        // The broken rule leaves its event as a single occurrence, the valid
+        // one keeps its three.
+        $event_ids = EventSearch::factory($osec_app)->get_event_ids_for_feed($DATA['feed']->feed_url);
+        $this->assertCount(2, $event_ids);
+        $time_zone = Timezones::factory($osec_app)->get_default_timezone();
+        $inserted  = EventSearch::factory($osec_app)->get_events_between(
+            new DT(strtotime('1 July 2026 00:00:00 ' . $time_zone), $time_zone),
+            new DT(strtotime('1 September 2026 00:00:00 ' . $time_zone), $time_zone),
+            ['post_ids' => array_map('intval', $event_ids)]
+        );
+        $this->assertCount(4, $inserted);
+    }
+
+    /**
+     * A rule iCalcreator rejects while parsing fails the feed, with a reason.
+     *
+     * This gate sits in front of the generator: iCalcreator validates the whole
+     * calendar in Vcalendar::parse(), so the feed never reaches the per event
+     * handling that drops a single bad rule. Its RuntimeException used to leave
+     * import() uncaught, which fataled the admin request and the cron run.
+     */
+    public function test_structurally_invalid_rule_reports_the_feed_as_unreadable()
+    {
+        global $osec_app;
+        $DATA = [
+            'events_in_db'   => [],
+            'feed'           =>
+                (object)[
+                    'feed_id'              => '10',
+                    'feed_url'             => 'https://ddev-wordpress.ddev.site/wp-content/plugins/open-source-event-calendar/tests/Unit/App/Model/ical_feeds/structurally_invalid_rule.ics',
+                    'feed_name'            => 'structurally_invalid_rule.ics',
+                    'feed_category'        => '',
+                    'feed_tags'            => '',
+                    'hide_cost'            => '0',
+                    'comments_enabled'     => '0',
+                    'map_display_enabled'  => '0',
+                    'keep_tags_categories' => '0',
+                    'keep_old_events'      => '0',
+                    'import_timezone'      => '1',
+                    'import_post_status'   => 'publish',
+                ],
+            'comment_status' => 'closed',
+            'do_show_map'    => 0,
+            'source'         => file_get_contents(__DIR__ . '/ical_feeds/structurally_invalid_rule.ics'),
+        ];
+
+        try {
+            IcsImportExportParser::factory($osec_app)->import($DATA);
+            $this->fail('The feed must be reported as unreadable.');
+        } catch (ImportExportParseException $exception) {
+            $this->assertStringContainsString('could not be read', $exception->getMessage());
+            $this->assertStringContainsString(
+                'BYMONTHDAY',
+                $exception->getMessage(),
+                'The reason survives, so the feed owner learns what to fix.'
+            );
+        }
+    }
+
+    /**
      * Reoccurrence and overrides.
      */
     public function test_simple_occurrences_with_oveeride_ics()

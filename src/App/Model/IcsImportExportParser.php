@@ -62,7 +62,20 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $unique        = md5($unique_prefix . $arguments['feed']->feed_url);
         $cal           = Vcalendar::factory([IcalInterface::UNIQUE_ID => $unique]);
 
-        if ($cal->parse($arguments['source'])) {
+        try {
+            $parsed = $cal->parse($arguments['source']);
+        } catch (\Throwable $exception) {
+            // iCalcreator validates the whole calendar while parsing, so a single
+            // malformed property (a RRULE the RFC does not allow, for example)
+            // rejects the feed. Report it instead of failing the request.
+            throw new ImportExportParseException(
+                esc_html(
+                    'The feed could not be read: ' . $exception->getMessage()
+                )
+            );
+        }
+
+        if ($parsed) {
             try {
                 $result = $this->add_vcalendar_events_to_db(
                     $cal,
@@ -161,6 +174,19 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $v->getComponents(),
             fn($c) => $c instanceof \Kigkonsult\Icalcreator\Vevent
         );
+
+        // A rule the generator cannot apply is reported, not thrown, so the
+        // rest of the feed still imports. Collect what happened per feed.
+        $truncated      = 0;
+        $invalid        = 0;
+        $on_truncated   = function () use (&$truncated) {
+            ++$truncated;
+        };
+        $on_invalid     = function () use (&$invalid) {
+            ++$invalid;
+        };
+        add_action('osec_recurrence_truncated', $on_truncated);
+        add_action('osec_recurrence_rule_invalid', $on_invalid);
 
         // Walk events.
         foreach ($events as $e) {
@@ -537,9 +563,85 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // End event processing.
         }
 
+        remove_action('osec_recurrence_truncated', $on_truncated);
+        remove_action('osec_recurrence_rule_invalid', $on_invalid);
+        if ($invalid > 0) {
+            $output['messages'][] = sprintf(
+                /* translators: %s: number of events. */
+                _n(
+                    'The repeat rule of %s event is not valid and was ignored.',
+                    'The repeat rules of %s events are not valid and were ignored.',
+                    $invalid,
+                    'open-source-event-calendar'
+                ),
+                number_format_i18n($invalid)
+            );
+        }
+        if ($truncated > 0) {
+            $output['messages'][] = sprintf(
+                /* translators: 1: number of events, 2: number of instances. */
+                _n(
+                    '%1$s event repeats more often than the calendar stores, only %2$s occurrences were created.',
+                    '%1$s events repeat more often than the calendar stores, only %2$s occurrences each were
+                    created.',
+                    $truncated,
+                    'open-source-event-calendar'
+                ),
+                number_format_i18n($truncated),
+                number_format_i18n(OSEC_REOCCURRENCE_MAX_INSTANCES)
+            );
+        }
+
         // Update parent/child relations.
         $this->process_parent_child_relations();
         return $output;
+    }
+
+    /**
+     * Writes a recurrence rule into the exported event, if iCalcreator takes it.
+     *
+     * A rule the generator already refused is still stored on the event, so the
+     * export is the second place it surfaces. Exporting the event without the
+     * rule keeps the feed readable, and matches the calendar, which shows the
+     * event as a single occurrence for the same reason.
+     *
+     * @param  Vevent  $component  Event being exported.
+     * @param  string  $property  'RRULE' or 'EXRULE'.
+     * @param  array  $rule  Rule parts.
+     * @param  Event  $event  Event being exported.
+     *
+     * @return void
+     */
+    protected function export_recurrence_rule(
+        Vevent $component,
+        string $property,
+        array $rule,
+        Event $event
+    ): void {
+        try {
+            if ('EXRULE' === $property) {
+                $component->setExrule($this->sanitizeValue($rule));
+
+                return;
+            }
+            $component->setRrule($this->sanitizeValue($rule));
+        } catch (\InvalidArgumentException $exception) {
+            /**
+             * Fired when a stored recurrence rule cannot be exported.
+             *
+             * @since 1.1.15
+             *
+             * @param  string  $rrule  Rule that was left out.
+             * @param  string  $message  Why iCalcreator rejected it.
+             * @param  Event  $event  Event being exported.
+             */
+            do_action(
+                'osec_recurrence_rule_not_exportable',
+                $property . ':' . wp_json_encode($rule),
+                $exception->getMessage(),
+                $event
+            );
+        }
     }
 
     protected function add_parent_child_relations(string $uid, Event $event, ?string $recurrence_id): void {
@@ -1413,11 +1515,11 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
 
         // add rrule to exported calendar
         if (! empty($rrule) && ! isset($rrule['RDATE'])) {
-            $e->setRrule($this->sanitizeValue($rrule));
+            $this->export_recurrence_rule($e, 'RRULE', $rrule, $event);
         }
         // add exrule to exported calendar
         if (! empty($exrule) && ! isset($exrule['EXDATE'])) {
-            $e->setExrule($this->sanitizeValue($exrule));
+            $this->export_recurrence_rule($e, 'EXRULE', $exrule, $event);
         }
 
         // ===================

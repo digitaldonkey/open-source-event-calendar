@@ -5,6 +5,7 @@ namespace Osec\App\Model\PostTypeEvent;
 use Osec\App\Controller\AccessControl;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
+use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
@@ -24,6 +25,13 @@ class EventEditing extends OsecBaseClass
     public const NONCE_NAME = 'osec_edit_event_nonce';
 
     public const NONCE_ACTION = 'osec_edit_event_nonce';
+
+    /**
+     * Listeners collecting recurrence problems of the running save.
+     *
+     * @var callable[]
+     */
+    protected array $recurrence_listeners = [];
 
     /**
      * Saves meta post data.
@@ -256,8 +264,83 @@ class EventEditing extends OsecBaseClass
          *    });`
          */
         do_action('osec_save_post', $event);
+        $this->listen_for_recurrence_notices($post);
         $event->save($update);
+        $this->stop_listening_for_recurrence_notices();
+
         return $event;
+    }
+
+    /**
+     * Reports recurrence problems of the running save as admin notices.
+     *
+     * The notices are dispatched on the next admin page load, dismissible and
+     * limited to the calendar's own screens by NotificationAdmin.
+     *
+     * @param  WP_Post  $post  Event being saved, named in the notice.
+     *
+     * @return void
+     */
+    protected function listen_for_recurrence_notices(WP_Post $post): void
+    {
+        $notification = NotificationAdmin::factory($this->app);
+        $title        = esc_html(get_the_title($post));
+
+        $this->recurrence_listeners = [
+            'osec_recurrence_truncated'    => function ($rrule, $limit) use ($notification, $title) {
+                $notification->store(
+                    sprintf(
+                        /* translators: 1: event title, 2: number of instances. */
+                        __(
+                            '"%1$s" repeats more often than the calendar stores. Only the first %2$s occurrences
+                            were created, so the series ends earlier than its repeat rule asks for.',
+                            'open-source-event-calendar'
+                        ),
+                        $title,
+                        number_format_i18n($limit)
+                    ),
+                    'updated',
+                    0,
+                    [NotificationAdmin::RCPT_ADMIN],
+                    true
+                );
+            },
+            'osec_recurrence_rule_invalid' => function ($rrule, $message) use ($notification, $title) {
+                $notification->store(
+                    sprintf(
+                        /* translators: 1: event title, 2: recurrence rule, 3: reason. */
+                        __(
+                            'The repeat rule of "%1$s" is not valid and was ignored, the event was saved as a
+                            single event. Rule: %2$s Reason: %3$s',
+                            'open-source-event-calendar'
+                        ),
+                        $title,
+                        esc_html($rrule),
+                        esc_html($message)
+                    ),
+                    'error',
+                    0,
+                    [NotificationAdmin::RCPT_ADMIN],
+                    true
+                );
+            },
+        ];
+        foreach ($this->recurrence_listeners as $hook => $listener) {
+            add_action($hook, $listener, 10, 2);
+        }
+    }
+
+    /**
+     * Removes the listeners of the finished save.
+     *
+     * @return void
+     */
+    protected function stop_listening_for_recurrence_notices(): void
+    {
+        foreach ($this->recurrence_listeners as $hook => $listener) {
+            remove_action($hook, $listener, 10);
+        }
+        $this->recurrence_listeners = [];
     }
 
     /**

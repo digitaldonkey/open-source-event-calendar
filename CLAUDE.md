@@ -125,6 +125,10 @@ Do not access production databases.
 - Use PHP 8.2+ features when appropriate (typed properties, readonly classes, match expressions, anonymous classes)
 - Follow WordPress PHP Coding Standards from `phpcs.xml`
 - Avoid `declare(strict_types=1);` - legacy code incompatible
+- **Global classes need a leading backslash or an import inside `src/`.** `catch (Throwable ...)` in a
+  namespaced file silently catches `Osec\…\Throwable`, i.e. nothing, and phpcs does not flag it. This repo
+  also ships its **own** `Osec\Exception\InvalidArgumentException`, so a file importing that one must catch
+  the library's with `\InvalidArgumentException` — the names collide and the wrong one compiles fine
 - Utilize WordPress core functions and APIs when available
 - Implement proper error handling:
   - Use WordPress debug logging (`WP_DEBUG_LOG`)
@@ -165,6 +169,21 @@ Do not access production databases.
   `[23:00, 24:00)` loses the spring transition day. Integration tests that create events at "now" therefore
   pass or fail depending on what time the pipeline ran - see
   `.claude/plans/13-one-hour-before-midnight-test-fails.md`.
+- **Two limits bound how many instances one event may generate**, and they do different jobs:
+  `OSEC_REOCCURRENCE_TIMEFRAME` (`+ 3years`) is applied **only to a rule that names no end of its own** - it is
+  what keeps an open-ended `FREQ=DAILY` finite. An explicit `UNTIL` is honoured in full, however far out, and
+  `OSEC_REOCCURRENCE_MAX_INSTANCES` (2000) is the ceiling that actually bounds the table. Do **not** clamp
+  `UNTIL` to the timeframe: it costs a yearly series to 2099 70 of its 74 occurrences (monthly: 843 of 888)
+  while saving nothing the ceiling does not already bound (daily to 2099 is 27023 occurrences either way
+  capped at 2000).
+- **`UNTIL` and `COUNT` in one rule are repaired, not rejected.** RFC 5545 forbids the combination and
+  php-rrule throws on it, but real exporters emit it: `process_rrule_freq()` lifts `UNTIL` out before
+  `new RRule()` and applies it while iterating, so whichever part ends the series first wins.
+- **A rule the generator cannot use is dropped, never thrown.** php-rrule validates while parsing and
+  constructing; letting that escape failed the editor save and aborted a whole feed import over one event.
+  The event keeps its single occurrence (`createCollection()` caches it before expanding) and the reason is
+  reported - see "Admin Notifications" below. The rule string is still **stored**, which is why the ICS
+  export has to guard `setRrule()` as well.
 - Further reading: [wiki: Understanding data model](https://github.com/digitaldonkey/open-source-event-calendar/wiki/Understanding-data-modell)
 
 ## Feeds (iCalendar)
@@ -172,12 +191,64 @@ Do not access production databases.
 - RFC 5545 iCal feed support via `kigkonsult/icalcreator` + `rlanvin/php-rrule`
 - **Manual/UI testing**: `tests/Unit/App/Model/ical_feeds/*.ics` doubles as sample feed data you can subscribe to from any real calendar client (Google Calendar, Apple Calendar, etc.) to eyeball feed output end-to-end, e.g. `https://ddev-wordpress.ddev.site/wp-content/plugins/open-source-event-calendar/tests/Unit/App/Model/ical_feeds/google_cycling_halifax.ics`
 - **Automated/unit testing**: the same fixture files back `tests/Unit/App/Model/IcsImportExportParserTest.php`, which exercises `IcsImportExportParser->add_vcalendar_events_to_db(Vcalendar $v, array $args)` — the core ICS-import parsing logic
+- **The two libraries reject different rules, in three different places** — know which gate you are looking at
+  before debugging a "broken" feed:
+
+  | Rule | iCalcreator (`Vcalendar::parse()`, `setRrule()`) | php-rrule (the generator) |
+  |---|---|---|
+  | `FREQ=WEEKLY;BYMONTHDAY=15`, `FREQ=DAILY;BYWEEKNO=10` (structural) | rejects | rejects |
+  | `BYMONTH=13`, `BYMONTHDAY=32` (out of range), `INTERVAL=0` | accepts | rejects |
+  | `UNTIL` + `COUNT` together | accepts | rejects (we repair it, see above) |
+
+  `Vcalendar::parse()` validates the **whole calendar**, so a structural violation anywhere rejects the entire
+  feed before any event is processed - that gate sits in front of the per-event handling and no amount of
+  per-event recovery helps. It is caught in `IcsImportExportParser::import()` and rethrown as
+  `ImportExportParseException` carrying the library's reason.
+- **The export is the second place a stored bad rule surfaces.** Since an invalid rule is stored on the event,
+  `setRrule()` would throw and break the feed for every other event in it; `export_recurrence_rule()` leaves
+  the rule out instead, and the event exports as a single occurrence, matching what the calendar shows.
 
 ## Hooks & Extensions
 
 - Use hooks (actions and filters) exclusively - never modify core/plugin files
 - Hookster markdown documentation auto-generated from PHPdoc comments via `hookster_markdown/`
 - Document hooks in PHPdoc for documentation generation
+
+## Admin Notifications
+
+**Never hand-roll an `admin_notices` callback.** The plugin has one notification mechanism and everything
+that needs to tell an admin something goes through it:
+
+- `NotificationAdmin::factory($app)->store($message, $class, $importance, $recipients, $persistent)` queues a
+  message; `BootstrapController` already registers the `admin_notices` **and** `network_admin_notices`
+  dispatch (`->send()`), so a new notice needs **no new hook registration**.
+- `are_notices_available($importance)` does the screen gating for you: importance `0` shows only on the
+  calendar's own screens (`AccessControl::is_all_events_page()`, `are_we_editing_our_post()` — i.e. the event
+  edit screen), `1` adds Plugins/Updates, `2` adds the Dashboard.
+- `$persistent = true` renders the dismiss button wired to `wp_ajax_osec_dismiss_notice`
+  (`NotificationAdmin::dismiss_notice()`). A non-persistent message is deleted the first time it is shown.
+- Messages are keyed by `sha1` of the entity, so storing the same message twice does not stack it.
+- **`notification/admin.twig` prints `{{ message | raw }}`** — escape every interpolated value with
+  `esc_html()` *before* calling `store()`, never at render time.
+- Dispatch is delayed by design: `store()` during a `save_post` or a cron run, and the notice appears on the
+  next admin page load.
+
+**Anything that runs without a browser to answer to must use it.** Scheduled feed imports call
+`FeedsController::update_ics($feed_id)` with `$ajax === false`, and that return value — error message and all —
+is simply discarded. Before this was noticed, a nightly feed could fail forever in silence. The same applies to
+the ICS export, which runs unauthenticated: `ImportExportController::export_events()` subscribes to the export
+problem hook and stores a notice rather than answering the fetcher.
+
+**In tests**, notices live in the `osec_admin_notifications` option and therefore leak between tests in a
+class (and the bootstrap leaves one behind). Clear it in `set_up()`:
+`$osec_app->options->delete(NotificationAdmin::OPTION_KEY);` — see
+`tests/Unit/App/Model/PostTypeEvent/RecurrenceNoticeTest.php`.
+
+**Degrade and report, do not throw.** The pattern used for recurrence problems: the model fires a documented
+action, the caller decides how to surface it (editor notice, feed result message, admin notice). Current
+actions: `osec_recurrence_truncated`, `osec_recurrence_rule_invalid`, `osec_recurrence_rule_not_exportable`.
+A listener registered around one operation must be removed afterwards (`EventEditing` does this around
+`$event->save()`), or it outlives the request that wanted it.
 
 ## Assets & JavaScript
 
@@ -392,6 +463,9 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
   - Recovery: untrash the page, restore its slug and `publish` status, set `calendar_page_id` back to it, and
     reset the `CacheMemory` `calendar_base_page` - all four, or routing stays broken.
 - When fixing bugs, add tests where appropriate
+- **`phpcs.xml` excludes `/tests/`**, so GrumPHP and CI never lint test files. Passing a test file to
+  `vendor/bin/phpcs` explicitly still checks it; worth doing for a new test, but a style slip there will not
+  fail the build
 - **No skipped tests**: `phpunit.xml` has `failOnSkipped`/`failOnRisky`/`failOnIncomplete` — "OK, but … skipped" exits 1 and fails CI. Check the exit code, don't use `markTestSkipped()` for multisite-only variants (CI is single site), and run CI's command `vendor/bin/phpunit tests` (see `TESTING.md`)
 - **A calendar page must be set for any testing**: "no calendar page set" (`calendar_page_id` empty or pointing to a missing page) is a setup error, not a code bug. wp-admin shows the "installed, but has not been configured" notice (`EnvironmentCheck`). Don't fix or work around problems that only derive from that state; check the setup first when links, URLs or routing look wrong.
   - **PHPUnit**: `TestBase::set_up()` creates a published page per test and sets `calendar_page_id` plus the `CacheMemory` `calendar_base_page`. It can't be created once in the bootstrap, because the WP test lib's `_delete_all_data()` deletes all posts after each test class. Tests not extending `TestBase` must do the same.

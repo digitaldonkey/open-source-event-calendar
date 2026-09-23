@@ -4,6 +4,7 @@ namespace Osec\App\Controller;
 
 use Exception;
 use Osec\App\Model\PostTypeEvent\EventCreateException;
+use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\Model\PostTypeEvent\EventType;
 use Osec\Bootstrap\App;
@@ -413,8 +414,9 @@ class FeedsController extends OsecBaseClass
         );
         $output = [];
         if ($feed) {
-            $count   = 0;
-            $message = false;
+            $count    = 0;
+            $message  = false;
+            $messages = [];
 
             // reimport the feed
             $response = wp_remote_get(
@@ -490,6 +492,8 @@ class FeedsController extends OsecBaseClass
                     do_action('osec_ics_after_import', $result);
 
                     $count     = $result['count'];
+                    $messages  = $result['messages'] ?? [];
+
                     $feed_name = ! empty($result['name'][1]) ? $result['name'][1] : $feed->feed_url;
                     // we must flip again the array to iterate over it
                     if (0 === $feed->keep_old_events) {
@@ -498,8 +502,17 @@ class FeedsController extends OsecBaseClass
                             wp_delete_post($event_id, true);
                         }
                     }
-                } catch (ImportExportParseException) {
-                    $message = "The provided feed didn't return valid ics data";
+                } catch (ImportExportParseException $e) {
+                    // Carries what iCalcreator rejected, e.g. a RRULE the RFC
+                    // does not allow, which fails the feed as a whole.
+                    $message = sprintf(
+                        /* translators: %s: reason the feed could not be read. */
+                        __(
+                            "The provided feed didn't return valid ics data: %s",
+                            'open-source-event-calendar'
+                        ),
+                        $e->getMessage()
+                    );
                 } catch (EngineNotSetException) {
                     $message = 'ICS import is not supported on this install.';
                 } catch (EventCreateException $e) {
@@ -522,19 +535,49 @@ class FeedsController extends OsecBaseClass
                 );
             }
             if ($message) {
-                // If we already got an error message, display it.
+                // If we already got an error message, display it. A scheduled
+                // import has nobody to display it to, so record it as well.
+                NotificationAdmin::factory($this->app)->store(
+                    sprintf(
+                        /* translators: 1: feed url, 2: error message. */
+                        __('Importing the feed "%1$s" failed: %2$s', 'open-source-event-calendar'),
+                        esc_html($feed->feed_url),
+                        esc_html($message)
+                    ),
+                    'error',
+                    0,
+                    [NotificationAdmin::RCPT_ADMIN],
+                    true
+                );
                 $output['data'] = [
                     'error'   => true,
                     'message' => $message,
                 ];
             } else {
+                $imported = sprintf(
+                /* translators: 1: number, 2: plural number. */
+                    _n('Imported %s event', 'Imported %s events', $count, 'open-source-event-calendar'),
+                    $count
+                );
+                if (! empty($messages)) {
+                    $imported .= ' ' . implode(' ', $messages);
+                    // A scheduled import has nobody to return this to.
+                    NotificationAdmin::factory($this->app)->store(
+                        sprintf(
+                            /* translators: 1: feed name, 2: what happened during the import. */
+                            __('Importing the feed "%1$s": %2$s', 'open-source-event-calendar'),
+                            esc_html((string)$feed_name),
+                            esc_html(implode(' ', $messages))
+                        ),
+                        'error',
+                        0,
+                        [NotificationAdmin::RCPT_ADMIN],
+                        true
+                    );
+                }
                 $output['data'] = [
                     'error'   => false,
-                    'message' => sprintf(
-                    /* translators: 1: number, 2: plural number. */
-                        _n('Imported %s event', 'Imported %s events', $count, 'open-source-event-calendar'),
-                        $count
-                    ),
+                    'message' => $imported,
                     'name'    => $feed_name,
                 ];
             }

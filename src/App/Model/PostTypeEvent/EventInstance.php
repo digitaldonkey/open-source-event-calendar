@@ -3,10 +3,10 @@
 namespace Osec\App\Model\PostTypeEvent;
 
 use DateTime;
+use InvalidArgumentException;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
 use Osec\Bootstrap\OsecBaseClass;
-use Osec\Exception\Exception;
 use Osec\Exception\TimezoneException;
 use RRule\RfcParser;
 use RRule\RRule;
@@ -280,17 +280,30 @@ class EventInstance extends OsecBaseClass
         // Tailing semicolon must be removed.
         $rrule = rtrim(trim($rrule), ';');
 
-        // EXDATE and RDATE andled in process_rrule_datelist().
-        $rrule_array = $this->filter_rrules_array(
-            RfcParser::parseRRule($rrule, $start),
-            ['EXDATE', 'RDATE']
-        );
+        $until_limit = null;
+        try {
+            // EXDATE and RDATE andled in process_rrule_datelist().
+            $rrule_array = $this->filter_rrules_array(
+                RfcParser::parseRRule($rrule, $start),
+                ['EXDATE', 'RDATE']
+            );
 
-        if (!empty($rrule_array)) {
+            if (empty($rrule_array)) {
+                return $data;
+            }
             DT::require_php_timezone_utc();
 
-            // Add a sane max limit, because all generated events
-            // are represented in wp_osec_event_instances.
+            // RFC 5545 forbids UNTIL and COUNT in the same rule and php-rrule
+            // rejects it, but exporters send it. Keep COUNT, apply UNTIL while
+            // iterating: whichever ends the series first wins.
+            if (! empty($rrule_array['UNTIL']) && ! empty($rrule_array['COUNT'])) {
+                $until_limit = $rrule_array['UNTIL'];
+                unset($rrule_array['UNTIL']);
+            }
+
+            // Only a rule that names no end of its own gets the timeframe; an
+            // explicit UNTIL is kept, however far out, and bounded by the
+            // instance ceiling below.
             if (
                 (! isset($rrule_array['UNTIL']) || empty($rrule_array['UNTIL']))
                 && (! isset($rrule_array['COUNT']) || empty($rrule_array['COUNT']))
@@ -299,17 +312,89 @@ class EventInstance extends OsecBaseClass
             }
 
             $rulez = new RRule($rrule_array);
-            if ($rulez->isInfinite()) {
-                throw new Exception(esc_html('Too much to handle.'));
-            }
+        } catch (InvalidArgumentException $exception) {
+            // php-rrule validates while parsing and constructing. A rule a feed
+            // or an editor got wrong must not take the whole save down: drop the
+            // recurrence, keep the event, and report it.
+            $this->notify_recurrence_rule_invalid($rrule, $exception->getMessage());
 
-            // Occurrences are generated in DTSTART's timezone and already carry
-            // the correct wall clock time, including across DST transitions.
-            foreach ($rulez as $occurrence) {
-                $data[] = $occurrence->getTimestamp();
-            }
+            return $data;
         }
+
+        if ($rulez->isInfinite()) {
+            $this->notify_recurrence_rule_invalid(
+                $rrule,
+                __('The rule has no end.', 'open-source-event-calendar')
+            );
+
+            return $data;
+        }
+
+        // Occurrences are generated in DTSTART's timezone and already carry
+        // the correct wall clock time, including across DST transitions.
+        foreach ($rulez as $occurrence) {
+            // UNTIL bounds the rule inclusively (RFC 5545 3.3.10).
+            if (null !== $until_limit && $occurrence > $until_limit) {
+                break;
+            }
+            // Nothing else bounds a large COUNT or a far UNTIL.
+            if (count($data) >= OSEC_REOCCURRENCE_MAX_INSTANCES) {
+                $this->notify_recurrence_truncated($rrule);
+                break;
+            }
+            $data[] = $occurrence->getTimestamp();
+        }
+
         return $data;
+    }
+
+    /**
+     * Report a recurrence series cut short by the instance ceiling.
+     *
+     * @param  string  $rrule  Rule that was truncated.
+     *
+     * @return void
+     */
+    protected function notify_recurrence_truncated(string $rrule): void
+    {
+        /**
+         * Act on a recurrence series that hit OSEC_REOCCURRENCE_MAX_INSTANCES.
+         *
+         * The event is saved with the instances generated so far, so the series
+         * ends earlier than its rule asks for. Use this to warn an editor, or to
+         * log feeds whose rules exceed the ceiling.
+         *
+         * @since 1.1.15
+         *
+         * @param  string  $rrule  Rule that was truncated.
+         * @param  int  $limit  Ceiling that applied.
+         */
+        do_action('osec_recurrence_truncated', $rrule, OSEC_REOCCURRENCE_MAX_INSTANCES);
+    }
+
+    /**
+     * Report a recurrence rule that could not be applied.
+     *
+     * @param  string  $rrule  Rule that was dropped.
+     * @param  string  $message  Why the rule was rejected.
+     *
+     * @return void
+     */
+    protected function notify_recurrence_rule_invalid(string $rrule, string $message): void
+    {
+        /**
+         * Act on a recurrence rule the generator had to drop.
+         *
+         * The event is saved without the rule, as a single occurrence, instead
+         * of the save or the feed import failing. Use this to warn an editor or
+         * to log the feeds that send broken rules.
+         *
+         * @since 1.1.15
+         *
+         * @param  string  $rrule  Rule that was dropped.
+         * @param  string  $message  Why the rule was rejected.
+         */
+        do_action('osec_recurrence_rule_invalid', $rrule, $message);
     }
 
     /**
