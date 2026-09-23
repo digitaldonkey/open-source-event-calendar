@@ -150,6 +150,21 @@ Do not access production databases.
   SELECT id, post_id, `start`, DATE_FORMAT(FROM_UNIXTIME(`start`), '%Y-%m-%d %H:%i') AS 'start_formatted',
          `end`, DATE_FORMAT(FROM_UNIXTIME(`end`), '%Y-%m-%d %H:%i') AS 'end_formatted' FROM wp_osec_event_instances;
   ```
+- **Recurrence is expanded in the event's own timezone**, not UTC, so occurrences keep their wall clock time
+  across DST transitions (`EventInstance::process_rrule_freq()` hands php-rrule a DTSTART carrying a real
+  timezone and uses its occurrences as-is). Beware `new DateTime('@' . $ts, new DateTimeZone($tz))`: PHP
+  **silently ignores the timezone argument** whenever the time string starts with `@`, always yielding
+  `+00:00`. That one line made every recurrence drift an hour per DST change from 1.1.5 to 1.1.14.
+- **Instances are only (re)built by `Event::save()` → `EventInstance::recreate()`.** Nothing regenerates them
+  on read, so a fix to the generator does **not** repair events already in the database - they stay wrong
+  until each is re-saved or its ICS feed re-imported. Expect correct and broken events side by side on the
+  same install, and re-save before judging whether a recurrence fix worked.
+- **Near-midnight start times are the edge case that matters.** An hour of drift is only *visible* when it
+  crosses a calendar-day boundary, so bugs here hide unless the start time is within an hour of midnight:
+  a summer-created event at `[00:00, 01:00)` doubles the autumn transition day; a winter-created one at
+  `[23:00, 24:00)` loses the spring transition day. Integration tests that create events at "now" therefore
+  pass or fail depending on what time the pipeline ran - see
+  `.claude/plans/13-one-hour-before-midnight-test-fails.md`.
 - Further reading: [wiki: Understanding data model](https://github.com/digitaldonkey/open-source-event-calendar/wiki/Understanding-data-modell)
 
 ## Feeds (iCalendar)
@@ -354,7 +369,10 @@ failure mode, not a compile error.
   - `vendor/bin/phpunit tests` and check the exit code (see the no-skipped-tests rule below)
   - `vendor/bin/phpcs --standard=phpcs.xml <changed paths>`
   - after editing `agenda.twig`, `oneday.twig` or `month.twig`: re-run the twig→JS transform
-  - or `vendor/bin/grumphp run` for everything at once
+  - or `vendor/bin/grumphp run --testsuite=git_pre_commit` for composer + phpcs + phpunit at once
+  - **Never bare `vendor/bin/grumphp run` from an agent session** - with no `--testsuite` it runs *every*
+    configured task, including `integration_tests`, which drives the Selenium suite against the dev site
+    and trashes the calendar page (see the warning under Testing)
 
 ## Testing
 
@@ -363,7 +381,16 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
 - **PHPUnit**: `ddev phpunit` (or `ddev phpunit --filter test_name ./tests/Unit/...`)
 - **Integration (Mocha/Selenium)**: `cd integration_tests && npm run test`
 - **Code quality**: `ddev composer run-script phpcs` or `ddev run-script phpcs`
-- **GrumPHP**: `vendor/bin/grumphp run` (pre-commit hooks)
+- **GrumPHP**: `vendor/bin/grumphp run --testsuite=git_pre_commit` (what the pre-commit hook runs)
+- **The Mocha/Selenium integration suite is destructive to the dev site.** It installs/uninstalls the plugin,
+  exercises the `OSEC_UNINSTALL_PLUGIN_DATA` purge, creates its own `Calendar` page, and **trashes every
+  calendar page on teardown** - including one you were using - leaving `calendar_page_id` pointing at a
+  trashed post, i.e. the "no calendar page set" state described below. Ask before running it, and know the
+  ways to trigger it *indirectly*:
+  - `vendor/bin/grumphp run` with no `--testsuite` (the `integration_tests` task, `grumphp.yml:40-43`)
+  - `vendor/bin/grumphp run --testsuite=all_tests`, and `ddev grumphp all`
+  - Recovery: untrash the page, restore its slug and `publish` status, set `calendar_page_id` back to it, and
+    reset the `CacheMemory` `calendar_base_page` - all four, or routing stays broken.
 - When fixing bugs, add tests where appropriate
 - **No skipped tests**: `phpunit.xml` has `failOnSkipped`/`failOnRisky`/`failOnIncomplete` — "OK, but … skipped" exits 1 and fails CI. Check the exit code, don't use `markTestSkipped()` for multisite-only variants (CI is single site), and run CI's command `vendor/bin/phpunit tests` (see `TESTING.md`)
 - **A calendar page must be set for any testing**: "no calendar page set" (`calendar_page_id` empty or pointing to a missing page) is a setup error, not a code bug. wp-admin shows the "installed, but has not been configured" notice (`EnvironmentCheck`). Don't fix or work around problems that only derive from that state; check the setup first when links, URLs or routing look wrong.
@@ -440,6 +467,28 @@ Skip this for low-stakes or easily-reversible changes — it's overkill there. R
 - When refactoring, maintain backward compatibility where possible
 - Prefer updating to modern WordPress standards over maintaining legacy patterns
 - When uncertain about original JavaScript behavior, check available sources in `assets/` or `public/`
+
+### Comparing behaviour against an older release
+
+To answer "did this work in <tag>?", **do not** `git worktree add` and symlink `vendor/` into it.
+`vendor/composer/autoload_psr4.php` maps `Osec\` to `$baseDir . '/src'`, where `$baseDir` is resolved from the
+autoloader's own location - so a symlinked `vendor/` silently loads `src/` from the **main checkout**, and the
+old tag appears to behave like current `HEAD`. Verify with
+`php -r 'require "vendor/autoload.php"; echo (new ReflectionClass(Osec\App\Model\PostTypeEvent\EventInstance::class))->getFileName();'`
+before trusting any worktree result. A real `cp -a vendor` works, but the old tag's bootstrap may not survive a
+current dev database (e.g. pre-77524dd5 `verifySqlSchema()` aborts the PHPUnit bootstrap).
+
+What works reliably instead, on the live dev site:
+
+1. `git checkout <tag> -- <the few files in the code path>` (or all of `src/`)
+2. drive the real path with `/usr/local/bin/wp eval-file <script>` - each WP-CLI call is a fresh process, so
+   there is no opcache/worker staleness to fight
+3. `git checkout HEAD -- <same paths>` to restore
+
+Two traps when restoring: `git checkout <tag> -- src/` **resurrects files deleted since** that tag (they come
+back staged as added, and `git checkout HEAD -- src/` will not remove them - `git rm` them explicitly), and a
+`git diff --stat <tag>..HEAD -- <path>` that prints nothing means the file is byte-identical, which is usually
+a faster answer than any checkout.
 
 ## Documentation
 

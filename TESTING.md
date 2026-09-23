@@ -91,11 +91,17 @@ composer run phpcbf            # auto-fix
 ## GrumPHP (`grumphp.yml`)
 
 ```
-vendor/bin/grumphp run                              # every configured task (no --testsuite)
+vendor/bin/grumphp run                              # every configured task - INCLUDES integration_tests, see warning below
 vendor/bin/grumphp run --testsuite=git_pre_commit   # what the pre-commit hook runs: composer + phpcs + phpunit
 vendor/bin/grumphp run --testsuite=all_tests        # the full TESTING.md checklist in one command
 vendor/bin/grumphp run --testsuite=prepare_release  # release-readiness checks, run after all_tests
 ```
+
+> **Warning:** `integration_tests` runs the Mocha/Selenium suite against whatever `settings.local.js` points
+> at. It installs/uninstalls the plugin, exercises the `OSEC_UNINSTALL_PLUGIN_DATA` purge and **trashes every
+> calendar page on teardown**, leaving `calendar_page_id` pointing at a trashed post. Bare `grumphp run`,
+> `--testsuite=all_tests` and `ddev grumphp all` all include it. Use `--testsuite=git_pre_commit` when you only
+> want the code-quality gate.
 
 ### `ddev grumphp` shortcut
 
