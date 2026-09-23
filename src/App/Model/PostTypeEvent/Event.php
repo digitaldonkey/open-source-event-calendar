@@ -82,7 +82,7 @@ class Event extends OsecBaseClass
         if ($instance) {
             $this->entity->set('instance_id', $instance);
         }
-        if (null === $data) {
+        if (!$data) {
             return; // empty object
         }
 
