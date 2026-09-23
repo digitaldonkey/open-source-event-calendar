@@ -312,10 +312,10 @@ describe('Frontend tests', function(){
                     // Check for Map marker
                     const marker = await pageObject.getElement(By.css('.leaflet-marker-pane > img'));
                     const markerImgUrl = await marker.getAttribute('src');
-                    // https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png
+                    // <DOMAIN>/public/js/external_libs/leaflet/images/marker-icon-2x.png
                     // Version is a constant, marker-icon suffix might change depending on screen.
                     pageObject.assert.ok(
-                        markerImgUrl.startsWith('https://unpkg.com/leaflet')
+                        markerImgUrl.startsWith(pageObject.settings.domain)
                         && markerImgUrl.endsWith('.png')
                         && markerImgUrl.includes('marker-icon')
                     );
