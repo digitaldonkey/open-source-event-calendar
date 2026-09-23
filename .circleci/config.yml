@@ -163,6 +163,9 @@ jobs:
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
           background: True
       - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:3306 -timeout 2m
+      - run:
           name: Run PHP unit tests
           command: |
             set -Eeuxo pipefail
@@ -431,6 +434,9 @@ jobs:
             echo " WP_VERSION: $WP_VERSION"
             echo " $($WP_CLI --version) $WP_CLI"
             echo " PHP_VERSION: $PHP_VERSION"
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:3306 -timeout 2m
       - run:
           name: Install WordPress (DB, no unit test scripts)
           command: |
