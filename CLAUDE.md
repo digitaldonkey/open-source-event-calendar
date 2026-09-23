@@ -179,11 +179,14 @@ Do not access production databases.
 - **`UNTIL` and `COUNT` in one rule are repaired, not rejected.** RFC 5545 forbids the combination and
   php-rrule throws on it, but real exporters emit it: `process_rrule_freq()` lifts `UNTIL` out before
   `new RRule()` and applies it while iterating, so whichever part ends the series first wins.
-- **A rule the generator cannot use is dropped, never thrown.** php-rrule validates while parsing and
-  constructing; letting that escape failed the editor save and aborted a whole feed import over one event.
-  The event keeps its single occurrence (`createCollection()` caches it before expanding) and the reason is
-  reported - see "Admin Notifications" below. The rule string is still **stored**, which is why the ICS
-  export has to guard `setRrule()` as well.
+- **A rule the generator cannot use is never stored.** `Event::save()` asks
+  `EventInstance::get_rule_error()` before writing the row and drops the rule (reporting it) if php-rrule
+  would refuse it, so the editor, the feed import, the clone and "edit this instance" all get the same gate.
+  Storing such a rule instead forces *every* reader to guard against it - the generator, the ICS export and
+  the repeat text each produced their own bug that way - and leaves the event claiming a recurrence it does
+  not have. The downstream guards stay as a net for rules stored by older versions: the generator drops and
+  reports (`createCollection()` has already cached the single occurrence), the export leaves the rule out,
+  and `RepeatRuleToText` skips months it cannot name.
 - Further reading: [wiki: Understanding data model](https://github.com/digitaldonkey/open-source-event-calendar/wiki/Understanding-data-modell)
 
 ## Feeds (iCalendar)

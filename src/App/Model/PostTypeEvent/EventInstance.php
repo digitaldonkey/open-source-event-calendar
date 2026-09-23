@@ -280,53 +280,18 @@ class EventInstance extends OsecBaseClass
         // Tailing semicolon must be removed.
         $rrule = rtrim(trim($rrule), ';');
 
-        $until_limit = null;
         try {
-            // EXDATE and RDATE andled in process_rrule_datelist().
-            $rrule_array = $this->filter_rrules_array(
-                RfcParser::parseRRule($rrule, $start),
-                ['EXDATE', 'RDATE']
-            );
-
-            if (empty($rrule_array)) {
-                return $data;
-            }
-            DT::require_php_timezone_utc();
-
-            // RFC 5545 forbids UNTIL and COUNT in the same rule and php-rrule
-            // rejects it, but exporters send it. Keep COUNT, apply UNTIL while
-            // iterating: whichever ends the series first wins.
-            if (! empty($rrule_array['UNTIL']) && ! empty($rrule_array['COUNT'])) {
-                $until_limit = $rrule_array['UNTIL'];
-                unset($rrule_array['UNTIL']);
-            }
-
-            // Only a rule that names no end of its own gets the timeframe; an
-            // explicit UNTIL is kept, however far out, and bounded by the
-            // instance ceiling below.
-            if (
-                (! isset($rrule_array['UNTIL']) || empty($rrule_array['UNTIL']))
-                && (! isset($rrule_array['COUNT']) || empty($rrule_array['COUNT']))
-            ) {
-                $rrule_array['UNTIL'] = $recurrence_time_limit;
-            }
-
-            $rulez = new RRule($rrule_array);
+            [$rulez, $until_limit] = $this->build_rule($rrule, $start, $recurrence_time_limit);
         } catch (InvalidArgumentException $exception) {
-            // php-rrule validates while parsing and constructing. A rule a feed
-            // or an editor got wrong must not take the whole save down: drop the
+            // Rules stored before Event::save() started refusing them still
+            // reach this point, so the generator keeps its own guard: drop the
             // recurrence, keep the event, and report it.
             $this->notify_recurrence_rule_invalid($rrule, $exception->getMessage());
 
             return $data;
         }
 
-        if ($rulez->isInfinite()) {
-            $this->notify_recurrence_rule_invalid(
-                $rrule,
-                __('The rule has no end.', 'open-source-event-calendar')
-            );
-
+        if (null === $rulez) {
             return $data;
         }
 
@@ -346,6 +311,90 @@ class EventInstance extends OsecBaseClass
         }
 
         return $data;
+    }
+
+    /**
+     * Builds the php-rrule instance for a rule, or explains why it cannot.
+     *
+     * @param  string  $rrule  Recurrence rule.
+     * @param  DateTime  $start  Event start, in the event's own timezone.
+     * @param  DateTime  $recurrence_time_limit  End for a rule that names none.
+     *
+     * @return array{0: ?RRule, 1: ?DateTime} Rule and the UNTIL to stop at.
+     * @throws InvalidArgumentException When the rule cannot be used.
+     */
+    protected function build_rule(
+        string $rrule,
+        DateTime $start,
+        DateTime $recurrence_time_limit
+    ): array {
+        $until_limit = null;
+
+        // EXDATE and RDATE andled in process_rrule_datelist().
+        $rrule_array = $this->filter_rrules_array(
+            RfcParser::parseRRule($rrule, $start),
+            ['EXDATE', 'RDATE']
+        );
+
+        if (empty($rrule_array)) {
+            return [null, null];
+        }
+        DT::require_php_timezone_utc();
+
+        // RFC 5545 forbids UNTIL and COUNT in the same rule and php-rrule
+        // rejects it, but exporters send it. Keep COUNT, apply UNTIL while
+        // iterating: whichever ends the series first wins.
+        if (! empty($rrule_array['UNTIL']) && ! empty($rrule_array['COUNT'])) {
+            $until_limit = $rrule_array['UNTIL'];
+            unset($rrule_array['UNTIL']);
+        }
+
+        // Only a rule that names no end of its own gets the timeframe; an
+        // explicit UNTIL is kept, however far out, and bounded by the instance
+        // ceiling while iterating.
+        if (
+            (! isset($rrule_array['UNTIL']) || empty($rrule_array['UNTIL']))
+            && (! isset($rrule_array['COUNT']) || empty($rrule_array['COUNT']))
+        ) {
+            $rrule_array['UNTIL'] = $recurrence_time_limit;
+        }
+
+        $rule = new RRule($rrule_array);
+        if ($rule->isInfinite()) {
+            throw new InvalidArgumentException(
+                esc_html__('The rule has no end.', 'open-source-event-calendar')
+            );
+        }
+
+        return [$rule, $until_limit];
+    }
+
+    /**
+     * Tells whether a rule can be used, without generating anything.
+     *
+     * Event::save() asks before storing, so a rule the generator would have to
+     * drop never reaches the database, the ICS export or the repeat text.
+     *
+     * @param  ?string  $rrule  Rule to check.
+     * @param  DateTime  $start  Event start, in the event's own timezone.
+     *
+     * @return ?string Reason the rule cannot be used, null when it can.
+     */
+    public function get_rule_error(?string $rrule, DateTime $start): ?string
+    {
+        if (empty($rrule)) {
+            return null;
+        }
+        $recurrence_time_limit = new DateTime();
+        $recurrence_time_limit->modify(OSEC_REOCCURRENCE_TIMEFRAME);
+
+        try {
+            $this->build_rule(rtrim(trim($rrule), ';'), $start, $recurrence_time_limit);
+        } catch (InvalidArgumentException $exception) {
+            return $exception->getMessage();
+        }
+
+        return null;
     }
 
     /**

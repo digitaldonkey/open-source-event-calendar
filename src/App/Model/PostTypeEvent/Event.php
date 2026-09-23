@@ -558,6 +558,8 @@ class Event extends OsecBaseClass
             }
         }
 
+        $this->discard_unusable_recurrence_rules();
+
         $dbi        = $this->app->db;
         $columns    = $this->prepare_store_entity();
         $format     = $this->prepare_store_format($columns);
@@ -653,6 +655,43 @@ class Event extends OsecBaseClass
         do_action('osec_event_saved', $post_id, $this, $update);
 
         return $post_id;
+    }
+
+    /**
+     * Drops recurrence rules the generator cannot use, before they are stored.
+     *
+     * Storing them would make every reader guard against them - the instance
+     * generator, the ICS export, the repeat text - and the event would claim a
+     * recurrence it does not have. The rule is reported instead, so the editor
+     * and the feed import can say what happened.
+     *
+     * @return void
+     */
+    protected function discard_unusable_recurrence_rules(): void
+    {
+        $start = clone $this->get('start')->getObject();
+
+        foreach (['recurrence_rules', 'exception_rules'] as $field) {
+            $rule  = $this->get($field);
+            $error = EventInstance::factory($this->app)->get_rule_error($rule, $start);
+            if (null === $error) {
+                continue;
+            }
+            $this->set($field, '');
+
+            /**
+             * Act on a recurrence rule the calendar had to drop.
+             *
+             * The event is saved without the rule, as a single occurrence,
+             * instead of the save or the feed import failing.
+             *
+             * @since 1.1.15
+             *
+             * @param  string  $rrule  Rule that was dropped.
+             * @param  string  $message  Why the rule was rejected.
+             */
+            do_action('osec_recurrence_rule_invalid', $rule, $error);
+        }
     }
 
     /**

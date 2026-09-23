@@ -284,11 +284,20 @@ class RepeatRuleToText extends OsecBaseClass
                 }
                 break;
             case 'yearly':
-                if ($rc->getByMonth()) {
+                // A rule can carry a month the calendar cannot name, e.g.
+                // BYMONTH=13. The generator refuses such a rule, this text is
+                // rendered anyway, so leave the impossible months out.
+                $months = array_values(
+                    array_filter(
+                        (array)$rc->getByMonth(),
+                        static fn($month) => is_numeric($month) && (int)$month >= 1 && (int)$month <= 12
+                    )
+                );
+                if ($months) {
                     // if there are more than 2 months
-                    if (count($rc->getByMonth()) > 2) {
+                    if (count($months) > 2) {
                         $_months = '';
-                        foreach ($rc->getByMonth() as $_m) {
+                        foreach ($months as $_m) {
                             $_m      = $_m < 10 ? 0 . $_m : $_m;
                             $_months .= ' ' . $wp_locale->month_abbrev[$wp_locale->month[$_m]] . ',';
                         }
@@ -298,9 +307,9 @@ class RepeatRuleToText extends OsecBaseClass
                             'Recurrence editor - yearly tab',
                             'open-source-event-calendar'
                         ) . $_months;
-                    } elseif (count($rc->getByMonth()) > 1) {
+                    } elseif (count($months) > 1) {
                         $_months = '';
-                        foreach ($rc->getByMonth() as $_m) {
+                        foreach ($months as $_m) {
                             $_m      = $_m < 10 ? 0 . $_m : $_m;
                             $_months .= ' ' . $wp_locale->month[$_m] . ' ' . __('and', 'open-source-event-calendar');
                         }
@@ -312,7 +321,7 @@ class RepeatRuleToText extends OsecBaseClass
                         ) . $_months;
                     } else {
                         $_months = '';
-                        foreach ($rc->getByMonth() as $_m) {
+                        foreach ($months as $_m) {
                             $_m      = $_m < 10 ? 0 . $_m : $_m;
                             $_months .= ' ' . $wp_locale->month[$_m];
                         }

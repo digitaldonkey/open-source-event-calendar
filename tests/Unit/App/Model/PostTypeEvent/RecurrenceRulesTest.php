@@ -343,6 +343,54 @@ class RecurrenceRulesTest extends TestBase
     }
 
     /**
+     * A rule the generator cannot use is not written to the database.
+     *
+     * Storing it would make every reader guard against it - the generator, the
+     * ICS export, the repeat text of the editor - and the event would claim a
+     * recurrence it does not have.
+     */
+    public function test_an_unusable_rule_is_not_stored()
+    {
+        global $osec_app;
+
+        $reported = [];
+        add_action(
+            'osec_recurrence_rule_invalid',
+            function ($rule, $message) use (&$reported) {
+                $reported[] = $rule;
+            },
+            10,
+            2
+        );
+
+        $post_id = self::factory()->post->create(['post_type' => OSEC_POST_TYPE]);
+        $start   = new DT('2026-01-05 09:00:00', self::TIMEZONE);
+        $end     = new DT('2026-01-05 10:00:00', self::TIMEZONE);
+        $event   = new Event(
+            $osec_app,
+            [
+                'post_id'          => $post_id,
+                'post'             => get_post($post_id),
+                'start'            => $start,
+                'end'              => $end,
+                'allday'           => 0,
+                'timezone_name'    => self::TIMEZONE,
+                'recurrence_rules' => 'FREQ=YEARLY;BYMONTH=13',
+                'recurrence_dates' => '',
+                'exception_rules'  => '',
+                'exception_dates'  => '',
+            ]
+        );
+        $event->save(false);
+
+        $this->assertSame('', $event->get('recurrence_rules'), 'The rule is dropped before storing.');
+        $this->assertSame(['FREQ=YEARLY;BYMONTH=13'], $reported, 'Reported once, with the rule.');
+
+        $stored = new Event($osec_app, $post_id);
+        $this->assertEmpty($stored->get('recurrence_rules'), 'Nothing unusable reaches the database.');
+    }
+
+    /**
      * A malformed rule is dropped and reported, it does not abort the save.
      *
      * php-rrule validates while parsing and constructing. Letting that reach

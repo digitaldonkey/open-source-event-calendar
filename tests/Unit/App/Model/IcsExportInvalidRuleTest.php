@@ -10,9 +10,10 @@ use Osec\Tests\Utilities\TestBase;
 /**
  * Exporting an event whose stored recurrence rule iCalcreator refuses.
  *
- * The generator drops such a rule but the event keeps it, so the ICS export is
- * the second place it surfaces - and there one bad event used to break the feed
- * for every other event in it.
+ * Event::save() refuses such a rule now, so this covers what is already in the
+ * database: one bad event used to break the export feed for every other event
+ * in it. The events carry an ical_uid, because the export re-saves an event
+ * without one, which would clear the rule before it is written.
  *
  * @group ics
  * @group recurrence
@@ -75,6 +76,7 @@ class IcsExportInvalidRuleTest extends TestBase
                 'end'              => $end,
                 'allday'           => 0,
                 'timezone_name'    => 'UTC',
+                'ical_uid'         => 'stored-' . md5($rrule) . '@test',
                 'recurrence_rules' => $rrule,
                 'recurrence_dates' => '',
                 'exception_rules'  => '',
