@@ -64,12 +64,13 @@ parameters:
             metadata:
                 task: shell
         # WordPress plugin-check gate. `wp plugin check` always exits 0 even
-        # with errors, so bin/plugin-check.php parses its output, keeps only
+        # with errors, so bin/plugin-check.sh parses its output, keeps only
         # findings in files the release actually ships and fails on ERROR.
+        # Needs jq and yq.
         plugin_check:
             triggered_by: ['php']
             scripts:
-                - ["-c", "php bin/plugin-check.php"]
+                - ["-c", "bin/plugin-check.sh"]
             metadata:
                 task: shell
 

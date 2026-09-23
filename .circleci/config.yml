@@ -468,7 +468,7 @@ jobs:
             # workspace vendor directory, i.e. the version composer.lock pins.
             cp -R /tmp/vendor/plugin-check $WP_CORE_DIR/wp-content/plugins/plugin-check
             $WP_CLI --path=$WP_CORE_DIR plugin activate plugin-check
-            php bin/plugin-check.php --release --wp=$WP_CLI --path=$WP_CORE_DIR --slug=$WP_ORG_PLUGIN_NAME
+            bin/plugin-check.sh --release --wp=$WP_CLI --path=$WP_CORE_DIR --slug=$WP_ORG_PLUGIN_NAME
             $WP_CLI --path=$WP_CORE_DIR plugin deactivate plugin-check
             rm -rf $WP_CORE_DIR/wp-content/plugins/plugin-check
       - run:

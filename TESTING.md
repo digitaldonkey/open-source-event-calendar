@@ -13,7 +13,7 @@ Run before pushing:
 [ ] vendor/bin/phpcs --standard=phpcs.xml --runtime-set testVersion 8.2-    # coding standards
 [ ] vendor/bin/phpunit                                                      # unit + integration tests
 [ ] cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test  # Mocha/Selenium (~5 min)
-[ ] php bin/plugin-check.php                                                 # WordPress plugin-check gate (~13 s)
+[ ] bin/plugin-check.sh                                                     # WordPress plugin-check gate (~13 s)
 [ ] vendor/bin/grumphp run --testsuite=all_tests                           # everything above, in one command
 ```
 
@@ -127,25 +127,28 @@ Unlike the git hook, which only checks staged files, these commands check the wh
 
 Task inventory as currently configured:
 
-- **Active**: `composer` (validates `composer.json`/`composer.lock`), `phpcs` (standard `./phpcs.xml`), `phpunit` (config file `./phpunit.xml`, `always_execute: true` so it runs regardless of which files changed), `integration_tests` (a named `shell` task instance — `metadata.task: shell` — running `cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test`; needs the `ddev-selenium-standalone-chrome` add-on and `constants-local.php`, see [Integration tests](#integration-tests-mochaselenium) above), `plugin_check` (a named `shell` task running `php bin/plugin-check.php`, the WordPress plugin-check gate — see [WordPress plugin-check](#wordpress-plugin-check) below)
+- **Active**: `composer` (validates `composer.json`/`composer.lock`), `phpcs` (standard `./phpcs.xml`), `phpunit` (config file `./phpunit.xml`, `always_execute: true` so it runs regardless of which files changed), `integration_tests` (a named `shell` task instance — `metadata.task: shell` — running `cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test`; needs the `ddev-selenium-standalone-chrome` add-on and `constants-local.php`, see [Integration tests](#integration-tests-mochaselenium) above), `plugin_check` (a named `shell` task running `bin/plugin-check.sh`, the WordPress plugin-check gate — see [WordPress plugin-check](#wordpress-plugin-check) below)
 - **Present but commented out** (not run): `gherkin`, `git_commit_message`, `phpcpd` (would exclude `lib`/`tests`/`vendor`), `phplint`, `phpmd` (ruleset `codesize, design, naming, unusedcode`, would exclude `tests`/`vendor`)
 
 Testsuites:
 - `git_pre_commit` — matched by name to GrumPHP's git hook (`PreCommitCommand` looks up a testsuite literally named `git_pre_commit`), so this is what actually runs on every commit: `composer`, `phpcs`, `phpunit`. Without this testsuite the hook would run every configured task, including `integration_tests` and the release checks. CI's "Run code quality tests" step deliberately does not use this testsuite (it runs `--tasks=composer,phpcs`, as that job has no database for `phpunit`).
 - `all_tests` — not hook-bound, for running everything on demand: `composer`, `phpcs`, `phpunit`, `plugin_check`, `integration_tests`.
-- `prepare_release` — `release_check` (`wp osec prepare_release`), `make_readme` (`wp osec make_readme --check`), `hooks_and_filters` (`hookster_markdown` check), `plugin_check` (`php bin/plugin-check.php`). Run after `all_tests`.
+- `prepare_release` — `release_check` (`wp osec prepare_release`), `make_readme` (`wp osec make_readme --check`), `hooks_and_filters` (`hookster_markdown` check), `plugin_check` (`bin/plugin-check.sh`). Run after `all_tests`.
 
 The git pre-commit hook already runs inside DDEV — `git_hook_variables.EXEC_GRUMPHP_COMMAND` wraps it in `ddev exec -d "/var/www/html/wp-content/plugins/open-source-event-calendar"`. No extra setup needed; only reinit (`ddev exec grumphp git:init`) if the hook itself isn't installed.
 
 ## WordPress plugin-check
 
 `wp plugin check` is what wordpress.org reviews run. It **always exits 0**, even with errors, so it cannot
-be a gate on its own. `bin/plugin-check.php` wraps it:
+be a gate on its own. `bin/plugin-check.sh` wraps it:
 
 ```bash
-php bin/plugin-check.php            # working tree, fails on ERROR
-php bin/plugin-check.php --strict   # also fails on WARNING
+bin/plugin-check.sh            # working tree, fails on ERROR
+bin/plugin-check.sh --strict   # also fails on WARNING
 ```
+
+Needs `jq`, and `yq` as well unless `--release` is given. Both are present in the DDEV web container
+and in every `cimg/php` image CI uses (verified 2026-09-23: jq 1.6, yq v4.42.1).
 
 Exit codes: `0` clean, `1` blocking findings, `2` the check could not be run or its output could not be
 trusted (fail closed — unparseable output is never read as "nothing found").

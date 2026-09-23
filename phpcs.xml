@@ -140,27 +140,4 @@
 		<type>error</type>
 	</rule>
 
-	<!--
-		Developer CLI scripts in bin/ are never part of the release package
-		(they are outside OSEC_RELEASE_WHITE_LIST). They print to a terminal,
-		read files without WordPress loaded and shell out to WP-CLI, so the
-		web-facing WordPress sniffs below do not apply to them. Everything
-		else - PSR-12, PHPCompatibility, naming - still is.
-	-->
-	<rule ref="WordPress.Security.EscapeOutput">
-		<exclude-pattern>/bin/*\.php$</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.WP.AlternativeFunctions">
-		<exclude-pattern>/bin/*\.php$</exclude-pattern>
-	</rule>
-	<rule ref="WordPress.PHP.DiscouragedPHPFunctions">
-		<exclude-pattern>/bin/*\.php$</exclude-pattern>
-	</rule>
-	<rule ref="Generic.PHP.ForbiddenFunctions">
-		<exclude-pattern>/bin/*\.php$</exclude-pattern>
-	</rule>
-	<rule ref="PSR1.Files.SideEffects">
-		<exclude-pattern>/bin/*\.php$</exclude-pattern>
-	</rule>
-
 </ruleset>
