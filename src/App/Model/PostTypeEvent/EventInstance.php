@@ -3,7 +3,6 @@
 namespace Osec\App\Model\PostTypeEvent;
 
 use DateTime;
-use DateTimeZone;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
 use Osec\Bootstrap\OsecBaseClass;
@@ -177,7 +176,9 @@ class EventInstance extends OsecBaseClass
         $timezone
     ) {
         $events = [];
-        $origEventTime = new DT($_start, 'UTC');
+        // Recurrence must be expanded in the event's own timezone, so that
+        // occurrences keep their wall clock time across DST transitions.
+        $origEventTime = new DT($_start, $timezone);
 
         $recurrence_time_limit = new DateTime();
         $recurrence_time_limit->modify(OSEC_REOCCURRENCE_TIMEFRAME);
@@ -194,9 +195,8 @@ class EventInstance extends OsecBaseClass
                 ),
                 $this->process_rrule_freq(
                     $event->get('recurrence_rules'),
-                    $origEventTime->getObject(),
-                    $recurrence_time_limit,
-                    $timezone
+                    clone $origEventTime->getObject(),
+                    $recurrence_time_limit
                 ),
             ),
             SORT_NUMERIC
@@ -210,9 +210,8 @@ class EventInstance extends OsecBaseClass
                 ),
                 $this->process_rrule_freq(
                     $event->get('exception_rules'),
-                    $origEventTime->getObject(),
-                    $recurrence_time_limit,
-                    $timezone,
+                    clone $origEventTime->getObject(),
+                    $recurrence_time_limit
                 )
             ),
             SORT_STRING
@@ -260,9 +259,8 @@ class EventInstance extends OsecBaseClass
 
     /**
      * @param  string  $rrule
-     * @param  DateTime  $start
+     * @param  DateTime  $start  Event start, in the event's own timezone.
      * @param  DateTime  $recurrence_time_limit
-     * @param  string  $timezone
      *
      * @return array
      * @throws \DateInvalidTimeZoneException
@@ -271,8 +269,7 @@ class EventInstance extends OsecBaseClass
     protected function process_rrule_freq(
         ?string $rrule,
         DateTime $start,
-        DateTime $recurrence_time_limit,
-        string $timezone
+        DateTime $recurrence_time_limit
     ): array {
         $data = [];
 
@@ -306,16 +303,10 @@ class EventInstance extends OsecBaseClass
                 throw new Exception(esc_html('Too much to handle.'));
             }
 
+            // Occurrences are generated in DTSTART's timezone and already carry
+            // the correct wall clock time, including across DST transitions.
             foreach ($rulez as $occurrence) {
-                $instanceDate = new DateTime(
-                    '@' . $occurrence->getTimestamp(),
-                    new DateTimeZone($timezone)
-                );
-                $instanceDate->setTime(
-                    (int) $start->format('H'),
-                    (int) $start->format('i'),
-                );
-                $data[] = $instanceDate->getTimestamp();
+                $data[] = $occurrence->getTimestamp();
             }
         }
         return $data;
