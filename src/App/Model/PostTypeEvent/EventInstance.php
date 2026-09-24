@@ -180,8 +180,7 @@ class EventInstance extends OsecBaseClass
         // occurrences keep their wall clock time across DST transitions.
         $origEventTime = new DT($_start, $timezone);
 
-        $recurrence_time_limit = new DateTime();
-        $recurrence_time_limit->modify(OSEC_REOCCURRENCE_TIMEFRAME);
+        $recurrence_time_limit = $this->recurrence_time_limit();
 
         // TODO:
         //   Do we need to check for lower boundary limits?
@@ -314,6 +313,35 @@ class EventInstance extends OsecBaseClass
     }
 
     /**
+     * The point at which a rule naming no end of its own stops.
+     *
+     * Kept in one place so both the generator and get_rule_error() bound a rule
+     * identically, and so tests can pin it instead of depending on the clock.
+     *
+     * @return DateTime Cut-off, by default now + OSEC_REOCCURRENCE_TIMEFRAME.
+     */
+    protected function recurrence_time_limit(): DateTime
+    {
+        $limit = new DateTime();
+        $limit->modify(OSEC_REOCCURRENCE_TIMEFRAME);
+
+        /**
+         * Filters the point at which an open ended recurrence stops.
+         *
+         * Only a rule that names no end of its own is bounded by this; an
+         * explicit UNTIL or COUNT is honoured as given and bounded instead by
+         * OSEC_REOCCURRENCE_MAX_INSTANCES.
+         *
+         * @since 1.1.15
+         *
+         * @param  DateTime  $limit  Cut-off, default now + OSEC_REOCCURRENCE_TIMEFRAME.
+         *
+         * @return DateTime
+         */
+        return apply_filters('osec_recurrence_time_limit', $limit);
+    }
+
+    /**
      * Builds the php-rrule instance for a rule, or explains why it cannot.
      *
      * @param  string  $rrule  Recurrence rule.
@@ -385,8 +413,7 @@ class EventInstance extends OsecBaseClass
         if (empty($rrule)) {
             return null;
         }
-        $recurrence_time_limit = new DateTime();
-        $recurrence_time_limit->modify(OSEC_REOCCURRENCE_TIMEFRAME);
+        $recurrence_time_limit = $this->recurrence_time_limit();
 
         try {
             $this->build_rule(rtrim(trim($rrule), ';'), $start, $recurrence_time_limit);

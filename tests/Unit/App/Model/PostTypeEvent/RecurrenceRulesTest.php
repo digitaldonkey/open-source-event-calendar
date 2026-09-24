@@ -241,14 +241,27 @@ class RecurrenceRulesTest extends TestBase
 
     /**
      * An open ended rule still stops at OSEC_REOCCURRENCE_TIMEFRAME.
+     *
+     * The cut-off is pinned through osec_recurrence_time_limit: derived from
+     * the clock it would be a moving target, and comparing it against an
+     * occurrence formatted in the event's own timezone silently compared two
+     * different timezones.
      */
     public function test_rule_without_an_end_stops_at_the_timeframe()
     {
-        $starts = $this->expand('FREQ=DAILY', '2026-01-05 09:00', '');
-        $limit  = (new DateTime(OSEC_REOCCURRENCE_TIMEFRAME))->format('Y-m-d H:i');
+        $limit = new DateTime('2029-09-24 08:46', new DateTimeZone('UTC'));
+        add_filter('osec_recurrence_time_limit', static fn() => clone $limit);
 
-        $this->assertNotEmpty($starts);
-        $this->assertLessThanOrEqual($limit, end($starts));
+        try {
+            $starts = $this->expand('FREQ=DAILY', '2026-01-05 09:00', '');
+
+            // 09:00 Europe/Berlin is 07:00 UTC, so the occurrence on the
+            // cut-off date itself is still inside the limit; the next one is not.
+            $this->assertSame('2029-09-24 09:00', end($starts));
+            $this->assertCount(1359, $starts);
+        } finally {
+            remove_all_filters('osec_recurrence_time_limit');
+        }
     }
 
     /**
