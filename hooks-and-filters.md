@@ -835,11 +835,7 @@ add_filter('osec_leaflet_library_alter', $leaflet);
 #### Description
 
 
-Leaflet is bundled in public/js/external_libs/leaflet; the version is defined in OSEC_LEAFLET_VERSION. Use this filter to load it from a CDN instead.
-
-
-
-Note: leaflet.css resolves the default marker icons relative to itself, so a custom style URL needs a sibling images/ directory.
+Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
 
 #### Parameters
 
@@ -854,12 +850,7 @@ Note: leaflet.css resolves the default marker icons relative to itself, so a cus
 /**
  * Alter Leaflet Library.
  *
- * Leaflet is bundled in public/js/external_libs/leaflet; the version is
- * defined in OSEC_LEAFLET_VERSION. Use this filter to load it from a CDN
- * instead.
- *
- * Note: leaflet.css resolves the default marker icons relative to itself,
- * so a custom style URL needs a sibling images/ directory.
+ * Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
  *
  * @since 1.1
  *
@@ -883,11 +874,6 @@ Alter Leaflet geocoder library (leaflet-control-geocoder)
 add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
 ```
 
-#### Description
-
-
-The library is bundled in public/js/external_libs/leaflet-control-geocoder; the version is defined in OSEC_LEAFLET_GEOCODER_VERSION.
-
 #### Parameters
 
 
@@ -900,9 +886,6 @@ The library is bundled in public/js/external_libs/leaflet-control-geocoder; the 
 ```php
 /**
  * Alter Leaflet geocoder library (leaflet-control-geocoder)
- *
- * The library is bundled in public/js/external_libs/leaflet-control-geocoder;
- * the version is defined in OSEC_LEAFLET_GEOCODER_VERSION.
  *
  * @since 1.1
  *
@@ -1260,44 +1243,6 @@ do_action('osec_ics_import_event_saved', $event $feed);
 </details>
 
 
-### osec_recurrence_rule_not_exportable <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Fired when a stored recurrence rule cannot be exported.
-
-```php
-do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
-```
-
-#### Parameters
-
-
- - **$rrule** <span style="color:crimson"> </span> Rule that was left out.
- - **$message** <span style="color:crimson"> </span> Why iCalcreator rejected it.
- - **$event** <span style="color:crimson"> </span> Event being exported.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Fired when a stored recurrence rule cannot be exported.
- *
- * @since 1.1.15
- *
- * @param  string  $rrule  Rule that was left out.
- * @param  string  $message  Why iCalcreator rejected it.
- * @param  Event  $event  Event being exported.
- *
- * @file src/App/Model/IcsImportExportParser.php
- */
-do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
-```
-
-</details>
-
-
 ---
 
 
@@ -1492,50 +1437,6 @@ do_action('osec_event_saved', $post_id $event $update);
 </details>
 
 
-### osec_recurrence_rule_invalid <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Act on a recurrence rule the calendar had to drop.
-
-```php
-do_action('osec_recurrence_rule_invalid', $rrule $message);
-```
-
-#### Description
-
-
-The event is saved without the rule, as a single occurrence, instead of the save or the feed import failing.
-
-#### Parameters
-
-
- - **$rrule** <span style="color:crimson"> </span> Rule that was dropped.
- - **$message** <span style="color:crimson"> </span> Why the rule was rejected.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Act on a recurrence rule the calendar had to drop.
- *
- * The event is saved without the rule, as a single occurrence,
- * instead of the save or the feed import failing.
- *
- * @since 1.1.15
- *
- * @param  string  $rrule  Rule that was dropped.
- * @param  string  $message  Why the rule was rejected.
- *
- * @file src/App/Model/PostTypeEvent/Event.php
- */
-do_action('osec_recurrence_rule_invalid', $rrule $message);
-```
-
-</details>
-
-
 ### osec_sanitize_unserialize_cost_regex <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -1668,146 +1569,6 @@ Basically somehow ensures that Event post types can not have a calendar shortcod
  * @file src/App/Model/PostTypeEvent/EventEditing.php
  */
 add_filter('osec_content_remove_shortcode_{$tag[2]}', $bool);
-```
-
-</details>
-
-
----
-
-
-@file **../src/App/Model/PostTypeEvent/EventInstance.php**
-
-### osec_recurrence_time_limit <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Filters the point at which an open ended recurrence stops.
-
-```php
-add_filter('osec_recurrence_time_limit', $limit);
-```
-
-#### Description
-
-
-Only a rule that names no end of its own is bounded by this; an explicit UNTIL or COUNT is honoured as given and bounded instead by OSEC_REOCCURRENCE_MAX_INSTANCES.
-
-#### Parameters
-
-
- - **$limit** <span style="color:crimson"> </span> Cut-off, default now + OSEC_REOCCURRENCE_TIMEFRAME.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Filters the point at which an open ended recurrence stops.
- *
- * Only a rule that names no end of its own is bounded by this; an
- * explicit UNTIL or COUNT is honoured as given and bounded instead by
- * OSEC_REOCCURRENCE_MAX_INSTANCES.
- *
- * @since 1.1.15
- *
- * @param  DateTime  $limit  Cut-off, default now + OSEC_REOCCURRENCE_TIMEFRAME.
- *
- * @return DateTime
- *
- * @file src/App/Model/PostTypeEvent/EventInstance.php
- */
-add_filter('osec_recurrence_time_limit', $limit);
-```
-
-</details>
-
-
-### osec_recurrence_truncated <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Act on a recurrence series that hit OSEC_REOCCURRENCE_MAX_INSTANCES.
-
-```php
-do_action('osec_recurrence_truncated', $rrule $limit);
-```
-
-#### Description
-
-
-The event is saved with the instances generated so far, so the series ends earlier than its rule asks for. Use this to warn an editor, or to log feeds whose rules exceed the ceiling.
-
-#### Parameters
-
-
- - **$rrule** <span style="color:crimson"> </span> Rule that was truncated.
- - **$limit** <span style="color:crimson"> </span> Ceiling that applied.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Act on a recurrence series that hit OSEC_REOCCURRENCE_MAX_INSTANCES.
- *
- * The event is saved with the instances generated so far, so the series
- * ends earlier than its rule asks for. Use this to warn an editor, or to
- * log feeds whose rules exceed the ceiling.
- *
- * @since 1.1.15
- *
- * @param  string  $rrule  Rule that was truncated.
- * @param  int  $limit  Ceiling that applied.
- *
- * @file src/App/Model/PostTypeEvent/EventInstance.php
- */
-do_action('osec_recurrence_truncated', $rrule $limit);
-```
-
-</details>
-
-
-### osec_recurrence_rule_invalid <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Act on a recurrence rule the generator had to drop.
-
-```php
-do_action('osec_recurrence_rule_invalid', $rrule $message);
-```
-
-#### Description
-
-
-The event is saved without the rule, as a single occurrence, instead of the save or the feed import failing. Use this to warn an editor or to log the feeds that send broken rules.
-
-#### Parameters
-
-
- - **$rrule** <span style="color:crimson"> </span> Rule that was dropped.
- - **$message** <span style="color:crimson"> </span> Why the rule was rejected.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Act on a recurrence rule the generator had to drop.
- *
- * The event is saved without the rule, as a single occurrence, instead
- * of the save or the feed import failing. Use this to warn an editor or
- * to log the feeds that send broken rules.
- *
- * @since 1.1.15
- *
- * @param  string  $rrule  Rule that was dropped.
- * @param  string  $message  Why the rule was rejected.
- *
- * @file src/App/Model/PostTypeEvent/EventInstance.php
- */
-do_action('osec_recurrence_rule_invalid', $rrule $message);
 ```
 
 </details>
@@ -6116,11 +5877,7 @@ add_filter('osec_leaflet_library_alter', $leaflet);
 #### Description
 
 
-Leaflet is bundled in public/js/external_libs/leaflet; the version is defined in OSEC_LEAFLET_VERSION. Use this filter to load it from a CDN instead.
-
-
-
-Note: leaflet.css resolves the default marker icons relative to itself, so a custom style URL needs a sibling images/ directory.
+Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
 
 #### Parameters
 
@@ -6135,12 +5892,7 @@ Note: leaflet.css resolves the default marker icons relative to itself, so a cus
 /**
  * Alter Leaflet Library.
  *
- * Leaflet is bundled in public/js/external_libs/leaflet; the version is
- * defined in OSEC_LEAFLET_VERSION. Use this filter to load it from a CDN
- * instead.
- *
- * Note: leaflet.css resolves the default marker icons relative to itself,
- * so a custom style URL needs a sibling images/ directory.
+ * Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
  *
  * @since 1.1
  *
@@ -6164,11 +5916,6 @@ Alter Leaflet geocoder library (leaflet-control-geocoder)
 add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
 ```
 
-#### Description
-
-
-The library is bundled in public/js/external_libs/leaflet-control-geocoder; the version is defined in OSEC_LEAFLET_GEOCODER_VERSION.
-
 #### Parameters
 
 
@@ -6181,9 +5928,6 @@ The library is bundled in public/js/external_libs/leaflet-control-geocoder; the 
 ```php
 /**
  * Alter Leaflet geocoder library (leaflet-control-geocoder)
- *
- * The library is bundled in public/js/external_libs/leaflet-control-geocoder;
- * the version is defined in OSEC_LEAFLET_GEOCODER_VERSION.
  *
  * @since 1.1
  *
@@ -6541,44 +6285,6 @@ do_action('osec_ics_import_event_saved', $event $feed);
 </details>
 
 
-### osec_recurrence_rule_not_exportable <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Fired when a stored recurrence rule cannot be exported.
-
-```php
-do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
-```
-
-#### Parameters
-
-
- - **$rrule** <span style="color:crimson"> </span> Rule that was left out.
- - **$message** <span style="color:crimson"> </span> Why iCalcreator rejected it.
- - **$event** <span style="color:crimson"> </span> Event being exported.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Fired when a stored recurrence rule cannot be exported.
- *
- * @since 1.1.15
- *
- * @param  string  $rrule  Rule that was left out.
- * @param  string  $message  Why iCalcreator rejected it.
- * @param  Event  $event  Event being exported.
- *
- * @file src/App/Model/IcsImportExportParser.php
- */
-do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
-```
-
-</details>
-
-
 ---
 
 
@@ -6773,50 +6479,6 @@ do_action('osec_event_saved', $post_id $event $update);
 </details>
 
 
-### osec_recurrence_rule_invalid <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Act on a recurrence rule the calendar had to drop.
-
-```php
-do_action('osec_recurrence_rule_invalid', $rrule $message);
-```
-
-#### Description
-
-
-The event is saved without the rule, as a single occurrence, instead of the save or the feed import failing.
-
-#### Parameters
-
-
- - **$rrule** <span style="color:crimson"> </span> Rule that was dropped.
- - **$message** <span style="color:crimson"> </span> Why the rule was rejected.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Act on a recurrence rule the calendar had to drop.
- *
- * The event is saved without the rule, as a single occurrence,
- * instead of the save or the feed import failing.
- *
- * @since 1.1.15
- *
- * @param  string  $rrule  Rule that was dropped.
- * @param  string  $message  Why the rule was rejected.
- *
- * @file src/App/Model/PostTypeEvent/Event.php
- */
-do_action('osec_recurrence_rule_invalid', $rrule $message);
-```
-
-</details>
-
-
 ### osec_sanitize_unserialize_cost_regex <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -6949,146 +6611,6 @@ Basically somehow ensures that Event post types can not have a calendar shortcod
  * @file src/App/Model/PostTypeEvent/EventEditing.php
  */
 add_filter('osec_content_remove_shortcode_{$tag[2]}', $bool);
-```
-
-</details>
-
-
----
-
-
-@file **../src/App/Model/PostTypeEvent/EventInstance.php**
-
-### osec_recurrence_time_limit <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Filters the point at which an open ended recurrence stops.
-
-```php
-add_filter('osec_recurrence_time_limit', $limit);
-```
-
-#### Description
-
-
-Only a rule that names no end of its own is bounded by this; an explicit UNTIL or COUNT is honoured as given and bounded instead by OSEC_REOCCURRENCE_MAX_INSTANCES.
-
-#### Parameters
-
-
- - **$limit** <span style="color:crimson"> </span> Cut-off, default now + OSEC_REOCCURRENCE_TIMEFRAME.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Filters the point at which an open ended recurrence stops.
- *
- * Only a rule that names no end of its own is bounded by this; an
- * explicit UNTIL or COUNT is honoured as given and bounded instead by
- * OSEC_REOCCURRENCE_MAX_INSTANCES.
- *
- * @since 1.1.15
- *
- * @param  DateTime  $limit  Cut-off, default now + OSEC_REOCCURRENCE_TIMEFRAME.
- *
- * @return DateTime
- *
- * @file src/App/Model/PostTypeEvent/EventInstance.php
- */
-add_filter('osec_recurrence_time_limit', $limit);
-```
-
-</details>
-
-
-### osec_recurrence_truncated <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Act on a recurrence series that hit OSEC_REOCCURRENCE_MAX_INSTANCES.
-
-```php
-do_action('osec_recurrence_truncated', $rrule $limit);
-```
-
-#### Description
-
-
-The event is saved with the instances generated so far, so the series ends earlier than its rule asks for. Use this to warn an editor, or to log feeds whose rules exceed the ceiling.
-
-#### Parameters
-
-
- - **$rrule** <span style="color:crimson"> </span> Rule that was truncated.
- - **$limit** <span style="color:crimson"> </span> Ceiling that applied.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Act on a recurrence series that hit OSEC_REOCCURRENCE_MAX_INSTANCES.
- *
- * The event is saved with the instances generated so far, so the series
- * ends earlier than its rule asks for. Use this to warn an editor, or to
- * log feeds whose rules exceed the ceiling.
- *
- * @since 1.1.15
- *
- * @param  string  $rrule  Rule that was truncated.
- * @param  int  $limit  Ceiling that applied.
- *
- * @file src/App/Model/PostTypeEvent/EventInstance.php
- */
-do_action('osec_recurrence_truncated', $rrule $limit);
-```
-
-</details>
-
-
-### osec_recurrence_rule_invalid <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
-
-
-Act on a recurrence rule the generator had to drop.
-
-```php
-do_action('osec_recurrence_rule_invalid', $rrule $message);
-```
-
-#### Description
-
-
-The event is saved without the rule, as a single occurrence, instead of the save or the feed import failing. Use this to warn an editor or to log the feeds that send broken rules.
-
-#### Parameters
-
-
- - **$rrule** <span style="color:crimson"> </span> Rule that was dropped.
- - **$message** <span style="color:crimson"> </span> Why the rule was rejected.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Act on a recurrence rule the generator had to drop.
- *
- * The event is saved without the rule, as a single occurrence, instead
- * of the save or the feed import failing. Use this to warn an editor or
- * to log the feeds that send broken rules.
- *
- * @since 1.1.15
- *
- * @param  string  $rrule  Rule that was dropped.
- * @param  string  $message  Why the rule was rejected.
- *
- * @file src/App/Model/PostTypeEvent/EventInstance.php
- */
-do_action('osec_recurrence_rule_invalid', $rrule $message);
 ```
 
 </details>
