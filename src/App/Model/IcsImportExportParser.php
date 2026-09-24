@@ -1126,13 +1126,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $e = $calendar->newVevent();
 
         /* @var string $uid Unique ID */
-        if ($event->get('ical_uid')) {
-            $uid = addcslashes((string)$event->get('ical_uid'), "\\;,\n");
-        } else {
-            $uid = $event->get_uid();
-            $event->set('ical_uid', $uid);
-            $event->save(true);
-        }
+        $uid = addcslashes((string)$event->get_uid(), "\\;,\n");
         $e->setUid($this->sanitizeValue($uid));
         $event_url = get_permalink($event->get('post_id'));
         $e->setUrl($event_url);

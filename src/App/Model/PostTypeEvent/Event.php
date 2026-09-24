@@ -559,6 +559,7 @@ class Event extends OsecBaseClass
         }
 
         $this->discard_unusable_recurrence_rules();
+        $this->pin_ical_uid();
 
         $dbi        = $this->app->db;
         $columns    = $this->prepare_store_entity();
@@ -600,7 +601,9 @@ class Event extends OsecBaseClass
                 return false;
             }
             $this->set('post_id', $post_id);
-            $columns['post_id'] = $post_id;
+            $this->pin_ical_uid();
+            $columns['post_id']  = $post_id;
+            $columns['ical_uid'] = $this->storage_format('ical_uid');
 
             // Insert new event data
             if (false === $dbi->insert($table_name, $columns, $format)) {
@@ -655,6 +658,21 @@ class Event extends OsecBaseClass
         do_action('osec_event_saved', $post_id, $this, $update);
 
         return $post_id;
+    }
+
+    /**
+     * Stores the UID the event is exported with, once its post ID is known.
+     *
+     * get_uid() derives it from the site URL, so storing it keeps the UID
+     * stable if the site moves, and the export never has to write it.
+     *
+     * @return void
+     */
+    protected function pin_ical_uid(): void
+    {
+        if (empty($this->get('ical_uid')) && $this->get('post_id')) {
+            $this->set('ical_uid', $this->get_uid());
+        }
     }
 
     /**

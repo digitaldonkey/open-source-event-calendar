@@ -12,8 +12,7 @@ use Osec\Tests\Utilities\TestBase;
  *
  * Event::save() refuses such a rule now, so this covers what is already in the
  * database: one bad event used to break the export feed for every other event
- * in it. The events carry an ical_uid, because the export re-saves an event
- * without one, which would clear the rule before it is written.
+ * in it.
  *
  * @group ics
  * @group recurrence
@@ -76,7 +75,6 @@ class IcsExportInvalidRuleTest extends TestBase
                 'end'              => $end,
                 'allday'           => 0,
                 'timezone_name'    => 'UTC',
-                'ical_uid'         => 'stored-' . md5($rrule) . '@test',
                 'recurrence_rules' => $rrule,
                 'recurrence_dates' => '',
                 'exception_rules'  => '',
