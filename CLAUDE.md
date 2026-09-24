@@ -502,13 +502,53 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
 
 ## Release & Build Tooling
 
-- Anything shipped in a release **must be committed to git first**; the CI `static_release_job` verifies generated files are up to date
+- Anything shipped in a release **must be committed to git first**; `static_release_job` gates four generated files - see the inventory below for which, and for the three it does *not* cover
 - `README.txt` is generated from `README.md` — never hand-edit it: `ddev wp osec make_readme`
 - `hooks-and-filters.md` is generated from PHPDoc by the separate [`hookster_markdown`](https://github.com/digitaldonkey/hookster_markdown) tool and must be regenerated before each release:
   ```bash
   git clone git@github.com:digitaldonkey/hookster_markdown.git
   cd hookster_markdown && npm install && npm run build
   ```
+
+### What `static_release_job` gates - and what it does not
+
+Four steps in one job under `set -Eeuxo pipefail`, so **the job stops at the first failing gate** and
+the later ones never run. Each was verified in both directions on 2026-09-24 - a passing run *and* a
+deliberately broken commit that turned it red:
+
+| Step | Regenerates | What actually gates |
+|---|---|---|
+| Verify WordPress version metadata | nothing - `osec prepare_release` is read-only by design | the command's own `WP_CLI::error()` exit 1; the `git status` wrapper around it is vestigial and can never fire |
+| Verify Readme.txt | `README.txt` from `README.md` + plugin headers | `git status --porcelain` at the repo root |
+| Verify Twig frontend templates | `public/js/{agenda,oneday,month}.js` and `public/js/pages/calendar.js` | `git status -s` from `twig_to_js_transform/` |
+| Verify hooks-and-filters.md | `hooks-and-filters.md` | `git status --porcelain` at the repo root |
+
+**The hooks gate was inert until `fcaab93d`**, and its failure mode is the one to watch for: it ran
+`git status` *after* `cd hookster_markdown`, a separately **cloned repository**, so it inspected a tree
+the build never touches and answered "No changes detected" unconditionally. The Twig step uses the same
+`cd` + `git status` shape and is fine, because `twig_to_js_transform/` is a subdirectory of *this* repo
+and `git status` from a subdirectory reports the whole repo with `../`-prefixed paths. **A nested clone
+breaks such a check; a subdirectory does not.**
+
+A hand-edit alone does not reproduce a readme failure: `make_readme` overwrites `README.txt`, so an
+uncommitted edit is silently restored and the tree comes back clean. The stale content must be committed.
+
+**Not gated, though shipped in `OSEC_RELEASE_WHITE_LIST`:**
+
+- **`languages/`** - stale as of 2026-09-24. The committed `.pot` carries `POT-Creation-Date: 2025-05-20`
+  and `Project-Id-Version: … 1.0.2` with 512 msgids; `wp i18n make-pot` yields 569. Strings added since
+  (e.g. the recurrence-truncated notice) are absent, so they are untranslatable in all three locales, and
+  the `.po` files sit at 512 too. `a58d837b` hand-edited 4 lines of the `.pot` rather than regenerating it.
+- **`calendar_block/build/`** - tracked output of `wp-scripts build` from `calendar_block/src/`. In sync
+  today (both last touched by `1d6c041f`), but nothing stops the next `src/` edit shipping a stale bundle.
+
+**To probe a gate, name the branch `release-…`.** `static_release_job` is filtered to
+`only: /^(master|release-.*)$/`, so a probe branch named anything else passes by never running the job -
+the same false pass one level up. Use **one branch per gate** (`set -e` hides every gate after the first
+failure), and trim the workflow to `build -> static_job -> static_release_job` to keep the probe off the
+Selenium matrix. Nothing can publish from such a branch: all three deploy jobs are `only: /master/` *and*
+carry a `circleci-agent step halt` guard.
+
 
 ## CircleCI Behavior by Branch
 
