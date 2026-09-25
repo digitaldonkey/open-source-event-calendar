@@ -341,18 +341,30 @@ class BootstrapController
             /**
              * Repair fields stored with HTML entities by earlier versions.
              *
-             * Notice once per plugin version, review page, form handler.
+             * Check once per plugin version, notice for admins, review page, form handlers.
              */
             add_action(
                 'admin_init',
                 function () use ($app) {
-                    EscapingRepairController::factory($app)->maybe_notify();
+                    EscapingRepairController::factory($app)->maybe_check();
+                }
+            );
+            add_action(
+                'admin_notices',
+                function () use ($app) {
+                    EscapingRepairController::factory($app)->render_notice();
                 }
             );
             add_action(
                 'admin_post_' . EscapingRepairController::ACTION,
                 function () use ($app) {
                     EscapingRepairController::factory($app)->handle_repair();
+                }
+            );
+            add_action(
+                'admin_post_' . EscapingRepairController::ACTION_DISMISS,
+                function () use ($app) {
+                    EscapingRepairController::factory($app)->handle_dismiss();
                 }
             );
 

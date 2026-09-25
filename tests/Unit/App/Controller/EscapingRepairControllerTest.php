@@ -27,31 +27,65 @@ class EscapingRepairControllerTest extends TestBase
         wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
     }
 
-    public function test_notice_once_per_version_and_cleared_after_repair()
+    public function test_notice_for_admins_until_dismissed_or_repaired()
     {
         global $osec_app;
 
         $this->insert_feed('https://example.com/cal.ics?a=1&amp;b=2');
         $controller = EscapingRepairController::factory($osec_app);
+        $controller->maybe_check();
 
-        $controller->maybe_notify();
-        $messages = $this->stored_messages();
-        $this->assertCount(1, $messages);
-        $notice = reset($messages);
-        $this->assertStringContainsString('2 event or feed fields', $notice['message'], 'feed_url and feed_name.');
-        $this->assertTrue($notice['persistent']);
+        $html = $this->render_notice();
+        $this->assertStringContainsString('2 event or feed fields', $html, 'feed_url and feed_name.');
+        $this->assertStringContainsString('page=osec-repair-escaping', $html);
+        $this->assertStringContainsString('action=' . EscapingRepairController::ACTION_DISMISS, $html);
+        $this->assertSame([], $this->stored_messages(), 'Not stored for all users.');
 
-        // Dismissed: the next admin request of the same version does not bring it back.
-        NotificationAdmin::factory($osec_app)->remove($notice['msg_key']);
-        $controller->maybe_notify();
-        $this->assertSame([], $this->stored_messages());
+        // Dismissed for this admin only.
+        $controller->dismiss_for_current_user();
+        $this->assertSame('', $this->render_notice());
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+        $this->assertNotSame('', $this->render_notice(), 'Another admin still gets it.');
 
-        // New version, the notice is back until the repair clears it.
-        $osec_app->options->set(EscapingRepairController::OPTION, ['version' => '0.0.1', 'message' => null]);
-        $controller->maybe_notify();
-        $this->assertCount(1, $this->stored_messages());
+        // Repaired: gone for everyone.
         $controller->clear_notice();
-        $this->assertSame([], $this->stored_messages());
+        $this->assertSame('', $this->render_notice());
+    }
+
+    public function test_new_version_brings_back_a_dismissed_notice()
+    {
+        global $osec_app;
+
+        $this->insert_feed('https://example.com/cal.ics?a=1&amp;b=2');
+        $controller = EscapingRepairController::factory($osec_app);
+        $controller->maybe_check();
+        $controller->dismiss_for_current_user();
+        $this->assertSame('', $this->render_notice());
+
+        $state            = $osec_app->options->get(EscapingRepairController::OPTION);
+        $state['version'] = '0.0.1';
+        $osec_app->options->set(EscapingRepairController::OPTION, $state);
+        $controller->maybe_check();
+
+        $this->assertNotSame('', $this->render_notice());
+    }
+
+    /**
+     * Editors can edit events but not run the repair: no notice, no check.
+     */
+    public function test_no_notice_and_no_check_for_editors()
+    {
+        global $osec_app;
+
+        $this->insert_feed('https://example.com/cal.ics?a=1&amp;b=2');
+        EscapingRepairController::factory($osec_app)->maybe_check();
+
+        wp_set_current_user(self::factory()->user->create(['role' => 'editor']));
+        $this->assertSame('', $this->render_notice());
+
+        $osec_app->options->delete(EscapingRepairController::OPTION);
+        EscapingRepairController::factory($osec_app)->maybe_check();
+        $this->assertNull($osec_app->options->get(EscapingRepairController::OPTION));
     }
 
     public function test_no_notice_without_corrupt_fields()
@@ -59,20 +93,10 @@ class EscapingRepairControllerTest extends TestBase
         global $osec_app;
 
         $this->insert_feed(self::FEED_URL);
-        EscapingRepairController::factory($osec_app)->maybe_notify();
+        EscapingRepairController::factory($osec_app)->maybe_check();
 
-        $this->assertSame([], $this->stored_messages());
+        $this->assertSame('', $this->render_notice());
         $this->assertSame(OSEC_VERSION, $osec_app->options->get(EscapingRepairController::OPTION)['version']);
-    }
-
-    public function test_no_check_without_capability()
-    {
-        global $osec_app;
-
-        wp_set_current_user(self::factory()->user->create(['role' => 'editor']));
-        EscapingRepairController::factory($osec_app)->maybe_notify();
-
-        $this->assertNull($osec_app->options->get(EscapingRepairController::OPTION));
     }
 
     /**
@@ -121,6 +145,20 @@ class EscapingRepairControllerTest extends TestBase
             'javascript'   => ['javascript:alert(1)', ''],
             'null'         => [null, ''],
         ];
+    }
+
+    /**
+     * Notice output on the Plugins screen, where importance 1 notices show.
+     */
+    private function render_notice(): string
+    {
+        global $osec_app;
+
+        set_current_screen('plugins');
+        ob_start();
+        EscapingRepairController::factory($osec_app)->render_notice();
+
+        return trim((string)ob_get_clean());
     }
 
     private function insert_feed(string $url): void

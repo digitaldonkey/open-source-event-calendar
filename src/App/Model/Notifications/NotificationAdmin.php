@@ -227,6 +227,27 @@ class NotificationAdmin extends NotificationAbstract
         return $this->write();
     }
 
+    /**
+     * Renders a message now, without storing it.
+     *
+     * For notices a caller decides per request and per user, e.g. by capability.
+     * Honours the importance like stored messages (see store()).
+     *
+     * @param  string  $message  Message, escaped for HTML output.
+     * @param  string  $class  Message box class.
+     * @param  int  $importance  Importance, see store().
+     */
+    public function display(string $message, string $class = 'updated', int $importance = 0): void
+    {
+        $this->renderMessage([
+            'message'    => $message,
+            'class'      => $class,
+            'importance' => $importance,
+            'persistent' => false,
+            'msg_key'    => '',
+        ]);
+    }
+
     protected function renderMessage(array $entity)
     {
         $importance = 0;
