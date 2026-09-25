@@ -12,6 +12,7 @@ use WP_CLI\Utils;
  */
 class EventCommand extends \WP_CLI_Command
 {
+    use ConfirmsAll;
     use PrintsAdminNotices;
 
     private App $app;
@@ -66,8 +67,8 @@ class EventCommand extends \WP_CLI_Command
      *   - ids
      * ---
      *
-     * [--yes]
-     * : Do not ask for confirmation when processing all events.
+     * [--yes|y]
+     * : Do not ask for confirmation when processing all events. Short: -y
      *
      * ## EXAMPLES
      *
@@ -87,6 +88,7 @@ class EventCommand extends \WP_CLI_Command
      */
     public function regenerate($args, $assoc_args)
     {
+        $this->accept_yes_alias($args, $assoc_args);
         $feed_id     = Utils\get_flag_value($assoc_args, 'feed');
         $resave      = (bool)Utils\get_flag_value($assoc_args, 'resave', false);
         $dry_run     = (bool)Utils\get_flag_value($assoc_args, 'dry-run', false);
@@ -131,7 +133,7 @@ class EventCommand extends \WP_CLI_Command
         }
         if (null === $post_ids) {
             $total = $regenerator->count(null, $start_after) - count($orphans['events']);
-            WP_CLI::confirm("Regenerate the instances of all {$total} events?", $assoc_args);
+            $this->confirm_all("Regenerate the instances of all {$total} events?", $assoc_args);
         }
 
         $this->print_admin_notices(function () use (

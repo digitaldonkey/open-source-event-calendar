@@ -12,6 +12,7 @@ use WP_CLI\Utils;
  */
 class FeedCommand extends \WP_CLI_Command
 {
+    use ConfirmsAll;
     use PrintsAdminNotices;
 
     private App $app;
@@ -89,8 +90,8 @@ class FeedCommand extends \WP_CLI_Command
      * [--dry-run]
      * : List the feeds that would be updated, without fetching them.
      *
-     * [--yes]
-     * : Do not ask for confirmation when updating all feeds.
+     * [--yes|y]
+     * : Do not ask for confirmation when updating all feeds. Short: -y
      *
      * ## EXAMPLES
      *
@@ -104,6 +105,7 @@ class FeedCommand extends \WP_CLI_Command
      */
     public function update($args, $assoc_args)
     {
+        $this->accept_yes_alias($args, $assoc_args);
         $force   = (bool)Utils\get_flag_value($assoc_args, 'force', false);
         $dry_run = (bool)Utils\get_flag_value($assoc_args, 'dry-run', false);
         $feeds   = FeedsController::factory($this->app);
@@ -138,7 +140,7 @@ class FeedCommand extends \WP_CLI_Command
             return;
         }
         if (! $requested) {
-            WP_CLI::confirm('Update all ' . count($rows) . ' feeds?', $assoc_args);
+            $this->confirm_all('Update all ' . count($rows) . ' feeds?', $assoc_args);
         }
 
         // The result message already carries what a notice would say.
@@ -159,6 +161,15 @@ class FeedCommand extends \WP_CLI_Command
                 }
                 $message = html_entity_decode(wp_strip_all_tags((string)$result['message']), ENT_QUOTES);
                 $message = trim(preg_replace('/\s+/', ' ', $message));
+                $lock    = empty($result['error']) ? null : $feeds->get_import_lock($feed_id);
+                if (null !== $lock) {
+                    $message = sprintf(
+                        'Locked by an import started %s ago (PID %d), which may still be running. ' .
+                        'Use --force to update anyway.',
+                        human_time_diff($lock['time']),
+                        $lock['pid']
+                    );
+                }
                 if (! empty($result['error'])) {
                     WP_CLI::warning("Feed {$feed_id} ({$row->feed_url}): {$message}");
                     ++$failed;
