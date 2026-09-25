@@ -146,7 +146,7 @@ Events are processed in batches (`--batch-size`, default 500). Every batch line 
     wp osec feed update 3                           # one feed
     wp osec feed update 3 --force                   # break the lock a crashed import left behind
 
-Only use `--force` when no other import of that feed is running, or events may be imported twice. A feed is imported in one go: a feed of 10,000 events needs about 200 MB of PHP memory (`php -d memory_limit=256M $(which wp) osec feed update 3`).
+Only use `--force` when no other import of that feed is running, or events may be imported twice. A feed is imported in one go: a feed of 10,000 events needs about 150 MB of PHP memory (`php -d memory_limit=256M $(which wp) osec feed update 3`).
 
 To give a slow feed server more time than the default 120 seconds, use WordPress' `http_request_args` filter:
 

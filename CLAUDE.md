@@ -188,6 +188,13 @@ Do not access production databases.
   not have. The downstream guards stay as a net for rules stored by older versions: the generator drops and
   reports (`createCollection()` has already cached the single occurrence), the export leaves the rule out,
   and `RepeatRuleToText` skips months it cannot name.
+- **`exception_dates` (EXDATE) stores the date in the series' own timezone; the time part is ignored.**
+  `EventInstance::process_rrule_datelist()` reads only `Ymd` and applies the series' start time, so every
+  writer must convert first - `EventParent::add_exception_date()` does, the feed import does since `4b34a211`
+  (`IcsImportExportParser::exclusion_date()`, also used for RECURRENCE-ID overrides). A UTC date there names
+  the wrong day whenever the local start falls on another UTC date: after midnight east of UTC, in the
+  evening west of it (New York from ~19:00), a far wider window than the "hour before midnight" above.
+  `recurrence_dates` (RDATE) is still stored as the feed wrote it - same trap if a feed writes RDATEs in UTC.
 - Further reading: [wiki: Understanding data model](https://github.com/digitaldonkey/open-source-event-calendar/wiki/Understanding-data-modell)
 
 ## Feeds (iCalendar)
