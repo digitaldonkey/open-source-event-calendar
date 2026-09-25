@@ -537,7 +537,7 @@ class FeedsController extends OsecBaseClass
 
                     $feed_name = ! empty($result['name'][1]) ? $result['name'][1] : $feed->feed_url;
                     // we must flip again the array to iterate over it
-                    if (0 === $feed->keep_old_events) {
+                    if (0 === (int)$feed->keep_old_events) {
                         $events_to_delete = array_flip($result['events_to_delete']);
                         foreach ($events_to_delete as $event_id) {
                             wp_delete_post($event_id, true);
