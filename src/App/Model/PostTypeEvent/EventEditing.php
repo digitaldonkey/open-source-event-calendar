@@ -34,6 +34,22 @@ class EventEditing extends OsecBaseClass
     protected array $recurrence_listeners = [];
 
     /**
+     * A text field of the event form, with the old double escaping undone.
+     *
+     * Heals values stored by earlier versions on the next save. Decoding after
+     * sanitize_text_field() also keeps a lone `<` from being stored as `&lt;`.
+     *
+     * @param  string  $name  Request parameter.
+     *
+     * @return string Value, empty if not submitted.
+     * @see EventEscapingRepair
+     */
+    protected function get_text_param(string $name): string
+    {
+        return EventEscapingRepair::decode_text((string)RequestParser::get_param($name, ''));
+    }
+
+    /**
      * Saves meta post data.
      *
      * @wp_hook save_post
@@ -113,29 +129,29 @@ class EventEditing extends OsecBaseClass
             $event->set('instant_event', false);
         }
 
-        $osec_venue = RequestParser::get_param('osec_venue', false);
+        $osec_venue = $this->get_text_param('osec_venue');
         if ($osec_venue) {
             $event->set('venue', $osec_venue);
         }
 
-        $osec_address = RequestParser::get_param('osec_address', false);
+        $osec_address = $this->get_text_param('osec_address');
         if ($osec_address) {
             $event->set('address', $osec_address);
         }
-        $osec_city = RequestParser::get_param('osec_city', false);
+        $osec_city = $this->get_text_param('osec_city');
         if ($osec_city) {
             $event->set('city', $osec_city);
         }
 
-        $osec_province = RequestParser::get_param('osec_province', false);
+        $osec_province = $this->get_text_param('osec_province');
         if ($osec_province) {
             $event->set('province', $osec_province);
         }
-        $osec_postal_code = RequestParser::get_param('osec_postal_code', false);
+        $osec_postal_code = $this->get_text_param('osec_postal_code');
         if ($osec_postal_code) {
             $event->set('postal_code', $osec_postal_code);
         }
-        $osec_country = RequestParser::get_param('osec_country', false);
+        $osec_country = $this->get_text_param('osec_country');
         if ($osec_country) {
             $event->set('country', $osec_country);
         }
@@ -143,7 +159,7 @@ class EventEditing extends OsecBaseClass
         $show_map = (bool)RequestParser::get_param('osec_google_map', false);
         $event->set('show_map', $show_map);
 
-        $osec_cost = RequestParser::get_param('osec_cost', false);
+        $osec_cost = $this->get_text_param('osec_cost');
         if ($osec_cost) {
             $event->set('cost', $osec_cost);
         }
@@ -158,27 +174,29 @@ class EventEditing extends OsecBaseClass
             (bool)RequestParser::get_param('osec_hide_cost', false)
         );
 
-        $osec_ticket_url = RequestParser::get_param('osec_ticket_url', '');
+        $osec_ticket_url = $this->get_text_param('osec_ticket_url');
         if ($osec_ticket_url) {
             // Clickable links.
             $event->set('ticket_url', sanitize_url($osec_ticket_url, ['http', 'https']));
         }
-        $osec_contact_url = RequestParser::get_param('osec_contact_url', '');
+        $osec_contact_url = $this->get_text_param('osec_contact_url');
         if ($osec_contact_url) {
             // Allow any of @see wp_allowed_protocols().
             $event->set('contact_url', sanitize_url($osec_contact_url));
         }
-        $osec_contact_name = RequestParser::get_param('osec_contact_name', false);
+        $osec_contact_name = $this->get_text_param('osec_contact_name');
         if ($osec_contact_name) {
             $event->set('contact_name', $osec_contact_name);
         }
 
-        $osec_contact_phone = RequestParser::get_param('osec_contact_phone', false);
+        $osec_contact_phone = $this->get_text_param('osec_contact_phone');
         if ($osec_contact_phone) {
             $event->set('contact_phone', $osec_contact_phone);
         }
 
-        $osec_contact_email = RequestParser::get_param('osec_contact_email', false);
+        $osec_contact_email = EventEscapingRepair::decode_email(
+            (string)RequestParser::get_param('osec_contact_email', '')
+        );
         if ($osec_contact_email) {
             $event->set('contact_email', sanitize_email($osec_contact_email));
         }

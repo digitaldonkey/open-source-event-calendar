@@ -62,6 +62,38 @@ Check out the [CircleCi pipeline script](https://github.com/digitaldonkey/open-s
 
 See [TESTING.md](TESTING.md) for the full checklist: first-time setup, one-time WP test-DB init, PHPUnit, phpcs, GrumPHP, integration (Mocha/Selenium) tests, and manual ICS feed testing.
 
+### Escaping in views and Twig templates
+
+Twig autoescapes every `{{ }}` (strategy `html`), so that is where escaping happens: late, at output.
+Escaping in PHP as well escapes twice. The browser then shows `D&amp;D`, and a form stores it back
+(up to 1.1.14 the event editor did this, see `EventEscapingRepair`).
+
+1. **PHP passes raw values to Twig.** No `esc_html()`, `esc_attr()` or `esc_url()` on values printed
+   with `{{ }}`. New labels use `__()`, not `esc_html__()`, and `…` instead of `&#8230;`.
+2. **Autoescape stays on.** `{{ venue }}` is right for text and for double-quoted attributes
+   (`value="{{ venue }}"`, `data-venue="{{ venue }}"`). Always quote attributes. Other contexts need
+   their strategy: `{{ value|e('js') }}` in scripts, `{{ value|e('url') }}` for one query parameter.
+3. **Links use `|esc_url`**: `href="{{ contact_url|esc_url }}"`. Twig does not check the protocol, so
+   `javascript:` would pass. The filter runs WordPress' `esc_url()` and is not escaped again.
+   An input the user edits keeps plain `value="{{ ticket_url }}"`.
+4. **`|raw` only for HTML that is already safe**, and the variable name ends in `_html`:
+   `{{ nonce_field_html|raw }}`. Safe means rendered by another Twig template, returned escaped by
+   WordPress (`wp_nonce_field()`, `paginate_links()`), or passed through `wp_kses*()`.
+   Existing `|raw` variables without `_html` get renamed when the code is touched.
+5. **No new `{% autoescape false %}` blocks.** They switch escaping off for everything added to the
+   block later. Replace existing ones with a per-variable `|raw` when the code is touched.
+6. **Sanitize on input, independently** (`sanitize_text_field()`, `sanitize_url()`,
+   `sanitize_email()`). Never store escaped values.
+7. **Every PHP `echo` of HTML** goes through `wp_kses*()`, like `FileAbstract::render()` does for
+   Twig output. Where that is impossible, add
+   `// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- <reason>`.
+
+Plugin Check's `EscapeOutput` sniff only checks PHP output points (`echo`, `print`, `printf`, …).
+It never flags values handed to Twig, and `.twig` files are not scanned.
+
+The TwigJs templates (`agenda`, `month`, `oneday`, see below) run in the browser: PHP filters like
+`|esc_url` are not available there.
+
 ## Tools 
 
 There are some local helpers used to avoid doing things on the fly in ci pipeline.

@@ -4,6 +4,7 @@ namespace Osec\App\Controller;
 
 use Exception;
 use Osec\App\Model\PostTypeEvent\EventCreateException;
+use Osec\App\Model\PostTypeEvent\EventEscapingRepair;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\Model\PostTypeEvent\EventType;
@@ -904,14 +905,14 @@ class FeedsController extends OsecBaseClass
             }
             unset($feed_categories);
             $args = self::merge_commom_vars([
-                'feed_name' => esc_attr(! empty($row->feed_name) ? $row->feed_name : $row->feed_url),
-                'feed_url' => esc_attr($row->feed_url),
+                'feed_name' => ! empty($row->feed_name) ? $row->feed_name : $row->feed_url,
+                'feed_url' => $row->feed_url,
                 'event_category' => implode(', ', $categories),
-                'events_categories_ids' => esc_attr($row->feed_category),
+                'events_categories_ids' => $row->feed_category,
                 'tags' => stripslashes(
-                    str_replace(',', ', ', esc_attr($row->feed_tags))
+                    str_replace(',', ', ', (string)$row->feed_tags)
                 ),
-                'tags_ids'             => esc_attr($row->feed_tags),
+                'tags_ids'             => $row->feed_tags,
                 'feed_id'              => $row->feed_id,
                 'comments_enabled'     => (int) $row->comments_enabled,
                 'map_display_enabled'  => (int) $row->map_display_enabled,
@@ -950,7 +951,8 @@ class FeedsController extends OsecBaseClass
             }
 
             if (isset($_REQUEST['feed_url']) && ! empty($_REQUEST['feed_url'])) {
-                $url = esc_url_raw(wp_unslash($_REQUEST['feed_url']));
+                // Heal a URL stored with the old double escaping, see EventEscapingRepair.
+                $url = EventEscapingRepair::decode_text(esc_url_raw(wp_unslash($_REQUEST['feed_url'])));
             }
 
             $feedId = RequestParser::get_param('feed_id', null);

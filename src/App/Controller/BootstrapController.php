@@ -22,6 +22,7 @@ use Osec\App\View\Admin\AdminPageDebugOptions;
 use Osec\App\View\Admin\AdminPageManageFeeds;
 use Osec\App\View\Admin\AdminPageManageTaxonomies;
 use Osec\App\View\Admin\AdminPageManageThemes;
+use Osec\App\View\Admin\AdminPageRepairEscaping;
 use Osec\App\View\Admin\AdminPageSettings;
 use Osec\App\View\Admin\AdminPageThemeOptions;
 use Osec\App\View\Calendar\CalendarShortcodeView;
@@ -338,6 +339,24 @@ class BootstrapController
             );
 
             /**
+             * Repair fields stored with HTML entities by earlier versions.
+             *
+             * Notice once per plugin version, review page, form handler.
+             */
+            add_action(
+                'admin_init',
+                function () use ($app) {
+                    EscapingRepairController::factory($app)->maybe_notify();
+                }
+            );
+            add_action(
+                'admin_post_' . EscapingRepairController::ACTION,
+                function () use ($app) {
+                    EscapingRepairController::factory($app)->handle_repair();
+                }
+            );
+
+            /**
              * save rrurle and convert it to text
              *
              * On Event editing you may add a recurring event.
@@ -374,6 +393,7 @@ class BootstrapController
                 AdminPageManageThemes::factory($app)->add_page();
                 AdminPageThemeOptions::factory($app)->add_page();
                 AdminPageSettings::factory($app)->add_page();
+                AdminPageRepairEscaping::factory($app)->add_page();
 
                 if (OSEC_DEBUG) {
                     AdminPageDebugOptions::factory($app)->add_page();

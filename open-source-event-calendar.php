@@ -98,4 +98,5 @@ if (defined('WP_CLI') && WP_CLI) {
 
     WP_CLI::add_command('osec event', \Osec\WpCli\EventCommand::class);
     WP_CLI::add_command('osec feed', \Osec\WpCli\FeedCommand::class);
+    WP_CLI::add_command('osec repair-escaping', \Osec\WpCli\RepairEscapingCommand::class);
 }

@@ -327,9 +327,9 @@ class AdminPageAddEvent extends OsecBaseClass
             'show_recurrence_and_excludes' => !($instance_id || $parent_event_id),
             'recurrence' => [
                 'checked' => !empty($event->get('recurrence_rules')) ? 'checked' : '',
-                'rrule_value' => esc_attr($event->get('recurrence_rules')),
+                'rrule_value' => $event->get('recurrence_rules'),
                 'label' => esc_html__('Repeat', 'open-source-event-calendar') . ($is_repeating_event ? ':' : ' ... '),
-                'rrule_text' => esc_html($rrule_text),
+                'rrule_text' => $rrule_text,
             ],
             'excludes' => [
                 'checked' => ($event->get('recurrence_rules'))
@@ -337,7 +337,7 @@ class AdminPageAddEvent extends OsecBaseClass
                 'disabled' => $is_repeating_event || $event->get('recurrence_rules') ? '' : ' disabled="disabled"',
                 'exrule_value' => $event->get('exception_rules'),
                 'label' => esc_html__('Exclude', 'open-source-event-calendar') . ($has_excluded_events ? ':' : '...' ),
-                'exrule_text' => esc_html($exrule_text),
+                'exrule_text' => $exrule_text,
             ],
         ];
         wp_nonce_field(EventEditing::NONCE_ACTION, EventEditing::NONCE_NAME);
@@ -379,9 +379,9 @@ class AdminPageAddEvent extends OsecBaseClass
             'post_venue_html'  => apply_filters('osec_post_form_after_venue_html', ''),
             'show_coordinates_checkbox' => (bool) $show_coordinates,
             'venue_label'      => esc_html__('Venue name:', 'open-source-event-calendar'),
-            'venue'            => esc_attr($event->get('venue')),
+            'venue'            => $event->get('venue'),
             'address_label'    => esc_html__('Address:', 'open-source-event-calendar'),
-            'address'          => esc_attr($event->get('address')),
+            'address'          => $event->get('address'),
             'show_coordinates' => $show_coordinates,
             'coordinates_title'   => esc_html__('Coordinates', 'open-source-event-calendar'),
             'coordinates_label' => esc_html__('Use your own coordinates', 'open-source-event-calendar'),
@@ -391,10 +391,10 @@ class AdminPageAddEvent extends OsecBaseClass
             'longitude'        => (float) $event->get('longitude', ''),
             'show_map'         => (bool) $event->get('show_map'),
             'show_map_label'   => esc_html__('Show Map on event', 'open-source-event-calendar'),
-            'city'             => esc_html($event->get('city', '')),
-            'province'         => esc_html($event->get('province', '')),
-            'postal_code'      => esc_attr($event->get('postal_code', '')),
-            'country'          => esc_html($event->get('country', '')),
+            'city'             => $event->get('city', ''),
+            'province'         => $event->get('province', ''),
+            'postal_code'      => $event->get('postal_code', ''),
+            'country'          => $event->get('country', ''),
         ];
         ThemeLoader::factory($this->app)->get_file('box_event_location.twig', $args, true)->render();
     }
@@ -409,7 +409,7 @@ class AdminPageAddEvent extends OsecBaseClass
         $event = $this->get_event();
         $args    = [
             'cost_label' => esc_html__('Cost', 'open-source-event-calendar'),
-            'cost' => esc_attr($event->get('cost')),
+            'cost' => $event->get('cost'),
             'is_free_event_label' => esc_html__('Free event', 'open-source-event-calendar'),
             'hide_cost_label' => esc_html__('Hide event cost', 'open-source-event-calendar'),
             'is_free' => $event->is_free(),
@@ -417,7 +417,7 @@ class AdminPageAddEvent extends OsecBaseClass
             'ticket_url_label' => (!$event->is_free()) ?
                 esc_html__('Buy Tickets URL:', 'open-source-event-calendar')
                 : esc_html__('Registration URL:', 'open-source-event-calendar'),
-            'ticket_url' => esc_attr($event->get('ticket_url')),
+            'ticket_url' => $event->get('ticket_url'),
             'event'      => $event,
         ];
         ThemeLoader::factory($this->app)->get_file('box_event_cost.twig', $args, true)->render();
@@ -433,13 +433,13 @@ class AdminPageAddEvent extends OsecBaseClass
         $event = $this->get_event();
         $args    = [
             'contact_name_label' => esc_html__('Contact name:', 'open-source-event-calendar'),
-            'contact_name'  => esc_attr($event->get('contact_name')),
+            'contact_name'  => $event->get('contact_name'),
             'contact_phone_label' => esc_html__('Phone:', 'open-source-event-calendar'),
-            'contact_phone' => esc_attr($event->get('contact_phone')),
+            'contact_phone' => $event->get('contact_phone'),
             'contact_email_label' => esc_html__('E-mail:', 'open-source-event-calendar'),
-            'contact_email' => esc_attr($event->get('contact_email')),
+            'contact_email' => $event->get('contact_email'),
             'contact_url_label' => esc_html__('Website URL:', 'open-source-event-calendar'),
-            'contact_url'   => esc_attr($event->get('contact_url')),
+            'contact_url'   => $event->get('contact_url'),
             'event'         => $event,
         ];
         ThemeLoader::factory($this->app)->get_file('box_event_contact.twig', $args, true)->render();

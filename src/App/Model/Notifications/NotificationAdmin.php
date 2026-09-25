@@ -96,7 +96,7 @@ class NotificationAdmin extends NotificationAbstract
         $this->retrieve();
 
         $entity            = compact('message', 'class', 'importance', 'persistent');
-        $msg_key           = sha1(wp_json_encode($entity));
+        $msg_key           = self::message_key($message, $class, $importance, $persistent);
         $entity['msg_key'] = $msg_key;
         if (isset($this->messages['_messages'][$msg_key])) {
             return true;
@@ -107,6 +107,41 @@ class NotificationAdmin extends NotificationAbstract
                 continue;
             }
             $this->messages[$rcpt][$msg_key] = $msg_key;
+        }
+
+        return $this->write();
+    }
+
+    /**
+     * Key of a stored message, to remove() it later.
+     *
+     * Takes the same arguments as store().
+     *
+     * @param  string  $message  Actual message.
+     * @param  string  $class  Message box class.
+     * @param  int  $importance  Importance.
+     * @param  bool  $persistent  Persistent.
+     *
+     * @return string Message key.
+     */
+    public static function message_key($message, $class = 'updated', $importance = 0, $persistent = false): string
+    {
+        return sha1(wp_json_encode(compact('message', 'class', 'importance', 'persistent')));
+    }
+
+    /**
+     * Removes a stored message.
+     *
+     * @param  string  $msg_key  Key, see message_key().
+     *
+     * @return bool Success.
+     */
+    public function remove(string $msg_key): bool
+    {
+        $this->retrieve();
+        unset($this->messages['_messages'][$msg_key]);
+        foreach (array_keys($this->messages) as $dest) {
+            unset($this->messages[$dest][$msg_key]);
         }
 
         return $this->write();
@@ -276,12 +311,6 @@ class NotificationAdmin extends NotificationAbstract
             return;
         }
         // phpcs:ignore WordPress.Security.NonceVerification.Missing
-        $key = sanitize_text_field(wp_unslash($_POST['key']));
-        foreach ($this->messages as $dest) {
-            if (isset($this->messages[$dest][$key])) {
-                unset($this->messages[$dest][$key]);
-            }
-        }
-        $this->write();
+        $this->remove(sanitize_text_field(wp_unslash($_POST['key'])));
     }
 }
