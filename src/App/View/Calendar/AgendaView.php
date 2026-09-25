@@ -136,7 +136,7 @@ class AgendaView extends AbstractView
 
         if ($view_args['display_date_navigation'] !== 'false') {
             $pagination_links = $this->getPaginationLinks(
-                $view_args,
+                ['exact_date' => $exact_date] + $view_args,
                 $results['prev'],
                 $results['next'],
                 $results['date_first'],
@@ -387,13 +387,22 @@ class AgendaView extends AbstractView
             $args['request_format'] = 'json';
         }
 
-        $args['page_offset'] = $make_absolute ? 0 : -1;
-        $timeLimit = (new DT($date_first))->set_time(
-            $date_first->format('H'),
-            $date_first->format('i'),
-            $date_first->format('s') - 1
-        );
-        $args['exact_date']  = $timeLimit->format_to_gmt();
+        // Pages are counted from a fixed exact_date: page_offset -1, -2, … back and
+        // 1, 2, … forward, so back and forward always return the same pages. Moving
+        // exact_date to the page's first event instead, with an offset of ±1,
+        // repeated the same page on days with more events than one page holds.
+        $page_offset = (int)($args['page_offset'] ?? 0);
+
+        if ($make_absolute) {
+            $args['page_offset'] = 0;
+            $args['exact_date']  = (new DT($date_first))->set_time(
+                $date_first->format('H'),
+                $date_first->format('i'),
+                $date_first->format('s') - 1
+            )->format_to_gmt();
+        } else {
+            $args['page_offset'] = $page_offset - 1;
+        }
 
         $href = HtmlFactory::factory($this->app)
                            ->create_href_helper_instance($args);
@@ -412,13 +421,15 @@ class AgendaView extends AbstractView
             $title_short
         );
 
-        $args['page_offset'] = $make_absolute ? 0 : 1;
-        $timeLimit          = (new DT($date_last))->set_time(
-            $date_first->format('H'),
-            $date_first->format('i'),
-            (int)$date_first->format('s') + 1
-        );
-        $args['exact_date'] = $timeLimit->format_to_gmt();
+        if ($make_absolute) {
+            $args['exact_date'] = (new DT($date_last))->set_time(
+                $date_first->format('H'),
+                $date_first->format('i'),
+                (int)$date_first->format('s') + 1
+            )->format_to_gmt();
+        } else {
+            $args['page_offset'] = $page_offset + 1;
+        }
 
         $href = HtmlFactory::factory($this->app)
                            ->create_href_helper_instance($args);

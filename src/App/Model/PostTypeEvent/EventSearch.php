@@ -129,9 +129,11 @@ class EventSearch extends OsecBaseClass
         $wpml_where_particle = $localization_helper
             ->get_wpml_table_where();
 
+        // Pages 0, 1, … hold what ends after $time, pages -1, -2, … the rest, so an
+        // event in progress at $time is on page 0 only.
         $filter_date_clause = ($page_offset >= 0)
             ? 'i.end > %d '
-            : 'i.start < %d ';
+            : 'i.end <= %d ';
         $order_direction    = ($page_offset >= 0) ? 'ASC' : 'DESC';
         if (false !== $last_day) {
             if (0 === $last_day) {
