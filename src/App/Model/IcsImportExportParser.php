@@ -113,6 +113,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      */
     public function add_vcalendar_events_to_db(Vcalendar $v, array $args): array
     {
+        // The parser is shared within a process, e.g. by the cron import of all
+        // feeds, so overrides of an earlier calendar must not be processed again.
+        $this->override_exclussions = [];
         $output         = [
             'count'            => 0,
             'events_to_delete' => $args['events_in_db'] ?? 0,

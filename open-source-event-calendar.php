@@ -98,4 +98,7 @@ if (defined('WP_CLI') && WP_CLI) {
 
     require_once __DIR__ . '/src/WpCli/PrepareRelease.php';
     WP_CLI::add_command('osec', '\Osec\WpCli\PrepareRelease');
+
+    WP_CLI::add_command('osec event', \Osec\WpCli\EventCommand::class);
+    WP_CLI::add_command('osec feed', \Osec\WpCli\FeedCommand::class);
 }

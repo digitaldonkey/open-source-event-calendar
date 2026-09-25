@@ -22,6 +22,7 @@ This plugin is open source software in the traditional sense. I pledge this plug
 - [Blocks & Shortcodes](#blocks)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [WP-CLI](#wp-cli)
 - [Fork Notice](#this-is-a-fork)
 - [Migration Notes](#migration-notes)
 - [Development & Support](#development--support)
@@ -122,6 +123,47 @@ Install as any other plugin, or from GitHub.
 Copy [constants-local.php.example](https://raw.githubusercontent.com/digitaldonkey/open-source-event-calendar/refs/heads/master/constants-local.php.example) and save as `constants-local.php`
 
 To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA', true);`
+
+---
+
+## WP-CLI
+
+**Rebuild recurring event instances.** Instances are only written when an event is saved. After an update that fixes recurrence, regenerate them. Rows left behind by deleted event posts are removed along the way.
+
+    wp osec event regenerate --dry-run              # what would happen
+    wp osec event regenerate --yes                  # all events
+    wp osec event regenerate 123 456                # some events
+    wp osec event regenerate --feed=3               # events of one feed
+    wp osec event regenerate --yes --resave         # save like the editor does, firing all save hooks
+    wp osec event regenerate --yes --start-after=4711   # resume an interrupted run
+
+Events are processed in batches (`--batch-size`, default 500). Every batch line prints the `--start-after` value to resume with, so any number of events can be processed.
+
+**Update feeds now**, instead of waiting for the scheduled import. Problems are printed to the console instead of being stored as admin notices.
+
+    wp osec feed list
+    wp osec feed update --yes                       # all feeds
+    wp osec feed update 3                           # one feed
+    wp osec feed update 3 --force                   # break the lock a crashed import left behind
+
+Only use `--force` when no other import of that feed is running, or events may be imported twice. A feed is imported in one go: a feed of 10,000 events needs about 200 MB of PHP memory (`php -d memory_limit=256M $(which wp) osec feed update 3`).
+
+To give a slow feed server more time than the default 120 seconds, use WordPress' `http_request_args` filter:
+
+```php
+add_filter('http_request_args', function ($args, $url) {
+    if (str_starts_with($url, 'https://slow.example.org/')) {
+        $args['timeout'] = 300;
+    }
+    return $args;
+}, 10, 2);
+```
+
+The commands run per site. On multisite, loop over the sites:
+
+    wp site list --field=url | xargs -I{} wp --url={} osec event regenerate --yes
+
+Exit code is 1 if any event or feed failed.
 
 ---
 

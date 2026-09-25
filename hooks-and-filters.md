@@ -1303,6 +1303,61 @@ do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
 
 @file **../src/App/Model/Notifications/NotificationAdmin.php**
 
+### osec_admin_notification_pre_store <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Short-circuit storing an admin notice.
+
+```php
+add_filter('osec_admin_notification_pre_store', $pre $message $class $importance $recipients $persistent);
+```
+
+#### Description
+
+
+Return anything but null to handle the message yourself; it is then not stored and store() returns that value. The WP-CLI commands use this to print notices to the console instead of wp-admin, for the length of a run. A listener returning non-null on every call hides all admin notices of the calendar, including failing feeds - keep it narrow.
+
+#### Parameters
+
+
+ - **$pre** <span style="color:crimson"> </span> Null to store the message as usual.
+ - **$message** <span style="color:crimson"> </span> Message, already escaped for HTML output.
+ - **$class** <span style="color:crimson"> </span> Message box class, e.g. 'error' or 'updated'.
+ - **$importance** <span style="color:crimson"> </span> Importance, see store().
+ - **$recipients** <span style="color:crimson"> </span> List of message recipients.
+ - **$persistent** <span style="color:crimson"> </span> Whether it must be dismissed by the user.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Short-circuit storing an admin notice.
+ *
+ * Return anything but null to handle the message yourself; it is then not
+ * stored and store() returns that value. The WP-CLI commands use this to
+ * print notices to the console instead of wp-admin, for the length of a run.
+ * A listener returning non-null on every call hides all admin notices of
+ * the calendar, including failing feeds - keep it narrow.
+ *
+ * @since 1.1.15
+ *
+ * @param  mixed  $pre  Null to store the message as usual.
+ * @param  string  $message  Message, already escaped for HTML output.
+ * @param  string  $class  Message box class, e.g. 'error' or 'updated'.
+ * @param  int  $importance  Importance, see store().
+ * @param  array  $recipients  List of message recipients.
+ * @param  bool  $persistent  Whether it must be dismissed by the user.
+ *
+ * @file src/App/Model/Notifications/NotificationAdmin.php
+ */
+add_filter('osec_admin_notification_pre_store', $pre $message $class $importance $recipients $persistent);
+```
+
+</details>
+
+
 ### osec_notification_label <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -6583,6 +6638,61 @@ do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
 
 
 @file **../src/App/Model/Notifications/NotificationAdmin.php**
+
+### osec_admin_notification_pre_store <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Short-circuit storing an admin notice.
+
+```php
+add_filter('osec_admin_notification_pre_store', $pre $message $class $importance $recipients $persistent);
+```
+
+#### Description
+
+
+Return anything but null to handle the message yourself; it is then not stored and store() returns that value. The WP-CLI commands use this to print notices to the console instead of wp-admin, for the length of a run. A listener returning non-null on every call hides all admin notices of the calendar, including failing feeds - keep it narrow.
+
+#### Parameters
+
+
+ - **$pre** <span style="color:crimson"> </span> Null to store the message as usual.
+ - **$message** <span style="color:crimson"> </span> Message, already escaped for HTML output.
+ - **$class** <span style="color:crimson"> </span> Message box class, e.g. 'error' or 'updated'.
+ - **$importance** <span style="color:crimson"> </span> Importance, see store().
+ - **$recipients** <span style="color:crimson"> </span> List of message recipients.
+ - **$persistent** <span style="color:crimson"> </span> Whether it must be dismissed by the user.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Short-circuit storing an admin notice.
+ *
+ * Return anything but null to handle the message yourself; it is then not
+ * stored and store() returns that value. The WP-CLI commands use this to
+ * print notices to the console instead of wp-admin, for the length of a run.
+ * A listener returning non-null on every call hides all admin notices of
+ * the calendar, including failing feeds - keep it narrow.
+ *
+ * @since 1.1.15
+ *
+ * @param  mixed  $pre  Null to store the message as usual.
+ * @param  string  $message  Message, already escaped for HTML output.
+ * @param  string  $class  Message box class, e.g. 'error' or 'updated'.
+ * @param  int  $importance  Importance, see store().
+ * @param  array  $recipients  List of message recipients.
+ * @param  bool  $persistent  Whether it must be dismissed by the user.
+ *
+ * @file src/App/Model/Notifications/NotificationAdmin.php
+ */
+add_filter('osec_admin_notification_pre_store', $pre $message $class $importance $recipients $persistent);
+```
+
+</details>
+
 
 ### osec_notification_label <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 

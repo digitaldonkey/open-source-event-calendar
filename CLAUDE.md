@@ -162,7 +162,8 @@ Do not access production databases.
 - **Instances are only (re)built by `Event::save()` → `EventInstance::recreate()`.** Nothing regenerates them
   on read, so a fix to the generator does **not** repair events already in the database - they stay wrong
   until each is re-saved or its ICS feed re-imported. Expect correct and broken events side by side on the
-  same install, and re-save before judging whether a recurrence fix worked.
+  same install, and re-save before judging whether a recurrence fix worked. `wp osec event regenerate` rebuilds them
+  in bulk (keyset batches, flat memory, resumable with `--start-after`) and removes rows of deleted posts.
 - **Near-midnight start times are the edge case that matters.** An hour of drift is only *visible* when it
   crosses a calendar-day boundary, so bugs here hide unless the start time is within an hour of midnight:
   a summer-created event at `[00:00, 01:00)` doubles the autumn transition day; a winter-created one at
@@ -235,6 +236,9 @@ that needs to tell an admin something goes through it:
   `esc_html()` *before* calling `store()`, never at render time.
 - Dispatch is delayed by design: `store()` during a `save_post` or a cron run, and the notice appears on the
   next admin page load.
+- The `osec_admin_notification_pre_store` filter short-circuits `store()`. The WP-CLI commands hook it for
+  the length of a run (`Osec\WpCli\PrintsAdminNotices`) to print instead of store. Keep it scoped like that:
+  `wp cron event run` is also WP-CLI, and a global redirect would send nightly feed failures to a cron log.
 
 **Anything that runs without a browser to answer to must use it.** Scheduled feed imports call
 `FeedsController::update_ics($feed_id)` with `$ajax === false`, and that return value — error message and all —
@@ -469,6 +473,11 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
 - **`phpcs.xml` excludes `/tests/`**, so GrumPHP and CI never lint test files. Passing a test file to
   `vendor/bin/phpcs` explicitly still checks it; worth doing for a new test, but a style slip there will not
   fail the build
+- **Two DB traps in tests.** `$app->db->update()` does **not** add the table prefix (`insert()` and `delete()`
+  do), so `update(OSEC_DB__EVENTS, …)` silently hits a missing table - pass `get_table_name()`.
+  `ExecutionLimitController::acquire()` runs its own `COMMIT`, which ends the test framework's transaction, so
+  anything a test writes before a feed import survives the rollback - clean up after `parent::tear_down()` and
+  `COMMIT` (see `tests/Unit/App/Controller/FeedsControllerLockTest.php`)
 - **No skipped tests**: `phpunit.xml` has `failOnSkipped`/`failOnRisky`/`failOnIncomplete` — "OK, but … skipped" exits 1 and fails CI. Check the exit code, don't use `markTestSkipped()` for multisite-only variants (CI is single site), and run CI's command `vendor/bin/phpunit tests` (see `TESTING.md`)
 - **A calendar page must be set for any testing**: "no calendar page set" (`calendar_page_id` empty or pointing to a missing page) is a setup error, not a code bug. wp-admin shows the "installed, but has not been configured" notice (`EnvironmentCheck`). Don't fix or work around problems that only derive from that state; check the setup first when links, URLs or routing look wrong.
   - **PHPUnit**: `TestBase::set_up()` creates a published page per test and sets `calendar_page_id` plus the `CacheMemory` `calendar_base_page`. It can't be created once in the bootstrap, because the WP test lib's `_delete_all_data()` deletes all posts after each test class. Tests not extending `TestBase` must do the same.
