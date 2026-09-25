@@ -304,7 +304,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     if ($allday) {
                         $exdate .= gmdate('Ymd', $item->format('U'));
                     } else {
-                        $exdate .= gmdate('Ymd\THis\Z', $item->format('U'));
+                        $exdate .= $this->exclusion_date((int)$item->format('U'), $event_timezone);
                     }
                     if ($i !== $last_id) {
                         $exdate .= ',';
