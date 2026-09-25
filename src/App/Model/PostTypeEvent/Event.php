@@ -888,9 +888,14 @@ class Event extends OsecBaseClass
         $this->entity = clone $this->entity;
     }
 
+    /**
+     * Dates without a rule are stored as the rule 'RDATE=<dates>', the editor's
+     * "custom dates". Next to a real rule, as feeds send them, both are kept: the
+     * instance generator and the export read the dates on their own.
+     */
     protected function handlePropertyConstruct_recurrence_dates($value)
     {
-        if ($value) {
+        if ($value && $this->is_date_list_rule('recurrence_rules', 'RDATE=')) {
             $this->entity->set('recurrence_rules', 'RDATE=' . $value);
         }
 
@@ -899,11 +904,21 @@ class Event extends OsecBaseClass
 
     protected function handlePropertyConstruct_exception_dates($value)
     {
-        if ($value) {
+        if ($value && $this->is_date_list_rule('exception_rules', 'EXDATE=')) {
             $this->entity->set('exception_rules', 'EXDATE=' . $value);
         }
 
         return $value;
+    }
+
+    /**
+     * @return bool Whether the rule property is empty or only holds a date list.
+     */
+    private function is_date_list_rule(string $property, string $prefix): bool
+    {
+        $rule = (string)$this->entity->get($property);
+
+        return '' === $rule || str_starts_with($rule, $prefix);
     }
 
     protected function handlePropertyDestruct_instant_event($value)

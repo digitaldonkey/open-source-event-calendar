@@ -49,6 +49,13 @@ class IcsExdateTest extends TestBase
             'New York evening, EXDATE in the series\' TZID'      => [
                 'America/New_York', '200000', ';TZID=America/New_York:20250114T200000', $york,
             ],
+            'New York evening, EXDATE as a date'                 => [
+                'America/New_York', '200000', ';VALUE=DATE:20250114', $york,
+            ],
+            'New York after midnight, EXDATE floating'           => [
+                'America/New_York', '003000', ':20250114T003000',
+                ['2025-01-07 00:30', '2025-01-21 00:30', '2025-01-28 00:30'],
+            ],
             'Berlin midday, EXDATE in UTC'                       => [
                 'Europe/Berlin', '120000', ':20250114T110000Z',
                 ['2025-01-07 12:00', '2025-01-21 12:00', '2025-01-28 12:00'],
