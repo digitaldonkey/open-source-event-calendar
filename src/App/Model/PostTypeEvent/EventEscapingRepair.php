@@ -27,7 +27,7 @@ class EventEscapingRepair extends OsecBaseClass
         'province'      => 'text',
         'postal_code'   => 'text',
         'country'       => 'text',
-        'cost'          => 'text',
+        'cost'          => 'cost',
         'ticket_url'    => 'text',
         'contact_name'  => 'text',
         'contact_phone' => 'text',
@@ -51,6 +51,7 @@ class EventEscapingRepair extends OsecBaseClass
     protected const PATTERNS = [
         'text'  => ['&amp;', '&quot;', '&#039;', '&#39;', '&lt;', '&gt;'],
         'email' => ['&amp', '&#039', '&#39'],
+        'cost'  => ['&amp;', '&quot;', '&#039;', '&#39;', '&lt;', '&gt;'],
     ];
 
     /**
@@ -86,16 +87,50 @@ class EventEscapingRepair extends OsecBaseClass
     }
 
     /**
+     * Undoes one level of escaping of the cost inside its storage format.
+     *
+     * The column holds JSON (`{"cost":"5 &amp; up","is_free":false,...}`, see
+     * Event::handlePropertyDestruct_cost()). Decoding the whole string would
+     * turn `&quot;` into `"` and break the JSON. Legacy serialized values are
+     * left alone, plain values are decoded as text.
+     *
+     * @param  string  $value  Stored value.
+     *
+     * @return string Decoded value.
+     */
+    public static function decode_cost(string $value): string
+    {
+        $data = json_decode($value, true);
+        if (is_array($data)) {
+            if (! isset($data['cost']) || ! is_string($data['cost'])) {
+                return $value;
+            }
+            $data['cost'] = self::decode_text($data['cost']);
+
+            return (string)wp_json_encode($data);
+        }
+        if (is_serialized($value)) {
+            return $value;
+        }
+
+        return self::decode_text($value);
+    }
+
+    /**
      * Decodes a value by rule.
      *
-     * @param  string  $rule  'text' or 'email'.
+     * @param  string  $rule  'text', 'email' or 'cost'.
      * @param  string  $value  Stored value.
      *
      * @return string Decoded value.
      */
     public static function decode(string $rule, string $value): string
     {
-        return 'email' === $rule ? self::decode_email($value) : self::decode_text($value);
+        return match ($rule) {
+            'email' => self::decode_email($value),
+            'cost'  => self::decode_cost($value),
+            default => self::decode_text($value),
+        };
     }
 
     /**

@@ -61,6 +61,32 @@ class EventEscapingRepairTest extends TestBase
         ];
     }
 
+    /**
+     * The cost column stores JSON, only the value inside is decoded.
+     *
+     * @dataProvider provide_cost
+     */
+    public function test_decode_cost(string $stored, string $expected)
+    {
+        $this->assertSame($expected, EventEscapingRepair::decode_cost($stored));
+    }
+
+    public function provide_cost(): array
+    {
+        return [
+            'json'       => [
+                '{"cost":"5 \\u20ac &quot;early&quot; &amp; up","is_free":false,"hide_cost":false}',
+                '{"cost":"5 \\u20ac \\"early\\" & up","is_free":false,"hide_cost":false}',
+            ],
+            'json clean' => [
+                '{"cost":"5 & up","is_free":false,"hide_cost":false}',
+                '{"cost":"5 & up","is_free":false,"hide_cost":false}',
+            ],
+            'serialized' => ['a:1:{s:4:"cost";s:9:"5 &amp; up";}', 'a:1:{s:4:"cost";s:9:"5 &amp; up";}'],
+            'plain'      => ['5 &amp; up', '5 & up'],
+        ];
+    }
+
     public function test_find_and_repair_events_and_feeds()
     {
         global $osec_app;
@@ -71,6 +97,7 @@ class EventEscapingRepairTest extends TestBase
             'address'       => 'Tom &amp; Jerry Street 1',
             'ticket_url'    => 'https://example.com/buy?event=1&amp;ref=cal',
             'contact_email' => 'o&amp#039brien@example.com',
+            'cost'          => '5 &quot;early bird&quot;',
         ]);
         $clean   = $this->create_event([
             'venue'         => 'D&D Bar',
@@ -94,6 +121,7 @@ class EventEscapingRepairTest extends TestBase
             [
                 ['events', $corrupt, 'venue', 'D&D Bar'],
                 ['events', $corrupt, 'address', 'Tom & Jerry Street 1'],
+                ['events', $corrupt, 'cost', '{"cost":"5 \\"early bird\\"","is_free":false,"hide_cost":false}'],
                 ['events', $corrupt, 'ticket_url', 'https://example.com/buy?event=1&ref=cal'],
                 ['events', $corrupt, 'contact_email', 'o\'brien@example.com'],
                 ['feeds', $feed_id, 'feed_url', 'https://example.com/cal.ics?a=1&b=2'],
@@ -109,6 +137,7 @@ class EventEscapingRepairTest extends TestBase
         $event = new Event($osec_app, $corrupt);
         $this->assertSame('D&D Bar', $event->get('venue'));
         $this->assertSame('o\'brien@example.com', $event->get('contact_email'));
+        $this->assertSame('5 "early bird"', $event->get('cost'));
         $this->assertSame('D&D Bar', (new Event($osec_app, $clean))->get('venue'));
     }
 
