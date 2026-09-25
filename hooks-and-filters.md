@@ -1821,16 +1821,29 @@ do_action('osec_recurrence_rule_invalid', $rrule $message);
 ### osec_filter_distinct_types_logic <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Mess around with some logic here
+How calendar filters of different types combine.
 
 ```php
 add_filter('osec_filter_distinct_types_logic', $default);
 ```
 
+#### Description
+
+
+A calendar can be filtered by categories, tags, authors, events and instances (e.g. `cat_id` and `tag_id` in the shortcode, or the filters of the block and the feed URL). Within one type an event matches any of the given values. This filter decides how the types combine with each other.
+
+
+
+With 'AND' (the default) an event must match every filter type given, e.g. be in one of the categories and have one of the tags. With 'OR' it must match at least one of them. Either way only published events in the requested date range are shown, and private ones only to users allowed to read them.
+
+
+
+To show events in category 12 or with tag 34 with `[osec cat_id="12" tag_id="34"]`, return 'OR': `add_filter('osec_filter_distinct_types_logic', fn() => 'OR');`
+
 #### Parameters
 
 
- - **$default** <span style="color:crimson"> </span> Default distinct type logic.
+ - **$default** <span style="color:crimson"> </span> 'AND'. Return 'AND' or 'OR'; anything else is treated as 'AND'.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -1838,11 +1851,25 @@ add_filter('osec_filter_distinct_types_logic', $default);
 
 ```php
 /**
- * Mess around with some logic here
+ * How calendar filters of different types combine.
  *
- * @since too long to understand
+ * A calendar can be filtered by categories, tags, authors, events and
+ * instances (e.g. `cat_id` and `tag_id` in the shortcode, or the filters of
+ * the block and the feed URL). Within one type an event matches any of the
+ * given values. This filter decides how the types combine with each other.
  *
- * @param  array  $default  Default distinct type logic.
+ * With 'AND' (the default) an event must match every filter type given, e.g.
+ * be in one of the categories and have one of the tags. With 'OR' it must
+ * match at least one of them. Either way only published events in the
+ * requested date range are shown, and private ones only to users allowed
+ * to read them.
+ *
+ * To show events in category 12 or with tag 34 with `[osec cat_id="12" tag_id="34"]`,
+ * return 'OR': `add_filter('osec_filter_distinct_types_logic', fn() => 'OR');`
+ *
+ * @since 1.0
+ *
+ * @param  string  $default  'AND'. Return 'AND' or 'OR'; anything else is treated as 'AND'.
  *
  * @see EventSearch->getFilterSql()
  *
@@ -7102,16 +7129,29 @@ do_action('osec_recurrence_rule_invalid', $rrule $message);
 ### osec_filter_distinct_types_logic <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Mess around with some logic here
+How calendar filters of different types combine.
 
 ```php
 add_filter('osec_filter_distinct_types_logic', $default);
 ```
 
+#### Description
+
+
+A calendar can be filtered by categories, tags, authors, events and instances (e.g. `cat_id` and `tag_id` in the shortcode, or the filters of the block and the feed URL). Within one type an event matches any of the given values. This filter decides how the types combine with each other.
+
+
+
+With 'AND' (the default) an event must match every filter type given, e.g. be in one of the categories and have one of the tags. With 'OR' it must match at least one of them. Either way only published events in the requested date range are shown, and private ones only to users allowed to read them.
+
+
+
+To show events in category 12 or with tag 34 with `[osec cat_id="12" tag_id="34"]`, return 'OR': `add_filter('osec_filter_distinct_types_logic', fn() => 'OR');`
+
 #### Parameters
 
 
- - **$default** <span style="color:crimson"> </span> Default distinct type logic.
+ - **$default** <span style="color:crimson"> </span> 'AND'. Return 'AND' or 'OR'; anything else is treated as 'AND'.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -7119,11 +7159,25 @@ add_filter('osec_filter_distinct_types_logic', $default);
 
 ```php
 /**
- * Mess around with some logic here
+ * How calendar filters of different types combine.
  *
- * @since too long to understand
+ * A calendar can be filtered by categories, tags, authors, events and
+ * instances (e.g. `cat_id` and `tag_id` in the shortcode, or the filters of
+ * the block and the feed URL). Within one type an event matches any of the
+ * given values. This filter decides how the types combine with each other.
  *
- * @param  array  $default  Default distinct type logic.
+ * With 'AND' (the default) an event must match every filter type given, e.g.
+ * be in one of the categories and have one of the tags. With 'OR' it must
+ * match at least one of them. Either way only published events in the
+ * requested date range are shown, and private ones only to users allowed
+ * to read them.
+ *
+ * To show events in category 12 or with tag 34 with `[osec cat_id="12" tag_id="34"]`,
+ * return 'OR': `add_filter('osec_filter_distinct_types_logic', fn() => 'OR');`
+ *
+ * @since 1.0
+ *
+ * @param  string  $default  'AND'. Return 'AND' or 'OR'; anything else is treated as 'AND'.
  *
  * @see EventSearch->getFilterSql()
  *

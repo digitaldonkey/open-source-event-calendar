@@ -343,10 +343,13 @@ class EventSearch extends OsecBaseClass
         $filter_where = array_filter($filter_where);
         $filter_join  = implode(' ', $filter_join);
         if (count($filter_where) > 0) {
+            // Callers append this to their WHERE. The outer brackets keep an OR
+            // between the filters from also escaping the date range and the post
+            // status, since AND binds tighter than OR.
             $operator     = $this->get_distinct_types_operator();
-            $filter_where = $operator . '( ' .
+            $filter_where = 'AND ( ( ' .
                             implode(' ) ' . $operator . ' ( ', $filter_where) .
-                            ' ) ';
+                            ' ) ) ';
         } else {
             $filter_where = '';
         }
@@ -367,11 +370,25 @@ class EventSearch extends OsecBaseClass
         ];
         $default = key($operators);
         /**
-         * Mess around with some logic here
+         * How calendar filters of different types combine.
          *
-         * @since too long to understand
+         * A calendar can be filtered by categories, tags, authors, events and
+         * instances (e.g. `cat_id` and `tag_id` in the shortcode, or the filters of
+         * the block and the feed URL). Within one type an event matches any of the
+         * given values. This filter decides how the types combine with each other.
          *
-         * @param  array  $default  Default distinct type logic.
+         * With 'AND' (the default) an event must match every filter type given, e.g.
+         * be in one of the categories and have one of the tags. With 'OR' it must
+         * match at least one of them. Either way only published events in the
+         * requested date range are shown, and private ones only to users allowed
+         * to read them.
+         *
+         * To show events in category 12 or with tag 34 with `[osec cat_id="12" tag_id="34"]`,
+         * return 'OR': `add_filter('osec_filter_distinct_types_logic', fn() => 'OR');`
+         *
+         * @since 1.0
+         *
+         * @param  string  $default  'AND'. Return 'AND' or 'OR'; anything else is treated as 'AND'.
          *
          * @see EventSearch->getFilterSql()
          */
