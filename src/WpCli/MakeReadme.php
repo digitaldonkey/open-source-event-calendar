@@ -37,8 +37,6 @@ class MakeReadme
      *
      *     wp osec make_readme
      *     wp osec make_readme --check
-     *
-     * @when before_wp_load
      */
     public function make_readme($args = [], $assoc_args = [])
     {

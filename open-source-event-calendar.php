@@ -93,11 +93,8 @@ register_deactivation_hook(
 );
 
 if (defined('WP_CLI') && WP_CLI) {
-    require_once __DIR__ . '/src/WpCli/MakeReadme.php';
-    WP_CLI::add_command('osec', '\Osec\WpCli\MakeReadme');
-
-    require_once __DIR__ . '/src/WpCli/PrepareRelease.php';
-    WP_CLI::add_command('osec', '\Osec\WpCli\PrepareRelease');
+    WP_CLI::add_command('osec', \Osec\WpCli\MakeReadme::class);
+    WP_CLI::add_command('osec', \Osec\WpCli\PrepareRelease::class);
 
     WP_CLI::add_command('osec event', \Osec\WpCli\EventCommand::class);
     WP_CLI::add_command('osec feed', \Osec\WpCli\FeedCommand::class);
