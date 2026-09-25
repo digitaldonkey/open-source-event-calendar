@@ -468,6 +468,7 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
 - **PHPUnit**: `ddev phpunit` (or `ddev phpunit --filter test_name ./tests/Unit/...`)
 - **Integration (Mocha/Selenium)**: `cd integration_tests && npm run test`
 - **Code quality**: `ddev composer run-script phpcs` or `ddev run-script phpcs`
+- **WordPress plugin-check**: `bin/plugin-check.sh` (~13 s; ERROR fails, `--strict` also fails on WARNING). Deliberately **not** in `git_pre_commit` - it runs in `all_tests`, `prepare_release` and CI
 - **GrumPHP**: `vendor/bin/grumphp run --testsuite=git_pre_commit` (what the pre-commit hook runs)
 - **The Mocha/Selenium integration suite is destructive to the dev site.** It installs/uninstalls the plugin,
   exercises the `OSEC_UNINSTALL_PLUGIN_DATA` purge, creates its own `Calendar` page, and **trashes every
@@ -520,7 +521,7 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
 
 ## Release & Build Tooling
 
-- Anything shipped in a release **must be committed to git first**; `static_release_job` gates four generated files - see the inventory below for which, and for the three it does *not* cover
+- Two jobs gate a release: `static_release_job` (four generated files - see the inventory below for which, and for the three it does *not* cover) and `release_test_job`, which runs WordPress plugin-check against the built zip. Anything shipped **must be committed to git first**, or the first job's `git status` checks fail
 - `README.txt` is generated from `README.md` — never hand-edit it: `ddev wp osec make_readme`
 - `hooks-and-filters.md` is generated from PHPDoc by the separate [`hookster_markdown`](https://github.com/digitaldonkey/hookster_markdown) tool and must be regenerated before each release:
   ```bash
@@ -560,12 +561,46 @@ uncommitted edit is silently restored and the tree comes back clean. The stale c
 - **`calendar_block/build/`** - tracked output of `wp-scripts build` from `calendar_block/src/`. In sync
   today (both last touched by `1d6c041f`), but nothing stops the next `src/` edit shipping a stale bundle.
 
-**To probe a gate, name the branch `release-…`.** `static_release_job` is filtered to
-`only: /^(master|release-.*)$/`, so a probe branch named anything else passes by never running the job -
-the same false pass one level up. Use **one branch per gate** (`set -e` hides every gate after the first
-failure), and trim the workflow to `build -> static_job -> static_release_job` to keep the probe off the
-Selenium matrix. Nothing can publish from such a branch: all three deploy jobs are `only: /master/` *and*
-carry a `circleci-agent step halt` guard.
+**A probe branch's name must match the job's own filter, and the right name differs per job** - get it
+wrong and the probe passes by never running the gate, the same false pass one level up.
+`static_release_job` is filtered to `only: /^(master|release-.*)$/`, so **probe it from a `release-…`
+branch**. Use **one branch per gate** (`set -e` hides every gate after the first failure), and trim the
+workflow to `build -> static_job -> static_release_job` to keep the probe off the Selenium matrix. For the
+plugin-check gate the rule inverts - see below. Nothing can publish from such a branch: all three deploy
+jobs are `only: /master/` *and* carry a `circleci-agent step halt` guard.
+
+### The other release gate: plugin-check in `release_test_job`
+
+`bin/plugin-check.sh` (run locally, by GrumPHP's `all_tests` / `prepare_release`, and by
+`release_test_job`'s "WordPress plugin-check (release build)" step against the unzipped release).
+**`wp plugin check` always exits 0**, so the wrapper is what makes it a gate: ERROR fails, WARNING only
+prints unless `--strict`. Mechanics, filtering and the one known false positive are in `TESTING.md`.
+
+Verified in both directions (2026-09-24):
+
+- green - `a5627205` on `feature/plugin-check-gate`, run `0b4e26c9…`: step `exit=0`,
+  `0 error(s), 1 warning(s)`. This also settles that the WP-CLI 3.0 dev build at `$WP_CLI` registers
+  plugin-check's command;
+- red - probe `ci-probe-plugin-check` (`6e27471b`), run `b67fed37…`: one line putting
+  `leaflet.js` back on `https://unpkg.com/` made the step `exit=1` with
+  `PluginCheck.CodeAnalysis.Offloading.OffloadedContent` and failed the job.
+
+**Do not name this probe branch `release-…`.** `release_test_job` (8.2) carries **no** branch filter,
+while `release_test_job_php_8_{3,4,5}` are `master|release-*` - a `release-…` name buys four Selenium
+jobs instead of one.
+
+Two things a probe of *this* gate must get right, or it proves nothing:
+
+- **inject into a file that ships** (`src/`, i.e. in `OSEC_RELEASE_WHITE_LIST` and not in `.distignore`) -
+  the wrapper drops findings in files the zip never contains, so a probe in `tests/` or `bin/` is filtered
+  away. Verify by rebuilding the release tree locally and grepping for the line;
+- **keep `phpcs` and `phpunit` green**, because `create_release_job` requires `static_job` and `db_job`;
+  a probe that trips one of those never reaches the gate. A probe commit therefore still deserves a
+  `phpcs` run.
+
+Cost is small: once the step fails, the later steps are skipped, so Apache and `node/install-packages`
+never run and the `when: always` integration step dies in seconds for lack of `node_modules` - no Selenium
+time. The whole red run took 3m07s.
 
 
 ## CircleCI Behavior by Branch
