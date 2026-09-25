@@ -50,6 +50,7 @@ class KsesHelper extends OsecBaseClass
                     'itemtype'    => true,
                     'tabindex'    => true,
                     'content'     => true,
+                    'hidden'      => true,
                 ],
                 'a'      => [
                     'class'               => true,
