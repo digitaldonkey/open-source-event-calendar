@@ -41,12 +41,15 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
     protected ?RepeatRuleToText $ruleFilter = null;
 
     /**
-     * @var array $override_exclussions Format is [UID][...].
+     * @var array $override_exclussions Format is [UID][] = ['post_id' => int, 'recurrence_id' => int|string|null].
      *
      * Overriding events (same UID) may a REOCURRENCE-ID
      * containing a date, to alter the provided FREQ.
      * Thus events having a REOCURRENCE-ID need to get into
      * the exclude list of the parent (repeating) event.
+     *
+     * Holds one entry per imported event until the calendar is done, so only
+     * IDs and dates: keeping the Event objects cost about 100 MB per 10,000 events.
      */
     protected $override_exclussions = [];
 
@@ -192,8 +195,13 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         add_action('osec_recurrence_rule_invalid', $on_invalid);
 
         // Walk events.
+        $walked = 0;
         foreach ($events as $e) {
             /* @var \Kigkonsult\Icalcreator\Vevent $e Vevent component. */
+            ++$walked;
+            if (0 === $walked % 500) {
+                $this->release_runtime_cache();
+            }
 
             /* @var array $data Data to create Event */
             $data = $this->process_event_date_fields(
@@ -296,7 +304,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     if ($allday) {
                         $exdate .= gmdate('Ymd', $item->format('U'));
                     } else {
-                        $exdate .= gmdate('Ymd\THis\Z', $item->format('U'));
+                        $exdate .= $this->exclusion_date((int)$item->format('U'), $event_timezone);
                     }
                     if ($i !== $last_id) {
                         $exdate .= ',';
@@ -546,21 +554,11 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
              * it must be included in parent event exclude list.
              */
             $recurrence_id = $e->getRecurrenceid();
-            $exclude_date = null;
-            if ($recurrence_id instanceof \DateTime) {
-                if ($allday) {
-                    $exclude_date = $recurrence_id->format('Ymd');
-                } else {
-                    $exclude_date = $recurrence_id->format('Ymd\THms\Z');
-                    // T%02d%02d%02d%s
-                }
-                $exclusions[$e->getUid()][] = $exdate;
-            }
-
             $this->add_parent_child_relations(
                 $e->getUid(),
-                $event,
-                $exclude_date,
+                (int)$event->get('post_id'),
+                $recurrence_id instanceof DateTime ? $recurrence_id : null,
+                $allday
             );
 
             // End event processing.
@@ -647,73 +645,112 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         }
     }
 
-    protected function add_parent_child_relations(string $uid, Event $event, ?string $recurrence_id): void {
-        if (!isset($this->override_exclussions[$uid])) {
-            $this->override_exclussions[$uid] = [];
+    /**
+     * Empties the in-memory object cache during a long import.
+     *
+     * Saving an event caches its post and five term queries, which nothing
+     * evicts within one request: about 70 MB per 10,000 events. Only a cache
+     * declaring a runtime-only flush is flushed, which is WordPress' own cache
+     * and drop-ins that implement it; a persistent cache is never wiped.
+     */
+    protected function release_runtime_cache(): void
+    {
+        if (wp_cache_supports('flush_runtime')) {
+            wp_cache_flush_runtime();
+        }
+    }
+
+    /**
+     * Remembers an imported event for process_parent_child_relations().
+     *
+     * @param  string  $uid  UID shared by a series and its overrides.
+     * @param  int  $post_id  Post ID of the imported event.
+     * @param  DateTime|null  $recurrence_id  RECURRENCE-ID, null for the series itself.
+     * @param  bool  $allday  All-day dates are kept as written, times as an instant.
+     */
+    protected function add_parent_child_relations(
+        string $uid,
+        int $post_id,
+        ?DateTime $recurrence_id,
+        bool $allday
+    ): void {
+        if (null !== $recurrence_id) {
+            $recurrence_id = $allday ? $recurrence_id->format('Ymd') : (int)$recurrence_id->format('U');
         }
         $this->override_exclussions[$uid][] = [
-            'event' => $event,
+            'post_id'       => $post_id,
             'recurrence_id' => $recurrence_id,
         ];
     }
 
-    protected function process_parent_child_relations(): void {
-        foreach ($this->override_exclussions as $uid => $items) {
-            /* @var ?Event $parent_event  This is the Parent Event */
-            $parent_event = null;
-            $children = [];
-            $child_exclude_dates = '';
-
-            if (count($items) > 1) {
-                foreach ($items as $item) {
-                    if ($item['recurrence_id']) {
-                        // Child
-                        $children[] = $item;
-                        $child_exclude_dates .= $item['recurrence_id'] . ',';
-                    } else {
-                        if (!is_null($parent_event)) {
-                            throw new Exception(esc_html('There must be only one parent.'));
-                        }
-                        $parent_event = $item['event'];
-                    }
+    /**
+     * Excludes each override's occurrence from its series and links it as a child.
+     *
+     * Runs once the whole calendar is imported, so an override may come before
+     * or after its series in the feed.
+     */
+    protected function process_parent_child_relations(): void
+    {
+        foreach ($this->override_exclussions as $items) {
+            if (count($items) < 2) {
+                continue;
+            }
+            $parent_id = null;
+            $children  = [];
+            foreach ($items as $item) {
+                if (null !== $item['recurrence_id']) {
+                    $children[] = $item;
+                    continue;
                 }
+                if (null !== $parent_id) {
+                    throw new Exception(esc_html('There must be only one parent.'));
+                }
+                $parent_id = $item['post_id'];
+            }
+            if (null === $parent_id || ! $children) {
+                continue;
             }
 
-            // If there are parent/children relations:
-            if ($parent_event && count($children) > 0) {
-                //
-                // Update parent with excludes
-                //
-                $exception_dates = $parent_event->get('exception_dates', '');
-                if (!empty($exception_dates)) {
-                    $exception_dates .= ',';
-                }
-                $exception_dates .= $child_exclude_dates;
-                $exception_dates = rtrim($exception_dates, ',');
-                $parent_event->set('exception_dates', $exception_dates);
-                $parent_event->save(true);
-                //
-                // Update children with Parent relation
-                //
-                foreach ($children as $child) {
-                    $child_event = $child['event'];
-                    $post = $child_event->get('post', null);
-
-                    // I do not know why they are different.
-                    if ($post instanceof \WP_Post) {
-                        // UI import
-                        $post->post_parent = $parent_event->get('post_id');
-                    } elseif ($post instanceof \StdClass) {
-                        // PHP unit
-                        $post->post_parent = $parent_event->get('post_id');
-                        $post->ID = $child_event->get('post_id');
-                    } else {
-                        throw new Exception(esc_html('Where is my child?'));
-                    }
-                    wp_update_post($post);
-                }
+            $parent   = new Event($this->app, $parent_id);
+            $timezone = Timezones::factory($this->app)->get_name($parent->get('start')->get_timezone());
+            $dates    = array_filter(explode(',', (string)$parent->get('exception_dates')));
+            foreach ($children as $child) {
+                $dates[] = is_int($child['recurrence_id'])
+                    ? $this->exclusion_date($child['recurrence_id'], $timezone)
+                    : $child['recurrence_id'];
+                wp_update_post(
+                    [
+                        'ID'          => $child['post_id'],
+                        'post_parent' => $parent_id,
+                    ]
+                );
             }
+            $parent->set('exception_dates', implode(',', array_unique($dates)));
+            $parent->save(true);
         }
+    }
+
+    /**
+     * An exclusion date the way the instance generator reads it.
+     *
+     * EventInstance::process_rrule_datelist() only reads the date part and applies
+     * the series' own start time, so the date must be the one in the series'
+     * timezone. Taken in UTC it names the wrong day, or none, whenever the local
+     * start falls on another UTC date: after midnight east of UTC, in the evening
+     * west of it. The time part is ignored, as in EventParent::add_exception_date().
+     *
+     * @param  int  $timestamp  Occurrence to exclude.
+     * @param  string  $timezone  Timezone of the series.
+     *
+     * @return string Date as Ymd\THis\Z.
+     */
+    protected function exclusion_date(int $timestamp, string $timezone): string
+    {
+        // Separate setTimezone(): the constructor ignores a timezone for '@' strings.
+        $date = new DateTime('@' . $timestamp);
+        $date->setTimezone(new DateTimeZone($timezone));
+
+        return $date->format('Ymd') . 'T000000Z';
     }
 
     /**
