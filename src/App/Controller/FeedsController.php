@@ -419,11 +419,13 @@ class FeedsController extends OsecBaseClass
             $messages = [];
 
             // reimport the feed
+            // Certificates are verified (the WordPress default): without it anyone on
+            // the network path could inject events. A feed server with a broken
+            // certificate can be exempted with the http_request_args filter.
             $response = wp_remote_get(
                 $feed->feed_url,
                 [
-                    'sslverify' => false,
-                    'timeout'   => (float) 120,
+                    'timeout' => (float) 120,
                 ]
             );
 
