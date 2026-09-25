@@ -283,6 +283,7 @@ add_filter('http_request_args', function ($args, $url) {
 - Feed imports need about a third less memory
 - Fix: agenda "forward" got stuck on days with more events than one page holds, and "back" did not return to the previous page
 - Fix: agenda previous/next buttons showed for drafts, trashed or filtered-out events, leading to an empty page
+- Fix: with category and tag filters combined by OR (filter `osec_filter_distinct_types_logic`), the filters were ignored and draft and private events showed
 
 = 1.1.14 =
 - Print support for all calendar views: print button in month, week, day and agenda #55
