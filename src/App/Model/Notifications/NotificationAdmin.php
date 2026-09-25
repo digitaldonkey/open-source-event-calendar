@@ -62,6 +62,37 @@ class NotificationAdmin extends NotificationAbstract
         array $recipients = [self::RCPT_ADMIN],
         $persistent = false
     ) {
+        /**
+         * Short-circuit storing an admin notice.
+         *
+         * Return anything but null to handle the message yourself; it is then not
+         * stored and store() returns that value. The WP-CLI commands use this to
+         * print notices to the console instead of wp-admin, for the length of a run.
+         * A listener returning non-null on every call hides all admin notices of
+         * the calendar, including failing feeds - keep it narrow.
+         *
+         * @since 1.1.15
+         *
+         * @param  mixed  $pre  Null to store the message as usual.
+         * @param  string  $message  Message, already escaped for HTML output.
+         * @param  string  $class  Message box class, e.g. 'error' or 'updated'.
+         * @param  int  $importance  Importance, see store().
+         * @param  array  $recipients  List of message recipients.
+         * @param  bool  $persistent  Whether it must be dismissed by the user.
+         */
+        $pre = apply_filters(
+            'osec_admin_notification_pre_store',
+            null,
+            $message,
+            $class,
+            $importance,
+            $recipients,
+            $persistent
+        );
+        if (null !== $pre) {
+            return $pre;
+        }
+
         $this->retrieve();
 
         $entity            = compact('message', 'class', 'importance', 'persistent');

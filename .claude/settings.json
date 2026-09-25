@@ -2,5 +2,42 @@
   "context": [
     "./CLAUDE.md"
   ],
-  "plansDirectory": ".claude/plans"
+  "plansDirectory": ".claude/plans",
+  "permissions": {
+    "allow": [
+      "Bash(circleci run list:*)",
+      "Bash(circleci run get:*)",
+      "Bash(circleci run ls:*)",
+      "Bash(circleci workflow get:*)",
+      "Bash(circleci job get:*)",
+      "Bash(circleci job output:*)",
+      "Bash(circleci testresult:*)",
+      "Bash(circleci artifact:*)",
+      "Bash(circleci job artifact:*)",
+      "Bash(circleci config validate:*)",
+      "Bash(circleci auth me:*)",
+      "Bash(circleci setting list:*)",
+      "Bash(circleci run watch:*)"
+    ],
+    "deny": [
+      "Bash(circleci workflow cancel:*)",
+      "Bash(circleci workflow rerun:*)",
+      "Bash(circleci run cancel:*)",
+      "Bash(circleci run trigger:*)",
+      "Bash(circleci envvar:*)",
+      "Bash(circleci context:*)",
+      "Bash(circleci project:*)",
+      "Bash(circleci policy:*)",
+      "Bash(circleci runner:*)",
+      "Bash(circleci deploy:*)",
+      "Bash(circleci dlc:*)",
+      "Bash(circleci setting set:*)",
+      "Bash(circleci setting unset:*)",
+      "Bash(circleci orb publish:*)",
+      "Bash(circleci namespace:*)",
+      "Bash(circleci auth login:*)",
+      "Bash(circleci auth logout:*)",
+      "Read(/var/www/html/.ddev/.env.web.local)"
+    ]
+  }
 }

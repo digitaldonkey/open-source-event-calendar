@@ -342,8 +342,11 @@ class FeedsController extends OsecBaseClass
      * update_ics_feed function
      *
      * Imports the selected iCalendar feed
+     *
+     * @param  int|null  $feed_id  Feed to import, null to read it from the ajax request.
+     * @param  bool  $force  Break the import lock of this feed, even if another import holds it.
      */
-    public function update_ics(?int $feed_id = null): array
+    public function update_ics(?int $feed_id = null, bool $force = false): array
     {
         $ajax = false;
         $data = [];
@@ -363,10 +366,18 @@ class FeedsController extends OsecBaseClass
                 ),
             ],
         ];
-        if ($this->execLimiter->acquire($cron_name, $this->getUpdateTimout())) {
-            $data = $this->process_ics_feed_update($feed_id);
+        if ($force) {
+            $this->execLimiter->release($cron_name);
         }
-        $this->execLimiter->release($cron_name);
+        // Only the holder may release the lock, or a second process would free the
+        // lock of a first one still importing.
+        if ($this->execLimiter->acquire($cron_name, $this->getUpdateTimout())) {
+            try {
+                $data = $this->process_ics_feed_update($feed_id);
+            } finally {
+                $this->execLimiter->release($cron_name);
+            }
+        }
 
         if (true === $ajax) {
             RenderJson::factory($this->app)->render($data);
@@ -385,6 +396,36 @@ class FeedsController extends OsecBaseClass
     protected function importLockName(int $feed_id)
     {
         return 'ics_import_' . $feed_id;
+    }
+
+    /**
+     * Who holds the import lock of a feed.
+     *
+     * @param  int  $feed_id  Feed ID.
+     *
+     * @return array|null ['time' => int, 'pid' => int], null if the feed is not locked.
+     */
+    public function get_import_lock(int $feed_id): ?array
+    {
+        return $this->execLimiter->get_holder($this->importLockName($feed_id));
+    }
+
+    /**
+     * Feeds, optionally limited to the given IDs.
+     *
+     * @param  int[]  $feed_ids  Feed IDs, empty for all.
+     *
+     * @return object[] Feed rows ordered by feed_id.
+     */
+    public function get_feeds(array $feed_ids = []): array
+    {
+        $where = '';
+        if ($feed_ids) {
+            $where = ' WHERE feed_id IN (' . implode(',', array_map('absint', $feed_ids)) . ')';
+        }
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- absint-secured.
+        return $this->app->db->get_results("SELECT * FROM {$this->feedsTable}{$where} ORDER BY feed_id");
     }
 
     private function getUpdateTimout(): int
@@ -419,11 +460,13 @@ class FeedsController extends OsecBaseClass
             $messages = [];
 
             // reimport the feed
+            // Certificates are verified (the WordPress default): without it anyone on
+            // the network path could inject events. A feed server with a broken
+            // certificate can be exempted with the http_request_args filter.
             $response = wp_remote_get(
                 $feed->feed_url,
                 [
-                    'sslverify' => false,
-                    'timeout'   => (float) 120,
+                    'timeout' => (float) 120,
                 ]
             );
 
@@ -496,7 +539,7 @@ class FeedsController extends OsecBaseClass
 
                     $feed_name = ! empty($result['name'][1]) ? $result['name'][1] : $feed->feed_url;
                     // we must flip again the array to iterate over it
-                    if (0 === $feed->keep_old_events) {
+                    if (0 === (int)$feed->keep_old_events) {
                         $events_to_delete = array_flip($result['events_to_delete']);
                         foreach ($events_to_delete as $event_id) {
                             wp_delete_post($event_id, true);

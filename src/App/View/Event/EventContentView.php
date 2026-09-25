@@ -119,6 +119,22 @@ class EventContentView extends OsecBaseClass
         return $this->filteringDepth > 0;
     }
 
+    /**
+     * Runs the_content with the event as the current post and restores the previous post context.
+     *
+     * setup_postdata() fills the loop globals but not $post itself - core assigns that separately in
+     * WP_Query::the_post() - so it is set here too: page builders read the global, not the value passed
+     * into the filter.
+     *
+     * The previous globals are snapshotted and put back instead of calling wp_reset_postdata(), which
+     * restores the *main* query's post rather than whatever was current: event content is filtered
+     * inside other loops and, for the ICS export, in no loop at all. WP_Query::reset_postdata() also
+     * does nothing when its query holds no post, which would leave the event behind as current post.
+     *
+     * @param  WP_Post  $event_post  Event whose content is filtered.
+     *
+     * @return string Filtered content.
+     */
     private function apply_content_filters_in_post_context(WP_Post $event_post): string
     {
         $snapshot = [];
@@ -127,16 +143,16 @@ class EventContentView extends OsecBaseClass
                 $snapshot[$name] = $GLOBALS[$name];
             }
         }
-        // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+        // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restored `finally`.
         $GLOBALS['post'] = $event_post;
         setup_postdata($event_post);
         try {
             // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
             return (string) apply_filters('the_content', $event_post->post_content);
         } finally {
+            // restoring globals.
             foreach (self::POSTDATA_GLOBALS as $name) {
                 if (array_key_exists($name, $snapshot)) {
-                    // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
                     $GLOBALS[$name] = $snapshot[$name];
                 } else {
                     unset($GLOBALS[$name]);

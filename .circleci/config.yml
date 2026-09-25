@@ -349,9 +349,12 @@ jobs:
             cd hookster_markdown
             nvm install
             npm install
-            npm run build-hooks-and-filters            
-            output=$(git status -s 2>&1)
-            if [[ $? -ne 0 || -z "$output" ]]; then
+            npm run build-hooks-and-filters
+            # The generator writes ../hooks-and-filters.md, so the status check must
+            # run in the plugin repo. hookster_markdown is a separate clone (and is
+            # gitignored here), and its own tree is never touched by the build.
+            cd ..
+            if output=$(git status --porcelain) && [ -z "$output" ]; then
               echo "No changes detected"
               exit 0;
             else
@@ -459,6 +462,18 @@ jobs:
             sudo chmod 775 $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
             echo "ls -al $WP_CORE_DIR/wp-content/uploads" && ls -al $WP_CORE_DIR/wp-content/uploads
             echo "ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache" && ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
+      - run:
+          name: WordPress plugin-check (release build)
+          command: |
+            set -Eeuxo pipefail
+            # Runs before constants-local.php is written, so only files that
+            # are actually released are checked. plugin-check comes from the
+            # workspace vendor directory, i.e. the version composer.lock pins.
+            cp -R /tmp/vendor/plugin-check $WP_CORE_DIR/wp-content/plugins/plugin-check
+            $WP_CLI --path=$WP_CORE_DIR plugin activate plugin-check
+            bin/plugin-check.sh --release --wp=$WP_CLI --path=$WP_CORE_DIR --slug=$WP_ORG_PLUGIN_NAME
+            $WP_CLI --path=$WP_CORE_DIR plugin deactivate plugin-check
+            rm -rf $WP_CORE_DIR/wp-content/plugins/plugin-check
       - run:
           name: Add constants-local.php
           command: |

@@ -117,6 +117,48 @@ To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA
 
 ---
 
+== WP-CLI ==
+
+
+**Rebuild recurring event instances.** Instances are only written when an event is saved. After an update that fixes recurrence, regenerate them. Rows left behind by deleted event posts are removed along the way.
+
+    wp osec event regenerate --dry-run              # what would happen
+    wp osec event regenerate --yes                  # all events
+    wp osec event regenerate 123 456                # some events
+    wp osec event regenerate --feed=3               # events of one feed
+    wp osec event regenerate --yes --resave         # save like the editor does, firing all save hooks
+    wp osec event regenerate --yes --start-after=4711   # resume an interrupted run
+
+Events are processed in batches (`--batch-size`, default 500). Every batch line prints the `--start-after` value to resume with, so any number of events can be processed.
+
+**Update feeds now**, instead of waiting for the scheduled import. Problems are printed to the console instead of being stored as admin notices.
+
+    wp osec feed list
+    wp osec feed update --yes                       # all feeds
+    wp osec feed update 3                           # one feed
+    wp osec feed update 3 --force                   # break the lock a crashed import left behind
+
+Only use `--force` when no other import of that feed is running, or events may be imported twice. A feed is imported in one go: a feed of 10,000 events needs about 150 MB of PHP memory (`php -d memory_limit=256M $(which wp) osec feed update 3`).
+
+To give a slow feed server more time than the default 120 seconds, use WordPress' `http_request_args` filter:
+
+```php
+add_filter('http_request_args', function ($args, $url) {
+    if (str_starts_with($url, 'https://slow.example.org/')) {
+        $args['timeout'] = 300;
+    }
+    return $args;
+}, 10, 2);
+```
+
+The commands run per site. On multisite, loop over the sites:
+
+    wp site list --field=url | xargs -I{} wp --url={} osec event regenerate --yes
+
+Exit code is 1 if any event or feed failed.
+
+---
+
 == Languages ==
 
 
@@ -199,6 +241,19 @@ Event descriptions in the agenda view and the ICS feed are passed through WordPr
 
 If a plugin still adds unwanted content, enable *OSEC Settings → Advanced → Strict compatibility content filtering*. Event descriptions in agenda view and the ICS feed then only get basic formatting (`wptexturize`, `convert_smilies`, `convert_chars`, `wpautop`); developers can change that list with the `osec_event_the_content_strict_filters` filter.
 
+### A feed fails with "cURL error 60: SSL certificate problem"
+
+Feeds are fetched with certificate verification, so a server with a self-signed, expired or incomplete certificate is refused (before 1.1.15 certificates were not checked). Ask the feed's provider to fix the certificate, or use `http://` if the provider offers it. If you trust that server anyway, you can exempt just its host with WordPress' `http_request_args` filter:
+
+```php
+add_filter('http_request_args', function ($args, $url) {
+    if ('calendar.example.org' === wp_parse_url($url, PHP_URL_HOST)) {
+        $args['sslverify'] = false;
+    }
+    return $args;
+}, 10, 2);
+```
+
 ---
 
 == Screenshots ==
@@ -213,6 +268,22 @@ If a plugin still adds unwanted content, enable *OSEC Settings → Advanced → 
 9. Schema.org/Event data validator
 
 == Changelog ==
+
+= 1.1.15 =
+- WP-CLI: `wp osec event regenerate` rebuilds the recurrence instances of all or specific events (resumable batches, flat memory for 10,000+ events) and removes rows left behind by deleted events
+- WP-CLI: `wp osec feed update` imports all or specific feeds now, `--force` breaks a stale import lock; `wp osec feed list`
+- Problems during these commands are printed to the console instead of stored as admin notices (new filter `osec_admin_notification_pre_store`)
+- Feed fetches verify TLS certificates again; a self-signed feed now fails with "cURL error 60" (see FAQ)
+- Fix: events removed from a feed were never deleted when "keep old events" is off (since 1.0.7)
+- Fix: a failed import no longer frees the lock of another running import, and an import error no longer leaves its feed locked for 24 hours
+- Fix: deleting an event outside wp-admin (WP-CLI, REST, cron) left its instances behind
+- Fix: moved occurrences (RECURRENCE-ID) near midnight showed twice; importing several feeds in one run mixed up their overrides
+- Fix: EXDATE and RDATE of feeds excluded or added the wrong day near midnight or in the evening west of UTC
+- Fix: only the last RDATE line of a feed was imported, and an RRULE next to RDATEs was dropped
+- Feed imports need about a third less memory
+- Fix: agenda "forward" got stuck on days with more events than one page holds, and "back" did not return to the previous page
+- Fix: agenda previous/next buttons showed for drafts, trashed or filtered-out events, leading to an empty page
+- Fix: with category and tag filters combined by OR (filter `osec_filter_distinct_types_logic`), the filters were ignored and draft and private events showed
 
 = 1.1.14 =
 - Print support for all calendar views: print button in month, week, day and agenda #55

@@ -22,6 +22,7 @@ This plugin is open source software in the traditional sense. I pledge this plug
 - [Blocks & Shortcodes](#blocks)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [WP-CLI](#wp-cli)
 - [Fork Notice](#this-is-a-fork)
 - [Migration Notes](#migration-notes)
 - [Development & Support](#development--support)
@@ -125,6 +126,47 @@ To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA
 
 ---
 
+## WP-CLI
+
+**Rebuild recurring event instances.** Instances are only written when an event is saved. After an update that fixes recurrence, regenerate them. Rows left behind by deleted event posts are removed along the way.
+
+    wp osec event regenerate --dry-run              # what would happen
+    wp osec event regenerate --yes                  # all events
+    wp osec event regenerate 123 456                # some events
+    wp osec event regenerate --feed=3               # events of one feed
+    wp osec event regenerate --yes --resave         # save like the editor does, firing all save hooks
+    wp osec event regenerate --yes --start-after=4711   # resume an interrupted run
+
+Events are processed in batches (`--batch-size`, default 500). Every batch line prints the `--start-after` value to resume with, so any number of events can be processed.
+
+**Update feeds now**, instead of waiting for the scheduled import. Problems are printed to the console instead of being stored as admin notices.
+
+    wp osec feed list
+    wp osec feed update --yes                       # all feeds
+    wp osec feed update 3                           # one feed
+    wp osec feed update 3 --force                   # break the lock a crashed import left behind
+
+Only use `--force` when no other import of that feed is running, or events may be imported twice. A feed is imported in one go: a feed of 10,000 events needs about 150 MB of PHP memory (`php -d memory_limit=256M $(which wp) osec feed update 3`).
+
+To give a slow feed server more time than the default 120 seconds, use WordPress' `http_request_args` filter:
+
+```php
+add_filter('http_request_args', function ($args, $url) {
+    if (str_starts_with($url, 'https://slow.example.org/')) {
+        $args['timeout'] = 300;
+    }
+    return $args;
+}, 10, 2);
+```
+
+The commands run per site. On multisite, loop over the sites:
+
+    wp site list --field=url | xargs -I{} wp --url={} osec event regenerate --yes
+
+Exit code is 1 if any event or feed failed.
+
+---
+
 ## Languages
 
 OSEC supports multiple languages
@@ -199,6 +241,19 @@ I may also provide paid support.
 Event descriptions in the agenda view and the ICS feed are passed through WordPress' `the_content` filter, in the context of the event, so plugins hooking into it behave as on the event itself. Most of them can be switched off per post type in their own settings.
 
 If a plugin still adds unwanted content, enable *OSEC Settings → Advanced → Strict compatibility content filtering*. Event descriptions in agenda view and the ICS feed then only get basic formatting (`wptexturize`, `convert_smilies`, `convert_chars`, `wpautop`); developers can change that list with the `osec_event_the_content_strict_filters` filter.
+
+### A feed fails with "cURL error 60: SSL certificate problem"
+
+Feeds are fetched with certificate verification, so a server with a self-signed, expired or incomplete certificate is refused (before 1.1.15 certificates were not checked). Ask the feed's provider to fix the certificate, or use `http://` if the provider offers it. If you trust that server anyway, you can exempt just its host with WordPress' `http_request_args` filter:
+
+```php
+add_filter('http_request_args', function ($args, $url) {
+    if ('calendar.example.org' === wp_parse_url($url, PHP_URL_HOST)) {
+        $args['sslverify'] = false;
+    }
+    return $args;
+}, 10, 2);
+```
 
 ---
 

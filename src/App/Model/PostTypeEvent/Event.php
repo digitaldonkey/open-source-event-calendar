@@ -559,6 +559,7 @@ class Event extends OsecBaseClass
         }
 
         $this->discard_unusable_recurrence_rules();
+        $this->pin_ical_uid();
 
         $dbi        = $this->app->db;
         $columns    = $this->prepare_store_entity();
@@ -600,7 +601,9 @@ class Event extends OsecBaseClass
                 return false;
             }
             $this->set('post_id', $post_id);
-            $columns['post_id'] = $post_id;
+            $this->pin_ical_uid();
+            $columns['post_id']  = $post_id;
+            $columns['ical_uid'] = $this->storage_format('ical_uid');
 
             // Insert new event data
             if (false === $dbi->insert($table_name, $columns, $format)) {
@@ -655,6 +658,21 @@ class Event extends OsecBaseClass
         do_action('osec_event_saved', $post_id, $this, $update);
 
         return $post_id;
+    }
+
+    /**
+     * Stores the UID the event is exported with, once its post ID is known.
+     *
+     * get_uid() derives it from the site URL, so storing it keeps the UID
+     * stable if the site moves, and the export never has to write it.
+     *
+     * @return void
+     */
+    protected function pin_ical_uid(): void
+    {
+        if (empty($this->get('ical_uid')) && $this->get('post_id')) {
+            $this->set('ical_uid', $this->get_uid());
+        }
     }
 
     /**
@@ -870,9 +888,14 @@ class Event extends OsecBaseClass
         $this->entity = clone $this->entity;
     }
 
+    /**
+     * Dates without a rule are stored as the rule 'RDATE=<dates>', the editor's
+     * "custom dates". Next to a real rule, as feeds send them, both are kept: the
+     * instance generator and the export read the dates on their own.
+     */
     protected function handlePropertyConstruct_recurrence_dates($value)
     {
-        if ($value) {
+        if ($value && $this->is_date_list_rule('recurrence_rules', 'RDATE=')) {
             $this->entity->set('recurrence_rules', 'RDATE=' . $value);
         }
 
@@ -881,11 +904,21 @@ class Event extends OsecBaseClass
 
     protected function handlePropertyConstruct_exception_dates($value)
     {
-        if ($value) {
+        if ($value && $this->is_date_list_rule('exception_rules', 'EXDATE=')) {
             $this->entity->set('exception_rules', 'EXDATE=' . $value);
         }
 
         return $value;
+    }
+
+    /**
+     * @return bool Whether the rule property is empty or only holds a date list.
+     */
+    private function is_date_list_rule(string $property, string $prefix): bool
+    {
+        $rule = (string)$this->entity->get($property);
+
+        return '' === $rule || str_starts_with($rule, $prefix);
     }
 
     protected function handlePropertyDestruct_instant_event($value)

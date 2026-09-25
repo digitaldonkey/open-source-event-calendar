@@ -835,7 +835,11 @@ add_filter('osec_leaflet_library_alter', $leaflet);
 #### Description
 
 
-Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+Leaflet is bundled in public/js/external_libs/leaflet; the version is defined in OSEC_LEAFLET_VERSION. Use this filter to load it from a CDN instead.
+
+
+
+Note: leaflet.css resolves the default marker icons relative to itself, so a custom style URL needs a sibling images/ directory.
 
 #### Parameters
 
@@ -850,7 +854,12 @@ Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
 /**
  * Alter Leaflet Library.
  *
- * Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+ * Leaflet is bundled in public/js/external_libs/leaflet; the version is
+ * defined in OSEC_LEAFLET_VERSION. Use this filter to load it from a CDN
+ * instead.
+ *
+ * Note: leaflet.css resolves the default marker icons relative to itself,
+ * so a custom style URL needs a sibling images/ directory.
  *
  * @since 1.1
  *
@@ -874,6 +883,11 @@ Alter Leaflet geocoder library (leaflet-control-geocoder)
 add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
 ```
 
+#### Description
+
+
+The library is bundled in public/js/external_libs/leaflet-control-geocoder; the version is defined in OSEC_LEAFLET_GEOCODER_VERSION.
+
 #### Parameters
 
 
@@ -886,6 +900,9 @@ add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
 ```php
 /**
  * Alter Leaflet geocoder library (leaflet-control-geocoder)
+ *
+ * The library is bundled in public/js/external_libs/leaflet-control-geocoder;
+ * the version is defined in OSEC_LEAFLET_GEOCODER_VERSION.
  *
  * @since 1.1
  *
@@ -1243,10 +1260,103 @@ do_action('osec_ics_import_event_saved', $event $feed);
 </details>
 
 
+### osec_recurrence_rule_not_exportable <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Fired when a stored recurrence rule cannot be exported.
+
+```php
+do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
+```
+
+#### Parameters
+
+
+ - **$rrule** <span style="color:crimson"> </span> Rule that was left out.
+ - **$message** <span style="color:crimson"> </span> Why iCalcreator rejected it.
+ - **$event** <span style="color:crimson"> </span> Event being exported.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Fired when a stored recurrence rule cannot be exported.
+ *
+ * @since 1.1.15
+ *
+ * @param  string  $rrule  Rule that was left out.
+ * @param  string  $message  Why iCalcreator rejected it.
+ * @param  Event  $event  Event being exported.
+ *
+ * @file src/App/Model/IcsImportExportParser.php
+ */
+do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
+```
+
+</details>
+
+
 ---
 
 
 @file **../src/App/Model/Notifications/NotificationAdmin.php**
+
+### osec_admin_notification_pre_store <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Short-circuit storing an admin notice.
+
+```php
+add_filter('osec_admin_notification_pre_store', $pre $message $class $importance $recipients $persistent);
+```
+
+#### Description
+
+
+Return anything but null to handle the message yourself; it is then not stored and store() returns that value. The WP-CLI commands use this to print notices to the console instead of wp-admin, for the length of a run. A listener returning non-null on every call hides all admin notices of the calendar, including failing feeds - keep it narrow.
+
+#### Parameters
+
+
+ - **$pre** <span style="color:crimson"> </span> Null to store the message as usual.
+ - **$message** <span style="color:crimson"> </span> Message, already escaped for HTML output.
+ - **$class** <span style="color:crimson"> </span> Message box class, e.g. 'error' or 'updated'.
+ - **$importance** <span style="color:crimson"> </span> Importance, see store().
+ - **$recipients** <span style="color:crimson"> </span> List of message recipients.
+ - **$persistent** <span style="color:crimson"> </span> Whether it must be dismissed by the user.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Short-circuit storing an admin notice.
+ *
+ * Return anything but null to handle the message yourself; it is then not
+ * stored and store() returns that value. The WP-CLI commands use this to
+ * print notices to the console instead of wp-admin, for the length of a run.
+ * A listener returning non-null on every call hides all admin notices of
+ * the calendar, including failing feeds - keep it narrow.
+ *
+ * @since 1.1.15
+ *
+ * @param  mixed  $pre  Null to store the message as usual.
+ * @param  string  $message  Message, already escaped for HTML output.
+ * @param  string  $class  Message box class, e.g. 'error' or 'updated'.
+ * @param  int  $importance  Importance, see store().
+ * @param  array  $recipients  List of message recipients.
+ * @param  bool  $persistent  Whether it must be dismissed by the user.
+ *
+ * @file src/App/Model/Notifications/NotificationAdmin.php
+ */
+add_filter('osec_admin_notification_pre_store', $pre $message $class $importance $recipients $persistent);
+```
+
+</details>
+
 
 ### osec_notification_label <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
@@ -1437,6 +1547,50 @@ do_action('osec_event_saved', $post_id $event $update);
 </details>
 
 
+### osec_recurrence_rule_invalid <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Act on a recurrence rule the calendar had to drop.
+
+```php
+do_action('osec_recurrence_rule_invalid', $rrule $message);
+```
+
+#### Description
+
+
+The event is saved without the rule, as a single occurrence, instead of the save or the feed import failing.
+
+#### Parameters
+
+
+ - **$rrule** <span style="color:crimson"> </span> Rule that was dropped.
+ - **$message** <span style="color:crimson"> </span> Why the rule was rejected.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Act on a recurrence rule the calendar had to drop.
+ *
+ * The event is saved without the rule, as a single occurrence,
+ * instead of the save or the feed import failing.
+ *
+ * @since 1.1.15
+ *
+ * @param  string  $rrule  Rule that was dropped.
+ * @param  string  $message  Why the rule was rejected.
+ *
+ * @file src/App/Model/PostTypeEvent/Event.php
+ */
+do_action('osec_recurrence_rule_invalid', $rrule $message);
+```
+
+</details>
+
+
 ### osec_sanitize_unserialize_cost_regex <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -1577,21 +1731,26 @@ add_filter('osec_content_remove_shortcode_{$tag[2]}', $bool);
 ---
 
 
-@file **../src/App/Model/PostTypeEvent/EventSearch.php**
+@file **../src/App/Model/PostTypeEvent/EventInstance.php**
 
-### osec_filter_distinct_types_logic <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_recurrence_time_limit <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Mess around with some logic here
+Filters the point at which an open ended recurrence stops.
 
 ```php
-add_filter('osec_filter_distinct_types_logic', $default);
+add_filter('osec_recurrence_time_limit', $limit);
 ```
+
+#### Description
+
+
+Only a rule that names no end of its own is bounded by this; an explicit UNTIL or COUNT is honoured as given and bounded instead by OSEC_REOCCURRENCE_MAX_INSTANCES.
 
 #### Parameters
 
 
- - **$default** <span style="color:crimson"> </span> Default distinct type logic.
+ - **$limit** <span style="color:crimson"> </span> Cut-off, default now + OSEC_REOCCURRENCE_TIMEFRAME.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -1599,11 +1758,173 @@ add_filter('osec_filter_distinct_types_logic', $default);
 
 ```php
 /**
- * Mess around with some logic here
+ * Filters the point at which an open ended recurrence stops.
  *
- * @since too long to understand
+ * Only a rule that names no end of its own is bounded by this; an
+ * explicit UNTIL or COUNT is honoured as given and bounded instead by
+ * OSEC_REOCCURRENCE_MAX_INSTANCES.
  *
- * @param  array  $default  Default distinct type logic.
+ * @since 1.1.15
+ *
+ * @param  DateTime  $limit  Cut-off, default now + OSEC_REOCCURRENCE_TIMEFRAME.
+ *
+ * @return DateTime
+ *
+ * @file src/App/Model/PostTypeEvent/EventInstance.php
+ */
+add_filter('osec_recurrence_time_limit', $limit);
+```
+
+</details>
+
+
+### osec_recurrence_truncated <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Act on a recurrence series that hit OSEC_REOCCURRENCE_MAX_INSTANCES.
+
+```php
+do_action('osec_recurrence_truncated', $rrule $limit);
+```
+
+#### Description
+
+
+The event is saved with the instances generated so far, so the series ends earlier than its rule asks for. Use this to warn an editor, or to log feeds whose rules exceed the ceiling.
+
+#### Parameters
+
+
+ - **$rrule** <span style="color:crimson"> </span> Rule that was truncated.
+ - **$limit** <span style="color:crimson"> </span> Ceiling that applied.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Act on a recurrence series that hit OSEC_REOCCURRENCE_MAX_INSTANCES.
+ *
+ * The event is saved with the instances generated so far, so the series
+ * ends earlier than its rule asks for. Use this to warn an editor, or to
+ * log feeds whose rules exceed the ceiling.
+ *
+ * @since 1.1.15
+ *
+ * @param  string  $rrule  Rule that was truncated.
+ * @param  int  $limit  Ceiling that applied.
+ *
+ * @file src/App/Model/PostTypeEvent/EventInstance.php
+ */
+do_action('osec_recurrence_truncated', $rrule $limit);
+```
+
+</details>
+
+
+### osec_recurrence_rule_invalid <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Act on a recurrence rule the generator had to drop.
+
+```php
+do_action('osec_recurrence_rule_invalid', $rrule $message);
+```
+
+#### Description
+
+
+The event is saved without the rule, as a single occurrence, instead of the save or the feed import failing. Use this to warn an editor or to log the feeds that send broken rules.
+
+#### Parameters
+
+
+ - **$rrule** <span style="color:crimson"> </span> Rule that was dropped.
+ - **$message** <span style="color:crimson"> </span> Why the rule was rejected.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Act on a recurrence rule the generator had to drop.
+ *
+ * The event is saved without the rule, as a single occurrence, instead
+ * of the save or the feed import failing. Use this to warn an editor or
+ * to log the feeds that send broken rules.
+ *
+ * @since 1.1.15
+ *
+ * @param  string  $rrule  Rule that was dropped.
+ * @param  string  $message  Why the rule was rejected.
+ *
+ * @file src/App/Model/PostTypeEvent/EventInstance.php
+ */
+do_action('osec_recurrence_rule_invalid', $rrule $message);
+```
+
+</details>
+
+
+---
+
+
+@file **../src/App/Model/PostTypeEvent/EventSearch.php**
+
+### osec_filter_distinct_types_logic <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+How calendar filters of different types combine.
+
+```php
+add_filter('osec_filter_distinct_types_logic', $default);
+```
+
+#### Description
+
+
+A calendar can be filtered by categories, tags, authors, events and instances (e.g. `cat_id` and `tag_id` in the shortcode, or the filters of the block and the feed URL). Within one type an event matches any of the given values. This filter decides how the types combine with each other.
+
+
+
+With 'AND' (the default) an event must match every filter type given, e.g. be in one of the categories and have one of the tags. With 'OR' it must match at least one of them. Either way only published events in the requested date range are shown, and private ones only to users allowed to read them.
+
+
+
+To show events in category 12 or with tag 34 with `[osec cat_id="12" tag_id="34"]`, return 'OR': `add_filter('osec_filter_distinct_types_logic', fn() => 'OR');`
+
+#### Parameters
+
+
+ - **$default** <span style="color:crimson"> </span> 'AND'. Return 'AND' or 'OR'; anything else is treated as 'AND'.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * How calendar filters of different types combine.
+ *
+ * A calendar can be filtered by categories, tags, authors, events and
+ * instances (e.g. `cat_id` and `tag_id` in the shortcode, or the filters of
+ * the block and the feed URL). Within one type an event matches any of the
+ * given values. This filter decides how the types combine with each other.
+ *
+ * With 'AND' (the default) an event must match every filter type given, e.g.
+ * be in one of the categories and have one of the tags. With 'OR' it must
+ * match at least one of them. Either way only published events in the
+ * requested date range are shown, and private ones only to users allowed
+ * to read them.
+ *
+ * To show events in category 12 or with tag 34 with `[osec cat_id="12" tag_id="34"]`,
+ * return 'OR': `add_filter('osec_filter_distinct_types_logic', fn() => 'OR');`
+ *
+ * @since 1.0
+ *
+ * @param  string  $default  'AND'. Return 'AND' or 'OR'; anything else is treated as 'AND'.
  *
  * @see EventSearch->getFilterSql()
  *
@@ -5877,7 +6198,11 @@ add_filter('osec_leaflet_library_alter', $leaflet);
 #### Description
 
 
-Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+Leaflet is bundled in public/js/external_libs/leaflet; the version is defined in OSEC_LEAFLET_VERSION. Use this filter to load it from a CDN instead.
+
+
+
+Note: leaflet.css resolves the default marker icons relative to itself, so a custom style URL needs a sibling images/ directory.
 
 #### Parameters
 
@@ -5892,7 +6217,12 @@ Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
 /**
  * Alter Leaflet Library.
  *
- * Note: leaflet version is defined in OSEC_LEAFLET_VERSION.
+ * Leaflet is bundled in public/js/external_libs/leaflet; the version is
+ * defined in OSEC_LEAFLET_VERSION. Use this filter to load it from a CDN
+ * instead.
+ *
+ * Note: leaflet.css resolves the default marker icons relative to itself,
+ * so a custom style URL needs a sibling images/ directory.
  *
  * @since 1.1
  *
@@ -5916,6 +6246,11 @@ Alter Leaflet geocoder library (leaflet-control-geocoder)
 add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
 ```
 
+#### Description
+
+
+The library is bundled in public/js/external_libs/leaflet-control-geocoder; the version is defined in OSEC_LEAFLET_GEOCODER_VERSION.
+
 #### Parameters
 
 
@@ -5928,6 +6263,9 @@ add_filter('osec_leaflet_geocoder_library_alter', $leaflet);
 ```php
 /**
  * Alter Leaflet geocoder library (leaflet-control-geocoder)
+ *
+ * The library is bundled in public/js/external_libs/leaflet-control-geocoder;
+ * the version is defined in OSEC_LEAFLET_GEOCODER_VERSION.
  *
  * @since 1.1
  *
@@ -6285,10 +6623,103 @@ do_action('osec_ics_import_event_saved', $event $feed);
 </details>
 
 
+### osec_recurrence_rule_not_exportable <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Fired when a stored recurrence rule cannot be exported.
+
+```php
+do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
+```
+
+#### Parameters
+
+
+ - **$rrule** <span style="color:crimson"> </span> Rule that was left out.
+ - **$message** <span style="color:crimson"> </span> Why iCalcreator rejected it.
+ - **$event** <span style="color:crimson"> </span> Event being exported.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Fired when a stored recurrence rule cannot be exported.
+ *
+ * @since 1.1.15
+ *
+ * @param  string  $rrule  Rule that was left out.
+ * @param  string  $message  Why iCalcreator rejected it.
+ * @param  Event  $event  Event being exported.
+ *
+ * @file src/App/Model/IcsImportExportParser.php
+ */
+do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
+```
+
+</details>
+
+
 ---
 
 
 @file **../src/App/Model/Notifications/NotificationAdmin.php**
+
+### osec_admin_notification_pre_store <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+Short-circuit storing an admin notice.
+
+```php
+add_filter('osec_admin_notification_pre_store', $pre $message $class $importance $recipients $persistent);
+```
+
+#### Description
+
+
+Return anything but null to handle the message yourself; it is then not stored and store() returns that value. The WP-CLI commands use this to print notices to the console instead of wp-admin, for the length of a run. A listener returning non-null on every call hides all admin notices of the calendar, including failing feeds - keep it narrow.
+
+#### Parameters
+
+
+ - **$pre** <span style="color:crimson"> </span> Null to store the message as usual.
+ - **$message** <span style="color:crimson"> </span> Message, already escaped for HTML output.
+ - **$class** <span style="color:crimson"> </span> Message box class, e.g. 'error' or 'updated'.
+ - **$importance** <span style="color:crimson"> </span> Importance, see store().
+ - **$recipients** <span style="color:crimson"> </span> List of message recipients.
+ - **$persistent** <span style="color:crimson"> </span> Whether it must be dismissed by the user.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Short-circuit storing an admin notice.
+ *
+ * Return anything but null to handle the message yourself; it is then not
+ * stored and store() returns that value. The WP-CLI commands use this to
+ * print notices to the console instead of wp-admin, for the length of a run.
+ * A listener returning non-null on every call hides all admin notices of
+ * the calendar, including failing feeds - keep it narrow.
+ *
+ * @since 1.1.15
+ *
+ * @param  mixed  $pre  Null to store the message as usual.
+ * @param  string  $message  Message, already escaped for HTML output.
+ * @param  string  $class  Message box class, e.g. 'error' or 'updated'.
+ * @param  int  $importance  Importance, see store().
+ * @param  array  $recipients  List of message recipients.
+ * @param  bool  $persistent  Whether it must be dismissed by the user.
+ *
+ * @file src/App/Model/Notifications/NotificationAdmin.php
+ */
+add_filter('osec_admin_notification_pre_store', $pre $message $class $importance $recipients $persistent);
+```
+
+</details>
+
 
 ### osec_notification_label <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
@@ -6479,6 +6910,50 @@ do_action('osec_event_saved', $post_id $event $update);
 </details>
 
 
+### osec_recurrence_rule_invalid <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Act on a recurrence rule the calendar had to drop.
+
+```php
+do_action('osec_recurrence_rule_invalid', $rrule $message);
+```
+
+#### Description
+
+
+The event is saved without the rule, as a single occurrence, instead of the save or the feed import failing.
+
+#### Parameters
+
+
+ - **$rrule** <span style="color:crimson"> </span> Rule that was dropped.
+ - **$message** <span style="color:crimson"> </span> Why the rule was rejected.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Act on a recurrence rule the calendar had to drop.
+ *
+ * The event is saved without the rule, as a single occurrence,
+ * instead of the save or the feed import failing.
+ *
+ * @since 1.1.15
+ *
+ * @param  string  $rrule  Rule that was dropped.
+ * @param  string  $message  Why the rule was rejected.
+ *
+ * @file src/App/Model/PostTypeEvent/Event.php
+ */
+do_action('osec_recurrence_rule_invalid', $rrule $message);
+```
+
+</details>
+
+
 ### osec_sanitize_unserialize_cost_regex <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -6619,21 +7094,26 @@ add_filter('osec_content_remove_shortcode_{$tag[2]}', $bool);
 ---
 
 
-@file **../src/App/Model/PostTypeEvent/EventSearch.php**
+@file **../src/App/Model/PostTypeEvent/EventInstance.php**
 
-### osec_filter_distinct_types_logic <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+### osec_recurrence_time_limit <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Mess around with some logic here
+Filters the point at which an open ended recurrence stops.
 
 ```php
-add_filter('osec_filter_distinct_types_logic', $default);
+add_filter('osec_recurrence_time_limit', $limit);
 ```
+
+#### Description
+
+
+Only a rule that names no end of its own is bounded by this; an explicit UNTIL or COUNT is honoured as given and bounded instead by OSEC_REOCCURRENCE_MAX_INSTANCES.
 
 #### Parameters
 
 
- - **$default** <span style="color:crimson"> </span> Default distinct type logic.
+ - **$limit** <span style="color:crimson"> </span> Cut-off, default now + OSEC_REOCCURRENCE_TIMEFRAME.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -6641,11 +7121,173 @@ add_filter('osec_filter_distinct_types_logic', $default);
 
 ```php
 /**
- * Mess around with some logic here
+ * Filters the point at which an open ended recurrence stops.
  *
- * @since too long to understand
+ * Only a rule that names no end of its own is bounded by this; an
+ * explicit UNTIL or COUNT is honoured as given and bounded instead by
+ * OSEC_REOCCURRENCE_MAX_INSTANCES.
  *
- * @param  array  $default  Default distinct type logic.
+ * @since 1.1.15
+ *
+ * @param  DateTime  $limit  Cut-off, default now + OSEC_REOCCURRENCE_TIMEFRAME.
+ *
+ * @return DateTime
+ *
+ * @file src/App/Model/PostTypeEvent/EventInstance.php
+ */
+add_filter('osec_recurrence_time_limit', $limit);
+```
+
+</details>
+
+
+### osec_recurrence_truncated <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Act on a recurrence series that hit OSEC_REOCCURRENCE_MAX_INSTANCES.
+
+```php
+do_action('osec_recurrence_truncated', $rrule $limit);
+```
+
+#### Description
+
+
+The event is saved with the instances generated so far, so the series ends earlier than its rule asks for. Use this to warn an editor, or to log feeds whose rules exceed the ceiling.
+
+#### Parameters
+
+
+ - **$rrule** <span style="color:crimson"> </span> Rule that was truncated.
+ - **$limit** <span style="color:crimson"> </span> Ceiling that applied.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Act on a recurrence series that hit OSEC_REOCCURRENCE_MAX_INSTANCES.
+ *
+ * The event is saved with the instances generated so far, so the series
+ * ends earlier than its rule asks for. Use this to warn an editor, or to
+ * log feeds whose rules exceed the ceiling.
+ *
+ * @since 1.1.15
+ *
+ * @param  string  $rrule  Rule that was truncated.
+ * @param  int  $limit  Ceiling that applied.
+ *
+ * @file src/App/Model/PostTypeEvent/EventInstance.php
+ */
+do_action('osec_recurrence_truncated', $rrule $limit);
+```
+
+</details>
+
+
+### osec_recurrence_rule_invalid <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Act on a recurrence rule the generator had to drop.
+
+```php
+do_action('osec_recurrence_rule_invalid', $rrule $message);
+```
+
+#### Description
+
+
+The event is saved without the rule, as a single occurrence, instead of the save or the feed import failing. Use this to warn an editor or to log the feeds that send broken rules.
+
+#### Parameters
+
+
+ - **$rrule** <span style="color:crimson"> </span> Rule that was dropped.
+ - **$message** <span style="color:crimson"> </span> Why the rule was rejected.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Act on a recurrence rule the generator had to drop.
+ *
+ * The event is saved without the rule, as a single occurrence, instead
+ * of the save or the feed import failing. Use this to warn an editor or
+ * to log the feeds that send broken rules.
+ *
+ * @since 1.1.15
+ *
+ * @param  string  $rrule  Rule that was dropped.
+ * @param  string  $message  Why the rule was rejected.
+ *
+ * @file src/App/Model/PostTypeEvent/EventInstance.php
+ */
+do_action('osec_recurrence_rule_invalid', $rrule $message);
+```
+
+</details>
+
+
+---
+
+
+@file **../src/App/Model/PostTypeEvent/EventSearch.php**
+
+### osec_filter_distinct_types_logic <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
+
+
+How calendar filters of different types combine.
+
+```php
+add_filter('osec_filter_distinct_types_logic', $default);
+```
+
+#### Description
+
+
+A calendar can be filtered by categories, tags, authors, events and instances (e.g. `cat_id` and `tag_id` in the shortcode, or the filters of the block and the feed URL). Within one type an event matches any of the given values. This filter decides how the types combine with each other.
+
+
+
+With 'AND' (the default) an event must match every filter type given, e.g. be in one of the categories and have one of the tags. With 'OR' it must match at least one of them. Either way only published events in the requested date range are shown, and private ones only to users allowed to read them.
+
+
+
+To show events in category 12 or with tag 34 with `[osec cat_id="12" tag_id="34"]`, return 'OR': `add_filter('osec_filter_distinct_types_logic', fn() => 'OR');`
+
+#### Parameters
+
+
+ - **$default** <span style="color:crimson"> </span> 'AND'. Return 'AND' or 'OR'; anything else is treated as 'AND'.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * How calendar filters of different types combine.
+ *
+ * A calendar can be filtered by categories, tags, authors, events and
+ * instances (e.g. `cat_id` and `tag_id` in the shortcode, or the filters of
+ * the block and the feed URL). Within one type an event matches any of the
+ * given values. This filter decides how the types combine with each other.
+ *
+ * With 'AND' (the default) an event must match every filter type given, e.g.
+ * be in one of the categories and have one of the tags. With 'OR' it must
+ * match at least one of them. Either way only published events in the
+ * requested date range are shown, and private ones only to users allowed
+ * to read them.
+ *
+ * To show events in category 12 or with tag 34 with `[osec cat_id="12" tag_id="34"]`,
+ * return 'OR': `add_filter('osec_filter_distinct_types_logic', fn() => 'OR');`
+ *
+ * @since 1.0
+ *
+ * @param  string  $default  'AND'. Return 'AND' or 'OR'; anything else is treated as 'AND'.
  *
  * @see EventSearch->getFilterSql()
  *
