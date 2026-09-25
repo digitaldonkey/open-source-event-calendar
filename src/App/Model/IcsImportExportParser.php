@@ -6,6 +6,7 @@ use DateTime;
 use DateTimeZone;
 use Kigkonsult\Icalcreator\CalendarComponent;
 use Kigkonsult\Icalcreator\IcalInterface;
+use Kigkonsult\Icalcreator\Pc;
 use Kigkonsult\Icalcreator\Vcalendar;
 use Kigkonsult\Icalcreator\Vevent;
 use Osec\App\Model\Date\DT;
@@ -276,41 +277,23 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $exrule = trim(end($exrule));
             }
 
-            $rdate = $e->createRdate();
-            if ($rdate) {
-                // Remove Prefix `RDATE:`
-                $rdate = explode(':', (string)$rdate);
-                $rdate = trim(end($rdate));
+            // Every RDATE line, each may list several dates.
+            $rdates = [];
+            while (false !== ($pc = $e->getRdate(null, true))) {
+                array_push($rdates, ...$this->recurrence_dates($pc, $allday, $event_timezone));
             }
+            $rdate = $rdates ? implode(',', array_unique($rdates)) : null;
 
             // ===================
             // = Exception dates =
             // ===================
 
-            /* @var $exdates DateTime[] A list of dates. */
             $exdates = [];
-            // EXDATE may have two formats:
-            //   one exdate with many dates ot more EXDATE rules
-            while (false !== ($pc = $e->getExdate())) {
-                $exdates = array_merge($exdates, $pc);
+            while (false !== ($pc = $e->getExdate(null, true))) {
+                array_push($exdates, ...$this->recurrence_dates($pc, $allday, $event_timezone));
             }
-
             /* @var string $exdate Aggregated exdates to store in DB */
-            $exdate = '';
-            if (!empty($exdates)) {
-                // Format for DB entry
-                $last_id = count($exdates) - 1;
-                foreach ($exdates as $i => $item) {
-                    if ($allday) {
-                        $exdate .= gmdate('Ymd', $item->format('U'));
-                    } else {
-                        $exdate .= $this->exclusion_date((int)$item->format('U'), $event_timezone);
-                    }
-                    if ($i !== $last_id) {
-                        $exdate .= ',';
-                    }
-                }
-            }
+            $exdate = implode(',', array_unique($exdates));
 
             // ========================
             // = Latitude & longitude =
@@ -728,6 +711,38 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $parent->set('exception_dates', implode(',', array_unique($dates)));
             $parent->save(true);
         }
+    }
+
+    /**
+     * The dates of an RDATE or EXDATE property the way the instance generator reads them.
+     *
+     * A date (VALUE=DATE) and a floating time (no TZID, no Z) are wall clock
+     * values and keep their date. Anything else is a point in time and becomes
+     * the date it falls on in the series' timezone. A PERIOD counts by its start.
+     *
+     * @param  Pc  $pc  The property, with its parameters.
+     * @param  bool  $allday  Whether the series is an all-day event.
+     * @param  string  $timezone  Timezone of the series.
+     *
+     * @return string[] Dates as Ymd\THis\Z, see exclusion_date().
+     */
+    protected function recurrence_dates(Pc $pc, bool $allday, string $timezone): array
+    {
+        $wall_clock = $allday || $pc->hasParamValue(IcalInterface::DATE) || $pc->hasParamIsLocalTime();
+        $dates      = [];
+        foreach ((array)$pc->getValue() as $value) {
+            if (is_array($value)) {
+                $value = reset($value);
+            }
+            if (! $value instanceof \DateTimeInterface) {
+                continue;
+            }
+            $dates[] = $wall_clock
+                ? $value->format('Ymd') . 'T000000Z'
+                : $this->exclusion_date((int)$value->format('U'), $timezone);
+        }
+
+        return $dates;
     }
 
     /**
