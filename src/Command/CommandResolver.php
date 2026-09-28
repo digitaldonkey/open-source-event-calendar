@@ -43,10 +43,6 @@ class CommandResolver
         );
 
         $this->add_command(
-            CompileCoreCss::factory($this->app, $request)
-        );
-
-        $this->add_command(
             ExportEvents::factory($this->app, $request)
         );
 

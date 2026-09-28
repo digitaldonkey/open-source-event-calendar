@@ -224,25 +224,10 @@ class FrontendCssController extends OsecBaseClass
             return false;
         }
 
-        /* @var int|string $saved_par = Number value required to display css in Header. */
+        /* @var int|string|null $saved_par = Number value required to display css in Header. */
         $saved_par = $this->app->options->get(self::COMPILED_CSS_KEY);
-        // if it's empty it's a new install, probably. Return static css.
-        if (null === $saved_par) {
-            $theme = $this->app->options->get('osec_current_theme');
-
-            return ResponseHelper::remove_protocols(
-            /**
-             * Alter css file.
-             *
-             * @since 1.0
-             *
-             * @param  string  $parsed_css  Css file path
-             */
-                apply_filters('osec_frontend_standard_css_url', $theme['theme_url'] . '/css/osec_parsed.css')
-            );
-        }
-        // if it's numeric, just consider it a new install
-        if (is_numeric($saved_par)) {
+        // Numeric: stored in a non-file cache. Null: not compiled yet, compiled on request.
+        if (null === $saved_par || is_numeric($saved_par)) {
             // "Link CSS in <head> section
             // when file cache is unavailable."
             if ($this->app->settings->get('render_css_as_link')) {
@@ -328,11 +313,6 @@ class FrontendCssController extends OsecBaseClass
     public function invalidate_cache(?array $variables = null, bool $update_persistence = true): bool
     {
         $lessCtrl = LessController::factory($this->app);
-        if ( ! $lessCtrl->is_compilation_needed($variables)) {
-            $this->app->options->delete(self::COMPILED_CSS_KEY);
-            return true;
-        }
-
         $notification = NotificationAdmin::factory($this->app);
         if ( ! MemoryCheck::check_available_memory(OSEC_LESS_MIN_AVAIL_MEMORY)) {
             $message = sprintf(

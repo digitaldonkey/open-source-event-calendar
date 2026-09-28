@@ -283,9 +283,11 @@ changes *where in the DOM the stylesheet lives*, so never assume it is a `<link>
 |---|---|---|
 | `OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST` (debug constant, usually in `constants-local.php`) | `echo_css()` on `wp_head` | inline `<style id="osec-frontend-css-inline-css">` **in `<body>`** |
 | Option `osec_compiled.css` (`COMPILED_CSS_KEY`) is a string | that URL | `<link>` in `<head>` |
-| Option is numeric **and** setting `render_css_as_link` is on (default) | site URL with `?osec-css-cache=<timestamp>` | `<link>` in `<head>` |
-| Option is numeric and `render_css_as_link` is off | `echo_css()` on `wp_head` | inline `<style>` **in `<body>`** |
-| Option is `null` (new install) | `<theme_url>/css/osec_parsed.css` | `<link>` in `<head>`, and the file is usually absent - see `.claude/plans/less-sha1-map-and-precompiled-css.md` |
+| Option is numeric or `null` (not compiled yet) **and** setting `render_css_as_link` is on (default) | site URL with `?osec-css-cache=<timestamp>` (`0` for `null`); the request compiles on a cache miss | `<link>` in `<head>` |
+| Option is numeric or `null` and `render_css_as_link` is off | `echo_css()` on `wp_head` | inline `<style>` **in `<body>`** |
+
+No theme ships precompiled CSS (dropped in 1.0.8, the `osec_parsed.css` fallback and `less.sha1.map.php` removed
+later), so every site compiles its own; `invalidate_cache()` always recompiles.
 
 **Why the inline variant lands in the body:** `echo_css()` does not echo. It is hooked to `wp_head` but calls
 `wp_register_style()` + `wp_add_inline_style()` + `wp_enqueue_style()`, and by then `wp_print_styles` has already
@@ -365,9 +367,7 @@ branch - takes the `CacheFile` path instead of the generic one:
    goes through `get_compiled_css()`, whose cache lookup finds that file and returns it, so a
    LESS edit can sit unreflected through any number of cache-bust requests *and* a php-fpm
    restart. Pair it with `wp option update osec_compiled.css "$(date +%s)"` - the option holds
-   the file's URL once written, and `null` is worse than a number here, since that is the
-   "new install" branch (see the table above), which links a static `osec_parsed.css` that
-   usually does not exist and never triggers a compile at all.
+   the file's URL once written; a number or `null` makes the page link the compiling route.
 3. A LESS→CSS compile can need a second request to be fully reflected (per maintainer note) -
    don't conclude a change "didn't take" from a single request's response.
 4. With APCu disabled per above, read the actual file in `cache/css/` rather than re-parsing

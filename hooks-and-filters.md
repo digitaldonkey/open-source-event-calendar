@@ -456,45 +456,6 @@ do_action('osec_ics_feed_deleted', $feed_id);
 ---
 
 
-@file **../src/App/Controller/FrontendCssController.php**
-
-### osec_frontend_standard_css_url <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter css file.
-
-```php
-add_filter('osec_frontend_standard_css_url', $parsed_css);
-```
-
-#### Parameters
-
-
- - **$parsed_css** <span style="color:crimson"> </span> Css file path
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter css file.
- *
- * @since 1.0
- *
- * @param  string  $parsed_css  Css file path
- *
- * @file src/App/Controller/FrontendCssController.php
- */
-add_filter('osec_frontend_standard_css_url', $parsed_css);
-```
-
-</details>
-
-
----
-
-
 @file **../src/App/Controller/ImportExportController.php**
 
 ### osec_import_export_engines_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -615,83 +576,6 @@ Inject variables after loading theme user_variables.php
  * @file src/App/Controller/LessController.php
  */
 add_filter('osec_less_variables', $variables);
-```
-
-</details>
-
-
-### osec_should_recompile_less <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Hook to trigger less processing
-
-```php
-add_filter('osec_should_recompile_less', $variables);
-```
-
-#### Description
-
-
-Allows to request theme recompile action. You may also set OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST which forces recompile too.
-
-#### Parameters
-
-
- - **$variables** <span style="color:crimson"> </span> Array of less variables.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Hook to trigger less processing
- *
- * Allows to request theme recompile action.
- * You may also set OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST
- * which forces recompile too.
- *
- * @since 1.0
- *
- * @param  array  $variables  Array of less variables.
- *
- * @file src/App/Controller/LessController.php
- */
-add_filter('osec_should_recompile_less', $variables);
-```
-
-</details>
-
-
-### osec_less_constants_pre_hashmap <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter Less variables before hashmap generation.
-
-```php
-add_filter('osec_less_constants_pre_hashmap', $variables);
-```
-
-#### Parameters
-
-
- - **$variables** <span style="color:crimson"> </span> Array of less variables
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter Less variables before hashmap generation.
- *
- * @since 1.0
- *
- * @param  array  $variables  Array of less variables
- *
- * @file src/App/Controller/LessController.php
- */
-add_filter('osec_less_constants_pre_hashmap', $variables);
 ```
 
 </details>
@@ -5819,45 +5703,6 @@ do_action('osec_ics_feed_deleted', $feed_id);
 ---
 
 
-@file **../src/App/Controller/FrontendCssController.php**
-
-### osec_frontend_standard_css_url <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter css file.
-
-```php
-add_filter('osec_frontend_standard_css_url', $parsed_css);
-```
-
-#### Parameters
-
-
- - **$parsed_css** <span style="color:crimson"> </span> Css file path
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter css file.
- *
- * @since 1.0
- *
- * @param  string  $parsed_css  Css file path
- *
- * @file src/App/Controller/FrontendCssController.php
- */
-add_filter('osec_frontend_standard_css_url', $parsed_css);
-```
-
-</details>
-
-
----
-
-
 @file **../src/App/Controller/ImportExportController.php**
 
 ### osec_import_export_engines_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -5978,83 +5823,6 @@ Inject variables after loading theme user_variables.php
  * @file src/App/Controller/LessController.php
  */
 add_filter('osec_less_variables', $variables);
-```
-
-</details>
-
-
-### osec_should_recompile_less <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Hook to trigger less processing
-
-```php
-add_filter('osec_should_recompile_less', $variables);
-```
-
-#### Description
-
-
-Allows to request theme recompile action. You may also set OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST which forces recompile too.
-
-#### Parameters
-
-
- - **$variables** <span style="color:crimson"> </span> Array of less variables.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Hook to trigger less processing
- *
- * Allows to request theme recompile action.
- * You may also set OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST
- * which forces recompile too.
- *
- * @since 1.0
- *
- * @param  array  $variables  Array of less variables.
- *
- * @file src/App/Controller/LessController.php
- */
-add_filter('osec_should_recompile_less', $variables);
-```
-
-</details>
-
-
-### osec_less_constants_pre_hashmap <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter Less variables before hashmap generation.
-
-```php
-add_filter('osec_less_constants_pre_hashmap', $variables);
-```
-
-#### Parameters
-
-
- - **$variables** <span style="color:crimson"> </span> Array of less variables
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter Less variables before hashmap generation.
- *
- * @since 1.0
- *
- * @param  array  $variables  Array of less variables
- *
- * @file src/App/Controller/LessController.php
- */
-add_filter('osec_less_constants_pre_hashmap', $variables);
 ```
 
 </details>
