@@ -159,6 +159,40 @@ Exit code is 1 if any event or feed failed.
 
 ---
 
+== Custom calendar themes ==
+
+
+The calendar has its own themes (Events › Calendar Themes), independent of your WordPress theme. A custom calendar theme is based on Vortex: it only contains the files that add to or replace Vortex's.
+
+1. Create a folder in `wp-content/themes/osec_themes/`, e.g. `wp-content/themes/osec_themes/my-calendar/`. The plugin's Gamma theme (`public/osec_themes/gamma/`) is an empty skeleton you can copy.
+2. Add a `style.css` with a theme header, and optionally a `screenshot.png`:
+
+        /**
+         * Theme Name: My Calendar
+         * Description: My own calendar theme.
+         * Version: 1.0.0
+         */
+
+3. Add your styles, compiled after all Vortex styles:
+    - `less/override.less` - [LESS](https://lesscss.org/). You can use the Vortex variables (`less/variables.less`, `less/user_variables.php`) and the Bootstrap 3 mixins, which carry an `ai1ec-` prefix:
+
+            @import "bootstrap/mixins.less";
+            .my-calendar-box { .ai1ec-clearfix(); color: @link-color; }
+
+    - or `css/override.css` - plain CSS. If both files exist, only `less/override.less` is used.
+4. Activate the theme under Events › Calendar Themes.
+
+Optional:
+
+- `twig/<template>.twig` replaces the Vortex template of the same name (copy it from `public/osec_themes/vortex/twig/`). With "Use frontend rendering" enabled in the settings, the agenda, month and day views are rendered in the browser from the Vortex templates, so overrides of `agenda.twig`, `month.twig` and `oneday.twig` only apply to views rendered on the server.
+- `less/user_variables.php`, copied from Vortex, sets your own defaults for Events › Theme Options.
+
+The CSS is compiled when the theme is activated, when Theme Options are saved and after a plugin update. **After editing your theme's files, save Events › Theme Options once.** Activating a theme resets the saved Theme Options.
+
+Use `em` or `%` for font sizes, not `px` or `rem`, so they follow the "Base font size" theme option.
+
+---
+
 == Languages ==
 
 
