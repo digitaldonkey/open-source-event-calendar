@@ -159,6 +159,8 @@ class LessController extends OsecBaseClass
 
         // Find out the active theme URL.
         $theme = $this->app->options->get('osec_current_theme');
+        // The base theme always ships with the plugin, also for custom themes in wp-content.
+        $base_less = OSEC_DEFAULT_THEME_ROOT . '/' . OSEC_ROOT_THEME_NAME . '/less/';
 
         // IMPORT DIRS
         $this->lessc->SetImportDirs(
@@ -166,11 +168,11 @@ class LessController extends OsecBaseClass
                 /**
                  * Callback - Mapping SASS imports as needed.
                  */
-                function ($path) use ($theme) {
+                function ($path) use ($theme, $base_less) {
 
                     // Bootstrap is only in vortex theme.
                     if (substr($path, 0, 10) === 'bootstrap/') {
-                        return [$theme['theme_root'] . '/vortex/less/' . $path, null];
+                        return [$base_less . $path, null];
                     }
 
                     // File exists in theme.
@@ -179,8 +181,8 @@ class LessController extends OsecBaseClass
                     }
 
                     // File exists in base theme (vortex)
-                    if (file_exists($theme['theme_root'] . '/vortex/less/' . $path)) {
-                        return [$theme['theme_root'] . '/vortex/less/' . $path, null];
+                    if (file_exists($base_less . $path)) {
+                        return [$base_less . $path, null];
                     }
 
                     // Huston, we have a problem.
