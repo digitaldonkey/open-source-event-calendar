@@ -114,6 +114,7 @@ class RequestParserGetParamTest extends TestBase
             'callback dotted'   => [ParamType::Callback, 'timely.cb', 'timely.cb'],
             'callback code'     => [ParamType::Callback, 'alert(document.domain)', null],
             'callback injected' => [ParamType::Callback, 'a;alert(1)', null],
+            'callback newline'  => [ParamType::Callback, "cb\n", null],
         ];
     }
 

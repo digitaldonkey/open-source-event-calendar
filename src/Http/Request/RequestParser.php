@@ -291,7 +291,7 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
             ParamType::Url      => sanitize_url($value),
             ParamType::HttpUrl  => sanitize_url($value, ['http', 'https']),
             ParamType::Email    => sanitize_email($value),
-            ParamType::Callback => preg_match('/^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*)*$/', $value) ? $value : $default,
+            ParamType::Callback => preg_match('/^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*)*$/D', $value) ? $value : $default,
         };
     }
 
