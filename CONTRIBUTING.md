@@ -66,7 +66,7 @@ See [TESTING.md](TESTING.md) for the full checklist: first-time setup, one-time 
 
 Twig autoescapes every `{{ }}` (strategy `html`), so that is where escaping happens: late, at output.
 Escaping in PHP as well escapes twice. The browser then shows `D&amp;D`, and a form stores it back
-(up to 1.1.14 the event editor did this).
+(up to 1.1.14 the event editor did this; `wp osec repair-escaping` repairs stored values).
 
 1. **PHP passes raw values to Twig.** No `esc_html()`, `esc_attr()` or `esc_url()` on values printed
    with `{{ }}`. New labels use `__()`, not `esc_html__()`, and `…` instead of `&#8230;`.
@@ -85,9 +85,11 @@ Escaping in PHP as well escapes twice. The browser then shows `D&amp;D`, and a f
 6. **Sanitize on input, independently** (`sanitize_text_field()`, `sanitize_url()`,
    `sanitize_email()`). Never store escaped values.
    - **The sanitizer always runs last.** Decoding user input (`html_entity_decode()`,
-     `htmlspecialchars_decode()`) is followed by the field's sanitizer again:
+     `htmlspecialchars_decode()`, `EventEscapingRepair::decode_*()`) is followed by the field's
+     sanitizer again:
      `sanitize_text_field()` leaves `&lt;img&gt;` alone as text, and decoding it afterwards
      stores a real tag.
+   - Tests for code that stores or repairs user input use `Osec\Tests\Utilities\HostileInput`.
 7. **Every PHP `echo` of HTML** goes through `wp_kses*()`, like `FileAbstract::render()` does for
    Twig output. Where that is impossible, add
    `// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- <reason>`.
