@@ -12,6 +12,8 @@ use Osec\Bootstrap\OsecBaseClass;
 use Osec\Cache\CacheMemory;
 use stdClass;
 use WP_Post;
+use Osec\Http\Request\ParamType;
+use Osec\Http\Request\RequestParser;
 
 /**
  * Class which represnt event parent/child relationship.
@@ -81,13 +83,11 @@ class EventParent extends OsecBaseClass
          * its own instance, while keeping parent relation.
          */
         if (
-            isset($_POST['osec_instance_id'])
-            && isset($_POST['action'])
-            && 'editpost' === sanitize_key($_POST['action'])
+            RequestParser::has_param('osec_instance_id')
+            && 'editpost' === RequestParser::get_param('action', '', ParamType::Key)
         ) {
-            $old_post_id = isset($_POST['post_ID']) ? absint($_POST['post_ID']) : null;
-            $instance_id = absint($_POST['osec_instance_id']);
-            // phpcs:enable
+            $old_post_id = RequestParser::get_param('post_ID', null, ParamType::Id);
+            $instance_id = RequestParser::get_param('osec_instance_id', 0, ParamType::Id);
             $post_id = EventEditing::factory($this->app)->create_duplicate_post();
             if (!is_null($old_post_id) && false !== $post_id) {
                 $this->handleInstances(
