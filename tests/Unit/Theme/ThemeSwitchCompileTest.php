@@ -93,7 +93,7 @@ class ThemeSwitchCompileTest extends TestBase
         wp_mkdir_p($dir . '/less');
         file_put_contents(
             $dir . '/less/override.less',
-            "@import \"bootstrap/mixins.less\";\n.osec-child-test { .ai1ec-clearfix(); color: #123456; }\n"
+            "@import \"bootstrap/mixins.less\";\n.my-calendar-box { .ai1ec-clearfix(); color: @link-color; }\n"
         );
 
         ThemeLoader::factory($osec_app)->switch_theme($this->theme($this->custom_root, 'child_test'));
@@ -106,8 +106,9 @@ class ThemeSwitchCompileTest extends TestBase
         $cache = (new \ReflectionProperty($ctrl, 'cache'))->getValue($ctrl);
         $css   = $cache->get(FrontendCssController::COMPILED_CSS_KEY);
 
-        $this->assertStringContainsString('.osec-child-test{color:#123456}', $css);
-        $this->assertStringContainsString('.osec-child-test:before', $css);
+        // The example from README.md "Custom calendar themes".
+        $this->assertMatchesRegularExpression('/\\.my-calendar-box\\{color:#[0-9a-f]{3,6}\\}/', $css);
+        $this->assertStringContainsString('.my-calendar-box:before', $css);
         $this->assertFalse((bool) $osec_app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY));
     }
 
