@@ -6,6 +6,7 @@ use Osec\App\View\Admin\AdminPageSettings;
 use Osec\Exception\Exception;
 use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
+use Osec\Settings\Elements\SettingsTextarea;
 
 /**
  * The concrete command that save settings.
@@ -52,7 +53,12 @@ class SaveSettings extends SaveAbstract
                 $value = false;
             }
 
-            $post_field_value = RequestParser::get_param($name, null);
+            $is_textarea      = SettingsTextarea::class === ($data['renderer']['class'] ?? null);
+            $post_field_value = RequestParser::get_param(
+                $name,
+                null,
+                $is_textarea ? ParamType::Textarea : ParamType::Text
+            );
             if (!is_null($post_field_value)) {
                 switch ($data['type']) {
                     case 'bool':
@@ -107,7 +113,7 @@ class SaveSettings extends SaveAbstract
                  *
                  * @param  array  $value  Maybe unvalidated variables.
                  */
-                $value = apply_filters('osec_pre_save_settings', stripslashes_deep($value));
+                $value = apply_filters('osec_pre_save_settings', $value);
 
                 $this->app->settings->set($name, $value);
             }
