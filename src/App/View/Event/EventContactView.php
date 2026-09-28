@@ -26,10 +26,10 @@ class EventContactView extends OsecBaseClass
     public function get_contact_html(Event $event)
     {
         $data = [
-            'contact_name'  => esc_html($event->get('contact_name')),
-            'contact_phone' => esc_html($event->get('contact_phone')),
-            'contact_email' => esc_attr($event->get('contact_email')),
-            'contact_url'   => esc_attr($event->get('contact_url')),
+            'contact_name'  => $event->get('contact_name'),
+            'contact_phone' => $event->get('contact_phone'),
+            'contact_email' => $event->get('contact_email'),
+            'contact_url'   => $event->get('contact_url'),
         ];
         $has_data = !empty(array_filter($data));
         $args = array_merge($data, [
