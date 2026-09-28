@@ -572,9 +572,8 @@ class ThemeLoader extends OsecBaseClass
             );
         }
 
-        // Recompile CSS for new theme.
-        // TODO Ensure cache is working
-        FrontendCssController::factory($this->app)
-                             ->invalidate_cache(null, false);
+        // Recompile CSS for the new theme on the next request (BootstrapController::verifyCache()).
+        // This request still resolves theme files with the paths of the previous theme.
+        $this->app->options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true, true);
     }
 }
