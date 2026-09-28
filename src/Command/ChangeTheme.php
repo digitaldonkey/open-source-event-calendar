@@ -3,6 +3,7 @@
 namespace Osec\Command;
 
 use Osec\App\View\Admin\AdminPageManageThemes;
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderRedirect;
 use Osec\Theme\ThemeLoader;
@@ -31,22 +32,18 @@ class ChangeTheme extends SaveAbstract
                 sanitize_key($_REQUEST[AdminPageManageThemes::$NONCE['nonce_name']],),
                 AdminPageManageThemes::$NONCE['action']
             )
-            && isset($_GET['osec_theme'])
-            && isset($_GET['osec_theme_root'])
-            && isset($_GET['osec_theme_dir'])
-            && isset($_GET['ai1ec_theme_url'])
+            && RequestParser::has_param('osec_theme')
+            && RequestParser::has_param('osec_theme_root')
+            && RequestParser::has_param('osec_theme_dir')
+            && RequestParser::has_param('ai1ec_theme_url')
         ) {
-            $stylesheet = preg_replace(
-                '|[^a-z_\-]+|i',
-                '',
-                sanitize_text_field(wp_unslash($_GET['osec_theme']))
-            );
+            $stylesheet = preg_replace('|[^a-z_\-]+|i', '', RequestParser::get_param('osec_theme'));
 
             ThemeLoader::factory($this->app)->switch_theme(
                 [
-                    'theme_root' => realpath(sanitize_text_field(wp_unslash($_GET['osec_theme_root']))),
-                    'theme_dir'  => realpath(sanitize_text_field(wp_unslash($_GET['osec_theme_dir']))),
-                    'theme_url'  => sanitize_url(wp_unslash($_GET['ai1ec_theme_url'])),
+                    'theme_root' => realpath(RequestParser::get_param('osec_theme_root')),
+                    'theme_dir'  => realpath(RequestParser::get_param('osec_theme_dir')),
+                    'theme_url'  => RequestParser::get_param('ai1ec_theme_url', '', ParamType::Url),
                     'stylesheet' => $stylesheet,
                 ]
             );
@@ -78,14 +75,11 @@ class ChangeTheme extends SaveAbstract
 
     public function is_this_to_execute()
     {
-        return isset($_GET['osec_action'])
-                && $_GET['osec_action'] === AdminPageManageThemes::$NONCE['action']
+        return RequestParser::get_param('osec_action') === AdminPageManageThemes::$NONCE['action']
                 && current_user_can('switch_osec_themes')
-                && isset($_GET['osec_theme_dir'])
-                && is_dir(sanitize_text_field(wp_unslash($_GET['osec_theme_dir'])))
-                && isset($_GET['osec_theme_root'])
-                && is_dir(sanitize_text_field(wp_unslash($_GET['osec_theme_root'])))
-                && isset($_GET['osec_theme'])
+                && is_dir(RequestParser::get_param('osec_theme_dir'))
+                && is_dir(RequestParser::get_param('osec_theme_root'))
+                && RequestParser::has_param('osec_theme')
                 && check_admin_referer(
                     AdminPageManageThemes::$NONCE['action'],
                     AdminPageManageThemes::$NONCE['nonce_name'],

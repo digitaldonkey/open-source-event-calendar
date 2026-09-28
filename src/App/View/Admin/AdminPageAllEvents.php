@@ -8,6 +8,8 @@ use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\View\Event\EventTimeView;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Http\Request\ParamType;
+use Osec\Http\Request\RequestParser;
 use WP_Query;
 
 /**
@@ -112,8 +114,7 @@ class AdminPageAllEvents extends OsecBaseClass
                         'taxonomy'        => $tax_slug,
                         'name'            => $tax_obj->name,
                         'orderby'         => 'name',
-                        // phpcs:ignore WordPress.Security.NonceVerification
-                        'selected'        => isset($_GET[$tax_slug]) ? sanitize_key($_GET[$tax_slug]) : '',
+                        'selected'        => RequestParser::get_param($tax_slug, '', ParamType::Key),
                         'hierarchical'    => $tax_obj->hierarchical,
                         'show_count'      => true,
                         'hide_if_empty'   => true,
@@ -125,11 +126,9 @@ class AdminPageAllEvents extends OsecBaseClass
                 'name'            => 'author',
                 'show_option_all' => __('Show All Authors', 'open-source-event-calendar'),
             ];
-            // phpcs:disable WordPress.Security.NonceVerification.Recommended
-            if (isset($_GET['user'])) {
-                $args['selected'] = absint($_GET['user']);
+            if (RequestParser::has_param('user')) {
+                $args['selected'] = RequestParser::get_param('user', 0, ParamType::Id);
             }
-            // phpcs:enable
             wp_dropdown_users($args);
         }
     }

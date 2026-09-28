@@ -9,6 +9,7 @@ use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
 use WP_Post;
 
@@ -92,7 +93,7 @@ class EventEditing extends OsecBaseClass
         if ($timezone_input) {
             $timezone_input = Timezones::factory($this->app)->get_name($timezone_input);
         }
-        $event->set('allday', (bool)RequestParser::get_param('osec_all_day_event', false));
+        $event->set('allday', RequestParser::get_param('osec_all_day_event', false, ParamType::Bool));
 
         $startTime = new DT(RequestParser::get_param('osec_start_time', null), $timezone_input);
         $event->set('start', $startTime);
@@ -105,7 +106,7 @@ class EventEditing extends OsecBaseClass
         }
 
         /* End time and `instant event` */
-        if (RequestParser::get_param('osec_instant_event', false)) {
+        if (RequestParser::get_param('osec_instant_event', false, ParamType::Bool)) {
             $event->set_no_end_time();
         } else {
             $endTime = RequestParser::get_param('osec_end_time', '');
@@ -140,7 +141,7 @@ class EventEditing extends OsecBaseClass
             $event->set('country', $osec_country);
         }
 
-        $show_map = (bool)RequestParser::get_param('osec_google_map', false);
+        $show_map = RequestParser::get_param('osec_google_map', false, ParamType::Bool);
         $event->set('show_map', $show_map);
 
         $osec_cost = RequestParser::get_param('osec_cost', false);
@@ -148,25 +149,25 @@ class EventEditing extends OsecBaseClass
             $event->set('cost', $osec_cost);
         }
 
-        $osec_is_free_event = (bool)RequestParser::get_param('osec_is_free_event', false);
+        $osec_is_free_event = RequestParser::get_param('osec_is_free_event', false, ParamType::Bool);
         if ($osec_is_free_event) {
             $event->set('is_free', true);
             $event->set('cost', '');
         }
         $event->set(
             'hide_cost',
-            (bool)RequestParser::get_param('osec_hide_cost', false)
+            RequestParser::get_param('osec_hide_cost', false, ParamType::Bool)
         );
 
-        $osec_ticket_url = RequestParser::get_param('osec_ticket_url', '');
+        // Clickable links.
+        $osec_ticket_url = RequestParser::get_param('osec_ticket_url', '', ParamType::HttpUrl);
         if ($osec_ticket_url) {
-            // Clickable links.
-            $event->set('ticket_url', sanitize_url($osec_ticket_url, ['http', 'https']));
+            $event->set('ticket_url', $osec_ticket_url);
         }
-        $osec_contact_url = RequestParser::get_param('osec_contact_url', '');
+        // Allow any of @see wp_allowed_protocols().
+        $osec_contact_url = RequestParser::get_param('osec_contact_url', '', ParamType::Url);
         if ($osec_contact_url) {
-            // Allow any of @see wp_allowed_protocols().
-            $event->set('contact_url', sanitize_url($osec_contact_url));
+            $event->set('contact_url', $osec_contact_url);
         }
         $osec_contact_name = RequestParser::get_param('osec_contact_name', false);
         if ($osec_contact_name) {
@@ -178,29 +179,29 @@ class EventEditing extends OsecBaseClass
             $event->set('contact_phone', $osec_contact_phone);
         }
 
-        $osec_contact_email = RequestParser::get_param('osec_contact_email', false);
+        $osec_contact_email = RequestParser::get_param('osec_contact_email', false, ParamType::Email);
         if ($osec_contact_email) {
-            $event->set('contact_email', sanitize_email($osec_contact_email));
+            $event->set('contact_email', $osec_contact_email);
         }
 
-        $showCoordinates = (bool)RequestParser::get_param('osec_input_coordinates', false);
+        $showCoordinates = RequestParser::get_param('osec_input_coordinates', false, ParamType::Bool);
         $event->set('show_coordinates', $showCoordinates);
 
-        $osec_latitude = RequestParser::get_param('osec_latitude', null);
-        if ($osec_latitude && Event::is_geo_value((float)$osec_latitude)) {
-            $event->set('latitude', (float)$osec_latitude);
+        $osec_latitude = RequestParser::get_param('osec_latitude', null, ParamType::Float);
+        if ($osec_latitude && Event::is_geo_value($osec_latitude)) {
+            $event->set('latitude', $osec_latitude);
         }
-        $osec_longitude = RequestParser::get_param('osec_longitude', null);
-        if ($osec_longitude && Event::is_geo_value((float)$osec_longitude)) {
-            $event->set('longitude', (float)$osec_longitude);
+        $osec_longitude = RequestParser::get_param('osec_longitude', null, ParamType::Float);
+        if ($osec_longitude && Event::is_geo_value($osec_longitude)) {
+            $event->set('longitude', $osec_longitude);
         }
 
         /* Repeats */
         $rdate         = null;
         $rrule         = null;
         $repRuleString = '';
-        if (RequestParser::get_param('osec_repeat', false)) {
-            $repRuleString = (string)RequestParser::get_param('osec_rrule', '');
+        if (RequestParser::get_param('osec_repeat', false, ParamType::Bool)) {
+            $repRuleString = RequestParser::get_param('osec_rrule', '');
             if ($repRuleString) {
                 /*
                  *  Repeat "custom" (array of dates)
@@ -223,8 +224,8 @@ class EventEditing extends OsecBaseClass
         /* Excludes */
         $exrule = null;
         $exdate = null;
-        if (RequestParser::get_param('osec_exclude', false)) {
-            $exRuleString = (string)RequestParser::get_param('osec_exrule', '');
+        if (RequestParser::get_param('osec_exclude', false, ParamType::Bool)) {
+            $exRuleString = RequestParser::get_param('osec_exrule', '');
             if ($exRuleString) {
                 /*
                  *  Exclude "custom" (array of dates)
@@ -363,11 +364,10 @@ class EventEditing extends OsecBaseClass
         }
 
         // For details @see EventParent->admin_init_post().
-        $post_ID = RequestParser::get_param('post_ID', null);
-        if (is_null($post_ID)) {
+        $old_post_id = RequestParser::get_param('post_ID', null, ParamType::Id);
+        if (is_null($old_post_id)) {
             return false;
         }
-        $old_post_id = (int) $post_ID;
         $clean_fields = [
             'osec_repeat'      => null,
             'osec_rrule'       => '',

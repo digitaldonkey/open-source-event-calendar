@@ -7,6 +7,7 @@ use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\ScriptsFrontendController;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\View\Event\EventSingleView;
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
 
 /**
@@ -58,7 +59,7 @@ class RenderEvent extends RenderCalendar
                 'data'     => [
                     'html' => $view->get_full_article($event, $footer_html),
                 ],
-                'callback' => RequestParser::get_param('callback', null),
+                'callback' => RequestParser::get_param('callback', null, ParamType::Callback),
             ];
         }
 

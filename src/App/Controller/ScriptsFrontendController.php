@@ -13,6 +13,7 @@ use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
 use Osec\Http\Request\HttpConditionalGet;
 use Osec\Http\Request\HttpEncoder;
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\ResponseHelper;
 
@@ -113,8 +114,7 @@ class ScriptsFrontendController extends OsecBaseClass
 
     public static function add_actions(App $app, bool $is_admin)
     {
-        // phpcs:ignore WordPress.Security.NonceVerification
-        if (isset($_GET[self::LOAD_JS_PARAMETER])) {
+        if (RequestParser::has_param(self::LOAD_JS_PARAMETER)) {
             add_action(
                 'wp_loaded',
                 function () use ($app) {
@@ -140,16 +140,12 @@ class ScriptsFrontendController extends OsecBaseClass
     public function render_js()
     {
         $common_js = '';
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended
-        if (! isset($_GET[self::LOAD_JS_PARAMETER])) {
+        $page_to_load = RequestParser::get_param(self::LOAD_JS_PARAMETER, null);
+        if (null === $page_to_load) {
             return null;
         }
-        $page_to_load = sanitize_text_field(wp_unslash($_GET[self::LOAD_JS_PARAMETER]));
 
-        if (
-            isset($_GET[self::IS_BACKEND_PARAMETER]) &&
-            $_GET[self::IS_BACKEND_PARAMETER] === self::TRUE_PARAM
-        ) {
+        if (RequestParser::get_param(self::IS_BACKEND_PARAMETER) === self::TRUE_PARAM) {
             $common_js = file_get_contents(OSEC_ADMIN_THEME_JS_PATH . 'pages/common_backend.js');
         } elseif (
             $page_to_load === self::EVENT_PAGE_JS ||
@@ -745,8 +741,7 @@ class ScriptsFrontendController extends OsecBaseClass
     {
         static $page = null;
         if (is_null($page)) {
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-            $page = isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
+            $page = RequestParser::get_param('page', '', ParamType::Key);
         }
         return $page === $page_requested;
     }
@@ -765,8 +760,7 @@ class ScriptsFrontendController extends OsecBaseClass
     {
         static $post_type = null;
         if (is_null($post_type)) {
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-            $post_type = isset($_GET['post_type']) ? sanitize_key(wp_unslash($_GET['post_type'])) : '';
+            $post_type = RequestParser::get_param('post_type', '', ParamType::Key);
         }
         return $post_type === $post_type_required;
     }

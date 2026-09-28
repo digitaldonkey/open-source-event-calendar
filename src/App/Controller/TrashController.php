@@ -8,6 +8,7 @@ use Osec\App\Model\PostTypeEvent\EventNotFoundException;
 use Osec\App\Model\PostTypeEvent\EventParent;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Http\Request\RequestParser;
 use WP_User;
 
 /**
@@ -194,8 +195,7 @@ class TrashController extends OsecBaseClass
     public function display_trash_link($allcaps, $caps, $args, WP_User $user)
     {
         if (
-            // phpcs:ignore WordPress.Security.NonceVerification
-            isset($_GET['instance']) &&
+            RequestParser::has_param('instance') &&
             in_array('delete_published_osec_events', $caps, true)
         ) {
             return [];

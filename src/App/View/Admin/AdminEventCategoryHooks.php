@@ -7,6 +7,8 @@ use Osec\App\View\Event\EventTaxonomyView;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
+use Osec\Http\Request\ParamType;
+use Osec\Http\Request\RequestParser;
 use Osec\Theme\ThemeLoader;
 use WP_Term;
 
@@ -188,22 +190,14 @@ class AdminEventCategoryHooks extends OsecBaseClass
     public function edited_events_categories($term_id): void
     {
         // Nonce is done before.
-        // phpcs:disable  WordPress.Security.NonceVerification
-        if (isset($_POST['_inline_edit'])) {
+        if (RequestParser::has_param('_inline_edit')) {
             return;
         }
-        $tag_color_value = '';
-        if ( ! empty($_POST['tag-color-value'])) {
-            $tag_color_value = sanitize_text_field(wp_unslash($_POST['tag-color-value']));
-        }
-        $tag_image_value = '';
-        if ( ! empty($_POST['osec_category_image_url'])) {
-            $tag_image_value = sanitize_url(wp_unslash($_POST['osec_category_image_url']));
-        }
-        if (isset($_POST['osec_category_image_url_remove'])) {
+        $tag_color_value = RequestParser::get_param('tag-color-value', '');
+        $tag_image_value = RequestParser::get_param('osec_category_image_url', '', ParamType::Url);
+        if (RequestParser::has_param('osec_category_image_url_remove')) {
             $tag_image_value = null;
         }
-        // phpcs:enable
         $db         = $this->app->db;
         $table_name = $db->get_table_name(OSEC_DB__META);
         $term       = $db->get_row(

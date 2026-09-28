@@ -8,6 +8,7 @@ use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventNotFoundException;
 use Osec\Http\Request\Request;
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderRedirect;
 use Osec\Http\Response\RenderVoid;
@@ -340,12 +341,10 @@ class CommandClone extends CommandAbstract
             && ! empty($_REQUEST['_wpnonce'])
             && wp_verify_nonce(sanitize_key(wp_unslash($_REQUEST['_wpnonce'])), 'bulk-posts')
             && current_user_can('edit_osec_events')
-            && isset($_REQUEST['post']) && ! empty($_REQUEST['post'])
-            && is_array($_REQUEST['post'])
+            && RequestParser::get_param('post', [], ParamType::IdList)
         ) {
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-            foreach ($_REQUEST['post'] as $post_id) {
-                $post = get_post((int)$post_id);
+            foreach (RequestParser::get_param('post', [], ParamType::IdList) as $post_id) {
+                $post = get_post($post_id);
                 if ($post) {
                     $this->posts[] = [
                         'status' => '',
@@ -357,7 +356,7 @@ class CommandClone extends CommandAbstract
         }
 
         // duplicate single post
-        $post_id = !empty($_REQUEST['post']) ? (int)$_REQUEST['post'] : null;
+        $post_id = RequestParser::get_param('post', null, ParamType::Id);
 
         if (
             !$post_id

@@ -14,6 +14,8 @@ use Osec\App\WpmlHelper;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Theme\ThemeLoader;
 use WP_Post;
+use Osec\Http\Request\ParamType;
+use Osec\Http\Request\RequestParser;
 
 /**
  * Event create/update form backend view layer.
@@ -217,12 +219,7 @@ class AdminPageAddEvent extends OsecBaseClass
         /* @var int $instance_id See DB table wp_osec_event_instances */
         static $instance_id = null;
         if (is_null($instance_id)) {
-            $instance_id = false;
-            // phpcs:disable WordPress.Security.NonceVerification.Recommended
-            if (isset($_REQUEST['instance'])) {
-                $instance_id = absint($_REQUEST['instance']);
-            }
-            // phpcs:enable
+            $instance_id = RequestParser::get_param('instance', false, ParamType::Id);
             if ($instance_id) {
                 add_filter(
                     'print_scripts_array',

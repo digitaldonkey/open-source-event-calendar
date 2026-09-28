@@ -54,6 +54,24 @@ yoursite.com?osec_recompile_templates=TRUE
 We have a PHP (require_dev) based toolset.
 Project has been set up using ddev. All scripts should be running stable in ddev using provided config.
 
+**Reading request values**
+
+Read `$_GET`, `$_POST` and `$_REQUEST` only through `RequestParser`:
+
+```php
+$url  = RequestParser::get_param('osec_ticket_url', '', ParamType::HttpUrl);
+$ids  = RequestParser::get_param('feed_category', [], ParamType::IdList);
+$sent = RequestParser::has_param('osec_hide_cost');
+```
+
+- Pick the `ParamType` for what the value is (see `src/Http/Request/ParamType.php`), don't cast
+  afterwards. The default `Text` runs `sanitize_text_field()`, which strips `%xx` from URLs and
+  line breaks from textareas.
+- A missing parameter returns the default unchanged; a sent one is converted even when empty. Use a
+  `null` default to tell a cleared field from a missing one.
+- `get_param()` does not check a nonce: the caller verifies it first. Nonce checks and writes to
+  `$_REQUEST` are the only direct superglobal accesses left.
+
 **Test & Release pipeline**
 
 Check out the [CircleCi pipeline script](https://github.com/digitaldonkey/open-source-event-calendar/blob/master/.circleci/config.yml) and see [the results](https://app.circleci.com/pipelines/github/digitaldonkey/open-source-event-calendar).

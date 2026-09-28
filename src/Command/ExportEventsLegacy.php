@@ -2,6 +2,7 @@
 
 namespace Osec\Command;
 
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
 
 /**
@@ -55,10 +56,7 @@ class ExportEventsLegacy extends ExportEvents
                 'lang',
                 false
             );
-            $params['no_html']  = (bool)RequestParser::get_param(
-                'no_html',
-                false
-            );
+            $params['no_html']  = RequestParser::get_param('no_html', false, ParamType::Bool);
             $this->params      = $params;
 
             return true;

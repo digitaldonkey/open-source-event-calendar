@@ -3,6 +3,8 @@
 namespace Osec\App\View\Admin;
 
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Http\Request\ParamType;
+use Osec\Http\Request\RequestParser;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -48,11 +50,7 @@ class AdminPageManageTaxonomies extends OsecBaseClass
 
         foreach ($taxonomies as $taxonomy => $data) {
             if (true === $data->public) {
-                // phpcs:disable WordPress.Security.NonceVerification.Recommended
-                $active_taxonomy =
-                    isset($_GET['taxonomy']) &&
-                    $taxonomy === sanitize_key($_GET['taxonomy']);
-                // phpcs:enable
+                $active_taxonomy = $taxonomy === RequestParser::get_param('taxonomy', null, ParamType::Key);
                 $edit_url = '';
                 $edit_label = '';
                 if (isset($taxonomy_metadata[$taxonomy]['url'])) {

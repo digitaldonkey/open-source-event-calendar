@@ -13,6 +13,7 @@ use Osec\Exception\BootstrapException;
 use Osec\Exception\EngineNotSetException;
 use Osec\Exception\ImportExportParseException;
 use Osec\Exception\InvalidArgumentException;
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderJson;
 use Osec\Theme\ThemeLoader;
@@ -730,8 +731,7 @@ class FeedsController extends OsecBaseClass
     {
         $feed_id = 0;
         // Nonce checked before.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        if (isset($_REQUEST['feed_id'])) {
+        if (RequestParser::has_param('feed_id')) {
             $feed_id = $this->get_request_params('feed_id');
         }
         if (false === $feed_url) {
@@ -949,37 +949,28 @@ class FeedsController extends OsecBaseClass
                 wp_die(esc_html__('User not allowed to manage feeds.', 'open-source-event-calendar'));
             }
 
-            if (isset($_REQUEST['feed_url']) && ! empty($_REQUEST['feed_url'])) {
-                $url = esc_url_raw(wp_unslash($_REQUEST['feed_url']));
-            }
-
-            $feedId = RequestParser::get_param('feed_id', null);
-            if ($feedId) {
-                $feedId = (int) $feedId;
-            }
-            $feed_categories = '';
+            $url    = RequestParser::get_param('feed_url', '', ParamType::Url);
+            $feedId = RequestParser::get_param('feed_id', null, ParamType::Id) ?: null;
             // Different from tags they are submitted as [](int).
-            if (isset($_REQUEST['feed_category']) && is_array($_REQUEST['feed_category'])) {
-                $f_cats = array_map('intval', $_REQUEST['feed_category']);
-                $feed_categories = implode(',', $f_cats);
-            }
+            $feed_categories = implode(',', RequestParser::get_param('feed_category', [], ParamType::IdList));
 
             $requestArgs = [
-                'feed_url'             => $url ?? '',
-                'feed_name'            => $url ?? '',
+                'feed_url'             => $url,
+                'feed_name'            => $url,
                 // Update integer or New null.
                 'feed_id'              => $feedId,
                 'feed_category'        => $feed_categories,
                 'feed_tags'            => RequestParser::get_param('feed_tags', ''),
                 // Booleans are integers in DB.
-                'hide_cost'            => (int) RequestParser::get_param('hide_cost', 1),
-                'comments_enabled'     => (int) RequestParser::get_param('comments_enabled', 0),
-                'map_display_enabled'  => (int) RequestParser::get_param('map_display_enabled', 0),
-                'keep_tags_categories' => (int) RequestParser::get_param('keep_tags_categories', 0),
-                'keep_old_events'      => (int) RequestParser::get_param('keep_old_events', 0),
-                'import_timezone'      => (int) RequestParser::get_param('feed_import_timezone', 0),
-                'remove_events'        => (RequestParser::get_param('remove_events') === 'true'),
-                'import_post_status'   => (string) RequestParser::get_param('import_post_status', 'publish'),
+                'hide_cost'            => RequestParser::get_param('hide_cost', 1, ParamType::Int),
+                'comments_enabled'     => RequestParser::get_param('comments_enabled', 0, ParamType::Int),
+                'map_display_enabled'  => RequestParser::get_param('map_display_enabled', 0, ParamType::Int),
+                'keep_tags_categories' => RequestParser::get_param('keep_tags_categories', 0, ParamType::Int),
+                'keep_old_events'      => RequestParser::get_param('keep_old_events', 0, ParamType::Int),
+                'import_timezone'      => RequestParser::get_param('feed_import_timezone', 0, ParamType::Int),
+                // jQuery sends the JS boolean as 'true' / 'false'.
+                'remove_events'        => RequestParser::get_param('remove_events', false, ParamType::Bool),
+                'import_post_status'   => RequestParser::get_param('import_post_status', 'publish'),
             ];
         }
 
