@@ -5,6 +5,7 @@ namespace Osec\Command;
 use Osec\App\Controller\LessController;
 use Osec\App\Model\PostTypeEvent\InvalidArgumentException;
 use Osec\Exception\Exception;
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderVoid;
 use Osec\Http\Response\ResponseHelper;
@@ -57,19 +58,19 @@ class CompileCoreCss extends CommandAbstract
     protected function processFiles()
     {
         // Only available in DEBUG mode.
-        $less   = LessController::factory($this->app);
-        $theme  = RequestParser::get_param('theme', false);
+        $less = LessController::factory($this->app);
+        $name = RequestParser::get_param('theme', '', ParamType::Key);
+        if ('' === $name) {
+            return 'Param theme is required';
+        }
+        $theme = $this->getTheme($name);
 
         // Switch theme.
-        if ($theme && RequestParser::get_param('switch', false)) {
+        if (RequestParser::get_param('switch', false, ParamType::Bool)) {
             $this->app->options->delete(LessController::DB_KEY_FOR_LESS_VARIABLES);
             $this->app->options->set('osec_current_theme', $theme);
 
             return 'Theme switched to "' . $theme['stylesheet'] . '".';
-        }
-
-        if (empty($theme)) {
-            return 'Param theme is required';
         }
 
         // Rebuild theme.
