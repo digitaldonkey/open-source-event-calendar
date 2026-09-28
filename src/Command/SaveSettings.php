@@ -4,6 +4,7 @@ namespace Osec\Command;
 
 use Osec\App\View\Admin\AdminPageSettings;
 use Osec\Exception\Exception;
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
 
 /**
@@ -27,8 +28,8 @@ class SaveSettings extends SaveAbstract
 
         // Add common handler for tags and categories
         $_REQUEST['default_tags_categories'] = (
-            isset($_REQUEST['default_tags_categories_default_categories']) ||
-            isset($_REQUEST['default_tags_categories_default_tags'])
+            RequestParser::has_param('default_tags_categories_default_categories') ||
+            RequestParser::has_param('default_tags_categories_default_tags')
         );
         // Set some a variable to true to trigger the saving.
         $_REQUEST['enabled_views'] = true;
@@ -47,7 +48,7 @@ class SaveSettings extends SaveAbstract
             }
 
             // False booleans are not send by browser.
-            if ( ! isset($_REQUEST[$name]) && isset($data['type']) && 'bool' === $data['type']) {
+            if ( ! RequestParser::has_param($name) && isset($data['type']) && 'bool' === $data['type']) {
                 $value = false;
             }
 
@@ -161,17 +162,13 @@ class SaveSettings extends SaveAbstract
      */
     protected function handleSaving_default_tags_categories()
     {
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended
-        $tags = isset($_REQUEST['default_tags_categories_default_tags'])
-                    && is_array($_REQUEST['default_tags_categories_default_tags']) ?
-                        array_map('absint', $_REQUEST['default_tags_categories_default_tags']) : [];
-        $categories = isset($_REQUEST['default_tags_categories_default_categories'])
-                    && is_array($_REQUEST['default_tags_categories_default_categories']) ?
-                        array_map('absint', $_REQUEST['default_tags_categories_default_categories']) : [];
-        // phpcs:enable
         return [
-            'tags'       => $tags,
-            'categories' => $categories,
+            'tags'       => RequestParser::get_param('default_tags_categories_default_tags', [], ParamType::IdList),
+            'categories' => RequestParser::get_param(
+                'default_tags_categories_default_categories',
+                [],
+                ParamType::IdList
+            ),
         ];
     }
 
