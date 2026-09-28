@@ -4,6 +4,8 @@ namespace Osec\App;
 
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Http\Request\ParamType;
+use Osec\Http\Request\RequestParser;
 
 /**
  * Localization manager for wpml.
@@ -189,14 +191,14 @@ class WpmlHelper extends OsecBaseClass
     {
         // phpcs:disable WordPress.Security.NonceVerification.Recommended
         if (
-            isset($_GET['trid']) &&
-            isset($_GET['source_lang']) &&
+            RequestParser::has_param('trid') &&
+            RequestParser::has_param('source_lang') &&
             $this->is_wpml_active()
         ) {
             global $sitepress;
-            $source_lang = sanitize_key($_GET['source_lang']);
+            $source_lang = RequestParser::get_param('source_lang', '', ParamType::Key);
             $details = $sitepress->get_element_translations(
-                sanitize_key($_GET['trid']),
+                RequestParser::get_param('trid', '', ParamType::Key),
                 'post_' . OSEC_POST_TYPE
             );
             if (isset($details[$source_lang])) {

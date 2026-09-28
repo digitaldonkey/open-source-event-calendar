@@ -4,6 +4,8 @@ namespace Osec\App\View\Event;
 
 use Osec\App\Model\Date\DT;
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Http\Request\ParamType;
+use Osec\Http\Request\RequestParser;
 
 /**
  * This class renders the html for the event colors.
@@ -39,16 +41,14 @@ class EventPostView extends OsecBaseClass
             2  => __('Custom field updated.', 'open-source-event-calendar'),
             3  => __('Custom field deleted.', 'open-source-event-calendar'),
             4  => __('Event updated.', 'open-source-event-calendar'),
-            // phpcs:disable WordPress.Security.NonceVerification.Recommended
             /* translators: %s: date and time of the revision */
-            5  => isset($_GET['revision'])
+            5  => RequestParser::has_param('revision')
                 ? sprintf(
                     /* translators: Revision ID */
                     __('Event restored to revision from %s', 'open-source-event-calendar'),
-                    wp_post_revision_title((int)$_GET['revision'], false)
+                    wp_post_revision_title(RequestParser::get_param('revision', 0, ParamType::Int), false)
                 )
                 : false,
-            // phpcs:enable
             6  => sprintf(
                     /* translators: Url */
                 __('Event published. <a href="%s">View event</a>', 'open-source-event-calendar'),

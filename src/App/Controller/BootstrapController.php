@@ -126,8 +126,7 @@ class BootstrapController
             // ==================================
             // = Add the hook to render the css =
             // ==================================
-            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-            if (isset($_GET[FrontendCssController::REQUEST_CSS_PARAM])) {
+            if (RequestParser::has_param(FrontendCssController::REQUEST_CSS_PARAM)) {
                 // We need to wait for the extension to be registered if the css
                 // needs to be compiled. Will find a better way when compiling css.
                 $css_controller = FrontendCssController::factory($this->app);
