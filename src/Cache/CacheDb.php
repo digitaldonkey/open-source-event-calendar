@@ -41,7 +41,7 @@ class CacheDb extends OsecBaseClass implements CacheInterface
     public function get(string $key, mixed $default = null): mixed
     {
         $key  = $this->_key($key);
-        $data = $this->app->options->get($key);
+        $data = $this->app->options->get($key, false);
         if (false === $data) {
             throw new CacheNotSetException(
                 'No data under `' . esc_html($key) . '` present'
