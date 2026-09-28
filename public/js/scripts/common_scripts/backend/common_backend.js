@@ -23,7 +23,7 @@ timely.define(["jquery_timely", "domReady", "ai1ec_config", "scripts/common_scri
         }
     }, u = function () {
         e(document).on("click", ".ai1ec-facebook-cron-dismiss-notification", r.dismiss_plugins_messages_handler).on("click", ".ai1ec-dismiss-notification", r.dismiss_notification_handler).on("click", ".ai1ec-dismiss-intro-video", r.dismiss_intro_video_handler).on("click", ".ai1ec-dismiss-license-warning", r.dismiss_license_warning_handler).on("click", ".ai1ec-limit-by-cat, .ai1ec-limit-by-tag, .ai1ec-limit-by-event", r.handle_multiselect_containers_widget_page).on("click", ".ai1ec-dismissable", function () {
-            var t = {action: "osec_dismiss_notice", key: e(this).data("key")}, n = this;
+            var t = {action: "osec_dismiss_notice", key: e(this).data("key"), nonce: e(this).data("nonce")}, n = this;
             e.post(ajaxurl, t, function (t) {
                 e(n).closest(".ai1ec-message").remove()
             })

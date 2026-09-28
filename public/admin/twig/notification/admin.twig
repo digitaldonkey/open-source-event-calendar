@@ -5,9 +5,9 @@
 	<p><strong>{{ label }}:</strong></p>
 	{{ message | raw }}
 
-	{% if persistent %}
+	{% if persistent and dismiss_nonce %}
 		<button class="button button-primary ai1ec-dismissable"
-			data-key="{{ msg_key }}">
+			data-key="{{ msg_key }}" data-nonce="{{ dismiss_nonce }}">
 			{{ text_dismiss_button }}
 		</button>
 	{% endif %}
