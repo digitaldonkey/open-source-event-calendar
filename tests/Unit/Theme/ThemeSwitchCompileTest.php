@@ -2,6 +2,7 @@
 
 namespace Osec\Tests\Unit\Theme;
 
+use Osec\App\Controller\BootstrapController;
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\LessController;
 use Osec\Theme\ThemeLoader;
@@ -39,7 +40,13 @@ class ThemeSwitchCompileTest extends TestBase
             $osec_app->options->set($key, $value, true);
         }
         $osec_app->inject_object(ThemeLoader::class, new ThemeLoader($osec_app));
-        rmdir($this->custom_root . '/child_test');
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($this->custom_root, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($files as $file) {
+            $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+        }
         rmdir($this->custom_root);
         parent::tear_down();
     }
@@ -72,6 +79,54 @@ class ThemeSwitchCompileTest extends TestBase
 
         $this->assertTrue((bool) $osec_app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY));
         $this->assertSame(123, $osec_app->options->get(FrontendCssController::COMPILED_CSS_KEY));
+    }
+
+    /**
+     * A custom theme with its own LESS file is enabled and compiled on the next request.
+     */
+    public function test_custom_theme_with_own_less_compiles_after_enabling()
+    {
+        global $osec_app;
+
+        $dir = $this->custom_root . '/child_test';
+        file_put_contents($dir . '/style.css', "/**\n * Theme Name: Child Test\n * Version: 1.0.0\n */\n");
+        wp_mkdir_p($dir . '/less');
+        file_put_contents(
+            $dir . '/less/override.less',
+            "@import \"bootstrap/mixins.less\";\n.osec-child-test { .ai1ec-clearfix(); color: #123456; }\n"
+        );
+
+        ThemeLoader::factory($osec_app)->switch_theme($this->theme($this->custom_root, 'child_test'));
+
+        // Next request: the loader is built for the new theme, then 'init' runs verifyCache().
+        $osec_app->inject_object(ThemeLoader::class, new ThemeLoader($osec_app));
+        $this->verify_cache_callback()();
+
+        $ctrl  = FrontendCssController::factory($osec_app);
+        $cache = (new \ReflectionProperty($ctrl, 'cache'))->getValue($ctrl);
+        $css   = $cache->get(FrontendCssController::COMPILED_CSS_KEY);
+
+        $this->assertStringContainsString('.osec-child-test{color:#123456}', $css);
+        $this->assertStringContainsString('.osec-child-test:before', $css);
+        $this->assertFalse((bool) $osec_app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY));
+    }
+
+    /**
+     * BootstrapController::verifyCache() as registered on 'init'.
+     */
+    private function verify_cache_callback(): callable
+    {
+        global $wp_filter;
+
+        foreach ($wp_filter['init']->callbacks as $callbacks) {
+            foreach ($callbacks as $callback) {
+                $fn = $callback['function'];
+                if (is_array($fn) && $fn[0] instanceof BootstrapController && 'verifyCache' === $fn[1]) {
+                    return $fn;
+                }
+            }
+        }
+        $this->fail('BootstrapController::verifyCache() is not registered on init.');
     }
 
     private function theme(string $root, string $name): array
