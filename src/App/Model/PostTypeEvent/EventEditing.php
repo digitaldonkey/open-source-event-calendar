@@ -159,15 +159,15 @@ class EventEditing extends OsecBaseClass
             RequestParser::get_param('osec_hide_cost', false, ParamType::Bool)
         );
 
-        $osec_ticket_url = RequestParser::get_param('osec_ticket_url', '');
+        // Clickable links.
+        $osec_ticket_url = RequestParser::get_param('osec_ticket_url', '', ParamType::HttpUrl);
         if ($osec_ticket_url) {
-            // Clickable links.
-            $event->set('ticket_url', sanitize_url($osec_ticket_url, ['http', 'https']));
+            $event->set('ticket_url', $osec_ticket_url);
         }
-        $osec_contact_url = RequestParser::get_param('osec_contact_url', '');
+        // Allow any of @see wp_allowed_protocols().
+        $osec_contact_url = RequestParser::get_param('osec_contact_url', '', ParamType::Url);
         if ($osec_contact_url) {
-            // Allow any of @see wp_allowed_protocols().
-            $event->set('contact_url', sanitize_url($osec_contact_url));
+            $event->set('contact_url', $osec_contact_url);
         }
         $osec_contact_name = RequestParser::get_param('osec_contact_name', false);
         if ($osec_contact_name) {
@@ -179,9 +179,9 @@ class EventEditing extends OsecBaseClass
             $event->set('contact_phone', $osec_contact_phone);
         }
 
-        $osec_contact_email = RequestParser::get_param('osec_contact_email', false);
+        $osec_contact_email = RequestParser::get_param('osec_contact_email', false, ParamType::Email);
         if ($osec_contact_email) {
-            $event->set('contact_email', sanitize_email($osec_contact_email));
+            $event->set('contact_email', $osec_contact_email);
         }
 
         $showCoordinates = RequestParser::get_param('osec_input_coordinates', false, ParamType::Bool);
