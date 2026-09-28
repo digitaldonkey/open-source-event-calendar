@@ -15,9 +15,28 @@ use Osec\Tests\Utilities\TestBase;
  */
 class SaveSettingsTest extends TestBase
 {
+    /**
+     * Setting values before the test. A save without view checkboxes disables
+     * every view, and the Settings object outlives the DB rollback.
+     */
+    private array $saved = [];
+
+    public function set_up()
+    {
+        global $osec_app;
+
+        parent::set_up();
+        $this->saved = array_map(fn($option) => $option['value'] ?? null, $osec_app->settings->get_options());
+    }
+
     public function tear_down()
     {
+        global $osec_app;
+
         $_REQUEST = [];
+        foreach ($this->saved as $name => $value) {
+            $osec_app->settings->set($name, $value);
+        }
         parent::tear_down();
     }
 
