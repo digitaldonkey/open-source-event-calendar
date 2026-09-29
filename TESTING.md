@@ -224,6 +224,39 @@ Confirmed working (2026-09-11): 1 passing in 3s vs. the full suite's ~5 minutes.
 
 **Known flakiness**: the `afterEach` hook in `test/01_OsecPluginInstall.spec.js` (`doLogout()` in `page_objects/WpLogin.js`, which hovers the admin bar then clicks Log Out) can intermittently hit a `TimeoutError: Waiting until element is visible` right after the very first plugin activation in a run — most likely first-page-load timing rather than a real regression. It hasn't reproduced on a re-run in practice; if it fails, re-run just that spec (`npx mocha test/01_OsecPluginInstall.spec.js --timeout 60000`) before assuming a real break.
 
+## JS smoke tests (non-destructive)
+
+`integration_tests/js_smoke/` visits every page that loads an OSEC JS bundle, waits for its requirejs modules to
+run, fails on any browser console error or failed script request, and does one or two interactions per page
+(view switching, paging, date pickers, filters, popover, maps, repeat dialog, color pickers). Unlike `test/` it
+installs, uninstalls and trashes nothing, so it is safe to run on the dev site after every JS change. Not part
+of `npm run test` or CI (yet).
+
+```bash
+/usr/local/bin/wp eval-file bin/dev-seed-block-test-data.php   # test data, once ([OSEC-TEST] events and terms)
+cd integration_tests
+npm run test:js                                   # all groups, ~10 s
+npm run test:js -- --grep @js-calendar            # one group
+```
+
+Groups, one per bundle: `@js-calendar`, `@js-event`, `@js-backend` (common backend), `@js-add-new-event`,
+`@js-settings`, `@js-feeds`, `@js-categories`, `@js-less-variables`. The grid defaults to
+`http://selenium-chrome:4444/wd/hub` (`SELENIUM_REMOTE_URL` overrides it).
+
+### Checking a hand edit of a bundle: `js-equivalent.js`
+
+`public/js/pages/*.js` are minified bundles without build tooling, edited by hand. To prove an edit only renamed
+local names (or reformatted, or changed comments), compare the terser-minified output (mangle on, compress off)
+at a git revision with the working tree; it must be byte-identical:
+
+```bash
+node integration_tests/js-equivalent.js public/js/pages/calendar.js              # vs HEAD
+node integration_tests/js-equivalent.js --rev=master public/js/pages/*.js        # exit 1 if any file differs
+```
+
+Needs `npm install` in `integration_tests/` (terser is a dev dependency there). Run the JS smoke tests as well:
+the check says nothing about edits that are meant to change behaviour.
+
 ## Firefox (second browser)
 
 The Chrome add-on's service is Chrome only. `.ddev/docker-compose.selenium-firefox.yaml` adds a second node -

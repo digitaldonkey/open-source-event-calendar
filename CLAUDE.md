@@ -437,8 +437,7 @@ failure mode, not a compile error.
   npm install
   npm run build-twig-frontend
   ```
-  (Note: `twig_to_js_transform/readme.md` says `npm run transform` — that script doesn't exist in `package.json`; only `build-twig-frontend` does. Use the command above.)
-- What it does: compiles each `.twig` file to twig-js, then splices the compiled output into `public/js/{agenda,oneday,month}.js` **and** `public/js/pages/calendar.js` (which carries its own bundled copy inherited from the original vendor's unknown build tooling) — replacing only the content between matching `/*REPLACE:<template>.twig*/` marker comments in each destination file.
+- What it does: compiles each `.twig` file to twig-js, then splices the compiled output into `public/js/pages/calendar.js` (the only served copy, inherited from the original vendor's unknown build tooling) — replacing only the content between matching `/*REPLACE:<template>.twig*/` marker comments. The standalone `public/js/{agenda,oneday,month}.js` copies were never loaded and are gone since 1.2.0.
 - **Never upgrade the `twig` npm package past `^0.7.2`** — pinned to stay compatible with legacy ai1ec-derived code.
 - No original build tooling exists for these templates (this script is a workaround). If you'd rather not deal with it after a Twig edit, `use_frontend_rendering` can be turned off in OSEC Settings so only backend rendering is used.
 
@@ -555,7 +554,7 @@ deliberately broken commit that turned it red:
 |---|---|---|
 | Verify WordPress version metadata | nothing - `osec prepare_release` is read-only by design | the command's own `WP_CLI::error()` exit 1; the `git status` wrapper around it is vestigial and can never fire |
 | Verify Readme.txt | `README.txt` from `README.md` + plugin headers | `git status --porcelain` at the repo root |
-| Verify Twig frontend templates | `public/js/{agenda,oneday,month}.js` and `public/js/pages/calendar.js` | `git status -s` from `twig_to_js_transform/` |
+| Verify Twig frontend templates | `public/js/pages/calendar.js` | `git status -s` from `twig_to_js_transform/` |
 | Verify hooks-and-filters.md | `hooks-and-filters.md` | `git status --porcelain` at the repo root |
 
 **The hooks gate was inert until `fcaab93d`**, and its failure mode is the one to watch for: it ran

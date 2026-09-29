@@ -36,7 +36,7 @@ class MapsController extends OsecBaseClass
 
         wp_register_script(
             'event-maps-common.js',
-            OSEC_ADMIN_THEME_JS_URL . 'scripts/event-maps-common.js',
+            OSEC_ADMIN_THEME_JS_URL . 'maps/event-maps-common.js',
             ['leaflet'],
             OSEC_VERSION,
             ['in_footer' => true]
@@ -47,7 +47,7 @@ class MapsController extends OsecBaseClass
 
             wp_register_script(
                 'admin-box-event-map.js',
-                OSEC_ADMIN_THEME_JS_URL . 'scripts/admin-box-event-map.js',
+                OSEC_ADMIN_THEME_JS_URL . 'maps/admin-box-event-map.js',
                 [
                     'event-maps-common.js',
                     'leaflet-control-geocoder',
@@ -96,7 +96,7 @@ class MapsController extends OsecBaseClass
         } else {
             wp_enqueue_script(
                 'event-map-public.js',
-                OSEC_ADMIN_THEME_JS_URL . 'scripts/event-map-public.js',
+                OSEC_ADMIN_THEME_JS_URL . 'maps/event-map-public.js',
                 ['event-maps-common.js'],
                 OSEC_VERSION,
                 ['in_footer' => true]

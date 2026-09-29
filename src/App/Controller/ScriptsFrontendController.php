@@ -228,7 +228,7 @@ class ScriptsFrontendController extends OsecBaseClass
         // Finally, load the page_ready script to execute code that must run after
         // all scripts have been loaded.
         $page_ready = file_get_contents(
-            OSEC_ADMIN_THEME_JS_PATH . 'scripts/common_scripts/page_ready.js'
+            OSEC_ADMIN_THEME_JS_PATH . 'page_ready.js'
         );
 
         $javascript = $require . PHP_EOL
