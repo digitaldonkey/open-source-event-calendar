@@ -261,6 +261,20 @@ export default function Edit(props) {
 							}}
 						/>
 					</p>
+					<p>
+						<BoolSwitch
+							labelText={__(
+								'Display print icon',
+								'open source-event-calendar'
+							)}
+							value={attributes.displayPrint}
+							onChange={(val) => {
+								setAttributes({
+									displayPrint: val
+								})
+							}}
+						/>
+					</p>
 					{(attributes.view === 'agenda' || attributes.displayViewSwitch) && (
 						<p>
 							<BoolSwitch
