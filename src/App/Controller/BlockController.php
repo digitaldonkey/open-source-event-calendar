@@ -95,6 +95,7 @@ class BlockController extends OsecBaseClass
             'post_ids' => implode(',', $atts['postIds']),
             'display_filters' => 'true',
             'display_subscribe' => 'true',
+            'display_print' => 'true',
             'agenda_toggle' => 'true',
             'display_view_switch' => 'true',
             'display_date_navigation' => 'true',
@@ -114,6 +115,7 @@ class BlockController extends OsecBaseClass
         foreach ([
             'displayFilters' => 'display_filters',
             'displaySubscribe' => 'display_subscribe',
+            'displayPrint' => 'display_print',
             'displayViewSwitch' => 'display_view_switch',
             'displayDateNavigation' => 'display_date_navigation',
             'agendaToggle' => 'agenda_toggle',

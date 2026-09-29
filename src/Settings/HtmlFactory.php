@@ -105,6 +105,7 @@ class HtmlFactory extends OsecBaseClass
             'exact_date' => '__DATE__',
             'display_filters' => $args['display_filters'],
             'display_subscribe' => $args['display_subscribe'],
+            'display_print' => $args['display_print'] ?? 'true',
             'agenda_toggle' => $args['agenda_toggle'],
             'display_view_switch' => $args['display_view_switch'],
             'display_date_navigation' => $args['display_date_navigation'],

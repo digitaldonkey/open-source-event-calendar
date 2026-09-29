@@ -333,7 +333,11 @@ abstract class AbstractView extends OsecBaseClass
      */
     protected function getPrintButtonHtml(): string
     {
-        if (! $this->app->settings->get('display_print_button')) {
+        // The setting is the master switch, a block can only hide the button.
+        if (
+            ! $this->app->settings->get('display_print_button')
+            || $this->request->get('display_print') === 'false'
+        ) {
             return '';
         }
 
