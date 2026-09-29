@@ -85,7 +85,8 @@ $today = new DateTimeImmutable('today', new DateTimeZone($tz));
  * @param  string  $title
  * @param  string  $start  Modifier relative to today 00:00, e.g. '+1 day 18:00'.
  * @param  string|null  $end  Modifier relative to the start, e.g. '+2 hours'; null = instant event.
- * @param  array  $opts  categories, tags, allday, rrule, exdates (modifiers relative to start), status, content, venue
+ * @param  array  $opts  categories, tags, allday, rrule, exdates (modifiers relative to start), status, content, venue,
+ *                       map (address, latitude, longitude: shows the map)
  */
 $event = function (string $title, string $start, ?string $end, array $opts = []) use ($osec_app, $today, $tz): int {
     $start_dt = $today->modify($start);
@@ -120,6 +121,12 @@ $event = function (string $title, string $start, ?string $end, array $opts = [])
         'exception_dates'  => implode(',', $exdates),
         'venue'            => $opts['venue'] ?? '',
     ];
+    if (! empty($opts['map'])) {
+        $data += $opts['map'] + [
+            'show_map'         => true,
+            'show_coordinates' => true,
+        ];
+    }
     (new Event($osec_app, $data))->save(false);
 
     // Event::save() does not assign terms (the editor saves them with the post).
@@ -141,6 +148,22 @@ $events = [
     ['All-day family fair', '+1 day', '+1 day', ['sports'], ['family', 'outdoor'], ['allday' => true]],
     ['Three-day workshop', '+3 days 09:00', '+2 days 8 hours', ['workshops'], ['family']],
     ['No category, no tag', '+2 days 15:00', '+1 hour', [], []],
+    // Single event page with a map (integration_tests/js_smoke).
+    [
+        'Open-air cinema (map)',
+        '+2 days 21:00',
+        '+2 hours',
+        ['concerts'],
+        ['outdoor'],
+        [
+            'venue' => 'Brandenburg Gate',
+            'map'   => [
+                'address'   => 'Pariser Platz 1, 10117 Berlin, Germany',
+                'latitude'  => 52.51627,
+                'longitude' => 13.377703,
+            ],
+        ],
+    ],
     // Recurring.
     [
         'Weekly football training',

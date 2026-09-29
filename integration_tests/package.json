@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "scripts": {
         "test": "NODE_ENV=development npx mocha test/**/*.spec.js --timeout 60000",
-        "flow": "flow"
+        "flow": "flow",
+        "test:js": "NODE_ENV=development npx mocha \"js_smoke/**/*.spec.js\" --timeout 60000 --reporter spec"
     },
     "author": "digitaldonkey",
     "license": "Apache-2.0",
