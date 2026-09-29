@@ -605,11 +605,46 @@ time. The whole red run took 3m07s.
 
 ## CircleCI Behavior by Branch
 
-What the CircleCI pipeline (`.circleci/config.yml`) does differently depending on which branch triggers it:
+What the CircleCI pipeline (`.circleci/config.yml`) does differently depending on which branch or tag triggers it:
 
-- `master` — runs the full test matrix; creates a GitHub dev release; creates a GitHub tag release and a [WordPress.org plugin release](https://wordpress.org/plugins/open-source-event-calendar) if the commit is tagged; contains the latest bugfixes
+- `master` — runs the full test matrix; replaces the WordPress.org SVN **trunk** and the GitHub `dev` prerelease, on every push (skipped when master has moved on, so a rerun never rolls back); contains the latest bugfixes
+- tag `X.Y.Z` — runs the full test matrix, then creates SVN `tags/X.Y.Z` and the GitHub release `X.Y.Z` (see below)
+- tag `X.Y.Z-dryrun` — the same, but prints what it would commit and publishes nothing
 - `release-*` — runs the full test matrix; does not create a release
 - Next-release branch (e.g. `1.2.x-dev` if the current release is `1.1.x`) — a dev branch for the next semantic major version; should include all bugfixes from master; no release
+
+### Releasing to WordPress.org
+
+```bash
+# on master, once the release commit (version bumped everywhere) is pushed and green
+git tag -a 1.2.0 -m "Release 1.2.0"
+git push origin 1.2.0
+```
+
+- **`.circleci/release-context.sh` decides, once, in the `build` job** and writes `/tmp/release.env`
+  (`RELEASE_MODE` none/dev/tagged/dryrun, `RELEASE_VERSION`, `RELEASE_UPDATE_TRUNK`) for the GitHub and SVN
+  jobs. A tag that fails a check fails `build`, before any test runs:
+  - `X.Y.Z` or `X.Y.Z-dryrun` only;
+  - the tagged commit is on master;
+  - the tag equals plugin header `Version` and `Stable Tag`, `README.txt` `Stable Tag` and `OSEC_VERSION`;
+  - the tag is higher than every other `X.Y.Z` tag.
+- **Trunk (and the GitHub `dev` release) is only replaced while the pipeline's commit is master's HEAD.**
+  Checked when `build` starts and again right before the deploy (`.circleci/still-master-head.sh`), because
+  master can move on during the ~20 min of tests. A master pipeline that was overtaken deploys nothing; a tag on
+  an older master commit creates just `tags/X.Y.Z`. If the check itself fails (fetch error), the job fails.
+- **The release commit reaches trunk through its master pipeline before the tag exists** - WordPress.org
+  serves trunk as that version until the tag pipeline finishes. Tag it before pushing anything else to master.
+- **An existing `tags/X.Y.Z` is never touched**, so rerunning a tag pipeline is harmless.
+- **The tag is committed as a working-copy copy of the updated trunk**, so a release uploads only what differs
+  from trunk. A whole-tag upload (~1,500 files) timed out on "Committing transaction..." in 2026-09.
+- **Only the maintainer can push `X.Y.Z` tags**: GitHub tag ruleset "Release tags" (`refs/tags/*.*.*`,
+  creation/update/deletion restricted, bypass: repository admin). `ghr` therefore must not use `-delete`
+  for a release tag.
+- **`.circleci/tests/test-release-scripts.sh`** (run in `build`) covers both scripts against a local git
+  origin and a local `file://` SVN repository. Run it after any change to them.
+- Before 2026-09-29 a pushed tag ran nothing and the "tagged" branch of the old deploy script could never
+  be taken, so 1.1.12 - 1.1.14 never got SVN tags; `tags/1.1.14` and a repaired `tags/1.1.5` were added by
+  hand (r3719399).
 
 ## Reading CI Results
 
