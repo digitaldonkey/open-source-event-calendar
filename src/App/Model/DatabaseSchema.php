@@ -157,82 +157,82 @@ class DatabaseSchema extends OsecBaseClass
         // =======================
         $table_name = $dbi->get_table_name(OSEC_DB__EVENTS);
         $sql        = "CREATE TABLE $table_name (
-				post_id bigint NOT NULL,
-				start bigint UNSIGNED NOT NULL,
-				end bigint UNSIGNED,
-				timezone_name varchar(50),
-				allday tinyint(1) NOT NULL,
-				instant_event tinyint(1) NOT NULL DEFAULT 0,
-				recurrence_rules longtext,
-				exception_rules longtext,
-				recurrence_dates longtext,
-				exception_dates longtext,
-				venue varchar(255),
-				country varchar(255),
-				address varchar(255),
-				city varchar(255),
-				province varchar(255),
-				postal_code varchar(32),
-				show_map tinyint(1),
-				contact_name varchar(255),
-				contact_phone varchar(32),
-				contact_email varchar(128),
-				contact_url varchar(255),
-				cost varchar(255),
-				ticket_url varchar(255),
-				ical_feed_url varchar(768),
-				ical_source_url varchar(768),
-				ical_organizer varchar(255),
-				ical_contact varchar(255),
-				ical_uid varchar(255),
-				show_coordinates tinyint(1),
-				latitude decimal(20,15),
-				longitude decimal(20,15),
-				PRIMARY KEY  (post_id),
-				KEY feed_source (ical_feed_url)
-				) CHARACTER SET utf8;";
+                post_id bigint NOT NULL,
+                start bigint UNSIGNED NOT NULL,
+                end bigint UNSIGNED,
+                timezone_name varchar(50),
+                allday tinyint(1) NOT NULL,
+                instant_event tinyint(1) NOT NULL DEFAULT 0,
+                recurrence_rules longtext,
+                exception_rules longtext,
+                recurrence_dates longtext,
+                exception_dates longtext,
+                venue varchar(255),
+                country varchar(255),
+                address varchar(255),
+                city varchar(255),
+                province varchar(255),
+                postal_code varchar(32),
+                show_map tinyint(1),
+                contact_name varchar(255),
+                contact_phone varchar(32),
+                contact_email varchar(128),
+                contact_url varchar(255),
+                cost varchar(255),
+                ticket_url varchar(255),
+                ical_feed_url varchar(768),
+                ical_source_url varchar(768),
+                ical_organizer varchar(255),
+                ical_contact varchar(255),
+                ical_uid varchar(255),
+                show_coordinates tinyint(1),
+                latitude decimal(20,15),
+                longitude decimal(20,15),
+                PRIMARY KEY  (post_id),
+                KEY feed_source (ical_feed_url)
+                ) CHARACTER SET utf8;";
 
         // ==========================
         // = Create table instances =
         // ==========================
         $table_name = $dbi->get_table_name(OSEC_DB__INSTANCES);
         $sql        .= "CREATE TABLE $table_name (
-				id bigint NOT NULL AUTO_INCREMENT,
-				post_id bigint NOT NULL,
-				start bigint unsigned NOT NULL,
-				end bigint unsigned NOT NULL,
-				PRIMARY KEY  (id),
-				UNIQUE KEY evt_instance (post_id,start)
-				) CHARACTER SET utf8;";
+                id bigint NOT NULL AUTO_INCREMENT,
+                post_id bigint NOT NULL,
+                start bigint unsigned NOT NULL,
+                end bigint unsigned NOT NULL,
+                PRIMARY KEY  (id),
+                UNIQUE KEY evt_instance (post_id,start)
+                ) CHARACTER SET utf8;";
 
         // ================================
         // = Create table category colors =
         // ================================
         $table_name = $dbi->get_table_name(OSEC_DB__META);
         $sql        .= "CREATE TABLE $table_name (
-			term_id bigint NOT NULL,
-			term_color varchar(255) NOT NULL,
-			term_image varchar(254) NULL DEFAULT NULL,
-			PRIMARY KEY  (term_id)
-			) CHARACTER SET utf8;";
+            term_id bigint NOT NULL,
+            term_color varchar(255) NOT NULL,
+            term_image varchar(254) NULL DEFAULT NULL,
+            PRIMARY KEY  (term_id)
+            ) CHARACTER SET utf8;";
 
         $table_name = $dbi->get_table_name(OSEC_DB__FEEDS);
         $sql        .= "CREATE TABLE $table_name (
-					feed_id bigint NOT NULL AUTO_INCREMENT,
-					feed_url varchar(768) NOT NULL,
-					feed_name varchar(768) NOT NULL,
-					feed_category varchar(255) NOT NULL,
-					feed_tags varchar(255) NOT NULL,
-					comments_enabled tinyint(1) NOT NULL DEFAULT '1',
-					import_post_status varchar(255) NOT NULL DEFAULT 'publish',					
-					map_display_enabled tinyint(1) NOT NULL DEFAULT '0',
-					keep_tags_categories tinyint(1) NOT NULL DEFAULT '0',
-					keep_old_events tinyint(1) NOT NULL DEFAULT '0',
-					import_timezone tinyint(1) NOT NULL DEFAULT '0',
-					hide_cost tinyint(1) NOT NULL DEFAULT '1',
-					PRIMARY KEY  (feed_id),
-					UNIQUE KEY feed (feed_url)
-					) CHARACTER SET utf8;";
+                    feed_id bigint NOT NULL AUTO_INCREMENT,
+                    feed_url varchar(768) NOT NULL,
+                    feed_name varchar(768) NOT NULL,
+                    feed_category varchar(255) NOT NULL,
+                    feed_tags varchar(255) NOT NULL,
+                    comments_enabled tinyint(1) NOT NULL DEFAULT '1',
+                    import_post_status varchar(255) NOT NULL DEFAULT 'publish',
+                    map_display_enabled tinyint(1) NOT NULL DEFAULT '0',
+                    keep_tags_categories tinyint(1) NOT NULL DEFAULT '0',
+                    keep_old_events tinyint(1) NOT NULL DEFAULT '0',
+                    import_timezone tinyint(1) NOT NULL DEFAULT '0',
+                    hide_cost tinyint(1) NOT NULL DEFAULT '1',
+                    PRIMARY KEY  (feed_id),
+                    UNIQUE KEY feed (feed_url)
+                    ) CHARACTER SET utf8;";
 
         return $sql;
     }
@@ -305,10 +305,10 @@ class DatabaseSchema extends OsecBaseClass
         }
         $current_table = null;
         $ctable_regexp = '#
-			\s*CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?([^ ]+)`?\s*
-			\((.+)\)
-			([^()]*)
-			#six';
+            \s*CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?([^ ]+)`?\s*
+            \((.+)\)
+            ([^()]*)
+            #six';
         foreach ($queries as $query) {
             if (preg_match($ctable_regexp, (string)$query, $matches)) {
                 $this->schemaDelta[$matches[1]] = [
@@ -528,28 +528,28 @@ class DatabaseSchema extends OsecBaseClass
     protected function parseColumn($description)
     {
         $column_regexp = '#^
-			([a-z][a-z_]+)\s+
-			(
-				[A-Z]+
-				(?:\s*\(\s*\d+(?:\s*,\s*\d+\s*)?\s*\))?
-				(?:\s+unsigned)?
-				(?:\s+ZEROFILL)?
-				(?:\s+BINARY)?
-				(?:
-					\s+CHARACTER\s+SET\s+[a-z][a-z_]+
-					(?:\s+COLLATE\s+[a-z][a-z0-9_]+)?
-				)?
-			)
-			(
-				\s+(?:NOT\s+)?NULL
-			)?
-			(
-				\s+DEFAULT\s+[^\s]+
-			)?
-			(\s+ON\s+UPDATE\s+CURRENT_(?:TIMESTAMP|DATE))?
-			(\s+AUTO_INCREMENT)?
-			\s*,?\s*
-		$#six';
+            ([a-z][a-z_]+)\s+
+            (
+                [A-Z]+
+                (?:\s*\(\s*\d+(?:\s*,\s*\d+\s*)?\s*\))?
+                (?:\s+unsigned)?
+                (?:\s+ZEROFILL)?
+                (?:\s+BINARY)?
+                (?:
+                    \s+CHARACTER\s+SET\s+[a-z][a-z_]+
+                    (?:\s+COLLATE\s+[a-z][a-z0-9_]+)?
+                )?
+            )
+            (
+                \s+(?:NOT\s+)?NULL
+            )?
+            (
+                \s+DEFAULT\s+[^\s]+
+            )?
+            (\s+ON\s+UPDATE\s+CURRENT_(?:TIMESTAMP|DATE))?
+            (\s+AUTO_INCREMENT)?
+            \s*,?\s*
+        $#six';
         if (! preg_match($column_regexp, $description, $matches)) {
             throw new DatabaseErrorException(
                 esc_html(

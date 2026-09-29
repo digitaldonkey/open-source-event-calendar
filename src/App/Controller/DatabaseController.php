@@ -473,29 +473,29 @@ class DatabaseController extends OsecBaseClass
         if (count($this->queries) && $this->isLogEnabled && php_sapi_name() !== 'cli') {
             echo '
         <div class="timely timely-debug" style="max-width: 90%; margin: 0 auto">
-		  <table class="ai1ec-table ai1ec-table-striped">
-		    <thead>
-		      <tr>
-		        <th>N.</th>
-		        <th>Query</th>
-		        <th>Duration, ms</th>
-		        <th>Row Count</th>
-		      </tr>
-		    </thead>
-		    <tbody>';
+          <table class="ai1ec-table ai1ec-table-striped">
+            <thead>
+              <tr>
+                <th>N.</th>
+                <th>Query</th>
+                <th>Duration, ms</th>
+                <th>Row Count</th>
+              </tr>
+            </thead>
+            <tbody>';
             $i    = 0;
             $time = 0;
             foreach ($this->queries as $query) {
                 $time += $query['d'];
                 echo '<tr>
-			        <td>', esc_html(++$i), '</td>
-			        <td>', esc_html($query['q']), '</td>
-			        <td>', esc_html(round($query['d'] * 1000, 2)), '</td>
-			        <td>', esc_html((int)$query['r']), '</td>
-			      </tr>';
+                    <td>', esc_html(++$i), '</td>
+                    <td>', esc_html($query['q']), '</td>
+                    <td>', esc_html(round($query['d'] * 1000, 2)), '</td>
+                    <td>', esc_html((int)$query['r']), '</td>
+                  </tr>';
             }
             echo '
-		    </tbody>
+            </tbody>
             <tfoot>
               <tr>
                 <th colspan="4">Total time, ms: ';
@@ -503,8 +503,8 @@ class DatabaseController extends OsecBaseClass
             echo '</th>
               </tr>
             </tfoot>
-		  </table>
-		</div>';
+          </table>
+        </div>';
         }
     }
 }

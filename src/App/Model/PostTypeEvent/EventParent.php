@@ -278,8 +278,8 @@ class EventParent extends OsecBaseClass
         $table_posts     = $dbi->get_table_name('posts');
         return (int) $dbi->get_var(
             $dbi->prepare(
-                "SELECT COUNT(i.id) FROM {$table_instances} i 
-                         JOIN {$table_posts} p ON (p.ID = i.post_id)  
+                "SELECT COUNT(i.id) FROM {$table_instances} i
+                         JOIN {$table_posts} p ON (p.ID = i.post_id)
                          WHERE i.post_id = %d AND i.id > %d AND p.post_status = 'publish'",
                 $post_id,
                 $instance_id

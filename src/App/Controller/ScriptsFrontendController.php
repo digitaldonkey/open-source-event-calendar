@@ -258,10 +258,10 @@ class ScriptsFrontendController extends OsecBaseClass
         $namespace = self::REQUIRE_NAMESPACE;
         $config    = "
             $namespace.require.config( {
-			    waitSeconds : 15,
-			    urlArgs     : 'ver=$version',
-			    baseUrl     : '$js_url'
-		    } );
+                waitSeconds : 15,
+                urlArgs     : 'ver=$version',
+                baseUrl     : '$js_url'
+            } );
         ";
 
         return $config;
