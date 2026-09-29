@@ -83,7 +83,7 @@ class CalendarPageView extends OsecBaseClass
             // short-circuit and return error message
             return '<div id="osec-container"><div class="timely"><p>'
                 . __(
-                    'There was an error loading calendar. 
+                    'There was an error loading calendar.
                         Please contact site administrator and inform him to configure calendar views.',
                     'open-source-event-calendar'
                 )
@@ -107,7 +107,7 @@ class CalendarPageView extends OsecBaseClass
                 sprintf(
                 /* translators: View Name */
                     __(
-                        'Calendar was unable to initialize %s view and has reverted to Agenda view. 
+                        'Calendar was unable to initialize %s view and has reverted to Agenda view.
                             Please check if you have installed the latest versions of calendar add-ons.',
                         'open-source-event-calendar'
                     ),

@@ -444,7 +444,7 @@ class Timezones extends OsecBaseClass
                         sprintf(
                             /* translators: Link options-general timezone settings */
                             __(
-                                'OSEC fixed your site’s timezone for you.  
+                                'OSEC fixed your site’s timezone for you.
                                  Please verify in %s <em>Timezone</em> dropdown menu.',
                                 'open-source-event-calendar'
                             ),
@@ -609,7 +609,7 @@ class Timezones extends OsecBaseClass
             sprintf(
                 /* translators: 1: Timezone offset 2: LinkOpen 3: 2: LinkClose */
                 __(
-                    'Timezone "UTC%1$" is not recognized. Please %2$suse valid%3$ timezone name, 
+                    'Timezone "UTC%1$" is not recognized. Please %2$suse valid%3$ timezone name,
                         until then events will be created in UTC timezone.',
                     'open-source-event-calendar'
                 ),

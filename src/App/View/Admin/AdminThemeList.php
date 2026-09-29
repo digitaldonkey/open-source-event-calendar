@@ -232,7 +232,7 @@ class AdminThemeList extends WP_List_Table
                 printf(
                 /* translators: 1: Url 2: Url */
                     esc_html__(
-                        'You only have one theme enabled for this site right now. Visit the Network Admin to 
+                        'You only have one theme enabled for this site right now. Visit the Network Admin to
                             <a href="%1$s">enable</a> or <a href="%2$s">install</a> more themes.',
                         'open-source-event-calendar'
                     ),
@@ -251,7 +251,7 @@ class AdminThemeList extends WP_List_Table
                 printf(
                 /* translators: Url */
                     esc_html__(
-                        'You only have one theme enabled for this site right now. Visit the Network Admin to 
+                        'You only have one theme enabled for this site right now. Visit the Network Admin to
                             <a href="%1$s">enable</a> more themes.',
                         'open-source-event-calendar'
                     ),
