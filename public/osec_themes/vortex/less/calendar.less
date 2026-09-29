@@ -1169,6 +1169,15 @@ table.ai1ec-oneday-view-original {
   .ai1ec-month-view .ai1ec-day-stretcher {
     height: 3.5em;
   }
+  // Month: fill the landscape page like a paper calendar, also when it is empty. A table
+  // treats its height as a minimum, so a month with more events still grows onto more
+  // pages. Measured 2026-09-30 in Chrome and Firefox: up to 150mm keeps an empty and a full
+  // month on one A4 landscape page (the shorter of A4 and Letter), 160mm does not; 145mm
+  // leaves room for a larger base font size in the print header. Not 100vh: Firefox sizes
+  // vh by the window, not the page, and printed an empty second page.
+  .ai1ec-month-view {
+    height: 145mm;
+  }
   // Agenda: dates never split; events only split with enough lines on both pages.
   .ai1ec-agenda-view {
     // Flex instead of float with overflow:hidden, which clips events continued on the next page.

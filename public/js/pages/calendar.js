@@ -399,8 +399,10 @@ timely.define("domReady", [], function () {
     }, c
 }), timely.define("scripts/calendar/print", ["jquery_timely", "ai1ec_config"], function ($, config) {
     // Week/day grids are scaled to one page: page height minus print header and margins (px, 96 dpi).
-    // Week prints landscape, day portrait; the smaller of A4 and Letter.
-    var PAGE_HEIGHT = {week: 660, oneday: 860},
+    // Week prints landscape, day portrait; the smaller of A4 and Letter. Measured 2026-09-30 in
+    // Chrome and Firefox: a week above 660 spills onto a second A4 landscape page, a day fits
+    // up to 925 on Letter portrait.
+    var PAGE_HEIGHT = {week: 660, oneday: 900},
         PRINT_HEADER_HEIGHT = 80,
         MIN_GRID_HEIGHT = 300,
         // Events are at least this high, so the time and a title line stay readable.
