@@ -26,13 +26,34 @@ class IcsFeedTermsTest extends TestBase
 {
     private const FEED_URL = 'https://example.org/terms.ics';
 
+    /**
+     * The sample feed: CATEGORIES on one or several lines, X-TAGS lists, terms
+     * shared by events, special characters, a recurring event and one without terms.
+     */
     public function test_categories_and_tags_of_the_feed_are_assigned()
     {
         $this->import_source(file_get_contents(__DIR__ . '/ical_feeds/categories_and_tags.ics'));
 
-        $post_id = $this->post_id();
-        $this->assertSame(['Cat A', 'Cat B', 'Cat C'], $this->names($post_id, EventTaxonomy::CATEGORIES));
-        $this->assertSame(['tag1', 'tag2'], $this->names($post_id, EventTaxonomy::TAGS));
+        $expected = [
+            'game-night'       => [['Community', 'Evening', 'Games'], ['board games', 'D&D']],
+            'cycling-tour'     => [['Outdoor', 'Sports'], ['bike', 'outdoor']],
+            'open-air-concert' => [['Music', 'Outdoor'], ['free', 'outdoor']],
+            'crepes-workshop'  => [['Food & Drink'], ['café', 'workshop']],
+            'weekly-meetup'    => [['Community'], []],
+            'spring-cleaning'  => [[], []],
+        ];
+        $this->assertCount(count($expected), EventSearch::factory($GLOBALS['osec_app'])->get_event_ids_for_feed(self::FEED_URL));
+        foreach ($expected as $uid => [$categories, $tags]) {
+            $post_id = $this->post_id_by_uid($uid . '-2027@neighbourhood-club.example.org');
+            $this->assertSame($categories, $this->decoded_names($post_id, EventTaxonomy::CATEGORIES), "$uid categories");
+            $this->assertSame($tags, $this->decoded_names($post_id, EventTaxonomy::TAGS), "$uid tags");
+        }
+
+        // A term sent by several events is one term.
+        foreach ([[EventTaxonomy::CATEGORIES, 'Outdoor', 2], [EventTaxonomy::CATEGORIES, 'Community', 2], [EventTaxonomy::TAGS, 'outdoor', 2]] as [$taxonomy, $name, $count]) {
+            $term = get_term_by('name', $name, $taxonomy);
+            $this->assertSame($count, (int)$term->count, "$name count");
+        }
     }
 
     public function test_feed_settings_terms_are_assigned_without_keep()
@@ -242,6 +263,32 @@ class IcsFeedTermsTest extends TestBase
         $this->assertCount(1, $ids);
 
         return (int)$ids[0];
+    }
+
+    private function post_id_by_uid(string $uid): int
+    {
+        global $osec_app;
+
+        $post_id = (int)$osec_app->db->get_var(
+            $osec_app->db->prepare(
+                'SELECT post_id FROM ' . $osec_app->db->get_table_name(OSEC_DB__EVENTS) . ' WHERE ical_uid = %s',
+                $uid
+            )
+        );
+        $this->assertGreaterThan(0, $post_id, "event $uid imported");
+
+        return $post_id;
+    }
+
+    /**
+     * Term names as shown, WordPress stores "&" in term names as "&amp;".
+     */
+    private function decoded_names(int $post_id, string $taxonomy): array
+    {
+        $names = array_map('wp_specialchars_decode', $this->names($post_id, $taxonomy));
+        sort($names, SORT_STRING | SORT_FLAG_CASE);
+
+        return $names;
     }
 
     /**
