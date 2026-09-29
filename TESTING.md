@@ -93,7 +93,7 @@ composer run phpcbf            # auto-fix
 
 ```
 vendor/bin/grumphp run                              # every configured task - INCLUDES integration_tests, see warning below
-vendor/bin/grumphp run --testsuite=git_pre_commit   # what the pre-commit hook runs: composer + phpcs + phpunit
+vendor/bin/grumphp run --testsuite=git_pre_commit   # what the pre-commit hook runs: composer + phpcs + editorconfig + phpunit
 vendor/bin/grumphp run --testsuite=all_tests        # the full TESTING.md checklist in one command
 vendor/bin/grumphp run --testsuite=prepare_release  # release-readiness checks, run after all_tests
 ```
@@ -127,12 +127,12 @@ Unlike the git hook, which only checks staged files, these commands check the wh
 
 Task inventory as currently configured:
 
-- **Active**: `composer` (validates `composer.json`/`composer.lock`), `phpcs` (standard `./phpcs.xml`), `phpunit` (config file `./phpunit.xml`, `always_execute: true` so it runs regardless of which files changed), `integration_tests` (a named `shell` task instance — `metadata.task: shell` — running `cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test`; needs the `ddev-selenium-standalone-chrome` add-on and `constants-local.php`, see [Integration tests](#integration-tests-mochaselenium) above), `plugin_check` (a named `shell` task running `bin/plugin-check.sh`, the WordPress plugin-check gate — see [WordPress plugin-check](#wordpress-plugin-check) below)
+- **Active**: `composer` (validates `composer.json`/`composer.lock`), `phpcs` (standard `./phpcs.xml`), `editorconfig` (a `shell` task running `vendor/bin/ec` from `armin/editorconfig-cli` over every tracked file except `calendar_block/`, against `.editorconfig`; also in CI `static_job`. Fix reports by hand or with `vendor/bin/ec --fix` (rewrites every reported file - check `git diff` first; it knows nothing about strings); whitespace-only fixes go in their own `style:` commit, listed in `.git-blame-ignore-revs`), `phpunit` (config file `./phpunit.xml`, `always_execute: true` so it runs regardless of which files changed), `integration_tests` (a named `shell` task instance — `metadata.task: shell` — running `cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test`; needs the `ddev-selenium-standalone-chrome` add-on and `constants-local.php`, see [Integration tests](#integration-tests-mochaselenium) above), `plugin_check` (a named `shell` task running `bin/plugin-check.sh`, the WordPress plugin-check gate — see [WordPress plugin-check](#wordpress-plugin-check) below)
 - **Present but commented out** (not run): `gherkin`, `git_commit_message`, `phpcpd` (would exclude `lib`/`tests`/`vendor`), `phplint`, `phpmd` (ruleset `codesize, design, naming, unusedcode`, would exclude `tests`/`vendor`)
 
 Testsuites:
-- `git_pre_commit` — matched by name to GrumPHP's git hook (`PreCommitCommand` looks up a testsuite literally named `git_pre_commit`), so this is what actually runs on every commit: `composer`, `phpcs`, `phpunit`. Without this testsuite the hook would run every configured task, including `integration_tests` and the release checks. CI's "Run code quality tests" step deliberately does not use this testsuite (it runs `--tasks=composer,phpcs`, as that job has no database for `phpunit`).
-- `all_tests` — not hook-bound, for running everything on demand: `composer`, `phpcs`, `phpunit`, `plugin_check`, `integration_tests`.
+- `git_pre_commit` — matched by name to GrumPHP's git hook (`PreCommitCommand` looks up a testsuite literally named `git_pre_commit`), so this is what actually runs on every commit: `composer`, `phpcs`, `editorconfig`, `phpunit`. Without this testsuite the hook would run every configured task, including `integration_tests` and the release checks. CI's "Run code quality tests" step deliberately does not use this testsuite (it runs `--tasks=composer,phpcs`, as that job has no database for `phpunit`).
+- `all_tests` — not hook-bound, for running everything on demand: `composer`, `phpcs`, `editorconfig`, `phpunit`, `plugin_check`, `integration_tests`.
 - `prepare_release` — `release_check` (`wp osec prepare_release`), `make_readme` (`wp osec make_readme --check`), `hooks_and_filters` (`hookster_markdown` check), `plugin_check` (`bin/plugin-check.sh`). Run after `all_tests`.
 
 The git pre-commit hook already runs inside DDEV — `git_hook_variables.EXEC_GRUMPHP_COMMAND` wraps it in `ddev exec -d "/var/www/html/wp-content/plugins/open-source-event-calendar"`. No extra setup needed; only reinit (`ddev exec grumphp git:init`) if the hook itself isn't installed.
