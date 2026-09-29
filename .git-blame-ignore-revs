@@ -6,3 +6,9 @@
 b1fe63c2e94d7d6b29a830f75e9e26c999c944ee
 # style: re-indent leading tabs as spaces - no functional change (#60)
 09b45136f5227ecbf82ec9e217fb6abf9ca0d49f
+# style: whitespace inside SQL, HTML and JS strings - no functional change (#60)
+ea445990d0b50ab95764c688c68f2080481cfe24
+# style: remove blank lines at end of file - no functional change (#60)
+5b67a821553a9d3aa0911cebc28db11e4a523fcb
+# style: drop a space before a tab in DateAndTime.js - no functional change (#60)
+660c13618e97fc5b27888d135699b1838d1710fe
