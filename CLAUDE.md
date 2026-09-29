@@ -459,8 +459,16 @@ failure mode, not a compile error.
 
 - **The maintainer commits and pushes.** Default workflow: prepare the changes, run the checks, report what changed and let the maintainer commit. Commit only when asked to in that session (as during the print work), and never push.
 - **Commit identity is `digitaldonkey <tho@donkeymedia.eu>`**, set repo-locally in `.git/config`. The container's `~/.gitconfig` says `DDEV User <nobody@example.com>`, which is what commits get if the local setting is missing. Before committing, check `git var GIT_AUTHOR_IDENT`; if it isn't that identity, stop and tell the maintainer instead of committing.
-- **GrumPHP hooks do not run inside the container.** `.git/hooks/pre-commit` and `commit-msg` call `ddev exec`, and `/usr/local/bin/ddev` in the web container is a stub that prints a hint and exits 0. So commits made from `ddev claude` silently skip phpcs and the other GrumPHP tasks — the hook is there for the maintainer on the host.
-- **Therefore run the checks manually**, before committing and before handing work back:
+- **The git hooks belong to the maintainer; leave them as they are and don't suggest changing them.**
+  `.git/hooks/pre-commit` and `commit-msg` call `ddev exec`, a stub inside the web container that prints a
+  hint and exits 0, so they do nothing for commits made from `ddev claude`. Ignore that hint.
+- **Claude's own pre-commit check is a Claude Code hook**: `.claude/hooks/pre-commit.sh`, registered as
+  `PreToolUse` in `.claude/settings.json`. Before every `git commit` inside the container it pipes the
+  staged diff into `vendor/bin/grumphp git:pre-commit`, as the git hook does (testsuite `git_pre_commit`:
+  composer, phpcs on the staged files, phpunit), and blocks the commit on failure. Stage with `git add` in
+  a **separate** command and don't use `commit -a`: the hook runs before the command, so it would check
+  the old index (it blocks both).
+- **Before handing work back** (and for anything the hook doesn't cover):
   - `vendor/bin/phpunit tests` and check the exit code (see the no-skipped-tests rule below)
   - `vendor/bin/phpcs --standard=phpcs.xml <changed paths>`
   - after editing `agenda.twig`, `oneday.twig` or `month.twig`: re-run the twig→JS transform
