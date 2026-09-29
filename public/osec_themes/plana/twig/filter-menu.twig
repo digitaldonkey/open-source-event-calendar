@@ -27,13 +27,13 @@
 
 	</span>
 
-	{% if additional_filters is defined %}
+	{% if additional_filters is not empty %}
 		<ul class="plana-flyout-menu--menu" role="menu">
 			{{ additional_filters | raw }}
 		</ul>
 	{% endif %}
 
-	{% if contribution_buttons is defined %}
+	{% if contribution_buttons is not empty %}
 		<ul class="plana-flyout-menu--menu" role="menu">
 			{{ contribution_buttons | raw }}
 		</ul>

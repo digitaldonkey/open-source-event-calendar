@@ -21,6 +21,7 @@ import BoolSwitch from "./components/BoolSwitch";
 import DateAndTime from "./components/DateAndTime/DateAndTime";
 import OsecEventsFilter from "./components/OsecEventsFilter";
 import LimitBy from "./components/LimitBy";
+import DocumentStyleCache from "./components/DocumentStyleCache";
 
 import './editor.scss';
 
@@ -58,8 +59,17 @@ export default function Edit(props) {
 	});
 
 
+	// The block editor renders blocks in an iframe, see DocumentStyleCache.
+	const [ownerDocument, setOwnerDocument] = useState(null);
+	const blockRef = useCallback((node) => {
+		if (node) {
+			setOwnerDocument(node.ownerDocument);
+		}
+	}, []);
+
 	const blockProps = useBlockProps({
 		className: 'inline-edit-wrapper',
+		ref: blockRef,
 	});
 
 	return (
@@ -92,7 +102,7 @@ export default function Edit(props) {
 			</div>
 
 			{isSelected && settings && (
-				<>
+				<DocumentStyleCache ownerDocument={ownerDocument}>
 					<p>
 						<strong>{__(
 							'View',
@@ -267,7 +277,7 @@ export default function Edit(props) {
 							/>
 						</p>
 					)}
-				</>
+				</DocumentStyleCache>
 			)}
 		</div>
 	);
