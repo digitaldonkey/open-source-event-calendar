@@ -73,6 +73,10 @@
       "default": true,
       "type": "boolean"
     },
+    "displayPrint": {
+      "default": true,
+      "type": "boolean"
+    },
     "agendaToggle": {
       "default": false,
       "type": "boolean"

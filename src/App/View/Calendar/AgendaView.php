@@ -451,6 +451,7 @@ class AgendaView extends AbstractView
             'time_limit',
             'display_filters',
             'display_subscribe',
+            'display_print',
             'agenda_toggle',
             'display_view_switch',
             'display_date_navigation',
