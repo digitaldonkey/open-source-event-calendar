@@ -27,33 +27,20 @@ class BlockController extends OsecBaseClass
 
     public function registerCalendarBlock()
     {
+        $asset = include OSEC_PATH . 'calendar_block/build/index.asset.php';
         wp_register_script(
             'osec-calendar-block-classic',
             plugins_url(OSEC_PLUGIN_NAME . '/calendar_block/build/index.js', OSEC_PLUGIN_NAME),
-            [
-                // Dependencies
-                'wp-blocks',
-                'wp-i18n',
-                'wp-block-editor',
-                'wp-data',
-                'wp-core-data',
-            ],
-            OSEC_VERSION,
+            $asset['dependencies'],
+            $asset['version'],
             true
         );
+        // Dependencies of an editor style are loaded into the editor iframe as well.
         wp_register_style(
             'osec-editor-style',
             plugins_url(OSEC_PLUGIN_NAME . '/calendar_block/build/index.css', OSEC_PLUGIN_NAME),
-            [],
-            OSEC_VERSION
-        );
-        register_block_style(
-            'open-source-event-calendar/osec-calendar-classic',
-            [
-                'name' => 'osec-editor-style',
-                'label' => __('osec-editor-style', 'open-source-event-calendar'),
-                'style_handle' => 'osec-editor-style',
-            ]
+            ['dashicons'],
+            $asset['version']
         );
         wp_register_style(
             OSEC_PLUGIN_NAME . '-frontend',
@@ -68,7 +55,10 @@ class BlockController extends OsecBaseClass
             array_merge_recursive(
                 $this->blockFile,
                 [
+                    // register_block_type() ignores the block.json spelling "apiVersion".
+                    'api_version' => $this->blockFile['apiVersion'],
                     'editor_script' => 'osec-calendar-block-classic',
+                    'editor_style' => 'osec-editor-style',
                     'render_callback' => function (array $attributes, string $content): string {
                         if (EventContentView::factory($this->app)->is_filtering_content()) {
                             // No calendars inside event content, see EventContentView::is_filtering_content().

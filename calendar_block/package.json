@@ -21,6 +21,8 @@
 		"add-static": "npx @wordpress/create-block --namespace open-source-event-calendar --no-plugin"
 	},
 	"dependencies": {
+		"@emotion/cache": "^11.14.0",
+		"@emotion/react": "^11.14.0",
 		"@wordpress/api-fetch": "^7.56.0",
 		"@wordpress/block-editor": "^18.0.0",
 		"@wordpress/blocks": "^16.1.0",

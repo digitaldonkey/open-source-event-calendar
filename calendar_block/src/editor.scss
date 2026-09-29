@@ -4,3 +4,12 @@
  * Replace them with your own styles or remove the file completely.
  */
 
+
+// The editor iframe does not load the wp-admin styles the block was designed with.
+.inline-edit-wrapper {
+	padding: 0 12px 12px;
+
+	strong {
+		font-weight: 600;
+	}
+}
