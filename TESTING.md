@@ -243,6 +243,20 @@ Groups, one per bundle: `@js-calendar`, `@js-event`, `@js-backend` (common backe
 `@js-settings`, `@js-feeds`, `@js-categories`, `@js-less-variables`. The grid defaults to
 `http://selenium-chrome:4444/wd/hub` (`SELENIUM_REMOTE_URL` overrides it).
 
+### Checking a hand edit of a bundle: `js-equivalent.js`
+
+`public/js/pages/*.js` are minified bundles without build tooling, edited by hand. To prove an edit only renamed
+local names (or reformatted, or changed comments), compare the terser-minified output (mangle on, compress off)
+at a git revision with the working tree; it must be byte-identical:
+
+```bash
+node integration_tests/js-equivalent.js public/js/pages/calendar.js              # vs HEAD
+node integration_tests/js-equivalent.js --rev=master public/js/pages/*.js        # exit 1 if any file differs
+```
+
+Needs `npm install` in `integration_tests/` (terser is a dev dependency there). Run the JS smoke tests as well:
+the check says nothing about edits that are meant to change behaviour.
+
 ## Firefox (second browser)
 
 The Chrome add-on's service is Chrome only. `.ddev/docker-compose.selenium-firefox.yaml` adds a second node -

@@ -4,7 +4,8 @@
     "scripts": {
         "test": "NODE_ENV=development npx mocha test/**/*.spec.js --timeout 60000",
         "flow": "flow",
-        "test:js": "NODE_ENV=development npx mocha \"js_smoke/**/*.spec.js\" --timeout 60000 --reporter spec"
+        "test:js": "NODE_ENV=development npx mocha \"js_smoke/**/*.spec.js\" --timeout 60000 --reporter spec",
+        "js:equivalent": "node js-equivalent.js"
     },
     "author": "digitaldonkey",
     "license": "Apache-2.0",
@@ -13,7 +14,8 @@
         "mocha": "^11.7.5",
         "mocha-junit-reporter": "^2.2.1",
         "mocha-multi": "^1.1.7",
-        "selenium-webdriver": "^4.39.0"
+        "selenium-webdriver": "^4.39.0",
+        "terser": "^5.51.2"
     },
     "mocha": {
         "reporter": "mocha-multi",
