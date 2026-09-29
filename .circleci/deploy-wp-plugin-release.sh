@@ -70,6 +70,10 @@ if [[ "$RELEASE_MODE" != "dev" ]] && svn ls "$SVN_URL/$tag_path" > /dev/null 2>&
     exit 0
 fi
 
+note "mode:        $RELEASE_MODE${RELEASE_VERSION:+ $RELEASE_VERSION}, replace trunk: ${RELEASE_UPDATE_TRUNK:-false}"
+note "SVN:         $SVN_URL"
+note "release zip: $RELEASE_ZIP"
+
 rm -rf "$WORK"
 mkdir -p "$WORK/build"
 unzip -q "$RELEASE_ZIP" -d "$WORK/build"
@@ -77,9 +81,11 @@ build="$WORK/build/$WP_ORG_PLUGIN_NAME"
 [[ -f "$build/$WP_ORG_PLUGIN_NAME.php" ]] || fail "zip does not contain $WP_ORG_PLUGIN_NAME/$WP_ORG_PLUGIN_NAME.php"
 
 # Only trunk is fetched; tags and assets stay empty in the working copy.
+note "checking out trunk"
 svn checkout --quiet --non-interactive --depth immediates "$SVN_URL" "$WORK/svn"
 cd "$WORK/svn"
 svn update --quiet --non-interactive --set-depth infinity trunk
+note "trunk is at revision $(svn info --show-item last-changed-revision trunk)"
 
 find trunk -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 cp -a "$build/." trunk/
@@ -103,20 +109,43 @@ else
     message="Release $RELEASE_VERSION ($sha)"
 fi
 
-note "$RELEASE_MODE: committing ${targets[*]} - \"$message\""
-svn status "${targets[@]}" | cut -c1 | sort | uniq -c
+# Counts of `svn status` by change type, e.g. "2 added, 1 modified, 0 deleted".
+summarize() {
+    svn status "$@" | awk '
+        { c[substr($0, 1, 1)]++ }
+        END { printf "%d added, %d modified, %d deleted, %d replaced\n", c["A"], c["M"], c["D"], c["R"] }'
+}
+
+changes=$(svn status "${targets[@]}")
+if [[ -z "$changes" ]]; then
+    note "no changes: ${targets[*]} already equals this build, nothing to commit"
+    exit 0
+fi
+note "to commit:   ${targets[*]}"
+note "message:     $message"
+note "changes:     $(summarize "${targets[@]}")"
+[[ "$RELEASE_MODE" == "dev" ]] || note "$tag_path:  copy of trunk (A +), plus the trunk changes listed below"
+note "svn status (first 50 lines):"
+head -n 50 <<< "$changes"
+lines=$(wc -l <<< "$changes")
+[[ $lines -le 50 ]] || note "... and $((lines - 50)) more lines"
 
 if [[ "$RELEASE_MODE" == "dryrun" ]]; then
-    svn status --depth immediates "${targets[@]}"
     note "dry run: nothing committed"
     exit 0
 fi
 
-printf '%s' "$WP_ORG_SVN_PASSWORD" | svn commit --quiet --non-interactive --no-auth-cache \
-    --username "$WP_ORG_USERNAME" --password-from-stdin -m "$message" "${targets[@]}"
+note "committing"
+if ! printf '%s' "$WP_ORG_SVN_PASSWORD" | svn commit --non-interactive --no-auth-cache \
+    --username "$WP_ORG_USERNAME" --password-from-stdin -m "$message" "${targets[@]}" > "$WORK/commit.log" 2>&1; then
+    cat "$WORK/commit.log" >&2
+    fail "svn commit failed"
+fi
+revision=$(sed -nE 's/^Committed revision ([0-9]+)\./\1/p' "$WORK/commit.log")
+note "committed revision ${revision:-?}: https://plugins.trac.wordpress.org/changeset/${revision:-}"
 
 if [[ "$RELEASE_MODE" == "tagged" ]]; then
     released=$(svn cat "$SVN_URL/$tag_path/$WP_ORG_PLUGIN_NAME.php" | sed -nE 's/^[[:space:]]*\*[[:space:]]*Version:[[:space:]]*([^[:space:]]+).*/\1/p')
     [[ "$released" == "$RELEASE_VERSION" ]] || fail "$tag_path was not created on WordPress.org (found version '$released')"
-    note "$tag_path is on WordPress.org"
+    note "verified:    $SVN_URL/$tag_path says Version: $released"
 fi

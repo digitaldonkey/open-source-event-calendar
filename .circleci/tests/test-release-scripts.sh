@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Tests release-context.sh and deploy-wp-plugin-release.sh against a local git
+# Tests release-context.sh, still-master-head.sh and both deploy scripts against a local git
 # origin and a local file:// SVN repository. Needs git, svn, svnadmin, zip.
 #
 #   bash .circleci/tests/test-release-scripts.sh
@@ -11,6 +11,7 @@ here=$(cd "$(dirname "$0")/.." && pwd)
 context="$here/release-context.sh"
 head_check="$here/still-master-head.sh"
 deploy="$here/deploy-wp-plugin-release.sh"
+deploy_assets="$here/deploy-wp-plugin-assets.sh"
 T=$(mktemp -d)
 trap 'rm -rf "$T"' EXIT
 plugin=open-source-event-calendar
@@ -162,6 +163,27 @@ git -C "$T/dev" remote set-url origin "$T/missing.git"
 if run_deploy dev "" true 1.4.0; then bad "dev deployed although master's HEAD could not be checked"; else pass "dev fails when master's HEAD cannot be checked"; fi
 git -C "$T/dev" remote set-url origin "$T/origin.git"
 expect_eq "failed HEAD check commits nothing" "$(youngest)" "$r"
+
+echo "deploy-wp-plugin-assets.sh"
+run_assets() { # runs from a directory holding ./assets
+    (cd "$T/assets-src" && CIRCLECI=true CIRCLE_BRANCH=master WP_ORG_SVN_URL="$url" \
+        WP_ORG_PLUGIN_NAME=$plugin WP_ORG_USERNAME=u WP_ORG_SVN_PASSWORD=p "$deploy_assets" > "$T/assets.out" 2>&1)
+}
+mkdir -p "$T/assets-src/assets" && echo banner > "$T/assets-src/assets/banner.png" && echo icon > "$T/assets-src/assets/icon.png"
+r=$(youngest)
+run_assets || bad "assets failed: $(cat "$T/assets.out")"
+expect_eq "assets: one commit" "$(youngest)" "$((r + 1))"
+rm -rf "$T/exp" && svn export -q "$url/assets" "$T/exp" && diff -r "$T/exp" "$T/assets-src/assets" > /dev/null \
+    && pass "assets: SVN assets equals ./assets" || bad "assets: SVN assets differs"
+r=$(youngest)
+run_assets || bad "assets re-run failed: $(cat "$T/assets.out")"
+expect_eq "assets unchanged: nothing committed" "$(youngest)" "$r"
+grep -q "no changes" "$T/assets.out" && pass "assets unchanged: says so" || bad "assets unchanged: no notice: $(cat "$T/assets.out")"
+rm "$T/assets-src/assets/icon.png"
+run_assets || bad "assets delete failed: $(cat "$T/assets.out")"
+svn ls "$url/assets/icon.png" > /dev/null 2>&1 && bad "assets: removed file still in SVN" || pass "assets: removed file deleted in SVN"
+if (cd "$T/assets-src" && CIRCLECI=true CIRCLE_BRANCH=feature WP_ORG_SVN_URL="$url" WP_ORG_PLUGIN_NAME=$plugin \
+    WP_ORG_USERNAME=u WP_ORG_SVN_PASSWORD=p "$deploy_assets" > /dev/null 2>&1); then bad "assets deployed from a feature branch"; else pass "assets refused outside master"; fi
 
 echo
 if [[ $failures -gt 0 ]]; then
