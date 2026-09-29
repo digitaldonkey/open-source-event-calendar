@@ -37,6 +37,21 @@ references:
         LICENSE
   workspace_root: &workspace_root /tmp
 
+  # Workflow filters. A job runs in a tag pipeline only with a tags filter, and
+  # only if every job it requires does too - so every release job carries one.
+  # See release-context.sh for what a tag deploys.
+  release_tags: &release_tags
+    tags:
+      only: /^\d+\.\d+\.\d+(-dryrun)?$/
+  main_branches: &main_branches
+    <<: *release_tags
+    branches:
+      only: /^(master|release-.*)$/
+  deploy_branches: &deploy_branches
+    <<: *release_tags
+    branches:
+      only: master
+
   # Default DB Docker image environement
   ENV_DB_IMAGE: &ENV_DB_IMAGE
     environment:
@@ -103,11 +118,27 @@ jobs:
       - run:
           name: Install WordPress (Test scripts)
           command: bash ./bin/install-wp-tests.sh $MYSQL_DATABASE $MYSQL_USER $MYSQL_PASSWORD $WP_HOST $WP_VERSION true false
+      - run:
+          name: Test the release scripts
+          command: bash .circleci/tests/test-release-scripts.sh
+      - run:
+          name: Decide what this pipeline releases variables
+          command: |
+            echo "CIRCLE_BRANCH: ${CIRCLE_BRANCH:-}"
+            echo "CIRCLE_TAG:    ${CIRCLE_TAG:-}"
+            echo "CIRCLE_SHA1:   $CIRCLE_SHA1"
+      - run:
+          name: Decide what this pipeline releases
+          # /tmp/release.env (RELEASE_MODE, RELEASE_VERSION, RELEASE_UPDATE_TRUNK) is read by
+          # the GitHub and SVN deploy jobs; the format is documented in release-context.sh.
+          command: |
+            .circleci/release-context.sh | tee /tmp/release.env
       - persist_to_workspace:
           root: *workspace_root
           paths:
             - wordpress
             - wordpress-tests-lib
+            - release.env
 
   # STATIC CODE ANALYSE
   static_job:
@@ -564,18 +595,44 @@ jobs:
       - checkout
       - *attach_workspace
       - run:
-          name: "Publish Release on GitHub"
+          name: Publish Release on GitHub variables
           command: |
-            # Allow other branches, but only deploy on master
-            if [ "$CIRCLE_BRANCH" != "master" ]; then
-                circleci-agent step halt
-            fi
-            git describe --tags --exact-match > /dev/null 2>&1 && VERSION=$(git describe --tags) || VERSION="dev"
-            if [ "$VERSION" == "dev" ]; then
-                ghr -prerelease -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
-            else
-              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
-            fi             
+            echo "cat /tmp/release.env:"
+            cat /tmp/release.env
+            echo "GITHUB_TOKEN:            $([ -n "${GITHUB_TOKEN:-}" ] && echo '**** (set)' || echo 'NOT SET')"
+            echo "CIRCLE_PROJECT_USERNAME: $CIRCLE_PROJECT_USERNAME"
+            echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
+            echo "CIRCLE_SHA1:             $CIRCLE_SHA1"
+            echo "ls -alh /tmp/open-source-event-calendar.zip:"
+            ls -alh /tmp/open-source-event-calendar.zip
+      - run:
+          name: "Publish Release on GitHub"
+          # /tmp/release.env: see .circleci/release-context.sh
+          command: |
+            . /tmp/release.env
+            case "$RELEASE_MODE" in
+              dev)
+                if .circleci/still-master-head.sh; then
+                  # -delete recreates the "dev" release and tag on this commit.
+                  ghr -prerelease -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete dev /tmp/open-source-event-calendar.zip
+                else
+                  rc=$?
+                  [ "$rc" -eq 1 ] || exit "$rc"
+                  echo "master has moved on, the dev release is left to the newer pipeline"
+                fi
+                ;;
+              tagged)
+                # No -delete: it would delete the release tag too (protected by the
+                # "Release tags" ruleset). -replace makes a rerun re-upload the zip.
+                ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -replace "$RELEASE_VERSION" /tmp/open-source-event-calendar.zip
+                ;;
+              dryrun)
+                echo "Dry run: would publish GitHub release $RELEASE_VERSION"
+                ;;
+              *)
+                echo "Nothing to publish"
+                ;;
+            esac
 
   wp_deploy_assets_job:
     <<: *container_config
@@ -584,18 +641,18 @@ jobs:
       - *attach_workspace
       - *install_subversion
       - run:
-          name: Deploy to wordpress.org variables
+          name: Deploy assets to WordPress plugin directory variables
           command: |
-            # Allow other branches, but only deploy on master
-            if [ "$CIRCLE_BRANCH" != "master" ]; then
-                circleci-agent step halt
-            fi
-            # WP_ORG_SVN_PASSWORD
-            echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-            echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"
+            echo "CIRCLE_BRANCH:       ${CIRCLE_BRANCH:-}"
+            echo "WP_ORG_PLUGIN_NAME:  $WP_ORG_PLUGIN_NAME"
+            echo "WP_ORG_USERNAME:     $WP_ORG_USERNAME"
+            echo "WP_ORG_SVN_PASSWORD: $([ -n "${WP_ORG_SVN_PASSWORD:-}" ] && echo '**** (set)' || echo 'NOT SET')"
+            echo "svn version (svn --version --quiet): $(svn --version --quiet)"
+            echo "ls -al assets:"
+            ls -al assets
       - run:
           name: Deploy assets to WordPress plugin directory
-          command: /home/circleci/open-source-event-calendar/.circleci/deploy-wp-plugin-assets.sh
+          command: .circleci/deploy-wp-plugin-assets.sh
     environment:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
@@ -607,25 +664,21 @@ jobs:
       - *attach_workspace
       - *install_subversion
       - run:
-          name: Deploy to wordpress.org variables
+          name: Deploy Plugin to WordPress plugin directory variables
           command: |
-            # Allow other branches, but only deploy on master
-            if [ "$CIRCLE_BRANCH" != "master" ]; then
-                circleci-agent step halt
-            fi
-            git describe --tags --exact-match > /dev/null 2>&1 && VERSION=$(git describe --tags) || VERSION="dev"
-            IS_TAGGED_RELEASE=$(( $VERSION == "dev" ? 1 : 0 ))
-            # WP_ORG_SVN_PASSWORD
-            echo "WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-            echo "WP_ORG_USERNAME: $WP_ORG_USERNAME"
-            echo "WP_ORG_SVN_PASSWORD: ****"
-            echo "CIRCLE_TAG: $CIRCLE_TAG"
-            echo "VERSION": $VERSION
-            echo "IS_TAGGED_RELEASE": $IS_TAGGED_RELEASE
+            echo "cat /tmp/release.env:"
+            cat /tmp/release.env
+            echo "CIRCLE_TAG:          ${CIRCLE_TAG:-}"
+            echo "CIRCLE_SHA1:         $CIRCLE_SHA1"
+            echo "WP_ORG_PLUGIN_NAME:  $WP_ORG_PLUGIN_NAME"
+            echo "WP_ORG_USERNAME:     $WP_ORG_USERNAME"
+            echo "WP_ORG_SVN_PASSWORD: $([ -n "${WP_ORG_SVN_PASSWORD:-}" ] && echo '**** (set)' || echo 'NOT SET')"
+            echo "svn version (svn --version --quiet): $(svn --version --quiet)"
+            echo "ls -alh /tmp/$OSEC_RELEASE_FILE:"
             ls -alh /tmp/$OSEC_RELEASE_FILE
       - run:
           name: Deploy Plugin to WordPress plugin directory
-          command: /home/circleci/open-source-event-calendar/.circleci/deploy-wp-plugin-release.sh
+          command: .circleci/deploy-wp-plugin-release.sh
     environment:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
@@ -638,74 +691,61 @@ workflows:
   build_test_deploy: # This is the name of the workflow, feel free to change it to better match your workflow.
     # Inside the workflow, you define the jobs you want to run.
     jobs:
-      - build
+      - build:
+          filters: *release_tags
       - static_job:
           requires:
             - build
+          filters: *release_tags
       - static_release_job:
           requires:
             - static_job
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - db_job:
           requires:
             - build
+          filters: *release_tags
       - db_job_maria_10_5:
           requires:
             - build
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - db_job_php_8_3:
           requires:
             - build
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - db_job_php_8_4:
           requires:
             - build
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - db_job_php_8_5:
           requires:
             - build
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - db_job_mysql_8:
           requires:
             - build
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - create_release_job:
           requires:
             - db_job
             - static_job
+          filters: *release_tags
       - release_test_job:
           requires:
             - create_release_job
+          filters: *release_tags
       - release_test_job_php_8_3:
           requires:
             - create_release_job
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - release_test_job_php_8_4:
           requires:
             - create_release_job
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - release_test_job_php_8_5:
           requires:
             - create_release_job
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - publish_github_release_job:
           requires:
             - static_job
@@ -720,24 +760,14 @@ workflows:
             - release_test_job_php_8_3
             - release_test_job_php_8_4
             - release_test_job_php_8_5
-          filters:
-            branches:
-              only: /master/
-            tags:
-              only: /^\d+\.\d+\.\d+$/
+          filters: *deploy_branches
       - wp_deploy_assets_job:
           requires:
             - create_release_job
           filters:
             branches:
-              only: /master/
-            tags:
-              only: /^\d+\.\d+\.\d+$/
+              only: master
       - wp_deploy_wp_org_job:
           requires:
             - publish_github_release_job
-          filters:
-            branches:
-              only: /master/
-            tags:
-              only: /^\d+\.\d+\.\d+$/
+          filters: *deploy_branches
