@@ -311,18 +311,26 @@ the whole compiled stylesheet (~390 KB).
 
 **If a LESS/theme-CSS edit doesn't seem to take effect, it is essentially never PHP opcache** -
 `.less` files are read as plain text (`file_get_contents()`), not compiled PHP, so opcache
-cannot cache them. Two different caches actually sit between a LESS edit and the browser:
+cannot cache them. Two caches sit between a LESS edit and the browser:
 
-1. **`FrontendCssController::get_compiled_css()` has `static $recompiledCss = null;`.** A PHP
-   `static` local variable is scoped to the **process**, not the request - a php-fpm worker is
-   reused across many requests, so once one worker computes this, that worker returns the same
-   value forever (ignoring source changes and cache-busting) until it recycles.
-2. **`CacheFactory::createCache()` tries three engines in order** (`src/Cache/CacheFactory.php`):
-   `CacheApcu` → `CacheFile` → `CacheDb` (DB-option-backed), first one available/enabled wins.
-   With `OSEC_ENABLE_CACHE_APCU` at its default `true`, `CacheApcu` always wins first, so
-   compiled CSS lives in APCu's shared memory - which every worker in the pool shares, and
-   which (like the static above) only clears on a full php-fpm restart, not per-request or via
-   the `?osec-css-cache=` cache-bust.
+1. **The cache engine.** `CacheFactory::createCache()` tries three engines in order
+   (`src/Cache/CacheFactory.php`): `CacheApcu` → `CacheFile` → `CacheDb` (DB-option-backed), first
+   one available/enabled wins. With `OSEC_ENABLE_CACHE_APCU` at its default `true`, `CacheApcu`
+   always wins first, so compiled CSS lives in APCu's shared memory - which every worker in the
+   pool shares, and which only clears on a full php-fpm restart, not per-request or via the
+   `?osec-css-cache=` cache-bust. **WP-CLI has its own APCu**, separate from the FPM pool's: a
+   `wp eval` can neither see nor clear the CSS the site serves, and a theme switch or compile run
+   from WP-CLI lands in the CLI's APCu. Trigger those through the browser (admin UI) instead.
+2. **The browser cache.** `render_css()` sends the stylesheet with a one-year `max-age` and an ETag
+   derived from the `?osec-css-cache=<timestamp>` value, so the browser only fetches new CSS when
+   the timestamp changes. It has one-second resolution: a recompile within the same second as the
+   previous one keeps the URL and the browser keeps the old CSS (side finding B21 - seen in scripted
+   Selenium runs, pause 2 s between actions).
+
+`get_compiled_css()`'s `static $recompiledCss` is only a runtime cache for the current request (like
+`CacheMemory`): it saves a second compile within one request and is gone afterwards. It cannot make
+CSS stale across requests - only APCu, the file cache, the DB cache and the browser cache outlive a
+request.
 
 **For local dev/debugging, disable APCu via `constants-local.php`** (gitignored - copy from
 `constants-local.php.example`, never edit the tracked `constants.php` for this):
@@ -359,9 +367,9 @@ branch - takes the `CacheFile` path instead of the generic one:
   until fixed) but never broken.
 
 **Reliable verification loop after any LESS/PHP change affecting compiled CSS:**
-1. `supervisorctl restart php-fpm` (inside the container) - clears both the per-worker `static`
-   and APCu's shared memory in one step; a `wp eval 'opcache_reset();'` does **not** do this,
-   since that runs in its own throwaway CLI process, not the FPM pool serving real requests.
+1. `supervisorctl restart php-fpm` (inside the container) - clears APCu's shared memory; a
+   `wp eval 'opcache_reset();'` or `apcu_clear_cache()` does **not** do this, since that runs in its
+   own throwaway CLI process with its own APCu, not the FPM pool serving real requests.
 2. **Delete `cache/css/*_osec_compiled.css`, then** hit `?osec-css-cache=<timestamp>`. Deleting
    the file is the part that actually forces the recompile: in file-cache mode the route still
    goes through `get_compiled_css()`, whose cache lookup finds that file and returns it, so a
@@ -451,8 +459,16 @@ failure mode, not a compile error.
 
 - **The maintainer commits and pushes.** Default workflow: prepare the changes, run the checks, report what changed and let the maintainer commit. Commit only when asked to in that session (as during the print work), and never push.
 - **Commit identity is `digitaldonkey <tho@donkeymedia.eu>`**, set repo-locally in `.git/config`. The container's `~/.gitconfig` says `DDEV User <nobody@example.com>`, which is what commits get if the local setting is missing. Before committing, check `git var GIT_AUTHOR_IDENT`; if it isn't that identity, stop and tell the maintainer instead of committing.
-- **GrumPHP hooks do not run inside the container.** `.git/hooks/pre-commit` and `commit-msg` call `ddev exec`, and `/usr/local/bin/ddev` in the web container is a stub that prints a hint and exits 0. So commits made from `ddev claude` silently skip phpcs and the other GrumPHP tasks — the hook is there for the maintainer on the host.
-- **Therefore run the checks manually**, before committing and before handing work back:
+- **The git hooks belong to the maintainer; leave them as they are and don't suggest changing them.**
+  `.git/hooks/pre-commit` and `commit-msg` call `ddev exec`, a stub inside the web container that prints a
+  hint and exits 0, so they do nothing for commits made from `ddev claude`. Ignore that hint.
+- **Claude's own pre-commit check is a Claude Code hook**: `.claude/hooks/pre-commit.sh`, registered as
+  `PreToolUse` in `.claude/settings.json`. Before every `git commit` inside the container it pipes the
+  staged diff into `vendor/bin/grumphp git:pre-commit`, as the git hook does (testsuite `git_pre_commit`:
+  composer, phpcs on the staged files, phpunit), and blocks the commit on failure. Stage with `git add` in
+  a **separate** command and don't use `commit -a`: the hook runs before the command, so it would check
+  the old index (it blocks both).
+- **Before handing work back** (and for anything the hook doesn't cover):
   - `vendor/bin/phpunit tests` and check the exit code (see the no-skipped-tests rule below)
   - `vendor/bin/phpcs --standard=phpcs.xml <changed paths>`
   - after editing `agenda.twig`, `oneday.twig` or `month.twig`: re-run the twig→JS transform
@@ -884,6 +900,14 @@ Before executing a plan (e.g. in `/plan` mode) that touches something with real 
 2. **One-by-one decision walkthrough**: after the harsh review, go through every discrete decision or assumption in the plan individually with the user — confirm, change, or remove each one — rather than a single "does this look good?" pass. Calibrate granularity to stakes: batch cosmetic/low-stakes decisions a few at a time, but give genuinely consequential ones (severity of a check, fail-open vs. fail-closed, a chosen mechanism) their own turn.
 
 Skip this for low-stakes or easily-reversible changes — it's overkill there. Reserve it for plans where a mistake would be expensive to discover after the fact.
+
+## Bug Fixing & Error Handling Rules
+
+* **Root Cause First:** Never rush into workarounds. Identify, explain, and fix the exact root cause of an error before writing any new code.
+* **No Workarounds:** Do not introduce wrappers, hacks, or complex boilerplate to fix problems introduced in previous steps. Keep fixes minimal and elegant.
+* **Trace & Verify:** Step back and trace the original data flow before assuming a new architectural change is needed.
+* **History First:** On unexpected behavior, check the git history of the code involved before designing a fix: `git log --follow -p -- <file>`, `git log -L :<function>:<file>`, `git log -S '<code>'`. Find the commit that changed it and compare with the version before. The root cause is often a small regression, and the older version often shows the intended behavior (B17: one line from `95e2c642` dropped a lookup that was still in the file). The January 2026 Plugin Check / nonce / "TWIGify" commits (2026-01-06..26) caused several such regressions (B1, B17).
+* **Self-Correction:** If a previous solution broke the build or introduced a new bug, immediately revert the logic to the last stable state and try a completely different approach.
 
 ## Working With This Codebase
 

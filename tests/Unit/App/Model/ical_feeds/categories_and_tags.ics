@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//osec tests//categories and tags//EN
+BEGIN:VEVENT
+UID:categories-and-tags@example.org
+DTSTAMP:20260901T100000Z
+DTSTART:20261015T100000Z
+DTEND:20261015T110000Z
+SUMMARY:Categories and tags
+DESCRIPTION:Two CATEGORIES lines\, one of them a list\, and an X-TAGS list.
+CATEGORIES:Cat A,Cat B
+CATEGORIES:Cat C
+X-TAGS:tag1\,tag2
+END:VEVENT
+END:VCALENDAR

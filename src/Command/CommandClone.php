@@ -6,6 +6,7 @@ use Osec\App\Controller\AccessControl;
 use Osec\App\Model\MetaAdapterPost;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\Model\PostTypeEvent\Event;
+use Osec\App\Model\PostTypeEvent\EventFeedTerms;
 use Osec\App\Model\PostTypeEvent\EventNotFoundException;
 use Osec\Http\Request\Request;
 use Osec\Http\Request\ParamType;
@@ -301,6 +302,10 @@ class CommandClone extends CommandAbstract
         }
 
         foreach ($post_meta_keys as $meta_key) {
+            // The clone is detached from the feed.
+            if (EventFeedTerms::POST_META_KEY === $meta_key) {
+                continue;
+            }
             $meta_values = get_post_custom_values($meta_key, $post->ID);
             foreach ($meta_values as $meta_value) {
                 $meta_value = maybe_unserialize($meta_value);

@@ -12,6 +12,7 @@ use Kigkonsult\Icalcreator\Vevent;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\PostTypeEvent\Event;
+use Osec\App\Model\PostTypeEvent\EventFeedTerms;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\Model\PostTypeEvent\EventTaxonomy;
 use Osec\App\View\Event\EventAvatarView;
@@ -217,12 +218,16 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $allday = $data['allday'];
 
             /* Categories */
-            $categories   = $e->getXprop('CATEGORIES', false, true);
+            // One call per CATEGORIES line, false after the last one.
+            $categories = [];
+            while (false !== ($category = $e->getCategories())) {
+                $categories[] = $category;
+            }
             $imported_cat = [EventTaxonomy::CATEGORIES => []];
             // If the user chose to preserve taxonomies during import, add categories.
             if ($categories && $feed->keep_tags_categories) {
                 $imported_cat = $this->add_categories_and_tags(
-                    $categories['value'],
+                    implode(',', $categories),
                     $imported_cat,
                     false,
                     true
@@ -510,8 +515,19 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     ++$output['count'];
                 }
             }
+            if ($event->get('post_id')) {
+                // A term aliased into the other taxonomy lands in the other list.
+                $feed_terms = $imported_cat;
+                foreach ($imported_tags as $taxonomy => $ids) {
+                    $feed_terms[$taxonomy] = ($feed_terms[$taxonomy] ?? []) + $ids;
+                }
+                EventFeedTerms::factory($this->app)->sync((int) $event->get('post_id'), $feed_terms);
+            }
             /**
              * Do something after IMPORTED event is saved
+             *
+             * The categories and tags of the feed are assigned by then. Terms
+             * assigned here count as assigned by hand: later imports keep them.
              *
              * @since 1.0
              *
@@ -520,16 +536,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
              */
             do_action('osec_ics_import_event_saved', $event, $feed);
 
-            // import not standard taxonomies.
-            // unset( $imported_cat[EventTaxonomy::CATEGORIES] );
-            foreach ($imported_cat as $tax_name => $ids) {
-                wp_set_post_terms($event->get('post_id'), array_keys($ids), $tax_name);
-            }
-
-            unset($imported_tags[EventTaxonomy::TAGS]);
-            foreach ($imported_tags as $tax_name => $ids) {
-                wp_set_post_terms($event->get('post_id'), array_keys($ids), $tax_name);
-            }
             unset($output['events_to_delete'][$event->get('post_id')]);
 
             /**
