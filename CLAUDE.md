@@ -621,16 +621,17 @@ git tag -a 1.2.0 -m "Release 1.2.0"
 git push origin 1.2.0
 ```
 
-- **`.circleci/release-context.sh` decides, once, in the `build` job** and writes `/tmp/release.env`
-  (`RELEASE_MODE` none/dev/tagged/dryrun, `RELEASE_VERSION`, `RELEASE_UPDATE_TRUNK`) for the GitHub and SVN
-  jobs. A tag that fails a check fails `build`, before any test runs:
+- **`.circleci/release-context.sh` decides, once, in `release_decision_job`** (master and release tags only,
+  after all tests; `build` stays release-free) and writes `/tmp/release.env` (`RELEASE_MODE`
+  none/dev/tagged/dryrun, `RELEASE_VERSION`, `RELEASE_UPDATE_TRUNK`) for the GitHub and SVN jobs. A tag that
+  fails a check fails that job, so nothing is deployed:
   - `X.Y.Z` or `X.Y.Z-dryrun` only;
   - the tagged commit is on master;
   - the tag equals plugin header `Version` and `Stable Tag`, `README.txt` `Stable Tag` and `OSEC_VERSION`;
   - the tag is higher than every other `X.Y.Z` tag.
 - **Trunk (and the GitHub `dev` release) is only replaced while the pipeline's commit is master's HEAD.**
-  Checked when `build` starts and again right before the deploy (`.circleci/still-master-head.sh`), because
-  master can move on during the ~20 min of tests. A master pipeline that was overtaken deploys nothing; a tag on
+  Checked in `release_decision_job` and again right before each deploy (`.circleci/still-master-head.sh`), because
+  master can move on while the pipeline runs. A master pipeline that was overtaken deploys nothing; a tag on
   an older master commit creates just `tags/X.Y.Z`. If the check itself fails (fetch error), the job fails.
 - **The release commit reaches trunk through its master pipeline before the tag exists** - WordPress.org
   serves trunk as that version until the tag pipeline finishes. Tag it before pushing anything else to master.
@@ -640,7 +641,7 @@ git push origin 1.2.0
 - **Only the maintainer can push `X.Y.Z` tags**: GitHub tag ruleset "Release tags" (`refs/tags/*.*.*`,
   creation/update/deletion restricted, bypass: repository admin). `ghr` therefore must not use `-delete`
   for a release tag.
-- **`.circleci/tests/test-release-scripts.sh`** (run in `build`) covers both scripts against a local git
+- **`.circleci/tests/test-release-scripts.sh`** (run in `release_decision_job`) covers the release scripts against a local git
   origin and a local `file://` SVN repository. Run it after any change to them.
 - Before 2026-09-29 a pushed tag ran nothing and the "tagged" branch of the old deploy script could never
   be taken, so 1.1.12 - 1.1.14 never got SVN tags; `tags/1.1.14` and a repaired `tags/1.1.5` were added by
