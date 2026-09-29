@@ -29,6 +29,7 @@
 		"@wordpress/components": "^41.0.0",
 		"@wordpress/core-data": "^8.1.0",
 		"@wordpress/data": "^10.56.0",
+		"@wordpress/html-entities": "^4.56.0",
 		"@wordpress/i18n": "^6.29.0",
 		"react-datepicker": "^8.10.0",
 		"react-select": "^5.10.2"
