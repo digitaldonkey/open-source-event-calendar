@@ -1,29 +1,29 @@
 = 1.1.15 =
-- WP-CLI: `wp osec event regenerate` rebuilds the recurrence instances of all or specific events (resumable batches, flat memory for 10,000+ events) and removes rows left behind by deleted events
-- WP-CLI: `wp osec feed update` imports all or specific feeds now, `--force` breaks a stale import lock; `wp osec feed list`
-- Problems during these commands are printed to the console instead of stored as admin notices (new filter `osec_admin_notification_pre_store`)
+- Print support for all calendar views with a print header; overlapping events print side by side, busy days as a list; category colors print as event borders; a calendar block can hide the print icon #55
+- Fix: many overlapping events in week and day view ran into the next day's column
+- Week and day grid follows the window width
+- Month view can show start and end time above the event title (new option)
+- Fix: recurring events drifted an hour at every daylight saving change (since 1.1.5). Existing events are corrected when saved again, or all at once with `wp osec event regenerate`
+- A recurring event creates at most 2000 occurrences; rules that cannot be expanded are rejected and reported
+- WP-CLI: `wp osec event regenerate`, `wp osec feed update`, `wp osec feed list`
+- Feed import: events removed from a feed are deleted again when "keep old events" is off, EXDATE, RDATE and moved occurrences land on the right day, every RDATE is imported, a failed import no longer blocks the feed for 24 hours
 - Feed fetches verify TLS certificates again; a self-signed feed now fails with "cURL error 60" (see FAQ)
-- Fix: events removed from a feed were never deleted when "keep old events" is off (since 1.0.7)
-- Fix: a failed import no longer frees the lock of another running import, and an import error no longer leaves its feed locked for 24 hours
-- Fix: deleting an event outside wp-admin (WP-CLI, REST, cron) left its instances behind
-- Fix: moved occurrences (RECURRENCE-ID) near midnight showed twice; importing several feeds in one run mixed up their overrides
-- Fix: EXDATE and RDATE of feeds excluded or added the wrong day near midnight or in the evening west of UTC
-- Fix: only the last RDATE line of a feed was imported, and an RRULE next to RDATEs was dropped
-- Feed imports need about a third less memory
-- Fix: agenda "forward" got stuck on days with more events than one page holds, and "back" did not return to the previous page
-- Fix: agenda previous/next buttons showed for drafts, trashed or filtered-out events, leading to an empty page
-- Fix: with category and tag filters combined by OR (filter `osec_filter_distinct_types_logic`), the filters were ignored and draft and private events showed
+- The calendar block works in the WordPress 7 editor
+- Leaflet maps are shipped with the plugin instead of loaded from unpkg.com
+- Fix: agenda paging got stuck or led to empty pages
+- Fix: category and tag filters combined with OR showed draft and private events
+- Fix: agenda view showed the entire homepage in the expanded toggle #59
+- Shortcode taxonomy filters warn about unknown terms instead of silently showing everything #53 #54 (thanks @xnaveira)
+- Fix: error when meta boxes are added on other post types #63
+- Fix: "Default calendar start date" was ignored, dates like 21/9/2026 showed as 1970, the date picker was off by a day and ignored "week starts on"
+- Fix: events deleted outside wp-admin left their occurrences behind
+- Database schema updates no longer report false failures
 
 = 1.1.14 =
-- Print support for all calendar views: print button in month, week, day and agenda #55
-- Printouts show a header with title, view name and a link to the printed view, and leave out navigation, filters, subscribe buttons and link addresses
-- Week and day print the hours shown on screen scaled to one page; days with many parallel events print as a list
-- Agenda print: dates are never split, events only where at least five lines fit on each page
-- Category colors print as event borders, so they survive black and white printing
-- Overlapping events in week and day view are placed side by side instead of covering each other (a custom week/day template positioning events by 'indent' must switch to 'column', 'columns' and 'stack')
-- Week and day grid now follows the window width instead of the width at page load
-- Month view shows start and end time above the event title
-- Fixed "Default calendar start date" setting is not applied
+- Fix: an exception rule with an ordinal BYDAY did not parse as recurring rule #45
+- Fix: default fallback image issues #49
+- Fix: agenda view still listed an all-day event of yesterday #51
+- (first built as 1.1.12, which never reached WordPress.org)
 
 = 1.1.13 =
 WP 7.1 compatibility
