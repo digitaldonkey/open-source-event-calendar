@@ -153,9 +153,9 @@ npm run build
 
 ### Twig frontend templates
 
-There are a few TwigJs templates in [public/js](https://github.com/digitaldonkey/open-source-event-calendar/tree/master/public/js): `agenda.js`, `month.js` and `oneday.js`, which are in use when [osec_use_frontend_rendering](https://github.com/digitaldonkey/open-source-event-calendar/blob/c3ecd0b20205f7830710506286a828b7049b27c4/src/App/Model/Settings.php#L830-L843) is set.
+Three Twig templates, `public/osec_themes/vortex/twig/{agenda,month,oneday}.twig`, also exist as TwigJs templates inside `public/js/pages/calendar.js`, which are in use when [osec_use_frontend_rendering](https://github.com/digitaldonkey/open-source-event-calendar/blob/c3ecd0b20205f7830710506286a828b7049b27c4/src/App/Model/Settings.php#L830-L843) is set.
 
-They are generated and [integrated](https://github.com/digitaldonkey/open-source-event-calendar/blob/c3ecd0b20205f7830710506286a828b7049b27c4/public/js/pages/calendar.js#L3973-L3981) with the following script.
+After editing one of them, regenerate the copies in `calendar.js` (between the `/*REPLACE:<template>.twig*/` comments) with the following script.
 
 ```bash
 cd open-source-event-calendar/twig_to_js_transform/

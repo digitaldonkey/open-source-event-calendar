@@ -30,8 +30,9 @@ const config = {
     /*
         The files where aggregated by Time.ly using unknown build script.
         So we just replace the Twig template parts, to be able to use frontend rendering.
+        The calendar bundle is the only served copy of these templates.
      */
-    additionalReplaces: [
+    destFiles: [
         '../public/js/pages/calendar.js',
     ]
 }
@@ -71,12 +72,7 @@ const processTemplate = async (template) => {
         'utf8'
     );
 
-    // Load file to replace
-    const replaceInPath = `${config.replaceFilesPath}/${template}.js`;
-
-    // All files to process replacements
-    const destFiles = structuredClone(config.additionalReplaces);
-    destFiles.push(replaceInPath);
+    const destFiles = config.destFiles;
 
     /*
         @var chopComment

@@ -2,13 +2,13 @@
 
 This is a tool working around the problem that we don't have original build tools for the Bootstrap templates. 
 
-Run this to update Twig-Javascript templates from the source Twig files used in PHP.
+Run this to update the Twig-Javascript templates in `public/js/pages/calendar.js` from the source Twig files used in PHP.
 
 ```
 cd twig_to_js_transform
 nvm use
-npm i 
-npm run transform
+npm i
+npm run build-twig-frontend
 ```
 
 Only a very few templates are used in **frontend rendering**:
