@@ -862,12 +862,12 @@ class Settings extends OsecBaseInitialized
                     'readonly' => 'readonly',
                     'help'     => __(
                         'The Robot Exclusion Standard, also known as the Robots Exclusion Protocol or
-						<code><a href="https://en.wikipedia.org/wiki/Robots.txt" target="_blank">robots.txt</a></code>
-						protocol, is a convention for cooperating web crawlers and other web robots
-						about accessing all or part of a website that is otherwise publicly viewable.<br />
-						The file is dynamically created using <a href="/?robots=1" target="_blank">/?robots=1</a>
-						and should map to <a href="/robots.txt" target="_blank">/robots.txt</a>
-						If you maintain a static robots.txt you should copy over above directives.',
+                        <code><a href="https://en.wikipedia.org/wiki/Robots.txt" target="_blank">robots.txt</a></code>
+                        protocol, is a convention for cooperating web crawlers and other web robots
+                        about accessing all or part of a website that is otherwise publicly viewable.<br />
+                        The file is dynamically created using <a href="/?robots=1" target="_blank">/?robots=1</a>
+                        and should map to <a href="/robots.txt" target="_blank">/robots.txt</a>
+                        If you maintain a static robots.txt you should copy over above directives.',
                         'open-source-event-calendar'
                     ),
                 ],

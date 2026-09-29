@@ -464,14 +464,14 @@ failure mode, not a compile error.
 - **Claude's own pre-commit check is a Claude Code hook**: `.claude/hooks/pre-commit.sh`, registered as
   `PreToolUse` in `.claude/settings.json`. Before every `git commit` inside the container it pipes the
   staged diff into `vendor/bin/grumphp git:pre-commit`, as the git hook does (testsuite `git_pre_commit`:
-  composer, phpcs on the staged files, phpunit), and blocks the commit on failure. Stage with `git add` in
+  composer, phpcs on the staged files, editorconfig on all tracked files, phpunit), and blocks the commit on failure. Stage with `git add` in
   a **separate** command and don't use `commit -a`: the hook runs before the command, so it would check
   the old index (it blocks both).
 - **Before handing work back** (and for anything the hook doesn't cover):
   - `vendor/bin/phpunit tests` and check the exit code (see the no-skipped-tests rule below)
   - `vendor/bin/phpcs --standard=phpcs.xml <changed paths>`
   - after editing `agenda.twig`, `oneday.twig` or `month.twig`: re-run the twig→JS transform
-  - or `vendor/bin/grumphp run --testsuite=git_pre_commit` for composer + phpcs + phpunit at once
+  - or `vendor/bin/grumphp run --testsuite=git_pre_commit` for composer + phpcs + editorconfig + phpunit at once
   - **Never bare `vendor/bin/grumphp run` from an agent session** - with no `--testsuite` it runs *every*
     configured task, including `integration_tests`, which drives the Selenium suite against the dev site
     and trashes the calendar page (see the warning under Testing)

@@ -1,12 +1,12 @@
 # OSEC Developer Readme
 
-Open Source Event calendar is based on All-in-One Event Calendar 2.3.4. 
+Open Source Event calendar is based on All-in-One Event Calendar 2.3.4.
 
-All 236 classes where rewritten using PHP Namespaces and composer for dependency management. 
+All 236 classes where rewritten using PHP Namespaces and composer for dependency management.
 
 Repository with all available sources are at [github.com/digitaldonkey/open-source-event-calendar](https://github.com/digitaldonkey/open-source-event-calendar).
 
-A CircleCI pipeline is on [CircleCI](https://app.circleci.com/pipelines/github/digitaldonkey/open-source-event-calendar). 
+A CircleCI pipeline is on [CircleCI](https://app.circleci.com/pipelines/github/digitaldonkey/open-source-event-calendar).
 
 ## Developing
 
@@ -16,7 +16,7 @@ A developer should **clone the repository** and run do ´composer install´ to g
 
 You most likely will need a debugger like xdebug and an IDE for efficient development.
 
-I love and recommend [ddev](https://ddev.com/) so some docs might just assume you use it too. 
+I love and recommend [ddev](https://ddev.com/) so some docs might just assume you use it too.
 
 Take a look into [hooks-and-filters.md](hooks-and-filters.md) and [constants.php](constants.php) first.
 
@@ -25,7 +25,7 @@ Take a look into [hooks-and-filters.md](hooks-and-filters.md) and [constants.php
 
 When you reached limits using the UI settings and template variables you can proceed with investigating constants and hooks of the plugin.
 
-**Constants** 
+**Constants**
 
 Take a look at [constants.php](https://github.com/digitaldonkey/open-source-event-calendar/blob/master/constants.php)
 you can easily add a `constants-local.php` to override.
@@ -42,14 +42,14 @@ Check out [hooks-and-filters.md](https://github.com/digitaldonkey/open-source-ev
 
 You might also propose new hooks if they make sense to solve your problem.
 
-**osec_recompile_templates** 
+**osec_recompile_templates**
 
-Enable debug mode `define('OSEC_DEBUG', true);` and add get param  
-yoursite.com?osec_recompile_templates=TRUE
+Enable debug mode `define('OSEC_DEBUG', true);` and add the GET parameter `osec_recompile_templates=TRUE`, e.g.
+`yoursite.com?osec_recompile_templates=TRUE`.
 
 
 
-## Coding standards 
+## Coding standards
 
 We have a PHP (require_dev) based toolset.
 Project has been set up using ddev. All scripts should be running stable in ddev using provided config.
@@ -120,12 +120,12 @@ rendering on by default. twig.js does **not autoescape**, and PHP filters like `
 available there. Values reaching them must already be safe as stored, which is one more reason the
 sanitizer runs last (rule 6).
 
-## Tools 
+## Tools
 
 There are some local helpers used to avoid doing things on the fly in ci pipeline.
 
 Anything going into release package **must be commited** to git before.
-Using local helpers and test in pipeline if these where used before creating a release. 
+Using local helpers and test in pipeline if these where used before creating a release.
 
 In pipeline the `static_release_job` test verifies that the generated files are up to date.
 
@@ -134,7 +134,7 @@ In pipeline the `static_release_job` test verifies that the generated files are 
 A wpl cli action generates the WordPress **Readme.txt** from Readme.md and constants.
 
 ```bash
-# Readme.md -> Readme.txt 
+# Readme.md -> Readme.txt
 ddev wp osec make_readme
 ```
 
@@ -186,7 +186,7 @@ npm run build-twig-frontend
 * should include all bugfixes from master
 * Might have surprising changes, not fully documented yet.
 
-## Background 
+## Background
 
 ### Events, EventEntity and EventInstances
 
@@ -208,15 +208,15 @@ CREATE VIEW wp_osec_event_instances_readable_date AS
 SELECT id, post_id, `start`, DATE_FORMAT(FROM_UNIXTIME(`start`), '%Y-%m-%d %H:%i') AS 'start_formatted',
        `end`, DATE_FORMAT(FROM_UNIXTIME(`end`), '%Y-%m-%d %H:%i') AS 'end_formatted' FROM wp_osec_event_instances;
 ```
- 
+
 @see https://github.com/digitaldonkey/open-source-event-calendar/wiki/Understanding-data-modell
 
 # Feeds
 
 Feeds got a huge update comparet to all-in-one: To improve RFC5445 support `kigkonsult/icalcreator` was updated and
-rlanvin/php-rrule added. 
+rlanvin/php-rrule added.
 
-There are test feeds in tests/Unit/App/Model/ical_feeds/*.ics 
+There are test feeds in tests/Unit/App/Model/ical_feeds/*.ics
 
 You can "Subscribe" to them for testing using localhost. e.g:
 
@@ -228,4 +228,4 @@ There are a few basic phpunit-tests allowing to test the "challenging heritage"
 
 ## This document
 
-is constant work in Progress. Please PR if you can help to improve. 
+is constant work in Progress. Please PR if you can help to improve.

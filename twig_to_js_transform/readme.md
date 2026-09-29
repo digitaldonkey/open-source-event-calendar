@@ -1,6 +1,6 @@
 # Twig-JS updater
 
-This is a tool working around the problem that we don't have original build tools for the Bootstrap templates. 
+This is a tool working around the problem that we don't have original build tools for the Bootstrap templates.
 
 Run this to update the Twig-Javascript templates in `public/js/pages/calendar.js` from the source Twig files used in PHP.
 

@@ -16,167 +16,167 @@
 
 .ai1ec-single-event,
 .ai1ec-multi-event {
-	.ai1ec-event-details {
-		margin: @event-line-height * 0.6 0;
-		.ai1ec-row {
-			margin-bottom: @event-line-height * 0.2;
-		}
-	}
+  .ai1ec-event-details {
+    margin: @event-line-height * 0.6 0;
+    .ai1ec-row {
+      margin-bottom: @event-line-height * 0.2;
+    }
+  }
 
-	.ai1ec-field-label {
-		line-height: 25px;
-	}
+  .ai1ec-field-label {
+    line-height: 25px;
+  }
 
-	.osec-timezone-info {
-		font-size: small;
-		line-height: 1.2;
-	}
-	.osec-timezone-info--gmt {
-		white-space: nowrap;
-	}
+  .osec-timezone-info {
+    font-size: small;
+    line-height: 1.2;
+  }
+  .osec-timezone-info--gmt {
+    white-space: nowrap;
+  }
 
-	// Date/time & recurrence.
-	.ai1ec-time .ai1ec-field-value {
-		font-size: 1.2em;
-		.ai1ec-allday-badge {
-			font-size: 0.75em;
-			line-height: 1.4em;
-		}
-	}
-	.ai1ec-recurrence {
-		vertical-align: bottom;
-		.ai1ec-btn.ai1ec-disabled {
-			cursor: default;
-			.ai1ec-opacity( 1 );
-			pointer-events: auto;
-		}
-	}
+  // Date/time & recurrence.
+  .ai1ec-time .ai1ec-field-value {
+    font-size: 1.2em;
+    .ai1ec-allday-badge {
+      font-size: 0.75em;
+      line-height: 1.4em;
+    }
+  }
+  .ai1ec-recurrence {
+    vertical-align: bottom;
+    .ai1ec-btn.ai1ec-disabled {
+      cursor: default;
+      .ai1ec-opacity( 1 );
+      pointer-events: auto;
+    }
+  }
 
-	// Categories & tags.
-	.ai1ec-category {
-		font-size: 0.8em;
-	}
-	.ai1ec-tag {
-		font-size: 0.85em;
-	}
+  // Categories & tags.
+  .ai1ec-category {
+    font-size: 0.8em;
+  }
+  .ai1ec-tag {
+    font-size: 0.85em;
+  }
 
-	// Location & map.
-	.osec-map-container {
-		border-radius: @border-radius-base;
-		position: relative;
-		padding-bottom: 3px;
-		padding-top: 3px;
-		z-index: 1;
-	}
-	.osec-map-link {
-		vertical-align: middle;
-		white-space: nowrap;
-		.dashicons {
-			vertical-align: middle;
-			font-size: 1.1rem;
-		}
-	}
-	.leaflet-control-attribution {
-		svg {
-			/* No borders, no nations, no wars. */
-			display: none !important;
-		}
-	}
+  // Location & map.
+  .osec-map-container {
+    border-radius: @border-radius-base;
+    position: relative;
+    padding-bottom: 3px;
+    padding-top: 3px;
+    z-index: 1;
+  }
+  .osec-map-link {
+    vertical-align: middle;
+    white-space: nowrap;
+    .dashicons {
+      vertical-align: middle;
+      font-size: 1.1rem;
+    }
+  }
+  .leaflet-control-attribution {
+    svg {
+      /* No borders, no nations, no wars. */
+      display: none !important;
+    }
+  }
 
 
-	.osec-map-placeholder {
-		border-radius: 4px;
-		color: @link-color;
-		cursor: pointer;
-		height: 12em;
-		border: 1px dashed @table-border-color;
-		margin-bottom: 0.3em;
-		text-align: center;
-		width: 100%;
-		&:hover {
-			border-color: darken( @table-border-color, 15% );
-			color: @link-hover-color;
-		}
-		strong {
-			position: relative;
-			top: 45%;
-		}
-	}
-	.osec-map-container-hidden {
-		display: none;
-	}
-	.ai1ec-contact span {
-		display: inline-block;
-		white-space: nowrap;
-		i:first-child:before {
-			text-align: center;
-			width: 1.7em;
-		}
-	}
+  .osec-map-placeholder {
+    border-radius: 4px;
+    color: @link-color;
+    cursor: pointer;
+    height: 12em;
+    border: 1px dashed @table-border-color;
+    margin-bottom: 0.3em;
+    text-align: center;
+    width: 100%;
+    &:hover {
+      border-color: darken( @table-border-color, 15% );
+      color: @link-hover-color;
+    }
+    strong {
+      position: relative;
+      top: 45%;
+    }
+  }
+  .osec-map-container-hidden {
+    display: none;
+  }
+  .ai1ec-contact span {
+    display: inline-block;
+    white-space: nowrap;
+    i:first-child:before {
+      text-align: center;
+      width: 1.7em;
+    }
+  }
 }
 
 // EventSingleView event page only.
 .ai1ec-single-event {
-	position: relative;
-	font-size: @event-font-size;
-	line-height: @event-line-height;
-	// Event avatar/featured image.
-	.ai1ec-event-avatar {
-		max-width: 40%;
-		img {
-			max-width: 300px;
-			max-height: 300px;
-			min-height: 0;
-			width: 100%;
-		}
-	}
-	.ai1ec-event-details {
-		overflow: hidden;
-	}
-	.ai1ec-actions {
-		.ai1ec-pull-right;
-		margin-left: 10px;
-		.ai1ec-btn-group-vertical {
-			margin-bottom: 10px;
-			display: block;
-		}
-		.ai1ec-btn {
-			font-size: @font-size-small;
-			text-align: left;
-		}
-		.ai1ec-fa-fw {
-			width: 20px;
-		}
-	}
+  position: relative;
+  font-size: @event-font-size;
+  line-height: @event-line-height;
+  // Event avatar/featured image.
+  .ai1ec-event-avatar {
+    max-width: 40%;
+    img {
+      max-width: 300px;
+      max-height: 300px;
+      min-height: 0;
+      width: 100%;
+    }
+  }
+  .ai1ec-event-details {
+    overflow: hidden;
+  }
+  .ai1ec-actions {
+    .ai1ec-pull-right;
+    margin-left: 10px;
+    .ai1ec-btn-group-vertical {
+      margin-bottom: 10px;
+      display: block;
+    }
+    .ai1ec-btn {
+      font-size: @font-size-small;
+      text-align: left;
+    }
+    .ai1ec-fa-fw {
+      width: 20px;
+    }
+  }
 
-	.osec-location {
-		line-height: 1.4;
-	}
+  .osec-location {
+    line-height: 1.4;
+  }
 }
 
 // This appears in a tooltip, so cannot be wrapped by a class qualifier.
 .ai1ec-recurrence-exclude {
-	font-size: smaller;
-	color: @text-muted;
+  font-size: smaller;
+  color: @text-muted;
 }
 
 // Multi-event loop and event excerpts.
 .ai1ec-multi-event,
 .ai1ec-excerpt {
-	font-size: @event-font-size;
-	line-height: @event-line-height;
-	.ai1ec-field-label {
-		margin-top: @event-font-size * 0.1;
-	}
+  font-size: @event-font-size;
+  line-height: @event-line-height;
+  .ai1ec-field-label {
+    margin-top: @event-font-size * 0.1;
+  }
 }
 
 .ai1ec-excerpt {
-	margin-bottom: @event-line-height * 0.5;
+  margin-bottom: @event-line-height * 0.5;
 }
 
 // Footer.
 .ai1ec-event-footer {
-	color: @text-muted;
-	clear: both;
-	margin: @line-height-computed / 2 0;
+  color: @text-muted;
+  clear: both;
+  margin: @line-height-computed / 2 0;
 }

@@ -3,61 +3,61 @@
 {% set alignment2 = 'left' == alignment ? 'right' : 'left' %}
 {% set button_classes = button_classes ? button_classes : 'ai1ec-btn-sm' %}
 <div class="ai1ec-subscribe-dropdown ai1ec-dropdown{% if placement == 'up' %} ai1ec-dropup{% endif %} ai1ec-btn
-	ai1ec-btn-default {{ button_classes | e('html_attr') }}">
-	<span role="button" class="ai1ec-dropdown-toggle ai1ec-subscribe"
-			data-toggle="ai1ec-dropdown">
-		<i class="ai1ec-fa ai1ec-icon-rss  ai1ec-fa-fw"></i>
-		<span class="ai1ec-hidden-xs">
-			{% if is_single_event %}
-				{{ subscribe_text.single_event }}
-			{% elseif is_filtered %}
-				{{ subscribe_text.filtered }}
-			{% else %}
-				{{ subscribe_text.unfiltered }}
-			{% endif %}
-			<span class="caret">▾</span>
-		</span>
-	</span>
-	<ul class="ai1ec-dropdown-menu ai1ec-pull-{{ alignment2 }}" role="menu">
-		<li>
-			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
-			  data-placement="{{ alignment }}" title="{{ title.google }}"
-			  href="http://www.google.com/calendar/render?cid={{ url_webcal_no_html | url_encode }}">
-				<i class="ai1ec-fa ai1ec-icon-google  ai1ec-fa-fw"></i>
-				{{ label.google }}
-			</a>
-		</li>
-		<li>
-			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
-			  data-placement="{{ alignment }}" title="{{ title.outlook }}"
-			  href="{{ url_webcal }}">
-				<i class="ai1ec-fa ai1ec-icon-windows  ai1ec-fa-fw"></i>
-				{{ label.outlook }}
-			</a>
-		</li>
-		<li>
-			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
-			  data-placement="{{ alignment }}" title="{{ title.apple }}"
-			  href="{{ url_webcal_no_html }}">
-				<i class="ai1ec-fa ai1ec-icon-apple  ai1ec-fa-fw"></i>
-				{{ label.apple }}
-			</a>
-		</li>
-		<li>
-			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto"
-			  data-placement="{{ alignment }}" title="{{ title.plaintext }}"
-			  href="{{ url_webcal_no_html }}">
-				<i class="ai1ec-fa ai1ec-icon-calendar ai1ec-fa-fw"></i>
-				{{ label.plaintext }}
-			</a>
-		</li>
-		<li>
-			<a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto"
-			   data-placement="{{ alignment }}" title="{{ title.download }}"
-			   href="{{ url_download }}">
-				<i class="ai1ec-fa ai1ec-icon-calendar ai1ec-fa-fw"></i>
-				{{ label.download }}
-			</a>
-		</li>
-	</ul>
+    ai1ec-btn-default {{ button_classes | e('html_attr') }}">
+    <span role="button" class="ai1ec-dropdown-toggle ai1ec-subscribe"
+            data-toggle="ai1ec-dropdown">
+        <i class="ai1ec-fa ai1ec-icon-rss  ai1ec-fa-fw"></i>
+        <span class="ai1ec-hidden-xs">
+            {% if is_single_event %}
+                {{ subscribe_text.single_event }}
+            {% elseif is_filtered %}
+                {{ subscribe_text.filtered }}
+            {% else %}
+                {{ subscribe_text.unfiltered }}
+            {% endif %}
+            <span class="caret">▾</span>
+        </span>
+    </span>
+    <ul class="ai1ec-dropdown-menu ai1ec-pull-{{ alignment2 }}" role="menu">
+        <li>
+            <a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
+              data-placement="{{ alignment }}" title="{{ title.google }}"
+              href="http://www.google.com/calendar/render?cid={{ url_webcal_no_html | url_encode }}">
+                <i class="ai1ec-fa ai1ec-icon-google  ai1ec-fa-fw"></i>
+                {{ label.google }}
+            </a>
+        </li>
+        <li>
+            <a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
+              data-placement="{{ alignment }}" title="{{ title.outlook }}"
+              href="{{ url_webcal }}">
+                <i class="ai1ec-fa ai1ec-icon-windows  ai1ec-fa-fw"></i>
+                {{ label.outlook }}
+            </a>
+        </li>
+        <li>
+            <a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto" target="_blank"
+              data-placement="{{ alignment }}" title="{{ title.apple }}"
+              href="{{ url_webcal_no_html }}">
+                <i class="ai1ec-fa ai1ec-icon-apple  ai1ec-fa-fw"></i>
+                {{ label.apple }}
+            </a>
+        </li>
+        <li>
+            <a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto"
+              data-placement="{{ alignment }}" title="{{ title.plaintext }}"
+              href="{{ url_webcal_no_html }}">
+                <i class="ai1ec-fa ai1ec-icon-calendar ai1ec-fa-fw"></i>
+                {{ label.plaintext }}
+            </a>
+        </li>
+        <li>
+            <a class="ai1ec-tooltip-trigger ai1ec-tooltip-auto"
+               data-placement="{{ alignment }}" title="{{ title.download }}"
+               href="{{ url_download }}">
+                <i class="ai1ec-fa ai1ec-icon-calendar ai1ec-fa-fw"></i>
+                {{ label.download }}
+            </a>
+        </li>
+    </ul>
 </div>

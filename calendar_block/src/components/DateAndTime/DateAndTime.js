@@ -6,7 +6,7 @@ export default function DateAndTime ({
 	onChange,
 	labelText,
 	placeholder,
- 	isRequired,
+	isRequired,
 	dateFormat,
 	id
 }) {

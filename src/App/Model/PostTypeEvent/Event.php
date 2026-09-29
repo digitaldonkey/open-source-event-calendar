@@ -196,38 +196,38 @@ class Event extends OsecBaseClass
 
         $left_join  = '';
         $select_sql = '
-			e.post_id,
-			e.timezone_name,
-			e.recurrence_rules,
-			e.exception_rules,
-			e.allday,
-			e.instant_event,
-			e.recurrence_dates,
-			e.exception_dates,
-			e.venue,
-			e.country,
-			e.address,
-			e.city,
-			e.province,
-			e.postal_code,
-			e.show_map,
-			e.contact_name,
-			e.contact_phone,
-			e.contact_email,
-			e.contact_url,
-			e.cost,
-			e.ticket_url,
-			e.ical_feed_url,
-			e.ical_source_url,
-			e.ical_organizer,
-			e.ical_contact,
-			e.ical_uid,
-			e.longitude,
-			e.latitude,
-			e.show_coordinates,
-			GROUP_CONCAT( ttc.term_id ) AS categories,
-			GROUP_CONCAT( ttt.term_id ) AS tags
-		';
+            e.post_id,
+            e.timezone_name,
+            e.recurrence_rules,
+            e.exception_rules,
+            e.allday,
+            e.instant_event,
+            e.recurrence_dates,
+            e.exception_dates,
+            e.venue,
+            e.country,
+            e.address,
+            e.city,
+            e.province,
+            e.postal_code,
+            e.show_map,
+            e.contact_name,
+            e.contact_phone,
+            e.contact_email,
+            e.contact_url,
+            e.cost,
+            e.ticket_url,
+            e.ical_feed_url,
+            e.ical_source_url,
+            e.ical_organizer,
+            e.ical_contact,
+            e.ical_uid,
+            e.longitude,
+            e.latitude,
+            e.show_coordinates,
+            GROUP_CONCAT( ttc.term_id ) AS categories,
+            GROUP_CONCAT( ttt.term_id ) AS tags
+        ';
 
         if (
             false !== $instance &&
@@ -256,23 +256,23 @@ class Event extends OsecBaseClass
         // = Fetch event from database =
         // =============================
         $query = 'SELECT ' . $select_sql . '
-			FROM ' . $dbi->get_table_name(OSEC_DB__EVENTS) . ' e
-				LEFT JOIN ' .
+            FROM ' . $dbi->get_table_name(OSEC_DB__EVENTS) . ' e
+                LEFT JOIN ' .
                  $dbi->get_table_name('term_relationships') . ' tr
-					ON ( e.post_id = tr.object_id )
-				LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttc
-					ON (
-						tr.term_taxonomy_id = ttc.term_taxonomy_id AND
-						ttc.taxonomy = \'osec_events_categories\'
-					)
-				LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttt
-					ON (
-						tr.term_taxonomy_id = ttt.term_taxonomy_id AND
-						ttt.taxonomy = \'osec_events_tags\'
-					)
-				' . $left_join . '
-			WHERE e.post_id = ' . absint($post_id) . '
-			GROUP BY e.post_id';
+                    ON ( e.post_id = tr.object_id )
+                LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttc
+                    ON (
+                        tr.term_taxonomy_id = ttc.term_taxonomy_id AND
+                        ttc.taxonomy = \'osec_events_categories\'
+                    )
+                LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttt
+                    ON (
+                        tr.term_taxonomy_id = ttt.term_taxonomy_id AND
+                        ttt.taxonomy = \'osec_events_tags\'
+                    )
+                ' . $left_join . '
+            WHERE e.post_id = ' . absint($post_id) . '
+            GROUP BY e.post_id';
         // FYI Not prepared but absint-secured ;)
         $event = $dbi->get_row($query, ARRAY_A);
         if (null === $event || null === $event['post_id']) {

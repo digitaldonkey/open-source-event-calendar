@@ -81,7 +81,7 @@ class SettingsShortcodesText extends OsecBaseClass
             'text_events_limit'             => __('Limit number of events per page:', 'open-source-event-calendar'),
             'text_warning'                  => __('Warning:', 'open-source-event-calendar'),
             'text_single_calendar'          => __(
-                'It is currently not supported to embed more than one calendar in the same page. Do not attempt to 
+                'It is currently not supported to embed more than one calendar in the same page. Do not attempt to
                     embed the calendar via shortcode in a page that already displays the calendar.',
                 'open-source-event-calendar'
             ),

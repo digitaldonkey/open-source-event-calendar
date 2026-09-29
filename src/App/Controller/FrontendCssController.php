@@ -144,7 +144,7 @@ class FrontendCssController extends OsecBaseClass
                         sprintf(
                             /* translators: Compile error */
                             __(
-                                'Your CSS is being compiled on every request, 
+                                'Your CSS is being compiled on every request,
                                     which causes your calendar to perform slowly. The following error occurred: %s',
                                 'open-source-event-calendar'
                             ),
@@ -318,7 +318,7 @@ class FrontendCssController extends OsecBaseClass
             $message = sprintf(
                 /* translators: Minimum PHP memory required */
                 __(
-                    'CSS compilation failed because you do not have enough free memory  
+                    'CSS compilation failed because you do not have enough free memory
                       (a minimum of %s is needed). Your calendar will not render or function
                       properly without CSS. Increase your PHP memory limit.',
                     'open-source-event-calendar'

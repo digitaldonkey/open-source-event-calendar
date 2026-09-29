@@ -22,10 +22,10 @@
             {% for category in date_info.events %}
             {% for event in category %}
             <div class="ai1ec-event
-								ai1ec-event-id-{{ event.post_id }}
-								ai1ec-event-instance-id-{{ event.instance_id }}
-								{% if event.is_allday %}ai1ec-allday{% endif %}
-								{% if expanded %}ai1ec-expanded{% endif %}"
+                                ai1ec-event-id-{{ event.post_id }}
+                                ai1ec-event-instance-id-{{ event.instance_id }}
+                                {% if event.is_allday %}ai1ec-allday{% endif %}
+                                {% if expanded %}ai1ec-expanded{% endif %}"
                  data-end="{{ event.end }}">
 
 
@@ -45,12 +45,12 @@
                         <a href="{{ event.permalink | e( 'html_attr' ) }}" title="{{ text_read_more }}">
                             {% endif %}
                             <span class="ai1ec-event-title">
-										{{ event.filtered_title | raw }}
+                                        {{ event.filtered_title | raw }}
                                 {% if show_location_in_title and event.venue is not empty %}
                                     <span class="ai1ec-event-location"
                                     >{{ text_venue_separator}}{{ event.venue }}</span>
                                 {% endif %}
-									</span>
+                                    </span>
                             {% if no_toggle %}
                         </a>
                         {% endif %}
@@ -84,7 +84,7 @@
                             <div class="ai1ec-btn-group ai1ec-actions">
                                 {% if is_ticket_button_enabled and event.ticket_url is not empty %}
                                     <a class="ai1ec-pull-right ai1ec-btn ai1ec-btn-primary
-														ai1ec-btn-xs ai1ec-buy-tickets"
+                                                        ai1ec-btn-xs ai1ec-buy-tickets"
                                        target="_blank"
                                        href="{{ event.ticket_url | e('html_attr') }}"
                                     >{{ event.ticket_url_label }}</a>
@@ -98,21 +98,21 @@
                             {% set tags       = event.tags_html %}
                             {% if categories is not empty %}
                                 <span class="ai1ec-categories">
-												<span class="ai1ec-field-label">
-													<i class="ai1ec-fa ai1ec-fa-folder-open"></i>
-													{{ text_categories }}
-												</span>
-												{{ categories | raw }}
-											</span>
+                                                <span class="ai1ec-field-label">
+                                                    <i class="ai1ec-fa ai1ec-fa-folder-open"></i>
+                                                    {{ text_categories }}
+                                                </span>
+                                                {{ categories | raw }}
+                                            </span>
                             {% endif %}
                             {% if tags is not empty %}
                                 <span class="ai1ec-tags">
-												<span class="ai1ec-field-label">
-													<i class="ai1ec-fa ai1ec-fa-tags"></i>
-													{{ text_tags }}
-												</span>
-												{{ tags | raw }}
-											</span>
+                                                <span class="ai1ec-field-label">
+                                                    <i class="ai1ec-fa ai1ec-fa-tags"></i>
+                                                    {{ text_tags }}
+                                                </span>
+                                                {{ tags | raw }}
+                                            </span>
                             {% endif %}
                         </div>
                     </div>

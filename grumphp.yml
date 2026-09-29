@@ -34,6 +34,16 @@ parameters:
             config_file: './phpunit.xml'
             # Run regardless of which files changed - see TESTING.md.
             always_execute: true
+        # .editorconfig rules (armin/editorconfig-cli): trailing whitespace, final
+        # newline, indent style, line endings, charset. Checks every tracked file
+        # (< 1 s), not only staged ones, so a violation anywhere fails. calendar_block/
+        # is left to wp-scripts (its JSDoc " *" lines trip the tab check).
+        editorconfig:
+            triggered_by: ['php', 'js', 'twig', 'less', 'css', 'scss', 'md', 'txt', 'yml', 'yaml', 'json', 'xml', 'sh', 'svg', 'po', 'pot', 'ics', 'patch']
+            scripts:
+                - ["-c", "vendor/bin/ec -n --no-progress --git-only --git-only-cmd=\"git ls-files -- . ':!calendar_block'\""]
+            metadata:
+                task: shell
         # Runs the Mocha/Selenium integration_tests suite.
         # Requires the ddev/ddev-selenium-standalone-chrome add-on (or a reachable
         # Selenium server) and constants-local.php - see TESTING.md.
@@ -79,6 +89,7 @@ parameters:
             tasks:
                 - composer
                 - phpcs
+                - editorconfig
                 - phpunit
         # Everything from the TESTING.md checklist in one go.
         # Run explicitly: vendor/bin/grumphp run --testsuite=all_tests
@@ -86,6 +97,7 @@ parameters:
             tasks:
                 - composer
                 - phpcs
+                - editorconfig
                 - phpunit
                 - plugin_check
                 - integration_tests

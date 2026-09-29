@@ -258,10 +258,10 @@ class ScriptsFrontendController extends OsecBaseClass
         $namespace = self::REQUIRE_NAMESPACE;
         $config    = "
             $namespace.require.config( {
-			    waitSeconds : 15,
-			    urlArgs     : 'ver=$version',
-			    baseUrl     : '$js_url'
-		    } );
+                waitSeconds : 15,
+                urlArgs     : 'ver=$version',
+                baseUrl     : '$js_url'
+            } );
         ";
 
         return $config;
@@ -421,7 +421,7 @@ class ScriptsFrontendController extends OsecBaseClass
             ),
             'javascript_widgets'             => [],
             'load_views_error'               => __(
-                'Something went wrong while fetching events. 
+                'Something went wrong while fetching events.
                     <br>The request status is: #STATUS# <br>The error thrown was: #ERROR#',
                 'open-source-event-calendar'
             ),
