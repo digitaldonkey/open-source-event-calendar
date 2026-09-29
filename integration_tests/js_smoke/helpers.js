@@ -106,8 +106,9 @@ async function visible(driver, css, timeout = TIMEOUT) {
 }
 
 /**
- * Clicks an element, looking it up again if an AJAX view reload replaced it
- * in between.
+ * Clicks an element, looking it up again if an AJAX view reload replaced it in
+ * between, and moving the mouse away if a tooltip left by an earlier hover
+ * covers it.
  */
 async function click(driver, css) {
     for (let attempt = 1; ; attempt++) {
@@ -117,8 +118,15 @@ async function click(driver, css) {
             await el.click();
             return el;
         } catch (e) {
-            if (e.name !== 'StaleElementReferenceError' || attempt === 3) {
+            if (!['StaleElementReferenceError', 'ElementClickInterceptedError'].includes(e.name) || attempt === 3) {
                 throw e;
+            }
+            if (e.name === 'ElementClickInterceptedError') {
+                await driver.actions({async: true}).move({x: 1, y: 1}).perform();
+                await driver.wait(
+                    () => driver.executeScript("return !document.querySelector('.ai1ec-tooltip.ai1ec-in');"),
+                    TIMEOUT
+                ).catch(() => {});
             }
         }
     }
