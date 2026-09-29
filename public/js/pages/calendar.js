@@ -5804,7 +5804,9 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
     }, g = function (t) {
         t.find(".osec-calendar-view-container").trigger("destroy_view.ai1ec");
         var n = t.find(".ai1ec-minical-trigger").data("datepicker");
-        typeof n != "undefined" && (n.picker.remove(), $(document).off("changeDate", ".ai1ec-minical-trigger")), t.find(".ai1ec-tooltip.ai1ec-in, .ai1ec-popup").remove(), t.find(".ai1ec-calendar-toolbar .ai1ec-btn-toolbar").remove()
+        // Drop the instance with its picker and handler, so a trigger that survives the reload
+        // gets a fresh picker for the new view on its next click.
+        typeof n != "undefined" && (n.picker.remove(), t.find(".ai1ec-minical-trigger").off("changeDate", k).removeData("datepicker")), t.find(".ai1ec-tooltip.ai1ec-in, .ai1ec-popup").remove(), t.find(".ai1ec-calendar-toolbar .ai1ec-btn-toolbar").remove()
     }, y = function () {
         var t = [], n = [], r = [], i;
         $(".ai1ec-category-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
@@ -5904,11 +5906,20 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
                     this.picker.css({left: "auto", right: $(document).width() - n.left - t.outerWidth()})
                 }
             }
-            $(document).one("changeDate", ".ai1ec-minical-trigger", k)
+            // On the trigger, for as long as its picker lives: a one-time handler was used up by
+            // the first pick, and a pick of the date already shown reloads nothing, so the next
+            // pick found no handler, did nothing and left the picker open.
+            n.on("changeDate", k)
         }
         n.datepicker("show")
     }, k = function (t) {
         var n, r = $(this), i = r.closest(".ai1ec-calendar"), s;
+        // Clicking the selected date deselects it (bootstrap-datepicker toggles dates): that
+        // date is already shown, so select it again and close instead of loading "no date".
+        if (!t.date) {
+            r.datepicker("update", r.attr("data-date")).datepicker("hide");
+            return;
+        }
         r.datepicker("hide"), n = r.data("href"), s = t.format(), s = s.replace(/\//g, "-"), n = n.replace("__DATE__", s), T(i, r.data("type"), n)
     }, L = function (t) {
         var n;
