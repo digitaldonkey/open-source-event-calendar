@@ -162,7 +162,8 @@ Do not access production databases.
 - **Instances are only (re)built by `Event::save()` → `EventInstance::recreate()`.** Nothing regenerates them
   on read, so a fix to the generator does **not** repair events already in the database - they stay wrong
   until each is re-saved or its ICS feed re-imported. Expect correct and broken events side by side on the
-  same install, and re-save before judging whether a recurrence fix worked.
+  same install, and re-save before judging whether a recurrence fix worked. `wp osec event regenerate` rebuilds them
+  in bulk (keyset batches, flat memory, resumable with `--start-after`) and removes rows of deleted posts.
 - **Near-midnight start times are the edge case that matters.** An hour of drift is only *visible* when it
   crosses a calendar-day boundary, so bugs here hide unless the start time is within an hour of midnight:
   a summer-created event at `[00:00, 01:00)` doubles the autumn transition day; a winter-created one at
@@ -187,6 +188,15 @@ Do not access production databases.
   not have. The downstream guards stay as a net for rules stored by older versions: the generator drops and
   reports (`createCollection()` has already cached the single occurrence), the export leaves the rule out,
   and `RepeatRuleToText` skips months it cannot name.
+- **`exception_dates` (EXDATE) stores the date in the series' own timezone; the time part is ignored.**
+  `EventInstance::process_rrule_datelist()` reads only `Ymd` and applies the series' start time, so every
+  writer must convert first - `EventParent::add_exception_date()` does, the feed import does since `4b34a211`
+  (`IcsImportExportParser::exclusion_date()`, also used for RECURRENCE-ID overrides). A UTC date there names
+  the wrong day whenever the local start falls on another UTC date: after midnight east of UTC, in the
+  evening west of it (New York from ~19:00), a far wider window than the "hour before midnight" above.
+  `recurrence_dates` (RDATE) follows the same convention since `45f0e747`; the import reads RDATE and EXDATE through
+  `IcsImportExportParser::recurrence_dates()` (a DATE or floating value keeps its date). Stored alone, the dates
+  also stand in as the rule `RDATE=<dates>` (the editor's "custom dates"); next to a real RRULE both are kept.
 - Further reading: [wiki: Understanding data model](https://github.com/digitaldonkey/open-source-event-calendar/wiki/Understanding-data-modell)
 
 ## Feeds (iCalendar)
@@ -235,6 +245,9 @@ that needs to tell an admin something goes through it:
   `esc_html()` *before* calling `store()`, never at render time.
 - Dispatch is delayed by design: `store()` during a `save_post` or a cron run, and the notice appears on the
   next admin page load.
+- The `osec_admin_notification_pre_store` filter short-circuits `store()`. The WP-CLI commands hook it for
+  the length of a run (`Osec\WpCli\PrintsAdminNotices`) to print instead of store. Keep it scoped like that:
+  `wp cron event run` is also WP-CLI, and a global redirect would send nightly feed failures to a cron log.
 
 **Anything that runs without a browser to answer to must use it.** Scheduled feed imports call
 `FeedsController::update_ics($feed_id)` with `$ajax === false`, and that return value — error message and all —
@@ -455,6 +468,7 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
 - **PHPUnit**: `ddev phpunit` (or `ddev phpunit --filter test_name ./tests/Unit/...`)
 - **Integration (Mocha/Selenium)**: `cd integration_tests && npm run test`
 - **Code quality**: `ddev composer run-script phpcs` or `ddev run-script phpcs`
+- **WordPress plugin-check**: `bin/plugin-check.sh` (~13 s; ERROR fails, `--strict` also fails on WARNING). Deliberately **not** in `git_pre_commit` - it runs in `all_tests`, `prepare_release` and CI
 - **GrumPHP**: `vendor/bin/grumphp run --testsuite=git_pre_commit` (what the pre-commit hook runs)
 - **The Mocha/Selenium integration suite is destructive to the dev site.** It installs/uninstalls the plugin,
   exercises the `OSEC_UNINSTALL_PLUGIN_DATA` purge, creates its own `Calendar` page, and **trashes every
@@ -469,6 +483,11 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
 - **`phpcs.xml` excludes `/tests/`**, so GrumPHP and CI never lint test files. Passing a test file to
   `vendor/bin/phpcs` explicitly still checks it; worth doing for a new test, but a style slip there will not
   fail the build
+- **Two DB traps in tests.** `$app->db->update()` does **not** add the table prefix (`insert()` and `delete()`
+  do), so `update(OSEC_DB__EVENTS, …)` silently hits a missing table - pass `get_table_name()`.
+  `ExecutionLimitController::acquire()` runs its own `COMMIT`, which ends the test framework's transaction, so
+  anything a test writes before a feed import survives the rollback - clean up after `parent::tear_down()` and
+  `COMMIT` (see `tests/Unit/App/Controller/FeedsControllerLockTest.php`)
 - **No skipped tests**: `phpunit.xml` has `failOnSkipped`/`failOnRisky`/`failOnIncomplete` — "OK, but … skipped" exits 1 and fails CI. Check the exit code, don't use `markTestSkipped()` for multisite-only variants (CI is single site), and run CI's command `vendor/bin/phpunit tests` (see `TESTING.md`)
 - **A calendar page must be set for any testing**: "no calendar page set" (`calendar_page_id` empty or pointing to a missing page) is a setup error, not a code bug. wp-admin shows the "installed, but has not been configured" notice (`EnvironmentCheck`). Don't fix or work around problems that only derive from that state; check the setup first when links, URLs or routing look wrong.
   - **PHPUnit**: `TestBase::set_up()` creates a published page per test and sets `calendar_page_id` plus the `CacheMemory` `calendar_base_page`. It can't be created once in the bootstrap, because the WP test lib's `_delete_all_data()` deletes all posts after each test class. Tests not extending `TestBase` must do the same.
@@ -502,7 +521,7 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
 
 ## Release & Build Tooling
 
-- Anything shipped in a release **must be committed to git first**; `static_release_job` gates four generated files - see the inventory below for which, and for the three it does *not* cover
+- Two jobs gate a release: `static_release_job` (four generated files - see the inventory below for which, and for the three it does *not* cover) and `release_test_job`, which runs WordPress plugin-check against the built zip. Anything shipped **must be committed to git first**, or the first job's `git status` checks fail
 - `README.txt` is generated from `README.md` — never hand-edit it: `ddev wp osec make_readme`
 - `hooks-and-filters.md` is generated from PHPDoc by the separate [`hookster_markdown`](https://github.com/digitaldonkey/hookster_markdown) tool and must be regenerated before each release:
   ```bash
@@ -542,21 +561,90 @@ uncommitted edit is silently restored and the tree comes back clean. The stale c
 - **`calendar_block/build/`** - tracked output of `wp-scripts build` from `calendar_block/src/`. In sync
   today (both last touched by `1d6c041f`), but nothing stops the next `src/` edit shipping a stale bundle.
 
-**To probe a gate, name the branch `release-…`.** `static_release_job` is filtered to
-`only: /^(master|release-.*)$/`, so a probe branch named anything else passes by never running the job -
-the same false pass one level up. Use **one branch per gate** (`set -e` hides every gate after the first
-failure), and trim the workflow to `build -> static_job -> static_release_job` to keep the probe off the
-Selenium matrix. Nothing can publish from such a branch: all three deploy jobs are `only: /master/` *and*
-carry a `circleci-agent step halt` guard.
+**A probe branch's name must match the job's own filter, and the right name differs per job** - get it
+wrong and the probe passes by never running the gate, the same false pass one level up.
+`static_release_job` is filtered to `only: /^(master|release-.*)$/`, so **probe it from a `release-…`
+branch**. Use **one branch per gate** (`set -e` hides every gate after the first failure), and trim the
+workflow to `build -> static_job -> static_release_job` to keep the probe off the Selenium matrix. For the
+plugin-check gate the rule inverts - see below. Nothing can publish from such a branch: all three deploy
+jobs are `only: /master/` *and* carry a `circleci-agent step halt` guard.
+
+### The other release gate: plugin-check in `release_test_job`
+
+`bin/plugin-check.sh` (run locally, by GrumPHP's `all_tests` / `prepare_release`, and by
+`release_test_job`'s "WordPress plugin-check (release build)" step against the unzipped release).
+**`wp plugin check` always exits 0**, so the wrapper is what makes it a gate: ERROR fails, WARNING only
+prints unless `--strict`. Mechanics, filtering and the one known false positive are in `TESTING.md`.
+
+Verified in both directions (2026-09-24):
+
+- green - `a5627205` on `feature/plugin-check-gate`, run `0b4e26c9…`: step `exit=0`,
+  `0 error(s), 1 warning(s)`. This also settles that the WP-CLI 3.0 dev build at `$WP_CLI` registers
+  plugin-check's command;
+- red - probe `ci-probe-plugin-check` (`6e27471b`), run `b67fed37…`: one line putting
+  `leaflet.js` back on `https://unpkg.com/` made the step `exit=1` with
+  `PluginCheck.CodeAnalysis.Offloading.OffloadedContent` and failed the job.
+
+**Do not name this probe branch `release-…`.** `release_test_job` (8.2) carries **no** branch filter,
+while `release_test_job_php_8_{3,4,5}` are `master|release-*` - a `release-…` name buys four Selenium
+jobs instead of one.
+
+Two things a probe of *this* gate must get right, or it proves nothing:
+
+- **inject into a file that ships** (`src/`, i.e. in `OSEC_RELEASE_WHITE_LIST` and not in `.distignore`) -
+  the wrapper drops findings in files the zip never contains, so a probe in `tests/` or `bin/` is filtered
+  away. Verify by rebuilding the release tree locally and grepping for the line;
+- **keep `phpcs` and `phpunit` green**, because `create_release_job` requires `static_job` and `db_job`;
+  a probe that trips one of those never reaches the gate. A probe commit therefore still deserves a
+  `phpcs` run.
+
+Cost is small: once the step fails, the later steps are skipped, so Apache and `node/install-packages`
+never run and the `when: always` integration step dies in seconds for lack of `node_modules` - no Selenium
+time. The whole red run took 3m07s.
 
 
 ## CircleCI Behavior by Branch
 
-What the CircleCI pipeline (`.circleci/config.yml`) does differently depending on which branch triggers it:
+What the CircleCI pipeline (`.circleci/config.yml`) does differently depending on which branch or tag triggers it:
 
-- `master` — runs the full test matrix; creates a GitHub dev release; creates a GitHub tag release and a [WordPress.org plugin release](https://wordpress.org/plugins/open-source-event-calendar) if the commit is tagged; contains the latest bugfixes
+- `master` — runs the full test matrix; replaces the WordPress.org SVN **trunk** and the GitHub `dev` prerelease, on every push (skipped when master has moved on, so a rerun never rolls back); contains the latest bugfixes
+- tag `X.Y.Z` — runs the full test matrix, then creates SVN `tags/X.Y.Z` and the GitHub release `X.Y.Z` (see below)
+- tag `X.Y.Z-dryrun` — the same, but prints what it would commit and publishes nothing
 - `release-*` — runs the full test matrix; does not create a release
 - Next-release branch (e.g. `1.2.x-dev` if the current release is `1.1.x`) — a dev branch for the next semantic major version; should include all bugfixes from master; no release
+
+### Releasing to WordPress.org
+
+```bash
+# on master, once the release commit (version bumped everywhere) is pushed and green
+git tag -a 1.2.0 -m "Release 1.2.0"
+git push origin 1.2.0
+```
+
+- **`.circleci/release-context.sh` decides, once, in the `build` job** and writes `/tmp/release.env`
+  (`RELEASE_MODE` none/dev/tagged/dryrun, `RELEASE_VERSION`, `RELEASE_UPDATE_TRUNK`) for the GitHub and SVN
+  jobs. A tag that fails a check fails `build`, before any test runs:
+  - `X.Y.Z` or `X.Y.Z-dryrun` only;
+  - the tagged commit is on master;
+  - the tag equals plugin header `Version` and `Stable Tag`, `README.txt` `Stable Tag` and `OSEC_VERSION`;
+  - the tag is higher than every other `X.Y.Z` tag.
+- **Trunk (and the GitHub `dev` release) is only replaced while the pipeline's commit is master's HEAD.**
+  Checked when `build` starts and again right before the deploy (`.circleci/still-master-head.sh`), because
+  master can move on during the ~20 min of tests. A master pipeline that was overtaken deploys nothing; a tag on
+  an older master commit creates just `tags/X.Y.Z`. If the check itself fails (fetch error), the job fails.
+- **The release commit reaches trunk through its master pipeline before the tag exists** - WordPress.org
+  serves trunk as that version until the tag pipeline finishes. Tag it before pushing anything else to master.
+- **An existing `tags/X.Y.Z` is never touched**, so rerunning a tag pipeline is harmless.
+- **The tag is committed as a working-copy copy of the updated trunk**, so a release uploads only what differs
+  from trunk. A whole-tag upload (~1,500 files) timed out on "Committing transaction..." in 2026-09.
+- **Only the maintainer can push `X.Y.Z` tags**: GitHub tag ruleset "Release tags" (`refs/tags/*.*.*`,
+  creation/update/deletion restricted, bypass: repository admin). `ghr` therefore must not use `-delete`
+  for a release tag.
+- **`.circleci/tests/test-release-scripts.sh`** (run in `build`) covers both scripts against a local git
+  origin and a local `file://` SVN repository. Run it after any change to them.
+- Before 2026-09-29 a pushed tag ran nothing and the "tagged" branch of the old deploy script could never
+  be taken, so 1.1.12 - 1.1.14 never got SVN tags; `tags/1.1.14` and a repaired `tags/1.1.5` were added by
+  hand (r3719399).
 
 ## Reading CI Results
 

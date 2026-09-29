@@ -1,3 +1,19 @@
+= 1.1.15 =
+- WP-CLI: `wp osec event regenerate` rebuilds the recurrence instances of all or specific events (resumable batches, flat memory for 10,000+ events) and removes rows left behind by deleted events
+- WP-CLI: `wp osec feed update` imports all or specific feeds now, `--force` breaks a stale import lock; `wp osec feed list`
+- Problems during these commands are printed to the console instead of stored as admin notices (new filter `osec_admin_notification_pre_store`)
+- Feed fetches verify TLS certificates again; a self-signed feed now fails with "cURL error 60" (see FAQ)
+- Fix: events removed from a feed were never deleted when "keep old events" is off (since 1.0.7)
+- Fix: a failed import no longer frees the lock of another running import, and an import error no longer leaves its feed locked for 24 hours
+- Fix: deleting an event outside wp-admin (WP-CLI, REST, cron) left its instances behind
+- Fix: moved occurrences (RECURRENCE-ID) near midnight showed twice; importing several feeds in one run mixed up their overrides
+- Fix: EXDATE and RDATE of feeds excluded or added the wrong day near midnight or in the evening west of UTC
+- Fix: only the last RDATE line of a feed was imported, and an RRULE next to RDATEs was dropped
+- Feed imports need about a third less memory
+- Fix: agenda "forward" got stuck on days with more events than one page holds, and "back" did not return to the previous page
+- Fix: agenda previous/next buttons showed for drafts, trashed or filtered-out events, leading to an empty page
+- Fix: with category and tag filters combined by OR (filter `osec_filter_distinct_types_logic`), the filters were ignored and draft and private events showed
+
 = 1.1.14 =
 - Print support for all calendar views: print button in month, week, day and agenda #55
 - Printouts show a header with title, view name and a link to the printed view, and leave out navigation, filters, subscribe buttons and link addresses

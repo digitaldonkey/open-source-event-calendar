@@ -73,6 +73,37 @@ class ExecutionLimitController extends OsecBaseClass
     }
 
     /**
+     * Who holds a guard, without acquiring it.
+     *
+     * @param  string  $name  Name of acquisition.
+     *
+     * @return array|null ['time' => int, 'pid' => int] of the holder, null if free.
+     */
+    public function get_holder($name): ?array
+    {
+        $dbi  = $this->app->db;
+        $prev = $dbi->get_var(
+            $dbi->prepare(
+                'SELECT option_value FROM ' . $dbi->get_table_name('options') .
+                ' WHERE option_name = %s',
+                $this->safe_name($name)
+            )
+        );
+        if (empty($prev)) {
+            return null;
+        }
+        $prev = json_decode((string)$prev, true);
+        if (! is_array($prev)) {
+            return null;
+        }
+
+        return [
+            'time' => (int)($prev['time'] ?? 0),
+            'pid'  => (int)($prev['pid'] ?? 0),
+        ];
+    }
+
+    /**
      * Prepare safe file names.
      *
      * @param  string  $name  Name of acquisition

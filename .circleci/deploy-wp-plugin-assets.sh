@@ -1,52 +1,35 @@
 #!/usr/bin/env bash
+#
+# Replaces the WordPress.org plugin SVN assets/ (banners, icons, screenshots)
+# with ./assets. Runs on master pushes only.
 
-# Prevent history save to keep secrets seecret.
+set -Eeuo pipefail
 set +o history
 
-if [[ -z "$CIRCLECI" ]]; then
-    echo "This script can only be run by CircleCI. Aborting." 1>&2
-    exit 1
-fi
+fail() { echo "deploy-assets: $*" >&2; exit 1; }
 
-if [[ -z "$CIRCLE_BRANCH" || "$CIRCLE_BRANCH" != "master" ]]; then
-    echo "Build branch is required and must be 'master' branch. Stopping deployment." 1>&2
-    exit 1
-fi
+[[ -n "${CIRCLECI:-}" ]] || fail "this script can only be run by CircleCI"
+[[ "${CIRCLE_BRANCH:-}" == "master" ]] || fail "assets are deployed from master only"
+: "${WP_ORG_PLUGIN_NAME:?WordPress.org plugin name not set}"
+: "${WP_ORG_USERNAME:?WordPress.org username not set}"
+: "${WP_ORG_SVN_PASSWORD:?WordPress.org password not set}"
 
-if [[ -z "$WP_ORG_SVN_PASSWORD" ]]; then
-    echo "WordPress.org password not set. Aborting." 1>&2
-    exit 1
-fi
+SVN_URL=${WP_ORG_SVN_URL:-https://plugins.svn.wordpress.org/$WP_ORG_PLUGIN_NAME}
+source_dir=$(pwd)/assets
+work=/tmp/wp-org-assets
 
-if [[ -z "$WP_ORG_PLUGIN_NAME" ]]; then
-    echo "WordPress.org plugin name not set. Aborting." 1>&2
-    exit 1
-fi
+rm -rf "$work"
+svn checkout --quiet --non-interactive --depth immediates "$SVN_URL" "$work"
+cd "$work"
+svn update --quiet --non-interactive --set-depth infinity assets
 
-if [[ -z "$WP_ORG_USERNAME" ]]; then
-    echo "WordPress.org username not set. Aborting." 1>&2
-    exit 1
-fi
+find assets -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+cp -a "$source_dir/." assets/
+svn add --quiet --force --no-ignore assets
+svn status assets | { grep '^!' || true; } | cut -c9- | while IFS= read -r missing; do
+    svn rm --quiet --force "$missing@"
+done
 
-PLUGIN_SVN_PATH="/tmp/svn"
-
-# Checkout the SVN repo
-svn co -q "http://svn.wp-plugins.org/$WP_ORG_PLUGIN_NAME" $PLUGIN_SVN_PATH
-
-# Delete the assets directory
-rm -rf $PLUGIN_SVN_PATH/assets
-
-# Copy our plugin assets as the new assets directory
-cp -r ./assets $PLUGIN_SVN_PATH/assets
-
-# Move to SVN directory
-cd $PLUGIN_SVN_PATH
-
-# Add new files to SVN
-svn stat | grep '^?' | awk '{print $2}' | xargs -I x svn add x@
-
-# Remove deleted files from SVN
-svn stat | grep '^!' | awk '{print $2}' | xargs -I x svn rm --force x@
-
-# Commit to SVN
- svn ci --no-auth-cache --username $WP_ORG_USERNAME --password $WP_ORG_SVN_PASSWORD -m "Deploy OSEC assets"
+svn status assets
+printf '%s' "$WP_ORG_SVN_PASSWORD" | svn commit --quiet --non-interactive --no-auth-cache \
+    --username "$WP_ORG_USERNAME" --password-from-stdin -m "Deploy OSEC assets" assets

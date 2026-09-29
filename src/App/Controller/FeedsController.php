@@ -342,8 +342,11 @@ class FeedsController extends OsecBaseClass
      * update_ics_feed function
      *
      * Imports the selected iCalendar feed
+     *
+     * @param  int|null  $feed_id  Feed to import, null to read it from the ajax request.
+     * @param  bool  $force  Break the import lock of this feed, even if another import holds it.
      */
-    public function update_ics(?int $feed_id = null): array
+    public function update_ics(?int $feed_id = null, bool $force = false): array
     {
         $ajax = false;
         $data = [];
@@ -363,10 +366,18 @@ class FeedsController extends OsecBaseClass
                 ),
             ],
         ];
-        if ($this->execLimiter->acquire($cron_name, $this->getUpdateTimout())) {
-            $data = $this->process_ics_feed_update($feed_id);
+        if ($force) {
+            $this->execLimiter->release($cron_name);
         }
-        $this->execLimiter->release($cron_name);
+        // Only the holder may release the lock, or a second process would free the
+        // lock of a first one still importing.
+        if ($this->execLimiter->acquire($cron_name, $this->getUpdateTimout())) {
+            try {
+                $data = $this->process_ics_feed_update($feed_id);
+            } finally {
+                $this->execLimiter->release($cron_name);
+            }
+        }
 
         if (true === $ajax) {
             RenderJson::factory($this->app)->render($data);
@@ -385,6 +396,36 @@ class FeedsController extends OsecBaseClass
     protected function importLockName(int $feed_id)
     {
         return 'ics_import_' . $feed_id;
+    }
+
+    /**
+     * Who holds the import lock of a feed.
+     *
+     * @param  int  $feed_id  Feed ID.
+     *
+     * @return array|null ['time' => int, 'pid' => int], null if the feed is not locked.
+     */
+    public function get_import_lock(int $feed_id): ?array
+    {
+        return $this->execLimiter->get_holder($this->importLockName($feed_id));
+    }
+
+    /**
+     * Feeds, optionally limited to the given IDs.
+     *
+     * @param  int[]  $feed_ids  Feed IDs, empty for all.
+     *
+     * @return object[] Feed rows ordered by feed_id.
+     */
+    public function get_feeds(array $feed_ids = []): array
+    {
+        $where = '';
+        if ($feed_ids) {
+            $where = ' WHERE feed_id IN (' . implode(',', array_map('absint', $feed_ids)) . ')';
+        }
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- absint-secured.
+        return $this->app->db->get_results("SELECT * FROM {$this->feedsTable}{$where} ORDER BY feed_id");
     }
 
     private function getUpdateTimout(): int

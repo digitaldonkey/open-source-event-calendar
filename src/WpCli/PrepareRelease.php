@@ -36,8 +36,6 @@ class PrepareRelease
      * ## EXAMPLES
      *
      *     wp osec prepare_release
-     *
-     * @when before_wp_load
      */
     public function prepare_release()
     {
