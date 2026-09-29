@@ -6,29 +6,29 @@
 
 // Gradients.
 #gradient {
-	// Use these for the following behaviour:
-	// If browser supports the gradient syntax it will *replace the background
-	// color* behind it, and is *especially important for translucent gradients*.
-	.ai1ec-horizontal-replace(@startColor: #555, @endColor: #333) {
-		background: @endColor;
-		background: linear-gradient(left, @startColor, @endColor); // Le standard
-		background-repeat: repeat-x;
-	}
-	.ai1ec-vertical-replace(@startColor: #555, @endColor: #333) {
-		background: mix(@startColor, @endColor, 60%);
-		background: linear-gradient(to top, @startColor, @endColor); // The standard
-		background-repeat: repeat-x;
-	}
-	.ai1ec-vertical-three-colors-replace(@startColor: #00b3ee, @midColor: #7a43b6, @colorStop: 50%, @endColor: #c3325f) {
-		background: mix(@midColor, @endColor, 80%);
-		background: linear-gradient(@startColor, @midColor @colorStop, @endColor);
-		background-repeat: no-repeat;
-	}
-	.ai1ec-horizontal-three-colors-replace(@startColor: #00b3ee, @midColor: #7a43b6, @colorStop: 50%, @endColor: #c3325f) {
-		background: mix(@midColor, @endColor, 80%);
-		background: linear-gradient(left, @startColor, @midColor @colorStop, @endColor);
-		background-repeat: no-repeat;
-	}
+  // Use these for the following behaviour:
+  // If browser supports the gradient syntax it will *replace the background
+  // color* behind it, and is *especially important for translucent gradients*.
+  .ai1ec-horizontal-replace(@startColor: #555, @endColor: #333) {
+    background: @endColor;
+    background: linear-gradient(left, @startColor, @endColor); // Le standard
+    background-repeat: repeat-x;
+  }
+  .ai1ec-vertical-replace(@startColor: #555, @endColor: #333) {
+    background: mix(@startColor, @endColor, 60%);
+    background: linear-gradient(to top, @startColor, @endColor); // The standard
+    background-repeat: repeat-x;
+  }
+  .ai1ec-vertical-three-colors-replace(@startColor: #00b3ee, @midColor: #7a43b6, @colorStop: 50%, @endColor: #c3325f) {
+    background: mix(@midColor, @endColor, 80%);
+    background: linear-gradient(@startColor, @midColor @colorStop, @endColor);
+    background-repeat: no-repeat;
+  }
+  .ai1ec-horizontal-three-colors-replace(@startColor: #00b3ee, @midColor: #7a43b6, @colorStop: 50%, @endColor: #c3325f) {
+    background: mix(@midColor, @endColor, 80%);
+    background: linear-gradient(left, @startColor, @midColor @colorStop, @endColor);
+    background-repeat: no-repeat;
+  }
 }
 
 //
@@ -118,76 +118,76 @@
 // =================
 
 .ai1ec-avatar( natural ) {
-	background-color: @body-bg;
-	.ai1ec-box-shadow( 0 1px 4px @event-image-shadow );
-	img {
-		height: auto;
-		display: block;
-		width: 100%;
-	}
+  background-color: @body-bg;
+  .ai1ec-box-shadow( 0 1px 4px @event-image-shadow );
+  img {
+    height: auto;
+    display: block;
+    width: 100%;
+  }
 }
 .ai1ec-avatar( thumbnail ) {
-	width: 90px;
-	img {
-		display: block;
-		margin: auto;
-		height: 90px !important;
-		max-width: 90px !important;
-		min-height: 0 !important;
-		min-width: 0 !important;
-		width: auto !important;
-	}
+  width: 90px;
+  img {
+    display: block;
+    margin: auto;
+    height: 90px !important;
+    max-width: 90px !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
 }
 
 // ====================
 // = List item styles =
 // ====================
 .ai1ec-listItem() {
-	color: @dropdown-link-color;
+  color: @dropdown-link-color;
 }
 .ai1ec-listItemActive( @extra-shadow: ~"" ) {
-	background-color: @dropdown-link-hover-bg;
-	border-color: @dropdown-link-hover-bg;
-	.ai1ec-box-shadow( inset 0 0 2px fade( @dropdown-link-hover-color, 30% ) @extra-shadow );
-	color: @dropdown-link-hover-color;
+  background-color: @dropdown-link-hover-bg;
+  border-color: @dropdown-link-hover-bg;
+  .ai1ec-box-shadow( inset 0 0 2px fade( @dropdown-link-hover-color, 30% ) @extra-shadow );
+  color: @dropdown-link-hover-color;
 }
 
 // ============================
 // = Multiline overflow trick =
 // ============================
 .ai1ec-multilineOverflow( @container-height, @line-height, @bg-color ) {
-	line-height: @line-height;
-	height: @container-height;
-	overflow: hidden;
-	&:before {
-		content: "";
-		float: left;
-		width: 5px;
-		height: @container-height;
-	}
-	> *:first-child {
-		float: right;
-		width: 100%;
-		margin-left: -5px;
-	}
-	&:after {
-		content: "…";
-		.ai1ec-box-sizing( content-box );
-		float: right;
-		left: 100%;
-		margin-left: -1.25em;
-		padding-right: 5px;
-		position: relative;
-		text-align: right;
-		top: -@line-height;
-		width: 1.25em;
-		#gradient > .ai1ec-horizontal-three-colors-replace(
-			fade( @bg-color, 0% ),
-			@bg-color,
-			50%,
-			@bg-color
-		);
-	}
+  line-height: @line-height;
+  height: @container-height;
+  overflow: hidden;
+  &:before {
+    content: "";
+    float: left;
+    width: 5px;
+    height: @container-height;
+  }
+  > *:first-child {
+    float: right;
+    width: 100%;
+    margin-left: -5px;
+  }
+  &:after {
+    content: "…";
+    .ai1ec-box-sizing( content-box );
+    float: right;
+    left: 100%;
+    margin-left: -1.25em;
+    padding-right: 5px;
+    position: relative;
+    text-align: right;
+    top: -@line-height;
+    width: 1.25em;
+    #gradient > .ai1ec-horizontal-three-colors-replace(
+      fade( @bg-color, 0% ),
+      @bg-color,
+      50%,
+      @bg-color
+    );
+  }
 }
 
 // =========================

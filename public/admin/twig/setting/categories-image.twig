@@ -1,47 +1,47 @@
 {% if edit %}
 
-	<tr class="form-field">
-		<th scope="row" valign="top">
-			<label for="tag-color">
-				{{ section_name | raw }}
-			</label>
-		</th>
-		<td>
+    <tr class="form-field">
+        <th scope="row" valign="top">
+            <label for="tag-color">
+                {{ section_name | raw }}
+            </label>
+        </th>
+        <td>
 
-			<img src='{{ image_src }}' {{ image_style }} alt='' id='osec_category_imag_preview' />
-			<input type="hidden" name="osec_category_image_url" id="osec_category_image_url" value="">
-			<input class="button at-upload_image_button" type="button" id='osec_category_image_uploader' value="{{ label }}">
+            <img src='{{ image_src }}' {{ image_style }} alt='' id='osec_category_imag_preview' />
+            <input type="hidden" name="osec_category_image_url" id="osec_category_image_url" value="">
+            <input class="button at-upload_image_button" type="button" id='osec_category_image_uploader' value="{{ label }}">
 
-			{% if image_src %}
-			<p>
-				<input type="checkbox" style="width:auto;" name="osec_category_image_url_remove" id="osec_category_image_url_remove" value="1" />
-				<label for="osec_category_image_url_remove">{{ remove_label }}</label>
-			</p>
-			{% endif %}
+            {% if image_src %}
+            <p>
+                <input type="checkbox" style="width:auto;" name="osec_category_image_url_remove" id="osec_category_image_url_remove" value="1" />
+                <label for="osec_category_image_url_remove">{{ remove_label }}</label>
+            </p>
+            {% endif %}
 
-			<div class="desc-field">
-				<p class="description">
-					{{ description | raw }}
-				</p>
-			</div>
-		</td>
-	</tr>
+            <div class="desc-field">
+                <p class="description">
+                    {{ description | raw }}
+                </p>
+            </div>
+        </td>
+    </tr>
 
 {% else %}
-	<div class="form-field">
-		<label for="osec_category_image_uploader">
-			{{ section_name | raw }}
-		</label>
+    <div class="form-field">
+        <label for="osec_category_image_uploader">
+            {{ section_name | raw }}
+        </label>
 
-		<img src='{{ image_src }}' {{ image_style }} alt='' id='osec_category_imag_preview' />
-		<input type="hidden" name="osec_category_image_url" id="osec_category_image_url" value="">
-		<input class="button at-upload_image_button" type="button" id='osec_category_image_uploader' value="{{ label }}">
+        <img src='{{ image_src }}' {{ image_style }} alt='' id='osec_category_imag_preview' />
+        <input type="hidden" name="osec_category_image_url" id="osec_category_image_url" value="">
+        <input class="button at-upload_image_button" type="button" id='osec_category_image_uploader' value="{{ label }}">
 
-		<div class="desc-field">
-			<p class="description">
-				{{ description | raw }}
-			</p>
-		</div>
-	</div>
+        <div class="desc-field">
+            <p class="description">
+                {{ description | raw }}
+            </p>
+        </div>
+    </div>
 
 {% endif %}

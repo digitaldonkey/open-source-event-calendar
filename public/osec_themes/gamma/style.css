@@ -9,28 +9,28 @@
  */
 
 /*
-	==============================================
-	= Custom calendar themes are based on Vortex =
-	==============================================
+    ==============================================
+    = Custom calendar themes are based on Vortex =
+    ==============================================
 
-	This file only holds the theme header; rules in it are not loaded.
-	Place your style rules in your theme folder
-	(wp-content/themes/osec_themes/[your-theme-directory]), in one of:
+    This file only holds the theme header; rules in it are not loaded.
+    Place your style rules in your theme folder
+    (wp-content/themes/osec_themes/[your-theme-directory]), in one of:
 
-	  less/override.less   LESS (https://lesscss.org/). May use the Vortex variables
-	                       (less/variables.less, less/user_variables.php) and the
-	                       Bootstrap 3 mixins, prefixed with "ai1ec-":
-	                         @import "bootstrap/mixins.less";
-	                         .my-calendar-box { .ai1ec-clearfix(); }
+      less/override.less   LESS (https://lesscss.org/). May use the Vortex variables
+                           (less/variables.less, less/user_variables.php) and the
+                           Bootstrap 3 mixins, prefixed with "ai1ec-":
+                             @import "bootstrap/mixins.less";
+                             .my-calendar-box { .ai1ec-clearfix(); }
 
-	  css/override.css     Plain CSS. Only used if there is no less/override.less.
+      css/override.css     Plain CSS. Only used if there is no less/override.less.
 
-	Both are applied *after* all default style rules of Vortex.
+    Both are applied *after* all default style rules of Vortex.
 
-	= NOTE ======================================================================
-	= Be sure to visit Events > Theme Options and click "Save Options" any time =
-	= you make changes to either of the above files before viewing your site.   =
-	=============================================================================
+    = NOTE ======================================================================
+    = Be sure to visit Events > Theme Options and click "Save Options" any time =
+    = you make changes to either of the above files before viewing your site.   =
+    =============================================================================
 
-	More in the plugin's README.md, section "Custom calendar themes".
+    More in the plugin's README.md, section "Custom calendar themes".
  */
