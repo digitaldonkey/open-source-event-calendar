@@ -611,23 +611,10 @@ class Event extends OsecBaseClass
             }
         }
 
+        // Categories and tags are not assigned here: the editor saves them with the post, the feed import through
+        // EventFeedTerms. The properties hold a comma separated string, read from the DB for the views.
         $taxonomy = new EventTaxonomy($this->app, $post_id);
-        $cats     = $this->get('categories');
-        if (
-            is_array($cats) &&
-            ! empty($cats)
-        ) {
-            $taxonomy->set_categories($cats);
-        }
-        $tags = $this->get('tags');
-        if (
-            is_array($tags) &&
-            ! empty($tags)
-        ) {
-            $taxonomy->set_tags($tags);
-        }
-
-        $feed = $this->get('feed');
+        $feed     = $this->get('feed');
         if ($feed && isset($feed->feed_id)) {
             $taxonomy->set_feed($feed);
         }
