@@ -236,8 +236,9 @@ class Event extends OsecBaseClass
         ) {
             $this->set('instance_id', $instance);
 
-            $select_sql .= ', IF( aei.start IS NOT NULL, aei.start, e.start ) as start,' .
-                           '  IF( aei.start IS NOT NULL, aei.end,   e.end )   as end ';
+            // CASE, not IF(): the SQLite driver (WordPress Playground) evaluates IF() to its else branch.
+            $select_sql .= ', CASE WHEN aei.start IS NOT NULL THEN aei.start ELSE e.start END AS start,' .
+                           ' CASE WHEN aei.start IS NOT NULL THEN aei.end ELSE e.end END AS `end` ';
             $left_join = 'LEFT JOIN ' . $dbi->get_table_name(OSEC_DB__INSTANCES) .
                          ' aei ON aei.id = ' . absint($instance) . ' AND e.post_id = aei.post_id ';
         } else {

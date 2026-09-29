@@ -201,10 +201,10 @@ class EventParent extends OsecBaseClass
         if (empty($dates_list[0])) {
             unset($dates_list[0]);
         }
-        $date->set_time(0, 0, 0);
-        $dates_list[] = $date->format(
-            'Ymd\THis\Z'
-        );
+        // The date in the series' own timezone, whatever timezone $date prefers:
+        // the generator reads only the date part (see IcsImportExportParser::exclusion_date()).
+        $timezone     = $event->get('timezone_name') ?: null;
+        $dates_list[] = $date->format('Ymd', $timezone) . 'T000000Z';
         $event->set('exception_dates', implode(',', $dates_list));
 
         return $event->save(true);
