@@ -224,6 +224,18 @@ Confirmed working (2026-09-11): 1 passing in 3s vs. the full suite's ~5 minutes.
 
 **Known flakiness**: the `afterEach` hook in `test/01_OsecPluginInstall.spec.js` (`doLogout()` in `page_objects/WpLogin.js`, which hovers the admin bar then clicks Log Out) can intermittently hit a `TimeoutError: Waiting until element is visible` right after the very first plugin activation in a run — most likely first-page-load timing rather than a real regression. It hasn't reproduced on a re-run in practice; if it fails, re-run just that spec (`npx mocha test/01_OsecPluginInstall.spec.js --timeout 60000`) before assuming a real break.
 
+## PHPUnit on SQLite
+
+WordPress Playground, and with it the WordPress.org Live Preview, runs WordPress on SQLite through the SQLite
+Database Integration drop-in. `bin/phpunit-sqlite.sh` copies the MySQL test WordPress to `/tmp/osec-sqlite-tests`,
+adds the drop-in there (the MySQL setup stays untouched) and runs PHPUnit; arguments go to phpunit. CI runs the
+same in `db_job_sqlite`.
+
+```bash
+bin/phpunit-sqlite.sh
+bin/phpunit-sqlite.sh --filter ExceptionDateTest
+```
+
 ## JS smoke tests (non-destructive)
 
 `integration_tests/js_smoke/` visits every page that loads an OSEC JS bundle, waits for its requirejs modules to
