@@ -1117,6 +1117,11 @@ Do something after IMPORTED event is saved
 do_action('osec_ics_import_event_saved', $event $feed);
 ```
 
+#### Description
+
+
+The categories and tags of the feed are assigned by then. Terms assigned here count as assigned by hand: later imports keep them.
+
 #### Parameters
 
 
@@ -1130,6 +1135,9 @@ do_action('osec_ics_import_event_saved', $event $feed);
 ```php
 /**
  * Do something after IMPORTED event is saved
+ *
+ * The categories and tags of the feed are assigned by then. Terms
+ * assigned here count as assigned by hand: later imports keep them.
  *
  * @since 1.0
  *
@@ -6364,6 +6372,11 @@ Do something after IMPORTED event is saved
 do_action('osec_ics_import_event_saved', $event $feed);
 ```
 
+#### Description
+
+
+The categories and tags of the feed are assigned by then. Terms assigned here count as assigned by hand: later imports keep them.
+
 #### Parameters
 
 
@@ -6377,6 +6390,9 @@ do_action('osec_ics_import_event_saved', $event $feed);
 ```php
 /**
  * Do something after IMPORTED event is saved
+ *
+ * The categories and tags of the feed are assigned by then. Terms
+ * assigned here count as assigned by hand: later imports keep them.
  *
  * @since 1.0
  *
