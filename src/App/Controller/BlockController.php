@@ -126,6 +126,15 @@ class BlockController extends OsecBaseClass
             }
         }
 
+        // Print icon: the global setting, or shown/hidden for this block. Blocks saved
+        // before printIcon existed only carry displayPrint, which the loop above maps.
+        $print_icon = $atts['printIcon'] ?? 'global';
+        if ('show' === $print_icon) {
+            $query['display_print'] = 'always';
+        } elseif ('hide' === $print_icon) {
+            $query['display_print'] = 'false';
+        }
+
         if (isset($atts['fixedDate']) && DT::isValidTimeStamp($atts['fixedDate'])) {
             $query['exact_date'] = $atts['fixedDate'];
         } else {
