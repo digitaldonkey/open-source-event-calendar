@@ -46,3 +46,13 @@ insert_final_newline = unset
 trim_trailing_whitespace = unset
 indent_style = unset
 indent_size = unset
+
+# Must stay byte-exact: patches apply to upstream sources whitespace and all, and
+# RFC 5545 feeds use CRLF (the test fixtures mix CRLF and LF on purpose).
+[{composer-patches/**,tests/**/*.ics}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
