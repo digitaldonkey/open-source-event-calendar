@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import DatePicker from "react-datepicker";
 import "./scss/datepicker.scss";
 export default function DateAndTime ({
@@ -12,14 +12,34 @@ export default function DateAndTime ({
 }) {
 	const defaultDate = defaultValue ? new Date(parseInt(defaultValue) * 1000) : null;
 	const [ date, setDate ] = useState(defaultDate);
+	const wrapperRef = useRef(null);
+	const pickerRef = useRef(null);
+
+	// react-datepicker listens for outside clicks on the global document, but the block
+	// editor renders blocks in an iframe with a document of its own.
+	useEffect(() => {
+		const ownerDocument = wrapperRef.current?.ownerDocument;
+		if (!ownerDocument || ownerDocument === document) {
+			return;
+		}
+		const handleMouseDown = (event) => {
+			if (pickerRef.current?.isCalendarOpen() && !wrapperRef.current.contains(event.target)) {
+				pickerRef.current.setOpen(false);
+			}
+		};
+		ownerDocument.addEventListener('mousedown', handleMouseDown);
+		return () => ownerDocument.removeEventListener('mousedown', handleMouseDown);
+	}, []);
+
 	const handleChange = (checked) => {
 		setDate(checked);
 		onChange(checked);
 	}
 	// @see https://reactdatepicker.com/
 	return (
-		<p>
+		<p ref={wrapperRef}>
 			<DatePicker
+				ref={pickerRef}
 				id={id}
 				placeholderText={placeholder}
 				selected={date}

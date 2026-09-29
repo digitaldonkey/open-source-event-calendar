@@ -136,3 +136,24 @@
     }
   }
 }
+
+// The calendar page and the shortcode narrow the agenda to the content size
+// (#osec-container in vortex style.less); its filters and toolbar take the same box.
+.wp-block-post-content > #osec-container:has(.ai1ec-agenda-view) {
+  .osec-taxonomy-filters,
+  .plana-toolbar {
+    max-width: var(--wp--style--global--content-size);
+    margin-left: auto;
+    margin-right: auto;
+    @media (min-width: @screen-sm) {
+      padding-left: var(--wp--style--root--padding-left);
+      padding-right: var(--wp--style--root--padding-right);
+    }
+  }
+
+  // Items wrapping to a second row (the view switcher next to "Collapse All")
+  // stay on the right, next to the print button.
+  .plana-toolbar {
+    justify-content: flex-end;
+  }
+}

@@ -3,6 +3,7 @@ import AsyncSelect from 'react-select/async';
 import {__} from "@wordpress/i18n";
 import makeAnimated from "react-select/animated";
 import apiFetch from '@wordpress/api-fetch';
+import {decodeEntities} from '@wordpress/html-entities';
 
 const animatedComponents = makeAnimated();
 
@@ -17,7 +18,7 @@ export default function OsecEventsFilter ({defaultValue = [], onChange}) {
 			const url =  'wp/v2/osec_event?include=' + defaultValue.join(',');
 			const events = await apiFetch( { path:url } );
 			const labels = events.map(e =>{
-				return { value: e.id, label: decodeHtml(e.title.rendered) }
+				return { value: e.id, label: decodeEntities(e.title.rendered) }
 			})
 			setSelectedOptions(labels);
 		}
@@ -40,21 +41,15 @@ export default function OsecEventsFilter ({defaultValue = [], onChange}) {
 		// TODO
 		//  This URL is not subdir capable
 		// /wp-json/wp/v2/osec_event?search=
-		return apiFetch( { path: '/wp/v2/osec_event?search=' + inputValue } )
+		return apiFetch( { path: '/wp/v2/osec_event?search=' + encodeURIComponent(inputValue) } )
 			.then( ( events ) => {
 				return events.map(e =>{
-					return { value: e.id, label: decodeHtml(e.title.rendered) }
+					return { value: e.id, label: decodeEntities(e.title.rendered) }
 			});
 		} );
 	};
 
-	const decodeHtml = (html) => {
-		const txt = document.createElement("textarea");
-		txt.innerHTML = html;
-		return txt.value;
-	}
-
-
+	// Labels are decoded titles: "&lt;b&gt;" is "<b>" now. Only ever render them as text.
 	// @see https://react-select.com/home
 	return (
 		<p>
