@@ -600,17 +600,17 @@ timely.define("domReady", [], function () {
         before_print: before_print,
         after_print: after_print
     }
-}), timely.define("scripts/calendar/agenda_view", ["jquery_timely"], function (e) {
+}), timely.define("scripts/calendar/agenda_view", ["jquery_timely"], function ($) {
     var t = function () {
-        e(this).closest(".ai1ec-event").toggleClass("ai1ec-expanded").find(".ai1ec-event-summary").slideToggle(300)
+        $(this).closest(".ai1ec-event").toggleClass("ai1ec-expanded").find(".ai1ec-event-summary").slideToggle(300)
     }, collapse_all = function () {
-        var t = e(this).closest(".ai1ec-calendar");
+        var t = $(this).closest(".ai1ec-calendar");
         t.find(".ai1ec-expanded .ai1ec-event-toggle").click();
-        e('#osec-calendar-view').toggleClass('osec-all-events-collapsed', true).toggleClass('osec-all-events-expanded', false)
+        $('#osec-calendar-view').toggleClass('osec-all-events-collapsed', true).toggleClass('osec-all-events-expanded', false)
     }, expand_all = function () {
-        var t = e(this).closest(".ai1ec-calendar");
+        var t = $(this).closest(".ai1ec-calendar");
         t.find(".ai1ec-event:not(.ai1ec-expanded) .ai1ec-event-toggle").click();
-        e('#osec-calendar-view').toggleClass('osec-all-events-collapsed', false).toggleClass('osec-all-events-expanded', true)
+        $('#osec-calendar-view').toggleClass('osec-all-events-collapsed', false).toggleClass('osec-all-events-expanded', true)
     };
     return {toggle_event: t, collapse_all: collapse_all, expand_all: expand_all}
 }), timely.define("external_libs/modernizr", [], function () {
@@ -682,19 +682,19 @@ timely.define("domReady", [], function () {
         return S(""), a = l = null, i._version = r, i._prefixes = h, i.testStyles = b, o.className = o.className.replace(/(^|\s)no-js(\s|$)/, "$1$2") + (s ? " js " + m.join(" ") : ""), i
     }(window, window.document);
     return e
-}), timely.define("scripts/calendar/month_view", ["jquery_timely", "external_libs/modernizr"], function (e, t) {
+}), timely.define("scripts/calendar/month_view", ["jquery_timely", "external_libs/modernizr"], function ($, modernizr) {
     var n = navigator.userAgent.match(/opera/i), r = navigator.userAgent.match(/webkit/i), i = function (calendar) {
         // Lays out multi-day events as bars across the day cells, and reserves room for them
         // below the date numbers. Bar heights are measured, so events may span several lines.
         var days = calendar.find(".ai1ec-day"), daysPerWeek = calendar.find(".ai1ec-week:first .ai1ec-day").length;
         calendar.find(".ai1ec-month-view .ai1ec-multiday").each(function () {
-            var bar = e(this), date = e(".ai1ec-date", this.parentNode), barHeight = bar.outerHeight(!0),
+            var bar = $(this), date = $(".ai1ec-date", this.parentNode), barHeight = bar.outerHeight(!0),
                 startDay = parseInt(date.text(), 10), endTruncated = bar.data("endTruncated"),
-                endDay = parseInt(endTruncated ? e(days[days.length - 1]).text() : bar.data("endDay"), 10),
-                barColor = e(".ai1ec-event", bar)[0].style.backgroundColor,
+                endDay = parseInt(endTruncated ? $(days[days.length - 1]).text() : bar.data("endDay"), 10),
+                barColor = $(".ai1ec-event", bar)[0].style.backgroundColor,
                 rowsBelow = 0, remainingDays = endDay - startDay + 1, firstRowMargin, daysInFirstRow = 0;
             days.each(function () {
-                var cellDate = e(".ai1ec-date", this), column = e(this.parentNode).index(),
+                var cellDate = $(".ai1ec-date", this), column = $(this.parentNode).index(),
                     dayNumber = parseInt(cellDate.text(), 10);
                 if (dayNumber >= startDay && dayNumber <= endDay) {
                     dayNumber === startDay && (firstRowMargin = parseInt(cellDate.css("marginBottom"), 10) + barHeight);
@@ -728,13 +728,13 @@ timely.define("domReady", [], function () {
             }), rowsBelow > 0 && bar.append(o(1, barColor)), bar.data("startTruncated") && bar.append(o(2, barColor)).addClass("ai1ec-multiday-bar")
         }), days.each(function () {
             // Push the day's own events below the bars crossing this day.
-            var date = e(".ai1ec-date", this), dayNumber = parseInt(date.text(), 10), week = date.closest(".ai1ec-week"),
-                eventCount = e(this).find("a.ai1ec-event-container:not(.ai1ec-multiday)").length, lowestBarBottom = null, bars;
+            var date = $(".ai1ec-date", this), dayNumber = parseInt(date.text(), 10), week = date.closest(".ai1ec-week"),
+                eventCount = $(this).find("a.ai1ec-event-container:not(.ai1ec-multiday)").length, lowestBarBottom = null, bars;
             if (0 === eventCount) return;
             bars = week.find("a.ai1ec-multiday[data-end-day]").filter(function () {
-                return e(this).data("startDay") <= dayNumber && e(this).data("endDay") >= dayNumber
+                return $(this).data("startDay") <= dayNumber && $(this).data("endDay") >= dayNumber;
             }), bars.each(function () {
-                var bottom = e(this).prop("offsetTop") + e(this).outerHeight(!0);
+                var bottom = $(this).prop("offsetTop") + $(this).outerHeight(!0);
                 if (null === lowestBarBottom || bottom > lowestBarBottom) lowestBarBottom = bottom
             }), null !== lowestBarBottom && date.css("marginBottom", lowestBarBottom - date.height() + 1)
         })
@@ -764,7 +764,7 @@ timely.define("domReady", [], function () {
         }
         return t + "%"
     }, o = function (t, n) {
-        var r = e('<div class="ai1ec-multiday-arrow' + t + '"></div>');
+        var r = $('<div class="ai1ec-multiday-arrow' + t + '"></div>');
         return t === 1 ? r.css({borderLeftColor: n}) : r.css({
             borderTopColor: n,
             borderRightColor: n,
@@ -842,7 +842,7 @@ timely.define("domReady", [], function () {
     }, e(document).on("click.bs.tab.data-api", '[data-toggle="ai1ec-tab"], [data-toggle="ai1ec-pill"]', function (t) {
         t.preventDefault(), e(this).tab("show")
     })
-}), timely.define("libs/utils", ["jquery_timely", "external_libs/bootstrap/tab"], function (e) {
+}), timely.define("libs/utils", ["jquery_timely", "external_libs/bootstrap/tab"], function ($) {
     var t = function () {
         return {
             is_float: function (e) {
@@ -853,8 +853,8 @@ timely.define("domReady", [], function () {
             }, convert_comma_to_dot: function (e) {
                 return e.replace(",", ".")
             }, field_has_value: function (t) {
-                var n = "#" + t, r = e(n), i = !1;
-                return r.length === 1 && (i = e.trim(r.val()) !== ""), i
+                var n = "#" + t, r = $(n), i = !1;
+                return r.length === 1 && (i = $.trim(r.val()) !== ""), i;
             }, make_alert: function (t, n, r) {
                 var i = "";
                 switch (n) {
@@ -867,9 +867,9 @@ timely.define("domReady", [], function () {
                     default:
                         i = "ai1ec-alert ai1ec-alert-info"
                 }
-                var s = e("<div />", {"class": i, html: t});
+                var s = $("<div />", {"class": i, html: t});
                 if (!r) {
-                    var o = e("<button>", {
+                    var o = $("<button>", {
                         type: "button",
                         "class": "ai1ec-close",
                         "data-dismiss": "ai1ec-alert",
@@ -887,28 +887,28 @@ timely.define("domReady", [], function () {
                 var t = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                 return t.test(e)
             }, activate_saved_tab_on_page_load: function (t) {
-                null === t || undefined === t ? e("ul.ai1ec-nav a:first").tab("show") : e("ul.ai1ec-nav a[href=" + t + "]").tab("show")
+                null === t || undefined === t ? $("ul.ai1ec-nav a:first").tab("show") : $("ul.ai1ec-nav a[href=" + t + "]").tab("show")
             }, add_query_arg: function (e, t) {
                 if ("string" != typeof e) return !1;
                 var n = e.indexOf("?") === -1 ? "?" : "&";
                 return -1 !== e.indexOf(n + t[0] + "=") ? e : e + n + t[0] + "=" + t[1]
             }, create_ai1ec_to_send: function (t) {
-                var n = e(t), r = [],
+                var n = $(t), r = [],
                     i = ["action", "cat_ids", "auth_ids", "tag_ids", "exact_date", "display_filters", "no_navigation", "events_limit"];
                 return n.each(function () {
-                    e.each(this.attributes, function () {
-                        this.specified && this.value && this.name.match(/^data-/) && (-1 < e.inArray(this.name.replace(/^data\-/, ""), i) || this.name.match(/_ids$/)) && r.push(this.name.replace(/^data\-/, "") + "~" + this.value)
+                    $.each(this.attributes, function () {
+                        this.specified && this.value && this.name.match(/^data-/) && (-1 < $.inArray(this.name.replace(/^data\-/, ""), i) || this.name.match(/_ids$/)) && r.push(this.name.replace(/^data\-/, "") + "~" + this.value)
                     })
-                }), r.join("|")
+                }), r.join("|");
             }, init_autoselect: function () {
-                e(document).on("click", ".ai1ec-autoselect", function (t) {
-                    if (e(this).data("clicked") && t.originalEvent.detail < 2) return;
-                    e(this).data("clicked", !0);
+                $(document).on("click", ".ai1ec-autoselect", function (t) {
+                    if ($(this).data("clicked") && t.originalEvent.detail < 2) return;
+                    $(this).data("clicked", !0);
                     var n;
                     document.body.createTextRange ? (n = document.body.createTextRange(), n.moveToElementText(this), n.select()) : window.getSelection && (selection = window.getSelection(), n = document.createRange(), n.selectNodeContents(this), selection.removeAllRanges(), selection.addRange(n))
                 })
             }
-        }
+        };
     }();
     return t
 }), timely.define("external_libs/bootstrap/affix", ["jquery_timely"], function (e) {
@@ -949,13 +949,13 @@ timely.define("domReady", [], function () {
             n.offset = n.offset || {}, n.offsetBottom && (n.offset.bottom = n.offsetBottom), n.offsetTop && (n.offset.top = n.offsetTop), t.affix(n)
         })
     })
-}), timely.define("scripts/common_scripts/frontend/common_event_handlers", ["jquery_timely", "external_libs/bootstrap/affix"], function (e) {
+}), timely.define("scripts/common_scripts/frontend/common_event_handlers", ["jquery_timely", "external_libs/bootstrap/affix"], function ($) {
     var t = function (t) {
-        var n = e(this), r = n.next(".ai1ec-popup"), i, s, o;
+        var n = $(this), r = n.next(".ai1ec-popup"), i, s, o;
         if (r.length === 0) return;
         i = r.html(), s = r.attr("class");
         var u = n.closest("#osec-calendar-view");
-        u.length === 0 && (u = e("body")), n.offset().left - u.offset().left > 182 ? o = "left" : o = "right", n.constrained_popover({
+        u.length === 0 && (u = $("body")), n.offset().left - u.offset().left > 182 ? o = "left" : o = "right", n.constrained_popover({
             content: i,
             title: "",
             placement: o,
@@ -965,17 +965,17 @@ timely.define("domReady", [], function () {
             container: "body"
         }).constrained_popover("show")
     }, n = function (t) {
-        var n = e(t.toElement || t.relatedTarget);
-        n.closest(".ai1ec-popup").length === 0 && e(this).constrained_popover("hide")
+        var n = $(t.toElement || t.relatedTarget);
+        n.closest(".ai1ec-popup").length === 0 && $(this).constrained_popover("hide")
     }, r = function (t) {
-        var n = e(t.toElement || t.relatedTarget);
-        n.closest(".ai1ec-tooltip").length === 0 && (e(this).remove(), e("body > .ai1ec-tooltip").remove())
+        var n = $(t.toElement || t.relatedTarget);
+        n.closest(".ai1ec-tooltip").length === 0 && ($(this).remove(), $("body > .ai1ec-tooltip").remove())
     }, i = function (t) {
         if ("ontouchstart" in document.documentElement) {
             t.preventDefault();
             return
         }
-        var n = e(this), r = {
+        var n = $(this), r = {
             template: '<div class="timely ai1ec-tooltip"><div class="ai1ec-tooltip-arrow"></div><div class="ai1ec-tooltip-inner"></div></div>',
             trigger: "manual",
             container: "body"
@@ -983,17 +983,17 @@ timely.define("domReady", [], function () {
         if (n.is(".ai1ec-category .ai1ec-color-swatch") || n.is(".ai1ec-custom-filter .ai1ec-color-swatch")) return;
         n.is(".ai1ec-tooltip-auto") && (r.placement = u(250)), n.tooltip(r), n.tooltip("show")
     }, s = function (t) {
-        e(this).tooltip("hide")
+        $(this).tooltip("hide")
     }, o = function (t) {
-        var n = e(t.toElement || t.relatedTarget);
-        n.closest(".ai1ec-tooltip-trigger").length === 0 && e(this).remove(), n.closest(".ai1ec-popup").length === 0 && e("body > .ai1ec-popup").remove()
+        var n = $(t.toElement || t.relatedTarget);
+        n.closest(".ai1ec-tooltip-trigger").length === 0 && $(this).remove(), n.closest(".ai1ec-popup").length === 0 && $("body > .ai1ec-popup").remove()
     }, u = function (t) {
         return function (n, r) {
-            var i, s, o = e(r), u = o.attr("data-placement"),
-                a = e.extend({}, o.offset(), {width: r.offsetWidth, height: r.offsetHeight}), f = function () {
+            var i, s, o = $(r), u = o.attr("data-placement"),
+                a = $.extend({}, o.offset(), {width: r.offsetWidth, height: r.offsetHeight}), f = function () {
                     return !1 === i ? !1 : (i = a.left - t >= 0, i ? "left" : !1)
                 }, l = function () {
-                    return !1 === s ? !1 : (s = a.left + t <= e(window).width(), s ? "right" : !1)
+                    return !1 === s ? !1 : (s = a.left + t <= $(window).width(), s ? "right" : !1);
                 };
             switch (u) {
                 case"top":
@@ -1009,7 +1009,7 @@ timely.define("domReady", [], function () {
                     if (l()) return "right";
                     return u
             }
-        }
+        };
     };
     return {
         handle_popover_over: t,
@@ -1300,11 +1300,11 @@ timely.define("domReady", [], function () {
     }, e(document).on("click.bs.dropdown.data-api", i).on("click.bs.dropdown.data-api", ".ai1ec-dropdown form", function (e) {
         e.stopPropagation()
     }).on("click.bs.dropdown.data-api", n, r.prototype.toggle).on("keydown.bs.dropdown.data-api", n + ", [role=menu]", r.prototype.keydown)
-}), timely.define("scripts/common_scripts/frontend/common_frontend", ["jquery_timely", "domReady", "scripts/common_scripts/frontend/common_event_handlers", "ai1ec_calendar", "external_libs/modernizr", "external_libs/bootstrap/tooltip", "external_libs/constrained_popover", "external_libs/bootstrap/dropdown"], function (e, t, n, r, i) {
+}), timely.define("scripts/common_scripts/frontend/common_frontend", ["jquery_timely", "domReady", "scripts/common_scripts/frontend/common_event_handlers", "ai1ec_calendar", "external_libs/modernizr", "external_libs/bootstrap/tooltip", "external_libs/constrained_popover", "external_libs/bootstrap/dropdown"], function ($, domReady, commonEventHandlers, calendarPage, modernizr) {
     var s = !1, o = function () {
-        s = !0, e(document).on("mouseenter", ".ai1ec-popup-trigger", n.handle_popover_over), e(document).on("mouseleave", ".ai1ec-popup-trigger", n.handle_popover_out), e(document).on("mouseleave", ".ai1ec-popup", n.handle_popover_self_out), e(document).on("mouseenter", ".ai1ec-tooltip-trigger", n.handle_tooltip_over), e(document).on("mouseleave", ".ai1ec-tooltip-trigger", n.handle_tooltip_out), e(document).on("mouseleave", ".ai1ec-tooltip", n.handle_tooltip_self_out)
+        s = !0, $(document).on("mouseenter", ".ai1ec-popup-trigger", commonEventHandlers.handle_popover_over), $(document).on("mouseleave", ".ai1ec-popup-trigger", commonEventHandlers.handle_popover_out), $(document).on("mouseleave", ".ai1ec-popup", commonEventHandlers.handle_popover_self_out), $(document).on("mouseenter", ".ai1ec-tooltip-trigger", commonEventHandlers.handle_tooltip_over), $(document).on("mouseleave", ".ai1ec-tooltip-trigger", commonEventHandlers.handle_tooltip_out), $(document).on("mouseleave", ".ai1ec-tooltip", commonEventHandlers.handle_tooltip_self_out)
     }, u = function () {
-        t(function () {
+        domReady(function () {
             o()
         })
     }, a = function () {
@@ -2350,15 +2350,15 @@ timely.define("domReady", [], function () {
             }
         }
     }(e)
-}), timely.define("libs/select2_multiselect_helper", ["jquery_timely", "external_libs/select2"], function (e) {
+}), timely.define("libs/select2_multiselect_helper", ["jquery_timely", "external_libs/select2"], function ($) {
     var t = function (t) {
-        var n = e(t.element), r = n.data("color"), i = n.data("description"), s = "";
+        var n = $(t.element), r = n.data("color"), i = n.data("description"), s = "";
         return typeof r != "undefined" && r !== "" && (s += '<span class="ai1ec-color-swatch" style="background: ' + n.data("color") + '"></span> '), s += t.text, s = '<span title="' + i + '">' + s + "</span>", s
     }, n = function (t) {
-        var n = e(t.element), r = n.data("color"), i = n.data("description"), s = "";
+        var n = $(t.element), r = n.data("color"), i = n.data("description"), s = "";
         return typeof r != "undefined" && r !== "" ? s += '<span class="ai1ec-color-swatch" style="background: ' + n.data("color") + '"></span> ' : s += '<span class="ai1ec-color-swatch-empty"></span> ', s += t.text, s = '<span title="' + i + '">' + s + "</span>", s
     }, r = function (r) {
-        typeof r == "undefined" && (r = e(document)), e(".ai1ec-select2-multiselect-selector", r).select2({
+        typeof r == "undefined" && (r = $(document)), $(".ai1ec-select2-multiselect-selector", r).select2({
             allowClear: !0,
             formatResult: n,
             formatSelection: t,
@@ -2367,8 +2367,8 @@ timely.define("domReady", [], function () {
             }
         })
     }, i = function (t) {
-        e(".ai1ec-select2-multiselect-selector.select2-container", t).each(function () {
-            e(this).data("select2").resizeSearch()
+        $(".ai1ec-select2-multiselect-selector.select2-container", t).each(function () {
+            $(this).data("select2").resizeSearch()
         })
     };
     return {init: r, refresh: i}
@@ -2518,7 +2518,7 @@ var Twig = function (e) {
                 }
                 e.log.trace("Twig.compile: ", " Output: ", n, " Logic Stack: ", r, " Pending Output: ", i)
             }
-            if (r.length > 0) throw u = r.pop(), new Error("Unable to find an end tag for " + u.type + ", expecting one of " + u.next);
+            if (r.length > 0) throw (u = r.pop(), new Error("Unable to find an end tag for " + u.type + ", expecting one of " + u.next));
             return n
         } catch (d) {
             e.log.error("Error compiling twig template " + this.id + ": "), d.stack ? e.log.error(d.stack) : e.log.error(d.toString());
@@ -2632,7 +2632,7 @@ var Twig = function (e) {
         return i
     }, e.Template.prototype.compile = function (t) {
         return e.compiler.compile(this, t)
-    }, e
+    }, e;
 }(Twig || {});
 (function () {
     String.prototype.trim || (String.prototype.trim = function () {
@@ -5778,14 +5778,14 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
     u.defaults = {}, e.removeCookie = function (t, n) {
         return e.cookie(t) === undefined ? !1 : (e.cookie(t, "", e.extend({}, n, {expires: -1})), !e.cookie(t))
     }
-}), timely.define("scripts/calendar/load_views", ["jquery_timely", "scripts/calendar/print", "scripts/calendar/agenda_view", "scripts/calendar/month_view", "libs/frontend_utils", "libs/utils", "ai1ec_calendar", "ai1ec_config", "scripts/common_scripts/frontend/common_frontend", "libs/select2_multiselect_helper", "external_libs/twig", "agenda", "oneday", "month", "external_libs/jquery_history", "external_libs/jquery.tablescroller", "external_libs/jquery.scrollTo", "external_libs/bootstrap_datepicker", "external_libs/bootstrap/alert", "external_libs/jquery_cookie"], function (e, t, n, r, i, s, o, config, a, f, l, c, h, p) {
-    e.cookie.json = !0;
-    var d = "ai1ec_saved_filter", v = !e("#save_filtered_views").hasClass("ai1ec-hide");
-    timely.renderer_map || (timely.renderer_map = {}), e.extend(timely.renderer_map, {
-        agenda: c,
-        oneday: h,
-        week: h,
-        month: p
+}), timely.define("scripts/calendar/load_views", ["jquery_timely", "scripts/calendar/print", "scripts/calendar/agenda_view", "scripts/calendar/month_view", "libs/frontend_utils", "libs/utils", "ai1ec_calendar", "ai1ec_config", "scripts/common_scripts/frontend/common_frontend", "libs/select2_multiselect_helper", "external_libs/twig", "agenda", "oneday", "month", "external_libs/jquery_history", "external_libs/jquery.tablescroller", "external_libs/jquery.scrollTo", "external_libs/bootstrap_datepicker", "external_libs/bootstrap/alert", "external_libs/jquery_cookie"], function ($, print, agendaView, monthView, frontendUtils, utils, calendarPage, config, commonFrontend, select2MultiselectHelper, twig, agendaTemplate, onedayTemplate, monthTemplate) {
+    $.cookie.json = !0;
+    var d = "ai1ec_saved_filter", v = !$("#save_filtered_views").hasClass("ai1ec-hide");
+    timely.renderer_map || (timely.renderer_map = {}), $.extend(timely.renderer_map, {
+        agenda: agendaTemplate,
+        oneday: onedayTemplate,
+        week: onedayTemplate,
+        month: monthTemplate
     });
     var m = function (e) {
         var t = e.find("#ai1ec-view-dropdown .ai1ec-dropdown-menu .ai1ec-active a"),
@@ -5800,52 +5800,52 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
             scroll: !1
         }), e.find(".tablescroll_wrapper, .tablescroll_head, .tablescroll_body").css("width", ""), e.find(".tablescroll_head th, .tablescroll_body > tbody > tr > td").css("width", "");
         if (e.find(".ai1ec-week-view").length || e.find(".ai1ec-oneday-view").length) e.find(".ai1ec-oneday-view .tablescroll_wrapper, .ai1ec-week-view .tablescroll_wrapper").scrollTo(e.find(".ai1ec-hour-marker:eq(" + config.week_view_starts_at + ")")), e.find(".ai1ec-hour-marker:eq(" + config.week_view_starts_at + ")").addClass("ai1ec-first-visible");
-        e.find(".ai1ec-month-view .ai1ec-multiday").length && r.extend_multiday_events(e), e.find(".osec-calendar-view-container").data("ai1ec-inited", !0).trigger("initialize_view.ai1ec"), e.find(".ai1ec-calendar-toolbar").trigger("ai1ec-affix.reinit")
+        e.find(".ai1ec-month-view .ai1ec-multiday").length && monthView.extend_multiday_events(e), e.find(".osec-calendar-view-container").data("ai1ec-inited", !0).trigger("initialize_view.ai1ec"), e.find(".ai1ec-calendar-toolbar").trigger("ai1ec-affix.reinit")
     }, g = function (t) {
         t.find(".osec-calendar-view-container").trigger("destroy_view.ai1ec");
         var n = t.find(".ai1ec-minical-trigger").data("datepicker");
-        typeof n != "undefined" && (n.picker.remove(), e(document).off("changeDate", ".ai1ec-minical-trigger")), t.find(".ai1ec-tooltip.ai1ec-in, .ai1ec-popup").remove(), t.find(".ai1ec-calendar-toolbar .ai1ec-btn-toolbar").remove()
+        typeof n != "undefined" && (n.picker.remove(), $(document).off("changeDate", ".ai1ec-minical-trigger")), t.find(".ai1ec-tooltip.ai1ec-in, .ai1ec-popup").remove(), t.find(".ai1ec-calendar-toolbar .ai1ec-btn-toolbar").remove()
     }, y = function () {
         var t = [], n = [], r = [], i;
-        e(".ai1ec-category-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
-            t.push(e(this).data("term"))
-        }), e(".ai1ec-tag-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
-            n.push(e(this).data("term"))
-        }), e(".ai1ec-author-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
-            r.push(e(this).data("term"))
+        $(".ai1ec-category-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
+            t.push($(this).data("term"))
+        }), $(".ai1ec-tag-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
+            n.push($(this).data("term"))
+        }), $(".ai1ec-author-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
+            r.push($(this).data("term"))
         });
         var s = {};
-        return s.cat_ids = t, s.tag_ids = n, s.auth_ids = r, i = e(".ai1ec-views-dropdown .ai1ec-dropdown-menu .ai1ec-active").data("action"), s.action = i, s
+        return s.cat_ids = t, s.tag_ids = n, s.auth_ids = r, i = $(".ai1ec-views-dropdown .ai1ec-dropdown-menu .ai1ec-active").data("action"), s.action = i, s;
     }, b = function () {
-        var t = History.getState(), n = e.cookie(d);
+        var t = History.getState(), n = $.cookie(d);
         if (null === n || undefined === n) n = {};
         var r = y();
-        config.is_calendar_page ? n.calendar_page = r : n[t.url] = r, e.cookie(d, n, {
+        config.is_calendar_page ? n.calendar_page = r : n[t.url] = r, $.cookie(d, n, {
             path: "/",
             expires: 365
-        }), e("#save_filtered_views").addClass("ai1ec-active").attr("data-original-title", config.clear_saved_filter_text);
-        var i = s.make_alert(config.save_filter_text_ok, "success");
-        e("#ai1ec-calendar").prepend(i)
+        }), $("#save_filtered_views").addClass("ai1ec-active").attr("data-original-title", config.clear_saved_filter_text);
+        var i = utils.make_alert(config.save_filter_text_ok, "success");
+        $("#ai1ec-calendar").prepend(i)
     }, w = function (t) {
         t.stopImmediatePropagation();
-        var n = e.cookie(d);
+        var n = $.cookie(d);
         if (config.is_calendar_page) delete n.calendar_page; else {
             var r = History.getState();
             delete n[r.url]
         }
-        e.cookie(d, n, {
+        $.cookie(d, n, {
             path: "/",
             expires: 365
-        }), e("#save_filtered_views").removeClass("ai1ec-active").attr("data-original-title", config.reset_saved_filter_text), v || e("#save_filtered_views").addClass("ai1ec-hide");
-        var i = s.make_alert(config.remove_filter_text_ok, "success");
-        e("#ai1ec-calendar").prepend(i)
+        }), $("#save_filtered_views").removeClass("ai1ec-active").attr("data-original-title", config.reset_saved_filter_text), v || $("#save_filtered_views").addClass("ai1ec-hide");
+        var i = utils.make_alert(config.remove_filter_text_ok, "success");
+        $("#ai1ec-calendar").prepend(i)
     }, E = function (t, n, r) {
         t.find(".osec-calendar-view-loading").fadeIn("fast").end().find(".osec-calendar-view").fadeTo("fast", .3, function () {
             var i = {request_type: r, osec_doing_ajax: !0};
-            e("#osec-container > .ai1ec-alert").remove();
-            var o = e.ajax({url: n, dataType: r, data: i, method: "get"});
+            $("#osec-container > .ai1ec-alert").remove();
+            var o = $.ajax({url: n, dataType: r, data: i, method: "get"});
             o.done(function (i) {
-                e(document).trigger("calendar_view_loaded.ai1ec", t), g(t), typeof i.views_dropdown == "string" && t.find(".ai1ec-views-dropdown").replaceWith(i.views_dropdown), typeof i.categories == "string" && t.find(".ai1ec-category-filter").replaceWith(i.categories), typeof i.authors == "string" && t.find(".ai1ec-author-filter").replaceWith(i.authors), typeof i.tags == "string" && t.find(".ai1ec-tag-filter").replaceWith(i.tags);
+                $(document).trigger("calendar_view_loaded.ai1ec", t), g(t), typeof i.views_dropdown == "string" && t.find(".ai1ec-views-dropdown").replaceWith(i.views_dropdown), typeof i.categories == "string" && t.find(".ai1ec-category-filter").replaceWith(i.categories), typeof i.authors == "string" && t.find(".ai1ec-author-filter").replaceWith(i.authors), typeof i.tags == "string" && t.find(".ai1ec-tag-filter").replaceWith(i.tags);
                 if (typeof i.custom_filters == "string") {
                     var s = t.find("li.ai1ec-custom-filter").parent();
                     t.find("li.ai1ec-custom-filter").remove(), s.append(i.custom_filters)
@@ -5863,18 +5863,18 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
                     }
                     o = timely.renderer_map[u]
                 }
-                t.find(".osec-calendar-view").html(o ? o.render(i.html) : e(i.html).find(".osec-calendar-view").length ? e(i.html).find(".osec-calendar-view").html() : i.html), m(t)
+                t.find(".osec-calendar-view").html(o ? o.render(i.html) : $(i.html).find(".osec-calendar-view").length ? $(i.html).find(".osec-calendar-view").html() : i.html), m(t)
             }), o.fail(function (n, r, i) {
                 var o = config.load_views_error;
                 o = o.replace("#STATUS#", n.status), o = o.replace("#ERROR#", i);
-                var a = s.make_alert(o, "error", !0);
-                e("#osec-container").prepend(a), g(t), m(t)
+                var a = utils.make_alert(o, "error", !0);
+                $("#osec-container").prepend(a), g(t), m(t)
             }), o.always(function () {
                 t.find(".osec-calendar-view-loading").fadeOut("fast"), t.find(".osec-calendar-view").fadeTo("fast", 1)
             })
         })
     }, S = !1, x = function (t) {
-        var n = History.getState(), r = e(".ai1ec-calendar:first");
+        var n = History.getState(), r = $(".ai1ec-calendar:first");
         if (n.data.ai1ec !== undefined && !0 === n.data.ai1ec || !0 === S) S = !0, E(r, n.url, "json")
     }, T = function (e, t, n) {
         if (t === "json") {
@@ -5882,10 +5882,10 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
             History.pushState(r, document.title, decodeURI(n))
         } else E(e, n, "jsonp")
     }, N = function (t) {
-        var n = e(this), r = n.closest(".ai1ec-calendar");
+        var n = $(this), r = n.closest(".ai1ec-calendar");
         t.preventDefault(), T(r, n.data("type"), n.attr("href"))
     }, handle_minical_trigger = function (t) {
-        var n = e(this);
+        var n = $(this);
         t.preventDefault();
         if (typeof n.data("datepicker") == "undefined") {
             n.datepicker({
@@ -5901,21 +5901,21 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
                 r.place = function () {
                     i.call(this);
                     var t = this.component ? this.component : this.element, n = t.offset();
-                    this.picker.css({left: "auto", right: e(document).width() - n.left - t.outerWidth()})
+                    this.picker.css({left: "auto", right: $(document).width() - n.left - t.outerWidth()})
                 }
             }
-            e(document).one("changeDate", ".ai1ec-minical-trigger", k)
+            $(document).one("changeDate", ".ai1ec-minical-trigger", k)
         }
         n.datepicker("show")
     }, k = function (t) {
-        var n, r = e(this), i = r.closest(".ai1ec-calendar"), s;
+        var n, r = $(this), i = r.closest(".ai1ec-calendar"), s;
         r.datepicker("hide"), n = r.data("href"), s = t.format(), s = s.replace(/\//g, "-"), n = n.replace("__DATE__", s), T(i, r.data("type"), n)
     }, L = function (t) {
         var n;
-        typeof t.added != "undefined" ? n = e(t.added.element).data("href") : n = e("option[value=" + t.removed.id + "]", t.target).data("href"), data = {ai1ec: !0}, History.pushState(data, null, n)
+        typeof t.added != "undefined" ? n = $(t.added.element).data("href") : n = $("option[value=" + t.removed.id + "]", t.target).data("href"), data = {ai1ec: !0}, History.pushState(data, null, n)
     }, A = function () {
-        var t = e(this).closest(".ai1ec-calendar");
-        T(t, e(this).data("type"), e(this).data("href"))
+        var t = $(this).closest(".ai1ec-calendar");
+        T(t, $(this).data("type"), $(this).data("href"))
     };
     return {
         initialize_view: m,
@@ -5930,23 +5930,23 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
         load_view_from_select2_filter: L,
         load_view_according_to_datatype: T
     }
-}), timely.define("scripts/calendar/calendar-affix", ["jquery_timely", "ai1ec_config"], function (e, t) {
+}), timely.define("scripts/calendar/calendar-affix", ["jquery_timely", "ai1ec_config"], function ($, config) {
     var n = function (n) {
         var r = n.find(".ai1ec-calendar-toolbar");
-        r.length || (r = e("<div />", {"class": "timely ai1ec-calendar-toolbar ai1ec-empty-toolbar ai1ec-clearfix"}), n.prepend(r));
+        r.length || (r = $("<div />", {"class": "timely ai1ec-calendar-toolbar ai1ec-empty-toolbar ai1ec-clearfix"}), n.prepend(r));
         var i = n.find(".ai1ec-views-dropdown").closest("div.ai1ec-clearfix").css("clear", "both"),
-            s = r.find(".ai1ec-dropdown-toggle"), o = n.find("#osec-calendar-view"), u = e("#wpadminbar"),
+            s = r.find(".ai1ec-dropdown-toggle"), o = n.find("#osec-calendar-view"), u = $("#wpadminbar"),
             a = r.offset().top, f = 0, l = null, c = function () {
-                return e("#ai1ec-bs-modes div:visible:first").text()
+                return $("#ai1ec-bs-modes div:visible:first").text();
             }, h = function () {
-                var t = ["xs", "sm", "md", "lg"], n = e('<div id="ai1ec-bs-modes"></div>');
-                for (var r in t) e('<div class="ai1ec-device-' + t[r] + " ai1ec-visible-" + t[r] + '">' + t[r] + "</div>").appendTo(n);
+                var t = ["xs", "sm", "md", "lg"], n = $('<div id="ai1ec-bs-modes"></div>');
+                for (var r in t) $('<div class="ai1ec-device-' + t[r] + " ai1ec-visible-" + t[r] + '">' + t[r] + "</div>").appendTo(n);
                 n.appendTo("body")
             }, p = function () {
-                return parseInt(t["affix_vertical_offset_" + c()] || 0)
+                return parseInt(config["affix_vertical_offset_" + c()] || 0);
             }, d = function () {
                 s.each(function () {
-                    e(this).contents().eq(-3).wrap('<div class="ai1ec-hidden" />')
+                    $(this).contents().eq(-3).wrap('<div class="ai1ec-hidden" />')
                 })
             }, v = function () {
                 s.find(".ai1ec-hidden").contents().unwrap()
@@ -5971,12 +5971,12 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
             }
         }).on("ai1ec-affix.bs.affix", function () {
             var t = o.offset().top;
-            i.hide().appendTo(r).show().css("opacity", 0).animate({opacity: 1}, 400), b(), m(), o.css("margin-top", r.outerHeight(!0) + parseInt(r.css("margin-bottom")) + "px"), e("body").addClass("ai1ec-has-affixed-toolbar")
+            i.hide().appendTo(r).show().css("opacity", 0).animate({opacity: 1}, 400), b(), m(), o.css("margin-top", r.outerHeight(!0) + parseInt(r.css("margin-bottom")) + "px"), $("body").addClass("ai1ec-has-affixed-toolbar")
         }).on("ai1ec-affix-top.bs.affix", function () {
-            i.hide(), o.prepend(i), i.show().css("opacity", 0).animate({opacity: 1}, 400), v(), m(), o.css("margin-top", 0), r.data("original_height", r.height()), e("body").removeClass("ai1ec-has-affixed-toolbar")
-        }).on("ai1ec-affix.reinit", w).filter(".ai1ec-affix").trigger("ai1ec-affix.bs.affix"), e(window).on("resize.affix", function () {
+            i.hide(), o.prepend(i), i.show().css("opacity", 0).animate({opacity: 1}, 400), v(), m(), o.css("margin-top", 0), r.data("original_height", r.height()), $("body").removeClass("ai1ec-has-affixed-toolbar")
+        }).on("ai1ec-affix.reinit", w).filter(".ai1ec-affix").trigger("ai1ec-affix.bs.affix"), $(window).on("resize.affix", function () {
             clearTimeout(l), l = setTimeout(E, 100)
-        }), n
+        }), n;
     };
     return {initialize_affixed_toolbar: n}
 }), timely.define("external_libs/bootstrap/transition", ["jquery_timely"], function (e) {
@@ -6070,29 +6070,29 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
     }).on("hidden.bs.modal", ".ai1ec-modal", function () {
         e(document.body).removeClass("ai1ec-modal-open")
     })
-}), timely.define("scripts/calendar", ["jquery_timely", "domReady", "scripts/calendar/load_views", "scripts/calendar/print", "scripts/calendar/agenda_view", "scripts/calendar/month_view", "scripts/calendar/calendar-affix", "ai1ec_calendar", "ai1ec_config", "scripts/common_scripts/frontend/common_frontend", "libs/utils", "libs/select2_multiselect_helper", "external_libs/bootstrap/transition", "external_libs/bootstrap/modal", "external_libs/jquery.scrollTo", "external_libs/jquery_cookie"], function (e, t, n, r, i, s, o, u, a, f, l, c) {
+}), timely.define("scripts/calendar", ["jquery_timely", "domReady", "scripts/calendar/load_views", "scripts/calendar/print", "scripts/calendar/agenda_view", "scripts/calendar/month_view", "scripts/calendar/calendar-affix", "ai1ec_calendar", "ai1ec_config", "scripts/common_scripts/frontend/common_frontend", "libs/utils", "libs/select2_multiselect_helper", "external_libs/bootstrap/transition", "external_libs/bootstrap/modal", "external_libs/jquery.scrollTo", "external_libs/jquery_cookie"], function ($, domReady, loadViews, print, agendaView, monthView, calendarAffix, calendarPage, config, commonFrontend, utils, select2MultiselectHelper) {
     var h = function () {
-        if (u.selector !== undefined && u.selector !== "" && e(u.selector).length === 1) {
-            var t = e(":header:contains(" + u.title + "):first");
-            t.length || (t = e('<h1 class="page-title"></h1>'), t.text(u.title));
-            var n = e(".ai1ec-main-container:first").detach().before(t);
-            e(u.selector).empty().append(n).hide().css("visibility", "visible").fadeIn("fast")
+        if (calendarPage.selector !== undefined && calendarPage.selector !== "" && $(calendarPage.selector).length === 1) {
+            var t = $(":header:contains(" + calendarPage.title + "):first");
+            t.length || (t = $('<h1 class="page-title"></h1>'), t.text(calendarPage.title));
+            var n = $(".ai1ec-main-container:first").detach().before(t);
+            $(calendarPage.selector).empty().append(n).hide().css("visibility", "visible").fadeIn("fast")
         }
     }, p = function () {
-        var t = e(this).data("instanceId"), n = e(this).closest(".ai1ec-calendar");
+        var t = $(this).data("instanceId"), n = $(this).closest(".ai1ec-calendar");
         n.find(".ai1ec-event-instance-id-" + t).addClass("ai1ec-hover")
     }, d = function () {
-        var t = e(this).data("instanceId"), n = e(this).closest(".ai1ec-calendar");
+        var t = $(this).data("instanceId"), n = $(this).closest(".ai1ec-calendar");
         n.find(".ai1ec-event-instance-id-" + t).removeClass("ai1ec-hover")
     }, v = function () {
-        var t = e(this), n = t.closest(".ai1ec-calendar"), r = t.data("instanceId");
+        var t = $(this), n = t.closest(".ai1ec-calendar"), r = t.data("instanceId");
         t.delay(500).queue(function () {
             n.find(".ai1ec-event-instance-id-" + r).addClass("ai1ec-raised")
         })
     }, m = function (t) {
-        var n = e(this), r = n.closest(".ai1ec-calendar"),
+        var n = $(this), r = n.closest(".ai1ec-calendar"),
             i = n.data("instanceId"),
-            s = e(t.toElement || t.relatedTarget), o = r.find(".ai1ec-event-instance-id-" + i);
+            s = $(t.toElement || t.relatedTarget), o = r.find(".ai1ec-event-instance-id-" + i);
         if (s.is(o) || s.parent().is(o)) return;
         r.find(".ai1ec-event-instance-id-" + i).clearQueue().removeClass("ai1ec-raised")
     }, g = function () {
@@ -6105,9 +6105,9 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
         // off-screen. Re-place it at the pointer: above it (below if there is no room), so the row
         // the pointer sweeps along to reach the other stacked events stays free. The shared handler
         // lives in the minified common_frontend.js, so this hooks its "shown" event instead.
-        var data = e(this).data("ai1ec.constrained_popover");
+        var data = $(this).data("ai1ec.constrained_popover");
         if (!data) return;
-        var tip = data.tip(), $win = e(window),
+        var tip = data.tip(), $win = $(window),
             width = tip.outerWidth(), height = tip.outerHeight(),
             // Room for the arrow (11px) plus a small gap.
             reach = 14,
@@ -6122,36 +6122,36 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
         // popover, so anchor_popover already sees the position of the pointer that opened it.
         document.addEventListener("mousemove", track_pointer, true);
         document.addEventListener("mouseover", track_pointer, true);
-        e(document).on({
+        $(document).on({
             mouseenter: p,
             mouseleave: d
-        }, ".ai1ec-event-container.ai1ec-multiday"), e(document).on({
+        }, ".ai1ec-event-container.ai1ec-multiday"), $(document).on({
             mouseenter: v,
             mouseleave: m
-        }, ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container"), e(document).on("shown.bs.constrained_popover", ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container", anchor_popover), e(document).on("click", ".ai1ec-agenda-view .ai1ec-event-header--toggle", i.toggle_event), e(document).on("click", "#ai1ec-agenda-expand-all", i.expand_all), e(document).on("click", "#ai1ec-agenda-collapse-all", i.collapse_all), e(document).on("click", "a.ai1ec-load-view", n.handle_click_on_link_to_load_view), e(document).on("click", ".ai1ec-minical-trigger", n.handle_minical_trigger), e(document).on("click", ".ai1ec-clear-filter", n.clear_filters), e(document).on("click", "#ai1ec-print-button", r.handle_click_on_print_button), window.addEventListener("beforeprint", r.before_print), window.addEventListener("afterprint", r.after_print), e(document).on("click", ".ai1ec-reveal-full-day button", function () {
-            var t = e(this).closest(".ai1ec-calendar");
-            e(this).fadeOut();
+        }, ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container"), $(document).on("shown.bs.constrained_popover", ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container", anchor_popover), $(document).on("click", ".ai1ec-agenda-view .ai1ec-event-header--toggle", agendaView.toggle_event), $(document).on("click", "#ai1ec-agenda-expand-all", agendaView.expand_all), $(document).on("click", "#ai1ec-agenda-collapse-all", agendaView.collapse_all), $(document).on("click", "a.ai1ec-load-view", loadViews.handle_click_on_link_to_load_view), $(document).on("click", ".ai1ec-minical-trigger", loadViews.handle_minical_trigger), $(document).on("click", ".ai1ec-clear-filter", loadViews.clear_filters), $(document).on("click", "#ai1ec-print-button", print.handle_click_on_print_button), window.addEventListener("beforeprint", print.before_print), window.addEventListener("afterprint", print.after_print), $(document).on("click", ".ai1ec-reveal-full-day button", function () {
+            var t = $(this).closest(".ai1ec-calendar");
+            $(this).fadeOut();
             var n = t.find(".ai1ec-oneday-view-original, .ai1ec-week-view-original"),
                 r = t.find(".tablescroll_wrapper").offset().top - n.offset().top;
-            e(window).scrollTo("+=" + r + "px", 400);
+            $(window).scrollTo("+=" + r + "px", 400);
             var i = 1442;
             t.find(".tablescroll_wrapper").scrollTo("-=" + r + "px", 400).animate({height: i + "px"})
-        }), History.Adapter.bind(window, "statechange", n.handle_state_change), e(document).on("click", "#osec-calendar-view .ai1ec-load-event", function (t) {
-            e.cookie.raw = !1, e.cookie("osec_calendar_url", document.URL, {path: a.cookie_path})
+        }), History.Adapter.bind(window, "statechange", loadViews.handle_state_change), $(document).on("click", "#osec-calendar-view .ai1ec-load-event", function (t) {
+            $.cookie.raw = !1, $.cookie("osec_calendar_url", document.URL, {path: config.cookie_path})
         })
     }, b = function () {
-        c.init(e(".ai1ec-select2-filters")), e(document).on("change", ".ai1ec-select2-multiselect-selector", n.load_view_from_select2_filter)
+        select2MultiselectHelper.init($(".ai1ec-select2-filters")), $(document).on("change", ".ai1ec-select2-multiselect-selector", loadViews.load_view_from_select2_filter)
     };
-    t(function () {
-        var t = e(".ai1ec-calendar"), r = e(".ai1ec-calendar:visible").first();
-        g(), a.use_select2 && b(), y(), t.each(function () {
-            n.initialize_view(e(this))
-        }), a.affix_filter_menu && 1 === r.length && o.initialize_affixed_toolbar(r)
+    domReady(function () {
+        var t = $(".ai1ec-calendar"), r = $(".ai1ec-calendar:visible").first();
+        g(), config.use_select2 && b(), y(), t.each(function () {
+            loadViews.initialize_view($(this))
+        }), config.affix_filter_menu && 1 === r.length && calendarAffix.initialize_affixed_toolbar(r)
     });
     var w = function () {
     };
-    return {start: w, initialize_view: n.initialize_view}
-}), timely.require(["scripts/calendar"], function (e) {
-    e.start()
+    return {start: w, initialize_view: loadViews.initialize_view};
+}), timely.require(["scripts/calendar"], function (calendar) {
+    calendar.start()
 }), timely.define("pages/calendar", function () {
 });

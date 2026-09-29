@@ -195,7 +195,7 @@ timely.define("domReady", [], function () {
     }, e(document).on("click.bs.tab.data-api", '[data-toggle="ai1ec-tab"], [data-toggle="ai1ec-pill"]', function (t) {
         t.preventDefault(), e(this).tab("show")
     })
-}), timely.define("libs/utils", ["jquery_timely", "external_libs/bootstrap/tab"], function (e) {
+}), timely.define("libs/utils", ["jquery_timely", "external_libs/bootstrap/tab"], function ($) {
     var t = function () {
         return {
             is_float: function (e) {
@@ -206,8 +206,8 @@ timely.define("domReady", [], function () {
             }, convert_comma_to_dot: function (e) {
                 return e.replace(",", ".")
             }, field_has_value: function (t) {
-                var n = "#" + t, r = e(n), i = !1;
-                return r.length === 1 && (i = e.trim(r.val()) !== ""), i
+                var n = "#" + t, r = $(n), i = !1;
+                return r.length === 1 && (i = $.trim(r.val()) !== ""), i;
             }, make_alert: function (t, n, r) {
                 var i = "";
                 switch (n) {
@@ -220,9 +220,9 @@ timely.define("domReady", [], function () {
                     default:
                         i = "ai1ec-alert ai1ec-alert-info"
                 }
-                var s = e("<div />", {"class": i, html: t});
+                var s = $("<div />", {"class": i, html: t});
                 if (!r) {
-                    var o = e("<button>", {
+                    var o = $("<button>", {
                         type: "button",
                         "class": "ai1ec-close",
                         "data-dismiss": "ai1ec-alert",
@@ -240,42 +240,42 @@ timely.define("domReady", [], function () {
                 var t = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                 return t.test(e)
             }, activate_saved_tab_on_page_load: function (t) {
-                null === t || undefined === t ? e("ul.ai1ec-nav a:first").tab("show") : e("ul.ai1ec-nav a[href=" + t + "]").tab("show")
+                null === t || undefined === t ? $("ul.ai1ec-nav a:first").tab("show") : $("ul.ai1ec-nav a[href=" + t + "]").tab("show")
             }, add_query_arg: function (e, t) {
                 if ("string" != typeof e) return !1;
                 var n = e.indexOf("?") === -1 ? "?" : "&";
                 return -1 !== e.indexOf(n + t[0] + "=") ? e : e + n + t[0] + "=" + t[1]
             }, create_ai1ec_to_send: function (t) {
-                var n = e(t), r = [],
+                var n = $(t), r = [],
                     i = ["action", "cat_ids", "auth_ids", "tag_ids", "exact_date", "display_filters", "no_navigation", "events_limit"];
                 return n.each(function () {
-                    e.each(this.attributes, function () {
-                        this.specified && this.value && this.name.match(/^data-/) && (-1 < e.inArray(this.name.replace(/^data\-/, ""), i) || this.name.match(/_ids$/)) && r.push(this.name.replace(/^data\-/, "") + "~" + this.value)
+                    $.each(this.attributes, function () {
+                        this.specified && this.value && this.name.match(/^data-/) && (-1 < $.inArray(this.name.replace(/^data\-/, ""), i) || this.name.match(/_ids$/)) && r.push(this.name.replace(/^data\-/, "") + "~" + this.value)
                     })
-                }), r.join("|")
+                }), r.join("|");
             }, init_autoselect: function () {
-                e(document).on("click", ".ai1ec-autoselect", function (t) {
-                    if (e(this).data("clicked") && t.originalEvent.detail < 2) return;
-                    e(this).data("clicked", !0);
+                $(document).on("click", ".ai1ec-autoselect", function (t) {
+                    if ($(this).data("clicked") && t.originalEvent.detail < 2) return;
+                    $(this).data("clicked", !0);
                     var n;
                     document.body.createTextRange ? (n = document.body.createTextRange(), n.moveToElementText(this), n.select()) : window.getSelection && (selection = window.getSelection(), n = document.createRange(), n.selectNodeContents(this), selection.removeAllRanges(), selection.addRange(n))
                 })
             }
-        }
+        };
     }();
     return t
-}), timely.define("scripts/setting/cache/cache_ajax_handlers", ["jquery_timely", "libs/utils"], function (e, t) {
+}), timely.define("scripts/setting/cache/cache_ajax_handlers", ["jquery_timely", "libs/utils"], function ($, utils) {
     var n = function (n) {
-        var r = e("#ai1ec-button-refresh"), i = e("#osec-cache-scan-success"), s = e("#ai1ec-cache-scan-danger"), o;
-        r.button("reset"), n.error ? o = t.make_alert(n.message, "error") : "0" === n.state ? (i.toggleClass("ai1ec-hide", !0), s.toggleClass("ai1ec-hide", !1)) : (i.toggleClass("ai1ec-hide", !1), s.toggleClass("ai1ec-hide", !0))
+        var r = $("#ai1ec-button-refresh"), i = $("#osec-cache-scan-success"), s = $("#ai1ec-cache-scan-danger"), o;
+        r.button("reset"), n.error ? o = utils.make_alert(n.message, "error") : "0" === n.state ? (i.toggleClass("ai1ec-hide", !0), s.toggleClass("ai1ec-hide", !1)) : (i.toggleClass("ai1ec-hide", !1), s.toggleClass("ai1ec-hide", !0))
     };
     return {handle_rescan_cache: n}
-}), timely.define("scripts/setting/cache/cache_event_handlers", ["jquery_timely", "scripts/setting/cache/cache_ajax_handlers", "libs/utils"], function (e, t, n) {
-    var r = n.get_ajax_url(), i = function () {
-        var n = e(this);
+}), timely.define("scripts/setting/cache/cache_event_handlers", ["jquery_timely", "scripts/setting/cache/cache_ajax_handlers", "libs/utils"], function ($, cacheAjaxHandlers, utils) {
+    var r = utils.get_ajax_url(), i = function () {
+        var n = $(this);
         n.button("loading");
         var i = {action: "osec_rescan_cache"};
-        return e.post(r, i, t.handle_rescan_cache, "json"), !1
+        return $.post(r, i, cacheAjaxHandlers.handle_rescan_cache, "json"), !1;
     };
     return {perform_rescan: i}
 }), timely.define("external_libs/bootstrap/button", ["jquery_timely"], function (e) {
@@ -387,10 +387,10 @@ timely.define("domReady", [], function () {
         if (!o || !o.transitioning) f && f.find('[data-toggle=ai1ec-collapse][data-parent="' + a + '"]').not(n).addClass("ai1ec-collapsed"), n[s.hasClass("ai1ec-in") ? "addClass" : "removeClass"]("ai1ec-collapsed");
         s.collapse(u)
     })
-}), timely.define("libs/collapse_helper", ["jquery_timely", "domReady", "external_libs/bootstrap/transition", "external_libs/bootstrap/collapse"], function (e, t) {
-    t(function () {
-        e(document).on("click", '[data-toggle="ai1ec-collapse"]', function () {
-            e(this).toggleClass("ai1ec-active"), e(".ai1ec-fa-caret-down, .ai1ec-fa-caret-up, .ai1ec-fa-chevron-down, .ai1ec-fa-chevron-up, .ai1ec-fa-arrow-down, .ai1ec-fa-arrow-up", this).toggleClass("ai1ec-hide")
+}), timely.define("libs/collapse_helper", ["jquery_timely", "domReady", "external_libs/bootstrap/transition", "external_libs/bootstrap/collapse"], function ($, domReady) {
+    domReady(function () {
+        $(document).on("click", '[data-toggle="ai1ec-collapse"]', function () {
+            $(this).toggleClass("ai1ec-active"), $(".ai1ec-fa-caret-down, .ai1ec-fa-caret-up, .ai1ec-fa-chevron-down, .ai1ec-fa-chevron-up, .ai1ec-fa-arrow-down, .ai1ec-fa-arrow-up", this).toggleClass("ai1ec-hide")
         })
     })
 }), timely.define("external_libs/locales/bootstrap-datepicker.bg", ["jquery_timely"], function (e) {
@@ -1659,52 +1659,52 @@ timely.define("domReady", [], function () {
     u.defaults = {}, e.removeCookie = function (t, n) {
         return e.cookie(t) === undefined ? !1 : (e.cookie(t, "", e.extend({}, n, {expires: -1})), !e.cookie(t))
     }
-}), timely.define("scripts/admin_settings", ["jquery_timely", "domReady", "ai1ec_config", "libs/utils", "scripts/setting/cache/cache_event_handlers", "external_libs/bootstrap/button", "libs/collapse_helper", "external_libs/bootstrap/tab", "external_libs/bootstrap_datepicker", "external_libs/bootstrap/tooltip", "external_libs/jquery_cookie"], function (e, t, n, r, i) {
+}), timely.define("scripts/admin_settings", ["jquery_timely", "domReady", "ai1ec_config", "libs/utils", "scripts/setting/cache/cache_event_handlers", "external_libs/bootstrap/button", "libs/collapse_helper", "external_libs/bootstrap/tab", "external_libs/bootstrap_datepicker", "external_libs/bootstrap/tooltip", "external_libs/jquery_cookie"], function ($, domReady, config, utils, cacheEventHandlers) {
     var s = function () {
         var t = !0;
-        e("#ai1ec-plugins-settings input:text").each(function () {
+        $("#ai1ec-plugins-settings input:text").each(function () {
             this.value !== "" && (t = !1)
-        }), t === !0 && e("#ai1ec-plugins-settings").remove()
+        }), t === !0 && $("#ai1ec-plugins-settings").remove()
     }, o = function (t) {
-        var n = e(this).attr("href");
-        e.cookie("osec_general_settings_active_tab", n)
+        var n = $(this).attr("href");
+        $.cookie("osec_general_settings_active_tab", n)
     }, u = function () {
-        var t = e("#week_view_starts_at"), r = e("#week_view_ends_at"), i = parseInt(t.val(), 10),
+        var t = $("#week_view_starts_at"), r = $("#week_view_ends_at"), i = parseInt(t.val(), 10),
             s = parseInt(r.val(), 10);
-        if (s < i) return window.alert(n.end_must_be_after_start), r.focus(), !1;
+        if (s < i) return window.alert(config.end_must_be_after_start), r.focus(), !1;
         var o = s - i;
-        if (o < 6) return window.alert(n.show_at_least_six_hours), r.focus(), !1
+        if (o < 6) return window.alert(config.show_at_least_six_hours), r.focus(), !1;
     }, a = function () {
-        e(".ai1ec-gzip-causes-js-failure").remove()
+        $(".ai1ec-gzip-causes-js-failure").remove()
     }, f = function () {
-        e("#osec_save_settings").on("click", function (t) {
-            var r = e("#require_disclaimer").is(":checked"), i = e("#disclaimer").val();
-            !0 === r && "" === i && (alert(n.require_desclaimer), e('#ai1ec-general-settings ul.ai1ec-nav a[href="#osec-advanced"]').tab("show"), e("#disclaimer").focus(), t.preventDefault())
+        $("#osec_save_settings").on("click", function (t) {
+            var r = $("#require_disclaimer").is(":checked"), i = $("#disclaimer").val();
+            !0 === r && "" === i && (alert(config.require_desclaimer), $('#ai1ec-general-settings ul.ai1ec-nav a[href="#osec-advanced"]').tab("show"), $("#disclaimer").focus(), t.preventDefault())
         })
     }, l = function () {
-        e("fieldset.ai1ec-captcha_provider").addClass("ai1ec-hidden"), e(".ai1ec-" + e(this).val()).removeClass("ai1ec-hidden")
+        $("fieldset.ai1ec-captcha_provider").addClass("ai1ec-hidden"), $(".ai1ec-" + $(this).val()).removeClass("ai1ec-hidden")
     }, c = function () {
-        t(function () {
-            f(), a(), r.activate_saved_tab_on_page_load(e.cookie("osec_general_settings_active_tab")), e(document).on("click", '#ai1ec-general-settings .ai1ec-nav a[data-toggle="ai1ec-tab"]', o), e(document).on("click", "#disable_standard_filter_menu_toggler", function (e) {
+        domReady(function () {
+            f(), a(), utils.activate_saved_tab_on_page_load($.cookie("osec_general_settings_active_tab")), $(document).on("click", '#ai1ec-general-settings .ai1ec-nav a[data-toggle="ai1ec-tab"]', o), $(document).on("click", "#disable_standard_filter_menu_toggler", function (e) {
                 e.preventDefault()
-            }), e(document).on("click", "#ai1ec-button-refresh", i.perform_rescan);
-            var t = e("#exact_date");
-            t.datepicker({autoclose: !0}), s(), e(document).on("click", ".ai1ec-admin-view-settings .ai1ec-toggle-view", function () {
-                var t = e(this), n = t.parent().index() + 1;
+            }), $(document).on("click", "#ai1ec-button-refresh", cacheEventHandlers.perform_rescan);
+            var t = $("#exact_date");
+            t.datepicker({autoclose: !0}), s(), $(document).on("click", ".ai1ec-admin-view-settings .ai1ec-toggle-view", function () {
+                var t = $(this), n = t.parent().index() + 1;
                 if (0 === t.closest("tr").siblings().find("td:nth-child(" + n + ") .ai1ec-toggle-view:checked").length) return !1;
                 if (t.parent().next("td").find(".ai1ec-toggle-default-view").is(":checked")) return !1
             });
             var n = function () {
-                var t = e(this).closest(".ai1ec-form-group").nextAll(".ai1ec-form-group").slice(0, 4);
-                e(this).prop("checked") ? t.show() : t.hide()
+                var t = $(this).closest(".ai1ec-form-group").nextAll(".ai1ec-form-group").slice(0, 4);
+                $(this).prop("checked") ? t.show() : t.hide()
             };
-            n.apply(e("#affix_filter_menu").on("click", n)[0]), e(document).on("click", ".ai1ec-admin-view-settings .ai1ec-toggle-default-view", function () {
-                e(this).parent().prev("td").children(".ai1ec-toggle-view").prop("checked", !0)
-            }), e(document).on("change", "#captcha_provider", l), r.init_autoselect(), e("#osec_save_settings").on("click", u), e("#show_create_event_button").trigger("ready")
+            n.apply($("#affix_filter_menu").on("click", n)[0]), $(document).on("click", ".ai1ec-admin-view-settings .ai1ec-toggle-default-view", function () {
+                $(this).parent().prev("td").children(".ai1ec-toggle-view").prop("checked", !0)
+            }), $(document).on("change", "#captcha_provider", l), utils.init_autoselect(), $("#osec_save_settings").on("click", u), $("#show_create_event_button").trigger("ready")
         })
     };
     return {start: c}
-}), timely.require(["scripts/admin_settings"], function (e) {
-    e.start()
+}), timely.require(["scripts/admin_settings"], function (adminSettings) {
+    adminSettings.start()
 }), timely.define("pages/admin_settings", function () {
 });

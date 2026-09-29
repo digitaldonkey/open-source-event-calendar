@@ -148,15 +148,15 @@ timely.define("domReady", [], function () {
     return c.version = "2.0.0", c.load = function (e, t, n, r) {
         r.isBuild ? n(null) : c(n)
     }, c
-}), timely.define("scripts/common_scripts/backend/common_ajax_handlers", ["jquery_timely"], function (e) {
+}), timely.define("scripts/common_scripts/backend/common_ajax_handlers", ["jquery_timely"], function ($) {
     var t = function (t) {
-        t && (typeof t.message != "undefined" ? window.alert(t.message) : e(".ai1ec-facebook-cron-dismiss-notification").closest(".message").fadeOut())
+        t && (typeof t.message != "undefined" ? window.alert(t.message) : $(".ai1ec-facebook-cron-dismiss-notification").closest(".message").fadeOut())
     }, n = function (t) {
-        t.error ? window.alert(t.message) : e(".ai1ec-dismiss-notification").closest(".message").fadeOut()
+        t.error ? window.alert(t.message) : $(".ai1ec-dismiss-notification").closest(".message").fadeOut()
     }, r = function (t) {
-        t.error ? window.alert(t.message) : e(".ai1ec-dismiss-intro-video").closest(".message").fadeOut()
+        t.error ? window.alert(t.message) : $(".ai1ec-dismiss-intro-video").closest(".message").fadeOut()
     }, i = function (t) {
-        t.error ? window.alert(t.message) : e(".ai1ec-dismiss-license-warning").closest(".message").fadeOut()
+        t.error ? window.alert(t.message) : $(".ai1ec-dismiss-license-warning").closest(".message").fadeOut()
     };
     return {
         handle_dismiss_plugins: t,
@@ -164,27 +164,27 @@ timely.define("domReady", [], function () {
         handle_dismiss_intro_video: r,
         handle_dismiss_license_warning: i
     }
-}), timely.define("scripts/common_scripts/backend/common_event_handlers", ["jquery_timely", "scripts/common_scripts/backend/common_ajax_handlers"], function (e, t) {
+}), timely.define("scripts/common_scripts/backend/common_event_handlers", ["jquery_timely", "scripts/common_scripts/backend/common_ajax_handlers"], function ($, commonAjaxHandlers) {
     var n = function (n) {
         var r = {action: "ai1ec_facebook_cron_dismiss"};
-        e.post(ajaxurl, r, t.handle_dismiss_plugins, "json")
+        $.post(ajaxurl, r, commonAjaxHandlers.handle_dismiss_plugins, "json")
     }, r = function (n) {
-        var r = e(this);
+        var r = $(this);
         r.attr("disabled", !0);
         var i = {action: "ai1ec_disable_notification", note: !1};
-        e.post(ajaxurl, i, t.handle_dismiss_notification)
+        $.post(ajaxurl, i, commonAjaxHandlers.handle_dismiss_notification)
     }, i = function (n) {
-        var r = e(this);
+        var r = $(this);
         r.attr("disabled", !0);
         var i = {action: "ai1ec_disable_intro_video", note: !1};
-        e.post(ajaxurl, i, t.handle_dismiss_intro_video)
+        $.post(ajaxurl, i, commonAjaxHandlers.handle_dismiss_intro_video)
     }, s = function (n) {
-        var r = e(this);
+        var r = $(this);
         r.attr("disabled", !0);
         var i = {action: "ai1ec_set_license_warning", value: "dismissed"};
-        e.post(ajaxurl, i, t.handle_dismiss_license_warning)
+        $.post(ajaxurl, i, commonAjaxHandlers.handle_dismiss_license_warning)
     }, o = function (t) {
-        e(this).parent().next(".ai1ec-limit-by-options-container").toggle().find("option").removeAttr("selected")
+        $(this).parent().next(".ai1ec-limit-by-options-container").toggle().find("option").removeAttr("selected")
     };
     return {
         dismiss_plugins_messages_handler: n,
@@ -623,30 +623,30 @@ timely.define("domReady", [], function () {
     }, e(document).on("click.bs.dropdown.data-api", i).on("click.bs.dropdown.data-api", ".ai1ec-dropdown form", function (e) {
         e.stopPropagation()
     }).on("click.bs.dropdown.data-api", n, r.prototype.toggle).on("keydown.bs.dropdown.data-api", n + ", [role=menu]", r.prototype.keydown)
-}), timely.define("scripts/common_scripts/backend/common_backend", ["jquery_timely", "domReady", "ai1ec_config", "scripts/common_scripts/backend/common_event_handlers", "external_libs/Placeholders", "external_libs/bootstrap/tooltip", "external_libs/bootstrap/popover", "external_libs/bootstrap/modal", "external_libs/bootstrap/dropdown"], function (e, t, n, r) {
+}), timely.define("scripts/common_scripts/backend/common_backend", ["jquery_timely", "domReady", "ai1ec_config", "scripts/common_scripts/backend/common_event_handlers", "external_libs/Placeholders", "external_libs/bootstrap/tooltip", "external_libs/bootstrap/popover", "external_libs/bootstrap/modal", "external_libs/bootstrap/dropdown"], function ($, domReady, config, commonEventHandlers) {
     var i = function () {
-        e("#ai1ec-facebook-filter option[value=exportable]:selected").length > 0 && e("table.wp-list-table tr.no-items").length === 0 && n.facebook_logged_in === "1" && (e("<option>").val("export-facebook").text("Export to facebook").appendTo("select[name='action']"), e("<option>").val("export-facebook").text("Export to facebook").appendTo("select[name='action2']"))
+        $("#ai1ec-facebook-filter option[value=exportable]:selected").length > 0 && $("table.wp-list-table tr.no-items").length === 0 && config.facebook_logged_in === "1" && ($("<option>").val("export-facebook").text("Export to facebook").appendTo("select[name='action']"), $("<option>").val("export-facebook").text("Export to facebook").appendTo("select[name='action2']"))
     }, s = function () {
         // disabled.
     }, u = function () {
-        e(document).on("click", ".ai1ec-facebook-cron-dismiss-notification", r.dismiss_plugins_messages_handler).on("click", ".ai1ec-dismiss-notification", r.dismiss_notification_handler).on("click", ".ai1ec-dismiss-intro-video", r.dismiss_intro_video_handler).on("click", ".ai1ec-dismiss-license-warning", r.dismiss_license_warning_handler).on("click", ".ai1ec-limit-by-cat, .ai1ec-limit-by-tag, .ai1ec-limit-by-event", r.handle_multiselect_containers_widget_page).on("click", ".ai1ec-dismissable", function () {
-            var t = {action: "osec_dismiss_notice", key: e(this).data("key"), nonce: e(this).data("nonce")}, n = this;
-            e.post(ajaxurl, t, function (t) {
-                e(n).closest(".ai1ec-message").remove()
+        $(document).on("click", ".ai1ec-facebook-cron-dismiss-notification", commonEventHandlers.dismiss_plugins_messages_handler).on("click", ".ai1ec-dismiss-notification", commonEventHandlers.dismiss_notification_handler).on("click", ".ai1ec-dismiss-intro-video", commonEventHandlers.dismiss_intro_video_handler).on("click", ".ai1ec-dismiss-license-warning", commonEventHandlers.dismiss_license_warning_handler).on("click", ".ai1ec-limit-by-cat, .ai1ec-limit-by-tag, .ai1ec-limit-by-event", commonEventHandlers.handle_multiselect_containers_widget_page).on("click", ".ai1ec-dismissable", function () {
+            var t = {action: "osec_dismiss_notice", key: $(this).data("key"), nonce: $(this).data("nonce")}, n = this;
+            $.post(ajaxurl, t, function (t) {
+                $(n).closest(".ai1ec-message").remove()
             })
         })
     }, a = function () {
-        e("#ai1ec-support .ai1ec-download a[title]").popover({placement: "left"}), e(".ai1ec-tooltip-toggle").tooltip({container: "body"})
+        $("#ai1ec-support .ai1ec-download a[title]").popover({placement: "left"}), $(".ai1ec-tooltip-toggle").tooltip({container: "body"})
     }, f = function () {
-        var t = e(".ai1ec-taxonomy-header"), n = e(".ai1ec-taxonomy-edit-link"), r;
-        t.length && (e("form#edittag").length || n.removeClass("ai1ec-hide").appendTo(".wrap > h2:first"), e(".wrap").prepend(t.removeClass("ai1ec-hide")), t.find("li.ai1ec-active").length || (r = e("[data-ai1ec_active_tab]").data("ai1ec_active_tab"), r && e(r).addClass("ai1ec-active")), e('#menu-posts-osec_event a[href="edit-tags.php?taxonomy=osec_events_categories&post_type=ai1ec_event"]').closest("li").addClass("current"))
+        var t = $(".ai1ec-taxonomy-header"), n = $(".ai1ec-taxonomy-edit-link"), r;
+        t.length && ($("form#edittag").length || n.removeClass("ai1ec-hide").appendTo(".wrap > h2:first"), $(".wrap").prepend(t.removeClass("ai1ec-hide")), t.find("li.ai1ec-active").length || (r = $("[data-ai1ec_active_tab]").data("ai1ec_active_tab"), r && $(r).addClass("ai1ec-active")), $('#menu-posts-osec_event a[href="edit-tags.php?taxonomy=osec_events_categories&post_type=ai1ec_event"]').closest("li").addClass("current"))
     }, l = function () {
-        t(function () {
+        domReady(function () {
             i(), f(), u(), s(), a()
         })
     };
     return {start: l}
-}), timely.require(["scripts/common_scripts/backend/common_backend"], function (e) {
-    e.start()
+}), timely.require(["scripts/common_scripts/backend/common_backend"], function (commonBackend) {
+    commonBackend.start()
 }), timely.define("pages/common_backend", function () {
 });
