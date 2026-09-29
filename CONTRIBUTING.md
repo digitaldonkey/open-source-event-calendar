@@ -44,8 +44,8 @@ You might also propose new hooks if they make sense to solve your problem.
 
 **osec_recompile_templates** 
 
-Enable debug mode `define('OSEC_DEBUG', true);` and add get param  
-yoursite.com?osec_recompile_templates=TRUE
+Enable debug mode `define('OSEC_DEBUG', true);` and add the GET parameter `osec_recompile_templates=TRUE`, e.g.
+`yoursite.com?osec_recompile_templates=TRUE`.
 
 
 
