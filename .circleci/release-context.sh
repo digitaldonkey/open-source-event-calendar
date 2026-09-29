@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Decides what a pipeline releases and prints it as shell assignments for the
-# deploy jobs (the build job writes them to /tmp/release.env):
+# deploy jobs (release_decision_job writes them to /tmp/release.env):
 #
 #   RELEASE_MODE          none | dev | tagged | dryrun
 #   RELEASE_VERSION       X.Y.Z for tagged and dryrun, empty otherwise
@@ -18,8 +18,9 @@
 # tag X.Y.Z-dryrun   -> dryrun (the same, without committing or publishing)
 # anything else      -> none
 #
-# A release tag that fails a check stops the pipeline (exit 1), before any test
-# job runs. Messages go to stderr, the assignments to stdout.
+# release_decision_job runs on master and release tags only, after all tests.
+# A release tag that fails a check fails it (exit 1), so nothing is deployed.
+# Messages go to stderr, the assignments to stdout.
 
 set -Eeuo pipefail
 

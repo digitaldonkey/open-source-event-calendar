@@ -118,27 +118,11 @@ jobs:
       - run:
           name: Install WordPress (Test scripts)
           command: bash ./bin/install-wp-tests.sh $MYSQL_DATABASE $MYSQL_USER $MYSQL_PASSWORD $WP_HOST $WP_VERSION true false
-      - run:
-          name: Test the release scripts
-          command: bash .circleci/tests/test-release-scripts.sh
-      - run:
-          name: Decide what this pipeline releases variables
-          command: |
-            echo "CIRCLE_BRANCH: ${CIRCLE_BRANCH:-}"
-            echo "CIRCLE_TAG:    ${CIRCLE_TAG:-}"
-            echo "CIRCLE_SHA1:   $CIRCLE_SHA1"
-      - run:
-          name: Decide what this pipeline releases
-          # /tmp/release.env (RELEASE_MODE, RELEASE_VERSION, RELEASE_UPDATE_TRUNK) is read by
-          # the GitHub and SVN deploy jobs; the format is documented in release-context.sh.
-          command: |
-            .circleci/release-context.sh | tee /tmp/release.env
       - persist_to_workspace:
           root: *workspace_root
           paths:
             - wordpress
             - wordpress-tests-lib
-            - release.env
 
   # STATIC CODE ANALYSE
   static_job:
@@ -586,6 +570,32 @@ jobs:
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
+  # Decides what this pipeline releases (master and release tags only), after all tests.
+  release_decision_job:
+    <<: *container_config
+    steps:
+      - checkout
+      - *install_subversion
+      - run:
+          name: Test the release scripts
+          command: bash .circleci/tests/test-release-scripts.sh
+      - run:
+          name: Decide what this pipeline releases variables
+          command: |
+            echo "CIRCLE_BRANCH: ${CIRCLE_BRANCH:-}"
+            echo "CIRCLE_TAG:    ${CIRCLE_TAG:-}"
+            echo "CIRCLE_SHA1:   $CIRCLE_SHA1"
+      - run:
+          name: Decide what this pipeline releases
+          # /tmp/release.env (RELEASE_MODE, RELEASE_VERSION, RELEASE_UPDATE_TRUNK) is read by
+          # the GitHub and SVN deploy jobs; the format is documented in release-context.sh.
+          command: |
+            .circleci/release-context.sh | tee /tmp/release.env
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - release.env
+
   # Publish github release
   publish_github_release_job:
     docker:
@@ -746,7 +756,7 @@ workflows:
           requires:
             - create_release_job
           filters: *main_branches
-      - publish_github_release_job:
+      - release_decision_job:
           requires:
             - static_job
             - db_job
@@ -760,6 +770,10 @@ workflows:
             - release_test_job_php_8_3
             - release_test_job_php_8_4
             - release_test_job_php_8_5
+          filters: *deploy_branches
+      - publish_github_release_job:
+          requires:
+            - release_decision_job
           filters: *deploy_branches
       - wp_deploy_assets_job:
           requires:
