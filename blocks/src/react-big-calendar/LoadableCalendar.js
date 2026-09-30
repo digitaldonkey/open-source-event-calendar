@@ -55,6 +55,7 @@ export const LoadableCalendar = Loadable.Map({
 			'./OsecBigCal'
 		),
 		// i18n: () => fetch('./i18n/bar.json').then(res => res.json()),
+		// The locale files are CommonJS: the context resolves to the locale object itself.
 		locale: () => dayjsLocales(`./${getUserLocale()}.js`),
 	},
 	loading() {
@@ -62,6 +63,6 @@ export const LoadableCalendar = Loadable.Map({
 	},
 	render(loaded, props) {
 		const OsecBigCal = loaded.OsecBigCal.default;
-		return <OsecBigCal {...props} locale={loaded.locale.default} />;
+		return <OsecBigCal {...props} locale={loaded.locale} />;
 	},
 });
