@@ -1,4 +1,5 @@
-import Loadable from 'react-loadable';
+import {lazy, Suspense} from '@wordpress/element';
+import {__} from '@wordpress/i18n';
 
 /**
  * All dayjs locales, each loaded on demand as its own chunk.
@@ -46,23 +47,24 @@ const getUserLocale = () => {
 }
 
 /**
- * Using a `Loadable` to load things we need.
+ * The calendar and the visitor's dayjs locale, both loaded on demand.
+ *
+ * The locale files are CommonJS: the context resolves to the locale object itself.
  */
-export const LoadableCalendar = Loadable.Map({
-	loader: {
-		OsecBigCal: () => import(
-			/* webpackChunkName: "react-big-calendar/osec-big-cal" */
-			'./OsecBigCal'
-		),
-		// i18n: () => fetch('./i18n/bar.json').then(res => res.json()),
-		// The locale files are CommonJS: the context resolves to the locale object itself.
-		locale: () => dayjsLocales(`./${getUserLocale()}.js`),
-	},
-	loading() {
-		return <div>Loading...</div>
-	},
-	render(loaded, props) {
-		const OsecBigCal = loaded.OsecBigCal.default;
-		return <OsecBigCal {...props} locale={loaded.locale} />;
-	},
-});
+const OsecBigCal = lazy(() => Promise.all([
+	import(
+		/* webpackChunkName: "react-big-calendar/osec-big-cal" */
+		'./OsecBigCal'
+	),
+	dayjsLocales(`./${getUserLocale()}.js`),
+]).then(([calendar, locale]) => ({
+	default: (props) => <calendar.default {...props} locale={locale} />,
+})));
+
+export function LoadableCalendar(props) {
+	return (
+		<Suspense fallback={<div>{__('Loading…', 'open-source-event-calendar')}</div>}>
+			<OsecBigCal {...props} />
+		</Suspense>
+	);
+}

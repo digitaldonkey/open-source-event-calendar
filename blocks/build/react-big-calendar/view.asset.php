@@ -5,7 +5,8 @@
 		'react-jsx-runtime',
 		'wp-api-fetch',
 		'wp-element',
+		'wp-i18n',
 		'wp-url'
 	),
-	'version' => '76293d98d18574a6c74d'
+	'version' => 'f56a8ceacc8030e3e778'
 );

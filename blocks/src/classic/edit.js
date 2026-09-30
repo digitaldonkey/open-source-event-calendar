@@ -9,7 +9,7 @@ export default function Edit(props) {
 	return (
 		<BlockEdit
 			{...props}
-			title={__('Osec Calendar', 'open source-event-calendar')}
+			title={__('Osec Calendar', 'open-source-event-calendar')}
 		/>
 	);
 }
