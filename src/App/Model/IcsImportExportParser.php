@@ -438,13 +438,19 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     'comment_status' => $comment_status,
                     'post_type'      => OSEC_POST_TYPE,
                     'post_author'    => 1,
-                    'post_title'     => $e->getSummary(),
+                    // Feed content is untrusted, whoever runs the import: without this, a feed
+                    // could store script in title or description, which the calendar prints as
+                    // HTML. SUMMARY is plain text (RFC 5545); DESCRIPTION often carries HTML, so
+                    // it gets what WordPress allows authors without unfiltered_html.
+                    'post_title'     => wp_strip_all_tags((string)$e->getSummary()),
                     'post_parent'    => null,
-                    'post_content'   => stripslashes(
-                        str_replace(
-                            '\n',
-                            "\n",
-                            $e->getDescription()
+                    'post_content'   => wp_kses_post(
+                        stripslashes(
+                            str_replace(
+                                '\n',
+                                "\n",
+                                (string)$e->getDescription()
+                            )
                         )
                     ),
                 ],
