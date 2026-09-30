@@ -83,7 +83,8 @@ class AdminEventCategoryHooks extends OsecBaseClass
         // Category image
         $args = [
             'image_src'    => '',
-            'image_style'  => 'style="display:none"',
+            // A style value, not an attribute: Twig escapes the quotes of an attribute string.
+            'image_style'  => 'display:none',
             'section_name' => __('Category Image', 'open-source-event-calendar'),
             'label'        => __('Add Image', 'open-source-event-calendar'),
             'description'  => __(
@@ -143,7 +144,7 @@ class AdminEventCategoryHooks extends OsecBaseClass
         $taxonomy = TaxonomyAdapter::factory($this->app);
         $image    = $taxonomy->get_category_image($term->term_id);
 
-        $style = 'style="display:none"';
+        $style = 'display:none';
 
         if (null !== $image) {
             $style = '';

@@ -37,7 +37,7 @@ class SettingsCache extends OsecBaseClass
     {
         $cachePath = (new CachePath())->getCacheData();
         if ($cachePath) {
-            $cachePathTxt = '<div style="max-width: 100%; overflow-x: scroll;">'
+            $cachePathTxt = '<div style="max-width: 100%; overflow: auto;">'
                                 . $cachePath['path']
                                 . '<br />'
                                 . $cachePath['url']
