@@ -13,8 +13,8 @@ Author URI: https://github.com/digitaldonkey
 Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 Text Domain: open-source-event-calendar
-Stable Tag: 1.1.15
-Version: 1.1.15
+Stable Tag: 1.1.16
+Version: 1.1.16
 
 An event calendar with native iCal / ICS import and export
 
@@ -268,6 +268,9 @@ add_filter('http_request_args', function ($args, $url) {
 9. Schema.org/Event data validator
 
 == Changelog ==
+
+= 1.1.16 =
+- Security: title and description of events imported from feeds are sanitized, whoever runs the import
 
 = 1.1.15 =
 - Print support for all calendar views with a print header; overlapping events print side by side, busy days as a list; category colors print as event borders; a calendar block can hide the print icon #55
