@@ -23,6 +23,28 @@ use Osec\Helper\JsonHelper;
 class Event extends OsecBaseClass
 {
     /**
+     * VARCHAR sizes of the events table (DatabaseSchema), see prepare_store_entity().
+     */
+    private const COLUMN_LENGTHS = [
+        'timezone_name'   => 50,
+        'venue'           => 255,
+        'country'         => 255,
+        'address'         => 255,
+        'city'            => 255,
+        'province'        => 255,
+        'postal_code'     => 32,
+        'contact_name'    => 255,
+        'contact_phone'   => 32,
+        'contact_email'   => 128,
+        'contact_url'     => 255,
+        'cost'            => 255,
+        'ticket_url'      => 255,
+        'ical_feed_url'   => 768,
+        'ical_source_url' => 768,
+        'ical_uid'        => 255,
+    ];
+
+    /**
      * @var EventEntity Data store object reference.
      */
     protected ?EventEntity $entity;
@@ -740,6 +762,14 @@ class Event extends OsecBaseClass
             'latitude'         => $this->storage_format('latitude'),
             'longitude'        => $this->storage_format('longitude'),
         ];
+
+        // A value longer than its column made the whole save fail ("Error saving Post Data"),
+        // and with it a feed import - e.g. a CONTACT whose part with a digit counts as phone.
+        foreach (self::COLUMN_LENGTHS as $column => $length) {
+            if (is_string($entity[$column]) && mb_strlen($entity[$column]) > $length) {
+                $entity[$column] = mb_substr($entity[$column], 0, $length);
+            }
+        }
 
         return $entity;
     }
