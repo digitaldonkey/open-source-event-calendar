@@ -41,8 +41,8 @@ class CalendarShortcodeView extends OsecBaseClass
         }
 
         $view               = $default_view;
-        $_events_categories = [];
-        $_events_tags = [];
+        $_osec_events_categories = [];
+        $_osec_events_tags = [];
         $post_ids = [];
 
         if (isset($atts['view'])) {
@@ -77,8 +77,8 @@ class CalendarShortcodeView extends OsecBaseClass
                 ) {
                     continue;
                 }
-                ${'_' . $matches[1] . '_ids'} = [];
-                $custom_taxonomies[]          = $matches[1];
+                ${'_' . $matches[1]} = [];
+                $custom_taxonomies[] = $matches[1];
 
                 if ( ! isset($mappings[$matches[1] . '_id'])) {
                     $mappings[$matches[1] . '_id'] = $matches[1];
@@ -93,15 +93,23 @@ class CalendarShortcodeView extends OsecBaseClass
             if ( ! isset($atts[$att_name])) {
                 continue;
             }
+            if ('events_limit' === $att_name) {
+                // Not a taxonomy. Value is read directly from $atts when the query is built.
+                continue;
+            }
             $raw_values = explode(',', (string)$atts[$att_name]);
             foreach ($raw_values as $argument) {
+                $argument = trim($argument);
+                if ('' === $argument) {
+                    continue;
+                }
                 if ('post_id' === $att_name) {
                     if (is_numeric($argument) && $argument > 0) {
                         $post_ids[] = $argument;
                     }
                 } else {
                     if ( ! is_numeric($argument)) {
-                        $search_val = trim($argument);
+                        $search_val = $argument;
                         $argument   = false;
                         foreach (['name', 'slug'] as $field) {
                             $record = get_term_by(
@@ -114,12 +122,33 @@ class CalendarShortcodeView extends OsecBaseClass
                                 break;
                             }
                         }
-                        unset($search_val, $record, $field);
+                        unset($record, $field);
                         if (false === $argument) {
+                            _doing_it_wrong(
+                                __METHOD__,
+                                esc_html(sprintf(
+                                    '[%s] shortcode: %s "%s" does not match any %s term. The filter value was ignored.',
+                                    OSEC_SHORTCODE,
+                                    $att_name,
+                                    $search_val,
+                                    $type
+                                )),
+                                '1.1.15'
+                            );
                             continue;
                         }
                         $argument = (int)$argument->term_id;
                     } elseif ((int) $argument <= 0) {
+                        _doing_it_wrong(
+                            __METHOD__,
+                            esc_html(sprintf(
+                                '[%s] shortcode: %s "%s" is not a valid term id. The filter value was ignored.',
+                                OSEC_SHORTCODE,
+                                $att_name,
+                                $argument
+                            )),
+                            '1.1.15'
+                        );
                         continue;
                     }
                     ${'_' . $type}[] = $argument;
@@ -129,8 +158,8 @@ class CalendarShortcodeView extends OsecBaseClass
         $request_type = $this->app->settings
             ->get('osec_use_frontend_rendering') ? 'json' : 'jsonp';
         $query        = [
-            'cat_ids'      => implode(',', $_events_categories),
-            'tag_ids'      => implode(',', $_events_tags),
+            'cat_ids'      => implode(',', $_osec_events_categories),
+            'tag_ids'      => implode(',', $_osec_events_tags),
             'post_ids'     => implode(',', $post_ids),
             'action'       => $view,
             'request_type' => $request_type,

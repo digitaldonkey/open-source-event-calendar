@@ -2,6 +2,7 @@
 cache/*
 /vendor/
 /hookster_markdown
+.claude/settings.local.json
 
 # From Block Editor gitignore.
 *.log
@@ -18,3 +19,4 @@ node_modules/
 *.tgz
 *.zip
 .env
+.idea/

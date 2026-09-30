@@ -498,21 +498,6 @@ class ThemeLoader extends OsecBaseClass
     }
 
     /**
-     * Called during 'after_setup_theme' action. Runs theme's special
-     * functions.php file, if present.
-     */
-    public function execute_theme_functions(): void
-    {
-        $theme     = $this->app->options->get('osec_current_theme');
-        $functions = $theme['theme_dir'] . '/functions.php';
-
-        if (file_exists($functions)) {
-            include $functions;
-        }
-    }
-
-
-    /**
      * Switches to default Vortex theme.
      *
      * @param  bool  $silent  Whether notify admin or not.
@@ -537,8 +522,8 @@ class ThemeLoader extends OsecBaseClass
         if ( ! $silent) {
             NotificationAdmin::factory($this->app)->store(
                 __(
-                    'Your calendar theme has been switched to Vortex due to a rendering problem. For more information, 
-                        please enable debug mode by adding this line to your WordPress <code>wp-config.php  
+                    'Your calendar theme has been switched to Vortex due to a rendering problem. For more information,
+                        please enable debug mode by adding this line to your WordPress <code>wp-config.php
                         </code> file:<pre>define( "OSEC_DEBUG", true );</pre>',
                     'open-source-event-calendar'
                 ),
@@ -587,9 +572,8 @@ class ThemeLoader extends OsecBaseClass
             );
         }
 
-        // Recompile CSS for new theme.
-        // TODO Ensure cache is working
-        FrontendCssController::factory($this->app)
-                             ->invalidate_cache(null, false);
+        // Recompile CSS for the new theme on the next request (BootstrapController::verifyCache()).
+        // This request still resolves theme files with the paths of the previous theme.
+        $this->app->options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true, true);
     }
 }

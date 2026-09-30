@@ -3,12 +3,12 @@
 namespace Osec\App\View\Calendar;
 
 use DateTime;
-use Osec\App\Controller\StrictContentFilterController;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\View\Event\EventAvatarView;
+use Osec\App\View\Event\EventContentView;
 use Osec\App\View\Event\EventTaxonomyView;
 use Osec\App\View\Event\EventTimeView;
 use Osec\Exception\BootstrapException;
@@ -42,7 +42,7 @@ class AgendaView extends AbstractView
         if (isset($view_args['exact_date']) && DT::is_timestamp($view_args['exact_date'])) {
             $exact_date = $view_args['exact_date'];
         } else {
-            //  This should not happen, but it does.
+            // No exact_date was requested; default to today.
             $exact_date = UIDateFormats::factory($this->app)->currentDay();
         }
 
@@ -136,7 +136,7 @@ class AgendaView extends AbstractView
 
         if ($view_args['display_date_navigation'] !== 'false') {
             $pagination_links = $this->getPaginationLinks(
-                $view_args,
+                ['exact_date' => $exact_date] + $view_args,
                 $results['prev'],
                 $results['next'],
                 $results['date_first'],
@@ -162,14 +162,16 @@ class AgendaView extends AbstractView
             'pagination_links'        => $pagination_links,
             'views_dropdown'          => $view_args['views_dropdown'],
             'below_toolbar'           => $this->getBelowToolbarHtml($type, $view_args),
+            'print_title'             => $titles->long,
+            'print_date'              => $results['date_first'],
+            'print_args'              => $view_args,
         ];
-        // Add extra buttons to Agenda view's nav bar if events were returned.
+        // Add collapse/expand buttons to Agenda view's nav bar if events were returned.
         if ($type === 'agenda' && $dates) {
             $button_args                  = [
                 'text_collapse_all' => __('Collapse All', 'open-source-event-calendar'),
                 'text_expand_all'   => __('Expand All', 'open-source-event-calendar'),
                 'no_toggle'         => $view_args['agenda_toggle'] !== 'false',
-                'display_print_button' => $this->app->settings->get('display_print_button'),
             ];
             $nav_args['after_pagination'] = ThemeLoader::factory($this->app)
                 ->get_file('agenda-buttons.twig', $button_args, false)
@@ -251,15 +253,10 @@ class AgendaView extends AbstractView
     public function get_agenda_like_date_array(array $events, RequestParser $request)
     {
         $dates = [];
-        StrictContentFilterController::factory($this->app)
-                                     ->clear_the_content_filters();
         // Classify each event into a date/allday category
         foreach ($events as $event) {
             $start_time    = new DT($event->get('start')->format('Y-m-d\T00:00:00'), 'sys.default');
-            $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url(
-                $start_time,
-                $this->app->settings->get('input_date_format')
-            );
+            $exact_date    = UIDateFormats::factory($this->app)->format_datetime_for_url($start_time);
             $href_for_date = $this->create_link_for_day_view($exact_date);
             // timestamp is used to have correctly sorted array as UNIX
             // timestamp never goes in decreasing order for increasing dates.
@@ -285,8 +282,12 @@ class AgendaView extends AbstractView
             $event_props['filtered_title']            = $event->get_runtime('filtered_title');
             $event_props['edit_post_link']            = $event->get_runtime('edit_post_link');
             $event_props['content_img_url']           = $event->get_runtime('content_img_url');
-            $event_props['filtered_content']          = $this->app->settings->get('feature_use_excerpt') ?
-                         $event->get_runtime('post_excerpt') : $event->get_runtime('filtered_content');
+            $event_props['filtered_content']          = $this->app->settings->get('feature_use_excerpt')
+                ? $event->get_runtime('post_excerpt')
+                : apply_filters(
+                    'osec_the_content',
+                    EventContentView::factory($this->app)->get_filtered_content($event->get('post'))
+                );
             $event_props['ticket_url_label']          = $event->get_runtime('ticket_url_label');
             $event_props['permalink']                 = $event->get_runtime('instance_permalink');
             $event_props['categories_html']           = $event->get_runtime('categories_html');
@@ -324,8 +325,6 @@ class AgendaView extends AbstractView
             $dates[$exact_date]['full_weekday']        = $timeObj->format_i18n('l');
             $dates[$exact_date]['year']                = $timeObj->format_i18n('Y');
         }
-        StrictContentFilterController::factory($this->app)
-                                     ->restore_the_content_filters();
         // Flag today
         $today = (new DT('now', 'sys.default'))->set_time(0, 0, 0)->format();
         if (isset($dates[$today])) {
@@ -388,13 +387,22 @@ class AgendaView extends AbstractView
             $args['request_format'] = 'json';
         }
 
-        $args['page_offset'] = $make_absolute ? 0 : -1;
-        $timeLimit = (new DT($date_first))->set_time(
-            $date_first->format('H'),
-            $date_first->format('i'),
-            $date_first->format('s') - 1
-        );
-        $args['exact_date']  = $timeLimit->format_to_gmt();
+        // Pages are counted from a fixed exact_date: page_offset -1, -2, … back and
+        // 1, 2, … forward, so back and forward always return the same pages. Moving
+        // exact_date to the page's first event instead, with an offset of ±1,
+        // repeated the same page on days with more events than one page holds.
+        $page_offset = (int)($args['page_offset'] ?? 0);
+
+        if ($make_absolute) {
+            $args['page_offset'] = 0;
+            $args['exact_date']  = (new DT($date_first))->set_time(
+                $date_first->format('H'),
+                $date_first->format('i'),
+                $date_first->format('s') - 1
+            )->format_to_gmt();
+        } else {
+            $args['page_offset'] = $page_offset - 1;
+        }
 
         $href = HtmlFactory::factory($this->app)
                            ->create_href_helper_instance($args);
@@ -413,13 +421,15 @@ class AgendaView extends AbstractView
             $title_short
         );
 
-        $args['page_offset'] = $make_absolute ? 0 : 1;
-        $timeLimit          = (new DT($date_last))->set_time(
-            $date_first->format('H'),
-            $date_first->format('i'),
-            (int)$date_first->format('s') + 1
-        );
-        $args['exact_date'] = $timeLimit->format_to_gmt();
+        if ($make_absolute) {
+            $args['exact_date'] = (new DT($date_last))->set_time(
+                $date_first->format('H'),
+                $date_first->format('i'),
+                (int)$date_first->format('s') + 1
+            )->format_to_gmt();
+        } else {
+            $args['page_offset'] = $page_offset + 1;
+        }
 
         $href = HtmlFactory::factory($this->app)
                            ->create_href_helper_instance($args);
@@ -438,15 +448,18 @@ class AgendaView extends AbstractView
     {
         $view_args += $this->request->get_dict([
             'page_offset',
-            'exact_date',
             'time_limit',
             'display_filters',
             'display_subscribe',
+            'display_print',
             'agenda_toggle',
             'display_view_switch',
             'display_date_navigation',
 
         ]);
+        if (false !== $exact_date) {
+            $view_args['exact_date'] = $exact_date;
+        }
         return $view_args;
     }
 

@@ -86,7 +86,8 @@ class DateCache {
 	addRequest(data: {start: string }[]) {
 		// Split Events into days.
 		data.map((item)=> {
-			const dayStart =  String(dayjs(item.start).startOf('day').unix());
+			// @ts-expect-error
+			const dayStart =  String(this.dayjs(item.start).startOf('day').unix());
 			if (!Array.isArray(this.cache[dayStart])) {
 				this.cache[dayStart] = [];
 			}

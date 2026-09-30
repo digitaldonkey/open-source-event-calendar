@@ -16,9 +16,9 @@
 	},
 	"textdomain": "open-source-event-calendar",
 	"editorScript": "file:./index.js",
-	"editorStyle": "file:./index.css",
+	"editorStyle": [ "file:./index.css", "dashicons" ],
 	"viewScript": "file:./view.js",
-	"style": "file:./view.scss",
+	"style": "file:./style-index.css",
 	"attributes": {
 		"view": {
 			"type": "string",
@@ -68,6 +68,14 @@
 		},
 		"displaySubscribe": {
 			"default": true,
+			"type": "boolean"
+		},
+		"displayPrint": {
+			"default": true,
+			"type": "boolean"
+		},
+		"agendaToggle": {
+			"default": false,
 			"type": "boolean"
 		}
 	}

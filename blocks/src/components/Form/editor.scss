@@ -1,0 +1,42 @@
+/**
+ * The following styles get applied inside the editor only.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+
+
+// The editor iframe does not load the wp-admin styles the block was designed with.
+.inline-edit-wrapper {
+	padding: 0 12px 12px;
+
+	strong {
+		font-weight: 600;
+	}
+
+	// ToggleControl: the form's font and the switch colour of the original design.
+	.components-toggle-control {
+		font: inherit;
+	}
+
+	// ToggleControl has no size option; the core CSS sets fixed px values.
+	.components-form-toggle {
+		--wp-components-color-accent: #080;
+		transform: scale(1.25);
+		transform-origin: left center;
+		margin-right: .75em;
+	}
+
+	.components-form-toggle:not(.is-checked, .is-disabled) .components-form-toggle__track {
+		background-color: #888;
+		border-color: #888;
+	}
+
+	.components-form-toggle:not(.is-disabled) .components-form-toggle__thumb {
+		background-color: #fff;
+	}
+
+	// Limit by events or days: a choice between two values, grey in both positions.
+	.osec-limit-by-toggle .components-form-toggle {
+		--wp-components-color-accent: #888;
+	}
+}

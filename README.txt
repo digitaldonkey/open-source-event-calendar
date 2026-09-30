@@ -3,7 +3,7 @@
 Tags: iCal, ics, ical importer, events calendar, open-source-event-calendar
 Requires PHP: 8.2
 Requires at least: 6.7
-Tested up to: 7.0
+Tested up to: 7.1
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Plugin URI: https://github.com/digitaldonkey/open-source-event-calendar
@@ -13,8 +13,8 @@ Author URI: https://github.com/digitaldonkey
 Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 Text Domain: open-source-event-calendar
-Stable Tag: 1.1.8
-Version: 1.1.8
+Stable Tag: 1.1.16
+Version: 1.1.16
 
 An event calendar with native iCal / ICS import and export
 
@@ -51,7 +51,7 @@ Importing and exporting iCalendar (.ics) feeds is one of the strongest features 
 
 You can embed the calendar by adding a **OSEC Calendar Block** to any page or post. Alternatively there is a shortcode available.
 
-> [!WARNING] 
+> [!WARNING]
 > At this time, only **one calendar per page or post** is supported.
 
 On the long run it's planned to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice old Bootstrap 3 stuff.
@@ -92,7 +92,7 @@ On the long run it's planned to have a Rest API to allow the calendar being rend
 == Requirements ==
 
 
-- WordPress: 6.6 or newer
+- WordPress: 6.7 or newer
 - PHP:
   - PHP 8.2+ required for development
   - PHP 8.1 may work for production builds when installed with `composer install --no-dev`
@@ -117,6 +117,82 @@ To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA
 
 ---
 
+== WP-CLI ==
+
+
+**Rebuild recurring event instances.** Instances are only written when an event is saved. After an update that fixes recurrence, regenerate them. Rows left behind by deleted event posts are removed along the way.
+
+    wp osec event regenerate --dry-run              # what would happen
+    wp osec event regenerate --yes                  # all events
+    wp osec event regenerate 123 456                # some events
+    wp osec event regenerate --feed=3               # events of one feed
+    wp osec event regenerate --yes --resave         # save like the editor does, firing all save hooks
+    wp osec event regenerate --yes --start-after=4711   # resume an interrupted run
+
+Events are processed in batches (`--batch-size`, default 500). Every batch line prints the `--start-after` value to resume with, so any number of events can be processed.
+
+**Update feeds now**, instead of waiting for the scheduled import. Problems are printed to the console instead of being stored as admin notices.
+
+    wp osec feed list
+    wp osec feed update --yes                       # all feeds
+    wp osec feed update 3                           # one feed
+    wp osec feed update 3 --force                   # break the lock a crashed import left behind
+
+Only use `--force` when no other import of that feed is running, or events may be imported twice. A feed is imported in one go: a feed of 10,000 events needs about 150 MB of PHP memory (`php -d memory_limit=256M $(which wp) osec feed update 3`).
+
+To give a slow feed server more time than the default 120 seconds, use WordPress' `http_request_args` filter:
+
+```php
+add_filter('http_request_args', function ($args, $url) {
+    if (str_starts_with($url, 'https://slow.example.org/')) {
+        $args['timeout'] = 300;
+    }
+    return $args;
+}, 10, 2);
+```
+
+The commands run per site. On multisite, loop over the sites:
+
+    wp site list --field=url | xargs -I{} wp --url={} osec event regenerate --yes
+
+Exit code is 1 if any event or feed failed.
+
+---
+
+== Custom calendar themes ==
+
+
+The calendar has its own themes (Events › Calendar Themes), independent of your WordPress theme. A custom calendar theme is based on Vortex: it only contains the files that add to or replace Vortex's.
+
+1. Create a folder in `wp-content/themes/osec_themes/`, e.g. `wp-content/themes/osec_themes/my-calendar/`. The plugin's Gamma theme (`public/osec_themes/gamma/`) is an empty skeleton you can copy.
+2. Add a `style.css` with a theme header, and optionally a `screenshot.png`:
+
+        /**
+         * Theme Name: My Calendar
+         * Description: My own calendar theme.
+         * Version: 1.0.0
+         */
+
+3. Add your styles, compiled after all Vortex styles:
+    - `less/override.less` - [LESS](https://lesscss.org/). You can use the Vortex variables (`less/variables.less`, `less/user_variables.php`) and the Bootstrap 3 mixins, which carry an `ai1ec-` prefix:
+
+            @import "bootstrap/mixins.less";
+            .my-calendar-box { .ai1ec-clearfix(); color: @link-color; }
+
+    - or `css/override.css` - plain CSS. If both files exist, only `less/override.less` is used.
+4. Activate the theme under Events › Calendar Themes.
+
+Optional:
+
+- `twig/<template>.twig` replaces the Vortex template of the same name (copy it from `public/osec_themes/vortex/twig/`). With "Use frontend rendering" enabled in the settings, the agenda, month and day views are rendered in the browser from the Vortex templates, so overrides of `agenda.twig`, `month.twig` and `oneday.twig` only apply to views rendered on the server.
+- `less/user_variables.php`, copied from Vortex, sets your own defaults for Events › Theme Options.
+
+The CSS is compiled when the theme is activated, when Theme Options are saved and after a plugin update. **After editing your theme's files, save Events › Theme Options once.** Activating a theme resets the saved Theme Options.
+
+Use `em` or `%` for font sizes, not `px` or `rem`, so they follow the "Base font size" theme option.
+
+---
+
 == Languages ==
 
 
@@ -137,9 +213,11 @@ OSEC may connect to OpenStreetMap to render maps. If you using maps feature make
 OSEC may connect to OpenStreetMap Nominatim geocoding API. [Terms of Service](https://operations.osmfoundation.org/policies/nominatim/).
 You may need to switch the servive on a heavy traffic site as Nominatim allows an *absolute maximum of 1 request per second*.
 
-By default leaflet and leaflet-control-geocoder are loaded from unpkg.com. [Terms of Service](https://app.unpkg.com/policies@1.0.1).
+Leaflet and leaflet-control-geocoder are bundled with the plugin, so rendering a map does not request
+them from a third party.
 
-You can change using hooks: `osec_leaflet_library_alter`, `osec_leaflet_geocoder_library_alter`.
+You can load them from elsewhere, for example a CDN, using the hooks `osec_leaflet_library_alter` and
+`osec_leaflet_geocoder_library_alter`.
 
 == Migration Notes ==
 
@@ -160,9 +238,9 @@ The principle behind this plugin is to be Open Source. Get in touch on [GitHub](
 
 Writing this fork was [a huge effort](https://github.com/wp-plugins/all-in-one-event-calendar/compare/master...digitaldonkey:open-source-event-calendar:master).
 
-Digitaldonkey believes everybody should be able to set up and manage public calendars. 
+Digitaldonkey believes everybody should be able to set up and manage public calendars.
 
-If you are implementing this plugin for others you should support ongoing development with a [donation](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6) or [contribution](https://github.com/digitaldonkey/open-source-event-calendar/issues). 
+If you are implementing this plugin for others you should support ongoing development with a [donation](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6) or [contribution](https://github.com/digitaldonkey/open-source-event-calendar/issues).
 
 [Be a maker](https://dri.es/solving-the-maker-taker-problem)😀
 
@@ -191,6 +269,25 @@ UPDATE  `wp_term_taxonomy` SET  `taxonomy` =  'osec_events_tags' WHERE  `taxonom
 Let's draft it out on [GitHub](https://github.com/digitaldonkey/open-source-event-calendar). You could donnate/pay me development time to get it contributed. Invoices possible. Or feel free to implement the requested feature yourself and create a Pull Request for it.
 I may also provide paid support.
 
+### Event descriptions show other content (page builders, share buttons, related posts)
+
+Event descriptions in the agenda view and the ICS feed are passed through WordPress' `the_content` filter, in the context of the event, so plugins hooking into it behave as on the event itself. Most of them can be switched off per post type in their own settings.
+
+If a plugin still adds unwanted content, enable *OSEC Settings → Advanced → Strict compatibility content filtering*. Event descriptions in agenda view and the ICS feed then only get basic formatting (`wptexturize`, `convert_smilies`, `convert_chars`, `wpautop`); developers can change that list with the `osec_event_the_content_strict_filters` filter.
+
+### A feed fails with "cURL error 60: SSL certificate problem"
+
+Feeds are fetched with certificate verification, so a server with a self-signed, expired or incomplete certificate is refused (before 1.1.15 certificates were not checked). Ask the feed's provider to fix the certificate, or use `http://` if the provider offers it. If you trust that server anyway, you can exempt just its host with WordPress' `http_request_args` filter:
+
+```php
+add_filter('http_request_args', function ($args, $url) {
+    if ('calendar.example.org' === wp_parse_url($url, PHP_URL_HOST)) {
+        $args['sslverify'] = false;
+    }
+    return $args;
+}, 10, 2);
+```
+
 ---
 
 == Screenshots ==
@@ -206,7 +303,59 @@ I may also provide paid support.
 
 == Changelog ==
 
-= 1.1.8 = 
+= 1.1.16 =
+- Security: title and description of events imported from feeds are sanitized, whoever runs the import. Every earlier version stored them unfiltered when a feed was added or refreshed by an administrator (since All-in-One Event Calendar 1.0, 2011, which this plugin is based on) or updated with `wp osec feed update` (1.1.15)
+
+= 1.1.15 =
+- Print support for all calendar views with a print header; overlapping events print side by side, busy days as a list; category colors print as event borders; a calendar block can hide the print icon #55
+- Fix: many overlapping events in week and day view ran into the next day's column
+- Week and day grid follows the window width
+- Month view can show start and end time above the event title (new option)
+- Fix: recurring events drifted an hour at every daylight saving change (since 1.1.5). Existing events are corrected when saved again, or all at once with `wp osec event regenerate`
+- A recurring event creates at most 2000 occurrences; rules that cannot be expanded are rejected and reported
+- WP-CLI: `wp osec event regenerate`, `wp osec feed update`, `wp osec feed list`
+- Feed import: events removed from a feed are deleted again when "keep old events" is off, EXDATE, RDATE and moved occurrences land on the right day, every RDATE is imported, a failed import no longer blocks the feed for 24 hours
+- Feed fetches verify TLS certificates again; a self-signed feed now fails with "cURL error 60" (see FAQ)
+- The calendar block works in the WordPress 7 editor
+- Leaflet maps are shipped with the plugin instead of loaded from unpkg.com
+- Fix: agenda paging got stuck or led to empty pages
+- Fix: category and tag filters combined with OR showed draft and private events
+- Fix: agenda view showed the entire homepage in the expanded toggle #59
+- Shortcode taxonomy filters warn about unknown terms instead of silently showing everything #53 #54 (thanks @xnaveira)
+- Fix: error when meta boxes are added on other post types #63
+- Fix: "Default calendar start date" was ignored, dates like 21/9/2026 showed as 1970, the date picker was off by a day and ignored "week starts on"
+- Fix: events deleted outside wp-admin left their occurrences behind
+- Database schema updates no longer report false failures
+
+= 1.1.14 =
+- Fix: an exception rule with an ordinal BYDAY did not parse as recurring rule #45
+- Fix: default fallback image issues #49
+- Fix: agenda view still listed an all-day event of yesterday #51
+- (first built as 1.1.12, which never reached WordPress.org)
+
+= 1.1.13 =
+WP 7.1 compatibility
+
+= 1.1.11 =
+Fix: Json displayed instead of coast #52
+
+= 1.1.10 =
+- Include ongoing events in ical export #47
+- Display hide cost, enable to hide cost when importing events via feed #42
+- Fix double escaped Urls in some links
+- Introduce OSEC_LEGACY_COST_SERIALIZED and to support fallback on Ai1ec serialized DB cost format #46
+
+= 1.1.9 =
+- Reword Subscribe button text  on single, fix subscribe buttons display and JS loading
+- deploy development releases to WP.org
+- Fixed ICS feed not refreshing #43
+- Allow to select a post status for feed imports
+- add blueprint
+- Fix some Url/ampersans issues around edit instance
+-  fix Aspect ratio in Event Popups
+- Rework image fallback mechanisms. Add option for default fallback image
+
+= 1.1.8 =
 - Fix Location, GEO and Contact - Events from ICS feed lose their location #40
 - Weekly/Monthly view not respecting the "week starts on day" when set to Sunday #38
 - Add iCal ORGANIZER prop import/export
@@ -251,7 +400,7 @@ I may also provide paid support.
 = 1.1.1 =
 - Change default theme to plana
 - Reworking Plana theme
- 
+
 = 1.1.0 =
 - OpenStreetMap support including Geocoding in Edit form.
 - Added full schema.org/Event support for single Event page using plana theme. Check [search engine readability](https://validator.schema.org).
@@ -274,7 +423,7 @@ I may also provide paid support.
 = 1.0.10 =
 - Beautified Admin Theme admin page
 - Twigify Admin Theme theme-row.
-- Add more plugin-check fixes, escape shortcodes, 
+- Add more plugin-check fixes, escape shortcodes,
 
 = 1.0.7 =
 - Fix additional redirect happening due to trailing slash in Link
@@ -283,7 +432,7 @@ More WP plugin check work.
 - Renaming capabilities with prefix
 - Rename Taxonomies: events_categories, events_tags, events_feeds to osec_events_categories,  osec_events_...
 - Fix some default value issues, timezone default
-- clean up translations, nonces, prefixes 
+- clean up translations, nonces, prefixes
 - migrate php templates to twig
 - Rework/fix: robots.txt generation, exact_date, get_exact_date, variable variants,
 - Updates: WP phpcs config, tools (npm) and composer updates
@@ -304,7 +453,7 @@ More WP plugin check work.
 
 - Rework translation at German example (I love Loco Translate)
 - Fixed: Category image will now be used as default featured image in single event view.
-- Fixed: Function _load_textdomain_just_in_time was called incorrectly. 
+- Fixed: Function _load_textdomain_just_in_time was called incorrectly.
 - If toggle in Agenda view is disabled link to the single Event on title click.
 - Fixed: "Click on title toggles when toggler is disabled."
 - Fixed: OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST does not work but lead to undefined variables.
@@ -320,10 +469,10 @@ More WP plugin check work.
 
 = 1.0.0 =
 
-* Rework query params, fixed date pagers 
+* Rework query params, fixed date pagers
 * Reworked date display to be consistent for Single and multiday and Allday Events.
 * Add flexible width Gutenberg Calendar Block
-* Removed Widget and Agenda Widget. 
+* Removed Widget and Agenda Widget.
 * Reworked date display to be consistent.
 
 = 0.9.0 =
@@ -339,5 +488,5 @@ More WP plugin check work.
 * Fixed Week-view date selection.
 * Fixed/rewrote caching system. Added APCU caching.
 * Added Test environment working well in ddev. Based on WP handbook standards [plugin-unit-tests](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/).
-* Upgrade strings to match current translation requirements. 
-* Solving WordPress "Plugin Check" minimum requirements. 
+* Upgrade strings to match current translation requirements.
+* Solving WordPress "Plugin Check" minimum requirements.

@@ -21,7 +21,7 @@ class RestControllerSettings extends OsecBaseInitialized
                     [
                         'methods' => 'GET',
                         'callback' => function (WP_REST_Request $request) use ($app) {
-                            return RestController::factory($app)->getSettings($request);
+                            return RestControllerSettings::factory($app)->getSettings($request);
                         },
                         'permission_callback' => function () {
                             return current_user_can('read');
@@ -64,23 +64,6 @@ class RestControllerSettings extends OsecBaseInitialized
 //                    'endTime' => $this->app->settings->get('week_view_starts_at'),
 //                    'startTime' => $this->app->settings->get('week_view_ends_at'),
 //                ]
-            ]);
-        }
-
-        return new \WP_Error(401, __('Not allowed', 'open-source-event-calendar'));
-    }
-
-    public function getRange(WP_REST_Request $request)
-    {
-        if (! is_wp_error($request)) {
-            return new \WP_REST_Response([
-                'dateFormat' => [
-                    'inputDateFormat' => DateValidator::get_rest_date_pattern_by_key(
-                        $this->app->settings->get('input_date_format')
-                    ),
-                    'input24hTime'    => (bool)$this->app->settings->get('input_24h_time'),
-                    'weekStart'       => (int)$this->app->settings->get('week_start_day'),
-                ],
             ]);
         }
 

@@ -4,6 +4,7 @@ namespace Osec\App\Controller;
 
 use Exception;
 use Osec\App\Model\PostTypeEvent\EventCreateException;
+use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\Model\PostTypeEvent\EventType;
 use Osec\Bootstrap\App;
@@ -12,6 +13,7 @@ use Osec\Exception\BootstrapException;
 use Osec\Exception\EngineNotSetException;
 use Osec\Exception\ImportExportParseException;
 use Osec\Exception\InvalidArgumentException;
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderJson;
 use Osec\Theme\ThemeLoader;
@@ -141,6 +143,7 @@ class FeedsController extends OsecBaseClass
                 ),
                 'cron_freq_label'  => esc_html__('Check for new events', 'open-source-event-calendar'),
                 'allow_comments_label' => esc_html__('Allow comments on imported events', 'open-source-event-calendar'),
+                'hide_cost_label' => esc_html__('Hide cost/free on imported events', 'open-source-event-calendar'),
                 'enable_maps_label' => esc_html__('Show map on imported events', 'open-source-event-calendar'),
                 'feed_import_timezone_label' => esc_html__(
                     'Assign default time zone to events in UTC',
@@ -211,6 +214,7 @@ class FeedsController extends OsecBaseClass
             'keep_old_events',
             'import_timezone',
             'import_post_status',
+            'hide_cost',
         ]);
 
         /**
@@ -296,6 +300,7 @@ class FeedsController extends OsecBaseClass
             'keep_tags_categories' => (int) $entry['keep_tags_categories'],
             'keep_old_events'      => (int) $entry['keep_old_events'],
             'import_post_status'   => (string) $entry['import_post_status'],
+            'hide_cost'         => (int) $entry['hide_cost'],
             'feed_import_timezone' => (int) $entry['import_timezone'],
             /**
              * Add Html content above feeds options
@@ -338,8 +343,11 @@ class FeedsController extends OsecBaseClass
      * update_ics_feed function
      *
      * Imports the selected iCalendar feed
+     *
+     * @param  int|null  $feed_id  Feed to import, null to read it from the ajax request.
+     * @param  bool  $force  Break the import lock of this feed, even if another import holds it.
      */
-    public function update_ics(?int $feed_id = null): array
+    public function update_ics(?int $feed_id = null, bool $force = false): array
     {
         $ajax = false;
         $data = [];
@@ -349,7 +357,7 @@ class FeedsController extends OsecBaseClass
             $feed_id = $this->get_request_params('feed_id');
         }
         $cron_name = $this->importLockName($feed_id);
-        $data    = [
+        $data = [
             'data' => [
                 'feed_id'  => $feed_id,
                 'error'   => true,
@@ -359,10 +367,18 @@ class FeedsController extends OsecBaseClass
                 ),
             ],
         ];
-        if ($this->execLimiter->acquire($cron_name, $this->getUpdateTimout())) {
-            $data = $this->process_ics_feed_update($feed_id);
+        if ($force) {
+            $this->execLimiter->release($cron_name);
         }
-        $this->execLimiter->release($cron_name);
+        // Only the holder may release the lock, or a second process would free the
+        // lock of a first one still importing.
+        if ($this->execLimiter->acquire($cron_name, $this->getUpdateTimout())) {
+            try {
+                $data = $this->process_ics_feed_update($feed_id);
+            } finally {
+                $this->execLimiter->release($cron_name);
+            }
+        }
 
         if (true === $ajax) {
             RenderJson::factory($this->app)->render($data);
@@ -381,6 +397,36 @@ class FeedsController extends OsecBaseClass
     protected function importLockName(int $feed_id)
     {
         return 'ics_import_' . $feed_id;
+    }
+
+    /**
+     * Who holds the import lock of a feed.
+     *
+     * @param  int  $feed_id  Feed ID.
+     *
+     * @return array|null ['time' => int, 'pid' => int], null if the feed is not locked.
+     */
+    public function get_import_lock(int $feed_id): ?array
+    {
+        return $this->execLimiter->get_holder($this->importLockName($feed_id));
+    }
+
+    /**
+     * Feeds, optionally limited to the given IDs.
+     *
+     * @param  int[]  $feed_ids  Feed IDs, empty for all.
+     *
+     * @return object[] Feed rows ordered by feed_id.
+     */
+    public function get_feeds(array $feed_ids = []): array
+    {
+        $where = '';
+        if ($feed_ids) {
+            $where = ' WHERE feed_id IN (' . implode(',', array_map('absint', $feed_ids)) . ')';
+        }
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- absint-secured.
+        return $this->app->db->get_results("SELECT * FROM {$this->feedsTable}{$where} ORDER BY feed_id");
     }
 
     private function getUpdateTimout(): int
@@ -410,15 +456,18 @@ class FeedsController extends OsecBaseClass
         );
         $output = [];
         if ($feed) {
-            $count   = 0;
-            $message = false;
+            $count    = 0;
+            $message  = false;
+            $messages = [];
 
             // reimport the feed
+            // Certificates are verified (the WordPress default): without it anyone on
+            // the network path could inject events. A feed server with a broken
+            // certificate can be exempted with the http_request_args filter.
             $response = wp_remote_get(
                 $feed->feed_url,
                 [
-                    'sslverify' => false,
-                    'timeout'   => (float) 120,
+                    'timeout' => (float) 120,
                 ]
             );
 
@@ -487,16 +536,27 @@ class FeedsController extends OsecBaseClass
                     do_action('osec_ics_after_import', $result);
 
                     $count     = $result['count'];
+                    $messages  = $result['messages'] ?? [];
+
                     $feed_name = ! empty($result['name'][1]) ? $result['name'][1] : $feed->feed_url;
                     // we must flip again the array to iterate over it
-                    if (0 === $feed->keep_old_events) {
+                    if (0 === (int)$feed->keep_old_events) {
                         $events_to_delete = array_flip($result['events_to_delete']);
                         foreach ($events_to_delete as $event_id) {
                             wp_delete_post($event_id, true);
                         }
                     }
-                } catch (ImportExportParseException) {
-                    $message = "The provided feed didn't return valid ics data";
+                } catch (ImportExportParseException $e) {
+                    // Carries what iCalcreator rejected, e.g. a RRULE the RFC
+                    // does not allow, which fails the feed as a whole.
+                    $message = sprintf(
+                        /* translators: %s: reason the feed could not be read. */
+                        __(
+                            "The provided feed didn't return valid ics data: %s",
+                            'open-source-event-calendar'
+                        ),
+                        $e->getMessage()
+                    );
                 } catch (EngineNotSetException) {
                     $message = 'ICS import is not supported on this install.';
                 } catch (EventCreateException $e) {
@@ -519,19 +579,49 @@ class FeedsController extends OsecBaseClass
                 );
             }
             if ($message) {
-                // If we already got an error message, display it.
+                // If we already got an error message, display it. A scheduled
+                // import has nobody to display it to, so record it as well.
+                NotificationAdmin::factory($this->app)->store(
+                    sprintf(
+                        /* translators: 1: feed url, 2: error message. */
+                        __('Importing the feed "%1$s" failed: %2$s', 'open-source-event-calendar'),
+                        esc_html($feed->feed_url),
+                        esc_html($message)
+                    ),
+                    'error',
+                    0,
+                    [NotificationAdmin::RCPT_ADMIN],
+                    true
+                );
                 $output['data'] = [
                     'error'   => true,
                     'message' => $message,
                 ];
             } else {
+                $imported = sprintf(
+                /* translators: 1: number, 2: plural number. */
+                    _n('Imported %s event', 'Imported %s events', $count, 'open-source-event-calendar'),
+                    $count
+                );
+                if (! empty($messages)) {
+                    $imported .= ' ' . implode(' ', $messages);
+                    // A scheduled import has nobody to return this to.
+                    NotificationAdmin::factory($this->app)->store(
+                        sprintf(
+                            /* translators: 1: feed name, 2: what happened during the import. */
+                            __('Importing the feed "%1$s": %2$s', 'open-source-event-calendar'),
+                            esc_html((string)$feed_name),
+                            esc_html(implode(' ', $messages))
+                        ),
+                        'error',
+                        0,
+                        [NotificationAdmin::RCPT_ADMIN],
+                        true
+                    );
+                }
                 $output['data'] = [
                     'error'   => false,
-                    'message' => sprintf(
-                    /* translators: 1: number, 2: plural number. */
-                        _n('Imported %s event', 'Imported %s events', $count, 'open-source-event-calendar'),
-                        $count
-                    ),
+                    'message' => $imported,
                     'name'    => $feed_name,
                 ];
             }
@@ -641,8 +731,7 @@ class FeedsController extends OsecBaseClass
     {
         $feed_id = 0;
         // Nonce checked before.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        if (isset($_REQUEST['feed_id'])) {
+        if (RequestParser::has_param('feed_id')) {
             $feed_id = $this->get_request_params('feed_id');
         }
         if (false === $feed_url) {
@@ -815,14 +904,14 @@ class FeedsController extends OsecBaseClass
             }
             unset($feed_categories);
             $args = self::merge_commom_vars([
-                'feed_name' => esc_attr(! empty($row->feed_name) ? $row->feed_name : $row->feed_url),
-                'feed_url' => esc_attr($row->feed_url),
+                'feed_name' => ! empty($row->feed_name) ? $row->feed_name : $row->feed_url,
+                'feed_url' => $row->feed_url,
                 'event_category' => implode(', ', $categories),
-                'events_categories_ids' => esc_attr($row->feed_category),
+                'events_categories_ids' => $row->feed_category,
                 'tags' => stripslashes(
-                    str_replace(',', ', ', esc_attr($row->feed_tags))
+                    str_replace(',', ', ', (string)$row->feed_tags)
                 ),
-                'tags_ids'             => esc_attr($row->feed_tags),
+                'tags_ids'             => $row->feed_tags,
                 'feed_id'              => $row->feed_id,
                 'comments_enabled'     => (int) $row->comments_enabled,
                 'map_display_enabled'  => (int) $row->map_display_enabled,
@@ -860,36 +949,28 @@ class FeedsController extends OsecBaseClass
                 wp_die(esc_html__('User not allowed to manage feeds.', 'open-source-event-calendar'));
             }
 
-            if (isset($_REQUEST['feed_url']) && ! empty($_REQUEST['feed_url'])) {
-                $url = esc_url_raw(wp_unslash($_REQUEST['feed_url']));
-            }
-
-            $feedId = RequestParser::get_param('feed_id', null);
-            if ($feedId) {
-                $feedId = (int) $feedId;
-            }
-            $feed_categories = '';
+            $url    = RequestParser::get_param('feed_url', '', ParamType::Url);
+            $feedId = RequestParser::get_param('feed_id', null, ParamType::Id) ?: null;
             // Different from tags they are submitted as [](int).
-            if (isset($_REQUEST['feed_category']) && is_array($_REQUEST['feed_category'])) {
-                $f_cats = array_map('intval', $_REQUEST['feed_category']);
-                $feed_categories = implode(',', $f_cats);
-            }
+            $feed_categories = implode(',', RequestParser::get_param('feed_category', [], ParamType::IdList));
 
             $requestArgs = [
-                'feed_url'             => $url ?? '',
-                'feed_name'            => $url ?? '',
+                'feed_url'             => $url,
+                'feed_name'            => $url,
                 // Update integer or New null.
                 'feed_id'              => $feedId,
                 'feed_category'        => $feed_categories,
                 'feed_tags'            => RequestParser::get_param('feed_tags', ''),
                 // Booleans are integers in DB.
-                'comments_enabled'     => (int) RequestParser::get_param('comments_enabled', 0),
-                'map_display_enabled'  => (int) RequestParser::get_param('map_display_enabled', 0),
-                'keep_tags_categories' => (int) RequestParser::get_param('keep_tags_categories', 0),
-                'keep_old_events'      => (int) RequestParser::get_param('keep_old_events', 0),
-                'import_timezone'      => (int) RequestParser::get_param('feed_import_timezone', 0),
-                'remove_events'        => (RequestParser::get_param('remove_events') === 'true'),
-                'import_post_status'   => (string) RequestParser::get_param('import_post_status', 'publish'),
+                'hide_cost'            => RequestParser::get_param('hide_cost', 1, ParamType::Int),
+                'comments_enabled'     => RequestParser::get_param('comments_enabled', 0, ParamType::Int),
+                'map_display_enabled'  => RequestParser::get_param('map_display_enabled', 0, ParamType::Int),
+                'keep_tags_categories' => RequestParser::get_param('keep_tags_categories', 0, ParamType::Int),
+                'keep_old_events'      => RequestParser::get_param('keep_old_events', 0, ParamType::Int),
+                'import_timezone'      => RequestParser::get_param('feed_import_timezone', 0, ParamType::Int),
+                // jQuery sends the JS boolean as 'true' / 'false'.
+                'remove_events'        => RequestParser::get_param('remove_events', false, ParamType::Bool),
+                'import_post_status'   => RequestParser::get_param('import_post_status', 'publish'),
             ];
         }
 

@@ -37,14 +37,29 @@ class CalenderPageViewTest extends TestBase
     {
         return [
             ['18-6-2026', 1781733600], // Donnerstag, 18. Juni 2026 00:00:00 Europe/Berlin GMT+02:00
+            ['2026-6-18', 1781733600], // same date, ISO - accepted regardless of input_date_format='def' (B5 fix)
             ['13-4-2026', 1776031200], // Montag, 13. April 2026 00:00:00 Europe/Berlin GMT+02:00
+            // `21/9/2026` split on the URL's '/' path separator arrives here as just '21' - must
+            // not be misread as a raw UNIX timestamp (epoch + 21s = 1970-01-01), regression for B5.
+            ['21', $expect_fail],
             ['1785621600', 1785621600], // GMT Saturday, 1. August 2026 22:00:00
             ['5-1-1984', 442105200], // // Relative To calendar TZ
             ['0001785621600', $expect_fail], // invalid timestamp
             ['17803512', 17803512], // GMT: Sunday, 26. July 1970 01:25:12 can be short,
             [-2177452800, $expect_fail], // Invalid
             [-1, $expect_fail], // Invalid
-            [0, 0], // GMT Thursday, 1. January 1970 00:00:00
+            // `exact_date=0` is indistinguishable from "no exact_date at all" by the time it
+            // reaches here (RequestParser::getVariable()'s `if ($ext_var)` check treats 0 as
+            // absent), so it resolves the same way a bare request does: the configured default
+            // date when one exists, otherwise false (see B6, exact-date-url-param-audit.md).
+            [0, $expect_fail],
+            // --- calendrically-invalid date-shaped exact_date values (regression for HTTP 500 fix) ---
+            ['32-13-2024', $expect_fail], // day 32, month 13 - out of range for any calendar
+            ['99-99-9999', $expect_fail], // day 99, month 99 - out of range
+            ['30-2-2024', $expect_fail], // Feb 30 - does not exist even in a leap year
+            ['29-2-2023', $expect_fail], // Feb 29 in a non-leap year - does not exist
+            ['31-4-2026', $expect_fail], // April has only 30 days
+            ['abc-def-ghij', $expect_fail], // non-numeric garbage - fails regex, pre-existing behavior
         ];
     }
 
@@ -156,5 +171,55 @@ class CalenderPageViewTest extends TestBase
 
         $osec_app->settings->set('exact_date', $default_date);
         $this->run_get_exact_date($request, $expected);
+    }
+
+    /**
+     * B6: a request that carries no `exact_date` at all (a bare `/calendar/`) must fall back to
+     * the "Default calendar start date" setting when one is configured, in every input_date_format.
+     *
+     * @group request_params
+     *
+     * @dataProvider requestProviderBareAcrossFormats
+     */
+    public function test_get_exact_date_bare_request_uses_settings_default(
+        string $input_date_format,
+        string $default_date
+    ) {
+        global $osec_app;
+        $osec_app->settings->set('input_date_format', $input_date_format);
+        $osec_app->settings->set('exact_date', $default_date);
+
+        $request = new RequestParser($osec_app, [], 'month');
+        $request->parse();
+
+        // 2025-01-01 00:00:00 Europe/Berlin (CET, UTC+1)
+        $this->run_get_exact_date($request, 1735686000);
+    }
+
+    public static function requestProviderBareAcrossFormats(): array
+    {
+        return [
+            'def (d/m/yyyy)'    => ['def', '1/1/2025'],
+            'us (MM/dd/yyyy)'   => ['us', '01/01/2025'],
+            'iso (yyyy-MM-dd)'  => ['iso', '2025-01-01'],
+            'dot (dd.MM.yyyy)'  => ['dot', '01.01.2025'],
+        ];
+    }
+
+    /**
+     * B6, negative case: a bare request with no default date configured still falls back to
+     * `false` (callers then default to today), it must not throw or fabricate a date.
+     *
+     * @group request_params
+     */
+    public function test_get_exact_date_bare_request_without_default_date_returns_false()
+    {
+        global $osec_app;
+        $osec_app->settings->set('exact_date', '');
+
+        $request = new RequestParser($osec_app, [], 'month');
+        $request->parse();
+
+        $this->run_get_exact_date($request, false);
     }
 }

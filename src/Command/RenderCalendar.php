@@ -7,6 +7,7 @@ use Osec\App\Controller\ScriptsFrontendController;
 use Osec\App\View\Calendar\CalendarPageView;
 use Osec\App\WpmlHelper;
 use Osec\Exception\BootstrapException;
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\{RenderCsv,
     RenderHtml,
@@ -95,10 +96,7 @@ class RenderCalendar extends CommandAbstract
         ScriptsFrontendController::factory($this->app)->load_frontend_js(true);
         return [
             'data'     => CalendarPageView::factory($this->app)->get_content($this->request),
-            'callback' => RequestParser::get_param(
-                'callback',
-                null
-            ),
+            'callback' => RequestParser::get_param('callback', null, ParamType::Callback),
             'caller'   => 'calendar',
         ];
     }

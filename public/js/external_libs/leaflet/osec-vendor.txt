@@ -1,0 +1,21 @@
+Third-party library - DO NOT EDIT.
+
+Unmodified files as published by the project. Local changes would be
+silently discarded: bin/update-leaflet.sh replaces this directory.
+Customised adaptations are marked as such and live elsewhere; see
+public/admin/less/admin-pages/control-geocoder.less for an example.
+
+release: Leaflet/Leaflet v1.9.4
+asset:   https://github.com/Leaflet/Leaflet/releases/download/v1.9.4/leaflet.zip
+sha256:  aaec1d5c3239a613a53e996087629aca1483cb2f0438b11b8a335c6cede4c16b  (of the asset, computed locally)
+updated: 2026-09-22
+script:  bin/update-leaflet.sh (version from constants.php)
+
+files:
+  dist/leaflet.js
+  dist/leaflet.css
+  dist/images/marker-icon.png
+  dist/images/marker-icon-2x.png
+  dist/images/marker-shadow.png
+  dist/images/layers.png
+  dist/images/layers-2x.png

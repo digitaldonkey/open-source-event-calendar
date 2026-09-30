@@ -12,24 +12,9 @@ import Edit from './edit';
 import metadata from './block.json';
 import './style.scss';
 
-/**
- * Every block starts by registering a new block type definition.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/
- */
-
-registerBlockType( metadata.name, {
-	title: metadata.title,
-	category: metadata.category,
-	icon: metadata.icon,
-	description: metadata.description,
-	supports: metadata.supports,
-	attributes: metadata.attributes,
-	editorScript: "file:./index.js",
-	editorStyle: "file:./index.css",
+registerBlockType( metadata, {
 	/**
 	 * @see ./edit.js
 	 */
 	edit: Edit
 } );
-

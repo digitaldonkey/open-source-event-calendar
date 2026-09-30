@@ -4,7 +4,7 @@
 public/admin/less/build-css.sh
 public/osec_themes/vortex/less/build-3rdparty-less.sh
 public/admin/less/build-css.bat
-calendar_block/.editorconfig
+blocks/.editorconfig
 vendor/wikimedia/less.php/bin/
 vendor/bin/
 vendor/kigkonsult/icalcreator/releaseNotes

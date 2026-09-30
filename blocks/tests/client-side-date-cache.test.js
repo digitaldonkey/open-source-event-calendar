@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { log } from "console";
+import { expect, test } from "vitest";
 import DateCache from '../src/react-big-calendar/DateCache';
 import utc from "dayjs/plugin/utc";
 

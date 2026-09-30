@@ -13,6 +13,7 @@ use Osec\Cache\CacheFactory;
 use Osec\Cache\CacheNotSetException;
 use Osec\Cache\CacheWriteException;
 use Osec\Exception\BootstrapException;
+use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\ResponseHelper;
 
 /**
@@ -85,8 +86,7 @@ class FrontendCssController extends OsecBaseClass
         header('HTTP/1.1 200 OK');
         header('Content-Type: text/css', true, 200);
         // Aggressive caching to save future requests from the same client.
-        // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
-        $etag = '"' . md5(__FILE__ . sanitize_text_field(wp_unslash($_GET[self::REQUEST_CSS_PARAM]))) . '"';
+        $etag = '"' . md5(__FILE__ . RequestParser::get_param(self::REQUEST_CSS_PARAM)) . '"';
         header('ETag: ' . $etag);
         $max_age = 31536000;
         header(
@@ -144,7 +144,7 @@ class FrontendCssController extends OsecBaseClass
                         sprintf(
                             /* translators: Compile error */
                             __(
-                                'Your CSS is being compiled on every request, 
+                                'Your CSS is being compiled on every request,
                                     which causes your calendar to perform slowly. The following error occurred: %s',
                                 'open-source-event-calendar'
                             ),
@@ -224,25 +224,10 @@ class FrontendCssController extends OsecBaseClass
             return false;
         }
 
-        /* @var int|string $saved_par = Number value required to display css in Header. */
+        /* @var int|string|null $saved_par = Number value required to display css in Header. */
         $saved_par = $this->app->options->get(self::COMPILED_CSS_KEY);
-        // if it's empty it's a new install, probably. Return static css.
-        if (null === $saved_par) {
-            $theme = $this->app->options->get('osec_current_theme');
-
-            return ResponseHelper::remove_protocols(
-            /**
-             * Alter css file.
-             *
-             * @since 1.0
-             *
-             * @param  string  $parsed_css  Css file path
-             */
-                apply_filters('osec_frontend_standard_css_url', $theme['theme_url'] . '/css/osec_parsed.css')
-            );
-        }
-        // if it's numeric, just consider it a new install
-        if (is_numeric($saved_par)) {
+        // Numeric: stored in a non-file cache. Null: not compiled yet, compiled on request.
+        if (null === $saved_par || is_numeric($saved_par)) {
             // "Link CSS in <head> section
             // when file cache is unavailable."
             if ($this->app->settings->get('render_css_as_link')) {
@@ -328,17 +313,12 @@ class FrontendCssController extends OsecBaseClass
     public function invalidate_cache(?array $variables = null, bool $update_persistence = true): bool
     {
         $lessCtrl = LessController::factory($this->app);
-        if ( ! $lessCtrl->is_compilation_needed($variables)) {
-            $this->app->options->delete(self::COMPILED_CSS_KEY);
-            return true;
-        }
-
         $notification = NotificationAdmin::factory($this->app);
         if ( ! MemoryCheck::check_available_memory(OSEC_LESS_MIN_AVAIL_MEMORY)) {
             $message = sprintf(
                 /* translators: Minimum PHP memory required */
                 __(
-                    'CSS compilation failed because you do not have enough free memory  
+                    'CSS compilation failed because you do not have enough free memory
                       (a minimum of %s is needed). Your calendar will not render or function
                       properly without CSS. Increase your PHP memory limit.',
                     'open-source-event-calendar'

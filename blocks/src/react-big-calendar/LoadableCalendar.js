@@ -1,5 +1,17 @@
 import Loadable from 'react-loadable';
-import availableLocales from './datejs-locales.json';
+
+/**
+ * All dayjs locales, each loaded on demand as its own chunk.
+ */
+const dayjsLocales = import.meta.webpackContext('dayjs/locale', {
+	recursive: false,
+	regExp: /\.js$/,
+	mode: 'lazy',
+	chunkName: 'react-big-calendar/dayjs-locale/[request]',
+});
+const availableLocales = dayjsLocales.keys()
+	.filter((key) => key.startsWith('./'))
+	.map((key) => key.slice(2, -3));
 
 /**
  * Load user locale based on browser settings.
@@ -14,7 +26,7 @@ const getUserLocale = () => {
 		return 'en';
 	}
 	const check_locale = (locale) => {
-		if(['en', 'en-us'].includes(locale)) return locale;
+		if(['en', 'en-us'].includes(locale)) return 'en';
 		if(locale === 'zn') return 'zh-cn';
 		if(locale === 'no') return 'nb';
 		if(availableLocales.includes(locale)) {
@@ -39,36 +51,11 @@ const getUserLocale = () => {
 export const LoadableCalendar = Loadable.Map({
 	loader: {
 		OsecBigCal: () => import(
-			// TODO chunck name is not applied in js :/
-			/* webpackChunkName: "osec-big-cal.bundle.js" */
+			/* webpackChunkName: "react-big-calendar/osec-big-cal" */
 			'./OsecBigCal'
 		),
 		// i18n: () => fetch('./i18n/bar.json').then(res => res.json()),
-		locale: ()  => {
-			const locale = getUserLocale();
-			const uri = osecSettings.dayjsLocaleUri + locale + '.js';
-
-			console.info(`Loading locale "${locale}". Want to load ${uri}`)
-			// return (
-			// 	import(/* webpackIgnore: true */ uri ) Would require CORS to be enabled :/
-			// );
-			// Why adding '.js'?
-			//  It leads to stupid xyzjs.js chunc names.
-			//  But avoids webpack errors
-			//  @see https://github.com/iamkun/dayjs/issues/792#issuecomment-639961997
-			//  It is also PR'd to save chuncks in current folder, which would be much nicer.
-			///  @see https://github.com/webpack/webpack/pull/11258
-			//
-			// TODO
-			//  We may also use blocks/build/react-big-calendar/dayjs-locales
-			//  created by CopyWebpackPlugin to keep our build/ folder more tidy.
-			//  Decide later....
-			// dayjsLocalesUri
-			return import(
-				/* webpackChunkName: "[request]" */
-				`dayjs/locale/${locale}.js`
-			);
-		}
+		locale: () => dayjsLocales(`./${getUserLocale()}.js`),
 	},
 	loading() {
 		return <div>Loading...</div>

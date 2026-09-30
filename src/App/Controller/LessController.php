@@ -5,11 +5,9 @@ namespace Osec\App\Controller;
 use Less_Parser;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
-use Osec\Exception\BootstrapException;
 use Osec\Exception\Exception;
 use Osec\Exception\FileNotFoundException;
 use Osec\Http\Response\ResponseHelper;
-use Osec\Theme\ThemeHashMap;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -32,9 +30,6 @@ class LessController extends OsecBaseClass
 
     private string $default_theme_url;
 
-    /*  @var array $variables Variables used for compilation. */
-    private array $variables;
-
     /**
      * @param  App  $app
      * @param  string  $default_theme_url
@@ -45,8 +40,27 @@ class LessController extends OsecBaseClass
     ) {
         parent::__construct($app);
 
-        // @see https://lesscss.org/usage/#less-options-lint;
-        $this->lessc = new Less_Parser(
+        $this->lessc = $this->create_parser();
+
+        $this->default_theme_url = $this->sanitize_default_theme_url($default_theme_url);
+        $this->parsed_css        = '';
+        $this->files             = ['style.less', 'event.less', 'calendar.less'];
+    }
+
+    /**
+     * A parser instance is good for one compilation.
+     *
+     * Parsing the same files into a parser that already holds them corrupts the variable
+     * scope: the second compilation in a process fails with "variable @text-color is
+     * undefined", the third with "Recursive variable definition". That only shows when a
+     * process compiles more than once, which OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST and an
+     * unavailable CSS cache both cause.
+     *
+     * @see https://lesscss.org/usage/#less-options-lint
+     */
+    private function create_parser(): Less_Parser
+    {
+        return new Less_Parser(
             [
                 'compress'     => ! OSEC_DEBUG_CSS,
                 'sourceMap'    => OSEC_DEBUG_CSS,
@@ -54,11 +68,6 @@ class LessController extends OsecBaseClass
                 'math'         => 'always',
             ]
         );
-
-        $this->default_theme_url = $this->sanitize_default_theme_url($default_theme_url);
-        $this->parsed_css        = '';
-        $this->variables         = [];
-        $this->files             = ['style.less', 'event.less', 'calendar.less'];
     }
 
     /**
@@ -96,6 +105,9 @@ class LessController extends OsecBaseClass
      */
     public function parse_less_files(?array $variables = null, $compile_core = true): string
     {
+        // Start from an empty parser: see create_parser().
+        $this->lessc = $this->create_parser();
+
         // If no variables are passed, initialize from DB, config file, and
         // extension injections in one call.
         if (empty($variables)) {
@@ -115,9 +127,6 @@ class LessController extends OsecBaseClass
          */
         $variables = apply_filters('osec_less_constants', $variables);
 
-        // Use these variables for hashmap purposes.
-        $this->variables = $this->cleanUp($variables);
-
         // Load the static variables defined in the theme's variables.less file.
         $staticVars = $this->load_static_theme_variables();
         $this->lessc->parseFile(
@@ -134,11 +143,15 @@ class LessController extends OsecBaseClass
          *
          * @return array
          */
-        $this->files   = apply_filters('osec_less_files', $this->files);
-        $this->files[] = 'override.less';
+        // Filter a copy: appending to $this->files would add override.less again on every
+        // compilation in the same process, and its rules would be duplicated in the output.
+        $files   = apply_filters('osec_less_files', $this->files);
+        $files[] = 'override.less';
 
         // Find out the active theme URL.
         $theme = $this->app->options->get('osec_current_theme');
+        // The base theme always ships with the plugin, also for custom themes in wp-content.
+        $base_less = OSEC_DEFAULT_THEME_ROOT . '/' . OSEC_ROOT_THEME_NAME . '/less/';
 
         // IMPORT DIRS
         $this->lessc->SetImportDirs(
@@ -146,11 +159,11 @@ class LessController extends OsecBaseClass
                 /**
                  * Callback - Mapping SASS imports as needed.
                  */
-                function ($path) use ($theme) {
+                function ($path) use ($theme, $base_less) {
 
                     // Bootstrap is only in vortex theme.
                     if (substr($path, 0, 10) === 'bootstrap/') {
-                        return [$theme['theme_root'] . '/vortex/less/' . $path, null];
+                        return [$base_less . $path, null];
                     }
 
                     // File exists in theme.
@@ -159,8 +172,8 @@ class LessController extends OsecBaseClass
                     }
 
                     // File exists in base theme (vortex)
-                    if (file_exists($theme['theme_root'] . '/vortex/less/' . $path)) {
-                        return [$theme['theme_root'] . '/vortex/less/' . $path, null];
+                    if (file_exists($base_less . $path)) {
+                        return [$base_less . $path, null];
                     }
 
                     // Huston, we have a problem.
@@ -179,7 +192,7 @@ class LessController extends OsecBaseClass
             ]
         );
         $import_dirs = [];
-        foreach ($this->files as $file) {
+        foreach ($files as $file) {
             $file_to_parse = null;
             try {
                 // Get the filename following our fallback convention
@@ -383,108 +396,6 @@ class LessController extends OsecBaseClass
             self::DB_KEY_FOR_LESS_VARIABLES,
             $new_variables
         );
-    }
-
-    /**
-     * Returns compilation specific hashmap.
-     *
-     * @return array Hashmap.
-     */
-    public function get_less_hashmap()
-    {
-        foreach ($this->variables as $key => $value) {
-            if (str_starts_with($key, 'fontdir_')) {
-                unset($this->variables[$key]);
-            }
-        }
-        $hashmap   = ThemeHashMap::factory($this->app)->build_current_theme_hashmap();
-        $variables = $this->variables;
-        ksort($variables);
-
-        return [
-            'variables' => $variables,
-            'files'     => $hashmap,
-        ];
-    }
-
-    /**
-     * Returns whether LESS compilation should be performed or not.
-     *
-     * @param  array|null  $variables  LESS variables.
-     *
-     * @return bool Result.
-     *
-     * @throws BootstrapException
-     */
-    public function is_compilation_needed(?array $variables = [])
-    {
-        /**
-         * Hook to trigger less processing
-         *
-         * Allows to request theme recompile action.
-         * You may also set OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST
-         * which forces recompile too.
-         *
-         * @since 1.0
-         *
-         * @param  array  $variables  Array of less variables.
-         */
-        $shouldRecompile = apply_filters('osec_should_recompile_less', false);
-        if ($shouldRecompile
-            || (defined('OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST')
-                && OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST)
-        ) {
-            return true;
-        }
-        if (null === $variables) {
-            $variables = [];
-        }
-        $hashMap = ThemeHashMap::factory($this->app);
-
-        $cur_hashmap = $hashMap->get_current_theme_hashmap();
-        if (empty($variables)) {
-            $variables = $this->get_saved_variables(false);
-        }
-        $variables = $this->convert_less_variables_for_parsing($variables);
-
-        $variables = $this->cleanUp($variables);
-        ksort($variables);
-
-        /**
-         * Alter Less variables before hashmap generation.
-         *
-         * @since 1.0
-         *
-         * @param  array  $variables  Array of less variables
-         */
-        $variables = apply_filters('osec_less_constants_pre_hashmap', $variables);
-        if (
-            null === $cur_hashmap ||
-            $variables !== $cur_hashmap['variables']
-        ) {
-            return true;
-        }
-        $file_hashmap = $hashMap->build_current_theme_hashmap();
-
-        return ! $hashMap->compare_hashmaps($file_hashmap, $cur_hashmap['files']);
-    }
-
-    /**
-     * Removes fontdir variables added by add-ons.
-     *
-     * @param  array  $variables  Input variables array.
-     *
-     * @return array Modified variables.
-     */
-    protected function cleanUp(array $variables)
-    {
-        foreach ($variables as $key => $value) {
-            if (str_starts_with($key, 'fontdir_')) {
-                unset($variables[$key]);
-            }
-        }
-
-        return $variables;
     }
 
     /**

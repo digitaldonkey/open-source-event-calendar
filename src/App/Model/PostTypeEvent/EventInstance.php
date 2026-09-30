@@ -3,11 +3,10 @@
 namespace Osec\App\Model\PostTypeEvent;
 
 use DateTime;
-use DateTimeZone;
+use InvalidArgumentException;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
 use Osec\Bootstrap\OsecBaseClass;
-use Osec\Exception\Exception;
 use Osec\Exception\TimezoneException;
 use RRule\RfcParser;
 use RRule\RRule;
@@ -177,10 +176,11 @@ class EventInstance extends OsecBaseClass
         $timezone
     ) {
         $events = [];
-        $origEventTime = new DT($_start, 'UTC');
+        // Recurrence must be expanded in the event's own timezone, so that
+        // occurrences keep their wall clock time across DST transitions.
+        $origEventTime = new DT($_start, $timezone);
 
-        $recurrence_time_limit = new DateTime();
-        $recurrence_time_limit->modify(OSEC_REOCCURRENCE_TIMEFRAME);
+        $recurrence_time_limit = $this->recurrence_time_limit();
 
         // TODO:
         //   Do we need to check for lower boundary limits?
@@ -194,9 +194,8 @@ class EventInstance extends OsecBaseClass
                 ),
                 $this->process_rrule_freq(
                     $event->get('recurrence_rules'),
-                    $origEventTime->getObject(),
-                    $recurrence_time_limit,
-                    $timezone
+                    clone $origEventTime->getObject(),
+                    $recurrence_time_limit
                 ),
             ),
             SORT_NUMERIC
@@ -210,9 +209,8 @@ class EventInstance extends OsecBaseClass
                 ),
                 $this->process_rrule_freq(
                     $event->get('exception_rules'),
-                    $origEventTime->getObject(),
-                    $recurrence_time_limit,
-                    $timezone,
+                    clone $origEventTime->getObject(),
+                    $recurrence_time_limit
                 )
             ),
             SORT_STRING
@@ -260,9 +258,8 @@ class EventInstance extends OsecBaseClass
 
     /**
      * @param  string  $rrule
-     * @param  DateTime  $start
+     * @param  DateTime  $start  Event start, in the event's own timezone.
      * @param  DateTime  $recurrence_time_limit
-     * @param  string  $timezone
      *
      * @return array
      * @throws \DateInvalidTimeZoneException
@@ -271,8 +268,7 @@ class EventInstance extends OsecBaseClass
     protected function process_rrule_freq(
         ?string $rrule,
         DateTime $start,
-        DateTime $recurrence_time_limit,
-        string $timezone
+        DateTime $recurrence_time_limit
     ): array {
         $data = [];
 
@@ -283,42 +279,198 @@ class EventInstance extends OsecBaseClass
         // Tailing semicolon must be removed.
         $rrule = rtrim(trim($rrule), ';');
 
+        try {
+            [$rulez, $until_limit] = $this->build_rule($rrule, $start, $recurrence_time_limit);
+        } catch (InvalidArgumentException $exception) {
+            // Rules stored before Event::save() started refusing them still
+            // reach this point, so the generator keeps its own guard: drop the
+            // recurrence, keep the event, and report it.
+            $this->notify_recurrence_rule_invalid($rrule, $exception->getMessage());
+
+            return $data;
+        }
+
+        if (null === $rulez) {
+            return $data;
+        }
+
+        // Occurrences are generated in DTSTART's timezone and already carry
+        // the correct wall clock time, including across DST transitions.
+        foreach ($rulez as $occurrence) {
+            // UNTIL bounds the rule inclusively (RFC 5545 3.3.10).
+            if (null !== $until_limit && $occurrence > $until_limit) {
+                break;
+            }
+            // Nothing else bounds a large COUNT or a far UNTIL.
+            if (count($data) >= OSEC_REOCCURRENCE_MAX_INSTANCES) {
+                $this->notify_recurrence_truncated($rrule);
+                break;
+            }
+            $data[] = $occurrence->getTimestamp();
+        }
+
+        return $data;
+    }
+
+    /**
+     * The point at which a rule naming no end of its own stops.
+     *
+     * Kept in one place so both the generator and get_rule_error() bound a rule
+     * identically, and so tests can pin it instead of depending on the clock.
+     *
+     * @return DateTime Cut-off, by default now + OSEC_REOCCURRENCE_TIMEFRAME.
+     */
+    protected function recurrence_time_limit(): DateTime
+    {
+        $limit = new DateTime();
+        $limit->modify(OSEC_REOCCURRENCE_TIMEFRAME);
+
+        /**
+         * Filters the point at which an open ended recurrence stops.
+         *
+         * Only a rule that names no end of its own is bounded by this; an
+         * explicit UNTIL or COUNT is honoured as given and bounded instead by
+         * OSEC_REOCCURRENCE_MAX_INSTANCES.
+         *
+         * @since 1.1.15
+         *
+         * @param  DateTime  $limit  Cut-off, default now + OSEC_REOCCURRENCE_TIMEFRAME.
+         *
+         * @return DateTime
+         */
+        return apply_filters('osec_recurrence_time_limit', $limit);
+    }
+
+    /**
+     * Builds the php-rrule instance for a rule, or explains why it cannot.
+     *
+     * @param  string  $rrule  Recurrence rule.
+     * @param  DateTime  $start  Event start, in the event's own timezone.
+     * @param  DateTime  $recurrence_time_limit  End for a rule that names none.
+     *
+     * @return array{0: ?RRule, 1: ?DateTime} Rule and the UNTIL to stop at.
+     * @throws InvalidArgumentException When the rule cannot be used.
+     */
+    protected function build_rule(
+        string $rrule,
+        DateTime $start,
+        DateTime $recurrence_time_limit
+    ): array {
+        $until_limit = null;
+
         // EXDATE and RDATE andled in process_rrule_datelist().
         $rrule_array = $this->filter_rrules_array(
             RfcParser::parseRRule($rrule, $start),
             ['EXDATE', 'RDATE']
         );
 
-        if (!empty($rrule_array)) {
-            DT::require_php_timezone_utc();
-
-            // Add a sane max limit, because all generated events
-            // are represented in wp_osec_event_instances.
-            if (
-                (! isset($rrule_array['UNTIL']) || empty($rrule_array['UNTIL']))
-                && (! isset($rrule_array['COUNT']) || empty($rrule_array['COUNT']))
-            ) {
-                $rrule_array['UNTIL'] = $recurrence_time_limit;
-            }
-
-            $rulez = new RRule($rrule_array);
-            if ($rulez->isInfinite()) {
-                throw new Exception(esc_html('Too much to handle.'));
-            }
-
-            foreach ($rulez as $occurrence) {
-                $instanceDate = new DateTime(
-                    '@' . $occurrence->getTimestamp(),
-                    new DateTimeZone($timezone)
-                );
-                $instanceDate->setTime(
-                    (int) $start->format('H'),
-                    (int) $start->format('i'),
-                );
-                $data[] = $instanceDate->getTimestamp();
-            }
+        if (empty($rrule_array)) {
+            return [null, null];
         }
-        return $data;
+        DT::require_php_timezone_utc();
+
+        // RFC 5545 forbids UNTIL and COUNT in the same rule and php-rrule
+        // rejects it, but exporters send it. Keep COUNT, apply UNTIL while
+        // iterating: whichever ends the series first wins.
+        if (! empty($rrule_array['UNTIL']) && ! empty($rrule_array['COUNT'])) {
+            $until_limit = $rrule_array['UNTIL'];
+            unset($rrule_array['UNTIL']);
+        }
+
+        // Only a rule that names no end of its own gets the timeframe; an
+        // explicit UNTIL is kept, however far out, and bounded by the instance
+        // ceiling while iterating.
+        if (
+            (! isset($rrule_array['UNTIL']) || empty($rrule_array['UNTIL']))
+            && (! isset($rrule_array['COUNT']) || empty($rrule_array['COUNT']))
+        ) {
+            $rrule_array['UNTIL'] = $recurrence_time_limit;
+        }
+
+        $rule = new RRule($rrule_array);
+        if ($rule->isInfinite()) {
+            throw new InvalidArgumentException(
+                esc_html__('The rule has no end.', 'open-source-event-calendar')
+            );
+        }
+
+        return [$rule, $until_limit];
+    }
+
+    /**
+     * Tells whether a rule can be used, without generating anything.
+     *
+     * Event::save() asks before storing, so a rule the generator would have to
+     * drop never reaches the database, the ICS export or the repeat text.
+     *
+     * @param  ?string  $rrule  Rule to check.
+     * @param  DateTime  $start  Event start, in the event's own timezone.
+     *
+     * @return ?string Reason the rule cannot be used, null when it can.
+     */
+    public function get_rule_error(?string $rrule, DateTime $start): ?string
+    {
+        if (empty($rrule)) {
+            return null;
+        }
+        $recurrence_time_limit = $this->recurrence_time_limit();
+
+        try {
+            $this->build_rule(rtrim(trim($rrule), ';'), $start, $recurrence_time_limit);
+        } catch (InvalidArgumentException $exception) {
+            return $exception->getMessage();
+        }
+
+        return null;
+    }
+
+    /**
+     * Report a recurrence series cut short by the instance ceiling.
+     *
+     * @param  string  $rrule  Rule that was truncated.
+     *
+     * @return void
+     */
+    protected function notify_recurrence_truncated(string $rrule): void
+    {
+        /**
+         * Act on a recurrence series that hit OSEC_REOCCURRENCE_MAX_INSTANCES.
+         *
+         * The event is saved with the instances generated so far, so the series
+         * ends earlier than its rule asks for. Use this to warn an editor, or to
+         * log feeds whose rules exceed the ceiling.
+         *
+         * @since 1.1.15
+         *
+         * @param  string  $rrule  Rule that was truncated.
+         * @param  int  $limit  Ceiling that applied.
+         */
+        do_action('osec_recurrence_truncated', $rrule, OSEC_REOCCURRENCE_MAX_INSTANCES);
+    }
+
+    /**
+     * Report a recurrence rule that could not be applied.
+     *
+     * @param  string  $rrule  Rule that was dropped.
+     * @param  string  $message  Why the rule was rejected.
+     *
+     * @return void
+     */
+    protected function notify_recurrence_rule_invalid(string $rrule, string $message): void
+    {
+        /**
+         * Act on a recurrence rule the generator had to drop.
+         *
+         * The event is saved without the rule, as a single occurrence, instead
+         * of the save or the feed import failing. Use this to warn an editor or
+         * to log the feeds that send broken rules.
+         *
+         * @since 1.1.15
+         *
+         * @param  string  $rrule  Rule that was dropped.
+         * @param  string  $message  Why the rule was rejected.
+         */
+        do_action('osec_recurrence_rule_invalid', $rrule, $message);
     }
 
     /**

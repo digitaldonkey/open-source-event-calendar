@@ -19,4 +19,18 @@ function osec_initiate_constants_local($osec_base_dir, $osec_base_url) {
     define(
       'OSEC_UNINSTALL_PLUGIN_DATA', FALSE);
   }
+
+  /**
+   * DDEV: feeds served by this dev site fail with "cURL error 60". WordPress checks
+   * certificates against its own CA bundle, which lacks the mkcert CA; the
+   * container's system bundle trusts it.
+   */
+  if (function_exists('add_filter')) {
+    add_filter('http_request_args', function ($args, $url) {
+      if (str_ends_with((string) wp_parse_url($url, PHP_URL_HOST), '.ddev.site')) {
+        $args['sslcertificates'] = '/etc/ssl/certs/ca-certificates.crt';
+      }
+      return $args;
+    }, 10, 2);
+  }
 }

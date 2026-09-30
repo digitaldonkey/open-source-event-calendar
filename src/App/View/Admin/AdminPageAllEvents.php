@@ -8,6 +8,8 @@ use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\View\Event\EventTimeView;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Http\Request\ParamType;
+use Osec\Http\Request\RequestParser;
 use WP_Query;
 
 /**
@@ -70,6 +72,19 @@ class AdminPageAllEvents extends OsecBaseClass
                 10,
                 2
             );
+
+            /**
+             * Autosaving Event Data does not currently work.
+             * Only post data is saved.
+             * If editing a Event Instance autosave is disabled when calling get_instance_id().
+             * EventEditing->save_post() is not receiving Event Data.
+             */
+            add_action('admin_enqueue_scripts', function () {
+                $type = get_post_type();
+                if ($type && $type === OSEC_POST_TYPE) {
+                    wp_dequeue_script('autosave');
+                }
+            });
         }
     }
 
@@ -99,8 +114,7 @@ class AdminPageAllEvents extends OsecBaseClass
                         'taxonomy'        => $tax_slug,
                         'name'            => $tax_obj->name,
                         'orderby'         => 'name',
-                        // phpcs:ignore WordPress.Security.NonceVerification
-                        'selected'        => isset($_GET[$tax_slug]) ? sanitize_key($_GET[$tax_slug]) : '',
+                        'selected'        => RequestParser::get_param($tax_slug, '', ParamType::Key),
                         'hierarchical'    => $tax_obj->hierarchical,
                         'show_count'      => true,
                         'hide_if_empty'   => true,
@@ -112,11 +126,9 @@ class AdminPageAllEvents extends OsecBaseClass
                 'name'            => 'author',
                 'show_option_all' => __('Show All Authors', 'open-source-event-calendar'),
             ];
-            // phpcs:disable WordPress.Security.NonceVerification.Recommended
-            if (isset($_GET['user'])) {
-                $args['selected'] = absint($_GET['user']);
+            if (RequestParser::has_param('user')) {
+                $args['selected'] = RequestParser::get_param('user', 0, ParamType::Id);
             }
-            // phpcs:enable
             wp_dropdown_users($args);
         }
     }

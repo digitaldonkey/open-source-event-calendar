@@ -3,35 +3,34 @@
  * Theme URI: http://time.ly/
  * Author: Timely Network Inc
  * Author URI: http://time.ly/
- * Description: A skeleton theme. Copy theme files to [wp-root]/wp-content/themes/[your-theme-directory] and rename to build your own calendar theme.
+ * Description: A skeleton theme. Copy this folder to wp-content/themes/osec_themes/[your-theme-directory] and rename it to build your own calendar theme.
  * Version: 2.0.0-core
  * Tags: light, white, gray, blue
  */
 
 /*
-	====================================================
-	= Theme structure in All-in-One Event Calendar 2.0 =
-	====================================================
+    ==============================================
+    = Custom calendar themes are based on Vortex =
+    ==============================================
 
-	Please do not place your custom CSS rules in this file. Instead, place them in
-	here:
+    This file only holds the theme header; rules in it are not loaded.
+    Place your style rules in your theme folder
+    (wp-content/themes/osec_themes/[your-theme-directory]), in one of:
 
-	  [wp-content]/themes/[your_theme_directory]/css/override.css
+      less/override.less   LESS (https://lesscss.org/). May use the Vortex variables
+                           (less/variables.less, less/user_variables.php) and the
+                           Bootstrap 3 mixins, prefixed with "ai1ec-":
+                             @import "bootstrap/mixins.less";
+                             .my-calendar-box { .ai1ec-clearfix(); }
 
-	Alternatively, for the more savvy designers, use the dynamic LESS stylesheet
-	language (http://lesscss.org/) to define your style rules, allowing you to
-	take advantage of any LESS variables defined by Vortex (see
-	[wp_root]/themes/vortex/less/user_variables.php). Place your LESS code
-	in this file:
+      css/override.css     Plain CSS. Only used if there is no less/override.less.
 
-	  [wp-content]/themes/[your_theme_directory]/less/override.less
+    Both are applied *after* all default style rules of Vortex.
 
-	The style rules produced by these files will be applied *after* all the
-	default style rules of Vortex have been applied.
+    = NOTE ======================================================================
+    = Be sure to visit Events > Theme Options and click "Save Options" any time =
+    = you make changes to either of the above files before viewing your site.   =
+    =============================================================================
 
-	= NOTE ======================================================================
-	= Be sure to visit Events > Theme Options and click "Save Options" any time =
-	= you make changes to either of the above files before viewing your site.   =
-	=============================================================================
-
+    More in the plugin's README.md, section "Custom calendar themes".
  */

@@ -5,6 +5,7 @@ namespace Osec\Command;
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\LessController;
 use Osec\App\View\Admin\AdminPageThemeOptions;
+use Osec\Http\Request\RequestParser;
 use Osec\Settings\Elements\ThemeVariableFont;
 
 /**
@@ -28,21 +29,17 @@ class SaveThemeOptions extends SaveAbstract
             wp_die('Invalid nonce');
         }
         $variables = [];
-        $isReset = isset($_POST[AdminPageThemeOptions::RESET_ID]);
+        $isReset = RequestParser::has_param(AdminPageThemeOptions::RESET_ID);
 
         // Handle updating of theme options.
-        if (isset($_POST[AdminPageThemeOptions::SUBMIT_ID])) {
+        if (RequestParser::has_param(AdminPageThemeOptions::SUBMIT_ID)) {
             $variables = LessController::factory($this->app)->get_saved_variables();
             foreach ($variables as $variable_name => $variable_params) {
-                if (isset($_POST[$variable_name])) {
-                    $var = sanitize_text_field(wp_unslash($_POST[$variable_name]));
+                $var = RequestParser::get_param($variable_name, null);
+                if (null !== $var) {
                     if (ThemeVariableFont::CUSTOM_FONT === $var) {
                         $variable_custom = $variable_name . ThemeVariableFont::CUSTOM_FONT_ID_SUFFIX;
-                        if (isset($_POST[$variable_custom])) {
-                            $var = sanitize_text_field(
-                                wp_unslash($_POST[$variable_custom])
-                            );
-                        }
+                        $var             = RequestParser::get_param($variable_custom, $var);
                     }
                     // update the original array
                     $variables[$variable_name]['value'] = $var;
@@ -68,4 +65,38 @@ class SaveThemeOptions extends SaveAbstract
             'query_args' => [],
         ];
     }
+
+//    public static function initialCompile($osec_app) {
+//
+////        FrontendCssController::factory($osec_app)->update_variables_and_compile_css(
+////            LessController::factory($osec_app)->get_saved_variables(),
+////            true
+////        );
+//        FrontendCssController::factory($osec_app)
+//                             ->invalidate_cache(null, true);
+//
+//
+////        require_once ABSPATH . 'wp-includes/pluggable.php';
+////        $nonce = wp_create_nonce(AdminPageThemeOptions::$NONCE['nonce_action']);
+////        $url = admin_url() . '/edit.php?plugin=open-source-event-calendar'
+////               . '&controller=front&action=osec_theme_options_save'
+////               . '&osec_reset_themes_options="true"&osec_theme_options_nonce='
+////               . $nonce;
+////        foreach ($_COOKIE as $name => $value) {
+////            $cookies[] = new WP_Http_Cookie([
+////                'name' => $name,
+////                'value' => $value,
+////            ]);
+////        }
+////        $request = wp_remote_get(
+////            $url,
+////            [
+////                'cookies' => $cookies,
+////                'sslverify' => false,
+////            ]
+////        );
+////        $body    = wp_remote_retrieve_body($request);
+////
+//
+//    }
 }

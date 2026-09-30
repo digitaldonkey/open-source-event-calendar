@@ -3,6 +3,7 @@
 namespace Osec\Settings;
 
 use Osec\App\Model\Date\DateValidator;
+use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\TaxonomyAdapter;
 use Osec\Bootstrap\App;
@@ -86,9 +87,14 @@ class HtmlFactory extends OsecBaseClass
         }
         // Convert initial date to formatted date if required.
         if (DateValidator::is_valid_time_stamp($initial_date)) {
-            $initial_date = $date_system->format_date(
-                $initial_date,
-                $this->app->settings->get('input_date_format')
+            // $initial_date holds the instant of local midnight for the displayed
+            // day (see AbstractView/CalendarPageView exact_date handling), so it
+            // must be formatted in the site's timezone - UIDateFormats::format_date()
+            // uses gmdate() and would show the day before for positive UTC offsets.
+            $initial_date = (new DT($initial_date, 'sys.default'))->format(
+                $date_system->get_date_format_patter(
+                    $this->app->settings->get('input_date_format')
+                )
             );
         }
 
@@ -99,6 +105,7 @@ class HtmlFactory extends OsecBaseClass
             'exact_date' => '__DATE__',
             'display_filters' => $args['display_filters'],
             'display_subscribe' => $args['display_subscribe'],
+            'display_print' => $args['display_print'] ?? 'true',
             'agenda_toggle' => $args['agenda_toggle'],
             'display_view_switch' => $args['display_view_switch'],
             'display_date_navigation' => $args['display_date_navigation'],

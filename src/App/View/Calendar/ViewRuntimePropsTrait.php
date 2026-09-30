@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Calendar;
 
-use Osec\App\Controller\AppendContentController;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\View\Event\EventColorView;
 use Osec\App\View\Event\EventContentView;
@@ -35,20 +34,6 @@ trait ViewRuntimePropsTrait
                 true
             )
         );
-        $appendController = AppendContentController::factory($app);
-        $appendController->set_append_content(false);
-        $event->set_runtime(
-            'filtered_content',
-            apply_filters(
-                'osec_the_content',
-                apply_filters(
-                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                    'the_content',
-                    $event->get('post')->post_content
-                )
-            )
-        );
-        $appendController->set_append_content(true);
 
         $taxonomyView = EventTaxonomyView::factory($app);
         $ticketView   = EventTicketView::factory($app);

@@ -60,6 +60,16 @@ function osec_manually_load_plugin()
     }
 
     require_once $plugin_file;
+
+    // The plugin creates the app on 'init' (-100), as in production. Activate right after it.
+    add_action('init', 'osec_activate_test_plugin', -99);
+}
+
+/**
+ * Activate the plugin once the app exists.
+ */
+function osec_activate_test_plugin()
+{
     osec_plugin_activate();
     // Now constants like OSEC_PLUGIN_NAME, OSEC_XYZ are available.
 
@@ -67,7 +77,8 @@ function osec_manually_load_plugin()
     // Avoid problems in case tearDown() didn't run.
     // @see CacheFileTestBase.
     CachePath::clean_and_check_dir(OSEC_FILE_CACHE_DEFAULT_PATH);
-    WP_Filesystem();
+    // Loads wp-admin/includes/file.php; clean_and_check_dir() may throw before doing so.
+    CachePath::get_wpfs();
     $wp_upload = wp_upload_dir();
     if ($wp_upload['error']) {
         throw new Exception('Error WP upload Error');

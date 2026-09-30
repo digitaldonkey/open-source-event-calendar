@@ -6,15 +6,17 @@ use DateTime;
 use DateTimeZone;
 use Kigkonsult\Icalcreator\CalendarComponent;
 use Kigkonsult\Icalcreator\IcalInterface;
+use Kigkonsult\Icalcreator\Pc;
 use Kigkonsult\Icalcreator\Vcalendar;
 use Kigkonsult\Icalcreator\Vevent;
-use Osec\App\Controller\StrictContentFilterController;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\PostTypeEvent\Event;
+use Osec\App\Model\PostTypeEvent\EventFeedTerms;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\Model\PostTypeEvent\EventTaxonomy;
 use Osec\App\View\Event\EventAvatarView;
+use Osec\App\View\Event\EventContentView;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
@@ -41,12 +43,15 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
     protected ?RepeatRuleToText $ruleFilter = null;
 
     /**
-     * @var array $override_exclussions Format is [UID][...].
+     * @var array $override_exclussions Format is [UID][] = ['post_id' => int, 'recurrence_id' => int|string|null].
      *
      * Overriding events (same UID) may a REOCURRENCE-ID
      * containing a date, to alter the provided FREQ.
      * Thus events having a REOCURRENCE-ID need to get into
      * the exclude list of the parent (repeating) event.
+     *
+     * Holds one entry per imported event until the calendar is done, so only
+     * IDs and dates: keeping the Event objects cost about 100 MB per 10,000 events.
      */
     protected $override_exclussions = [];
 
@@ -62,7 +67,20 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $unique        = md5($unique_prefix . $arguments['feed']->feed_url);
         $cal           = Vcalendar::factory([IcalInterface::UNIQUE_ID => $unique]);
 
-        if ($cal->parse($arguments['source'])) {
+        try {
+            $parsed = $cal->parse($arguments['source']);
+        } catch (\Throwable $exception) {
+            // iCalcreator validates the whole calendar while parsing, so a single
+            // malformed property (a RRULE the RFC does not allow, for example)
+            // rejects the feed. Report it instead of failing the request.
+            throw new ImportExportParseException(
+                esc_html(
+                    'The feed could not be read: ' . $exception->getMessage()
+                )
+            );
+        }
+
+        if ($parsed) {
             try {
                 $result = $this->add_vcalendar_events_to_db(
                     $cal,
@@ -100,6 +118,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      */
     public function add_vcalendar_events_to_db(Vcalendar $v, array $args): array
     {
+        // The parser is shared within a process, e.g. by the cron import of all
+        // feeds, so overrides of an earlier calendar must not be processed again.
+        $this->override_exclussions = [];
         $output         = [
             'count'            => 0,
             'events_to_delete' => $args['events_in_db'] ?? 0,
@@ -162,9 +183,27 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             fn($c) => $c instanceof \Kigkonsult\Icalcreator\Vevent
         );
 
+        // A rule the generator cannot apply is reported, not thrown, so the
+        // rest of the feed still imports. Collect what happened per feed.
+        $truncated      = 0;
+        $invalid        = 0;
+        $on_truncated   = function () use (&$truncated) {
+            ++$truncated;
+        };
+        $on_invalid     = function () use (&$invalid) {
+            ++$invalid;
+        };
+        add_action('osec_recurrence_truncated', $on_truncated);
+        add_action('osec_recurrence_rule_invalid', $on_invalid);
+
         // Walk events.
+        $walked = 0;
         foreach ($events as $e) {
             /* @var \Kigkonsult\Icalcreator\Vevent $e Vevent component. */
+            ++$walked;
+            if (0 === $walked % 500) {
+                $this->release_runtime_cache();
+            }
 
             /* @var array $data Data to create Event */
             $data = $this->process_event_date_fields(
@@ -179,12 +218,16 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $allday = $data['allday'];
 
             /* Categories */
-            $categories   = $e->getXprop('CATEGORIES', false, true);
+            // One call per CATEGORIES line, false after the last one.
+            $categories = [];
+            while (false !== ($category = $e->getCategories())) {
+                $categories[] = $category;
+            }
             $imported_cat = [EventTaxonomy::CATEGORIES => []];
             // If the user chose to preserve taxonomies during import, add categories.
             if ($categories && $feed->keep_tags_categories) {
                 $imported_cat = $this->add_categories_and_tags(
-                    $categories['value'],
+                    implode(',', $categories),
                     $imported_cat,
                     false,
                     true
@@ -239,41 +282,23 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $exrule = trim(end($exrule));
             }
 
-            $rdate = $e->createRdate();
-            if ($rdate) {
-                // Remove Prefix `RDATE:`
-                $rdate = explode(':', (string)$rdate);
-                $rdate = trim(end($rdate));
+            // Every RDATE line, each may list several dates.
+            $rdates = [];
+            while (false !== ($pc = $e->getRdate(null, true))) {
+                array_push($rdates, ...$this->recurrence_dates($pc, $allday, $event_timezone));
             }
+            $rdate = $rdates ? implode(',', array_unique($rdates)) : null;
 
             // ===================
             // = Exception dates =
             // ===================
 
-            /* @var $exdates DateTime[] A list of dates. */
             $exdates = [];
-            // EXDATE may have two formats:
-            //   one exdate with many dates ot more EXDATE rules
-            while (false !== ($pc = $e->getExdate())) {
-                $exdates = array_merge($exdates, $pc);
+            while (false !== ($pc = $e->getExdate(null, true))) {
+                array_push($exdates, ...$this->recurrence_dates($pc, $allday, $event_timezone));
             }
-
             /* @var string $exdate Aggregated exdates to store in DB */
-            $exdate = '';
-            if (!empty($exdates)) {
-                // Format for DB entry
-                $last_id = count($exdates) - 1;
-                foreach ($exdates as $i => $item) {
-                    if ($allday) {
-                        $exdate .= gmdate('Ymd', $item->format('U'));
-                    } else {
-                        $exdate .= gmdate('Ymd\THis\Z', $item->format('U'));
-                    }
-                    if ($i !== $last_id) {
-                        $exdate .= ',';
-                    }
-                }
-            }
+            $exdate = implode(',', array_unique($exdates));
 
             // ========================
             // = Latitude & longitude =
@@ -402,6 +427,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 'venue'            => $venue,
                 'address'          => $address,
                 'cost'             => $cost,
+                'hide_cost'        => (bool) $feed->hide_cost,
                 'ticket_url'       => $ticket_url,
                 'show_map'         => $event_do_show_map,
                 'ical_feed_url'    => $feed->feed_url,
@@ -417,13 +443,19 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     'comment_status' => $comment_status,
                     'post_type'      => OSEC_POST_TYPE,
                     'post_author'    => 1,
-                    'post_title'     => $e->getSummary(),
+                    // Feed content is untrusted, whoever runs the import: without this, a feed
+                    // could store script in title or description, which the calendar prints as
+                    // HTML. SUMMARY is plain text (RFC 5545); DESCRIPTION often carries HTML, so
+                    // it gets what WordPress allows authors without unfiltered_html.
+                    'post_title'     => wp_strip_all_tags((string)$e->getSummary()),
                     'post_parent'    => null,
-                    'post_content'   => stripslashes(
-                        str_replace(
-                            '\n',
-                            "\n",
-                            $e->getDescription()
+                    'post_content'   => wp_kses_post(
+                        stripslashes(
+                            str_replace(
+                                '\n',
+                                "\n",
+                                (string)$e->getDescription()
+                            )
                         )
                     ),
                 ],
@@ -489,8 +521,19 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     ++$output['count'];
                 }
             }
+            if ($event->get('post_id')) {
+                // A term aliased into the other taxonomy lands in the other list.
+                $feed_terms = $imported_cat;
+                foreach ($imported_tags as $taxonomy => $ids) {
+                    $feed_terms[$taxonomy] = ($feed_terms[$taxonomy] ?? []) + $ids;
+                }
+                EventFeedTerms::factory($this->app)->sync((int) $event->get('post_id'), $feed_terms);
+            }
             /**
              * Do something after IMPORTED event is saved
+             *
+             * The categories and tags of the feed are assigned by then. Terms
+             * assigned here count as assigned by hand: later imports keep them.
              *
              * @since 1.0
              *
@@ -499,16 +542,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
              */
             do_action('osec_ics_import_event_saved', $event, $feed);
 
-            // import not standard taxonomies.
-            // unset( $imported_cat[EventTaxonomy::CATEGORIES] );
-            foreach ($imported_cat as $tax_name => $ids) {
-                wp_set_post_terms($event->get('post_id'), array_keys($ids), $tax_name);
-            }
-
-            unset($imported_tags[EventTaxonomy::TAGS]);
-            foreach ($imported_tags as $tax_name => $ids) {
-                wp_set_post_terms($event->get('post_id'), array_keys($ids), $tax_name);
-            }
             unset($output['events_to_delete'][$event->get('post_id')]);
 
             /**
@@ -516,24 +549,43 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
              * it must be included in parent event exclude list.
              */
             $recurrence_id = $e->getRecurrenceid();
-            $exclude_date = null;
-            if ($recurrence_id instanceof \DateTime) {
-                if ($allday) {
-                    $exclude_date = $recurrence_id->format('Ymd');
-                } else {
-                    $exclude_date = $recurrence_id->format('Ymd\THms\Z');
-                    // T%02d%02d%02d%s
-                }
-                $exclusions[$e->getUid()][] = $exdate;
-            }
-
             $this->add_parent_child_relations(
                 $e->getUid(),
-                $event,
-                $exclude_date,
+                (int)$event->get('post_id'),
+                $recurrence_id instanceof DateTime ? $recurrence_id : null,
+                $allday
             );
 
             // End event processing.
+        }
+
+        remove_action('osec_recurrence_truncated', $on_truncated);
+        remove_action('osec_recurrence_rule_invalid', $on_invalid);
+        if ($invalid > 0) {
+            $output['messages'][] = sprintf(
+                /* translators: %s: number of events. */
+                _n(
+                    'The repeat rule of %s event is not valid and was ignored.',
+                    'The repeat rules of %s events are not valid and were ignored.',
+                    $invalid,
+                    'open-source-event-calendar'
+                ),
+                number_format_i18n($invalid)
+            );
+        }
+        if ($truncated > 0) {
+            $output['messages'][] = sprintf(
+                /* translators: 1: number of events, 2: number of instances. */
+                _n(
+                    '%1$s event repeats more often than the calendar stores, only %2$s occurrences were created.',
+                    '%1$s events repeat more often than the calendar stores, only %2$s occurrences each were
+                    created.',
+                    $truncated,
+                    'open-source-event-calendar'
+                ),
+                number_format_i18n($truncated),
+                number_format_i18n(OSEC_REOCCURRENCE_MAX_INSTANCES)
+            );
         }
 
         // Update parent/child relations.
@@ -541,73 +593,191 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         return $output;
     }
 
-    protected function add_parent_child_relations(string $uid, Event $event, ?string $recurrence_id): void {
-        if (!isset($this->override_exclussions[$uid])) {
-            $this->override_exclussions[$uid] = [];
+    /**
+     * Writes a recurrence rule into the exported event, if iCalcreator takes it.
+     *
+     * A rule the generator already refused is still stored on the event, so the
+     * export is the second place it surfaces. Exporting the event without the
+     * rule keeps the feed readable, and matches the calendar, which shows the
+     * event as a single occurrence for the same reason.
+     *
+     * @param  Vevent  $component  Event being exported.
+     * @param  string  $property  'RRULE' or 'EXRULE'.
+     * @param  array  $rule  Rule parts.
+     * @param  Event  $event  Event being exported.
+     *
+     * @return void
+     */
+    protected function export_recurrence_rule(
+        Vevent $component,
+        string $property,
+        array $rule,
+        Event $event
+    ): void {
+        try {
+            if ('EXRULE' === $property) {
+                $component->setExrule($this->sanitizeValue($rule));
+
+                return;
+            }
+            $component->setRrule($this->sanitizeValue($rule));
+        } catch (\InvalidArgumentException $exception) {
+            /**
+             * Fired when a stored recurrence rule cannot be exported.
+             *
+             * @since 1.1.15
+             *
+             * @param  string  $rrule  Rule that was left out.
+             * @param  string  $message  Why iCalcreator rejected it.
+             * @param  Event  $event  Event being exported.
+             */
+            do_action(
+                'osec_recurrence_rule_not_exportable',
+                $property . ':' . wp_json_encode($rule),
+                $exception->getMessage(),
+                $event
+            );
+        }
+    }
+
+    /**
+     * Empties the in-memory object cache during a long import.
+     *
+     * Saving an event caches its post and five term queries, which nothing
+     * evicts within one request: about 70 MB per 10,000 events. Only a cache
+     * declaring a runtime-only flush is flushed, which is WordPress' own cache
+     * and drop-ins that implement it; a persistent cache is never wiped.
+     */
+    protected function release_runtime_cache(): void
+    {
+        if (wp_cache_supports('flush_runtime')) {
+            wp_cache_flush_runtime();
+        }
+    }
+
+    /**
+     * Remembers an imported event for process_parent_child_relations().
+     *
+     * @param  string  $uid  UID shared by a series and its overrides.
+     * @param  int  $post_id  Post ID of the imported event.
+     * @param  DateTime|null  $recurrence_id  RECURRENCE-ID, null for the series itself.
+     * @param  bool  $allday  All-day dates are kept as written, times as an instant.
+     */
+    protected function add_parent_child_relations(
+        string $uid,
+        int $post_id,
+        ?DateTime $recurrence_id,
+        bool $allday
+    ): void {
+        if (null !== $recurrence_id) {
+            $recurrence_id = $allday ? $recurrence_id->format('Ymd') : (int)$recurrence_id->format('U');
         }
         $this->override_exclussions[$uid][] = [
-            'event' => $event,
+            'post_id'       => $post_id,
             'recurrence_id' => $recurrence_id,
         ];
     }
 
-    protected function process_parent_child_relations(): void {
-        foreach ($this->override_exclussions as $uid => $items) {
-            /* @var ?Event $parent_event  This is the Parent Event */
-            $parent_event = null;
-            $children = [];
-            $child_exclude_dates = '';
-
-            if (count($items) > 1) {
-                foreach ($items as $item) {
-                    if ($item['recurrence_id']) {
-                        // Child
-                        $children[] = $item;
-                        $child_exclude_dates .= $item['recurrence_id'] . ',';
-                    } else {
-                        if (!is_null($parent_event)) {
-                            throw new Exception(esc_html('There must be only one parent.'));
-                        }
-                        $parent_event = $item['event'];
-                    }
+    /**
+     * Excludes each override's occurrence from its series and links it as a child.
+     *
+     * Runs once the whole calendar is imported, so an override may come before
+     * or after its series in the feed.
+     */
+    protected function process_parent_child_relations(): void
+    {
+        foreach ($this->override_exclussions as $items) {
+            if (count($items) < 2) {
+                continue;
+            }
+            $parent_id = null;
+            $children  = [];
+            foreach ($items as $item) {
+                if (null !== $item['recurrence_id']) {
+                    $children[] = $item;
+                    continue;
                 }
+                if (null !== $parent_id) {
+                    throw new Exception(esc_html('There must be only one parent.'));
+                }
+                $parent_id = $item['post_id'];
+            }
+            if (null === $parent_id || ! $children) {
+                continue;
             }
 
-            // If there are parent/children relations:
-            if ($parent_event && count($children) > 0) {
-                //
-                // Update parent with excludes
-                //
-                $exception_dates = $parent_event->get('exception_dates', '');
-                if (!empty($exception_dates)) {
-                    $exception_dates .= ',';
-                }
-                $exception_dates .= $child_exclude_dates;
-                $exception_dates = rtrim($exception_dates, ',');
-                $parent_event->set('exception_dates', $exception_dates);
-                $parent_event->save(true);
-                //
-                // Update children with Parent relation
-                //
-                foreach ($children as $child) {
-                    $child_event = $child['event'];
-                    $post = $child_event->get('post', null);
-
-                    // I do not know why they are different.
-                    if ($post instanceof \WP_Post) {
-                        // UI import
-                        $post->post_parent = $parent_event->get('post_id');
-                    } elseif ($post instanceof \StdClass) {
-                        // PHP unit
-                        $post->post_parent = $parent_event->get('post_id');
-                        $post->ID = $child_event->get('post_id');
-                    } else {
-                        throw new Exception(esc_html('Where is my child?'));
-                    }
-                    wp_update_post($post);
-                }
+            $parent   = new Event($this->app, $parent_id);
+            $timezone = Timezones::factory($this->app)->get_name($parent->get('start')->get_timezone());
+            $dates    = array_filter(explode(',', (string)$parent->get('exception_dates')));
+            foreach ($children as $child) {
+                $dates[] = is_int($child['recurrence_id'])
+                    ? $this->exclusion_date($child['recurrence_id'], $timezone)
+                    : $child['recurrence_id'];
+                wp_update_post(
+                    [
+                        'ID'          => $child['post_id'],
+                        'post_parent' => $parent_id,
+                    ]
+                );
             }
+            $parent->set('exception_dates', implode(',', array_unique($dates)));
+            $parent->save(true);
         }
+    }
+
+    /**
+     * The dates of an RDATE or EXDATE property the way the instance generator reads them.
+     *
+     * A date (VALUE=DATE) and a floating time (no TZID, no Z) are wall clock
+     * values and keep their date. Anything else is a point in time and becomes
+     * the date it falls on in the series' timezone. A PERIOD counts by its start.
+     *
+     * @param  Pc  $pc  The property, with its parameters.
+     * @param  bool  $allday  Whether the series is an all-day event.
+     * @param  string  $timezone  Timezone of the series.
+     *
+     * @return string[] Dates as Ymd\THis\Z, see exclusion_date().
+     */
+    protected function recurrence_dates(Pc $pc, bool $allday, string $timezone): array
+    {
+        $wall_clock = $allday || $pc->hasParamValue(IcalInterface::DATE) || $pc->hasParamIsLocalTime();
+        $dates      = [];
+        foreach ((array)$pc->getValue() as $value) {
+            if (is_array($value)) {
+                $value = reset($value);
+            }
+            if (! $value instanceof \DateTimeInterface) {
+                continue;
+            }
+            $dates[] = $wall_clock
+                ? $value->format('Ymd') . 'T000000Z'
+                : $this->exclusion_date((int)$value->format('U'), $timezone);
+        }
+
+        return $dates;
+    }
+
+    /**
+     * An exclusion date the way the instance generator reads it.
+     *
+     * EventInstance::process_rrule_datelist() only reads the date part and applies
+     * the series' own start time, so the date must be the one in the series'
+     * timezone. Taken in UTC it names the wrong day, or none, whenever the local
+     * start falls on another UTC date: after midnight east of UTC, in the evening
+     * west of it. The time part is ignored, as in EventParent::add_exception_date().
+     *
+     * @param  int  $timestamp  Occurrence to exclude.
+     * @param  string  $timezone  Timezone of the series.
+     *
+     * @return string Date as Ymd\THis\Z.
+     */
+    protected function exclusion_date(int $timestamp, string $timezone): string
+    {
+        // Separate setTimezone(): the constructor ignores a timezone for '@' strings.
+        $date = new DateTime('@' . $timestamp);
+        $date->setTimezone(new DateTimeZone($timezone));
+
+        return $date->format('Ymd') . 'T000000Z';
     }
 
     /**
@@ -989,8 +1159,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             $post_ids[] = $event->get('post_id');
         }
         $this->taxonomyAdapter->prepare_meta_for_ics($post_ids);
-        StrictContentFilterController::factory($this->app)
-                                     ->clear_the_content_filters();
         foreach ($arguments['events'] as $event) {
             $c = $this->insertEventInCalendar(
                 $event,
@@ -999,8 +1167,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $params
             );
         }
-        StrictContentFilterController::factory($this->app)
-                                     ->restore_the_content_filters();
         return ltrim((string)$c->createCalendar());
     }
 
@@ -1027,13 +1193,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $e = $calendar->newVevent();
 
         /* @var string $uid Unique ID */
-        if ($event->get('ical_uid')) {
-            $uid = addcslashes((string)$event->get('ical_uid'), "\\;,\n");
-        } else {
-            $uid = $event->get_uid();
-            $event->set('ical_uid', $uid);
-            $event->save(true);
-        }
+        $uid = addcslashes((string)$event->get_uid(), "\\;,\n");
         $e->setUid($this->sanitizeValue($uid));
         $event_url = get_permalink($event->get('post_id'));
         $e->setUrl($event_url);
@@ -1063,11 +1223,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
 
         $content = apply_filters(
             'osec_the_content',
-            apply_filters(
-                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                'the_content',
-                $event->get('post')->post_content
-            )
+            EventContentView::factory($this->app)->get_filtered_content($event->get('post'))
         );
         $content = str_replace(']]>', ']]&gt;', $content);
         $content = html_entity_decode($content, ENT_QUOTES, 'UTF-8');
@@ -1087,7 +1243,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // Set image with ATTACH
         if ($img_url || $content_image_uri) {
             // Use featured image if available or fall back to content image if exists.
-            $img_url = $img_url ? $avatar_view->getPostAttachmentUrl($event, ['full'], $size) : $content_image_uri;
+            $img_url = $img_url ? $avatar_view->get_post_attachment_url($event, ['full'], $size) : $content_image_uri;
             $e->setAttach(
                 $this->sanitizeValue($img_url),
             );
@@ -1394,7 +1550,22 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 if ($k === 'BYDAY') {
                     $v = [];
                     foreach ($exploded as $day) {
-                        $v[] = ['DAY' => $day];
+                        // Handle intervals
+                        if (! ctype_alpha($day)) {
+                            $matches = [];
+                            preg_match(
+                                '/^(?<interval>-?[0-9]){0,1}(?<day>[a-zA-Z]{2})$/',
+                                $day,
+                                $matches
+                            );
+                            if (isset($matches['interval']) && is_int($matches['interval'])) {
+                                $v['INTERVAL'] = (int) $matches['interval'];
+                            }
+                            $v[] = ['DAY' => $matches['day']];
+                        } else {
+                            // No interval.
+                            $v[] = ['DAY' => $day];
+                        }
                     }
                 } else {
                     $v = $exploded;
@@ -1405,11 +1576,11 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
 
         // add rrule to exported calendar
         if (! empty($rrule) && ! isset($rrule['RDATE'])) {
-            $e->setRrule($this->sanitizeValue($rrule));
+            $this->export_recurrence_rule($e, 'RRULE', $rrule, $event);
         }
         // add exrule to exported calendar
         if (! empty($exrule) && ! isset($exrule['EXDATE'])) {
-            $e->setExrule($this->sanitizeValue($exrule));
+            $this->export_recurrence_rule($e, 'EXRULE', $exrule, $event);
         }
 
         // ===================

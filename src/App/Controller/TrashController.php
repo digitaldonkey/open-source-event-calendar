@@ -8,6 +8,7 @@ use Osec\App\Model\PostTypeEvent\EventNotFoundException;
 use Osec\App\Model\PostTypeEvent\EventParent;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Http\Request\RequestParser;
 use WP_User;
 
 /**
@@ -24,44 +25,50 @@ use WP_User;
  */
 class TrashController extends OsecBaseClass
 {
+    /**
+     * Registered in every context, not only in wp-admin.
+     *
+     * Events are also deleted by WP cron (WordPress emptying the trash after
+     * EMPTY_TRASH_DAYS), WP-CLI and the REST API. Skipping the cleanup there
+     * left the event row and all its instances behind.
+     *
+     * @param  App  $app
+     * @param  bool  $is_admin  Unused, kept for the add_actions() convention.
+     */
     public static function add_actions(App $app, bool $is_admin)
     {
-        if ($is_admin) {
-            add_action(
-                'delete_post',
-                function ($post_id) use ($app) {
-                    self::factory($app)->delete($post_id);
-                },
-                10,
-                1
-            );
-            add_action(
-                'delete_post',
-                function ($post_id) use ($app) {
-                    self::factory($app)->delete($post_id);
-                },
-                10,
-                1
-            );
+        add_action(
+            'delete_post',
+            function ($post_id) use ($app) {
+                if (OSEC_POST_TYPE === get_post_type($post_id)) {
+                    self::factory($app)->delete((int)$post_id);
+                }
+            },
+            10,
+            1
+        );
 
-            add_action(
-                'trashed_post',
-                function ($post_id) use ($app) {
-                    self::factory($app)->trash($post_id);
-                },
-                10,
-                1
-            );
+        add_action(
+            'trashed_post',
+            function ($post_id) use ($app) {
+                if (OSEC_POST_TYPE === get_post_type($post_id)) {
+                    self::factory($app)->trash((int)$post_id);
+                }
+            },
+            10,
+            1
+        );
 
-            add_action(
-                'untrashed_post',
-                function ($post_id) use ($app) {
-                    self::factory($app)->untrash($post_id);
-                },
-                10,
-                1
-            );
-        }
+        add_action(
+            'untrashed_post',
+            function ($post_id) use ($app) {
+                if (OSEC_POST_TYPE === get_post_type($post_id)) {
+                    self::factory($app)->untrash((int)$post_id);
+                }
+            },
+            10,
+            1
+        );
     }
 
     /**
@@ -71,7 +78,7 @@ class TrashController extends OsecBaseClass
      *
      * @wp_hook delete_post
      *
-     * @param  int  $post_id  ID of post, which was trashed.
+     * @param  int  $post_id  ID of post, which was deleted.
      *
      * @return bool Success.
      */
@@ -81,11 +88,11 @@ class TrashController extends OsecBaseClass
         $where   = ['post_id' => $post_id];
         $format  = ['%d'];
         $this->delete_children($post_id);
-        $success = $this->app->db->delete(OSEC_DB__EVENTS, $where, $format)
-                    && EventInstance::factory($this->app)->clean($post_id);
-        unset($where);
+        // Both run: an event row already gone must not keep its instances.
+        $events    = $this->app->db->delete(OSEC_DB__EVENTS, $where, $format);
+        $instances = EventInstance::factory($this->app)->clean($post_id);
 
-        return $success;
+        return false !== $events && false !== $instances;
     }
 
     /**
@@ -188,8 +195,7 @@ class TrashController extends OsecBaseClass
     public function display_trash_link($allcaps, $caps, $args, WP_User $user)
     {
         if (
-            // phpcs:ignore WordPress.Security.NonceVerification
-            isset($_GET['instance']) &&
+            RequestParser::has_param('instance') &&
             in_array('delete_published_osec_events', $caps, true)
         ) {
             return [];

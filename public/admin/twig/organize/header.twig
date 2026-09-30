@@ -1,27 +1,27 @@
 <div class="timely ai1ec-taxonomy-header ai1ec-hide">
-	<h1>{{ text_title }}</h1>
-	<ul class="ai1ec-nav ai1ec-nav-tabs">
-		{% for taxonomy in taxonomies %}
-			{% if taxonomy.children is not empty %}
-				<li class="{% if taxonomy.active %}ai1ec-active{% endif %}
-					ai1ec-taxonomy-{{ taxonomy.taxonomy_name }}
-					ai1ec-dropdown" role="presentation">
-					<a data-toggle="ai1ec-dropdown" href="#" class="ai1ec-dropdown-toggle"
-						role="button" aria-expanded="false">
-						{% if taxonomy.icon is not empty %}
-							<i class="{{ taxonomy.icon | e('html_attr') }} ai1ec-fa-fw"></i>
-						{% endif %}
-						{{ taxonomy.name }} <span class="ai1ec-caret"></span>
-					</a>
-					<ul class="ai1ec-dropdown-menu" role="menu">
-						{% for taxonomy2 in taxonomy.children %}
-							{% include 'organize/tab.twig' with { 'taxonomy': taxonomy2 } %}
-						{% endfor %}
-					</ul>
-				</li>
-			{% else %}
-				{% include 'organize/tab.twig' %}
-			{% endif %}
-		{% endfor %}
-	</ul>
+    <h1>{{ text_title }}</h1>
+    <ul class="ai1ec-nav ai1ec-nav-tabs">
+        {% for taxonomy in taxonomies %}
+            {% if taxonomy.children is not empty %}
+                <li class="{% if taxonomy.active %}ai1ec-active{% endif %}
+                    ai1ec-taxonomy-{{ taxonomy.taxonomy_name }}
+                    ai1ec-dropdown" role="presentation">
+                    <a data-toggle="ai1ec-dropdown" href="#" class="ai1ec-dropdown-toggle"
+                        role="button" aria-expanded="false">
+                        {% if taxonomy.icon is not empty %}
+                            <i class="{{ taxonomy.icon | e('html_attr') }} ai1ec-fa-fw"></i>
+                        {% endif %}
+                        {{ taxonomy.name }} <span class="ai1ec-caret"></span>
+                    </a>
+                    <ul class="ai1ec-dropdown-menu" role="menu">
+                        {% for taxonomy2 in taxonomy.children %}
+                            {% include 'organize/tab.twig' with { 'taxonomy': taxonomy2 } %}
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% else %}
+                {% include 'organize/tab.twig' %}
+            {% endif %}
+        {% endfor %}
+    </ul>
 </div>

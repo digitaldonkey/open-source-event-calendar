@@ -3,74 +3,31 @@
 namespace Osec\App\Controller;
 
 use Osec\App\Model\Date\DT;
-use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\SettingsView;
 use Osec\App\View\Calendar\CalendarPageView;
-use Osec\Bootstrap\App;
+use Osec\App\View\Event\EventContentView;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Http\Request\RequestParser;
 
 class ClassicBlockController extends OsecBaseClass
 {
-    private array $blockFile;
-
-    public function __construct(App $app)
-    {
-        parent::__construct($app);
-        $this->blockFile = json_decode(
-            file_get_contents(OSEC_PATH . 'blocks/build/classic/block.json'),
-            true,
-            512,
-            JSON_THROW_ON_ERROR
-        );
-    }
-
     public function registerCalendarBlock()
     {
-        wp_register_script(
-            'osec-calendar-block-classic',
-            plugins_url(OSEC_PLUGIN_NAME . '/blocks/build/classic/index.js', OSEC_PLUGIN_NAME),
-            [
-                // Dependencies
-                'wp-blocks',
-                'wp-i18n',
-                'wp-block-editor',
-                'wp-data',
-                'wp-core-data',
-            ],
-            OSEC_VERSION,
-            true
-        );
-        wp_register_style(
-            'osec-editor-style-classic',
-            plugins_url(OSEC_PLUGIN_NAME . '/blocks/build/classic/index.css', OSEC_PLUGIN_NAME),
-            [],
-            OSEC_VERSION
-        );
-        register_block_style(
-            'open-source-event-calendar/classic',
-            [
-                'name' => 'osec-editor-style-classic',
-                'label' => __('osec-editor-style-classic', 'open-source-event-calendar'),
-                'style_handle' => 'osec-editor-style-classic',
-            ]
-        );
-
         register_block_type(
-            $this->blockFile['name'],
-            array_merge_recursive(
-                $this->blockFile,
-                [
-                    'editor_script' => 'osec-calendar-block-classic',
-                    'render_callback' => function (array $attributes, string $content): string {
-                        $content .= '<div ' . get_block_wrapper_attributes() . '>';
-                        $content .= $this->getContent($this->transformAttributes($attributes));
-                        $content .= '</div>';
+            OSEC_PATH . 'blocks/build/classic',
+            [
+                'render_callback' => function (array $attributes, string $content): string {
+                    if (EventContentView::factory($this->app)->is_filtering_content()) {
+                        // No calendars inside event content, see EventContentView::is_filtering_content().
+                        return '';
+                    }
+                    $content .= '<div ' . get_block_wrapper_attributes() . '>';
+                    $content .= $this->getContent($this->transformAttributes($attributes));
+                    $content .= '</div>';
 
-                        return $content;
-                    },
-                ]
-            )
+                    return $content;
+                },
+            ]
         );
     }
 
@@ -94,6 +51,7 @@ class ClassicBlockController extends OsecBaseClass
             'post_ids' => implode(',', $atts['postIds']),
             'display_filters' => 'true',
             'display_subscribe' => 'true',
+            'display_print' => 'true',
             'agenda_toggle' => 'true',
             'display_view_switch' => 'true',
             'display_date_navigation' => 'true',
@@ -113,6 +71,7 @@ class ClassicBlockController extends OsecBaseClass
         foreach ([
             'displayFilters' => 'display_filters',
             'displaySubscribe' => 'display_subscribe',
+            'displayPrint' => 'display_print',
             'displayViewSwitch' => 'display_view_switch',
             'displayDateNavigation' => 'display_date_navigation',
             'agendaToggle' => 'agenda_toggle',
@@ -126,7 +85,7 @@ class ClassicBlockController extends OsecBaseClass
         if (isset($atts['fixedDate']) && DT::isValidTimeStamp($atts['fixedDate'])) {
             $query['exact_date'] = $atts['fixedDate'];
         } else {
-            $today = new DT('now', Timezones::factory($this->app)->get_default_timezone());
+            $today = new DT('now', 'sys.default');
             $today->set_time(0, 0, 0);
             $query['exact_date'] = $today->format();
         }
@@ -144,7 +103,7 @@ class ClassicBlockController extends OsecBaseClass
                     // Add a day on fixed date to match UI.
                     $dateLimit->adjust_day(1);
                 } else {
-                    $dateLimit = new DT('now', Timezones::factory($this->app)->get_default_timezone());
+                    $dateLimit = new DT('now', 'sys.default');
                 }
                 $dateLimit->adjust_day($number);
                 $dateLimit->set_time(0, 0, 0);

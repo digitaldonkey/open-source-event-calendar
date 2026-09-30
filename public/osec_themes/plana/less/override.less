@@ -10,6 +10,10 @@
 @import "event-single";
 
 @lineheight: 2.5;
+// Height of the toolbar controls on the right (print button, view switcher). Set as a
+// height instead of leaving it to line height and padding, because a link and a button
+// do not end up the same size otherwise - Safari differs from Chrome and Firefox.
+@toolbarControlHeight: 2.625em; // 42px, the height of the pagination links
 @foregroundColor: var(--wp--preset--color--contrast, buttontext);
 @backgroundColor: var(--wp--preset--color--accent, buttonFace);
 
@@ -28,116 +32,116 @@
 .ai1ec-popover.ai1ec-popup,
 .ai1ec-post_thumbnail,
 .ai1ec-content_img {
-	.ai1ec-box-shadow( none );
+  .ai1ec-box-shadow( none );
 }
 .ai1ec-agenda-view .ai1ec-date,
 .ai1ec-agenda-widget-view .ai1ec-date {
-	background: none;
-	border-top: 1px dotted mix( @body-bg, @text-color, 80% ) !important;
+  background: none;
+  border-top: 1px dotted mix( @body-bg, @text-color, 80% ) !important;
 }
 .ai1ec-agenda-view .ai1ec-date.ai1ec-today,
 .ai1ec-agenda-widget-view .ai1ec-date.ai1ec-today {
-	background: rgba(244, 244, 191, 0.5);
-	border-top: 1px dotted mix( @today-color, @text-color, 80% ) !important;
+  background: rgba(244, 244, 191, 0.5);
+  border-top: 1px dotted mix( @today-color, @text-color, 80% ) !important;
 }
 .ai1ec-agenda-view .ai1ec-date-title,
 .ai1ec-agenda-widget-view .ai1ec-date-title,
 .ai1ec-week-view .ai1ec-week .ai1ec-event-container,
 .ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
-	background-image: none; // Removes gradient.
-	background-color: @agenda-date-bg;
-	.ai1ec-box-shadow( none );
-	color: @link-color;
-	&:hover {
-		color: @link-hover-color;
-	}
+  background-image: none; // Removes gradient.
+  background-color: @agenda-date-bg;
+  .ai1ec-box-shadow( none );
+  color: @link-color;
+  &:hover {
+    color: @link-hover-color;
+  }
 }
 .ai1ec-full-event th,
 .ai1ec-excerpt .ai1ec-field-label {
-	font-size: 1em;
-	background: mix( @body-bg, @text-color, 94% );
-	background: rgba(0,0,0,0.05);
+  font-size: 1em;
+  background: mix( @body-bg, @text-color, 94% );
+  background: rgba(0,0,0,0.05);
 }
 
-.ai1ec-month-view .ai1ec-event-time,
-.ai1ec-week-view .ai1ec-event-time,
-.ai1ec-oneday-view .ai1ec-event-time {
-	font-size: .75em;
+.ai1ec-month-view,
+.ai1ec-week-view,
+.ai1ec-oneday-view {
+
+  .ai1ec-event-time {
+    font-size: .65em;
+    letter-spacing: -.04em;
+    @media screen and ( max-width: (@screen-sm - 1) ) {
+      font-size: .55em;
+    }
+  }
+  .ai1ec-event-title {
+    font-size: .7em;
+    @media screen and ( max-width: (@screen-sm - 1) ) {
+      font-size: .6em;
+      letter-spacing: -.04em;
+    }
+  }
 }
 
 .action-link {
-	// TODO Is there any consistent logic in these vars?
-	//@foregroundColor: var(--wp--preset--color--base, buttontext);
-	//@backgroundColor: var(--wp--preset--color--contrast, buttonFace);
-	@foregroundColor: var(--wp--preset--color--contrast, buttontext);
-	@backgroundColor: var(--wp--preset--color--accent, buttonFace);
-	@mutedColor: var(--wp--preset--color--cyan-bluish-gray, lightgray);
-	@editColor: var(--wp-admin-theme-color, buttonFace);
+  // TODO Is there any consistent logic in these vars?
+  //@foregroundColor: var(--wp--preset--color--base, buttontext);
+  //@backgroundColor: var(--wp--preset--color--contrast, buttonFace);
+  @foregroundColor: var(--wp--preset--color--contrast, buttontext);
+  @backgroundColor: var(--wp--preset--color--accent, buttonFace);
+  @mutedColor: var(--wp--preset--color--cyan-bluish-gray, lightgray);
+  @editColor: var(--wp-admin-theme-color, buttonFace);
 
-	display: inline-block;
-	padding: 0 .6em;
-	line-height: 2.62;
-	text-decoration: none;
+  display: inline-block;
+  padding: 0 .6em;
+  line-height: 2.62;
+  text-decoration: none;
 
-	color: @foregroundColor;
-	background: @backgroundColor;
-	&[disabled] {
-		color: @mutedColor;
-		//border: 0;
-	}
+  color: @foregroundColor;
+  background: @backgroundColor;
+  &[disabled] {
+    color: @mutedColor;
+  }
 
-	min-width: 2em;
-	text-align: center;
-	margin-bottom: .25rem;
+  min-width: 2em;
+  text-align: center;
+  margin-bottom: .25rem;
 
-	&:not([disabled]):hover {
-		background: @foregroundColor;
-		color: @backgroundColor;
-	}
-	&.edit-link {
-		&:not([disabled]):hover {
-			background: @editColor;
-		}
-	}
-	@media (min-width: 25rem) {
-		padding-right: 1em;
-		padding-left: 1em;
-	}
+  &:not([disabled]):hover {
+    background: @foregroundColor;
+    color: @backgroundColor;
+  }
+  &.edit-link {
+    &:not([disabled]):hover {
+      background: @editColor;
+    }
+  }
+  @media (min-width: 25rem) {
+    padding-right: 1em;
+    padding-left: 1em;
+  }
 
-	// Requires more specificity.
-	&.osec-read-more {
-		color: @foregroundColor;
-		background: @backgroundColor;
+  // Requires more specificity.
+  &.osec-read-more {
+    color: @foregroundColor;
+    background: @backgroundColor;
 
-		&:hover,
-		&:focus,
-		&:active {
-			color: @backgroundColor;
-			background: @foregroundColor;
-		}
-	}
+    &:hover,
+    &:focus,
+    &:active {
+      color: @backgroundColor;
+      background: @foregroundColor;
+    }
+  }
 }
 
 .osec-subscribe-container {
-	white-space: nowrap;
-	.ai1ec-fa.ai1ec-fa-fw {
-		width: 20px;
-	}
+  white-space: nowrap;
+  .ai1ec-fa.ai1ec-fa-fw {
+    width: 20px;
+  }
 }
 
-
-
-//.alignfull {
-//	outline: 2px dashed deeppink;
-//}
-
-
-//.is-layout-constrained > :where(:not(.alignleft):not(.alignright):not(.alignfull)) {
-//	max-width: var(--wp--style--global--content-size);
-//	margin-left: auto !important;
-//	margin-right: auto !important;
-//}
-
 table.ai1ec-month-view {
-	margin-bottom: .25rem;
+  margin-bottom: .25rem;
 }

@@ -1,0 +1,24 @@
+BEGIN:VCALENDAR
+PRODID:-//Open Source Event Calendar//Test Feed//EN
+VERSION:2.0
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:structurally_invalid_rule.ics
+X-WR-CALDESC:BYMONTHDAY with a weekly frequency. iCalcreator rejects this whi
+ le parsing the calendar.
+BEGIN:VEVENT
+DTSTART:20260706T090000Z
+DTEND:20260706T100000Z
+RRULE:FREQ=WEEKLY;BYMONTHDAY=15
+DTSTAMP:20260601T120000Z
+UID:structurally-invalid@open-source-event-calendar.test
+SUMMARY:Rule the RFC does not allow
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260707T090000Z
+DTEND:20260707T100000Z
+DTSTAMP:20260601T120000Z
+UID:plain@open-source-event-calendar.test
+SUMMARY:Event without a repeat rule
+END:VEVENT
+END:VCALENDAR

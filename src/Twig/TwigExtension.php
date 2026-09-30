@@ -271,7 +271,24 @@ class TwigExtension extends AbstractExtension
             new TwigFilter('month', $this->month(...)),
             new TwigFilter('year', $this->year(...)),
             new TwigFilter('theme_img_url', $this->theme_img_url(...)),
+            // Output of esc_url() is attribute-safe, Twig must not escape it again.
+            new TwigFilter('esc_url', $this->esc_url(...), ['is_safe' => ['html']]),
         ];
+    }
+
+    /**
+     * Twig filter esc_url - WordPress URL escaping for href/src attributes.
+     *
+     * Twig autoescaping does not check the protocol, so `javascript:` would pass.
+     *
+     * @param  mixed  $url  URL.
+     * @param  string[]|null  $protocols  Allowed protocols, default wp_allowed_protocols().
+     *
+     * @return string Escaped URL, empty if the protocol is not allowed.
+     */
+    public static function esc_url(mixed $url, ?array $protocols = null): string
+    {
+        return esc_url((string)$url, $protocols);
     }
 
     /**

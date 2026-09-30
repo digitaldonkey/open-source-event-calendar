@@ -1,143 +1,143 @@
 <?xml version="1.0"?>
 <ruleset name="WordPress-PSR-12">
-	<description>PSR-12 with WordPress Plugin Check requirements.</description>
+    <description>PSR-12 with WordPress Plugin Check requirements.</description>
 
-	<!-- BLACKLIST  -->
-	<file>./</file>
-	<exclude-pattern>/vendor/</exclude-pattern>
+    <!-- BLACKLIST  -->
+    <file>./</file>
+    <exclude-pattern>/vendor/</exclude-pattern>
     <exclude-pattern>/blocks/</exclude-pattern>
-	<exclude-pattern>/hookster_markdown/</exclude-pattern>
-	<exclude-pattern>/cache/</exclude-pattern>
-	<exclude-pattern>/node_modules/</exclude-pattern>
-	<exclude-pattern>*.map.php</exclude-pattern>
+    <exclude-pattern>/hookster_markdown/</exclude-pattern>
+    <exclude-pattern>/cache/</exclude-pattern>
+    <exclude-pattern>/node_modules/</exclude-pattern>
+    <exclude-pattern>/tests/</exclude-pattern>
+    <exclude-pattern>*.map.php</exclude-pattern>
 
 
-	<!-- How to scan -->
-	<!-- Usage instructions: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage -->
-	<!-- Annotated ruleset: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml -->
-	<arg value="sp"/> <!-- Show sniff and progress -->
-	<arg name="basepath" value="./"/><!-- Strip the file paths down to the relevant bit -->
-	<arg name="colors"/>
-	<arg name="extensions" value="php"/>
-	<arg name="parallel" value="20"/><!-- Enables parallel processing when available for faster results. -->
-	<arg name="warning-severity" value="1"/>
-	<!-- Rules: Check PHP version compatibility -->
-	<!-- https://github.com/PHPCompatibility/PHPCompatibility#sniffing-your-code-for-compatibility-with-specific-php-versions -->
-	<config name="testVersion" value="8.2-"/>
+    <!-- How to scan -->
+    <!-- Usage instructions: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage -->
+    <!-- Annotated ruleset: https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml -->
+    <arg value="sp"/> <!-- Show sniff and progress -->
+    <arg name="basepath" value="./"/><!-- Strip the file paths down to the relevant bit -->
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
+    <arg name="parallel" value="20"/><!-- Enables parallel processing when available for faster results. -->
+    <arg name="warning-severity" value="1"/>
+    <!-- Rules: Check PHP version compatibility -->
+    <!-- https://github.com/PHPCompatibility/PHPCompatibility#sniffing-your-code-for-compatibility-with-specific-php-versions -->
+    <config name="testVersion" value="8.2-"/>
 
-	<rule ref="WordPress.WP.Capabilities">
-		<properties>
-			<property name="custom_capabilities" type="array">
-				<element value="edit_osec_event" />
-				<element value="read_osec_event" />
-				<element value="delete_osec_event" />
-				<element value="edit_osec_events" />
-				<element value="edit_others_osec_events" />
-				<element value="delete_osec_events" />
-				<element value="publish_osec_events" />
-				<element value="read_private_osec_events" />
-				<element value="delete_private_osec_events" />
-				<element value="delete_published_osec_events" />
-				<element value="delete_others_osec_events" />
-				<element value="edit_private_osec_events" />
-				<element value="edit_published_osec_events" />
-				<element value="edit_osec_events" />
-				<element value="manage_osec_events_categories" />
-				<element value="manage_osec_feeds" />
-				<element value="switch_osec_themes" />
-				<element value="manage_osec_options" />
-			</property>
-		</properties>
-	</rule>
+    <rule ref="WordPress.WP.Capabilities">
+        <properties>
+            <property name="custom_capabilities" type="array">
+                <element value="edit_osec_event" />
+                <element value="read_osec_event" />
+                <element value="delete_osec_event" />
+                <element value="edit_osec_events" />
+                <element value="edit_others_osec_events" />
+                <element value="delete_osec_events" />
+                <element value="publish_osec_events" />
+                <element value="read_private_osec_events" />
+                <element value="delete_private_osec_events" />
+                <element value="delete_published_osec_events" />
+                <element value="delete_others_osec_events" />
+                <element value="edit_private_osec_events" />
+                <element value="edit_published_osec_events" />
+                <element value="edit_osec_events" />
+                <element value="manage_osec_events_categories" />
+                <element value="manage_osec_feeds" />
+                <element value="switch_osec_themes" />
+                <element value="manage_osec_options" />
+            </property>
+        </properties>
+    </rule>
 
-	<!--
+    <!--
         #############################################################################
         SET UP THE RULESETS
         #############################################################################
-	-->
+    -->
 
-	<!-- https://github.com/PHPCompatibility/PHPCompatibilityWP -->
-	<rule ref="PHPCompatibilityWP"/>
+    <!-- https://github.com/PHPCompatibility/PHPCompatibilityWP -->
+    <rule ref="PHPCompatibilityWP"/>
 
-	<!-- Rules: WordPress Coding Standards -->
-	<!-- https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards -->
-	<!-- https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki/Customizable-sniff-properties -->
-	<config name="minimum_supported_wp_version" value="6.2"/>
+    <!-- Rules: WordPress Coding Standards -->
+    <!-- https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards -->
+    <!-- https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/wiki/Customizable-sniff-properties -->
+    <config name="minimum_supported_wp_version" value="6.2"/>
 
-	<rule ref="PSR12">
-		<exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
-		<exclude name="PSR2.Methods.MethodDeclaration.Underscore" />
-		<exclude name="PSR12.ControlStructures.ControlStructureSpacing"/>
-	</rule>
+    <rule ref="PSR12">
+        <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
+        <exclude name="PSR2.Methods.MethodDeclaration.Underscore" />
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing"/>
+    </rule>
 
 
 
-	<!-- WordPress-Extra-->
-	<rule ref="./wp-extras.xml">
-		<!--
-			Disabling most WordPress oddities as we use PSR-12
-		 -->
-		<exclude  name="Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed" />
-		<exclude  name="Generic.WhiteSpace.ArbitraryParenthesesSpacing.SpaceAfterOpen" />
-		<exclude  name="Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed" />
-		<exclude  name="Generic.Formatting.SpaceAfterCast.NoSpace" />
-		<exclude  name="Generic.WhiteSpace.ArbitraryParenthesesSpacing.SpaceBeforeClose" />
-		<exclude  name="Generic.Classes.OpeningBraceSameLine.BraceOnNewLine" />
-		<exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
-		<exclude name="Generic.Formatting.MultipleStatementAlignment.NotSameWarning" />
-		<exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" />
-		<exclude name="Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition" />
-		<exclude name="WordPress.WhiteSpace.CastStructureSpacing.NoSpaceBeforeOpenParenthesis" />
-		<exclude name="WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase" />
-		<exclude name="WordPress.Arrays.ArrayKeySpacingRestrictions.NoSpacesAroundArrayKeys" />
-		<exclude name="WordPress.WhiteSpace.ControlStructureSpacing.NoSpaceAfterOpenParenthesis" />
-		<exclude name="WordPress.WhiteSpace.ControlStructureSpacing.NoSpaceBeforeCloseParenthesis" />
-		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase" />
-		<exclude name="WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase" />
-		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
-		<exclude name="WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase" />
-		<exclude name="WordPress.Arrays.ArrayIndentation.ItemNotAligned" />
-		<exclude name="WordPress.WhiteSpace.OperatorSpacing.NoSpaceBefore" />
-		<exclude name="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned" />
-		<exclude name="WordPress.WhiteSpace.OperatorSpacing.NoSpaceAfter" />
-		<exclude name="WordPress.PHP.YodaConditions.NotYoda" />
-		<exclude name="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid" />
-		<exclude name="Universal.Arrays.DisallowShortArraySyntax.Found" />
-		<exclude name="Universal.WhiteSpace.PrecisionAlignment.Found" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.Indent" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.MultipleArguments" />
-		<exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingBeforeClose" />
-		<exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingAfterOpen" />
-		<exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingBeforeClose" />
-		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterOpen" />
-		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeEnd" />
-		<exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound" />
-		<exclude name="Universal.Operators.DisallowShortTernary.Found" />
-		<exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames.classFound" />
-		<exclude name="NormalizedArrays.Arrays.ArrayBraceSpacing.SpaceAfterArrayOpenerSingleLine" />
-		<exclude name="NormalizedArrays.Arrays.ArrayBraceSpacing.SpaceBeforeArrayCloserSingleLine" />
-		<exclude name="NormalizedArrays.Arrays.ArrayBraceSpacing.EmptyArraySpacing" />
-		<exclude name="NormalizedArrays.Arrays.ArrayBraceSpacing.SpaceAfterKeyword" />
-	</rule>
+    <!-- WordPress-Extra-->
+    <rule ref="./wp-extras.xml">
+        <!--
+            Disabling most WordPress oddities as we use PSR-12
+         -->
+        <exclude  name="Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed" />
+        <exclude  name="Generic.WhiteSpace.ArbitraryParenthesesSpacing.SpaceAfterOpen" />
+        <exclude  name="Generic.Formatting.SpaceAfterCast.NoSpace" />
+        <exclude  name="Generic.WhiteSpace.ArbitraryParenthesesSpacing.SpaceBeforeClose" />
+        <exclude  name="Generic.Classes.OpeningBraceSameLine.BraceOnNewLine" />
+        <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
+        <exclude name="Generic.Formatting.MultipleStatementAlignment.NotSameWarning" />
+        <exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" />
+        <exclude name="Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition" />
+        <exclude name="WordPress.WhiteSpace.CastStructureSpacing.NoSpaceBeforeOpenParenthesis" />
+        <exclude name="WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase" />
+        <exclude name="WordPress.Arrays.ArrayKeySpacingRestrictions.NoSpacesAroundArrayKeys" />
+        <exclude name="WordPress.WhiteSpace.ControlStructureSpacing.NoSpaceAfterOpenParenthesis" />
+        <exclude name="WordPress.WhiteSpace.ControlStructureSpacing.NoSpaceBeforeCloseParenthesis" />
+        <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase" />
+        <exclude name="WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase" />
+        <exclude name="WordPress.Files.FileName.InvalidClassFileName" />
+        <exclude name="WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase" />
+        <exclude name="WordPress.Arrays.ArrayIndentation.ItemNotAligned" />
+        <exclude name="WordPress.WhiteSpace.OperatorSpacing.NoSpaceBefore" />
+        <exclude name="WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned" />
+        <exclude name="WordPress.WhiteSpace.OperatorSpacing.NoSpaceAfter" />
+        <exclude name="WordPress.PHP.YodaConditions.NotYoda" />
+        <exclude name="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid" />
+        <exclude name="Universal.Arrays.DisallowShortArraySyntax.Found" />
+        <exclude name="Universal.WhiteSpace.PrecisionAlignment.Found" />
+        <exclude name="PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket" />
+        <exclude name="PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket" />
+        <exclude name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket" />
+        <exclude name="PEAR.Functions.FunctionCallSignature.Indent" />
+        <exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine" />
+        <exclude name="PEAR.Functions.FunctionCallSignature.MultipleArguments" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingBeforeClose" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingAfterOpen" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingBeforeClose" />
+        <exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterOpen" />
+        <exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeEnd" />
+        <exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound" />
+        <exclude name="Universal.Operators.DisallowShortTernary.Found" />
+        <exclude name="Universal.NamingConventions.NoReservedKeywordParameterNames.classFound" />
+        <exclude name="NormalizedArrays.Arrays.ArrayBraceSpacing.SpaceAfterArrayOpenerSingleLine" />
+        <exclude name="NormalizedArrays.Arrays.ArrayBraceSpacing.SpaceBeforeArrayCloserSingleLine" />
+        <exclude name="NormalizedArrays.Arrays.ArrayBraceSpacing.EmptyArraySpacing" />
+        <exclude name="NormalizedArrays.Arrays.ArrayBraceSpacing.SpaceAfterKeyword" />
+    </rule>
 
-	<!-- Include everything of WP-Plugin-Check
+    <!-- Include everything of WP-Plugin-Check
 
-		https://github.com/WordPress/plugin-check/blob/1.8.0/phpcs-rulesets/plugin-check.ruleset.xml
+        https://github.com/WordPress/plugin-check/blob/1.8.0/phpcs-rulesets/plugin-check.ruleset.xml
 
-		The file phpunit-wp-plugin-review.xml should always contain
-		the latest tag release. By time of writing it was
-	 	https://raw.githubusercontent.com/WordPress/plugin-check/refs/tags/1.8.0/phpcs-rulesets/plugin-check.ruleset.xml
+        The file phpunit-wp-plugin-review.xml should always contain
+        the latest tag release. By time of writing it was
+        https://raw.githubusercontent.com/WordPress/plugin-check/refs/tags/1.8.0/phpcs-rulesets/plugin-check.ruleset.xml
 
-	 	This should be updated regularly.
-	 	@see bin/get-latest-plugin-review-phpcs-rulesets.sh
+        This should be updated regularly.
+        @see bin/get-latest-plugin-review-phpcs-rulesets.sh
 
-	 -->
-	<rule ref="./plugin-check.ruleset.xml">
-		<type>error</type>
-	</rule>
+     -->
+    <rule ref="./plugin-check.ruleset.xml">
+        <type>error</type>
+    </rule>
 
 </ruleset>

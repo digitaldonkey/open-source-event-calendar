@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import Switch from "react-switch";
+import {ToggleControl} from '@wordpress/components';
 import {__} from "@wordpress/i18n";
 
 export default function BoolSwitch({defaultLimitBy, defaultLimit, onChange}) {
@@ -45,25 +45,15 @@ export default function BoolSwitch({defaultLimitBy, defaultLimit, onChange}) {
 	return (
 		<>
 			<p>
-				<label style={{display: 'flex'}}>
-					<Switch
-						checked={limitBy === 'days'}
-						onChange={(e) => {
-							const val = e ? 'days' : 'events';
-							handleChange({limitBy: val})
-						}}
-						uncheckedIcon={false}
-						checkedIcon={false}
-						onColor="#888888"
-						onHandleColor="#ffffff"
-					/>
-					<span style={{
-						display: 'table-cell',
-						verticalAlign: 'middle',
-						paddingLeft: '1em',
-						paddingRight: '1em',
-					}}>{labelText()}</span>
-				</label>
+				<ToggleControl
+					__nextHasNoMarginBottom
+					className="osec-limit-by-toggle"
+					label={labelText()}
+					checked={limitBy === 'days'}
+					onChange={(checked) => {
+						handleChange({limitBy: checked ? 'days' : 'events'})
+					}}
+				/>
 			</p>
 			<p>
 				<label style={{

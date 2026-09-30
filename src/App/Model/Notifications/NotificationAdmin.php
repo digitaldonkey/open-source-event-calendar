@@ -36,6 +36,11 @@ class NotificationAdmin extends NotificationAbstract
     public const RCPT_ADMIN = 'admin_notices';
 
     /**
+     * Nonce action of the dismiss button (wp_ajax_osec_dismiss_notice).
+     */
+    public const DISMISS_ACTION = 'osec_dismiss_notice';
+
+    /**
      * @var array Map of messages to be rendered.
      */
     protected ?array $messages = [];
@@ -62,6 +67,37 @@ class NotificationAdmin extends NotificationAbstract
         array $recipients = [self::RCPT_ADMIN],
         $persistent = false
     ) {
+        /**
+         * Short-circuit storing an admin notice.
+         *
+         * Return anything but null to handle the message yourself; it is then not
+         * stored and store() returns that value. The WP-CLI commands use this to
+         * print notices to the console instead of wp-admin, for the length of a run.
+         * A listener returning non-null on every call hides all admin notices of
+         * the calendar, including failing feeds - keep it narrow.
+         *
+         * @since 1.1.15
+         *
+         * @param  mixed  $pre  Null to store the message as usual.
+         * @param  string  $message  Message, already escaped for HTML output.
+         * @param  string  $class  Message box class, e.g. 'error' or 'updated'.
+         * @param  int  $importance  Importance, see store().
+         * @param  array  $recipients  List of message recipients.
+         * @param  bool  $persistent  Whether it must be dismissed by the user.
+         */
+        $pre = apply_filters(
+            'osec_admin_notification_pre_store',
+            null,
+            $message,
+            $class,
+            $importance,
+            $recipients,
+            $persistent
+        );
+        if (null !== $pre) {
+            return $pre;
+        }
+
         $this->retrieve();
 
         $entity            = compact('message', 'class', 'importance', 'persistent');
@@ -184,6 +220,9 @@ class NotificationAdmin extends NotificationAbstract
                 __('Open Source Event Calendar', 'open-source-event-calendar')
             );
             $entity['text_dismiss_button'] = __('Got it – dismiss this', 'open-source-event-calendar');
+            $entity['dismiss_nonce']       = current_user_can('manage_osec_options')
+                ? wp_create_nonce(self::DISMISS_ACTION)
+                : '';
             $file                          = $theme->get_file(
                 'notification/admin.twig',
                 $entity,
@@ -236,21 +275,35 @@ class NotificationAdmin extends NotificationAbstract
     }
 
     /**
+     * Removes a stored message.
+     *
+     * @param  string  $msg_key  Key of the message (its `msg_key`).
+     *
+     * @return bool Success.
+     */
+    public function remove(string $msg_key): bool
+    {
+        $this->retrieve();
+        unset($this->messages['_messages'][$msg_key]);
+        foreach (array_keys($this->messages) as $dest) {
+            unset($this->messages[$dest][$msg_key]);
+        }
+
+        return $this->write();
+    }
+
+    /**
      * Delete a notice from ajax call.
      */
     public function dismiss_notice(): void
     {
-        // phpcs:ignore WordPress.Security.NonceVerification
-        if (!isset($_POST['key'])) {
-            return;
+        check_ajax_referer(self::DISMISS_ACTION, 'nonce');
+        // Dismissing removes the notice for everyone.
+        if (! current_user_can('manage_osec_options')) {
+            wp_die(-1, 403);
         }
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing
-        $key = sanitize_text_field(wp_unslash($_POST['key']));
-        foreach ($this->messages as $dest) {
-            if (isset($this->messages[$dest][$key])) {
-                unset($this->messages[$dest][$key]);
-            }
+        if (isset($_POST['key'])) {
+            $this->remove(sanitize_key(wp_unslash($_POST['key'])));
         }
-        $this->write();
     }
 }

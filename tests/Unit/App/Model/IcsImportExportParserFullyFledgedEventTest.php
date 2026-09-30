@@ -30,6 +30,7 @@ class IcsImportExportParserFullyFledgedEventTest extends TestBase
                     'feed_name'            => 'fully-fledged-event.ics',
                     'feed_category'        => '',
                     'feed_tags'            => '',
+                    'hide_cost'            => '0',
                     'comments_enabled'     => '0',
                     'map_display_enabled'  => '1',
                     'keep_tags_categories' => '0',

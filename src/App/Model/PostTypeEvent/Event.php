@@ -3,7 +3,6 @@
 namespace Osec\App\Model\PostTypeEvent;
 
 use Exception;
-use Osec\App\Model\AvatarFallbackModel;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\View\Event\EventAvatarView;
@@ -83,7 +82,7 @@ class Event extends OsecBaseClass
         if ($instance) {
             $this->entity->set('instance_id', $instance);
         }
-        if (null === $data) {
+        if (!$data) {
             return; // empty object
         }
 
@@ -197,38 +196,38 @@ class Event extends OsecBaseClass
 
         $left_join  = '';
         $select_sql = '
-			e.post_id,
-			e.timezone_name,
-			e.recurrence_rules,
-			e.exception_rules,
-			e.allday,
-			e.instant_event,
-			e.recurrence_dates,
-			e.exception_dates,
-			e.venue,
-			e.country,
-			e.address,
-			e.city,
-			e.province,
-			e.postal_code,
-			e.show_map,
-			e.contact_name,
-			e.contact_phone,
-			e.contact_email,
-			e.contact_url,
-			e.cost,
-			e.ticket_url,
-			e.ical_feed_url,
-			e.ical_source_url,
-			e.ical_organizer,
-			e.ical_contact,
-			e.ical_uid,
-			e.longitude,
-			e.latitude,
-			e.show_coordinates,
-			GROUP_CONCAT( ttc.term_id ) AS categories,
-			GROUP_CONCAT( ttt.term_id ) AS tags
-		';
+            e.post_id,
+            e.timezone_name,
+            e.recurrence_rules,
+            e.exception_rules,
+            e.allday,
+            e.instant_event,
+            e.recurrence_dates,
+            e.exception_dates,
+            e.venue,
+            e.country,
+            e.address,
+            e.city,
+            e.province,
+            e.postal_code,
+            e.show_map,
+            e.contact_name,
+            e.contact_phone,
+            e.contact_email,
+            e.contact_url,
+            e.cost,
+            e.ticket_url,
+            e.ical_feed_url,
+            e.ical_source_url,
+            e.ical_organizer,
+            e.ical_contact,
+            e.ical_uid,
+            e.longitude,
+            e.latitude,
+            e.show_coordinates,
+            GROUP_CONCAT( ttc.term_id ) AS categories,
+            GROUP_CONCAT( ttt.term_id ) AS tags
+        ';
 
         if (
             false !== $instance &&
@@ -237,8 +236,9 @@ class Event extends OsecBaseClass
         ) {
             $this->set('instance_id', $instance);
 
-            $select_sql .= ', IF( aei.start IS NOT NULL, aei.start, e.start ) as start,' .
-                           '  IF( aei.start IS NOT NULL, aei.end,   e.end )   as end ';
+            // CASE, not IF(): the SQLite driver (WordPress Playground) evaluates IF() to its else branch.
+            $select_sql .= ', CASE WHEN aei.start IS NOT NULL THEN aei.start ELSE e.start END AS start,' .
+                           ' CASE WHEN aei.start IS NOT NULL THEN aei.end ELSE e.end END AS `end` ';
             $left_join = 'LEFT JOIN ' . $dbi->get_table_name(OSEC_DB__INSTANCES) .
                          ' aei ON aei.id = ' . absint($instance) . ' AND e.post_id = aei.post_id ';
         } else {
@@ -256,23 +256,23 @@ class Event extends OsecBaseClass
         // = Fetch event from database =
         // =============================
         $query = 'SELECT ' . $select_sql . '
-			FROM ' . $dbi->get_table_name(OSEC_DB__EVENTS) . ' e
-				LEFT JOIN ' .
+            FROM ' . $dbi->get_table_name(OSEC_DB__EVENTS) . ' e
+                LEFT JOIN ' .
                  $dbi->get_table_name('term_relationships') . ' tr
-					ON ( e.post_id = tr.object_id )
-				LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttc
-					ON (
-						tr.term_taxonomy_id = ttc.term_taxonomy_id AND
-						ttc.taxonomy = \'osec_events_categories\'
-					)
-				LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttt
-					ON (
-						tr.term_taxonomy_id = ttt.term_taxonomy_id AND
-						ttt.taxonomy = \'osec_events_tags\'
-					)
-				' . $left_join . '
-			WHERE e.post_id = ' . absint($post_id) . '
-			GROUP BY e.post_id';
+                    ON ( e.post_id = tr.object_id )
+                LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttc
+                    ON (
+                        tr.term_taxonomy_id = ttc.term_taxonomy_id AND
+                        ttc.taxonomy = \'osec_events_categories\'
+                    )
+                LEFT JOIN ' . $dbi->get_table_name('term_taxonomy') . ' ttt
+                    ON (
+                        tr.term_taxonomy_id = ttt.term_taxonomy_id AND
+                        ttt.taxonomy = \'osec_events_tags\'
+                    )
+                ' . $left_join . '
+            WHERE e.post_id = ' . absint($post_id) . '
+            GROUP BY e.post_id';
         // FYI Not prepared but absint-secured ;)
         $event = $dbi->get_row($query, ARRAY_A);
         if (null === $event || null === $event['post_id']) {
@@ -370,7 +370,7 @@ class Event extends OsecBaseClass
     {
         return EventAvatarView::factory($this->app)->get_event_avatar(
             $this,
-            AvatarFallbackModel::factory($this->app)->get_all(),
+            null,
             '',
             $wrap_permalink
         );
@@ -383,10 +383,7 @@ class Event extends OsecBaseClass
      */
     public function get_avatar_data($wrap_permalink = true)
     {
-        return EventAvatarView::factory($this->app)->get_event_avatar_data(
-            $this,
-            AvatarFallbackModel::factory($this->app)->get_all(),
-        );
+        return EventAvatarView::factory($this->app)->get_event_avatar_data($this);
     }
 
     /**
@@ -565,6 +562,9 @@ class Event extends OsecBaseClass
             }
         }
 
+        $this->discard_unusable_recurrence_rules();
+        $this->pin_ical_uid();
+
         $dbi        = $this->app->db;
         $columns    = $this->prepare_store_entity();
         $format     = $this->prepare_store_format($columns);
@@ -605,7 +605,9 @@ class Event extends OsecBaseClass
                 return false;
             }
             $this->set('post_id', $post_id);
-            $columns['post_id'] = $post_id;
+            $this->pin_ical_uid();
+            $columns['post_id']  = $post_id;
+            $columns['ical_uid'] = $this->storage_format('ical_uid');
 
             // Insert new event data
             if (false === $dbi->insert($table_name, $columns, $format)) {
@@ -613,23 +615,10 @@ class Event extends OsecBaseClass
             }
         }
 
+        // Categories and tags are not assigned here: the editor saves them with the post, the feed import through
+        // EventFeedTerms. The properties hold a comma separated string, read from the DB for the views.
         $taxonomy = new EventTaxonomy($this->app, $post_id);
-        $cats     = $this->get('categories');
-        if (
-            is_array($cats) &&
-            ! empty($cats)
-        ) {
-            $taxonomy->set_categories($cats);
-        }
-        $tags = $this->get('tags');
-        if (
-            is_array($tags) &&
-            ! empty($tags)
-        ) {
-            $taxonomy->set_tags($tags);
-        }
-
-        $feed = $this->get('feed');
+        $feed     = $this->get('feed');
         if ($feed && isset($feed->feed_id)) {
             $taxonomy->set_feed($feed);
         }
@@ -660,6 +649,58 @@ class Event extends OsecBaseClass
         do_action('osec_event_saved', $post_id, $this, $update);
 
         return $post_id;
+    }
+
+    /**
+     * Stores the UID the event is exported with, once its post ID is known.
+     *
+     * get_uid() derives it from the site URL, so storing it keeps the UID
+     * stable if the site moves, and the export never has to write it.
+     *
+     * @return void
+     */
+    protected function pin_ical_uid(): void
+    {
+        if (empty($this->get('ical_uid')) && $this->get('post_id')) {
+            $this->set('ical_uid', $this->get_uid());
+        }
+    }
+
+    /**
+     * Drops recurrence rules the generator cannot use, before they are stored.
+     *
+     * Storing them would make every reader guard against them - the instance
+     * generator, the ICS export, the repeat text - and the event would claim a
+     * recurrence it does not have. The rule is reported instead, so the editor
+     * and the feed import can say what happened.
+     *
+     * @return void
+     */
+    protected function discard_unusable_recurrence_rules(): void
+    {
+        $start = clone $this->get('start')->getObject();
+
+        foreach (['recurrence_rules', 'exception_rules'] as $field) {
+            $rule  = $this->get($field);
+            $error = EventInstance::factory($this->app)->get_rule_error($rule, $start);
+            if (null === $error) {
+                continue;
+            }
+            $this->set($field, '');
+
+            /**
+             * Act on a recurrence rule the calendar had to drop.
+             *
+             * The event is saved without the rule, as a single occurrence,
+             * instead of the save or the feed import failing.
+             *
+             * @since 1.1.15
+             *
+             * @param  string  $rrule  Rule that was dropped.
+             * @param  string  $message  Why the rule was rejected.
+             */
+            do_action('osec_recurrence_rule_invalid', $rule, $error);
+        }
     }
 
     /**
@@ -838,9 +879,14 @@ class Event extends OsecBaseClass
         $this->entity = clone $this->entity;
     }
 
+    /**
+     * Dates without a rule are stored as the rule 'RDATE=<dates>', the editor's
+     * "custom dates". Next to a real rule, as feeds send them, both are kept: the
+     * instance generator and the export read the dates on their own.
+     */
     protected function handlePropertyConstruct_recurrence_dates($value)
     {
-        if ($value) {
+        if ($value && $this->is_date_list_rule('recurrence_rules', 'RDATE=')) {
             $this->entity->set('recurrence_rules', 'RDATE=' . $value);
         }
 
@@ -849,11 +895,21 @@ class Event extends OsecBaseClass
 
     protected function handlePropertyConstruct_exception_dates($value)
     {
-        if ($value) {
+        if ($value && $this->is_date_list_rule('exception_rules', 'EXDATE=')) {
             $this->entity->set('exception_rules', 'EXDATE=' . $value);
         }
 
         return $value;
+    }
+
+    /**
+     * @return bool Whether the rule property is empty or only holds a date list.
+     */
+    private function is_date_list_rule(string $property, string $prefix): bool
+    {
+        $rule = (string)$this->entity->get($property);
+
+        return '' === $rule || str_starts_with($rule, $prefix);
     }
 
     protected function handlePropertyDestruct_instant_event($value)
@@ -1018,15 +1074,46 @@ class Event extends OsecBaseClass
      */
     protected function handlePropertyConstruct_cost(string $value)
     {
-        $cost    = '';
+        $cost    = null;
         $is_free = true;
+        $hide_cost = false;
 
         // Aggregated value from DB.
         if (JsonHelper::isValidJson($value)) {
-            $data    = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
-            $is_free = (bool)$data['is_free'];
-            $cost    = $data['cost'];
-        } else {
+            $data      = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+            $is_free   = (bool)$data['is_free'];
+            $cost      = is_null($data['cost']) ? '' : $data['cost'];
+            $hide_cost = isset($data['hide_cost']) ? $data['hide_cost'] : false;
+        } elseif (OSEC_LEGACY_COST_SERIALIZED) {
+            // Serialized array requirements and hopefully all currency symbols.
+            $regex = '/^[a-zA-Z\d\s\-,;":{}_€$¢£¥ƒ₠₡₢₣₤₥₦₧₨₩₪₫₭₮₯₰₱₲₳₴₵₶₷₸₹₺₻₼₽₾₿$]*$/';
+            /**
+             * Alter security regex used to sanitize values before
+             * unserialize when OSEC_LEGACY_COST_SERIALIZED is active.
+             * Shoud allow DB records like:
+             *
+             *   a:2:{s:4:"cost";s:6:"999€";s:7:"is_free";b:0;}
+             *
+             * @since 1.1.10
+             *
+             * @param  array  $regex  String Regex.
+             */
+            $regex = apply_filters('osec_sanitize_unserialize_cost_regex', $regex);
+            if (preg_match($regex, $value)) {
+                // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+                $data = unserialize(trim($value), ['allowed_classes' => false]);
+            } else {
+                // Invalid input
+                throw new Exception(esc_html('Invalid serialized data.'));
+            }
+            if (is_array($data)) {
+                $cost = isset($data['cost']) ? $data['cost'] : '';
+                if ($cost) {
+                    $is_free = false;
+                }
+            }
+        }
+        if (is_null($cost)) {
             // Plain value submitted.
             $cost = sanitize_text_field($value);
             if ($cost) {
@@ -1034,7 +1121,7 @@ class Event extends OsecBaseClass
             }
         }
         $this->entity->set('is_free', $is_free);
-
+        $this->entity->set('hide_cost', $hide_cost);
         return $cost;
     }
 
@@ -1050,6 +1137,7 @@ class Event extends OsecBaseClass
         $data = [
             'cost'    => $cost,
             'is_free' => true,
+            'hide_cost' => $this->entity->get('hide_cost'),
         ];
         if ($cost) {
             $data['is_free'] = false;

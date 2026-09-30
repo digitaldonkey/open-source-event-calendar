@@ -19,6 +19,14 @@ use Osec\Exception\DatabaseErrorException;
  */
 class DatabaseSchema extends OsecBaseClass
 {
+    private const SCHEMA_UPDATE_LOCK = 'osec_schema_update_lock';
+
+    /**
+     * Transient set after a failed repair, holding the error message. While
+     * present, only privileged requests retry the repair.
+     */
+    public const SCHEMA_UPDATE_BACKOFF = 'osec_schema_update_failed';
+
     protected ?array $schemaDelta;
 
     protected array $prefixes;
@@ -37,17 +45,58 @@ class DatabaseSchema extends OsecBaseClass
     /**
      * Check if the schema is up to date.
      *
-     * @return void
+     * Any request attempts a repair when the schema is outdated, so sites heal
+     * on first traffic after an update (auto-updates, deploys, multisite
+     * subsites). After a failed repair, a backoff blocks retries from
+     * non-privileged requests for a while.
+     *
+     * @param  bool  $force  Ignore the failure backoff (e.g. from plugin
+     *                        activation, where a repair attempt is the
+     *                        deliberate point of the call). Users who can
+     *                        manage options and WP-CLI ignore it as well.
+     *
+     * @return bool True if the tables match the current schema. False if the
+     *              schema is outdated and the repair was skipped for this
+     *              request (failure backoff, lock held or filtered off) -
+     *              OSEC must not run on outdated tables then.
      * @throws DatabaseErrorException
      * @throws ErrorException
      */
-    public function verifySqlSchema()
+    public function verifySqlSchema(bool $force = false): bool
+    {
+        $notifier = DatabaseSchemaFailureNotifier::factory($this->app);
+        try {
+            $ready = $this->updateSchema($force, $notifier);
+        } catch (DatabaseErrorException | ErrorException $error) {
+            $notifier->register(false);
+            throw $error;
+        }
+        $notifier->register($ready);
+
+        return $ready;
+    }
+
+    /**
+     * @see verifySqlSchema()
+     */
+    private function updateSchema(bool $force, DatabaseSchemaFailureNotifier $notifier): bool
     {
         $schema_sql = $this->get_current_db_schema();
         $version    = sha1($schema_sql);
 
         if ($this->app->options->get('osec_db_version') !== $version) {
-            $do_schema_update = true;
+            // A persistently failing repair must not re-run DDL on every
+            // anonymous request, so after a failure only privileged requests
+            // retry until the backoff expires. current_user_can(), not
+            // is_admin(): is_admin() is true for anonymous admin-ajax.php
+            // requests. wp_get_current_user() is pluggable and not loaded yet
+            // when this runs on 'muplugins_loaded' (test bootstrap).
+            $privileged = $force
+                || (function_exists('wp_get_current_user') && current_user_can('manage_options'))
+                || (defined('WP_CLI') && WP_CLI);
+
+            $do_schema_update = $privileged || false === get_transient(self::SCHEMA_UPDATE_BACKOFF);
+
             if (
                 /**
                  * Define if Database schema upgrade should be executed
@@ -56,14 +105,43 @@ class DatabaseSchema extends OsecBaseClass
                  *
                  * @param $do_schema_update
                  */
-                apply_filters('osec_perform_scheme_update', $do_schema_update)
-                && $this->apply_delta($schema_sql)
+                ! apply_filters('osec_perform_scheme_update', $do_schema_update)
             ) {
+                // Deliberately skipped for this request - leave osec_db_version
+                // stale so the next eligible request retries, rather than
+                // treating a deliberate skip as failure.
+                return false;
+            }
+
+            if (get_transient(self::SCHEMA_UPDATE_LOCK)) {
+                // Another concurrent request is already repairing this same
+                // mismatch - skip rather than race it with overlapping DDL; the
+                // next eligible request retries. Best-effort: a small
+                // get/set race window remains, this isn't a hard guarantee.
+                return false;
+            }
+            // Released in `finally`; the TTL only matters if the request dies
+            // mid-repair, and must outlast a slow ALTER on a large table.
+            set_transient(self::SCHEMA_UPDATE_LOCK, true, 5 * MINUTE_IN_SECONDS);
+
+            try {
+                global $wpdb;
+                if (! $this->apply_delta($schema_sql)) {
+                    throw new ErrorException('osec: database schema update failed: ' . $wpdb->last_error);
+                }
                 $this->app->options->set('osec_db_version', $version, true);
-            } else {
-                throw new ErrorException();
+                delete_transient(self::SCHEMA_UPDATE_BACKOFF);
+                $notifier->clearFailure();
+            } catch (DatabaseErrorException | ErrorException $error) {
+                set_transient(self::SCHEMA_UPDATE_BACKOFF, $error->getMessage(), 10 * MINUTE_IN_SECONDS);
+                $notifier->recordFailure($error->getMessage());
+                throw $error;
+            } finally {
+                delete_transient(self::SCHEMA_UPDATE_LOCK);
             }
         }
+
+        return true;
     }
 
     /**
@@ -79,81 +157,82 @@ class DatabaseSchema extends OsecBaseClass
         // =======================
         $table_name = $dbi->get_table_name(OSEC_DB__EVENTS);
         $sql        = "CREATE TABLE $table_name (
-				post_id bigint NOT NULL,
-				start bigint UNSIGNED NOT NULL,
-				end bigint UNSIGNED,
-				timezone_name varchar(50),
-				allday tinyint(1) NOT NULL,
-				instant_event tinyint(1) NOT NULL DEFAULT 0,
-				recurrence_rules longtext,
-				exception_rules longtext,
-				recurrence_dates longtext,
-				exception_dates longtext,
-				venue varchar(255),
-				country varchar(255),
-				address varchar(255),
-				city varchar(255),
-				province varchar(255),
-				postal_code varchar(32),
-				show_map tinyint(1),
-				contact_name varchar(255),
-				contact_phone varchar(32),
-				contact_email varchar(128),
-				contact_url varchar(255),
-				cost varchar(255),
-				ticket_url varchar(255),
-				ical_feed_url varchar(768),
-				ical_source_url varchar(768),
-				ical_organizer varchar(255),
-				ical_contact varchar(255),
-				ical_uid varchar(255),
-				show_coordinates tinyint(1),
-				latitude decimal(20,15),
-				longitude decimal(20,15),
-				PRIMARY KEY  (post_id),
-				KEY feed_source (ical_feed_url)
-				) CHARACTER SET utf8;";
+                post_id bigint NOT NULL,
+                start bigint UNSIGNED NOT NULL,
+                end bigint UNSIGNED,
+                timezone_name varchar(50),
+                allday tinyint(1) NOT NULL,
+                instant_event tinyint(1) NOT NULL DEFAULT 0,
+                recurrence_rules longtext,
+                exception_rules longtext,
+                recurrence_dates longtext,
+                exception_dates longtext,
+                venue varchar(255),
+                country varchar(255),
+                address varchar(255),
+                city varchar(255),
+                province varchar(255),
+                postal_code varchar(32),
+                show_map tinyint(1),
+                contact_name varchar(255),
+                contact_phone varchar(32),
+                contact_email varchar(128),
+                contact_url varchar(255),
+                cost varchar(255),
+                ticket_url varchar(255),
+                ical_feed_url varchar(768),
+                ical_source_url varchar(768),
+                ical_organizer varchar(255),
+                ical_contact varchar(255),
+                ical_uid varchar(255),
+                show_coordinates tinyint(1),
+                latitude decimal(20,15),
+                longitude decimal(20,15),
+                PRIMARY KEY  (post_id),
+                KEY feed_source (ical_feed_url)
+                ) CHARACTER SET utf8;";
 
         // ==========================
         // = Create table instances =
         // ==========================
         $table_name = $dbi->get_table_name(OSEC_DB__INSTANCES);
         $sql        .= "CREATE TABLE $table_name (
-				id bigint NOT NULL AUTO_INCREMENT,
-				post_id bigint NOT NULL,
-				start bigint unsigned NOT NULL,
-				end bigint unsigned NOT NULL,
-				PRIMARY KEY  (id),
-				UNIQUE KEY evt_instance (post_id,start)
-				) CHARACTER SET utf8;";
+                id bigint NOT NULL AUTO_INCREMENT,
+                post_id bigint NOT NULL,
+                start bigint unsigned NOT NULL,
+                end bigint unsigned NOT NULL,
+                PRIMARY KEY  (id),
+                UNIQUE KEY evt_instance (post_id,start)
+                ) CHARACTER SET utf8;";
 
         // ================================
         // = Create table category colors =
         // ================================
         $table_name = $dbi->get_table_name(OSEC_DB__META);
         $sql        .= "CREATE TABLE $table_name (
-			term_id bigint NOT NULL,
-			term_color varchar(255) NOT NULL,
-			term_image varchar(254) NULL DEFAULT NULL,
-			PRIMARY KEY  (term_id)
-			) CHARACTER SET utf8;";
+            term_id bigint NOT NULL,
+            term_color varchar(255) NOT NULL,
+            term_image varchar(254) NULL DEFAULT NULL,
+            PRIMARY KEY  (term_id)
+            ) CHARACTER SET utf8;";
 
         $table_name = $dbi->get_table_name(OSEC_DB__FEEDS);
         $sql        .= "CREATE TABLE $table_name (
-					feed_id bigint NOT NULL AUTO_INCREMENT,
-					feed_url varchar(768) NOT NULL,
-					feed_name varchar(768) NOT NULL,
-					feed_category varchar(255) NOT NULL,
-					feed_tags varchar(255) NOT NULL,
-					comments_enabled tinyint(1) NOT NULL DEFAULT '1',
-					import_post_status varchar(255) NOT NULL DEFAULT 'publish',					
-					map_display_enabled tinyint(1) NOT NULL DEFAULT '0',
-					keep_tags_categories tinyint(1) NOT NULL DEFAULT '0',
-					keep_old_events tinyint(1) NOT NULL DEFAULT '0',
-					import_timezone tinyint(1) NOT NULL DEFAULT '0',
-					PRIMARY KEY  (feed_id),
-					UNIQUE KEY feed (feed_url)
-					) CHARACTER SET utf8;";
+                    feed_id bigint NOT NULL AUTO_INCREMENT,
+                    feed_url varchar(768) NOT NULL,
+                    feed_name varchar(768) NOT NULL,
+                    feed_category varchar(255) NOT NULL,
+                    feed_tags varchar(255) NOT NULL,
+                    comments_enabled tinyint(1) NOT NULL DEFAULT '1',
+                    import_post_status varchar(255) NOT NULL DEFAULT 'publish',
+                    map_display_enabled tinyint(1) NOT NULL DEFAULT '0',
+                    keep_tags_categories tinyint(1) NOT NULL DEFAULT '0',
+                    keep_old_events tinyint(1) NOT NULL DEFAULT '0',
+                    import_timezone tinyint(1) NOT NULL DEFAULT '0',
+                    hide_cost tinyint(1) NOT NULL DEFAULT '1',
+                    PRIMARY KEY  (feed_id),
+                    UNIQUE KEY feed (feed_url)
+                    ) CHARACTER SET utf8;";
 
         return $sql;
     }
@@ -181,9 +260,28 @@ class DatabaseSchema extends OsecBaseClass
         }
 
         $this->schemaDelta = [];
-        $result = dbDelta($this->prepareDelta($query));
+        $changes = dbDelta($this->prepareDelta($query));
 
-        return $this->checkDelta();
+        // dbDelta() reports the changes it queued, computed before any query runs -
+        // it never checks whether those queries actually succeeded. An empty result
+        // means nothing needed changing (schema already matches), not a failure.
+        if (empty($changes)) {
+            return true;
+        }
+
+        global $wpdb;
+
+        // $wpdb->last_error (reset by wpdb::query() on every call) only reflects
+        // the LAST query dbDelta() ran. If multiple queries were queued and an
+        // earlier one failed while a later one succeeded, that earlier failure
+        // is masked here. Log every queued change plus the final error state
+        // unconditionally (this only fires when there's actually something to
+        // report - not on every request) so a masked failure is still grep-able
+        // even though the boolean return below can't fully distinguish it.
+        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- deliberate production logging of a rare schema-repair event, not leftover debug code.
+        error_log('osec: dbDelta() changes: ' . wp_json_encode($changes) . '; last_error: ' . $wpdb->last_error);
+
+        return '' === $wpdb->last_error;
     }
 
     /**
@@ -207,10 +305,10 @@ class DatabaseSchema extends OsecBaseClass
         }
         $current_table = null;
         $ctable_regexp = '#
-			\s*CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?([^ ]+)`?\s*
-			\((.+)\)
-			([^()]*)
-			#six';
+            \s*CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?([^ ]+)`?\s*
+            \((.+)\)
+            ([^()]*)
+            #six';
         foreach ($queries as $query) {
             if (preg_match($ctable_regexp, (string)$query, $matches)) {
                 $this->schemaDelta[$matches[1]] = [
@@ -430,28 +528,28 @@ class DatabaseSchema extends OsecBaseClass
     protected function parseColumn($description)
     {
         $column_regexp = '#^
-			([a-z][a-z_]+)\s+
-			(
-				[A-Z]+
-				(?:\s*\(\s*\d+(?:\s*,\s*\d+\s*)?\s*\))?
-				(?:\s+unsigned)?
-				(?:\s+ZEROFILL)?
-				(?:\s+BINARY)?
-				(?:
-					\s+CHARACTER\s+SET\s+[a-z][a-z_]+
-					(?:\s+COLLATE\s+[a-z][a-z0-9_]+)?
-				)?
-			)
-			(
-				\s+(?:NOT\s+)?NULL
-			)?
-			(
-				\s+DEFAULT\s+[^\s]+
-			)?
-			(\s+ON\s+UPDATE\s+CURRENT_(?:TIMESTAMP|DATE))?
-			(\s+AUTO_INCREMENT)?
-			\s*,?\s*
-		$#six';
+            ([a-z][a-z_]+)\s+
+            (
+                [A-Z]+
+                (?:\s*\(\s*\d+(?:\s*,\s*\d+\s*)?\s*\))?
+                (?:\s+unsigned)?
+                (?:\s+ZEROFILL)?
+                (?:\s+BINARY)?
+                (?:
+                    \s+CHARACTER\s+SET\s+[a-z][a-z_]+
+                    (?:\s+COLLATE\s+[a-z][a-z0-9_]+)?
+                )?
+            )
+            (
+                \s+(?:NOT\s+)?NULL
+            )?
+            (
+                \s+DEFAULT\s+[^\s]+
+            )?
+            (\s+ON\s+UPDATE\s+CURRENT_(?:TIMESTAMP|DATE))?
+            (\s+AUTO_INCREMENT)?
+            \s*,?\s*
+        $#six';
         if (! preg_match($column_regexp, $description, $matches)) {
             throw new DatabaseErrorException(
                 esc_html(
@@ -479,207 +577,6 @@ class DatabaseSchema extends OsecBaseClass
         return $column;
     }
 
-    /**
-     * checkDelta method
-     *
-     * Given parsed schema definitions (in {@see self::$schemaDelta} map) this
-     * method performs checks, to ensure that table exists, columns are of
-     * expected type, and indexes match their definition in original query.
-     *
-     * @return bool Success
-     *
-     * @throws DatabaseErrorException In case of any error
-     */
-    protected function checkDelta()
-    {
-        if (empty($this->schemaDelta)) {
-            return true;
-        }
-        foreach ($this->schemaDelta as $table => $description) {
-            $currentTableColumns = $this->app->db->get_results('SHOW FULL COLUMNS FROM ' . $table);
-
-            if (empty($currentTableColumns)) {
-                throw new DatabaseErrorException(
-                    esc_html(
-                        'Required table `' . $table . '` was not created'
-                    )
-                );
-            }
-            $db_column_names = [];
-            foreach ($currentTableColumns as $column) {
-                if (! isset($description['columns'][$column->Field])) {
-                    if (
-                        $this->app->db->query(
-                            $this->app->db->prepare(
-                                $this->app->db->prepare(
-                                    "ALTER TABLE `$table` DROP COLUMN %s",
-                                    $column->Field
-                                )
-                            )
-                        )
-                    ) {
-                        continue;
-                    }
-                    continue; // ignore so far
-                    // throw new DatabaseErrorException(
-                    // 'Unknown column `' . $column->Field .
-                    // '` is present in table `' . $table . '`'
-                    // );
-                }
-                $db_column_names[$column->Field] = $column->Field;
-                $type_db                         = $column->Type;
-                $collation                       = '';
-                if ($column->Collation) {
-                    $collation = ' CHARACTER SET '
-                                    . substr(
-                                        $column->Collation,
-                                        0,
-                                        strpos($column->Collation, '_')
-                                    )
-                                    . ' COLLATE ' . $column->Collation;
-                }
-                $type_req = $description['columns'][$column->Field]
-                ['content']['type'];
-                if (
-                    false !== stripos(
-                        (string)$type_req,
-                        ' COLLATE '
-                    )
-                ) {
-                    // suspend collation checking
-                    $type_db .= $collation;
-                    $type_req = preg_replace(
-                        '#^
-							(.+)
-							\s+CHARACTER\s+SET\s+[a-z0-9_]+
-							\s+COLLATE\s+[a-z0-9_]+
-							(.+)?\s*
-						$#six',
-                        '$1$2',
-                        $type_req
-                    );
-                }
-                $type_db  = strtolower(
-                    preg_replace('#\s+#', '', $type_db)
-                );
-                $type_req = strtolower(
-                    preg_replace('#\s+#', '', $type_req)
-                );
-                // Mysql:5.x and mariadb return type(int)
-                // Mysql: 8.x does return the plain type.
-                // @see https://stackoverflow.com/a/60892835/308533.
-                $type_db = preg_replace('/^bigint(:?\([\d]+\))?(unsigned)?$/', 'bigint$2', $type_db);
-                if (0 !== strcmp($type_db, $type_req)) {
-                    throw new DatabaseErrorException(
-                        esc_html(
-                            'Field `' . $table . '`.`' . $column->Field .
-                            '` is of incompatible type'
-                        )
-                    );
-                }
-                if ((
-                        'YES' === $column->Null
-                        && false === $description['columns'][$column->Field]['content']['NULL']
-                    )
-                    || (
-                        'NO' === $column->Null
-                        && true === $description['columns'][$column->Field]['content']['NULL']
-                    )
-                ) {
-                    throw new DatabaseErrorException(
-                        esc_html(
-                            'Field `' . $table . '`.`' . $column->Field .
-                            '` NULLability is flipped'
-                        )
-                    );
-                }
-            }
-            $missing = array_diff(
-                array_keys($description['columns']),
-                $db_column_names
-            );
-            if ($missing) {
-                throw new DatabaseErrorException(
-                    esc_html(
-                        'In table `' . $table . '` fields are missing: '
-                        . implode(', ', $missing)
-                    )
-                );
-            }
-
-            $indexes = $this->get_indices($table);
-
-            foreach ($indexes as $name => $definition) {
-                if (! isset($description['indexes'][$name])) {
-                    continue; // ignore so far
-                    // throw new DatabaseErrorException(
-                    // 'Unknown index `' . $name .
-                    // '` is defined for table `' . $table . '`'
-                    // );
-                }
-                $missed = array_diff_assoc(
-                    $description['indexes'][$name]['content'],
-                    $definition['columns']
-                );
-                if ($missed) {
-                    throw new DatabaseErrorException(
-                        esc_html(
-                            'Index `' . $name
-                            . '` definition for table `' . $table . '` has invalid '
-                            . ' fields: ' . implode(', ', array_keys($missed))
-                        )
-                    );
-                }
-            }
-            $missing = array_diff(
-                array_keys($description['indexes']),
-                array_keys($indexes)
-            );
-            if ($missing) {
-                throw new DatabaseErrorException(
-                    esc_html(
-                        'In table `' . $table . '` indexes are missing: '
-                        . implode(', ', $missing)
-                    )
-                );
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Retrieve list of indices for a given table.
-     *
-     * Checks if table exists before attempting to retrieve it.
-     *
-     * @param  string  $table  Name of table to retrieve indices for.
-     *
-     * @return array Map of index names.
-     */
-    public function get_indices(string $table)
-    {
-        if (! $this->isTable($table)) {
-            return [];
-        }
-
-        $result  = $this->app->db->get_results('SHOW INDEX FROM `' . $table . '`');
-        $indices = [];
-        foreach ($result as $index) {
-            $name = $index->Key_name;
-            if (! isset($indices[$name])) {
-                $indices[$name] = [
-                    'name'    => $name,
-                    'columns' => [],
-                    'unique'  => ! (bool)intval($index->Non_unique),
-                ];
-            }
-            $indices[$name]['columns'][$index->Column_name] = $index->Sub_part;
-        }
-
-        return $indices;
-    }
-
     public function uninstall(bool $purge = false)
     {
         if ($purge) {
@@ -694,22 +591,6 @@ class DatabaseSchema extends OsecBaseClass
                 "DROP TABLE IF EXISTS {$events},{$event_instances},{$event_feeds},{$event_category_meta}"
             );
         }
-    }
-
-    /**
-     * Check if given table exists.
-     *
-     * @param  string  $table  Name of table to check.
-     *
-     * @return bool Existence.
-     */
-    protected function isTable($table)
-    {
-        $name = $this->app->db->get_var(
-            $this->app->db->prepare('SHOW TABLES LIKE %s', $table)
-        );
-
-        return ((string)$table === (string)$name);
     }
 
     /**

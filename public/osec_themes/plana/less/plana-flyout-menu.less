@@ -28,7 +28,11 @@
     display: inline-flex;
     justify-content: flex-start;
     align-items: center;
-    line-height: @lineheight;
+    // Same height as the print button next to it, in every browser.
+    box-sizing: border-box;
+    min-height: @toolbarControlHeight;
+    // Height comes from min-height, not from the line box, or a link and a button differ.
+    line-height: 1;
     text-align: left;
     font-size: var(--wp--preset--font-size--normal);
     border: 0;

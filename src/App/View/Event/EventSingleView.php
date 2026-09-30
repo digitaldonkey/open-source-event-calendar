@@ -108,7 +108,8 @@ class EventSingleView extends OsecBaseClass
 
         $subscribe_buttons = CalendarSubscribeView::factory($this->app)->render_subscribe(
             '&osec_post_ids=' . $event->get('post_id'),
-            false
+            false,
+            true
         );
 
         $event->set_runtime(
@@ -202,8 +203,6 @@ class EventSingleView extends OsecBaseClass
             'subscribe_buttons' => $subscribe_buttons,
             'edit_instance_url'      => null,
             'edit_instance_text'     => null,
-            // Has image??
-            'has_any_image'          => !is_null(EventAvatarView::factory($this->app)->get_event_avatar_url($event)),
             'hide_featured_image'    => $settings->get('hide_featured_image'),
             'extra_buttons'          => $extra_buttons,
             'text_add_calendar'      => __('Add to Calendar', 'open-source-event-calendar'),
@@ -219,6 +218,7 @@ class EventSingleView extends OsecBaseClass
             'start'                  => $event->get('start'),
             'end'                    => $event->get('end'),
             'instance_id'            => $event->get('instance_id'),
+            'hide_cost'              => $event->get('hide_cost'),
         ];
 
         /**
@@ -231,8 +231,8 @@ class EventSingleView extends OsecBaseClass
                 'text_cost'              => __('Cost:', 'open-source-event-calendar'),
                 'text_free'              => __('Free', 'open-source-event-calendar'),
                 'tickets_url_label'      => $event->get_runtime('tickets_url_label'),
-                'ticket_url'             => $event->get('ticket_url'),
-                'cost_number'   => $event->get_runtime('cost_number'),
+                'ticket_url'             => $event->get('ticket_url') ? esc_url($event->get('ticket_url')) : '',
+                'cost_number'            => $event->get_runtime('cost_number'),
                 'cost_iso_4217_currency' => $event->get_runtime('cost_iso_4217_currency'),
             ]);
         }
@@ -339,11 +339,7 @@ class EventSingleView extends OsecBaseClass
         $theContent = apply_filters(
             'osec_the_content',
             wpautop(
-                apply_filters(
-                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                    'the_content',
-                    $event->get('post')->post_content
-                )
+                EventContentView::factory($this->app)->get_filtered_content($event->get('post'), false)
             )
         );
         $args = [

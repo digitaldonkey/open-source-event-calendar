@@ -10,14 +10,14 @@
  * Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
  * Tags: iCal, ics, ical importer, events calendar, open-source-event-calendar
  * Requires at least: 6.7
- * Tested up to: 7.0
+ * Tested up to: 7.1
  * Requires PHP: 8.2
- * Stable Tag: 1.1.8
+ * Stable Tag: 1.1.16
  * License: GPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: open-source-event-calendar
  * Domain Path: /languages
- * Version: 1.1.8
+ * Version: 1.1.16
  */
 
 if (! defined('ABSPATH')) {
@@ -38,15 +38,15 @@ use Osec\Theme\ThemeLoader;
 // phpcs:disable PSR1.Files.SideEffects
 
 // PHP Composer @see package.json.
-if (
-    // Try fixing a bug where
-    ! class_exists('\Osec\App\Controller\BootstrapController')) {
+// Load the Composer autoloader unless it already ran
+// (vendor/bin/wp and vendor/bin/phpunit load it before WordPress includes the plugin).
+if (! class_exists('\Osec\App\Controller\BootstrapController')) {
     require_once __DIR__ . '/vendor/autoload.php';
-    add_action('init', function () {
-        BootstrapController::createApp(__DIR__);
-    }, -100);
 }
 
+add_action('init', function () {
+    BootstrapController::createApp(__DIR__);
+}, -100);
 
 /**
  * Activate plugin.
@@ -66,8 +66,9 @@ function osec_plugin_activate()
     if (is_null($osec_app)) {
         BootstrapController::createApp(__DIR__);
     }
-    DatabaseSchema::factory($osec_app)->verifySqlSchema();
+    DatabaseSchema::factory($osec_app)->verifySqlSchema(true);
     $osec_app->options->set('osec_force_flush_rewrite_rules', true);
+    $osec_app->options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true);
 }
 
 register_activation_hook(__FILE__, 'osec_plugin_activate');
@@ -92,19 +93,10 @@ register_deactivation_hook(
 );
 
 if (defined('WP_CLI') && WP_CLI) {
-    require_once __DIR__ . '/src/WpCli/MakeReadme.php';
-    WP_CLI::add_command('osec', '\Osec\WpCli\MakeReadme');
-}
+    WP_CLI::add_command('osec', \Osec\WpCli\MakeReadme::class);
+    WP_CLI::add_command('osec', \Osec\WpCli\PrepareRelease::class);
 
-/**
- * Autosaving Event Data does not currently work.
- * Only post data is saved.
- * If editing a Event Instance autosave is disabled when calling get_instance_id().
- * EventEditing->save_post() is not receiving Event Data.
- */
-add_action('admin_enqueue_scripts', function () {
-    $type = get_post_type();
-    if ($type && $type === OSEC_POST_TYPE) {
-        wp_dequeue_script('autosave');
-    }
-});
+    WP_CLI::add_command('osec event', \Osec\WpCli\EventCommand::class);
+    WP_CLI::add_command('osec feed', \Osec\WpCli\FeedCommand::class);
+    WP_CLI::add_command('osec repair-escaping', \Osec\WpCli\RepairEscapingCommand::class);
+}

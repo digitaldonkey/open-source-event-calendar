@@ -658,7 +658,7 @@ msgstr ""
 #. translators: Compile error
 #: src/App/Controller/FrontendCssController.php:146
 msgid ""
-"Your CSS is being compiled on every request, \n"
+"Your CSS is being compiled on every request,\n"
 "                                    which causes your calendar to perform slowly. The following error occurred: %s"
 msgstr ""
 
@@ -675,7 +675,7 @@ msgstr ""
 #. translators: Minimum PHP memory required
 #: src/App/Controller/FrontendCssController.php:336
 msgid ""
-"CSS compilation failed because you do not have enough free memory  \n"
+"CSS compilation failed because you do not have enough free memory\n"
 "                      (a minimum of %s is needed). Your calendar will not render or function\n"
 "                      properly without CSS. Increase your PHP memory limit."
 msgstr ""
@@ -760,7 +760,7 @@ msgstr ""
 
 #: src/App/Controller/ScriptsFrontendController.php:419
 msgid ""
-"Something went wrong while fetching events. \n"
+"Something went wrong while fetching events.\n"
 "                    <br>The request status is: #STATUS# <br>The error thrown was: #ERROR#"
 msgstr ""
 
@@ -859,7 +859,7 @@ msgstr ""
 #. translators: 1: Timezone offset 2: LinkOpen 3: 2: LinkClose
 #: src/App/Model/Date/Timezones.php:573
 msgid ""
-"Timezone \"UTC%1$\" is not recognized. Please %2$suse valid%3$ timezone name, \n"
+"Timezone \"UTC%1$\" is not recognized. Please %2$suse valid%3$ timezone name,\n"
 "                        until then events will be created in UTC timezone."
 msgstr ""
 
@@ -1613,14 +1613,14 @@ msgstr ""
 #. translators: 1: Url 2: Url
 #: src/App/View/Admin/AdminThemeList.php:222
 msgid ""
-"You only have one theme enabled for this site right now. Visit the Network Admin to \n"
+"You only have one theme enabled for this site right now. Visit the Network Admin to\n"
 "                            <a href=\"%1$s\">enable</a> or <a href=\"%2$s\">install</a> more themes."
 msgstr ""
 
 #. translators: Url
 #: src/App/View/Admin/AdminThemeList.php:241
 msgid ""
-"You only have one theme enabled for this site right now. Visit the Network Admin to \n"
+"You only have one theme enabled for this site right now. Visit the Network Admin to\n"
 "                            <a href=\"%1$s\">enable</a> more themes."
 msgstr ""
 
@@ -1681,7 +1681,7 @@ msgstr ""
 #. translators: View Name
 #: src/App/View/Calendar/CalendarPageView.php:110
 msgid ""
-"Calendar was unable to initialize %s view and has reverted to Agenda view. \n"
+"Calendar was unable to initialize %s view and has reverted to Agenda view.\n"
 "                            Please check if you have installed the latest versions of calendar add-ons."
 msgstr ""
 
@@ -1946,8 +1946,8 @@ msgid ", and "
 msgstr ""
 
 #: src/App/View/Event/EventTimeView.php:241
-msgctxt "Event time-time separator (nbsp,mdash,nbsp)"
-msgid " — "
+msgctxt "Event time-time separator (nbsp, hyphen, narrow nbsp)"
+msgid " - "
 msgstr ""
 
 #: src/App/View/Event/EventTimeView.php:264
@@ -2056,13 +2056,13 @@ msgstr ""
 #. translators: Admin url
 #: src/Bootstrap/EnvironmentCheck.php:64
 msgid ""
-"The plugin is installed, but has not been configured.  \n"
+"The plugin is installed, but has not been configured.\n"
 "                         <a href=\"%s\">Click here to set it up now &raquo;</a>"
 msgstr ""
 
 #: src/Bootstrap/EnvironmentCheck.php:78
 msgid ""
-"The plugin is installed, but has not been configured. \n"
+"The plugin is installed, but has not been configured.\n"
 "                        Please log in as an Administrator to set it up."
 msgstr ""
 
@@ -2104,7 +2104,7 @@ msgstr ""
 
 #: src/Exception/DatabaseErrorException.php:22
 msgid ""
-"Database update has failed. Please make sure, that database user, defined in <em>wp-config.php</em> \n"
+"Database update has failed. Please make sure, that database user, defined in <em>wp-config.php</em>\n"
 "                has permissions, to make changes (<strong>ALTER TABLE</strong>) to the database."
 msgstr ""
 
@@ -2304,7 +2304,7 @@ msgstr ""
 
 #: src/Settings/Elements/SettingsShortcodesText.php:86
 msgid ""
-"It is currently not supported to embed more than one calendar in the same page. Do not attempt to \n"
+"It is currently not supported to embed more than one calendar in the same page. Do not attempt to\n"
 "                    embed the calendar via shortcode in a page that already displays the calendar."
 msgstr ""
 
@@ -2339,8 +2339,8 @@ msgstr ""
 
 #: src/Theme/ThemeLoader.php:529
 msgid ""
-"Your calendar theme has been switched to Vortex due to a rendering problem. For more information, \n"
-"                        please enable debug mode by adding this line to your WordPress <code>wp-config.php  \n"
+"Your calendar theme has been switched to Vortex due to a rendering problem. For more information,\n"
+"                        please enable debug mode by adding this line to your WordPress <code>wp-config.php\n"
 "                        </code> file:<pre>define( \"OSEC_DEBUG\", true );</pre>"
 msgstr ""
 

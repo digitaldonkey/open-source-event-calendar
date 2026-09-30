@@ -1,0 +1,58 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "preferredVersions": {
+    "php": "8.5",
+    "wp": "latest"
+  },
+  "login": true,
+  "siteOptions": {
+    "blogname": "OSEC Demo",
+    "timezone_string": "Europe/Berlin"
+  },
+  "phpExtensionBundles": [
+    "kitchen-sink"
+  ],
+  "landingPage": "/wp-admin/",
+  "steps": [
+    {
+      "step": "defineWpConfigConsts",
+      "consts": {
+        "WP_DEBUG": false,
+        "WP_DEBUG_LOG": false,
+        "WP_DEBUG_DISPLAY": false,
+        "WP_DISABLE_FATAL_ERROR_HANDLER": false,
+        "FS_METHOD": "direct"
+      }
+    },
+    {
+      "step": "mkdir",
+      "path": "/wordpress/wp-content/plugins/open-source-event-calendar/cache"
+    },
+    {
+      "step": "mkdir",
+      "path": "/wordpress/wp-content/plugins/open-source-event-calendar/cache/twig"
+    },
+    {
+      "step": "installTheme",
+      "themeData": {
+        "resource": "wordpress.org/themes",
+        "slug": "twentytwentyfive"
+      }
+    },
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "url",
+        "url": "https://downloads.wordpress.org/plugin/open-source-event-calendar.zip"
+      }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php require_once '/wordpress/wp-load.php'; osec_plugin_activate(); ?>"
+    }
+
+  ],
+  "features": {
+    "networking": true
+  }
+}

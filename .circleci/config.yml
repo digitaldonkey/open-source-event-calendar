@@ -2,9 +2,8 @@
 # See: https://circleci.com/docs/configuration-reference
 version: 2.1
 orbs:
-  php: circleci/php@1.1.0
-  browser-tools: circleci/browser-tools@1.5.3
-  node: circleci/node@6.3.0
+  browser-tools: circleci/browser-tools@2.4.2
+  node: circleci/node@7.2.1
 
 # References section
 #   @see https://carlalexander.ca/continuous-deployment-wordpress-directory-circleci/
@@ -37,6 +36,21 @@ references:
         README.txt
         LICENSE
   workspace_root: &workspace_root /tmp
+
+  # Workflow filters. A job runs in a tag pipeline only with a tags filter, and
+  # only if every job it requires does too - so every release job carries one.
+  # See release-context.sh for what a tag deploys.
+  release_tags: &release_tags
+    tags:
+      only: /^\d+\.\d+\.\d+(-dryrun)?$/
+  main_branches: &main_branches
+    <<: *release_tags
+    branches:
+      only: /^(master|release-.*)$/
+  deploy_branches: &deploy_branches
+    <<: *release_tags
+    branches:
+      only: master
 
   # Default DB Docker image environement
   ENV_DB_IMAGE: &ENV_DB_IMAGE
@@ -119,7 +133,7 @@ jobs:
       - *copy_vendor
       - run:
           name: Run code quality tests
-          command: vendor/bin/wp
+          command: vendor/bin/grumphp run --tasks=composer,phpcs,editorconfig --no-interaction
 
 # Default configuration Database testing jobs
   db_job: &db_job
@@ -164,10 +178,13 @@ jobs:
           command: sudo php -S $WP_HOST:80 -t $WP_CORE_DIR
           background: True
       - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:3306 -timeout 2m
+      - run:
           name: Run PHP unit tests
           command: |
             set -Eeuxo pipefail
-            mkdir -p ~/phpunit          
+            mkdir -p ~/phpunit
             vendor/bin/phpunit --log-junit ~/phpunit/junit.xml tests
           when: always
       - store_test_results:
@@ -266,7 +283,7 @@ jobs:
       - run:
           name: Static release test VARIABLES
           command: |
-            echo "CONSTANTS:"            
+            echo "CONSTANTS:"
             echo " WP_HOST: $WP_HOST"
             echo " WP_CORE_DIR: $WP_CORE_DIR"
             echo " WP_VERSION: $WP_VERSION"
@@ -291,10 +308,23 @@ jobs:
               echo "nvm is already installed. Skipping nvm install.";
             else
               curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash;
-            
+
               echo 'export NVM_DIR="$HOME/.nvm"' >> "$BASH_ENV";
               echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use' >> "$BASH_ENV";
               source "$BASH_ENV";
+            fi
+      - run:
+          name: Verify WordPress version metadata is consistent
+          command: |
+            set -Eeuxo pipefail
+            $WP_CLI --path="$WP_CORE_DIR" osec prepare_release
+            if output=$(git status --porcelain) && [ -z "$output" ]; then
+              echo "No changes detected"
+              exit 0;
+            else
+              echo "wp osec prepare_release unexpectedly left uncommitted changes"
+              git diff
+              exit 1;
             fi
       - run:
           name: Verify Readme.txt is up to date
@@ -304,7 +334,7 @@ jobs:
             if output=$(git status --porcelain) && [ -z "$output" ]; then
               echo "No changes detected"
               exit 0;
-            else              
+            else
               echo "wp osec make_readme revealed uncomitted changes"
               git diff README.txt
               exit 1;
@@ -316,7 +346,7 @@ jobs:
             cd twig_to_js_transform
             nvm install
             npm install
-            npm run build-twig-frontend            
+            npm run build-twig-frontend
             output=$(git status -s 2>&1)
             if [[ $? -ne 0 || -z "$output" ]]; then
               echo "No changes detected"
@@ -334,9 +364,12 @@ jobs:
             cd hookster_markdown
             nvm install
             npm install
-            npm run build-hooks-and-filters            
-            output=$(git status -s 2>&1)
-            if [[ $? -ne 0 || -z "$output" ]]; then
+            npm run build-hooks-and-filters
+            # The generator writes ../hooks-and-filters.md, so the status check must
+            # run in the plugin repo. hookster_markdown is a separate clone (and is
+            # gitignored here), and its own tree is never touched by the build.
+            cd ..
+            if output=$(git status --porcelain) && [ -z "$output" ]; then
               echo "No changes detected"
               exit 0;
             else
@@ -364,8 +397,8 @@ jobs:
       - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
       - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
     steps:
-      - browser-tools/install-chrome
-      - browser-tools/install-chromedriver
+      - browser-tools/install_chrome
+      - browser-tools/install_chromedriver
       - checkout
       - *attach_workspace
       # @see https://circleci.com/developer/orbs/orb/circleci/browser-tools
@@ -375,8 +408,12 @@ jobs:
       - run:
           name: Install Apache, MySQL client and PHP extension
           command: |
-            sudo LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php  -y
-            sudo apt-get update   
+            # ppa:ondrej/php is being merged into packages.sury.org; this avoids the Launchpad keyserver lookup.
+            curl -fsSL --retry 5 -o /tmp/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb
+            sudo dpkg -i /tmp/debsuryorg-archive-keyring.deb
+            echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyring.gpg] https://packages.sury.org/php/ $(. /etc/os-release && echo "$VERSION_CODENAME") main" \
+              | sudo tee /etc/apt/sources.list.d/php.list
+            sudo apt-get update
             sudo apt-get install -y mysql-client apache2 php$PHP_VERSION-{fpm,cli,bz2,curl,mbstring,intl,bcmath,xml,mysql,zip,gd,mbstring,apcu}
             sudo rm -rf /var/lib/apt/lists/*
       - run:
@@ -387,14 +424,14 @@ jobs:
           command: |
             sudo mkdir -p /tmp/pear/temp
             sudo pecl channel-update pecl.php.net
-            echo no '' |  sudo pecl install apcu            
+            echo no '' |  sudo pecl install apcu
             sudo bash -c "echo 'memory_limit = 192M'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'apc.enabled = 1'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'error_reporting = E_ALL'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'ignore_repeated_errors = On'  >>  /etc/php.d/circleci.ini"
             sudo bash -c "echo 'log_errors = On'  >>  /etc/php.d/circleci.ini"
-            echo 'php -r "var_dump(function_exists(\"apcu_enabled\") && apcu_enabled());"' 
+            echo 'php -r "var_dump(function_exists(\"apcu_enabled\") && apcu_enabled());"'
             php -r "var_dump(function_exists('apcu_enabled') && apcu_enabled());"
       - run:
           name: Release test VARIABLES
@@ -404,9 +441,9 @@ jobs:
             php -i | grep -i memory_limit
             echo""
             echo "NODE $( node --version)"
-            echo "NPM $( npm --version)"             
+            echo "NPM $( npm --version)"
             google-chrome --version
-            chromedriver --version            
+            chromedriver --version
             echo""
             echo "CONSTANTS:"
             echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
@@ -416,9 +453,12 @@ jobs:
             echo " $($WP_CLI --version) $WP_CLI"
             echo " PHP_VERSION: $PHP_VERSION"
       - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:3306 -timeout 2m
+      - run:
           name: Install WordPress (DB, no unit test scripts)
           command: |
-            sudo chown root:circleci $WP_CORE_DIR/.. && sudo chmod g+w $WP_CORE_DIR/.. && sudo rm -rf $WP_CORE_DIR 
+            sudo chown root:circleci $WP_CORE_DIR/.. && sudo chmod g+w $WP_CORE_DIR/.. && sudo rm -rf $WP_CORE_DIR
             bash ./bin/install-wp-tests.sh $MYSQL_DATABASE $MYSQL_USER $MYSQL_PASSWORD $WP_HOST $WP_VERSION true true
             $WP_CLI config create --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
             $WP_CLI core install --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com" --skip-email
@@ -426,17 +466,29 @@ jobs:
       - run:
           name: Install Open source event calendar plugin (release)
           command: |
-            unzip /tmp/$OSEC_RELEASE_FILE -d $WP_CORE_DIR/wp-content/plugins            
+            unzip /tmp/$OSEC_RELEASE_FILE -d $WP_CORE_DIR/wp-content/plugins
             # Upload dir
             mkdir -p $WP_CORE_DIR/wp-content/uploads
             sudo chown circleci:www-data $WP_CORE_DIR/wp-content/uploads
             sudo chmod 775 $WP_CORE_DIR/wp-content/uploads
             # Plugin cache dir
-            mkdir -p $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache            
+            mkdir -p $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
             sudo chown circleci:www-data $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
             sudo chmod 775 $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
             echo "ls -al $WP_CORE_DIR/wp-content/uploads" && ls -al $WP_CORE_DIR/wp-content/uploads
             echo "ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache" && ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
+      - run:
+          name: WordPress plugin-check (release build)
+          command: |
+            set -Eeuxo pipefail
+            # Runs before constants-local.php is written, so only files that
+            # are actually released are checked. plugin-check comes from the
+            # workspace vendor directory, i.e. the version composer.lock pins.
+            cp -R /tmp/vendor/plugin-check $WP_CORE_DIR/wp-content/plugins/plugin-check
+            $WP_CLI --path=$WP_CORE_DIR plugin activate plugin-check
+            bin/plugin-check.sh --release --wp=$WP_CLI --path=$WP_CORE_DIR --slug=$WP_ORG_PLUGIN_NAME
+            $WP_CLI --path=$WP_CORE_DIR plugin deactivate plugin-check
+            rm -rf $WP_CORE_DIR/wp-content/plugins/plugin-check
       - run:
           name: Add constants-local.php
           command: |
@@ -445,12 +497,12 @@ jobs:
           name: Apache2 webserver
           command: |
             sudo mkdir -p /var/run/apache2
-            sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf            
+            sudo cp .circleci/apache2.conf /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "s/WP_HOST/$WP_HOST/g" /etc/apache2/sites-enabled/000-default.conf
             sudo sed -i "1s/^/ServerName localhost\\n /" /etc/apache2/apache2.conf
             sudo bash -c "echo 'extension=apcu.so'  >>/etc/php/$PHP_VERSION/fpm/php.ini"
             sudo bash -c "echo 'apc.enabled = 1'    >>/etc/php/$PHP_VERSION/fpm/php.ini"
-            sudo bash -c "echo 'apc.enable_cli = 1' >>/etc/php/$PHP_VERSION/fpm/php.ini"                
+            sudo bash -c "echo 'apc.enable_cli = 1' >>/etc/php/$PHP_VERSION/fpm/php.ini"
             sudo a2enconf php$PHP_VERSION-fpm
             sudo a2enmod proxy_fcgi setenvif rewrite
             sudo /etc/init.d/php$PHP_VERSION-fpm start
@@ -462,7 +514,7 @@ jobs:
       - run:
           name: Debug Tools
           command: |
-            sudo apt-get update && sudo apt-get install -y lynx && sudo rm -rf /var/lib/apt/lists/*            
+            sudo apt-get update && sudo apt-get install -y lynx && sudo rm -rf /var/lib/apt/lists/*
             sudo sed -i "s/'WP_DEBUG', false/'WP_DEBUG', true/g" /var/www/html/wp-config.php
       - run:
           name: Debug osec_apcu_test.php
@@ -475,7 +527,7 @@ jobs:
             set -Eeuxo pipefail
             mkdir -p /tmp/integration_test_results/screenshots
             (
-              cd integration_tests/ && 
+              cd integration_tests/ &&
               MOCHA_FILE=/tmp/integration_test_results/mocha-junit.xml \
               MOCHA_SCREENSHOT_DIR=/tmp/integration_test_results/screenshots \
               npm run test
@@ -518,6 +570,32 @@ jobs:
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
 
+  # Decides what this pipeline releases (master and release tags only), after all tests.
+  release_decision_job:
+    <<: *container_config
+    steps:
+      - checkout
+      - *install_subversion
+      - run:
+          name: Test the release scripts
+          command: bash .circleci/tests/test-release-scripts.sh
+      - run:
+          name: Decide what this pipeline releases variables
+          command: |
+            echo "CIRCLE_BRANCH: ${CIRCLE_BRANCH:-}"
+            echo "CIRCLE_TAG:    ${CIRCLE_TAG:-}"
+            echo "CIRCLE_SHA1:   $CIRCLE_SHA1"
+      - run:
+          name: Decide what this pipeline releases
+          # /tmp/release.env (RELEASE_MODE, RELEASE_VERSION, RELEASE_UPDATE_TRUNK) is read by
+          # the GitHub and SVN deploy jobs; the format is documented in release-context.sh.
+          command: |
+            .circleci/release-context.sh | tee /tmp/release.env
+      - persist_to_workspace:
+          root: *workspace_root
+          paths:
+            - release.env
+
   # Publish github release
   publish_github_release_job:
     docker:
@@ -527,18 +605,44 @@ jobs:
       - checkout
       - *attach_workspace
       - run:
-          name: "Publish Release on GitHub"
+          name: Publish Release on GitHub variables
           command: |
-            # Allow other branches, but only deploy on master
-            if [ "$CIRCLE_BRANCH" != "master" ]; then
-                circleci-agent step halt
-            fi
-            git describe --tags --exact-match > /dev/null 2>&1 && VERSION=$(git describe --tags) || VERSION="dev"
-            if [ "$VERSION" == "dev" ]; then
-                ghr -prerelease -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
-            else
-              ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/open-source-event-calendar.zip
-            fi             
+            echo "cat /tmp/release.env:"
+            cat /tmp/release.env
+            echo "GITHUB_TOKEN:            $([ -n "${GITHUB_TOKEN:-}" ] && echo '**** (set)' || echo 'NOT SET')"
+            echo "CIRCLE_PROJECT_USERNAME: $CIRCLE_PROJECT_USERNAME"
+            echo "CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME"
+            echo "CIRCLE_SHA1:             $CIRCLE_SHA1"
+            echo "ls -alh /tmp/open-source-event-calendar.zip:"
+            ls -alh /tmp/open-source-event-calendar.zip
+      - run:
+          name: "Publish Release on GitHub"
+          # /tmp/release.env: see .circleci/release-context.sh
+          command: |
+            . /tmp/release.env
+            case "$RELEASE_MODE" in
+              dev)
+                if .circleci/still-master-head.sh; then
+                  # -delete recreates the "dev" release and tag on this commit.
+                  ghr -prerelease -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete dev /tmp/open-source-event-calendar.zip
+                else
+                  rc=$?
+                  [ "$rc" -eq 1 ] || exit "$rc"
+                  echo "master has moved on, the dev release is left to the newer pipeline"
+                fi
+                ;;
+              tagged)
+                # No -delete: it would delete the release tag too (protected by the
+                # "Release tags" ruleset). -replace makes a rerun re-upload the zip.
+                ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -replace "$RELEASE_VERSION" /tmp/open-source-event-calendar.zip
+                ;;
+              dryrun)
+                echo "Dry run: would publish GitHub release $RELEASE_VERSION"
+                ;;
+              *)
+                echo "Nothing to publish"
+                ;;
+            esac
 
   wp_deploy_assets_job:
     <<: *container_config
@@ -547,18 +651,18 @@ jobs:
       - *attach_workspace
       - *install_subversion
       - run:
-          name: Deploy to wordpress.org variables
+          name: Deploy assets to WordPress plugin directory variables
           command: |
-            # Allow other branches, but only deploy on master
-            if [ "$CIRCLE_BRANCH" != "master" ]; then
-                circleci-agent step halt
-            fi
-            # WP_ORG_SVN_PASSWORD
-            echo " WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-            echo " WP_ORG_USERNAME: $WP_ORG_USERNAME"
+            echo "CIRCLE_BRANCH:       ${CIRCLE_BRANCH:-}"
+            echo "WP_ORG_PLUGIN_NAME:  $WP_ORG_PLUGIN_NAME"
+            echo "WP_ORG_USERNAME:     $WP_ORG_USERNAME"
+            echo "WP_ORG_SVN_PASSWORD: $([ -n "${WP_ORG_SVN_PASSWORD:-}" ] && echo '**** (set)' || echo 'NOT SET')"
+            echo "svn version (svn --version --quiet): $(svn --version --quiet)"
+            echo "ls -al assets:"
+            ls -al assets
       - run:
           name: Deploy assets to WordPress plugin directory
-          command: /home/circleci/open-source-event-calendar/.circleci/deploy-wp-plugin-assets.sh
+          command: .circleci/deploy-wp-plugin-assets.sh
     environment:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
@@ -570,25 +674,21 @@ jobs:
       - *attach_workspace
       - *install_subversion
       - run:
-          name: Deploy to wordpress.org variables
+          name: Deploy Plugin to WordPress plugin directory variables
           command: |
-            # Allow other branches, but only deploy on master
-            if [ "$CIRCLE_BRANCH" != "master" ]; then
-                circleci-agent step halt
-            fi
-            git describe --tags --exact-match > /dev/null 2>&1 && VERSION=$(git describe --tags) || VERSION="dev"
-            IS_TAGGED_RELEASE=$(( $VERSION == "dev" ? 1 : 0 ))
-            # WP_ORG_SVN_PASSWORD
-            echo "WP_ORG_PLUGIN_NAME: $WP_ORG_PLUGIN_NAME"
-            echo "WP_ORG_USERNAME: $WP_ORG_USERNAME"
-            echo "WP_ORG_SVN_PASSWORD: ****"
-            echo "CIRCLE_TAG: $CIRCLE_TAG"
-            echo "VERSION": $VERSION
-            echo "IS_TAGGED_RELEASE": $IS_TAGGED_RELEASE
+            echo "cat /tmp/release.env:"
+            cat /tmp/release.env
+            echo "CIRCLE_TAG:          ${CIRCLE_TAG:-}"
+            echo "CIRCLE_SHA1:         $CIRCLE_SHA1"
+            echo "WP_ORG_PLUGIN_NAME:  $WP_ORG_PLUGIN_NAME"
+            echo "WP_ORG_USERNAME:     $WP_ORG_USERNAME"
+            echo "WP_ORG_SVN_PASSWORD: $([ -n "${WP_ORG_SVN_PASSWORD:-}" ] && echo '**** (set)' || echo 'NOT SET')"
+            echo "svn version (svn --version --quiet): $(svn --version --quiet)"
+            echo "ls -alh /tmp/$OSEC_RELEASE_FILE:"
             ls -alh /tmp/$OSEC_RELEASE_FILE
       - run:
           name: Deploy Plugin to WordPress plugin directory
-          command: /home/circleci/open-source-event-calendar/.circleci/deploy-wp-plugin-release.sh
+          command: .circleci/deploy-wp-plugin-release.sh
     environment:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_ORG_USERNAME: *WP_ORG_USERNAME
@@ -601,75 +701,62 @@ workflows:
   build_test_deploy: # This is the name of the workflow, feel free to change it to better match your workflow.
     # Inside the workflow, you define the jobs you want to run.
     jobs:
-      - build
+      - build:
+          filters: *release_tags
       - static_job:
           requires:
             - build
+          filters: *release_tags
       - static_release_job:
           requires:
             - static_job
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - db_job:
           requires:
             - build
+          filters: *release_tags
       - db_job_maria_10_5:
           requires:
             - build
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - db_job_php_8_3:
           requires:
             - build
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - db_job_php_8_4:
           requires:
             - build
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - db_job_php_8_5:
           requires:
             - build
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - db_job_mysql_8:
           requires:
             - build
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - create_release_job:
           requires:
             - db_job
             - static_job
+          filters: *release_tags
       - release_test_job:
           requires:
             - create_release_job
+          filters: *release_tags
       - release_test_job_php_8_3:
           requires:
             - create_release_job
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - release_test_job_php_8_4:
           requires:
             - create_release_job
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
+          filters: *main_branches
       - release_test_job_php_8_5:
           requires:
             - create_release_job
-          filters:
-            branches:
-              only: /^(master|release-.*)$/
-      - publish_github_release_job:
+          filters: *main_branches
+      - release_decision_job:
           requires:
             - static_job
             - db_job
@@ -683,24 +770,18 @@ workflows:
             - release_test_job_php_8_3
             - release_test_job_php_8_4
             - release_test_job_php_8_5
-          filters:
-            branches:
-              only: /master/
-            tags:
-              only: /^\d+\.\d+\.\d+$/
+          filters: *deploy_branches
+      - publish_github_release_job:
+          requires:
+            - release_decision_job
+          filters: *deploy_branches
       - wp_deploy_assets_job:
           requires:
             - create_release_job
           filters:
             branches:
-              only: /master/
-            tags:
-              only: /^\d+\.\d+\.\d+$/
+              only: master
       - wp_deploy_wp_org_job:
           requires:
             - publish_github_release_job
-          filters:
-            branches:
-              only: /master/
-            tags:
-              only: /^\d+\.\d+\.\d+$/
+          filters: *deploy_branches

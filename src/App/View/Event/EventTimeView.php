@@ -241,12 +241,24 @@ class EventTimeView extends OsecBaseClass
     {
         static $timespanSeparator = null;
         if (null === $timespanSeparator) {
-            $timespanSeparator = _x(' — ', 'Event time-time separator (nbsp,mdash,nbsp)', 'open-source-event-calendar');
+            /*
+             * translators: separates the start and the end time of an event, as in
+             * "14:14 - 15:14". The default is three invisible-by-name characters:
+             * U+00A0 no-break space, U+002D hyphen-minus, U+202F narrow no-break space.
+             * Both spaces are non-breaking, so a timespan is never split across two
+             * lines - which matters in the narrow day cells of the month view.
+             */
+            $timespanSeparator = _x(
+                ' - ',
+                'Event time-time separator (nbsp, hyphen, narrow nbsp)',
+                'open-source-event-calendar'
+            );
             /**
              * Timespan separator string/html
              *
              * Separates from to time and to time values.
-             * if they are not all-day. Defaults to &mdash;
+             * if they are not all-day. Defaults to a hyphen between a no-break space
+             * and a narrow no-break space, so the timespan stays narrow and unbreakable.
              *
              * @since 1.0
              *

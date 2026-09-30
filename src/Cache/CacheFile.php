@@ -155,8 +155,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
         $oldFile = $this->get_file_name($key);
         if ($result !== false) {
             // Delete old file if on update.
-            if ($oldFile !== $this->_cache_path . $fileName
-                    && $oldFile
+            if ($oldFile && $oldFile  !== $this->_cache_path . $fileName
                     && file_exists($oldFile)
             ) {
                 wp_delete_file($oldFile);

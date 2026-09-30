@@ -2,7 +2,6 @@
 
 namespace Osec\App\View\Calendar;
 
-use Osec\App\Controller\StrictContentFilterController;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\Event;
@@ -121,6 +120,9 @@ class OnedayView extends AbstractView
                 'pagination_links' => $pagination_links,
                 'views_dropdown'   => $args['views_dropdown'],
                 'below_toolbar'    => $this->getBelowToolbarHtml($this->get_name(), $view_args),
+                'print_title'      => $title,
+                'print_date'       => $local_date,
+                'print_args'       => $args,
             ]
         );
 
@@ -152,6 +154,7 @@ class OnedayView extends AbstractView
      *     ['indent']    => how much to indent this event to accommodate multiple
      *                      events occurring at the same time (0, 1, 2, etc., to
      *                      be multiplied by whatever desired px/em amount)
+     *     ['indent_depth']=> deepest indent in this event's group of overlapping events
      *     ['event']     => event data object
      *
      * @param  DT  $start_time
@@ -189,8 +192,6 @@ class OnedayView extends AbstractView
 
         $day_start_ts = $loc_start_time->format();
         $day_end_ts   = $loc_end_time->format();
-        StrictContentFilterController::factory($this->app)
-                                     ->clear_the_content_filters();
         foreach ($day_events as $evt) {
             [$evt_start, $evt_end] = $this->getView_specific_timestamps($evt);
 
@@ -219,8 +220,6 @@ class OnedayView extends AbstractView
                 }
             }
         }
-        StrictContentFilterController::factory($this->app)
-                                     ->restore_the_content_filters();
 
         // This will store the returned array
         $days = [];
@@ -301,6 +300,9 @@ class OnedayView extends AbstractView
                 }
             }
         }
+        unset($events, $evt);
+        $all_events[$day_start_ts]['notallday'] = static::addIndentDepth($all_events[$day_start_ts]['notallday']);
+
         $days[$day_start_ts] = [
             'today'     => 0 === strcmp(
                 (string)$today_ymd,

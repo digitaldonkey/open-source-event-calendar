@@ -1,0 +1,58 @@
+# EditorConfig: https://editorconfig.org
+# Sets a consistent default indentation style for new edits.
+# See blocks/.editorconfig for that subtree's separate (tabs) convention.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.less]
+indent_size = 2
+
+[*.{yml,yaml,json}]
+indent_size = 2
+
+# Third-party libraries are committed exactly as published upstream, so no rule
+# may rewrite them. For the ones installed by bin/update-leaflet.sh this is
+# load-bearing (see their osec-vendor.txt): leaflet.css, LICENSE and README.md
+# are CRLF, and the minified JS has no final newline, so any reformatting would
+# break the match with the upstream archive and produce a diff on every re-run.
+# .gitattributes marks the same paths -text so Git cannot normalise them either.
+[public/js/external_libs/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
+# Generated or copied from upstream: whatever a rule changed here, the next
+# generator run or upstream refresh would undo.
+# - public/admin/css: lessc output (bin/compile-less-production.sh) without a
+#   final newline, and bootstrap.min.css, which cannot be rebuilt with Less 4
+# - hooks-and-filters.md: hookster_markdown output
+# - plugin-check.ruleset.xml: bin/get-latest-plugin-review-phpcs-rulesets.sh
+# - require.js, jquery_timely20.js and the icon fonts: vendor copies
+[{public/admin/css/**,hooks-and-filters.md,plugin-check.ruleset.xml,public/js/require.js,public/js/jquery_timely20.js,public/admin/font/timely-icons.svg,public/osec_themes/vortex/font/fontawesome-webfont.svg}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
+# Must stay byte-exact: patches apply to upstream sources whitespace and all, and
+# RFC 5545 feeds use CRLF (the test fixtures mix CRLF and LF on purpose).
+[{composer-patches/**,tests/**/*.ics}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset

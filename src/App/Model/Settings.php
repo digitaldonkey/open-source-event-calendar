@@ -450,7 +450,7 @@ class Settings extends OsecBaseInitialized
                     'label'   => __('Timezone', 'open-source-event-calendar'),
                     'options' => 'Osec\App\Model\Date\Timezones::get_timezones',
                     'help'    => __(
-                        'This is an alias to wp-settings timezone and could also be 
+                        'This is an alias to wp-settings timezone and could also be
                             changed on <a href="/wp-admin/options-general.php">Settings&nbsp;>&nbsp;general</a>.',
                         'open-source-event-calendar'
                     ),
@@ -536,6 +536,15 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => false,
             ],
+            'month_show_times' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'viewing-events',
+                    'label' => __('Show times in Month view', 'open-source-event-calendar'),
+                ],
+                'default'  => false,
+            ],
             'month_word_wrap' => [
                 'type'     => 'bool',
                 'renderer' => [
@@ -589,7 +598,7 @@ class Settings extends OsecBaseInitialized
                     'class' => 'Osec\Settings\Elements\SettingsCheckbox',
                     'tab'   => 'viewing-events',
                     'label' => __(
-                        'Hide Subscribe/Add to Calendar 
+                        'Hide Subscribe/Add to Calendar
                             buttons in calendar and single event views ',
                         'open-source-event-calendar'
                     ),
@@ -693,12 +702,32 @@ class Settings extends OsecBaseInitialized
                     ),
                     'help'  => __(
                         'Select if your want to use category images as featured image fallback on event page.
-                         Fallbacks can be influenced by hook <code>osec_avatar_valid_callbacks</code>.
+                         Fallbacks can be influenced by hook <code>osec_avatar_valid_callbacks</code> and
+                          <code>osec_avatar_fallback_order</code>.
                         ',
                         'open-source-event-calendar'
                     ),
                 ],
                 'default'  => true,
+            ],
+            'featured_image_fallback_to_default' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'viewing-events',
+                    'label' => __(
+                        'Fall back to default image',
+                        'open-source-event-calendar'
+                    ),
+                    'help'  => __(
+                        'Use osec-fallback-image.png, provided by OSEC_DEFAULT_IMAGE constant
+                         or osec-fallback-image.[png|jpg] from upload directory. Delete Item in
+                         media gallery to pick up new image from upload dir. Only applied if "Use
+                          featured image fallbacks" is active.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => false,
             ],
             'input_date_format' => [
                 'type'     => 'string',
@@ -833,12 +862,12 @@ class Settings extends OsecBaseInitialized
                     'readonly' => 'readonly',
                     'help'     => __(
                         'The Robot Exclusion Standard, also known as the Robots Exclusion Protocol or
-						<code><a href="https://en.wikipedia.org/wiki/Robots.txt" target="_blank">robots.txt</a></code>
-						protocol, is a convention for cooperating web crawlers and other web robots
-						about accessing all or part of a website that is otherwise publicly viewable.<br />
-						The file is dynamically created using <a href="/?robots=1" target="_blank">/?robots=1</a>
-						and should map to <a href="/robots.txt" target="_blank">/robots.txt</a>
-						If you maintain a static robots.txt you should copy over above directives.',
+                        <code><a href="https://en.wikipedia.org/wiki/Robots.txt" target="_blank">robots.txt</a></code>
+                        protocol, is a convention for cooperating web crawlers and other web robots
+                        about accessing all or part of a website that is otherwise publicly viewable.<br />
+                        The file is dynamically created using <a href="/?robots=1" target="_blank">/?robots=1</a>
+                        and should map to <a href="/robots.txt" target="_blank">/robots.txt</a>
+                        If you maintain a static robots.txt you should copy over above directives.',
                         'open-source-event-calendar'
                     ),
                 ],
@@ -858,11 +887,11 @@ class Settings extends OsecBaseInitialized
                         'open-source-event-calendar'
                     ),
                     'help'  => __(
-                        'You may re-add the oldschool print icon.',
+                        'Display print icon to print calendar without site header or footer.',
                         'open-source-event-calendar'
                     ),
                 ],
-                'default'  => false,
+                'default'  => true,
             ],
             'always_use_calendar_timezone' => [
                 'type'     => 'bool',
@@ -1020,7 +1049,7 @@ class Settings extends OsecBaseInitialized
                     'type'   => 'append',
                     'append'   => '[CSS length units]',
                     'help'  => __(
-                        'It is recommended to use absolute values like rem or px. 
+                        'It is recommended to use absolute values like rem or px.
                         Leaflet sets its own font-size, placeholder- and map-height may vary using em.',
                         'open-source-event-calendar'
                     ),

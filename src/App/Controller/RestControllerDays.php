@@ -11,6 +11,11 @@ use WP_REST_Request;
 
 class RestControllerDays extends OsecBaseInitialized
 {
+    /**
+     * Largest range one request may ask for. The calendar asks for at most six weeks (month view).
+     */
+    public const MAX_RANGE_DAYS = 62;
+
     public function initialize()
     {
         $app = $this->app;
@@ -27,7 +32,7 @@ class RestControllerDays extends OsecBaseInitialized
                     'args'                => $this->getRestArgs(),
                     'permission_callback' => function () {
                         return true;
-                    }
+                    },
                 ],
             );
         });
@@ -47,6 +52,18 @@ class RestControllerDays extends OsecBaseInitialized
                     $filter = []
                 );
             } else {
+                $span = $request->get_param('end') - $request->get_param('start');
+                if ($span < 0 || $span > self::MAX_RANGE_DAYS * DAY_IN_SECONDS) {
+                    return new \WP_Error(
+                        'osec_invalid_range',
+                        sprintf(
+                            /* translators: %d: number of days */
+                            __('The range must be positive and at most %d days.', 'open-source-event-calendar'),
+                            self::MAX_RANGE_DAYS
+                        ),
+                        ['status' => 400]
+                    );
+                }
                 $end = new DT($request->get_param('end'), 'UTC');
 
                 // TODO

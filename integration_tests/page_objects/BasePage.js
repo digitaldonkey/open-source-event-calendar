@@ -141,7 +141,7 @@ class BasePage {
         await className;
         return await this.driver.executeScript(`
         const elm = document.getElementsByClassName('${className}')[0];
-        for (const child of elm.childNodes) {    
+        for (const child of elm.childNodes) {
             if (child.nodeType === Node.TEXT_NODE) {
                     return child.nodeValue;
             }
@@ -164,6 +164,22 @@ class BasePage {
     }
 
     async takeScreenshot(mocha){
+        const screenShotWidth= 1024;
+
+        // Get dimensions
+        const dimensions = await this.driver.executeScript(() => {
+            return {
+                width: Math.max(document.body.scrollWidth, document.documentElement.scrollWidth),
+                height: Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
+            };
+        });
+
+        // Prepare to restore.
+        const prevDimensions = await this.driver.manage().window().getRect();
+
+        // Resize the browser window to match the full document dimensions
+        await this.driver.manage().window().setRect({width: screenShotWidth, height: dimensions.height});
+
         // Cout up a digit number for each shot per test.
         const number = this.screenshotCount.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})
         this.screenshotCount ++;
@@ -171,6 +187,10 @@ class BasePage {
         let image = await this.driver.takeScreenshot();
         const screenshotsDir = process.env.MOCHA_SCREENSHOT_DIR ?? this.settings.screenshotsDir;
         const filename = screenshotsDir + '/' + title.replace( /[^\w-]+/g, '_' ).trim() + '.png'
+
+        // Resize the browser window to match the full document dimensions
+        await this.driver.manage().window().setRect(prevDimensions);
+
         return writeFile(filename, image, 'base64')
     }
 }

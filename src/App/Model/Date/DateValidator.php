@@ -28,6 +28,10 @@ class DateValidator
             return false;
         }
 
+        if ( ! checkdate((int) $matches['m'], (int) $matches['d'], (int) $matches['y'])) {
+            return false;
+        }
+
         return sprintf(
             '%04d-%02d-%02d',
             $matches['y'],
@@ -145,5 +149,23 @@ class DateValidator
                && ($timestamp <= PHP_INT_MAX)
                && ($timestamp >= 0 /*~ PHP_INT_MAX*/);
         // do not allow negative timestamps until this is widely accepted
+    }
+
+    /**
+     * Check if the value is a timestamp that can plausibly be an 'exact_date'
+     * calendar parameter, as opposed to a stray numeric fragment.
+     *
+     * The `exact_date` URL segment is split on '/', so a date like `21/9/2026`
+     * arrives truncated to `21`, which passes {@see is_valid_time_stamp()} as
+     * epoch + 21 seconds. Any real calendar timestamp is at least one full day
+     * (86400 s) past the epoch.
+     *
+     * @param  string|int  $timestamp
+     *
+     * @return bool
+     */
+    public static function is_exact_date_timestamp($timestamp)
+    {
+        return self::is_valid_time_stamp($timestamp) && $timestamp >= 86400;
     }
 }

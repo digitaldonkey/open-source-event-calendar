@@ -4,6 +4,7 @@ namespace Osec\App\Model\Date;
 
 use Osec\Bootstrap\OsecBaseInitialized;
 use Osec\Exception\Exception;
+use Osec\Http\Request\RequestParser;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -65,7 +66,7 @@ class DateFormatsFrontend extends OsecBaseInitialized
             function () {
                 echo '<p>'
                 . esc_html__(
-                    'Osec calendar uses WordPress default "date_format" and "time_format" above and 
+                    'Osec calendar uses WordPress default "date_format" and "time_format" above and
                         provides additional <strong>frontend date formats</strong>.',
                     'open-source-event-calendar'
                 )
@@ -194,10 +195,8 @@ class DateFormatsFrontend extends OsecBaseInitialized
             return $value;
         }
         $key = $format . '_custom';
-        // phpcs:ignore WordPress.Security.NonceVerification
-        if ($value === 'custom' && isset($_REQUEST[$key])) {
-            // phpcs:ignore WordPress.Security.NonceVerification
-            $customVal = sanitize_text_field(wp_unslash($_REQUEST[$key]));
+        if ($value === 'custom' && RequestParser::has_param($key)) {
+            $customVal = RequestParser::get_param($key);
             // Check if it works.
             if ($customVal && (bool) strtotime(date_format(date_create(), $customVal))) {
                 return $customVal;

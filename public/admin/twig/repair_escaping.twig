@@ -1,0 +1,44 @@
+<div class="wrap">
+    <h1>{{ title }}</h1>
+    <hr class="wp-header-end">
+    <p>{{ intro }}</p>
+    {% if changes is empty %}
+        <p><strong>{{ nothing_text }}</strong></p>
+    {% else %}
+        <table class="widefat striped">
+            <thead>
+            <tr>
+                <th>{{ labels.table }}</th>
+                <th>{{ labels.id }}</th>
+                <th>{{ labels.column }}</th>
+                <th>{{ labels.before }}</th>
+                <th>{{ labels.after }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for change in changes %}
+                <tr>
+                    <td>{{ change.table }}</td>
+                    <td>
+                        {% if change.edit_url %}
+                            <a href="{{ change.edit_url|esc_url }}">{{ change.id }}</a>
+                        {% else %}
+                            {{ change.id }}
+                        {% endif %}
+                    </td>
+                    <td><code>{{ change.column }}</code></td>
+                    <td><code>{{ change.before }}</code></td>
+                    <td><code>{{ change.after }}</code></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <form method="post" action="{{ action|esc_url }}">
+            <input type="hidden" name="action" value="{{ action_name }}">
+            {# wp_nonce_field() output. #}
+            {{ nonce_field_html|raw }}
+            <p><button type="submit" class="button button-primary">{{ submit_text }}</button></p>
+        </form>
+    {% endif %}
+    <p>{{ cli_text }} <code>wp osec repair-escaping --dry-run</code></p>
+</div>

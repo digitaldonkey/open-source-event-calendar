@@ -92,6 +92,7 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
         $this->add_rule('display_filters', false, 'string', 'true', false);
         $this->add_rule('display_date_navigation', false, 'string', 'true', false);
         $this->add_rule('display_view_switch', false, 'string', 'true', false);
+        $this->add_rule('display_print', false, 'string', 'true', false);
         $this->add_rule(
             'agenda_toggle',
             false,
@@ -244,24 +245,68 @@ class RequestParser extends OsecBaseClass implements ArrayAccess
     }
 
     /**
-     * get_param function
+     * A request value (GET or POST), unslashed and cleaned for its type.
      *
-     * Tries to return the parameter from POST and GET
-     * incase it is missing, default value is returned
+     * A parameter that was not sent returns $default unchanged. A sent one is
+     * always converted, also when empty: '' stays '' (Text), Int gives 0. So
+     * callers can tell a cleared field from a missing one with a null default.
+     * A value of the wrong shape (an array for a single value) returns $default.
      *
-     * @param  string  $param  Parameter to return
-     * @param  mixed  $default  Default value
+     * Does not verify a nonce: the caller does.
+     *
+     * @param  string  $param  Parameter name.
+     * @param  mixed  $default  Returned if the parameter is missing or has the wrong shape.
+     * @param  ParamType  $type  How to clean the value.
      *
      * @return mixed
      **/
-    public static function get_param($param, mixed $default = '')
+    public static function get_param($param, mixed $default = '', ParamType $type = ParamType::Text)
     {
         // phpcs:disable WordPress.Security.NonceVerification.Recommended
-        if (isset($_REQUEST[$param])) {
-            return sanitize_text_field(wp_unslash($_REQUEST[$param]));
+        // phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cleaned per type below.
+        if (! isset($_REQUEST[$param])) {
+            return $default;
         }
+        $value = wp_unslash($_REQUEST[$param]);
         // phpcs:enable
-        return $default;
+
+        if (ParamType::IdList === $type) {
+            $ids = is_array($value) ? $value : explode(',', (string)$value);
+            $ids = array_map('absint', array_filter($ids, 'is_scalar'));
+
+            return array_values(array_filter($ids));
+        }
+        if (! is_scalar($value)) {
+            return $default;
+        }
+        $value = (string)$value;
+
+        return match ($type) {
+            ParamType::Text     => sanitize_text_field($value),
+            ParamType::Textarea => sanitize_textarea_field($value),
+            ParamType::Key      => sanitize_key($value),
+            ParamType::Int      => (int)sanitize_text_field($value),
+            ParamType::Id       => absint(sanitize_text_field($value)),
+            ParamType::Float    => (float)sanitize_text_field($value),
+            ParamType::Bool     => ! in_array(strtolower(trim($value)), ['', '0', 'false', 'off', 'no'], true),
+            ParamType::Url      => sanitize_url($value),
+            ParamType::HttpUrl  => sanitize_url($value, ['http', 'https']),
+            ParamType::Email    => sanitize_email($value),
+            ParamType::Callback => preg_match('/^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*)*$/D', $value) ? $value : $default,
+        };
+    }
+
+    /**
+     * Whether a request parameter was sent (GET or POST), even if empty.
+     *
+     * Unchecked checkboxes are not sent at all. Does not verify a nonce.
+     *
+     * @param  string  $param  Parameter name.
+     */
+    public static function has_param(string $param): bool
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        return isset($_REQUEST[$param]);
     }
 
     /**
