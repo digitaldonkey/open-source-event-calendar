@@ -88,14 +88,14 @@ export default function Edit(props) {
 				<p>
 					{__(
 						'Osec Calendar',
-						'open source-event-calendar'
+						'open-source-event-calendar'
 					)}
 					{!isSelected && (
 						<>
 							<br/>
 							<small><a style={{cursor: 'pointer'}}>{__(
 								'Edit',
-								'open source-event-calendar'
+								'open-source-event-calendar'
 							)}</a></small>
 						</>
 					)}
@@ -107,7 +107,7 @@ export default function Edit(props) {
 					<p>
 						<strong>{__(
 							'View',
-							'open source-event-calendar'
+							'open-source-event-calendar'
 						)}
 						</strong>
 						<br/>
@@ -136,20 +136,20 @@ export default function Edit(props) {
 			<p>
 			<strong>{__(
 						'Fixed calendar date',
-						'open source-event-calendar'
+						'open-source-event-calendar'
 						)}
 						</strong>
 						<br />
 						<DateAndTime
 							id={'fixedDate'}
-							labelText={'Selected date for fixed calendar start time'}
+							labelText={__('Selected date for fixed calendar start time', 'open-source-event-calendar')}
 							onChange={(date) => {
 								const timestamp = date ? '' + (date.getTime()/1000) : null;
 								setAttributes({
 									fixedDate: timestamp
 								})
 							}}
-							placeholder={'Defaults to current day'}
+							placeholder={__('Defaults to current day', 'open-source-event-calendar')}
 							defaultValue={attributes.fixedDate}
 							isRequired={false}
 							dateFormat={settings.dateFormat}
@@ -160,7 +160,7 @@ export default function Edit(props) {
 					<p>
 						<strong>{__(
 							'Filters',
-							'open source-event-calendar'
+							'open-source-event-calendar'
 						)}
 						</strong>
 					</p>
@@ -201,7 +201,7 @@ export default function Edit(props) {
 					<p>
 						<strong>{__(
 							'View settings',
-							'open source-event-calendar'
+							'open-source-event-calendar'
 						)}
 						</strong>
 					</p>
@@ -209,7 +209,7 @@ export default function Edit(props) {
 						<BoolSwitch
 							labelText={__(
 								'Display filters',
-								'open source-event-calendar'
+								'open-source-event-calendar'
 							)}
 							value={attributes.displayFilters}
 							onChange={(val) => {
@@ -223,7 +223,7 @@ export default function Edit(props) {
 						<BoolSwitch
 							labelText={__(
 								'Display view select',
-								'open source-event-calendar'
+								'open-source-event-calendar'
 							)}
 							value={attributes.displayViewSwitch}
 							onChange={(val) => {
@@ -237,7 +237,7 @@ export default function Edit(props) {
 						<BoolSwitch
 							labelText={__(
 								'Display date navigation',
-								'open source-event-calendar'
+								'open-source-event-calendar'
 							)}
 							value={ (attributes.limitBy !== 'days' &&  attributes.displayDateNavigation) }
 							disabled={ (attributes.view === 'agenda' && attributes.limitBy === 'days') }
@@ -252,7 +252,7 @@ export default function Edit(props) {
 						<BoolSwitch
 							labelText={__(
 								'Display iCal Feeds',
-								'open source-event-calendar'
+								'open-source-event-calendar'
 							)}
 							value={attributes.displaySubscribe}
 							onChange={(val) => {
@@ -265,7 +265,7 @@ export default function Edit(props) {
 					<RadioControl
 						label={__(
 							'Print icon',
-							'open source-event-calendar'
+							'open-source-event-calendar'
 						)}
 						selected={
 							// Blocks saved before printIcon existed only carry displayPrint.
@@ -275,11 +275,11 @@ export default function Edit(props) {
 						}
 						options={[
 							{
-								label: __('Use the global setting', 'open source-event-calendar'),
+								label: __('Use the global setting', 'open-source-event-calendar'),
 								value: 'global'
 							},
-							{label: __('Show', 'open source-event-calendar'), value: 'show'},
-							{label: __('Hide', 'open source-event-calendar'), value: 'hide'},
+							{label: __('Show', 'open-source-event-calendar'), value: 'show'},
+							{label: __('Hide', 'open-source-event-calendar'), value: 'hide'},
 						]}
 						onChange={(val) => {
 							setAttributes({
@@ -293,7 +293,7 @@ export default function Edit(props) {
 							<BoolSwitch
 								labelText={__(
 									' Keep all events expanded in Agenda view (disables toggler)',
-									'open source-event-calendar'
+									'open-source-event-calendar'
 								)}
 								value={attributes.agendaToggle}
 								onChange={(val) => {

@@ -101,11 +101,6 @@ class AgendaView extends AbstractView
         }
         $this->updateMeta($results['events']);
 
-        $titles = $this->makePagerTitle(
-            $use_time_limit ? $exact_date : $results['date_first']->format_to_gmt(),
-            $use_time_limit ? $view_args['time_limit'] : $results['date_last']->format_to_gmt()
-        );
-
         if (! count($results['events'])) {
             // Fixing that navigation jumps if there are no results.
             // There is still a "jump" when you page back on an empty
@@ -124,6 +119,12 @@ class AgendaView extends AbstractView
             // Force using no page_offset.
             $absolute_pager = true;
         }
+
+        // After the empty-result fallback: with no events, date_first is "now", not the requested month.
+        $titles = $this->makePagerTitle(
+            $use_time_limit ? $exact_date : $results['date_first']->format_to_gmt(),
+            $use_time_limit ? $view_args['time_limit'] : $results['date_last']->format_to_gmt()
+        );
 
         $dates = $this->get_agenda_like_date_array(
             $results['events'],

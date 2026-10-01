@@ -6,8 +6,9 @@
  * path dispatches the event by hand and the button path stubs `window.print`.
  *
  * Usage: node print-pdfs.js <browser> <label> <outDir> [views...]
- * Env: BASE_URL, DATE, MODES (button,ctrlp), LONG_TEXT, REVEAL,
- *      SELENIUM_CHROME_URL, SELENIUM_FIREFOX_URL
+ * Env: BASE_URL, DATE, MODES (button,ctrlp), LONG_TEXT, REVEAL, PAPER (letter, the
+ *      browsers' default, or a4 - landscape A4 is the shorter page), SELENIUM_CHROME_URL,
+ *      SELENIUM_FIREFOX_URL
  */
 const path = require('path');
 const fs = require('fs');
@@ -20,6 +21,7 @@ const views = process.argv.length > 5 ? process.argv.slice(5) : ['month', 'week'
 const base = (process.env.BASE_URL || 'https://ddev-wordpress.ddev.site') + '/calendar/';
 const date = process.env.DATE || '15-9-2026';
 const modes = (process.env.MODES || 'ctrlp,button').split(',');
+const a4 = process.env.PAPER === 'a4';
 
 const now = new Date();
 const pad = (n) => String(n).padStart(2, '0');
@@ -44,11 +46,12 @@ function build() {
 // so no orientation is passed here.
 async function toPdf(driver) {
     if (browser === 'firefox') {
-        return driver.printPage({ background: false, shrinkToFit: false });
+        return driver.printPage(Object.assign({ background: false, shrinkToFit: false }, a4 ? { width: 21.0, height: 29.7 } : {}));
     }
     const res = await driver.sendAndGetDevToolsCommand('Page.printToPDF', {
         preferCSSPageSize: true,
         printBackground: false,
+        ...(a4 ? { paperWidth: 8.27, paperHeight: 11.69 } : {}),
     });
     return res.data;
 }
