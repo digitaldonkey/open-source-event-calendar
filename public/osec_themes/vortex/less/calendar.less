@@ -524,7 +524,9 @@ table.ai1ec-oneday-view-original {
   // a longer one wraps and is cut after the second.
   .ai1ec-event {
     height: auto;
-    line-height: 14px;
+    // The line is set by the spans below. The block's own font can be larger than theirs
+    // (plana scales only the spans), and any line-height here would size the line by it.
+    line-height: 0;
     margin: 0 0 @month-event-gap;
     white-space: normal;
     display: -webkit-box;
@@ -532,9 +534,12 @@ table.ai1ec-oneday-view-original {
     -webkit-line-clamp: 2;
     overflow: hidden;
   }
+  // Unitless, so the line follows the text: a fixed line-height smaller than the text lets
+  // overflow: hidden clip the descenders.
   .ai1ec-event-time,
   .ai1ec-event-title {
     display: inline;
+    line-height: 1.2;
   }
 
   .ai1ec-event-time {
@@ -547,7 +552,6 @@ table.ai1ec-oneday-view-original {
   // Day cells are about 40px wide on phones: smaller type, and the start time without the end.
   @media screen and ( max-width: (@screen-xs - 1) ) {
     .ai1ec-event {
-      line-height: 11px;
       padding-left: 1px;
       padding-right: 1px;
     }
