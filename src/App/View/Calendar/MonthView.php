@@ -443,15 +443,15 @@ class MonthView extends AbstractView
         // ======================
         // = Minical datepicker =
         // ======================
-        // Align date to first of month, month offset applied.
-
+        // Align date to first of month, month offset applied, at local midnight like the
+        // links above. In UTC with the time of local midnight kept, it named the 2nd east of UTC.
         $orig_date
-            ->set_timezone('UTC')
             ->set_date(
                 $orig_date->format('Y'),
                 $orig_date->format('m') + $args['month_offset'],
                 1
-            );
+            )
+            ->set_time(0, 0, 0);
         $args['exact_date'] = $orig_date->format();
         $links[]            = HtmlFactory::factory($this->app)->create_datepicker_link(
             $args,
