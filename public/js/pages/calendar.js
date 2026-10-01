@@ -6148,6 +6148,9 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
             mouseleave: m
         }, ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container"), $(document).on("shown.bs.constrained_popover", ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container", anchor_popover), $(document).on("click", ".ai1ec-agenda-view .ai1ec-event-header--toggle", agendaView.toggle_event), $(document).on("click", "#ai1ec-agenda-expand-all", agendaView.expand_all), $(document).on("click", "#ai1ec-agenda-collapse-all", agendaView.collapse_all), $(document).on("click", "a.ai1ec-load-view", loadViews.handle_click_on_link_to_load_view), $(document).on("click", ".ai1ec-minical-trigger", loadViews.handle_minical_trigger), $(document).on("click", ".ai1ec-clear-filter", loadViews.clear_filters), $(document).on("click", "#ai1ec-print-button", print.handle_click_on_print_button), window.addEventListener("beforeprint", print.before_print), window.addEventListener("afterprint", print.after_print), $(document).on("click", ".ai1ec-reveal-full-day button", function () {
             var t = $(this).closest(".ai1ec-calendar");
+            // The tooltip closes on mouseleave, which a button fading out under a resting
+            // pointer never gets.
+            $(this).data("bs.tooltip") && $(this).tooltip("hide");
             $(this).fadeOut();
             var n = t.find(".ai1ec-oneday-view-original, .ai1ec-week-view-original"),
                 r = t.find(".tablescroll_wrapper").offset().top - n.offset().top;
