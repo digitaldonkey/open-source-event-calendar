@@ -1057,6 +1057,38 @@ table.ai1ec-oneday-view-original {
   .osec-print-grid {
     width: auto !important;
   }
+  // Week/day fill the page area like the month: the view takes the page height, the grid what
+  // the header and the all-day row leave. Events and hour lines are placed in percent of the
+  // grid (scripts/calendar/print), so they scale with it.
+  .osec-calendar-view:has(.osec-print-grid) {
+    display: flex;
+    flex-direction: column;
+    min-height: @print-landscape-height;
+    > .ai1ec-week-view,
+    > .ai1ec-oneday-view {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+    }
+  }
+  .osec-calendar-view--oneday:has(.osec-print-grid) {
+    min-height: @print-portrait-height;
+  }
+  .osec-print-grid {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1 1 auto;
+    > table {
+      flex: 1 1 auto;
+      height: 100%;
+    }
+    tr,
+    td,
+    .ai1ec-grid-container,
+    .ai1ec-day {
+      height: 100% !important;
+    }
+  }
   .osec-print-grid {
     overflow: hidden !important;
     .ai1ec-event-container {
@@ -1172,20 +1204,24 @@ table.ai1ec-oneday-view-original {
   .ai1ec-month-view .ai1ec-day-stretcher {
     height: 3.5em;
   }
-  // Month: fill the landscape page like a paper calendar. A week with many events takes
-  // the height it needs and the other weeks share the rest equally (flex: 1 1 0 stops at
-  // the content height). A table cannot do this in both browsers: Chrome hands spare table
-  // height to rows in proportion to their content, Firefox fills percentage rows top-down
-  // (compared 2026-10-01, 8 variants). Cost: a month running over several pages repeats
-  // the weekday header only on the first page.
-  // 145mm: measured 2026-09-30, up to 150mm keeps an empty and a full month on one A4
-  // landscape page (the shorter of A4 and Letter), 160mm does not; the rest leaves room for
-  // a larger base font size in the print header. Not 100vh: Firefox sizes vh by the window,
-  // not the page, and printed an empty second page.
+  // Month: fill the landscape page like a paper calendar. The view is as high as the page
+  // area (see @page osec-landscape) and the table takes what the print header leaves. A week
+  // with many events takes the height it needs and the other weeks share the rest equally
+  // (flex: 1 1 0 stops at the content height). A table cannot do this in both browsers:
+  // Chrome hands spare table height to rows in proportion to their content, Firefox fills
+  // percentage rows top-down (compared 2026-10-01, 8 variants). Cost: a month running over
+  // several pages repeats the weekday header only on the first page.
+  // The page height has to be a length: percentages do not reach the page through html and
+  // body in print, and Firefox sizes vh by the window, not the page.
+  .osec-calendar-view:has(> .ai1ec-month-view) {
+    display: flex;
+    flex-direction: column;
+    min-height: @print-landscape-height;
+  }
   .ai1ec-month-view {
     display: flex;
     flex-direction: column;
-    min-height: 145mm;
+    flex: 1 1 auto;
     thead,
     tbody {
       display: flex;
@@ -1277,8 +1313,20 @@ table.ai1ec-oneday-view-original {
   }
 }
 
+// Fixed margins make the page area known, so month, week and day can fill it: the print
+// dialog's default margins differ per browser and setting (with headers and footers they
+// left a month at about two thirds of the page). Keep in sync with PAGE_HEIGHT in
+// scripts/calendar/print (public/js/pages/calendar.js).
+@print-page-margin: 10mm;
+// A4 landscape (210mm high, the shorter of A4 and Letter) minus the margins, minus 2mm so
+// rounding never pushes the last row onto a second page.
+@print-landscape-height: 188mm;
+// Letter portrait (279.4mm high, the shorter of A4 and Letter) minus margins and 2mm.
+@print-portrait-height: 257mm;
+
 @page osec-landscape {
   size: landscape;
+  margin: @print-page-margin;
 }
 
 // Day and agenda are sized for portrait: in landscape the day grid is taller than the page,
@@ -1286,6 +1334,7 @@ table.ai1ec-oneday-view-original {
 // overrides an orientation the print dialog remembers from a month or week print.
 @page osec-portrait {
   size: portrait;
+  margin: @print-page-margin;
 }
 
 @media print {
