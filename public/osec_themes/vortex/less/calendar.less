@@ -1205,7 +1205,8 @@ table.ai1ec-oneday-view-original {
     height: 3.5em;
   }
   // Month: fill the landscape page like a paper calendar. The view is as high as the page
-  // area (see @page osec-landscape) and the table takes what the print header leaves. A week
+  // (print button: any paper, see html.ai1ec-print; Ctrl+P: the page area of the smaller
+  // paper, see @page osec-landscape) and the table takes what the print header leaves. A week
   // with many events takes the height it needs and the other weeks share the rest equally
   // (flex: 1 1 0 stops at the content height). A table cannot do this in both browsers:
   // Chrome hands spare table height to rows in proportion to their content, Firefox fills
@@ -1313,10 +1314,10 @@ table.ai1ec-oneday-view-original {
   }
 }
 
-// Fixed margins make the page area known, so month, week and day can fill it: the print
-// dialog's default margins differ per browser and setting (with headers and footers they
-// left a month at about two thirds of the page). Keep in sync with PAGE_HEIGHT in
-// scripts/calendar/print (public/js/pages/calendar.js).
+// Fixed margins make the page area known for Ctrl+P, where month, week and day fill it with
+// the fixed heights below (the print button fills any paper, see html.ai1ec-print). The print
+// dialog's default margins differ per browser and setting. PAGE_HEIGHT in
+// scripts/calendar/print (public/js/pages/calendar.js) estimates the same area.
 @print-page-margin: 10mm;
 // A4 landscape (210mm high, the shorter of A4 and Letter) minus the margins, minus 2mm so
 // rounding never pushes the last row onto a second page.
@@ -1344,6 +1345,34 @@ table.ai1ec-oneday-view-original {
   }
   body:has(.ai1ec-oneday-view, .ai1ec-agenda-view) {
     page: osec-portrait;
+  }
+  // Print button: the page holds only the calendar, so the page height can reach it whatever
+  // paper the print dialog uses. In print, html's percentage height is the page area; body
+  // takes it as a minimum (a little less, or Firefox adds an empty page) and passes it on
+  // through flex, and month table or week/day grid fill what the print header leaves. A busy
+  // month still grows onto more pages. Ctrl+P keeps the site around the calendar, so it uses
+  // the fixed heights in .osec-print-calendar(). Verified 2026-10-01 on A3, A4 and Letter in
+  // Chrome and Firefox; 100vh is not an option, Firefox sizes it by the window.
+  html.ai1ec-print {
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    body {
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: calc(100% - 1mm) !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    #ai1ec-calendar,
+    #osec-calendar-view-container,
+    #osec-calendar-view {
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+    }
   }
 }
 
