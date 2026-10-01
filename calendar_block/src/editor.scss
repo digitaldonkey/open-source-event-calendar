@@ -35,39 +35,54 @@
 		background-color: #fff;
 	}
 
-	// RadioControl: one row in the form's font, the toggles' colour and size.
+	// RadioControl in the form's font, the toggles' colour and size, and their line
+	// pitch: 16px lines, 1em apart. The legend has a line of its own; the options share
+	// one while they fit, otherwise all stack: the basis is negative (so 0) above the
+	// threshold and larger than the line below it.
 	.components-radio-control {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: .5em 1.5em;
-		margin: 0 0 1em;
+		margin: 1em 0;
 		font: inherit;
 		--wp-components-color-accent: #080;
 	}
 
 	.components-radio-control legend {
-		float: left;
-		margin: 0 .5em 0 0;
+		height: 16px;
+		margin: 0 0 1em;
 		padding: 0;
 		font: inherit;
+		line-height: 16px;
 		text-transform: none;
 	}
 
 	.components-radio-control__group-wrapper {
 		flex-direction: row;
 		flex-wrap: wrap;
-		gap: .5em 1.5em;
+		justify-content: flex-start;
+		gap: 1em 1.5em;
 	}
 
 	.components-radio-control__option {
 		display: flex;
 		align-items: center;
+		height: 16px;
+		flex: 0 0 calc((22em - 100%) * 999);
+		min-width: max-content;
+		max-width: 100%;
 	}
 
-	.components-radio-control__input {
+	// Core switches to 24px below 600px; keep the size of the wider screens.
+	.components-radio-control__input[type=radio] {
+		width: 16px;
+		height: 16px;
+		min-width: 16px;
+		max-width: 16px;
 		transform: scale(1.25);
 		margin: 0 .6em 0 .15em;
+
+		// Filled green when checked, no white dot.
+		&:checked::before {
+			display: none;
+		}
 	}
 
 	.components-radio-control__label {

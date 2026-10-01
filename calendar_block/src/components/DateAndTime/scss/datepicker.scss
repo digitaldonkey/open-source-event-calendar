@@ -646,8 +646,14 @@ $header-height: 3em;
     position: absolute;
     display: flex;
     height: 100%;
-    width: 1.8rem;
-    padding: 0 .5em;
+    width: 1.7rem;
+    padding: 0 .5em 0 .3em;
+  }
+
+  > input {
+    font-size: inherit;
+    line-height: inherit;
+    padding: 0.5em .25em 0.5em 2.5rem;
   }
 }
 
