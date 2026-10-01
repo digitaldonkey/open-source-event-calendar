@@ -7,7 +7,10 @@
 
 // The editor iframe does not load the wp-admin styles the block was designed with.
 .inline-edit-wrapper {
-	padding: 0 12px 12px;
+	// No bottom padding: closed, the header ends the block. flow-root keeps the last
+	// setting's margin inside the block while the settings are open.
+	display: flow-root;
+	padding: 0 12px;
 
 	strong {
 		font-weight: 600;
@@ -87,6 +90,67 @@
 
 	.components-radio-control__label {
 		font: inherit;
+	}
+
+	// Header toggle: the chevron turns with the settings panel.
+	.osec-settings-toggle {
+		font-size: .8em;
+		line-height: 2.5;
+
+		.dashicons {
+			width: auto;
+			height: auto;
+			margin-right: .25em;
+			font-size: 1.25em;
+			vertical-align: middle;
+			transition: transform .25s ease-in-out;
+
+			&.is-open {
+				transform: rotate(180deg);
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				transition: none;
+			}
+		}
+	}
+
+	// Reveal: settings that depend on another one open and close. The row track grows
+	// from 0fr to 1fr; the margin, in the place of the content's outer margins, keeps
+	// the spacing collapsing with the neighbours, as the inner box contains its own.
+	.osec-reveal {
+		display: grid;
+		grid-template-rows: 0fr;
+		margin: 0;
+		opacity: 0;
+		transition: grid-template-rows .25s ease, margin .25s ease, opacity .25s ease;
+
+		&.is-open {
+			grid-template-rows: 1fr;
+			margin: 1em 0;
+			opacity: 1;
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+
+	// The padding moves the clip edge out, so the scaled toggles and focus rings are
+	// not cut; the negative margin takes the room back.
+	.osec-reveal__inner {
+		min-height: 0;
+		overflow: hidden;
+		padding: 4px;
+		margin: -4px;
+
+		> :first-child {
+			margin-top: 0;
+		}
+
+		> :last-child {
+			margin-bottom: 0;
+		}
 	}
 
 	// Limit by events or days: a choice between two values, grey in both positions.
