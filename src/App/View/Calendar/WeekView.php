@@ -436,7 +436,8 @@ class WeekView extends AbstractView
         // ======================
         // = Minical datepicker =
         // ======================
-        $args['exact_date'] = $orig_date;
+        // The first day of the displayed week, not the requested day inside it.
+        $args['exact_date'] = (new DT($orig_date, 'sys.default'))->getWeekStart()->format();
         $links[]            = HtmlFactory::factory($this->app)->create_datepicker_link(
             $args,
             $args['exact_date'],
