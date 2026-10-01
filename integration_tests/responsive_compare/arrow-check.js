@@ -98,11 +98,11 @@ async function shoot(driver, clip, file) {
                         if (!arrow) { return; }
                         var right = arrow.className.indexOf('arrow1') !== -1;
                         var ev = bar.querySelector('.ai1ec-event');
-                        // In print the shape hangs off .ai1ec-event and is pulled out over
-                        // that element's border, so it has to span the full border box - the
-                        // bounding rect as-is. On screen it spans the bar.
-                        var host = print ? ev : bar;
-                        var r = host.getBoundingClientRect();
+                        // The reference is always the coloured box, .ai1ec-event: on screen the
+                        // container (bar) is taller by the event's bottom margin. In print the
+                        // shape is pulled out over that element's border, so it has to span the
+                        // full border box - the bounding rect as-is.
+                        var r = ev.getBoundingClientRect();
                         var box = r.height;
                         var got = print
                             ? parseFloat(getComputedStyle(ev, right ? ':after' : ':before').height)

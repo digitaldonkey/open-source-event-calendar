@@ -14,6 +14,9 @@
 // font-size - themes scale the title down (plana: .7em), which would shrink the indent alone.
 // Their height is not set here - see .ai1ec-multiday-arrow1.
 @multiday-arrow-depth: .5em;
+// Space below each month view event. Part of the event container's box but not of the
+// coloured .ai1ec-event, so the continuation arrows stretched over the container leave it out.
+@month-event-gap: 1px;
 
 // =================
 // = Calendar page =
@@ -522,7 +525,7 @@ table.ai1ec-oneday-view-original {
   .ai1ec-event {
     height: auto;
     line-height: 14px;
-    margin: 0 0 1px;
+    margin: 0 0 @month-event-gap;
     white-space: normal;
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -611,8 +614,7 @@ table.ai1ec-oneday-view-original {
   // Continuation arrows. Each one is a mask painted in the page background colour over the
   // end of the bar: arrow1 cuts the right end down to a point, arrow2 cuts a V-notch into
   // the left end. The event colour is whatever shows through - the bar's own background -
-  // so these never need to know it (calendar.js still sets border colours on them inline;
-  // with no border-width left, that is inert).
+  // so these never need to know it.
   //
   // Two half-height layers, each a gradient split diagonally at 50%: the split of a
   // `to <corner>` gradient always runs corner to corner whatever the box's aspect ratio, so
@@ -635,6 +637,10 @@ table.ai1ec-oneday-view-original {
       linear-gradient( to bottom right, transparent 50%, @body-bg 50% );
     background-position: top right, bottom right;
     right: 0;
+  }
+  // Bars (.ai1ec-multiday-bar) reset the event's margin, so only the first segment has the gap.
+  .ai1ec-multiday:not( .ai1ec-multiday-bar ) > .ai1ec-multiday-arrow1 {
+    bottom: @month-event-gap;
   }
   .ai1ec-multiday-arrow2 {
     background-image:

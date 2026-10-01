@@ -718,21 +718,21 @@ timely.define("domReady", [], function () {
                             backgroundColor: barColor
                         });
                         var cloneDays = remainingDays > daysPerWeek ? daysPerWeek : remainingDays;
-                        cloneBar.css("width", s(cloneDays)), remainingDays > daysPerWeek && cloneBar.append(o(1, barColor)), cloneBar.append(o(2, barColor))
+                        cloneBar.css("width", s(cloneDays)), remainingDays > daysPerWeek && cloneBar.append(o(1)), cloneBar.append(o(2))
                     }
                     rowsBelow === 0 ? cellDate.css({marginBottom: firstRowMargin + "px"}) : cellDate.css({marginBottom: "+=" + barHeight + "px"}), remainingDays--, remainingDays > 0 && column === 6 && rowsBelow++
                 }
             });
             if (endTruncated) {
                 var lastSegment = bar.find("." + this.className.replace(/\s+/igm, ".")).last();
-                lastSegment.append(o(1, barColor))
+                lastSegment.append(o(1))
             }
             bar.css({
                 position: "absolute",
                 top: date.height() + 1 + "px",
                 left: "1px",
                 width: s(daysInFirstRow)
-            }), rowsBelow > 0 && bar.append(o(1, barColor)), bar.data("startTruncated") && bar.append(o(2, barColor)).addClass("ai1ec-multiday-bar")
+            }), rowsBelow > 0 && bar.append(o(1)), bar.data("startTruncated") && bar.append(o(2)).addClass("ai1ec-multiday-bar")
         }), days.each(function () {
             // Push the day's own events below the bars crossing this day.
             var date = $(".ai1ec-date", this), dayNumber = parseInt(date.text(), 10), week = date.closest(".ai1ec-week"),
@@ -770,13 +770,8 @@ timely.define("domReady", [], function () {
                 r || n ? t = 709 : t = 705
         }
         return t + "%"
-    }, o = function (t, n) {
-        var r = $('<div class="ai1ec-multiday-arrow' + t + '"></div>');
-        return t === 1 ? r.css({borderLeftColor: n}) : r.css({
-            borderTopColor: n,
-            borderRightColor: n,
-            borderBottomColor: n
-        }), r
+    }, o = function (t) {
+        return $('<div class="ai1ec-multiday-arrow' + t + '"></div>')
     };
     return {extend_multiday_events: i}
 }), timely.define("libs/frontend_utils", [], function () {
