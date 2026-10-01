@@ -35,6 +35,7 @@ class BlockController extends OsecBaseClass
             $asset['version'],
             true
         );
+        wp_set_script_translations('osec-calendar-block-classic', 'open-source-event-calendar');
         // Dependencies of an editor style are loaded into the editor iframe as well.
         wp_register_style(
             'osec-editor-style',
