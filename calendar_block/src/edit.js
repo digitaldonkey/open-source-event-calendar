@@ -7,6 +7,7 @@ import {__} from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import {useSelect} from "@wordpress/data";
 import {useBlockProps} from '@wordpress/block-editor';
+import {RadioControl} from '@wordpress/components';
 import {store as coreDataStore} from '@wordpress/core-data';
 
 /**
@@ -261,20 +262,32 @@ export default function Edit(props) {
 							}}
 						/>
 					</p>
-					<p>
-						<BoolSwitch
-							labelText={__(
-								'Display print icon',
-								'open-source-event-calendar'
-							)}
-							value={attributes.displayPrint}
-							onChange={(val) => {
-								setAttributes({
-									displayPrint: val
-								})
-							}}
-						/>
-					</p>
+					<RadioControl
+						label={__(
+							'Print icon',
+							'open-source-event-calendar'
+						)}
+						selected={
+							// Blocks saved before printIcon existed only carry displayPrint.
+							attributes.printIcon !== 'global'
+								? attributes.printIcon
+								: (attributes.displayPrint === false ? 'hide' : 'global')
+						}
+						options={[
+							{
+								label: __('Use the global setting', 'open-source-event-calendar'),
+								value: 'global'
+							},
+							{label: __('Show', 'open-source-event-calendar'), value: 'show'},
+							{label: __('Hide', 'open-source-event-calendar'), value: 'hide'},
+						]}
+						onChange={(val) => {
+							setAttributes({
+								printIcon: val,
+								displayPrint: true
+							})
+						}}
+					/>
 					{(attributes.view === 'agenda' || attributes.displayViewSwitch) && (
 						<p>
 							<BoolSwitch
