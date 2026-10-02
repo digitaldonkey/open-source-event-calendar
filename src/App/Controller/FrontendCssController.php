@@ -52,7 +52,8 @@ class FrontendCssController extends OsecBaseClass
     public const CSS_OPTION = 'osec_css';
 
     /**
-     * 1.1.x option holding the CSS file URL or a timestamp, replaced by self::CSS_OPTION. Only removed on upgrade.
+     * 1.1.x option holding the CSS file URL or a timestamp, replaced by self::CSS_OPTION. Kept as a number for a
+     * downgrade (see delete_legacy_state()).
      */
     public const COMPILED_CSS_KEY = 'osec_compiled.css';
 
@@ -419,7 +420,9 @@ class FrontendCssController extends OsecBaseClass
 
             return;
         }
-        wp_enqueue_style('ai1ec_style', $url, [], $this->get_state()['ver'] ?? OSEC_VERSION);
+        // The route URL carries the hash in its own parameter; a static file gets it as ver=.
+        $is_route = str_contains($url, self::REQUEST_CSS_PARAM . '=');
+        wp_enqueue_style('ai1ec_style', $url, [], $is_route ? null : ($this->get_state()['ver'] ?? OSEC_VERSION));
     }
 
     /**
@@ -669,11 +672,15 @@ class FrontendCssController extends OsecBaseClass
     }
 
     /**
-     * Removes the 1.1.x option rows: the CSS URL or timestamp, the file cache index and the database copy.
+     * Removes the 1.1.x option rows: the file cache index and the database copy.
+     *
+     * osec_compiled.css (the CSS URL or a timestamp) is replaced by a number instead: 1.2 ignores it, a site downgraded
+     * to 1.1.x then links its compiling route. Without the row, 1.1.x links a precompiled osec_parsed.css that no theme
+     * ships (404, unstyled calendar until the next compile).
      */
     public function delete_legacy_state(): void
     {
-        $this->app->options->delete(self::COMPILED_CSS_KEY);
+        $this->app->options->set(self::COMPILED_CSS_KEY, time());
         CacheDb::factory($this->app)->delete(self::COMPILED_CSS_KEY);
         global $wpdb;
         foreach (

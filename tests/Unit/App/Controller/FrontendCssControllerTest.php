@@ -152,6 +152,24 @@ class FrontendCssControllerTest extends TestBase
         $this->assertSame(substr(md5('body{color:red}'), 0, 7), wp_styles()->registered['ai1ec_style']->ver);
     }
 
+    /**
+     * The route carries the hash in its own parameter; a second ver= would only repeat it.
+     */
+    public function test_route_link_has_no_second_ver()
+    {
+        global $osec_app;
+
+        $this->use_css_engine('db');
+        $ctrl = FrontendCssController::factory($osec_app);
+        $ctrl->update_persistence_layer('body{color:red}');
+        $GLOBALS['wp_styles'] = null;
+
+        $ctrl->add_link_to_html_for_frontend();
+
+        $this->assertNull(wp_styles()->registered['ai1ec_style']->ver);
+        $this->assertSame($this->route_url(substr(md5('body{color:red}'), 0, 7)), wp_styles()->registered['ai1ec_style']->src);
+    }
+
     public function test_ver_changes_with_the_css_only()
     {
         global $osec_app;
@@ -227,9 +245,7 @@ class FrontendCssControllerTest extends TestBase
             $this->assertNull($this->get_or_null($engine, $name), get_class($engine));
         }
         $this->assertNull($osec_app->options->get(FrontendCssController::CSS_OPTION));
-        foreach ($legacy['options'] as $option) {
-            $this->assertFalse(get_option($option), $option);
-        }
+        $this->assertLegacyRowsReplaced($legacy['options']);
         $this->assertFileDoesNotExist($legacy['file']);
         $this->assertSame('other application', apcu_fetch('osec_test_foreign_key'));
         apcu_delete('osec_test_foreign_key');
@@ -248,12 +264,25 @@ class FrontendCssControllerTest extends TestBase
         $osec_app->settings->perform_upgrade_actions([]);
 
         $this->assertFalse(get_transient(FrontendCssController::COMPILE_FAILED_TRANSIENT));
-        foreach ($legacy['options'] as $option) {
-            $this->assertFalse(get_option($option), $option);
-        }
+        $this->assertLegacyRowsReplaced($legacy['options']);
         $this->assertFileExists($legacy['file']);
         $this->assertTrue((bool) $osec_app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY));
         wp_delete_file($legacy['file']);
+    }
+
+    /**
+     * The 1.1.x rows are gone, except osec_compiled.css: a number there makes a downgraded 1.1.x link its compiling
+     * route; without the row it links a precompiled osec_parsed.css that no theme ships (404, unstyled; V12).
+     */
+    private function assertLegacyRowsReplaced(array $options): void
+    {
+        foreach ($options as $option) {
+            if (FrontendCssController::COMPILED_CSS_KEY === $option) {
+                $this->assertTrue(is_numeric(get_option($option)), $option . ' is a number');
+                continue;
+            }
+            $this->assertFalse(get_option($option), $option);
+        }
     }
 
     private function route_url(string $ver): string
