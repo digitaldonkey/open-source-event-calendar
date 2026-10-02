@@ -2,6 +2,7 @@
 
 namespace Osec\Settings\Elements;
 
+use Osec\App\Controller\FrontendCssController;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Cache\CacheApcu;
 use Osec\Cache\CacheDb;
@@ -77,20 +78,87 @@ class SettingsCache extends OsecBaseClass
         $args = [
             'current_cache'        => $current_cache,
             'available_caches'     => $available_caches,
+            'css_location'         => $this->css_location(),
             'twig_cache_available' => (bool) $twigCache,
             'twig_path'            => $twigCache ?? CacheFile::OSEC_FILE_CACHE_UNAVAILABLE,
             'id'                   => 'twig_cache',
-            'info'                => __('Caches used in given order.', 'open-source-event-calendar'),
+            'info'                 => __('Caches used in given order.', 'open-source-event-calendar'),
+            'rescan_nonce'         => wp_create_nonce(ThemeLoader::RESCAN_NONCE),
+            'clear'                => [
+                'url'   => rest_url('osec/v1/cache/clear'),
+                'nonce' => wp_create_nonce('wp_rest'),
+            ],
             'text'                 => [
-                'refresh' => __('Check again', 'open-source-event-calendar'),
-                'nocache' => __('Templates cache is not writable', 'open-source-event-calendar'),
-                'okcache' => __('Twig cache is writable (FileCache("twig"))', 'open-source-event-calendar'),
-                'rescan'  => __('Checking...', 'open-source-event-calendar'),
-                'title'   => __('Performance Report', 'open-source-event-calendar'),
+                'refresh'       => __('Check again', 'open-source-event-calendar'),
+                'nocache'       => __('Templates cache is not writable', 'open-source-event-calendar'),
+                'okcache'       => __('Twig cache is writable', 'open-source-event-calendar'),
+                'rescan'        => __('Checking...', 'open-source-event-calendar'),
+                'title'         => __('Performance Report', 'open-source-event-calendar'),
+                'name'          => __('Name', 'open-source-event-calendar'),
+                'available'     => __('Available', 'open-source-event-calendar'),
+                'current'       => __('Used for the CSS', 'open-source-event-calendar'),
+                'constant'      => __('Constant', 'open-source-event-calendar'),
+                'notes'         => __('Notes', 'open-source-event-calendar'),
+                'css_title'     => __('Compiled CSS', 'open-source-event-calendar'),
+                'twig_title'    => __('Twig Cache', 'open-source-event-calendar'),
+                'twig_info'     => __('Compiled templates are stored as PHP files.', 'open-source-event-calendar') . ' '
+                    . __('Without a writable folder, they compile on every request.', 'open-source-event-calendar'),
+                'clear_title'   => __('Clear all caches', 'open-source-event-calendar'),
+                'clear_button'  => __('Clear all caches', 'open-source-event-calendar'),
+                'clear_busy'    => __('Clearing...', 'open-source-event-calendar'),
+                'clear_failed'  => __('The caches could not be cleared.', 'open-source-event-calendar'),
+                'clear_info'    => implode(
+                    ' ',
+                    [
+                        __(
+                            'Deletes the compiled calendar CSS from every cache (file, APCu, database),',
+                            'open-source-event-calendar'
+                        ),
+                        __(
+                            'the compiled Twig templates of this site and what older versions left behind.',
+                            'open-source-event-calendar'
+                        ),
+                        __('The CSS is compiled first and rebuilt right away.', 'open-source-event-calendar'),
+                        __('If it does not compile, the current CSS is kept.', 'open-source-event-calendar'),
+                        __('Templates are rebuilt on the next page view.', 'open-source-event-calendar'),
+                        __('Settings and theme options are not changed.', 'open-source-event-calendar'),
+                    ]
+                ),
             ],
         ];
 
         return $args;
+    }
+
+    /**
+     * Where the compiled CSS is now, from the state of the last compile.
+     */
+    private function css_location(): string
+    {
+        $ctrl  = FrontendCssController::factory($this->app);
+        $state = $ctrl->get_state();
+        if ( ! $state) {
+            return __(
+                'Not compiled yet: it is compiled on the next page view with a calendar.',
+                'open-source-event-calendar'
+            );
+        }
+        if ('file' !== $state['engine']) {
+            return sprintf(
+                /* translators: 1: cache engine (apcu or db), 2: URL */
+                __('Kept in %1$s, served by PHP: %2$s', 'open-source-event-calendar'),
+                $state['engine'],
+                $ctrl->get_css_url()
+            );
+        }
+        $dir = (string) CachePath::factory($this->app)->root_dir($state['root'], 'css');
+
+        return sprintf(
+            /* translators: 1: file path, 2: URL */
+            __('Static file %1$s, linked as %2$s', 'open-source-event-calendar'),
+            $dir . $state['file'],
+            $ctrl->get_css_url()
+        );
     }
 
     protected function niceBoolean($boolVar): string

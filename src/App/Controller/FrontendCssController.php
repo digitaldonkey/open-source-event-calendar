@@ -78,6 +78,11 @@ class FrontendCssController extends OsecBaseClass
     private const MAX_AGE = 31536000;
 
     /**
+     * Cron event removing the 1.1.x CSS files a week after the upgrade (H3).
+     */
+    public const LEGACY_CLEANUP_HOOK = 'osec_css_legacy_cleanup';
+
+    /**
      * The calendar block (calendar_block/src/block.json).
      */
     public const CALENDAR_BLOCK = 'open-source-event-calendar/osec-calendar-classic';
@@ -348,9 +353,16 @@ class FrontendCssController extends OsecBaseClass
 
     /**
      * @wp_hook wp_enqueue_scripts Only on the frontend.
+     * @wp_hook osec_css_legacy_cleanup
      */
     public static function add_actions(App $app, bool $is_admin): void
     {
+        add_action(
+            self::LEGACY_CLEANUP_HOOK,
+            function () use ($app) {
+                self::factory($app)->delete_legacy_files();
+            }
+        );
         if ($is_admin) {
             return;
         }
@@ -588,13 +600,67 @@ class FrontendCssController extends OsecBaseClass
         $db->delete(self::COMPILED_CSS_KEY);
         $this->app->options->delete(self::CSS_OPTION);
         $this->delete_legacy_state();
+        $this->delete_legacy_files();
+    }
 
-        // 1.1.x files: <site prefix>_osec_compiled.css, without the prefix in debug mode. Kept on upgrade, because
-        // cached pages may still link them.
-        $uploads = $path->root_dir(CachePath::ROOT_UPLOADS, 'css');
+    /**
+     * Removes the 1.1.x CSS files: <site prefix>_osec_compiled.css in the uploads cache folder, without the prefix in
+     * debug mode. Kept on upgrade, because pages cached with old HTML may still link them; removed a week later
+     * (self::LEGACY_CLEANUP_HOOK) or by "Clear all caches".
+     */
+    public function delete_legacy_files(): void
+    {
+        $uploads = CachePath::factory($this->app)->root_dir(CachePath::ROOT_UPLOADS, 'css');
         foreach ($uploads ? glob($uploads . '*osec_compiled.css') ?: [] : [] as $file) {
             wp_delete_file($file);
         }
+    }
+
+    /**
+     * Upgrade from 1.1.x: drops the old option rows now, the old files in a week.
+     */
+    public function migrate_legacy(): void
+    {
+        $this->delete_legacy_state();
+        if ( ! wp_next_scheduled(self::LEGACY_CLEANUP_HOOK)) {
+            wp_schedule_single_event(time() + WEEK_IN_SECONDS, self::LEGACY_CLEANUP_HOOK);
+        }
+    }
+
+    /**
+     * "Clear all caches": compiles in memory first and only then clears every engine and stores the new CSS, so a
+     * LESS error leaves the working CSS in place (H4). Ends the backoff of an earlier failure.
+     *
+     * @return array{ok: bool, engine?: string, error?: string}
+     */
+    public function rebuild(): array
+    {
+        try {
+            $css = LessController::factory($this->app)->parse_less_files(null, false);
+        } catch (Exception $e) {
+            $this->notify_compile_error($e);
+
+            return [
+                'ok'    => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+        $this->clear_cache();
+        $this->compiled = null;
+        try {
+            $this->update_persistence_layer($css);
+        } catch (CacheWriteException $e) {
+            // Pages link the route, which compiles again.
+            return [
+                'ok'    => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+
+        return [
+            'ok'     => true,
+            'engine' => $this->get_state()['engine'] ?? '',
+        ];
     }
 
     /**

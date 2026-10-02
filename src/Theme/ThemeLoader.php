@@ -33,6 +33,11 @@ class ThemeLoader extends OsecBaseClass
     public const OPTION_FORCE_CLEAN = 'osec_clean_twig_cache';
 
     /**
+     * Nonce action of "Check again" in the cache report (wp_ajax_osec_rescan_cache).
+     */
+    public const RESCAN_NONCE = 'osec_rescan_cache';
+
+    /**
      * @var array contains the admin and theme paths.
      */
     protected array $paths = [
@@ -183,6 +188,27 @@ class ThemeLoader extends OsecBaseClass
         }
 
         return $cleared;
+    }
+
+    /**
+     * C19: only for those who may change the settings, with the nonce the cache report sends (request field `nonce`).
+     */
+    public function is_rescan_allowed(): bool
+    {
+        return current_user_can('manage_osec_options')
+            && false !== check_ajax_referer(self::RESCAN_NONCE, 'nonce', false);
+    }
+
+    /**
+     * Removes wp-content/cache/osec/ with the Twig folders of every site (network-wide deactivation, H7).
+     */
+    public function delete_network_cache(): void
+    {
+        $root = realpath(trailingslashit(WP_CONTENT_DIR) . 'cache/osec');
+        if ($root && is_dir($root)) {
+            CachePath::delete_directory_content($root);
+            CachePath::get_wpfs()->rmdir($root);
+        }
     }
 
     /**

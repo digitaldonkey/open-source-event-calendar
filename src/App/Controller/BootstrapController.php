@@ -458,7 +458,11 @@ class BootstrapController
             add_action(
                 'wp_ajax_osec_rescan_cache',
                 function () use ($app) {
-                    ThemeLoader::factory($this->app)->ajax_clear_cache();
+                    $loader = ThemeLoader::factory($this->app);
+                    if ( ! $loader->is_rescan_allowed()) {
+                        wp_send_json_error(null, 403);
+                    }
+                    $loader->ajax_clear_cache();
                 }
             );
 
