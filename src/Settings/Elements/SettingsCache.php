@@ -72,13 +72,13 @@ class SettingsCache extends OsecBaseClass
             ],
         ];
 
-        $twigCache = CacheFile::createFileCacheInstance($this->app, 'twig');
+        $twigCache = ThemeLoader::factory($this->app)->get_cache_dir();
 
         $args = [
             'current_cache'        => $current_cache,
             'available_caches'     => $available_caches,
             'twig_cache_available' => (bool) $twigCache,
-            'twig_path'            => $twigCache ? $twigCache->getCachePath() : CacheFile::OSEC_FILE_CACHE_UNAVAILABLE,
+            'twig_path'            => $twigCache ?? CacheFile::OSEC_FILE_CACHE_UNAVAILABLE,
             'id'                   => 'twig_cache',
             'info'                => __('Caches used in given order.', 'open-source-event-calendar'),
             'text'                 => [

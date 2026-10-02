@@ -305,8 +305,9 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = FILE CACHE DEFAULT PATH  ==
     // ============================
     //
-    // Optional absolute folder for the file cache: compiled CSS in css/, Twig templates in twig/.
-    // Empty (default): the uploads folder, see OSEC_FILE_CACHE_WP_UPLOAD_DIR.
+    // Optional absolute folder for the file cache: compiled CSS in css/, Twig templates in twig/site-<id>/.
+    // Empty (default): CSS in the uploads folder (see OSEC_FILE_CACHE_WP_UPLOAD_DIR),
+    // Twig templates in wp-content/cache/osec/twig/site-<id>/.
     // The CSS is linked as a static file when the folder is below wp-content, the WordPress folder
     // or the web root, otherwise PHP serves it. Not writable: the default is used.
     // Takes effect at the next compile (Theme Options save).
@@ -319,8 +320,8 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = WP-UPLOADS CACHE DIRECTORY  ==
     // ================================
     //
-    // Subfolder of each site's uploads folder holding the file cache: compiled CSS in css/,
-    // Twig templates in twig/.
+    // Subfolder of each site's uploads folder holding the compiled CSS (css/), and the Twig templates
+    // (twig/) when wp-content/cache/osec/ is not writable.
     //
     if (! defined('OSEC_FILE_CACHE_WP_UPLOAD_DIR')) {
         define('OSEC_FILE_CACHE_WP_UPLOAD_DIR', str_replace('-', '_', OSEC_PLUGIN_NAME . '_cache/'));

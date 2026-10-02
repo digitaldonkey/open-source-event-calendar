@@ -288,7 +288,7 @@ class FrontendCssControllerTest extends TestBase
 
     private function failing_engine(): CacheInterface
     {
-        return new class implements CacheInterface {
+        return new class () implements CacheInterface {
             public static function is_available(): bool
             {
                 return true;

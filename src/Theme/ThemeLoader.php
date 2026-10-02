@@ -8,6 +8,7 @@ use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Cache\CacheFile;
+use Osec\Cache\CachePath;
 use Osec\Exception\BootstrapException;
 use Osec\Exception\Exception;
 use Osec\Http\Response\RenderJson;
@@ -54,8 +55,6 @@ class ThemeLoader extends OsecBaseClass
      */
     protected bool $coreTheme = false;
 
-    protected ?CacheFile $fileCache = null;
-
     /**
      *
      * @param $app App
@@ -65,7 +64,6 @@ class ThemeLoader extends OsecBaseClass
     {
         parent::__construct($app);
         $this->init_themes();
-        $this->fileCache = CacheFile::createFileCacheInstance($app, 'twig');
     }
 
     private function init_themes(): void
@@ -153,7 +151,7 @@ class ThemeLoader extends OsecBaseClass
 
     public function getCachPath(): string
     {
-        return $this->fileCache->getCachePath();
+        return (string) $this->get_cache_dir();
     }
 
     /**
@@ -167,14 +165,39 @@ class ThemeLoader extends OsecBaseClass
     public function ajax_clear_cache(): void
     {
         $args['data'] = [
-            'state' => (int)(false !== $this->clear_cache()),
+            'state' => (int) ($this->clear_cache() && null !== $this->get_cache_dir(true)),
         ];
         RenderJson::factory($this->app)->render($args);
     }
 
+    /**
+     * Empties every Twig cache folder of the current site.
+     */
     public function clear_cache(): bool
     {
-        return ! $this->fileCache || (bool)$this->fileCache->clear_cache();
+        $cleared = true;
+        foreach (CachePath::factory($this->app)->twig_dirs() as $dir) {
+            if (is_dir($dir)) {
+                $cleared = CachePath::clean_and_check_dir(untrailingslashit(realpath($dir))) && $cleared;
+            }
+        }
+
+        return $cleared;
+    }
+
+    /**
+     * Removes the Twig cache folders of a deleted site. Core removes the site's uploads folder itself.
+     *
+     * @wp_hook wp_uninitialize_site
+     */
+    public function delete_site_cache(int $site_id): void
+    {
+        foreach (CachePath::factory($this->app)->twig_dirs($site_id) as $dir) {
+            if (is_dir($dir)) {
+                CachePath::delete_directory_content(untrailingslashit(realpath($dir)));
+                CachePath::get_wpfs()->rmdir($dir);
+            }
+        }
     }
 
     /**
@@ -416,40 +439,28 @@ class ThemeLoader extends OsecBaseClass
     /**
      * Get cache dir for Twig.
      *
-     * TODO:
-     *   We are not regenerating any cache yet.
+     * The folder found by the last scan is stored in the setting `twig_cache`; a scan runs when there is none, when
+     * it is no longer writable, or on request.
      *
      * @param  bool  $rescan  Set to true to force rescan
      *
-     * @return ?string Cache directory or false
+     * @return ?string Cache directory or null
      */
     public function get_cache_dir(bool $rescan = false): ?string
     {
         $twig_cache = $this->app->settings->get('twig_cache');
-
-        // New Install ?
-        if ($twig_cache === '') {
-            $rescan = true;
-        }
-        if (false === $rescan) {
+        if ( ! $rescan) {
             if (CacheFile::OSEC_FILE_CACHE_UNAVAILABLE === $twig_cache) {
                 return null;
             }
-            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable, WordPress.PHP.NoSilencedErrors
-            return @is_writable($twig_cache) ? $twig_cache : null;
+            if (is_string($twig_cache) && '' !== $twig_cache && is_dir($twig_cache) && wp_is_writable($twig_cache)) {
+                return $twig_cache;
+            }
         }
-        $this->fileCache = CacheFile::createFileCacheInstance($this->app, 'twig');
-        if ( ! $this->fileCache) {
-            // TODO This doubles up saving disabled cache to DB.
-            // It's not a setting it's an option prefixed with Cache.
+        $dir = CachePath::factory($this->app)->get_twig_dir();
+        $this->app->settings->set('twig_cache', $dir ?? CacheFile::OSEC_FILE_CACHE_UNAVAILABLE);
 
-            $this->app->settings->set('twig_cache', CacheFile::OSEC_FILE_CACHE_UNAVAILABLE);
-
-            return null;
-        }
-        $this->app->settings->set('twig_cache', $this->fileCache->getCachePath());
-
-        return $this->fileCache->getCachePath();
+        return $dir;
     }
 
     /**
@@ -488,11 +499,12 @@ class ThemeLoader extends OsecBaseClass
      */
     public function clean_cache_on_upgrade(): void
     {
-        if (apply_filters('osec_clean_cache_on_upgrade', true)) {
+        if ( ! apply_filters('osec_clean_cache_on_upgrade', true)) {
             return;
         }
         if ($this->app->options->get(self::OPTION_FORCE_CLEAN, false)) {
             $this->app->options->set(self::OPTION_FORCE_CLEAN, false);
+            $this->clear_cache();
             $this->get_cache_dir(true);
         }
     }

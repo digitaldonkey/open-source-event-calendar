@@ -110,6 +110,52 @@ class CachePath extends OsecBaseClass
     }
 
     /**
+     * The first writable Twig cache folder of the current site, created if missing.
+     *
+     * @return string|null With trailing slash. Null if file caching is off or no folder is writable.
+     */
+    public function get_twig_dir(): ?string
+    {
+        if ( ! OSEC_ENABLE_CACHE_FILE) {
+            return null;
+        }
+        foreach ($this->twig_dirs() as $dir) {
+            if ($this->is_writable_dir($dir)) {
+                return $dir;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Twig cache folders of a site, in order of preference, without creating them.
+     *
+     * The override, then wp-content/cache/osec/ (compiled templates are PHP files: kept out of uploads where possible),
+     * then the site's uploads folder. Never the plugin folder, which a plugin update replaces.
+     *
+     * @param  int|null  $site_id  Default: the current site. Another site's uploads folder is not listed.
+     *
+     * @return string[] With trailing slash.
+     */
+    public function twig_dirs(?int $site_id = null): array
+    {
+        $current = null === $site_id || get_current_blog_id() === $site_id;
+        $site    = 'twig/site-' . ($current ? get_current_blog_id() : $site_id) . '/';
+        $dirs    = [];
+        if ('' !== OSEC_FILE_CACHE_DEFAULT_PATH) {
+            $dirs[] = trailingslashit(OSEC_FILE_CACHE_DEFAULT_PATH) . $site;
+        }
+        $dirs[] = trailingslashit(WP_CONTENT_DIR) . 'cache/osec/' . $site;
+        $uploads = $current ? $this->root_dir(self::ROOT_UPLOADS, 'twig') : null;
+        if ($uploads) {
+            $dirs[] = $uploads;
+        }
+
+        return $dirs;
+    }
+
+    /**
      * Absolute folder of a root, without creating or testing it.
      *
      * @param  string  $root  self::ROOT_OVERRIDE or self::ROOT_UPLOADS.
