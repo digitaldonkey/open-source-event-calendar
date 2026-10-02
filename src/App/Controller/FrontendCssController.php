@@ -4,6 +4,7 @@ namespace Osec\App\Controller;
 
 use Exception;
 use Osec\App\Model\Notifications\NotificationAdmin;
+use Osec\Bootstrap\App;
 use Osec\Bootstrap\MemoryCheck;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Cache\Cache;
@@ -18,6 +19,7 @@ use Osec\Cache\CacheWriteException;
 use Osec\Exception\BootstrapException;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\ResponseHelper;
+use WP_Post;
 
 /**
  * The class which handles Frontend CSS.
@@ -74,6 +76,11 @@ class FrontendCssController extends OsecBaseClass
     private const COMPILE_BACKOFF = 30 * MINUTE_IN_SECONDS;
 
     private const MAX_AGE = 31536000;
+
+    /**
+     * The calendar block (calendar_block/src/block.json).
+     */
+    public const CALENDAR_BLOCK = 'open-source-event-calendar/osec-calendar-classic';
 
     /**
      * Engine names stored in self::CSS_OPTION.
@@ -340,14 +347,65 @@ class FrontendCssController extends OsecBaseClass
     }
 
     /**
-     * Create the link that will be added to the frontend
+     * @wp_hook wp_enqueue_scripts Only on the frontend.
+     */
+    public static function add_actions(App $app, bool $is_admin): void
+    {
+        if ($is_admin) {
+            return;
+        }
+        add_action(
+            'wp_enqueue_scripts',
+            function () use ($app) {
+                $ctrl = self::factory($app);
+                if ($ctrl->page_shows_calendar()) {
+                    $ctrl->add_link_to_html_for_frontend();
+                }
+            }
+        );
+    }
+
+    /**
+     * Whether the requested page will show a calendar, known before wp_head (D4): the calendar page, a single event,
+     * or singular content with the shortcode or the calendar block.
+     *
+     * Not detected (the CSS then follows with the footer styles): calendars in widgets, template parts, patterns,
+     * reusable blocks or page builders (H9).
+     */
+    public function page_shows_calendar(): bool
+    {
+        if ( ! is_singular()) {
+            return false;
+        }
+        $post = get_queried_object();
+        if ( ! $post instanceof WP_Post) {
+            return false;
+        }
+
+        return OSEC_POST_TYPE === $post->post_type
+            || (int) $this->app->settings->get('calendar_page_id') === $post->ID
+            || has_shortcode($post->post_content, OSEC_SHORTCODE)
+            || has_block(self::CALENDAR_BLOCK, $post);
+    }
+
+    /**
+     * Adds the compiled CSS to the page: a stylesheet link, or the CSS inline.
+     *
+     * Called early for pages known to show a calendar, and again by every calendar while it renders. Before wp_head
+     * it lands in <head>; after it, WordPress prints it with the footer styles. Adding it twice prints it once.
      */
     public function add_link_to_html_for_frontend(): void
     {
-        $url = $this->get_css_url();
-        if ('' !== $url && ! is_admin()) {
-            wp_enqueue_style('ai1ec_style', $url, [], $this->get_state()['ver'] ?? OSEC_VERSION);
+        if (is_admin()) {
+            return;
         }
+        $url = $this->get_css_url();
+        if ('' === $url) {
+            $this->echo_css();
+
+            return;
+        }
+        wp_enqueue_style('ai1ec_style', $url, [], $this->get_state()['ver'] ?? OSEC_VERSION);
     }
 
     /**
@@ -355,13 +413,12 @@ class FrontendCssController extends OsecBaseClass
      *
      * The static file when it exists and has a URL, otherwise the route compiling or reading the CSS.
      *
-     * @return string|false
+     * @return string Empty for the inline variant (debug mode, or no file and render_css_as_link off).
      */
-    public function get_css_url()
+    public function get_css_url(): string
     {
         if (OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST) {
-            add_action('wp_head', $this->echo_css(...));
-            return false;
+            return '';
         }
 
         $state = $this->get_state();
@@ -383,14 +440,19 @@ class FrontendCssController extends OsecBaseClass
                 )
             );
         }
-        // Write CSS into Style tag.
-        add_action('wp_head', $this->echo_css(...));
+
         return '';
     }
 
+    /**
+     * Adds the CSS as an inline style (handle osec-frontend-css), once per request.
+     */
     public function echo_css()
     {
         $handle = 'osec-frontend-css';
+        if (wp_style_is($handle)) {
+            return;
+        }
         wp_register_style($handle, false, [], OSEC_VERSION);
         $compiled = $this->get_compiled_css();
         if (null === $compiled) {
