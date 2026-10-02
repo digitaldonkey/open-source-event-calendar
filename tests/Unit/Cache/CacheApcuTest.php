@@ -5,12 +5,13 @@ namespace Osec\Tests\Unit\Cache;
 use Osec\Cache\CacheApcu;
 
 /**
- * Sample test case.
+ * CI and the dev container run PHP CLI with apc.enable_cli=1 (phpunit.xml).
+ *
+ * @group cache
  */
 class CacheApcuTest extends CacheFileTestBase
 {
 
-    //var_dump($osec_app);
     public function test_apcu_available()
     {
         $this->assertTrue(
@@ -23,9 +24,6 @@ class CacheApcuTest extends CacheFileTestBase
     {
         global $osec_app;
         $value = 'Curabitur blandit tempus porttitor.';
-        if ( ! CacheApcu::is_available()) {
-            $this->markTestSkipped('APCU not available');
-        }
         $cache = CacheApcu::factory($osec_app);
         $this->assertTrue($cache->set('test_key', $value));
         $this->assertEquals($value, $cache->get('test_key'));

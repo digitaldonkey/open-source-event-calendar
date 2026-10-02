@@ -305,21 +305,22 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = FILE CACHE DEFAULT PATH  ==
     // ============================
     //
-    // Must be Writeable. Fallback is wp-content/Uploads/....
+    // Optional absolute folder for the file cache: compiled CSS in css/, Twig templates in twig/.
+    // Empty (default): the uploads folder, see OSEC_FILE_CACHE_WP_UPLOAD_DIR.
+    // The CSS is linked as a static file when the folder is below wp-content, the WordPress folder
+    // or the web root, otherwise PHP serves it. Not writable: the default is used.
+    // Takes effect at the next compile (Theme Options save).
     //
     if (! defined('OSEC_FILE_CACHE_DEFAULT_PATH')) {
-        define(
-            'OSEC_FILE_CACHE_DEFAULT_PATH',
-            OSEC_PATH . 'cache/'
-        );
+        define('OSEC_FILE_CACHE_DEFAULT_PATH', '');
     }
 
     // ================================
     // = WP-UPLOADS CACHE DIRECTORY  ==
     // ================================
     //
-    // In case OSEC_FILE_CACHE_DEFAULT_PATH is not writable,
-    // we try to use wp-content/uploads/OSEC_FILE_CACHE_WP_UPLOAD_DIR
+    // Subfolder of each site's uploads folder holding the file cache: compiled CSS in css/,
+    // Twig templates in twig/.
     //
     if (! defined('OSEC_FILE_CACHE_WP_UPLOAD_DIR')) {
         define('OSEC_FILE_CACHE_WP_UPLOAD_DIR', str_replace('-', '_', OSEC_PLUGIN_NAME . '_cache/'));
@@ -329,11 +330,10 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = ENABLE FILE CACHE  ==
     // =======================
     //
-    // Enabling/Disabling any cache will require to recompile
-    // the theme by reenabling it or updating theme color options.
-    //
-    // File cache by default will use
-    // plugindir/cache cache/css/f9d016b4_osec_compiled.css.
+    // Store the compiled CSS as a static file, served by the web server.
+    // false: the CSS is kept in APCu or the database and served by PHP through ?osec-css-cache=,
+    // and Twig templates are not cached.
+    // Takes effect at the next compile (Theme Options save).
     //
     if (! defined('OSEC_ENABLE_CACHE_FILE')) {
         define('OSEC_ENABLE_CACHE_FILE', true);
@@ -343,8 +343,8 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // = ENABLE ACPU CACHE  ==
     // =======================
     //
-    // ACPU and DB cache will deliver CSS on a different url than file cache.
-    // E.g: yourdomain.tld/?osec-css-cache=1728977613
+    // Keep the compiled CSS in APCu when no cache folder is writable (before the database).
+    // Served by PHP through ?osec-css-cache=.
     //
     if (! defined('OSEC_ENABLE_CACHE_APCU')) {
         define('OSEC_ENABLE_CACHE_APCU', true);
@@ -355,7 +355,7 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         define('OSEC_LESS_MIN_AVAIL_MEMORY', '24M');
     }
 
-    // Defines if LESS files are parsed at every request
+    // Debug only: compile the CSS on every request and print it inline. Never on a live site.
     if (! defined('OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST')) {
         define('OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST', false);
     }

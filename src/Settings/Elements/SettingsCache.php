@@ -35,19 +35,26 @@ class SettingsCache extends OsecBaseClass
      */
     public function get_twig_cache_args()
     {
-        $cachePath = (new CachePath())->getCacheData();
+        $cachePath = CachePath::factory($this->app)->getCacheData('css');
         if ($cachePath) {
             $cachePathTxt = '<div style="max-width: 100%; overflow-x: scroll;">'
-                                . $cachePath['path']
+                                . esc_html($cachePath['path'])
                                 . '<br />'
-                                . $cachePath['url']
+                                . esc_html((string) $cachePath['url'])
                             . '</div>';
         } else {
             $cachePathTxt = __('Not Available', 'open-source-event-calendar');
         }
 
-        $current_cache    = CacheFactory::factory($this->app)->createCache('test')->get_active_cache();
+        $current_cache    = CacheFactory::factory($this->app)->createCache('css')->get_active_cache();
         $available_caches = [
+            'CacheFile' => [
+                'name'            => 'CacheFile',
+                'is_available'    => $this->niceBoolean(CacheFile::is_available()),
+                'is_current_cache' => $this->niceBoolean($current_cache === 'CacheFile'),
+                'notes'           => $cachePathTxt,
+                'constant'        => 'OSEC_ENABLE_CACHE_FILE',
+            ],
             'CacheApcu' => [
                 'name'            => 'CacheApcu',
                 'is_available'    => $this->niceBoolean(CacheApcu::is_available()),
@@ -55,13 +62,6 @@ class SettingsCache extends OsecBaseClass
                 'notes'           => '@see: <a target="_blank" href="https://www.php.net/manual/en/book.apcu.php">'
                                      . 'php.net/manual/en/book.apcu.php</a>',
                 'constant'        => 'OSEC_ENABLE_CACHE_APCU',
-            ],
-            'CacheFile' => [
-                'name'            => 'CacheFile',
-                'is_available'    => $this->niceBoolean(CacheFile::is_available()),
-                'is_current_cache' => $this->niceBoolean($current_cache === 'CacheFile'),
-                'notes'           => $cachePathTxt,
-                'constant'        => 'OSEC_ENABLE_CACHE_FILE',
             ],
             'CacheDb'   => [
                 'name'            => 'CacheDb',

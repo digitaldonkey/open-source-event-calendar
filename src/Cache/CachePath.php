@@ -3,42 +3,45 @@
 namespace Osec\Cache;
 
 use FilesystemIterator;
+use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\Exception;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
- * A factory class for caching strategy.
+ * Cache folders and their URLs.
+ *
+ * A folder is chosen when a cache is written (get_dir()), in this order: the folder set by the constant
+ * OSEC_FILE_CACHE_DEFAULT_PATH (empty by default), then the uploads folder. What was chosen is stored as a root
+ * name, so a page only resolves that root (root_dir()) and builds the URL (path_to_url()); nothing is created or
+ * tested for writability while a page renders.
  *
  * @since      2.0
  * @replaces Ai1ec_Filesystem_Checker
  * @author     Time.ly Network, Inc.
  */
-class CachePath
+class CachePath extends OsecBaseClass
 {
     public const CLEAN_DIR_DEFAULT_PERMISSIONS = 0754;
 
-    private Object $wpFs;
+    public const ROOT_OVERRIDE = 'override';
 
-    public function __construct()
-    {
-        $this->wpFs = self::get_wpfs();
-    }
+    public const ROOT_UPLOADS = 'uploads';
 
-    public static function get_wpfs() : object
+    public static function get_wpfs(): object
     {
         global $wp_filesystem;
-        if ( ! is_a( $wp_filesystem, 'WP_Filesystem_Base') ){
-            include_once(ABSPATH . 'wp-admin/includes/file.php');
+        if ( ! is_a($wp_filesystem, 'WP_Filesystem_Base')) {
+            include_once ABSPATH . 'wp-admin/includes/file.php';
             WP_Filesystem();
         }
         return $wp_filesystem;
     }
+
     /**
      * Ensure cache directory pre-conditions.
      *
      * Before compilation starts cache directory must be empty but existing.
-     * NOTE: it attempts to preserve `.gitignore` file in cache/ directory.
      *
      * @param  string  $dir  Directory to check.
      *
@@ -81,86 +84,152 @@ class CachePath
         }
     }
 
-    public function getCacheData(?string $subDirectory = null): ?array
-    {
-        static $webroot = null;
-        if (is_null($webroot)) {
-            $webroot = !empty($_SERVER['DOCUMENT_ROOT']) ? sanitize_text_field(wp_unslash($_SERVER['DOCUMENT_ROOT'])) : false;
-        }
-        $path = $this->getCachePath($subDirectory);
-        if ( ! $path) {
-            return null;
-        }
-        $url = ($webroot && str_starts_with($path, $webroot)) ?
-            get_bloginfo('wpurl') . substr($path, strlen(untrailingslashit($webroot))) : null;
-        return [
-            'path' => $path,
-            'url'  => $url,
-        ];
-    }
-
     /**
-     * Get a writable file cache directory
+     * The first writable cache folder for a sub folder, created if missing.
      *
-     * @param  string|null  $subDirectory  Cache `namespace`, subdirectory in cache.
+     * @param  string  $subDirectory  Cache `namespace`, e.g. 'css'. Empty for the root itself.
      *
-     * @return string|null
+     * @return array{root: string, dir: string}|null Null if file caching is off or no folder is writable.
      */
-    public function getCachePath(?string $subDirectory = null): ?string
+    public function get_dir(string $subDirectory = ''): ?array
     {
-        $subDirectory = $subDirectory ? trailingslashit($subDirectory) : '';
-
         if ( ! OSEC_ENABLE_CACHE_FILE) {
             return null;
         }
-
-        // Defaults to defined config
-        if ($default_path = $this->_default_cache()) {
-            $directory_path = $default_path . $subDirectory;
-            if ( ! is_dir($directory_path)) {
-                wp_mkdir_p($directory_path);
-            }
-            if ($this->wpFs->is_writable($directory_path)) {
-                return $directory_path;
+        foreach ([self::ROOT_OVERRIDE, self::ROOT_UPLOADS] as $root) {
+            $dir = $this->root_dir($root, $subDirectory);
+            if ($dir && $this->is_writable_dir($dir)) {
+                return [
+                    'root' => $root,
+                    'dir'  => $dir,
+                ];
             }
         }
 
-        // TODO
-        //   Maybe add a Notice/Info if we are not using the default cache path.
-
-        $wp_upload = wp_upload_dir();
-        if ($wp_upload['error']) {
-            //  Admit, that we can not use Filecache.
-            return null;
-        }
-        $cachePath = trailingslashit($wp_upload['basedir'])
-                     . trailingslashit(OSEC_FILE_CACHE_WP_UPLOAD_DIR)
-                     . $subDirectory;
-
-        if ( ! is_dir($cachePath)) {
-            wp_mkdir_p($cachePath);
-        }
-        if ($this->wpFs->is_writable($cachePath)) {
-            return trailingslashit(realpath($cachePath));
-        }
         return null;
     }
 
     /**
-     * Get constant defined default cache path.
+     * Absolute folder of a root, without creating or testing it.
      *
-     * @return string|null Path or Null if not writable.
+     * @param  string  $root  self::ROOT_OVERRIDE or self::ROOT_UPLOADS.
+     * @param  string  $subDirectory  Sub folder, e.g. 'css'.
+     *
+     * @return string|null With trailing slash. Null if the root is not configured or uploads report an error.
      */
-    private function _default_cache(): ?string
+    public function root_dir(string $root, string $subDirectory = ''): ?string
     {
-        if (is_dir(OSEC_FILE_CACHE_DEFAULT_PATH)) {
-            if ($this->wpFs->is_writable(OSEC_FILE_CACHE_DEFAULT_PATH)) {
-                return OSEC_FILE_CACHE_DEFAULT_PATH;
-            }
-        } else {
-            wp_mkdir_p(OSEC_FILE_CACHE_DEFAULT_PATH);
+        $subDirectory = $subDirectory ? trailingslashit($subDirectory) : '';
+        if (self::ROOT_OVERRIDE === $root) {
+            return '' === OSEC_FILE_CACHE_DEFAULT_PATH ? null
+                : trailingslashit(OSEC_FILE_CACHE_DEFAULT_PATH) . $subDirectory;
+        }
+        if (self::ROOT_UPLOADS === $root) {
+            $uploads = wp_get_upload_dir();
+
+            return empty($uploads['error'])
+                ? trailingslashit($uploads['basedir']) . trailingslashit(OSEC_FILE_CACHE_WP_UPLOAD_DIR) . $subDirectory
+                : null;
         }
 
-        return $this->wpFs->is_writable(OSEC_FILE_CACHE_DEFAULT_PATH) ? trailingslashit(OSEC_FILE_CACHE_DEFAULT_PATH) : null;
+        return null;
+    }
+
+    /**
+     * Public URL of a file or folder, from the most specific known location containing it.
+     *
+     * Checked in this order of length: uploads (which may be served from elsewhere), wp-content, the WordPress
+     * folder and the web server's document root.
+     *
+     * @param  string  $path  Absolute path of an existing file or folder.
+     *
+     * @return string|null Null if no known location contains the path.
+     */
+    public function path_to_url(string $path): ?string
+    {
+        $path = realpath($path);
+        if ( ! $path) {
+            return null;
+        }
+        $roots   = [];
+        $uploads = wp_get_upload_dir();
+        if (empty($uploads['error'])) {
+            $roots[] = [$uploads['basedir'], $uploads['baseurl']];
+        }
+        $roots[] = [WP_CONTENT_DIR, content_url()];
+        $roots[] = [ABSPATH, network_site_url()];
+        $document_root = isset($_SERVER['DOCUMENT_ROOT'])
+            ? sanitize_text_field(wp_unslash($_SERVER['DOCUMENT_ROOT'])) : '';
+        if ('' !== $document_root) {
+            $home    = wp_parse_url(home_url());
+            $roots[] = [
+                $document_root,
+                $home['scheme'] . '://' . $home['host'] . (isset($home['port']) ? ':' . $home['port'] : ''),
+            ];
+        }
+
+        $match = null;
+        foreach ($roots as [$dir, $url]) {
+            $dir = realpath($dir);
+            if (
+                $dir
+                && ($path === $dir || str_starts_with($path, trailingslashit($dir)))
+                && (null === $match || strlen($dir) > strlen($match[0]))
+            ) {
+                $match = [$dir, $url];
+            }
+        }
+        if (null === $match) {
+            return null;
+        }
+        $relative = substr($path, strlen($match[0]));
+
+        return untrailingslashit($match[1]) . implode('/', array_map('rawurlencode', explode('/', $relative)));
+    }
+
+    /**
+     * Absolute path of the first writable cache folder.
+     *
+     * @param  string|null  $subDirectory  Cache `namespace`, subdirectory in cache.
+     *
+     * @return string|null With trailing slash.
+     */
+    public function getCachePath(?string $subDirectory = null): ?string
+    {
+        return $this->get_dir((string) $subDirectory)['dir'] ?? null;
+    }
+
+    /**
+     * @param  string|null  $subDirectory  Cache `namespace`, subdirectory in cache.
+     *
+     * @return array{path: string, url: string|null}|null
+     */
+    public function getCacheData(?string $subDirectory = null): ?array
+    {
+        $path = $this->getCachePath($subDirectory);
+        if ( ! $path) {
+            return null;
+        }
+
+        return [
+            'path' => $path,
+            'url'  => $this->path_to_url($path),
+        ];
+    }
+
+    /**
+     * Creates the folder if missing.
+     *
+     * @param  string  $dir  Absolute path.
+     *
+     * @return bool Whether PHP can write to it.
+     */
+    protected function is_writable_dir(string $dir): bool
+    {
+        if ( ! is_dir($dir)) {
+            wp_mkdir_p($dir);
+        }
+
+        return is_dir($dir) && wp_is_writable($dir);
     }
 }

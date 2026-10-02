@@ -15,41 +15,31 @@ use Osec\Exception\BootstrapException;
 class CacheFactory extends OsecBaseClass
 {
     /**
-     * create_cache_strategy_instance method
+     * The first available engine: file, APCu, database.
      *
-     * Method to instantiate new cache strategy object
+     * The file cache comes first because the web server sends a static file without starting PHP; APCu and the
+     * database are read by PHP on the `?osec-css-cache=` route.
      *
-     * @param $cache_id
-     * @param  null  $override
+     * @param  string  $cache_id  Sub folder of the file cache, e.g. 'css'.
      *
-     * @return Cache Instance of CacheType
+     * @return Cache
      * @throws BootstrapException
      */
-    public function createCache($cache_id, $override = null): Cache
+    public function createCache(string $cache_id): Cache
     {
-        // TODO ADD SOME CONFIGURABILITY.
+        $cacheFile = CacheFile::createFileCacheInstance($this->app, $cache_id);
+        if ($cacheFile) {
+            return new Cache($cache_id, $cacheFile);
+        }
+        if ($this->is_apcu_available()) {
+            return new Cache($cache_id, new CacheApcu($this->app));
+        }
 
-        if (CacheApcu::is_available() && ! $override) {
-            $apcu = new CacheApcu($this->app);
-            if (!$apcu) throw new BootstrapException('Constructing CacheApcu returned null');
-            return new Cache(
-                $cache_id,
-                $apcu
-            );
-        }
-        if (true === OSEC_ENABLE_CACHE_FILE && CacheFile::is_available()) {
-            $cacheFile = CacheFile::createFileCacheInstance($this->app, $cache_id);
-            if (!$cacheFile) throw new BootstrapException('Constructing CacheFile returned null');
-            return new Cache(
-                $cache_id,
-                $cacheFile
-            );
-        }
-        $cacheDb = CacheDb::factory($this->app);
-        if (!$cacheDb) throw new BootstrapException('Constructing CacheDb returned null');
-        return new Cache(
-            $cache_id,
-            CacheDb::factory($this->app)
-        );
+        return new Cache($cache_id, CacheDb::factory($this->app));
+    }
+
+    protected function is_apcu_available(): bool
+    {
+        return CacheApcu::is_available();
     }
 }

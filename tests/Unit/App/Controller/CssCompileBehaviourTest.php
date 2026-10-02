@@ -5,13 +5,9 @@ namespace Osec\Tests\Unit\App\Controller;
 use Osec\App\Controller\BootstrapController;
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Model\Notifications\NotificationAdmin;
-use Osec\Cache\Cache;
 use Osec\Cache\CacheApcu;
-use Osec\Cache\CacheDb;
-use Osec\Cache\CacheFile;
-use Osec\Cache\CacheNotSetException;
+use Osec\Tests\Utilities\CssEngineTrait;
 use Osec\Tests\Utilities\TestBase;
-use ReflectionProperty;
 
 /**
  * Compile behaviour the cache rework must keep, for each cache engine.
@@ -24,11 +20,11 @@ use ReflectionProperty;
  */
 class CssCompileBehaviourTest extends TestBase
 {
+    use CssEngineTrait;
+
     private int $compiles = 0;
 
     private bool $fail = false;
-
-    private Cache $cache;
 
     public function set_up()
     {
@@ -45,10 +41,8 @@ class CssCompileBehaviourTest extends TestBase
         global $osec_app;
 
         remove_filter('osec_less_constants', [$this, 'count_and_fail']);
-        if (isset($this->cache)) {
-            $this->cache->delete(FrontendCssController::COMPILED_CSS_KEY);
-        }
-        $osec_app->inject_object(FrontendCssController::class, new FrontendCssController($osec_app));
+        $this->reset_css_engine();
+        $osec_app->options->delete(FrontendCssController::COMPILED_CSS_CACHE_KEY);
         parent::tear_down();
     }
 
@@ -151,8 +145,6 @@ class CssCompileBehaviourTest extends TestBase
     /**
      * The CSS route compiles and stores the CSS when the cache has none.
      *
-     * get_compiled_css() keeps its result in a function static for the rest of the PHP process, so this is the
-     * only test calling it, and it runs one engine only.
      */
     public function test_route_cache_miss_compiles_and_stores_the_css()
     {
@@ -176,30 +168,9 @@ class CssCompileBehaviourTest extends TestBase
         global $osec_app;
 
         $this->assertTrue('apcu' !== $engine || CacheApcu::is_available(), 'APCu needs apc.enable_cli=1');
-        $this->cache = new Cache(
-            'css',
-            match ($engine) {
-                'apcu' => new CacheApcu($osec_app),
-                'file' => CacheFile::createFileCacheInstance($osec_app, 'css'),
-                'db'   => CacheDb::factory($osec_app),
-            }
-        );
-        $ctrl = new FrontendCssController($osec_app);
-        (new ReflectionProperty($ctrl, 'cache'))->setValue($ctrl, $this->cache);
-        $osec_app->inject_object(FrontendCssController::class, $ctrl);
-
-        $this->cache->delete(FrontendCssController::COMPILED_CSS_KEY);
-        $osec_app->options->delete(FrontendCssController::COMPILED_CSS_KEY);
+        $this->use_css_engine($engine)->delete(FrontendCssController::css_file_name());
+        $osec_app->options->delete(FrontendCssController::CSS_OPTION);
         $this->compiles = 0;
-    }
-
-    private function stored_css(): ?string
-    {
-        try {
-            return $this->cache->get(FrontendCssController::COMPILED_CSS_KEY);
-        } catch (CacheNotSetException) {
-            return null;
-        }
     }
 
     /**

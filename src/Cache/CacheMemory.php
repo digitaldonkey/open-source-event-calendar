@@ -135,7 +135,7 @@ final class CacheMemory extends OsecBaseClass implements CacheInterface
         foreach (array_keys($this->cacheData) as $k) {
             if (str_contains($k, $pattern)) {
                 unset($this->cacheData [$k]);
-                $count++;
+                ++$count;
             }
         }
 

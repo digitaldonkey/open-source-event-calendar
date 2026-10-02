@@ -28,7 +28,7 @@ class CacheDb extends OsecBaseClass implements CacheInterface
      */
     public function add(string $key, mixed $value): bool
     {
-        if ( ! $this->app->options->get($key)) {
+        if (false === get_option($this->prefixed_key($key), false)) {
             return $this->set($key, $value);
         }
 
@@ -40,8 +40,8 @@ class CacheDb extends OsecBaseClass implements CacheInterface
      */
     public function get(string $key, mixed $default = null): mixed
     {
-        $key  = $this->_key($key);
-        $data = $this->app->options->get($key, false);
+        $key  = $this->prefixed_key($key);
+        $data = get_option($key, false);
         if (false === $data) {
             throw new CacheNotSetException(
                 'No data under `' . esc_html($key) . '` present'
@@ -60,7 +60,7 @@ class CacheDb extends OsecBaseClass implements CacheInterface
      *
      * @return string Safe to use key
      */
-    protected function _key($key)
+    protected function prefixed_key($key)
     {
         if (strlen($key) > 42) {
             $hash = substr(md5($key), 0, 8);
@@ -75,18 +75,22 @@ class CacheDb extends OsecBaseClass implements CacheInterface
      */
     public function set(string $key, mixed $value): bool
     {
-        $result = $this->app->options->set(
-            $this->_key($key),
-            maybe_serialize($value),
-            true
-        );
-        if (false === $result) {
+        // Not autoloaded: the value is only read on the CSS route, not on every page (D5). Written directly, as
+        // Options::set() keeps the autoload of an existing option.
+        $name  = $this->prefixed_key($key);
+        $value = maybe_serialize($value);
+        if (false === get_option($name, false)) {
+            $result = add_option($name, $value, '', false);
+        } else {
+            $result = get_option($name) === $value || update_option($name, $value, false);
+        }
+        if ( ! $result) {
             throw new CacheWriteException(
                 'An error occured while saving data to `' . esc_html($key) . '`'
             );
         }
 
-        return $result;
+        return true;
     }
 
     /**
@@ -111,7 +115,7 @@ class CacheDb extends OsecBaseClass implements CacheInterface
             )
         );
         foreach ($keys as $key) {
-            $this->app->options->delete($key);
+            delete_option($key);
         }
         return count($keys);
     }
@@ -121,8 +125,8 @@ class CacheDb extends OsecBaseClass implements CacheInterface
      */
     public function delete(string $key): bool
     {
-        return $this->app->options->delete(
-            $this->_key($key)
-        );
+        delete_option($this->prefixed_key($key));
+
+        return false === get_option($this->prefixed_key($key), false);
     }
 }

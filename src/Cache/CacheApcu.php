@@ -40,7 +40,7 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      */
     public function set($key, mixed $value): bool
     {
-        $dist_key = $this->_key($key);
+        $dist_key = $this->prefixed_key($key);
 
         return apcu_store($dist_key, $value);
     }
@@ -55,7 +55,7 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      *
      * @return string Key with prefix prepended
      */
-    protected function _key($key)
+    protected function prefixed_key($key)
     {
         static $prefix = null;
         if (null === $prefix) {
@@ -74,7 +74,7 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      */
     public function add($key, mixed $value): bool
     {
-        $dist_key = $this->_key($key);
+        $dist_key = $this->prefixed_key($key);
 
         return apcu_add($dist_key, $value);
     }
@@ -84,13 +84,13 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      */
     public function get($key, mixed $default = null): mixed
     {
-        $dist_key = $this->_key($key);
+        $dist_key = $this->prefixed_key($key);
         $data     = apcu_fetch($dist_key);
         if (false === $data && $default) {
             return $default;
         }
         if (false === $data) {
-            throw new CacheNotSetException(esc_html($dist_key) . " not set");
+            throw new CacheNotSetException(esc_html($dist_key) . ' not set');
         }
 
         return $data;
@@ -107,7 +107,7 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
         foreach (new APCUIterator('/$pattern/') as $counter) {
             $this->delete($counter['key']);
             if (apc_dec($counter['key'], $counter['value'])) {
-                $i++;
+                ++$i;
             }
         }
 
@@ -119,6 +119,6 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      */
     public function delete($key): bool
     {
-        return apcu_delete($this->_key($key));
+        return apcu_delete($this->prefixed_key($key));
     }
 }

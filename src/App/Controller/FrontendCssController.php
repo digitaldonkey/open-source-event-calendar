@@ -9,8 +9,13 @@ use Osec\Bootstrap\App;
 use Osec\Bootstrap\MemoryCheck;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Cache\Cache;
+use Osec\Cache\CacheApcu;
+use Osec\Cache\CacheDb;
 use Osec\Cache\CacheFactory;
+use Osec\Cache\CacheFile;
+use Osec\Cache\CacheInterface;
 use Osec\Cache\CacheNotSetException;
+use Osec\Cache\CachePath;
 use Osec\Cache\CacheWriteException;
 use Osec\Exception\BootstrapException;
 use Osec\Http\Request\RequestParser;
@@ -40,7 +45,13 @@ class FrontendCssController extends OsecBaseClass
     public const PARSE_LESS_FILES_AT_EVERY_REQUEST = OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST;
 
     /**
-     * Identifyer to CSS cache setting as wp-option.
+     * The compiled CSS state, an array (see update_persistence_layer()). Autoloaded: every calendar page reads it to
+     * build the stylesheet link.
+     */
+    public const CSS_OPTION = 'osec_css';
+
+    /**
+     * 1.1.x option holding the CSS file URL or a timestamp, replaced by self::CSS_OPTION. Only removed on upgrade.
      */
     public const COMPILED_CSS_KEY = 'osec_compiled.css';
 
@@ -50,31 +61,31 @@ class FrontendCssController extends OsecBaseClass
     public const COMPILED_CSS_CACHE_KEY = 'osec_invalidate_css_cache';
 
     /**
-     * @var
+     * Engine names stored in self::CSS_OPTION.
      */
-    private ?Cache $cache;
+    private const ENGINES = [
+        CacheFile::class => 'file',
+        CacheApcu::class => 'apcu',
+        CacheDb::class   => 'db',
+    ];
 
     /**
-     * @param  App  $app
-     *
-     * @throws BootstrapException
+     * Engine chosen for writing, created on the first compile; page views do not need it.
      */
-    public function __construct(App $app)
-    {
-        parent::__construct($app);
-        $this->cache = CacheFactory::factory($this->app)->createCache('css');
-    }
+    private ?Cache $cache = null;
 
-    // **
-    // *
-    // * Get if file cache is enabled
-    // *
-    // * @return boolean
-    // */
-    // public function is_file_cache_enabled()
-    // {
-    // return $this->cache->is_file_cache();
-    // }
+    /**
+     * CSS compiled in this request.
+     */
+    private ?string $compiled = null;
+
+    /**
+     * Cache key of the compiled CSS in every engine, and the file name in the file cache.
+     */
+    public static function css_file_name(): string
+    {
+        return 'osec-compiled-' . get_current_blog_id() . '.css';
+    }
 
     /**
      * Renders the css for our frontend.
@@ -114,89 +125,91 @@ class FrontendCssController extends OsecBaseClass
 
     /**
      * Try to get the CSS from cache.
-     * If it's not there re-generate it and save it to cache
-     * If we are in preview mode, recompile the css using the theme present in
-     * the url.
+     * If it's not there re-generate it and save it to cache.
      */
     public function get_compiled_css()
     {
-        static $recompiledCss = null;
+        if (null !== $this->compiled) {
+            return $this->compiled;
+        }
+        $stored = self::PARSE_LESS_FILES_AT_EVERY_REQUEST ? null : $this->get_stored_css();
+        if (null !== $stored) {
+            return $stored;
+        }
+        $this->compiled = LessController::factory($this->app)->parse_less_files(null, false);
         try {
-            // If we want to force a recompile, we throw an exception.
-            if (self::PARSE_LESS_FILES_AT_EVERY_REQUEST && is_null($recompiledCss)) {
-                throw new CacheNotSetException();
-            }
-
-            if (! is_null($recompiledCss)) {
-                return $recompiledCss;
-            }
-
-            return $this->cache->get(self::COMPILED_CSS_KEY);
-        } catch (CacheNotSetException $e) {
-            $recompiledCss = LessController::factory($this->app)->parse_less_files(null, false);
-            try {
-                $this->update_persistence_layer($recompiledCss);
-
-                return $recompiledCss;
-            } catch (CacheWriteException $e) {
-                if ( ! self::PARSE_LESS_FILES_AT_EVERY_REQUEST) {
-                    NotificationAdmin::factory($this->app)->store(
-                        sprintf(
-                            /* translators: Compile error */
-                            __(
-                                'Your CSS is being compiled on every request,
-                                    which causes your calendar to perform slowly. The following error occurred: %s',
-                                'open-source-event-calendar'
-                            ),
-                            $e->getMessage()
+            $this->update_persistence_layer($this->compiled);
+        } catch (CacheWriteException $e) {
+            if ( ! self::PARSE_LESS_FILES_AT_EVERY_REQUEST) {
+                NotificationAdmin::factory($this->app)->store(
+                    sprintf(
+                        /* translators: Compile error */
+                        __(
+                            'Your CSS is being compiled on every request,
+                                which causes your calendar to perform slowly. The following error occurred: %s',
+                            'open-source-event-calendar'
                         ),
-                        'error',
-                        2,
-                        [NotificationAdmin::RCPT_ADMIN],
-                        true
-                    );
-                }
-
-                // If something is really broken, still return the css.
-                // This means we parse it every time. This should never happen.
-                return $recompiledCss;
+                        $e->getMessage()
+                    ),
+                    'error',
+                    2,
+                    [NotificationAdmin::RCPT_ADMIN],
+                    true
+                );
             }
         }
+
+        // If something is really broken, still return the css.
+        return $this->compiled;
     }
 
     /**
-     * @param $css
+     * Stores the CSS in the first available engine, then the state pointing to it.
+     *
+     * State: engine ('file', 'apcu', 'db'), ver (first 7 characters of the CSS md5, changes with the CSS only), and
+     * for the file engine root (CachePath::ROOT_*) and file. Written only after the CSS, so a failed write keeps the
+     * previous state.
+     *
+     * @param  string  $css
      *
      * @return void
+     * @throws CacheWriteException
      */
     public function update_persistence_layer($css)
     {
-        if ($this->cache->is_file_cache()) {
-            $cacheData = $this->cache->engine->setWithFileInfo(self::COMPILED_CSS_KEY, $css);
-            $this->store_css_cache($cacheData['url']);
-        } else {
-            $this->cache->set(self::COMPILED_CSS_KEY, $css);
-            // At any other cache the self::COMPILED_CSS_KEY
-            // Value will be integer time.
-            // VALUSE is_numeric
-            $this->store_css_cache(time());
+        $cache = $this->get_cache();
+        if ( ! $cache->engine->set(self::css_file_name(), $css)) {
+            throw new CacheWriteException(esc_html(self::css_file_name()));
         }
+        $state = ['engine' => self::ENGINES[get_class($cache->engine)] ?? 'unknown'];
+        if ($cache->engine instanceof CacheFile) {
+            $state['root'] = $cache->engine->get_root();
+            $state['file'] = self::css_file_name();
+        }
+        $state['ver'] = substr(md5($css), 0, 7);
+        $this->app->options->set(self::CSS_OPTION, $state, true);
+        // Tell render cache to update.
+        $this->app->options->set(self::COMPILED_CSS_CACHE_KEY, true, true);
     }
 
     /**
-     * Save the path to the CSS file or false to load standard CSS
-     *
-     * @param  mixed|false  $value
+     * @return array|null The state written by update_persistence_layer(), null if none or invalid.
      */
-    private function store_css_cache(mixed $value = false)
+    public function get_state(): ?array
     {
-        $this->app->options->set(
-            self::COMPILED_CSS_KEY,
-            $value,
-            true
-        );
-        // Tell render cache to update.
-        $this->app->options->set(self::COMPILED_CSS_CACHE_KEY, true, true);
+        $state = $this->app->options->get(self::CSS_OPTION);
+        if (
+            ! is_array($state)
+            || ! in_array($state['engine'] ?? null, self::ENGINES, true)
+            || ! is_string($state['ver'] ?? null)
+        ) {
+            return null;
+        }
+        if ('file' === $state['engine'] && ! (is_string($state['root'] ?? null) && is_string($state['file'] ?? null))) {
+            return null;
+        }
+
+        return $state;
     }
 
     /**
@@ -206,48 +219,46 @@ class FrontendCssController extends OsecBaseClass
     {
         $url = $this->get_css_url();
         if ('' !== $url && ! is_admin()) {
-            wp_enqueue_style('ai1ec_style', $url, [], OSEC_VERSION);
+            wp_enqueue_style('ai1ec_style', $url, [], $this->get_state()['ver'] ?? OSEC_VERSION);
         }
     }
 
     /**
      * Get the url to retrieve the css
      *
-     * @return string
+     * The static file when it exists and has a URL, otherwise the route compiling or reading the CSS.
+     *
+     * @return string|false
      */
     public function get_css_url()
     {
-        // get what's saved. It could be false, int or string.
-        // if it's false or a int, use PHP to render CSS
         if (OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST) {
             add_action('wp_head', $this->echo_css(...));
             return false;
         }
 
-        /* @var int|string|null $saved_par = Number value required to display css in Header. */
-        $saved_par = $this->app->options->get(self::COMPILED_CSS_KEY);
-        // Numeric: stored in a non-file cache. Null: not compiled yet, compiled on request.
-        if (null === $saved_par || is_numeric($saved_par)) {
-            // "Link CSS in <head> section
-            // when file cache is unavailable."
-            if ($this->app->settings->get('render_css_as_link')) {
-                $time = (int)$saved_par;
-                return ResponseHelper::remove_protocols(
-                    add_query_arg(
-                        [self::REQUEST_CSS_PARAM => $time],
-                        trailingslashit(get_site_url())
-                    )
-                );
+        $state = $this->get_state();
+        if ($state && 'file' === $state['engine']) {
+            $dir = CachePath::factory($this->app)->root_dir($state['root'], 'css');
+            $url = $dir && file_exists($dir . $state['file'])
+                ? CachePath::factory($this->app)->path_to_url($dir . $state['file']) : null;
+            if ($url) {
+                return ResponseHelper::remove_protocols($url);
             }
-            // Write CSS into Style tag.
-            add_action('wp_head', $this->echo_css(...));
-            return '';
         }
 
-        // otherwise return the string
-        return ResponseHelper::remove_protocols(
-            $saved_par
-        );
+        // "Link CSS in <head> section when file cache is unavailable."
+        if ($this->app->settings->get('render_css_as_link')) {
+            return ResponseHelper::remove_protocols(
+                add_query_arg(
+                    [self::REQUEST_CSS_PARAM => $state['ver'] ?? 0],
+                    trailingslashit(get_site_url())
+                )
+            );
+        }
+        // Write CSS into Style tag.
+        add_action('wp_head', $this->echo_css(...));
+        return '';
     }
 
     public function echo_css()
@@ -338,15 +349,8 @@ class FrontendCssController extends OsecBaseClass
         try {
             // Try to parse the css
             $css = $lessCtrl->parse_less_files($variables, false);
-            // Reset the parse time to force a browser reload of the CSS, whether we are
-            // updating persistence or not. Do it here to be sure files compile ok.
-            // TODO Verify that this is not necessary anymore.
-            $this->store_css_cache(time());
-
             if ($update_persistence) {
                 $this->update_persistence_layer($css);
-            } else {
-                $this->cache->delete(self::COMPILED_CSS_KEY);
             }
         } catch (CacheWriteException) {
             // This means successful during parsing but problems persisting the CSS.
@@ -377,12 +381,105 @@ class FrontendCssController extends OsecBaseClass
         return true;
     }
 
+    /**
+     * Removes the compiled CSS from every engine, its state, and what 1.1.x left behind.
+     *
+     * Only this site's own entries: other applications share APCu, other sites share the database.
+     */
+    public function clear_cache(): void
+    {
+        $name  = self::css_file_name();
+        $path  = CachePath::factory($this->app);
+        foreach ([CachePath::ROOT_OVERRIDE, CachePath::ROOT_UPLOADS] as $root) {
+            $dir = $path->root_dir($root, 'css');
+            if ($dir && is_dir($dir)) {
+                CacheFile::for_dir($this->app, $dir, $root)->delete($name);
+            }
+        }
+        if (CacheApcu::is_available()) {
+            $apcu = new CacheApcu($this->app);
+            $apcu->delete($name);
+            $apcu->delete(self::COMPILED_CSS_KEY);
+        }
+        $db = CacheDb::factory($this->app);
+        $db->delete($name);
+        $db->delete(self::COMPILED_CSS_KEY);
+        $this->app->options->delete(self::CSS_OPTION);
+        $this->delete_legacy_state();
+
+        // 1.1.x files: <site prefix>_osec_compiled.css, without the prefix in debug mode. Kept on upgrade, because
+        // cached pages may still link them.
+        $uploads = $path->root_dir(CachePath::ROOT_UPLOADS, 'css');
+        foreach ($uploads ? glob($uploads . '*osec_compiled.css') ?: [] : [] as $file) {
+            wp_delete_file($file);
+        }
+    }
+
+    /**
+     * Removes the 1.1.x option rows: the CSS URL or timestamp, the file cache index and the database copy.
+     */
+    public function delete_legacy_state(): void
+    {
+        $this->app->options->delete(self::COMPILED_CSS_KEY);
+        CacheDb::factory($this->app)->delete(self::COMPILED_CSS_KEY);
+        global $wpdb;
+        foreach (
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+            $wpdb->get_col(
+                $wpdb->prepare(
+                    "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+                    $wpdb->esc_like(CacheFile::LEGACY_OPTION_PREFIX) . '%'
+                )
+            ) as $option
+        ) {
+            $this->app->options->delete($option);
+        }
+    }
+
     /*
      * Remove any (temp) content created by this class.
      */
-
     public function uninstall(bool $purge = false)
     {
-        $this->cache->clear_cache();
+        $this->clear_cache();
+    }
+
+    /**
+     * The CSS from the engine the state names, null if there is none.
+     */
+    private function get_stored_css(): ?string
+    {
+        $state  = $this->get_state();
+        $engine = $state ? $this->stored_engine($state) : null;
+        try {
+            return $engine ? $engine->get(self::css_file_name()) : null;
+        } catch (CacheNotSetException) {
+            return null;
+        }
+    }
+
+    /**
+     * Engine for writing, chosen when the CSS is compiled.
+     */
+    private function get_cache(): Cache
+    {
+        return $this->cache ??= CacheFactory::factory($this->app)->createCache('css');
+    }
+
+    /**
+     * The engine the state names, or null if it is gone.
+     */
+    private function stored_engine(array $state): ?CacheInterface
+    {
+        switch ($state['engine']) {
+            case 'file':
+                $dir = CachePath::factory($this->app)->root_dir($state['root'], 'css');
+
+                return $dir ? CacheFile::for_dir($this->app, $dir, $state['root']) : null;
+            case 'apcu':
+                return CacheApcu::is_available() ? new CacheApcu($this->app) : null;
+            default:
+                return CacheDb::factory($this->app);
+        }
     }
 }
