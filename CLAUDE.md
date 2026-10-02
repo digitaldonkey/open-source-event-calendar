@@ -284,7 +284,8 @@ link, route. Since 1.2.0 (`feature/css-cache-rework`, plan `.claude/plans/css-ca
 | Engine | Location | How the page gets it |
 |---|---|---|
 | File (default) | `uploads[/sites/<id>]/open_source_event_calendar_cache/css/osec-compiled-<blog_id>.css`, or `OSEC_FILE_CACHE_DEFAULT_PATH` + `css/` when that constant is set and writable | `<link>` to the static file, `?ver=<hash>`; no PHP involved |
-| APCu (no writable folder) | APCu, keys prefixed with the site URL hash | `<link>` to `?osec-css-cache=<hash>`, served by PHP |
+| Site transient (no writable folder, **only with a persistent object cache**: Redis, Memcached) | the object cache, key `osec_cache_osec-compiled-<blog_id>.css` | `<link>` to `?osec-css-cache=<hash>`, served by PHP |
+| APCu (no writable folder, no object cache) | APCu, keys prefixed with the site URL hash | `<link>` to `?osec-css-cache=<hash>`, served by PHP |
 | DB (neither) | option `osec_cache_osec-compiled-<blog_id>.css`, **autoload off** | same route |
 
 - **The option `osec_css`** (autoloaded) holds `[engine, root, file, ver]` of the last compile; `ver` is the first 7
@@ -338,7 +339,9 @@ link, route. Since 1.2.0 (`feature/css-cache-rework`, plan `.claude/plans/css-ca
 - **A successful compile clears the flag.** Before 1.2.0 it set it again, so everything compiled twice (D-CSS2).
 - **A failed compile never removes working CSS**: the CSS and `osec_css` are written only after a successful compile.
 - **WP-CLI and cron have their own APCu.** When the CSS would go to APCu, they leave the compile to the next web
-  request (flag kept); with the file engine they compile normally.
+  request (flag kept); with the file engine or an object cache (shared with web requests) they compile normally.
+- **Why transients only with an object cache**: without one, a transient without expiration is an autoloaded option
+  row - 400 KB on every page. The DB engine writes its own row with autoload off instead.
 - **Loading WordPress is never read-only for the CSS**: any request that boots WordPress, WP-CLI included, compiles
   when the flag is set (incident 2026-10-02). Read cache state with `mysql`, not WP-CLI.
 - `get_compiled_css()` keeps the CSS of the current request in a property; nothing else outlives a request except
@@ -360,15 +363,18 @@ Check, in order:
 3. **Backoff after a failure?** A notice in wp-admin carries the LESS error; the transient
    `osec_css_compile_failed` blocks automatic retries for 30 minutes. Saving Theme Options compiles anyway.
 
-**Escape hatches**: `OSEC_ENABLE_CACHE_FILE` `false` keeps the CSS in APCu or the database and serves it through
-the route (H12), e.g. when static files misbehave on a host; `OSEC_ENABLE_CACHE_APCU` `false` skips APCu.
-`OSEC_FILE_CACHE_DEFAULT_PATH` moves the file cache (CSS `css/`, Twig `twig/site-<id>/`). All take effect at the next
-compile.
+**Escape hatches**: `OSEC_ENABLE_CACHE_FILE` `false` keeps the CSS in the object cache, APCu or the database and
+serves it through the route (H12), e.g. when static files misbehave on a host - Twig still uses files;
+`OSEC_ENABLE_CACHE_TRANSIENT` `false` skips the object cache (without one it has no effect);
+`OSEC_ENABLE_CACHE_APCU` `false` skips APCu. `OSEC_FILE_CACHE_DEFAULT_PATH` moves the file cache (CSS `css/`, Twig
+`twig/site-<id>/`). All take effect at the next compile. **Set them in `constants-local.php`, never in the tracked
+`constants.php`.**
 
 **Twig cache**: compiled templates (PHP files) per site in the override folder, else
 `wp-content/cache/osec/twig/site-<id>/`, else uploads `…/twig/`, else none - never the plugin folder (replaced by
-updates). The folder found is stored in the setting `twig_cache` and rescanned when it is no longer writable, on
-upgrade, and by "Check again"/"Clear all caches". Deleting a site removes its Twig folder; a network-wide
+updates), independent of `OSEC_ENABLE_CACHE_FILE`. The folder found is stored in the setting `twig_cache` and
+rescanned when it is no longer writable, on upgrade, by "Check again"/"Clear all caches", and once an hour while none
+was writable (transient `osec_twig_cache_rescan`). Deleting a site removes its Twig folder; a network-wide
 deactivation removes `wp-content/cache/osec/`.
 
 **Multisite caveat (H10)**: OSEC keeps per-process singletons. A plugin that calls `switch_to_blog()` and renders

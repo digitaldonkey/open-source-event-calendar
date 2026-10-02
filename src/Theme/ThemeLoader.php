@@ -38,6 +38,11 @@ class ThemeLoader extends OsecBaseClass
     public const RESCAN_NONCE = 'osec_rescan_cache';
 
     /**
+     * Set while no Twig folder was writable: the next scan waits for it (once an hour, not on every request).
+     */
+    public const RESCAN_TRANSIENT = 'osec_twig_cache_rescan';
+
+    /**
      * @var array contains the admin and theme paths.
      */
     protected array $paths = [
@@ -466,7 +471,7 @@ class ThemeLoader extends OsecBaseClass
      * Get cache dir for Twig.
      *
      * The folder found by the last scan is stored in the setting `twig_cache`; a scan runs when there is none, when
-     * it is no longer writable, or on request.
+     * it is no longer writable, on request, and hourly while none was writable.
      *
      * @param  bool  $rescan  Set to true to force rescan
      *
@@ -476,7 +481,7 @@ class ThemeLoader extends OsecBaseClass
     {
         $twig_cache = $this->app->settings->get('twig_cache');
         if ( ! $rescan) {
-            if (CacheFile::OSEC_FILE_CACHE_UNAVAILABLE === $twig_cache) {
+            if (CacheFile::OSEC_FILE_CACHE_UNAVAILABLE === $twig_cache && get_transient(self::RESCAN_TRANSIENT)) {
                 return null;
             }
             if (is_string($twig_cache) && '' !== $twig_cache && is_dir($twig_cache) && wp_is_writable($twig_cache)) {
@@ -485,6 +490,9 @@ class ThemeLoader extends OsecBaseClass
         }
         $dir = CachePath::factory($this->app)->get_twig_dir();
         $this->app->settings->set('twig_cache', $dir ?? CacheFile::OSEC_FILE_CACHE_UNAVAILABLE);
+        if (null === $dir) {
+            set_transient(self::RESCAN_TRANSIENT, 1, HOUR_IN_SECONDS);
+        }
 
         return $dir;
     }

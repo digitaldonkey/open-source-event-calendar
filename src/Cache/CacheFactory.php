@@ -15,10 +15,11 @@ use Osec\Exception\BootstrapException;
 class CacheFactory extends OsecBaseClass
 {
     /**
-     * The first available engine: file, APCu, database.
+     * The first available engine: file, site transient (only with a persistent object cache), APCu, database.
      *
-     * The file cache comes first because the web server sends a static file without starting PHP; APCu and the
-     * database are read by PHP on the `?osec-css-cache=` route.
+     * The file cache comes first because the web server sends a static file without starting PHP; the others are
+     * read by PHP on the `?osec-css-cache=` route. An object cache (Redis, Memcached) comes before APCu, because web
+     * requests and WP-CLI share it.
      *
      * @param  string  $cache_id  Sub folder of the file cache, e.g. 'css'.
      *
@@ -30,6 +31,9 @@ class CacheFactory extends OsecBaseClass
         $cacheFile = CacheFile::createFileCacheInstance($this->app, $cache_id);
         if ($cacheFile) {
             return new Cache($cache_id, $cacheFile);
+        }
+        if (CacheTransient::is_available()) {
+            return new Cache($cache_id, CacheTransient::factory($this->app));
         }
         if ($this->is_apcu_available()) {
             return new Cache($cache_id, new CacheApcu($this->app));

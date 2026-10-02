@@ -9,6 +9,7 @@ use Osec\Cache\CacheDb;
 use Osec\Cache\CacheFactory;
 use Osec\Cache\CacheFile;
 use Osec\Cache\CachePath;
+use Osec\Cache\CacheTransient;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -56,6 +57,16 @@ class SettingsCache extends OsecBaseClass
                 'notes'           => $cachePathTxt,
                 'constant'        => 'OSEC_ENABLE_CACHE_FILE',
             ],
+            'CacheTransient' => [
+                'name'             => 'CacheTransient',
+                'is_available'     => $this->niceBoolean(CacheTransient::is_available()),
+                'is_current_cache' => $this->niceBoolean($current_cache === 'CacheTransient'),
+                'notes'            => esc_html__(
+                    'Only with a persistent object cache (Redis, Memcached).',
+                    'open-source-event-calendar'
+                ),
+                'constant'         => 'OSEC_ENABLE_CACHE_TRANSIENT',
+            ],
             'CacheApcu' => [
                 'name'            => 'CacheApcu',
                 'is_available'    => $this->niceBoolean(CacheApcu::is_available()),
@@ -96,7 +107,7 @@ class SettingsCache extends OsecBaseClass
                 'title'         => __('Performance Report', 'open-source-event-calendar'),
                 'name'          => __('Name', 'open-source-event-calendar'),
                 'available'     => __('Available', 'open-source-event-calendar'),
-                'current'       => __('Used for the CSS', 'open-source-event-calendar'),
+                'current'       => __('CSS', 'open-source-event-calendar'),
                 'constant'      => __('Constant', 'open-source-event-calendar'),
                 'notes'         => __('Notes', 'open-source-event-calendar'),
                 'css_title'     => __('Compiled CSS', 'open-source-event-calendar'),
@@ -132,33 +143,57 @@ class SettingsCache extends OsecBaseClass
 
     /**
      * Where the compiled CSS is now, from the state of the last compile.
+     *
+     * @return array<int, array{label: string, value: string, code: bool}> One row per line; code: a path or URL.
      */
-    private function css_location(): string
+    private function css_location(): array
     {
         $ctrl  = FrontendCssController::factory($this->app);
         $state = $ctrl->get_state();
         if ( ! $state) {
-            return __(
-                'Not compiled yet: it is compiled on the next page view with a calendar.',
-                'open-source-event-calendar'
-            );
+            return [
+                [
+                    'label' => __('Status', 'open-source-event-calendar'),
+                    'value' => __(
+                        'Not compiled yet: it is compiled on the next page view with a calendar.',
+                        'open-source-event-calendar'
+                    ),
+                    'code'  => false,
+                ],
+            ];
         }
-        if ('file' !== $state['engine']) {
-            return sprintf(
-                /* translators: 1: cache engine (apcu or db), 2: URL */
-                __('Kept in %1$s, served by PHP: %2$s', 'open-source-event-calendar'),
-                $state['engine'],
-                $ctrl->get_css_url()
-            );
+        $stored = [
+            'file' => __('Static file, sent by the web server', 'open-source-event-calendar'),
+            'transient' => __('Object cache (site transient), sent by PHP', 'open-source-event-calendar'),
+            'apcu' => __('APCu, sent by PHP', 'open-source-event-calendar'),
+            'db'   => __('Database, sent by PHP', 'open-source-event-calendar'),
+        ];
+        $rows   = [
+            [
+                'label' => __('Stored as', 'open-source-event-calendar'),
+                'value' => $stored[$state['engine']],
+                'code'  => false,
+            ],
+        ];
+        if ('file' === $state['engine']) {
+            $rows[] = [
+                'label' => __('File', 'open-source-event-calendar'),
+                'value' => CachePath::factory($this->app)->root_dir($state['root'], 'css') . $state['file'],
+                'code'  => true,
+            ];
         }
-        $dir = (string) CachePath::factory($this->app)->root_dir($state['root'], 'css');
+        $rows[] = [
+            'label' => __('URL', 'open-source-event-calendar'),
+            'value' => $ctrl->get_css_url(),
+            'code'  => true,
+        ];
+        $rows[] = [
+            'label' => __('Version', 'open-source-event-calendar'),
+            'value' => $state['ver'],
+            'code'  => true,
+        ];
 
-        return sprintf(
-            /* translators: 1: file path, 2: URL */
-            __('Static file %1$s, linked as %2$s', 'open-source-event-calendar'),
-            $dir . $state['file'],
-            $ctrl->get_css_url()
-        );
+        return $rows;
     }
 
     protected function niceBoolean($boolVar): string

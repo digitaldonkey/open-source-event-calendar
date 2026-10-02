@@ -112,13 +112,11 @@ class CachePath extends OsecBaseClass
     /**
      * The first writable Twig cache folder of the current site, created if missing.
      *
-     * @return string|null With trailing slash. Null if file caching is off or no folder is writable.
+     * @return string|null With trailing slash. Null if no folder is writable.
      */
     public function get_twig_dir(): ?string
     {
-        if ( ! OSEC_ENABLE_CACHE_FILE) {
-            return null;
-        }
+        // Not OSEC_ENABLE_CACHE_FILE: that is about serving the CSS as a static file; Twig files are only included.
         foreach ($this->twig_dirs() as $dir) {
             if ($this->is_writable_dir($dir)) {
                 return $dir;

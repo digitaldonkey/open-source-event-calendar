@@ -332,19 +332,32 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     // =======================
     //
     // Store the compiled CSS as a static file, served by the web server.
-    // false: the CSS is kept in APCu or the database and served by PHP through ?osec-css-cache=,
-    // and Twig templates are not cached.
+    // false: the CSS is kept in the object cache, APCu or the database and served by PHP through
+    // ?osec-css-cache=. Twig templates are cached as files either way.
     // Takes effect at the next compile (Theme Options save).
     //
     if (! defined('OSEC_ENABLE_CACHE_FILE')) {
         define('OSEC_ENABLE_CACHE_FILE', true);
     }
 
+    // ============================
+    // = ENABLE TRANSIENT CACHE  ==
+    // ============================
+    //
+    // Keep the compiled CSS in the persistent object cache (Redis, Memcached) as a site transient
+    // when no cache folder is writable. Served by PHP through ?osec-css-cache=.
+    // Without an object cache this has no effect.
+    //
+    if (! defined('OSEC_ENABLE_CACHE_TRANSIENT')) {
+        define('OSEC_ENABLE_CACHE_TRANSIENT', true);
+    }
+
     // =======================
     // = ENABLE ACPU CACHE  ==
     // =======================
     //
-    // Keep the compiled CSS in APCu when no cache folder is writable (before the database).
+    // Keep the compiled CSS in APCu when no cache folder is writable and there is no persistent
+    // object cache (Redis, Memcached), before the database.
     // Served by PHP through ?osec-css-cache=.
     //
     if (! defined('OSEC_ENABLE_CACHE_APCU')) {

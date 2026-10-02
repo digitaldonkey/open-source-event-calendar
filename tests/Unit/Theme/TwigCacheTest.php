@@ -127,6 +127,24 @@ class TwigCacheTest extends CacheFileTestBase
         $this->assertSame(CacheFile::OSEC_FILE_CACHE_UNAVAILABLE, $osec_app->settings->get('twig_cache'));
     }
 
+    /**
+     * A folder that becomes writable later is found without "Check again", but not by every request.
+     */
+    public function test_unavailable_is_retried_after_a_while()
+    {
+        global $osec_app;
+
+        $osec_app->settings->set('twig_cache', CacheFile::OSEC_FILE_CACHE_UNAVAILABLE);
+        set_transient(ThemeLoader::RESCAN_TRANSIENT, 1, HOUR_IN_SECONDS);
+        $this->assertNull(ThemeLoader::factory($osec_app)->get_cache_dir());
+
+        delete_transient(ThemeLoader::RESCAN_TRANSIENT);
+        $this->assertSame(
+            OSEC_FILE_CACHE_DEFAULT_PATH . 'twig/site-' . get_current_blog_id() . '/',
+            ThemeLoader::factory($osec_app)->get_cache_dir()
+        );
+    }
+
     public function test_clear_cache_empties_every_twig_folder_of_the_site()
     {
         global $osec_app;

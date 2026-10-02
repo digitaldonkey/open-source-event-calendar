@@ -32,8 +32,13 @@
     </div>
 
     <h3>{{ text.css_title }}</h3>
-    <div class="ai1ec-pre-scrollable">
-        <code>{{ css_location }}</code>
+    <div>
+        <ul>
+            {% for row in css_location %}
+                <li><strong>{{ row.label }}:</strong>
+                    {% if row.code %}<span style="font-family: monospace; overflow-wrap: anywhere;">{{ row.value }}</span>{% else %}{{ row.value }}{% endif %}</li>
+            {% endfor %}
+        </ul>
     </div>
 
     <h3>{{ text.twig_title }}</h3>

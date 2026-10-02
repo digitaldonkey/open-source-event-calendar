@@ -14,6 +14,7 @@ use Osec\Cache\CacheFactory;
 use Osec\Cache\CacheFile;
 use Osec\Cache\CacheInterface;
 use Osec\Cache\CacheNotSetException;
+use Osec\Cache\CacheTransient;
 use Osec\Cache\CachePath;
 use Osec\Cache\CacheWriteException;
 use Osec\Exception\BootstrapException;
@@ -91,9 +92,10 @@ class FrontendCssController extends OsecBaseClass
      * Engine names stored in self::CSS_OPTION.
      */
     private const ENGINES = [
-        CacheFile::class => 'file',
-        CacheApcu::class => 'apcu',
-        CacheDb::class   => 'db',
+        CacheFile::class      => 'file',
+        CacheTransient::class => 'transient',
+        CacheApcu::class      => 'apcu',
+        CacheDb::class        => 'db',
     ];
 
     /**
@@ -304,9 +306,9 @@ class FrontendCssController extends OsecBaseClass
     /**
      * Stores the CSS in the first available engine, then the state pointing to it.
      *
-     * State: engine ('file', 'apcu', 'db'), ver (first 7 characters of the CSS md5, changes with the CSS only), and
-     * for the file engine root (CachePath::ROOT_*) and file. Written only after the CSS, so a failed write keeps the
-     * previous state.
+     * State: engine ('file', 'transient', 'apcu', 'db'), ver (first 7 characters of the CSS md5, changes with the
+     * CSS only), and for the file engine root (CachePath::ROOT_*) and file. Written only after the CSS, so a failed
+     * write keeps the previous state.
      *
      * @param  string  $css
      *
@@ -595,6 +597,9 @@ class FrontendCssController extends OsecBaseClass
             $apcu->delete($name);
             $apcu->delete(self::COMPILED_CSS_KEY);
         }
+        if (CacheTransient::is_available()) {
+            CacheTransient::factory($this->app)->delete($name);
+        }
         $db = CacheDb::factory($this->app);
         $db->delete($name);
         $db->delete(self::COMPILED_CSS_KEY);
@@ -741,6 +746,8 @@ class FrontendCssController extends OsecBaseClass
                 $dir = CachePath::factory($this->app)->root_dir($state['root'], 'css');
 
                 return $dir ? CacheFile::for_dir($this->app, $dir, $state['root']) : null;
+            case 'transient':
+                return CacheTransient::is_available() ? CacheTransient::factory($this->app) : null;
             case 'apcu':
                 return CacheApcu::is_available() ? new CacheApcu($this->app) : null;
             default:
