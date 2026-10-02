@@ -275,111 +275,104 @@ A listener registered around one operation must be removed afterwards (`EventEdi
 
 ## Frontend CSS Delivery
 
-The compiled theme CSS reaches the page in one of **four** ways, decided per request by
-`FrontendCssController::get_css_url()` (`src/App/Controller/FrontendCssController.php`). Which one is active
-changes *where in the DOM the stylesheet lives*, so never assume it is a `<link>` in `<head>`:
+No theme ships precompiled CSS (dropped in 1.0.8), so every site compiles its own LESS into one stylesheet
+(~400 KB). `FrontendCssController` (`src/App/Controller/FrontendCssController.php`) owns all of it: compile, store,
+link, route. Since 1.2.0 (`feature/css-cache-rework`, plan `.claude/plans/css-cache-rework.md`):
 
-| Condition | Result | Where |
+**Where the CSS is stored** - decided only when it is compiled (`CacheFactory::createCache('css')`), first that works:
+
+| Engine | Location | How the page gets it |
 |---|---|---|
-| `OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST` (debug constant, usually in `constants-local.php`) | `echo_css()` on `wp_head` | inline `<style id="osec-frontend-css-inline-css">` **in `<body>`** |
-| Option `osec_compiled.css` (`COMPILED_CSS_KEY`) is a string | that URL | `<link>` in `<head>` |
-| Option is numeric or `null` (not compiled yet) **and** setting `render_css_as_link` is on (default) | site URL with `?osec-css-cache=<timestamp>` (`0` for `null`); the request compiles on a cache miss | `<link>` in `<head>` |
-| Option is numeric or `null` and `render_css_as_link` is off | `echo_css()` on `wp_head` | inline `<style>` **in `<body>`** |
+| File (default) | `uploads[/sites/<id>]/open_source_event_calendar_cache/css/osec-compiled-<blog_id>.css`, or `OSEC_FILE_CACHE_DEFAULT_PATH` + `css/` when that constant is set and writable | `<link>` to the static file, `?ver=<hash>`; no PHP involved |
+| APCu (no writable folder) | APCu, keys prefixed with the site URL hash | `<link>` to `?osec-css-cache=<hash>`, served by PHP |
+| DB (neither) | option `osec_cache_osec-compiled-<blog_id>.css`, **autoload off** | same route |
 
-No theme ships precompiled CSS (dropped in 1.0.8, the `osec_parsed.css` fallback and `less.sha1.map.php` removed
-later), so every site compiles its own; `invalidate_cache()` always recompiles.
+- **The option `osec_css`** (autoloaded) holds `[engine, root, file, ver]` of the last compile; `ver` is the first 7
+  characters of the CSS md5, so the URL changes only when the CSS does. It replaced the 1.1.x option
+  `osec_compiled.css` and the `osec_file_cache__*` index rows (deleted on upgrade; the 1.1.x files a week later,
+  because pages cached with old HTML still link them).
+- **The URL is built on every page view** from the stored root (`CachePath::path_to_url()`: uploads, `wp-content`, the
+  WordPress folder, `DOCUMENT_ROOT`), never stored. A missing file, or a file outside all of them, links the route.
+  Page views test no folders.
+- **The route reads the engine named in `osec_css`**, not the one the factory would pick today.
+- **Inline variant**: with `render_css_as_link` off (and no file URL) or `OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST`,
+  the CSS is printed as `<style id="osec-frontend-css-inline-css">` instead of a link.
 
-**Why the inline variant lands in the body:** `echo_css()` does not echo. It is hooked to `wp_head` but calls
-`wp_register_style()` + `wp_add_inline_style()` + `wp_enqueue_style()`, and by then `wp_print_styles` has already
-run for the head, so WordPress prints the handle with the footer styles - as a direct child of `<body>`, carrying
-the whole compiled stylesheet (~390 KB).
+**Where on the page** - `add_link_to_html_for_frontend()`:
+
+- **Early**, on `wp_enqueue_scripts`, for pages known to show a calendar (`page_shows_calendar()`: calendar page,
+  single event, singular content with the shortcode or the `osec-calendar-classic` block): in `<head>`.
+- **Late**, by every calendar while it renders: still in `<head>` before `wp_head` (calendar page route, block themes),
+  otherwise **with the footer styles, as a direct child of `<body>`**. That is the case for calendars in widgets,
+  template parts, patterns, reusable blocks and page builders on classic themes (H9: not detected early).
+- Requested twice, the CSS is printed once. Before 1.2.0 the inline variant hooked onto `wp_head` after `wp_head`
+  had run on classic themes and printed **nothing** (C3).
 
 **Consequences to keep in mind:**
 
-- **Any JS that clears, replaces or detaches the body can destroy the calendar's styling.** This is what made the
-  print button produce an unstyled page (`handle_click_on_print_button` in `public/js/pages/calendar.js`; fixed by
-  detaching everything *except* `style, link, script, noscript, template`). Exclude non-rendered elements, or work
-  on a container instead of `<body>`.
-- **A local `OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST` flips the dev site to the inline variant**, so behaviour
-  differs from a default production site. When a CSS-related bug reproduces in one place and not the other, check
-  this first: `curl -s <url> | grep -c 'id="osec-frontend-css-inline-css"'` (1 = inline in body, 0 = link in head;
-  grep without the `id=` also matches the comment WordPress appends after the style, so it counts 2).
-- That constant also makes `tests/Unit/ConstantsTest.php::test_is_less_debug_disabled` fail locally. Expected;
-  `constants-local.php` is gitignored, CI is unaffected.
+- **Any JS that clears, replaces or detaches the body can destroy the calendar's styling** when the CSS came late
+  (footer styles are children of `<body>`). This is what made the print button produce an unstyled page
+  (`handle_click_on_print_button` in `public/js/pages/calendar.js`; fixed by detaching everything *except*
+  `style, link, script, noscript, template`). Exclude non-rendered elements, or work on a container.
+- **A local `OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST` flips the dev site to the inline variant** and compiles on
+  every request. Check it first when a CSS bug reproduces in one place and not the other:
+  `curl -s <url> | grep -c 'id="osec-frontend-css-inline-css"'` (1 = inline, 0 = link; without the `id=` the grep
+  also matches the comment WordPress appends, so it counts 2). It also makes
+  `tests/Unit/ConstantsTest.php::test_is_less_debug_disabled` fail locally (expected; CI is unaffected).
 
-## CSS Compile Caching (Dev Staleness)
+## CSS Compile Caching
 
-**If a LESS/theme-CSS edit doesn't seem to take effect, it is essentially never PHP opcache** -
-`.less` files are read as plain text (`file_get_contents()`), not compiled PHP, so opcache
-cannot cache them. Two caches sit between a LESS edit and the browser:
+**When the CSS is compiled:**
 
-1. **The cache engine.** `CacheFactory::createCache()` tries three engines in order
-   (`src/Cache/CacheFactory.php`): `CacheApcu` → `CacheFile` → `CacheDb` (DB-option-backed), first
-   one available/enabled wins. With `OSEC_ENABLE_CACHE_APCU` at its default `true`, `CacheApcu`
-   always wins first, so compiled CSS lives in APCu's shared memory - which every worker in the
-   pool shares, and which only clears on a full php-fpm restart, not per-request or via the
-   `?osec-css-cache=` cache-bust. **WP-CLI has its own APCu**, separate from the FPM pool's: a
-   `wp eval` can neither see nor clear the CSS the site serves, and a theme switch or compile run
-   from WP-CLI lands in the CLI's APCu. Trigger those through the browser (admin UI) instead.
-2. **The browser cache.** `render_css()` sends the stylesheet with a one-year `max-age` and an ETag
-   derived from the `?osec-css-cache=<timestamp>` value, so the browser only fetches new CSS when
-   the timestamp changes. It has one-second resolution: a recompile within the same second as the
-   previous one keeps the URL and the browser keeps the old CSS (side finding B21 - seen in scripted
-   Selenium runs, pause 2 s between actions).
+| Trigger | When | Notes |
+|---|---|---|
+| Theme Options save | in that request (`invalidate_cache()`) | ignores lock and backoff; the admin sees the error at once |
+| Theme switch, activation, plugin update | next request's `init` (`verifyCache()` → `compile_flagged()`) | `request_compile()` sets the flag `osec_invalidate_css_cache` and ends the backoff |
+| No CSS stored (fresh install, file lost) | the CSS route `?osec-css-cache=` | answers a `no-store` comment while it cannot compile |
+| "Clear all caches" (cache report) | in that request (REST `POST osec/v1/cache/clear`) | compiles in memory first, clears only after success |
 
-`get_compiled_css()`'s `static $recompiledCss` is only a runtime cache for the current request (like
-`CacheMemory`): it saves a second compile within one request and is gone afterwards. It cannot make
-CSS stale across requests - only APCu, the file cache, the DB cache and the browser cache outlive a
-request.
+- **One compile at a time**: lock `osec_css_compile` (`ExecutionLimitController`, 120 s). A request that cannot get
+  it skips (flag kept; route: `no-store` comment).
+- **Backoff**: a failed automatic compile sets the transient `osec_css_compile_failed` for 30 minutes; flag and route
+  wait for it. Every admin action and every successful compile ends it.
+- **A successful compile clears the flag.** Before 1.2.0 it set it again, so everything compiled twice (D-CSS2).
+- **A failed compile never removes working CSS**: the CSS and `osec_css` are written only after a successful compile.
+- **WP-CLI and cron have their own APCu.** When the CSS would go to APCu, they leave the compile to the next web
+  request (flag kept); with the file engine they compile normally.
+- **Loading WordPress is never read-only for the CSS**: any request that boots WordPress, WP-CLI included, compiles
+  when the flag is set (incident 2026-10-02). Read cache state with `mysql`, not WP-CLI.
+- `get_compiled_css()` keeps the CSS of the current request in a property; nothing else outlives a request except
+  the engines and the browser cache.
 
-**For local dev/debugging, disable APCu via `constants-local.php`** (gitignored - copy from
-`constants-local.php.example`, never edit the tracked `constants.php` for this):
-```php
-if (!defined('OSEC_ENABLE_CACHE_APCU')) {
-    define('OSEC_ENABLE_CACHE_APCU', FALSE);
-}
-```
-With APCu out of the way, `CacheFactory` falls through to `CacheFile` (`OSEC_ENABLE_CACHE_FILE`
-is already `true` by default), so `FrontendCssController::update_persistence_layer($css)` - the
-save step run once right after a successful compile, inside `get_compiled_css()`'s cache-miss
-branch - takes the `CacheFile` path instead of the generic one:
+**The browser cache**: the static file is linked with `?ver=<hash>`; the route sends a one-year `max-age` and an
+ETag from its `?osec-css-cache=` value, and answers weak ETags (`W/"…"`, sent back after gzip) with 304. The URL
+changes with the CSS, so an edit is never hidden by the browser cache once it compiled.
 
-- **File cache** (`$this->cache->is_file_cache()` true): `CacheFile::setWithFileInfo()` writes
-  the CSS to `cache/css/<prefix>_osec_compiled.css`. The `<prefix>` is
-  `substr(md5(site_url()), 0, 8)` - constant per site, **not a content hash** - so the same file
-  is overwritten in place on every recompile; diff it directly to see what actually compiled,
-  no request round-trip or cache-timing guesswork. The returned file URL (a string) is written
-  into the plain `osec_compiled.css` WP option via `store_css_cache()`. From then on
-  `get_css_url()` (a separate code path, consulted on every page `<head>`) sees a string and
-  links straight to that static file - nginx serves it, no PHP involved, no second request
-  needed once it exists.
-- **Any other engine (APCu/DB)**: `$this->cache->set()` stores the CSS *inside that engine*,
-  but `store_css_cache(time())` writes a **timestamp**, not the CSS, into the same
-  `osec_compiled.css` option. `get_css_url()` then sees a number and can only embed
-  `<link href="?osec-css-cache=<timestamp>">` - a URL that routes back through WordPress
-  (`render_css()` → `get_compiled_css()` again) rather than ever containing CSS inline. This is
-  *why* a second request is structurally required for non-file caches, not a bug: the page HTML
-  can never carry the actual CSS in this branch, only a pointer back to WordPress.
-- If the file write itself fails (`CacheWriteException` from a permissions/disk issue),
-  `update_persistence_layer()` doesn't catch it - it propagates to `get_compiled_css()`'s outer
-  catch, which notifies an admin (unless already in per-request-recompile debug mode) but still
-  returns the freshly-compiled CSS for the current request. Degraded (recompiles every request
-  until fixed) but never broken.
+**If a LESS/theme-CSS edit doesn't seem to take effect**, it is never PHP opcache (`.less` files are read as text).
+Check, in order:
 
-**Reliable verification loop after any LESS/PHP change affecting compiled CSS:**
-1. `supervisorctl restart php-fpm` (inside the container) - clears APCu's shared memory; a
-   `wp eval 'opcache_reset();'` or `apcu_clear_cache()` does **not** do this, since that runs in its
-   own throwaway CLI process with its own APCu, not the FPM pool serving real requests.
-2. **Delete `cache/css/*_osec_compiled.css`, then** hit `?osec-css-cache=<timestamp>`. Deleting
-   the file is the part that actually forces the recompile: in file-cache mode the route still
-   goes through `get_compiled_css()`, whose cache lookup finds that file and returns it, so a
-   LESS edit can sit unreflected through any number of cache-bust requests *and* a php-fpm
-   restart. Pair it with `wp option update osec_compiled.css "$(date +%s)"` - the option holds
-   the file's URL once written; a number or `null` makes the page link the compiling route.
-3. A LESS→CSS compile can need a second request to be fully reflected (per maintainer note) -
-   don't conclude a change "didn't take" from a single request's response.
-4. With APCu disabled per above, read the actual file in `cache/css/` rather than re-parsing
-   HTML output.
+1. **Did it compile?** `mysql -e "SELECT option_value FROM wp_options WHERE option_name='osec_css'"` - the `ver`
+   changes with the CSS. Compile with Theme Options → Save, or "Clear all caches" in the cache report (Settings).
+2. **Which engine?** `engine` in `osec_css`. With `file`, read the file itself
+   (`wp-content/uploads/open_source_event_calendar_cache/css/osec-compiled-1.css` on the dev site) - diff it to see
+   what compiled. With `apcu`, the CSS lives in php-fpm's APCu: `supervisorctl restart php-fpm` clears it; a
+   `wp eval 'apcu_clear_cache();'` does not (own CLI APCu).
+3. **Backoff after a failure?** A notice in wp-admin carries the LESS error; the transient
+   `osec_css_compile_failed` blocks automatic retries for 30 minutes. Saving Theme Options compiles anyway.
+
+**Escape hatches**: `OSEC_ENABLE_CACHE_FILE` `false` keeps the CSS in APCu or the database and serves it through
+the route (H12), e.g. when static files misbehave on a host; `OSEC_ENABLE_CACHE_APCU` `false` skips APCu.
+`OSEC_FILE_CACHE_DEFAULT_PATH` moves the file cache (CSS `css/`, Twig `twig/site-<id>/`). All take effect at the next
+compile.
+
+**Twig cache**: compiled templates (PHP files) per site in the override folder, else
+`wp-content/cache/osec/twig/site-<id>/`, else uploads `…/twig/`, else none - never the plugin folder (replaced by
+updates). The folder found is stored in the setting `twig_cache` and rescanned when it is no longer writable, on
+upgrade, and by "Check again"/"Clear all caches". Deleting a site removes its Twig folder; a network-wide
+deactivation removes `wp-content/cache/osec/`.
+
+**Multisite caveat (H10)**: OSEC keeps per-process singletons. A plugin that calls `switch_to_blog()` and renders
+OSEC output for another site in the same request gets this site's cache paths; the APCu prefix follows the site.
 
 ## Base Font Size (Theme Setting)
 
@@ -424,7 +417,7 @@ and silently discards the second's, with no warning: `@a: .5em; @b: 1px; (@a + @
 `1.5em`, not `calc(.5em + 1px)`. Mixing `em` with `px` is easy to hit here precisely because the
 rule above pushes everything towards `em` while borders and hairlines stay `px`. Use
 `calc( ~"@{a} + @{b}" )` (the `~""` escape keeps LESS from evaluating it) and check the compiled
-output in `cache/css/*_osec_compiled.css` - a plausible-looking wrong number is the normal
+output in the CSS file (`osec_css` names it) - a plausible-looking wrong number is the normal
 failure mode, not a compile error.
 
 ## Twig → JS Frontend Templates
@@ -485,6 +478,13 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
 - **Code quality**: `ddev composer run-script phpcs` or `ddev run-script phpcs`
 - **WordPress plugin-check**: `bin/plugin-check.sh` (~13 s; ERROR fails, `--strict` also fails on WARNING). Deliberately **not** in `git_pre_commit` - it runs in `all_tests`, `prepare_release` and CI
 - **GrumPHP**: `vendor/bin/grumphp run --testsuite=git_pre_commit` (what the pre-commit hook runs)
+- **PHPUnit has its own file cache**: `tests/Utilities/bootstrap.php` sets `OSEC_FILE_CACHE_DEFAULT_PATH` to the test
+  site's `wp-content/osec-phpunit-cache/` and empties it on start. Before 1.2.0 it emptied the dev site's plugin
+  `cache/` (the test site shares the plugin folder) - on older branches, snapshot `cache/` around a run.
+- **The compile lock commits the test transaction** (`ExecutionLimitController::acquire()`), like the feed import:
+  CSS tests clean up after `parent::tear_down()` (`Tests\Utilities\CssEngineTrait::commit_css_cleanup()`), which
+  also gives the engine switch (`use_css_engine()`), a web-request controller (PHPUnit is always CLI) and the next
+  request's `init` (`css_next_request()`).
 - **The Mocha/Selenium integration suite is destructive to the dev site.** It installs/uninstalls the plugin,
   exercises the `OSEC_UNINSTALL_PLUGIN_DATA` purge, creates its own `Calendar` page, and **trashes every
   calendar page on teardown** - including one you were using - leaving `calendar_page_id` pointing at a
