@@ -554,18 +554,13 @@ class BootstrapController
     }
 
     /**
-     * Invalidates CSS cache if FrontendCssController::COMPILED_CSS_CACHE_KEY option was flagged.
-     * Deletes flag afterward.
+     * Compiles the CSS if FrontendCssController::COMPILED_CSS_CACHE_KEY is flagged.
+     *
+     * @see FrontendCssController::compile_flagged()
      */
     public function verifyCache()
     {
-        if (
-            $this->app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY)
-        ) {
-            FrontendCssController::factory($this->app)
-                                 ->invalidate_cache(null, true);
-            $this->app->options->delete(FrontendCssController::COMPILED_CSS_CACHE_KEY);
-        }
+        FrontendCssController::factory($this->app)->compile_flagged();
     }
 
     /**

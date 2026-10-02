@@ -2,6 +2,7 @@
 
 namespace Osec\Tests\Utilities;
 
+use Osec\App\Controller\BootstrapController;
 use Osec\App\Controller\FrontendCssController;
 use Osec\Cache\Cache;
 use Osec\Cache\CacheApcu;
@@ -49,7 +50,7 @@ trait CssEngineTrait
                 }
             }
         );
-        $osec_app->inject_object(FrontendCssController::class, new FrontendCssController($osec_app));
+        $osec_app->inject_object(FrontendCssController::class, $this->web_request_controller());
 
         return $this->css_cache;
     }
@@ -69,6 +70,62 @@ trait CssEngineTrait
         $osec_app->inject_object(CachePath::class, new CachePath($osec_app));
         $osec_app->inject_object(CacheFactory::class, new CacheFactory($osec_app));
         $osec_app->inject_object(FrontendCssController::class, new FrontendCssController($osec_app));
+    }
+
+    /**
+     * A controller that sees a web request (PHPUnit always runs in the CLI), or the CLI when $cli is true.
+     */
+    protected function web_request_controller(bool $cli = false): FrontendCssController
+    {
+        global $osec_app;
+
+        return new class ($osec_app, $cli) extends FrontendCssController {
+            public function __construct($app, private bool $cli)
+            {
+                parent::__construct($app);
+            }
+
+            protected function is_cli(): bool
+            {
+                return $this->cli;
+            }
+        };
+    }
+
+    /**
+     * The next request's init: BootstrapController::verifyCache() as registered on 'init'.
+     */
+    protected function css_next_request(): void
+    {
+        global $wp_filter;
+
+        foreach ($wp_filter['init']->callbacks as $callbacks) {
+            foreach ($callbacks as $callback) {
+                $fn = $callback['function'];
+                if (is_array($fn) && $fn[0] instanceof BootstrapController && 'verifyCache' === $fn[1]) {
+                    $fn();
+
+                    return;
+                }
+            }
+        }
+        $this->fail('BootstrapController::verifyCache() is not registered on init.');
+    }
+
+    /**
+     * The compile lock commits the test transaction, so whatever was written before it survives the rollback.
+     * Call after parent::tear_down().
+     */
+    protected function commit_css_cleanup(): void
+    {
+        global $osec_app, $wpdb;
+
+        // Through Options, which also keeps the values in memory.
+        $osec_app->options->delete(FrontendCssController::COMPILED_CSS_CACHE_KEY);
+        $osec_app->options->delete(FrontendCssController::CSS_OPTION);
+        delete_transient(FrontendCssController::COMPILE_FAILED_TRANSIENT);
+        delete_option('osec_xlock_' . FrontendCssController::COMPILE_LOCK);
+        $wpdb->query('COMMIT');
     }
 
     /**

@@ -3,9 +3,7 @@
 namespace Osec\App\Controller;
 
 use Exception;
-use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\Notifications\NotificationAdmin;
-use Osec\Bootstrap\App;
 use Osec\Bootstrap\MemoryCheck;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Cache\Cache;
@@ -61,6 +59,23 @@ class FrontendCssController extends OsecBaseClass
     public const COMPILED_CSS_CACHE_KEY = 'osec_invalidate_css_cache';
 
     /**
+     * Lock (ExecutionLimitController) held while one request compiles; others do not compile meanwhile.
+     */
+    public const COMPILE_LOCK = 'osec_css_compile';
+
+    /**
+     * Transient set after a failed compile: no automatic retry (flag, route) until it expires. Anything an admin does
+     * (Theme Options save, theme switch, update, clearing the caches) ends it.
+     */
+    public const COMPILE_FAILED_TRANSIENT = 'osec_css_compile_failed';
+
+    private const COMPILE_LOCK_TIMEOUT = 120;
+
+    private const COMPILE_BACKOFF = 30 * MINUTE_IN_SECONDS;
+
+    private const MAX_AGE = 31536000;
+
+    /**
      * Engine names stored in self::CSS_OPTION.
      */
     private const ENGINES = [
@@ -88,79 +103,190 @@ class FrontendCssController extends OsecBaseClass
     }
 
     /**
-     * Renders the css for our frontend.
+     * Renders the css for our frontend (the `?osec-css-cache=` route).
      *
      * Sets etags to avoid sending not needed data
      */
     public function render_css()
     {
-        header('HTTP/1.1 200 OK');
-        header('Content-Type: text/css', true, 200);
-        // Aggressive caching to save future requests from the same client.
-        $etag = '"' . md5(__FILE__ . RequestParser::get_param(self::REQUEST_CSS_PARAM)) . '"';
-        header('ETag: ' . $etag);
-        $max_age = 31536000;
-        header(
-            'Expires: ' .
-            gmdate(
-                'D, d M Y H:i:s',
-                UIDateFormats::factory($this->app)->current_time() . $max_age
-            ) .
-            ' GMT'
-        );
-        header('Cache-Control: public, max-age=' . $max_age);
-        if (
-            empty($_SERVER['HTTP_IF_NONE_MATCH'])
-            || $etag !== sanitize_text_field(wp_unslash($_SERVER['HTTP_IF_NONE_MATCH']))
-        ) {
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-            echo $this->get_compiled_css();
-        } else {
-            // Not modified!
+        $if_none_match = isset($_SERVER['HTTP_IF_NONE_MATCH'])
+            ? sanitize_text_field(wp_unslash($_SERVER['HTTP_IF_NONE_MATCH'])) : '';
+        if ($this->is_not_modified($if_none_match)) {
             status_header(304);
+            header('ETag: ' . $this->etag());
+            ResponseHelper::stop();
         }
-        // We're done!
+        $response = $this->css_response();
+        status_header($response['status']);
+        foreach ($response['headers'] as $name => $value) {
+            header($name . ': ' . $value);
+        }
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        echo $response['body'];
         ResponseHelper::stop();
     }
 
     /**
-     * Try to get the CSS from cache.
-     * If it's not there re-generate it and save it to cache.
+     * The route's response: the CSS, cached for a year (the URL changes with the CSS), or, while it cannot be had
+     * (another request compiles, a compile failed), a stylesheet with only a comment that is not cached, so the
+     * next page view asks again.
+     *
+     * @return array{status: int, headers: array<string, string>, body: string}
      */
-    public function get_compiled_css()
+    public function css_response(): array
+    {
+        $css = $this->get_compiled_css();
+        if (null === $css) {
+            return [
+                'status'  => 200,
+                'headers' => [
+                    'Content-Type'  => 'text/css',
+                    'Cache-Control' => 'no-store',
+                ],
+                'body'    => '/* The calendar stylesheet is not available yet. */',
+            ];
+        }
+
+        return [
+            'status'  => 200,
+            'headers' => [
+                'Content-Type'  => 'text/css',
+                'ETag'          => $this->etag(),
+                'Expires'       => gmdate('D, d M Y H:i:s', time() + self::MAX_AGE) . ' GMT',
+                'Cache-Control' => 'public, max-age=' . self::MAX_AGE,
+            ],
+            'body'    => $css,
+        ];
+    }
+
+    /**
+     * Whether the browser's copy is current. A server compressing the response marks the ETag weak (W/"..."),
+     * and browsers send it back that way.
+     *
+     * @param  string  $if_none_match  The If-None-Match request header.
+     */
+    public function is_not_modified(string $if_none_match): bool
+    {
+        foreach (explode(',', $if_none_match) as $tag) {
+            $tag = trim($tag);
+            if ($this->etag() === (str_starts_with($tag, 'W/') ? substr($tag, 2) : $tag)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function etag(): string
+    {
+        return '"' . md5(__FILE__ . RequestParser::get_param(self::REQUEST_CSS_PARAM)) . '"';
+    }
+
+    /**
+     * The CSS: compiled in this request, stored, or compiled now and stored.
+     *
+     * A compile runs under the lock and not during the backoff after a failed one.
+     *
+     * @return string|null Null while another request compiles or after a failed compile.
+     */
+    public function get_compiled_css(): ?string
     {
         if (null !== $this->compiled) {
             return $this->compiled;
         }
-        $stored = self::PARSE_LESS_FILES_AT_EVERY_REQUEST ? null : $this->get_stored_css();
+        if (self::PARSE_LESS_FILES_AT_EVERY_REQUEST) {
+            // Debug mode: compile errors are meant to show.
+            $this->compiled = LessController::factory($this->app)->parse_less_files(null, false);
+
+            return $this->compiled;
+        }
+        $stored = $this->get_stored_css();
         if (null !== $stored) {
             return $stored;
         }
-        $this->compiled = LessController::factory($this->app)->parse_less_files(null, false);
+        if (get_transient(self::COMPILE_FAILED_TRANSIENT)) {
+            return null;
+        }
+        $lock = ExecutionLimitController::factory($this->app);
+        if ( ! $lock->acquire(self::COMPILE_LOCK, self::COMPILE_LOCK_TIMEOUT)) {
+            return null;
+        }
+        try {
+            $this->compiled = LessController::factory($this->app)->parse_less_files(null, false);
+        } catch (Exception $e) {
+            $this->notify_compile_error($e);
+            set_transient(self::COMPILE_FAILED_TRANSIENT, 1, self::COMPILE_BACKOFF);
+            $lock->release(self::COMPILE_LOCK);
+
+            return null;
+        }
         try {
             $this->update_persistence_layer($this->compiled);
         } catch (CacheWriteException $e) {
-            if ( ! self::PARSE_LESS_FILES_AT_EVERY_REQUEST) {
-                NotificationAdmin::factory($this->app)->store(
-                    sprintf(
-                        /* translators: Compile error */
-                        __(
-                            'Your CSS is being compiled on every request,
-                                which causes your calendar to perform slowly. The following error occurred: %s',
-                            'open-source-event-calendar'
-                        ),
-                        $e->getMessage()
+            NotificationAdmin::factory($this->app)->store(
+                sprintf(
+                    /* translators: Compile error */
+                    __(
+                        'Your CSS is being compiled on every request,
+                            which causes your calendar to perform slowly. The following error occurred: %s',
+                        'open-source-event-calendar'
                     ),
-                    'error',
-                    2,
-                    [NotificationAdmin::RCPT_ADMIN],
-                    true
-                );
-            }
+                    $e->getMessage()
+                ),
+                'error',
+                2,
+                [NotificationAdmin::RCPT_ADMIN],
+                true
+            );
+        } finally {
+            $lock->release(self::COMPILE_LOCK);
         }
 
-        // If something is really broken, still return the css.
+        // If the CSS cannot be stored, still return it.
         return $this->compiled;
+    }
+
+    /**
+     * Compiles the CSS if a plugin update, activation or theme switch asked for it. Runs on init.
+     *
+     * Leaves the flag for a later request while another one compiles, during the backoff after a failed compile
+     * (S2), and in WP-CLI or cron when the CSS would go to APCu, which the web server does not share (D7).
+     */
+    public function compile_flagged(): void
+    {
+        if (
+            ! $this->app->options->get(self::COMPILED_CSS_CACHE_KEY)
+            || get_transient(self::COMPILE_FAILED_TRANSIENT)
+            || ($this->is_cli() && $this->get_cache()->engine instanceof CacheApcu)
+        ) {
+            return;
+        }
+        $lock = ExecutionLimitController::factory($this->app);
+        if ( ! $lock->acquire(self::COMPILE_LOCK, self::COMPILE_LOCK_TIMEOUT)) {
+            return;
+        }
+        try {
+            if ( ! $this->invalidate_cache(null, true)) {
+                set_transient(self::COMPILE_FAILED_TRANSIENT, 1, self::COMPILE_BACKOFF);
+            }
+        } finally {
+            $lock->release(self::COMPILE_LOCK);
+        }
+    }
+
+    /**
+     * Compile on the next request (theme switch, activation, update): ends the backoff of an earlier failure, so the
+     * change takes effect at once.
+     */
+    public function request_compile(): void
+    {
+        $this->app->options->set(self::COMPILED_CSS_CACHE_KEY, true, true);
+        delete_transient(self::COMPILE_FAILED_TRANSIENT);
+    }
+
+    protected function is_cli(): bool
+    {
+        return 'cli' === PHP_SAPI;
     }
 
     /**
@@ -188,8 +314,9 @@ class FrontendCssController extends OsecBaseClass
         }
         $state['ver'] = substr(md5($css), 0, 7);
         $this->app->options->set(self::CSS_OPTION, $state, true);
-        // Tell render cache to update.
-        $this->app->options->set(self::COMPILED_CSS_CACHE_KEY, true, true);
+        // Whatever asked for a compile is answered (D-CSS2: setting it here compiled everything twice).
+        $this->app->options->delete(self::COMPILED_CSS_CACHE_KEY);
+        delete_transient(self::COMPILE_FAILED_TRANSIENT);
     }
 
     /**
@@ -266,6 +393,9 @@ class FrontendCssController extends OsecBaseClass
         $handle = 'osec-frontend-css';
         wp_register_style($handle, false, [], OSEC_VERSION);
         $compiled = $this->get_compiled_css();
+        if (null === $compiled) {
+            return;
+        }
         if ($compiled !== wp_strip_all_tags($compiled)) {
             throw new Exception(esc_html__('Unexpected CSS content', 'open-source-event-calendar'));
         }
@@ -363,17 +493,7 @@ class FrontendCssController extends OsecBaseClass
 
             return false;
         } catch (Exception $e) {
-            // An error from lessphp.
-            $message = '<p>' . sprintf(
-            /* translators: Error message */
-                __(
-                    '<strong>There was an error while compiling CSS.</strong>
-                        The message returned was: <em>%s</em>',
-                    'open-source-event-calendar'
-                ),
-                $e->getMessage()
-            ) . '</p>';
-            $notification->store($message, 'error', 1);
+            $this->notify_compile_error($e);
 
             return false;
         }
@@ -445,6 +565,23 @@ class FrontendCssController extends OsecBaseClass
     }
 
     /**
+     * An error from lessphp.
+     */
+    private function notify_compile_error(Exception $e): void
+    {
+        $message = '<p>' . sprintf(
+            /* translators: Error message */
+            __(
+                '<strong>There was an error while compiling CSS.</strong>
+                    The message returned was: <em>%s</em>',
+                'open-source-event-calendar'
+            ),
+            esc_html($e->getMessage())
+        ) . '</p>';
+        NotificationAdmin::factory($this->app)->store($message, 'error', 1);
+    }
+
+    /**
      * The CSS from the engine the state names, null if there is none.
      */
     private function get_stored_css(): ?string
@@ -452,7 +589,7 @@ class FrontendCssController extends OsecBaseClass
         $state  = $this->get_state();
         $engine = $state ? $this->stored_engine($state) : null;
         try {
-            return $engine ? $engine->get(self::css_file_name()) : null;
+            return $engine?->get(self::css_file_name());
         } catch (CacheNotSetException) {
             return null;
         }

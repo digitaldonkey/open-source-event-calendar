@@ -586,6 +586,6 @@ class ThemeLoader extends OsecBaseClass
 
         // Recompile CSS for the new theme on the next request (BootstrapController::verifyCache()).
         // This request still resolves theme files with the paths of the previous theme.
-        $this->app->options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true, true);
+        FrontendCssController::factory($this->app)->request_compile();
     }
 }

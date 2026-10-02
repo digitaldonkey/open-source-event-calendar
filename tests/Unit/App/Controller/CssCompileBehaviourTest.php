@@ -2,7 +2,6 @@
 
 namespace Osec\Tests\Unit\App\Controller;
 
-use Osec\App\Controller\BootstrapController;
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\Cache\CacheApcu;
@@ -42,8 +41,8 @@ class CssCompileBehaviourTest extends TestBase
 
         remove_filter('osec_less_constants', [$this, 'count_and_fail']);
         $this->reset_css_engine();
-        $osec_app->options->delete(FrontendCssController::COMPILED_CSS_CACHE_KEY);
         parent::tear_down();
+        $this->commit_css_cleanup();
     }
 
     public function count_and_fail(array $variables): array
@@ -117,7 +116,7 @@ class CssCompileBehaviourTest extends TestBase
         $this->use_engine($engine);
         $osec_app->options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true, true);
 
-        $this->next_request();
+        $this->css_next_request();
 
         $this->assertSame(1, $this->compiles);
         $this->assertGreaterThan(100000, strlen((string) $this->stored_css()));
@@ -137,7 +136,7 @@ class CssCompileBehaviourTest extends TestBase
         $osec_app->options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true, true);
 
         $this->fail = true;
-        $this->next_request();
+        $this->css_next_request();
 
         $this->assertSame($good, $this->stored_css());
     }
@@ -171,25 +170,5 @@ class CssCompileBehaviourTest extends TestBase
         $this->use_css_engine($engine)->delete(FrontendCssController::css_file_name());
         $osec_app->options->delete(FrontendCssController::CSS_OPTION);
         $this->compiles = 0;
-    }
-
-    /**
-     * BootstrapController::verifyCache() as registered on 'init'.
-     */
-    private function next_request(): void
-    {
-        global $wp_filter;
-
-        foreach ($wp_filter['init']->callbacks as $callbacks) {
-            foreach ($callbacks as $callback) {
-                $fn = $callback['function'];
-                if (is_array($fn) && $fn[0] instanceof BootstrapController && 'verifyCache' === $fn[1]) {
-                    $fn();
-
-                    return;
-                }
-            }
-        }
-        $this->fail('BootstrapController::verifyCache() is not registered on init.');
     }
 }

@@ -53,6 +53,7 @@ class ThemeSwitchCompileTest extends TestBase
         }
         rmdir($this->custom_root);
         parent::tear_down();
+        $this->commit_css_cleanup();
     }
 
     /**
@@ -79,10 +80,13 @@ class ThemeSwitchCompileTest extends TestBase
         $state = ['engine' => 'db', 'ver' => 'abcdef0'];
         $osec_app->options->set(FrontendCssController::CSS_OPTION, $state, true);
         $osec_app->options->delete(FrontendCssController::COMPILED_CSS_CACHE_KEY);
+        set_transient(FrontendCssController::COMPILE_FAILED_TRANSIENT, 1, 30);
 
         ThemeLoader::factory($osec_app)->switch_theme($this->theme($this->custom_root, 'child_test'));
 
         $this->assertTrue((bool) $osec_app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY));
+        // Switching away from a theme that failed to compile must not wait for the backoff.
+        $this->assertFalse(get_transient(FrontendCssController::COMPILE_FAILED_TRANSIENT));
         $this->assertSame($state, $osec_app->options->get(FrontendCssController::CSS_OPTION));
     }
 

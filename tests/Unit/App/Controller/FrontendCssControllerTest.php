@@ -45,6 +45,7 @@ class FrontendCssControllerTest extends TestBase
         $_SERVER['DOCUMENT_ROOT'] = $this->document_root;
         $GLOBALS['wp_styles']     = null;
         parent::tear_down();
+        $this->commit_css_cleanup();
     }
 
     public function test_not_compiled_yet_links_the_compiling_route()
@@ -242,9 +243,11 @@ class FrontendCssControllerTest extends TestBase
         global $osec_app;
 
         $legacy = $this->legacy_state();
+        set_transient(FrontendCssController::COMPILE_FAILED_TRANSIENT, 1, 30);
 
         $osec_app->settings->perform_upgrade_actions([]);
 
+        $this->assertFalse(get_transient(FrontendCssController::COMPILE_FAILED_TRANSIENT));
         foreach ($legacy['options'] as $option) {
             $this->assertFalse(get_option($option), $option);
         }
