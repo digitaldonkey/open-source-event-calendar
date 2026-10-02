@@ -19,7 +19,7 @@ class CachePathTest extends CacheFileTestBase
         $cache_path = (new CachePath())->getCachePath();
 
         $this->assertEquals(
-            OSEC_TEST__PLUGIN_ROOT_PATH . 'cache/',
+            OSEC_FILE_CACHE_DEFAULT_PATH,
             $cache_path
         );
     }
@@ -29,7 +29,7 @@ class CachePathTest extends CacheFileTestBase
         $cachePath = (new CachePath())->getCachePath('the_new_directory');
         $this->deleteAtTeardown($cachePath);
         $this->assertEquals(
-            OSEC_TEST__PLUGIN_ROOT_PATH . 'cache/the_new_directory/',
+            OSEC_FILE_CACHE_DEFAULT_PATH . 'the_new_directory/',
             $cachePath
         );
     }

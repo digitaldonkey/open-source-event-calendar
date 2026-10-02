@@ -44,6 +44,11 @@ function osec_manually_load_plugin()
     // $_SERVER['DOCUMENT_ROOT'] = '/var/www/html'; // <-- in ddev.
     $_SERVER['DOCUMENT_ROOT'] = untrailingslashit(realpath(ABSPATH));
 
+    // The test site shares this plugin folder with the dev site. Keep the file cache out of the plugin's
+    // cache/, which the dev site serves its CSS from; the bootstrap and tests empty and chmod this folder.
+    define('OSEC_FILE_CACHE_DEFAULT_PATH', trailingslashit(realpath(ABSPATH)) . 'wp-content/osec-phpunit-cache/');
+    wp_mkdir_p(OSEC_FILE_CACHE_DEFAULT_PATH);
+
     if (!defined('OSEC_TEST__PLUGIN_ROOT_PATH')) {
         // Go two dir levels up.
         define('OSEC_TEST__PLUGIN_ROOT_PATH', trailingslashit(realpath(dirname(__DIR__, 2))));
