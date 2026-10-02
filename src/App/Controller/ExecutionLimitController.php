@@ -43,24 +43,27 @@ class ExecutionLimitController extends OsecBaseClass
                 $name
             )
         );
-        if ( ! empty($prev)) {
-            $prev = json_decode((string)$prev, true);
-        }
+        $exists = null !== $prev;
+        // Unreadable (versions up to 1.1.x stored it escaped twice): treated as expired.
+        $prev = $exists ? json_decode((string)$prev, true) : null;
         if (
-            ! empty($prev) &&
-            ((int)$prev['time'] + (int)$timeout) >= $entry['time']
+            is_array($prev) &&
+            ((int)($prev['time'] ?? 0) + (int)$timeout) >= $entry['time']
         ) {
             $dbi->query('ROLLBACK');
 
             return false;
         }
-        $query = ! $prev ? 'INSERT INTO' : 'UPDATE';
+        $query = ! $exists ? 'INSERT INTO' : 'UPDATE';
         $query .= ' `' . $table . '` SET `option_name` = %s, `option_value` = %s, `autoload` = 0';
-        if ( ! empty($prev)) {
+        $args   = [$name, wp_json_encode($entry)];
+        if ($exists) {
+            // Taking over an expired lock.
             $query .= ' WHERE `option_name` = %s';
+            $args[] = $name;
         }
         $success = $dbi->query(
-            $dbi->prepare($query, $name, wp_json_encode($entry))
+            $dbi->prepare($query, $args)
         );
         if ( ! $success) {
             $dbi->query('ROLLBACK');
