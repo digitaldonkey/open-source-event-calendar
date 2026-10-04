@@ -211,8 +211,7 @@ class ThemeLoader extends OsecBaseClass
     {
         $root = realpath(trailingslashit(WP_CONTENT_DIR) . 'cache/osec');
         if ($root && is_dir($root)) {
-            CachePath::delete_directory_content($root);
-            CachePath::get_wpfs()->rmdir($root);
+            CachePath::remove_dir($root);
         }
     }
 
@@ -225,8 +224,7 @@ class ThemeLoader extends OsecBaseClass
     {
         foreach (CachePath::factory($this->app)->twig_dirs($site_id) as $dir) {
             if (is_dir($dir)) {
-                CachePath::delete_directory_content(untrailingslashit(realpath($dir)));
-                CachePath::get_wpfs()->rmdir($dir);
+                CachePath::remove_dir($dir);
             }
         }
     }

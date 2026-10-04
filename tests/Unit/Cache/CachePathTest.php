@@ -194,6 +194,68 @@ class CachePathTest extends CacheFileTestBase
         return $uploads;
     }
 
+    /**
+     * R3: on hosts where WordPress uses FTP and has no credentials, WP_Filesystem() leaves an unconnected FTP object
+     * whose chmod()/rmdir() throw a TypeError. The cache cleanup must not depend on it.
+     */
+    public function test_cleanup_does_not_use_the_global_filesystem()
+    {
+        global $osec_app, $wp_filesystem;
+
+        $dir = CachePath::factory($osec_app)->get_dir('r3_cleanup')['dir'];
+        $this->deleteAtTeardown($dir);
+        file_put_contents($dir . 'a.css', '/* a */');
+        $saved         = $wp_filesystem;
+        $wp_filesystem = $this->unconnected_ftp();
+        try {
+            $cleaned = CachePath::clean_and_check_dir(untrailingslashit($dir));
+        } finally {
+            $wp_filesystem = $saved;
+        }
+
+        $this->assertTrue($cleaned);
+        $this->assertFileDoesNotExist($dir . 'a.css');
+    }
+
+    public function test_twig_cleanup_does_not_use_the_global_filesystem()
+    {
+        global $osec_app, $wp_filesystem;
+
+        $twig = \Osec\Theme\ThemeLoader::factory($osec_app);
+        $dir  = CachePath::factory($osec_app)->get_twig_dir();
+        file_put_contents($dir . 'template.php', '<?php');
+        $saved         = $wp_filesystem;
+        $wp_filesystem = $this->unconnected_ftp();
+        try {
+            $cleared = $twig->clear_cache();
+        } finally {
+            $wp_filesystem = $saved;
+        }
+
+        $this->assertTrue($cleared);
+        $this->assertFileDoesNotExist($dir . 'template.php');
+    }
+
+    /**
+     * Like WP_Filesystem_FTPext without a connection: a WP_Filesystem_Base whose calls throw a TypeError.
+     */
+    private function unconnected_ftp(): object
+    {
+        require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+
+        return new class () extends \WP_Filesystem_Base {
+            public function chmod($file, $mode = false, $recursive = false)
+            {
+                throw new \TypeError('ftp_chmod(): Argument #1 ($ftp) must be of type FTP\\Connection, null given');
+            }
+
+            public function rmdir($path, $recursive = false)
+            {
+                throw new \TypeError('ftp_rmdir(): Argument #1 ($ftp) must be of type FTP\\Connection, null given');
+            }
+        };
+    }
+
     public function test_delete_directory_content()
     {
         global $osec_app;

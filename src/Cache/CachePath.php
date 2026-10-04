@@ -7,6 +7,7 @@ use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\Exception;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use WP_Filesystem_Direct;
 
 /**
  * Cache folders and their URLs.
@@ -28,14 +29,18 @@ class CachePath extends OsecBaseClass
 
     public const ROOT_UPLOADS = 'uploads';
 
-    public static function get_wpfs(): object
+    /**
+     * Plain PHP file functions, as core uses for uploads: no credentials, no file owner test.
+     *
+     * Not WP_Filesystem(): on hosts where WordPress updates through FTP and has no credentials, it leaves an
+     * unconnected FTP object whose calls throw a TypeError (R3). The cache folders only hold files PHP wrote itself.
+     */
+    public static function filesystem(): WP_Filesystem_Direct
     {
-        global $wp_filesystem;
-        if ( ! is_a($wp_filesystem, 'WP_Filesystem_Base')) {
-            include_once ABSPATH . 'wp-admin/includes/file.php';
-            WP_Filesystem();
-        }
-        return $wp_filesystem;
+        require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+        require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+
+        return new WP_Filesystem_Direct(null);
     }
 
     /**
@@ -54,8 +59,24 @@ class CachePath extends OsecBaseClass
         }
         try {
             self::delete_directory_content($dir);
-            return self::get_wpfs()->chmod($dir, self::CLEAN_DIR_DEFAULT_PERMISSIONS);
-        } catch (\Exception) {
+            return self::filesystem()->chmod($dir, self::CLEAN_DIR_DEFAULT_PERMISSIONS);
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    /**
+     * Removes a cache folder with everything in it.
+     *
+     * @return bool False if it could not be removed (left for the next attempt).
+     */
+    public static function remove_dir(string $dir): bool
+    {
+        try {
+            self::delete_directory_content(untrailingslashit(realpath($dir)));
+
+            return self::filesystem()->rmdir($dir);
+        } catch (\Throwable) {
             return false;
         }
     }

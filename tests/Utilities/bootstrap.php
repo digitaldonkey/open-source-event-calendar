@@ -82,8 +82,8 @@ function osec_activate_test_plugin()
     // Avoid problems in case tearDown() didn't run.
     // @see CacheFileTestBase.
     CachePath::clean_and_check_dir(OSEC_FILE_CACHE_DEFAULT_PATH);
-    // Loads wp-admin/includes/file.php; clean_and_check_dir() may throw before doing so.
-    CachePath::get_wpfs();
+    // wp_upload_dir() below needs nothing from wp-admin; load file.php for the tests that use its helpers.
+    require_once ABSPATH . 'wp-admin/includes/file.php';
     $wp_upload = wp_upload_dir();
     if ($wp_upload['error']) {
         throw new Exception('Error WP upload Error');

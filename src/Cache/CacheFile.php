@@ -5,7 +5,6 @@ namespace Osec\Cache;
 use Exception;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
-use WP_Filesystem_Direct;
 
 /**
  * File cache: one folder, a key is the file name.
@@ -95,7 +94,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
     {
         $file = $this->path($key);
         $temp = $file . '.' . wp_generate_password(8, false) . '.tmp';
-        $fs   = self::filesystem();
+        $fs   = CachePath::filesystem();
         if ( ! $fs->put_contents($temp, maybe_serialize($value), self::file_mode())) {
             throw new CacheWriteException(esc_html($file));
         }
@@ -125,7 +124,7 @@ class CacheFile extends OsecBaseClass implements CacheInterface
             throw new CacheNotSetException(esc_html($file) . ' does not exist');
         }
 
-        return maybe_unserialize(self::filesystem()->get_contents($file));
+        return maybe_unserialize(CachePath::filesystem()->get_contents($file));
     }
 
     public function delete(string $key): bool
@@ -174,13 +173,5 @@ class CacheFile extends OsecBaseClass implements CacheInterface
     private static function file_mode(): int
     {
         return defined('FS_CHMOD_FILE') ? FS_CHMOD_FILE : (fileperms(ABSPATH . 'index.php') & 0777 | 0644);
-    }
-
-    private static function filesystem(): WP_Filesystem_Direct
-    {
-        require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
-        require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
-
-        return new WP_Filesystem_Direct(null);
     }
 }
