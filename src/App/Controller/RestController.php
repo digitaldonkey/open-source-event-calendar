@@ -63,7 +63,7 @@ class RestController extends OsecBaseClass
             $message = sprintf(
                 /* translators: %s: error message */
                 __(
-                    'The calendar CSS could not be rebuilt, so the current CSS was kept. Error: %s',
+                    'Twig cache cleared. The calendar CSS was not rebuilt, the previous CSS stays in place. Error: %s',
                     'open-source-event-calendar'
                 ),
                 $css['error']

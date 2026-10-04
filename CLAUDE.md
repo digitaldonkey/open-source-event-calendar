@@ -330,13 +330,18 @@ link, route. Since 1.2.0 (`feature/css-cache-rework`, plan `.claude/plans/css-ca
 | Theme Options save | in that request (`invalidate_cache()`) | ignores lock and backoff; the admin sees the error at once |
 | Theme switch, activation, plugin update | next request's `init` (`verifyCache()` → `compile_flagged()`) | `request_compile()` sets the flag `osec_invalidate_css_cache` and ends the backoff |
 | No CSS stored (fresh install, file lost) | the CSS route `?osec-css-cache=` | answers a `no-store` comment while it cannot compile |
-| "Clear all caches" (cache report) | in that request (REST `POST osec/v1/cache/clear`) | compiles in memory first, clears only after success |
+| "Clear all caches" (cache report) | in that request (REST `POST osec/v1/cache/clear`) | compiles in memory first, stores, then clears the other copies; a LESS or write error keeps the previous CSS and says so |
 
 - **One compile at a time**: lock `osec_css_compile` (`ExecutionLimitController`, 120 s). A request that cannot get
   it skips (flag kept; route: `no-store` comment).
 - **Backoff**: a failed automatic compile sets the transient `osec_css_compile_failed` for 30 minutes; flag and route
   wait for it. Every admin action and every successful compile ends it.
 - **A successful compile clears the flag.** Before 1.2.0 it set it again, so everything compiled twice (D-CSS2).
+- **Overlapping compiles: the later start wins.** `osec_css` stores when its compile *started*; a compile that
+  started earlier is not stored (a visitor's route compile cannot overwrite a newer Theme Options save). The flag holds
+  the time `request_compile()` set it; a compile clears it only if it was set before the compile started, so a theme
+  switch during a running compile still gets its own compile. Both are read from the DB (`$wpdb`), because the
+  option caches of the request do not see what other requests wrote.
 - **A failed compile never removes working CSS**: the CSS and `osec_css` are written only after a successful compile.
 - **WP-CLI and cron have their own APCu.** When the CSS would go to APCu, they leave the compile to the next web
   request (flag kept); with the file engine or an object cache (shared with web requests) they compile normally.

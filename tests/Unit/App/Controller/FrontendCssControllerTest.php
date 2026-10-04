@@ -76,6 +76,9 @@ class FrontendCssControllerTest extends TestBase
 
         FrontendCssController::factory($osec_app)->update_persistence_layer('body{color:red}');
 
+        $state = $osec_app->options->get(FrontendCssController::CSS_OPTION);
+        $this->assertIsFloat($state['started']);
+        unset($state['started']);
         $this->assertSame(
             [
                 'engine' => 'file',
@@ -83,7 +86,7 @@ class FrontendCssControllerTest extends TestBase
                 'file'   => 'osec-compiled-' . get_current_blog_id() . '.css',
                 'ver'    => substr(md5('body{color:red}'), 0, 7),
             ],
-            $osec_app->options->get(FrontendCssController::CSS_OPTION)
+            $state
         );
         $this->assertSame('body{color:red}', $this->stored_css());
     }

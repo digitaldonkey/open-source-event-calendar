@@ -110,6 +110,11 @@ class FrontendCssController extends OsecBaseClass
     private ?string $compiled = null;
 
     /**
+     * When the compile of this request started (microtime), see update_persistence_layer().
+     */
+    private ?float $compile_started = null;
+
+    /**
      * Cache key of the compiled CSS in every engine, and the file name in the file cache.
      */
     public static function css_file_name(): string
@@ -227,7 +232,8 @@ class FrontendCssController extends OsecBaseClass
             return null;
         }
         try {
-            $this->compiled = LessController::factory($this->app)->parse_less_files(null, false);
+            $this->compile_started = microtime(true);
+            $this->compiled        = LessController::factory($this->app)->parse_less_files(null, false);
         } catch (Exception $e) {
             $this->notify_compile_error($e);
             set_transient(self::COMPILE_FAILED_TRANSIENT, 1, self::COMPILE_BACKOFF);
@@ -295,7 +301,8 @@ class FrontendCssController extends OsecBaseClass
      */
     public function request_compile(): void
     {
-        $this->app->options->set(self::COMPILED_CSS_CACHE_KEY, true, true);
+        // The time of the request, so a compile already running (for the previous theme) does not clear it.
+        $this->app->options->set(self::COMPILED_CSS_CACHE_KEY, microtime(true), true);
         delete_transient(self::COMPILE_FAILED_TRANSIENT);
     }
 
@@ -308,16 +315,25 @@ class FrontendCssController extends OsecBaseClass
      * Stores the CSS in the first available engine, then the state pointing to it.
      *
      * State: engine ('file', 'transient', 'apcu', 'db'), ver (first 7 characters of the CSS md5, changes with the
-     * CSS only), and for the file engine root (CachePath::ROOT_*) and file. Written only after the CSS, so a failed
-     * write keeps the previous state.
+     * CSS only), started (when the compile began), and for the file engine root (CachePath::ROOT_*) and file. Written
+     * only after the CSS, so a failed write keeps the previous state.
+     *
+     * Compiles can overlap (a visitor's route compile, a Theme Options save, a theme switch): the CSS of a compile
+     * that started earlier than the stored one is not stored (R1), and the recompile flag is cleared only if it was
+     * set before this compile started. Both are read from the database, as other requests write them.
      *
      * @param  string  $css
+     * @param  float|null  $started  When the compile began (microtime); default: this request's compile, or now.
      *
      * @return void
      * @throws CacheWriteException
      */
-    public function update_persistence_layer($css)
+    public function update_persistence_layer($css, ?float $started = null)
     {
+        $started ??= $this->compile_started ?? microtime(true);
+        if ($this->stored_started() > $started) {
+            return;
+        }
         $cache = $this->get_cache();
         if ( ! $cache->engine->set(self::css_file_name(), $css)) {
             throw new CacheWriteException(esc_html(self::css_file_name()));
@@ -327,11 +343,45 @@ class FrontendCssController extends OsecBaseClass
             $state['root'] = $cache->engine->get_root();
             $state['file'] = self::css_file_name();
         }
-        $state['ver'] = substr(md5($css), 0, 7);
+        $state['ver']     = substr(md5($css), 0, 7);
+        $state['started'] = $started;
         $this->app->options->set(self::CSS_OPTION, $state, true);
-        // Whatever asked for a compile is answered (D-CSS2: setting it here compiled everything twice).
-        $this->app->options->delete(self::COMPILED_CSS_CACHE_KEY);
+        // Whatever asked for this compile is answered (D-CSS2: setting the flag here compiled everything twice).
+        if ($this->stored_flag() <= $started) {
+            $this->app->options->delete(self::COMPILED_CSS_CACHE_KEY);
+        }
         delete_transient(self::COMPILE_FAILED_TRANSIENT);
+    }
+
+    /**
+     * Start time of the compile that produced the stored CSS, from the database; 0 if none (or stored before 1.2.0).
+     */
+    private function stored_started(): float
+    {
+        $state = maybe_unserialize($this->option_from_db(self::CSS_OPTION));
+
+        return is_array($state) ? (float) ($state['started'] ?? 0) : 0.0;
+    }
+
+    /**
+     * The recompile flag from the database: the time it was set; 1 for a flag set before 1.2.0; 0 if none.
+     */
+    private function stored_flag(): float
+    {
+        return (float) $this->option_from_db(self::COMPILED_CSS_CACHE_KEY);
+    }
+
+    /**
+     * An option value as other requests left it, bypassing the option caches of this request.
+     */
+    private function option_from_db(string $name): ?string
+    {
+        global $wpdb;
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+        return $wpdb->get_var(
+            $wpdb->prepare("SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $name)
+        );
     }
 
     /**
@@ -557,7 +607,8 @@ class FrontendCssController extends OsecBaseClass
         }
         try {
             // Try to parse the css
-            $css = $lessCtrl->parse_less_files($variables, false);
+            $this->compile_started = microtime(true);
+            $css                   = $lessCtrl->parse_less_files($variables, false);
             if ($update_persistence) {
                 $this->update_persistence_layer($css);
             }
@@ -587,26 +638,41 @@ class FrontendCssController extends OsecBaseClass
      */
     public function clear_cache(): void
     {
-        $name  = self::css_file_name();
-        $path  = CachePath::factory($this->app);
+        $this->clear_other_copies([]);
+        $this->app->options->delete(self::CSS_OPTION);
+    }
+
+    /**
+     * Removes the compiled CSS from every engine except the one the state names, and the 1.1.x leftovers.
+     *
+     * @param  array  $keep  A state as written by update_persistence_layer(); empty to remove every copy.
+     */
+    private function clear_other_copies(array $keep): void
+    {
+        $name   = self::css_file_name();
+        $engine = $keep['engine'] ?? '';
+        $path   = CachePath::factory($this->app);
         foreach ([CachePath::ROOT_OVERRIDE, CachePath::ROOT_UPLOADS] as $root) {
             $dir = $path->root_dir($root, 'css');
-            if ($dir && is_dir($dir)) {
+            if ($dir && is_dir($dir) && ! ('file' === $engine && ($keep['root'] ?? '') === $root)) {
                 CacheFile::for_dir($this->app, $dir, $root)->delete($name);
             }
         }
-        if (CacheApcu::is_available()) {
-            $apcu = new CacheApcu($this->app);
-            $apcu->delete($name);
-            $apcu->delete(self::COMPILED_CSS_KEY);
-        }
-        if (CacheTransient::is_available()) {
+        if ('transient' !== $engine && CacheTransient::is_available()) {
             CacheTransient::factory($this->app)->delete($name);
         }
+        if (CacheApcu::is_available()) {
+            $apcu = new CacheApcu($this->app);
+            if ('apcu' !== $engine) {
+                $apcu->delete($name);
+            }
+            $apcu->delete(self::COMPILED_CSS_KEY);
+        }
         $db = CacheDb::factory($this->app);
-        $db->delete($name);
+        if ('db' !== $engine) {
+            $db->delete($name);
+        }
         $db->delete(self::COMPILED_CSS_KEY);
-        $this->app->options->delete(self::CSS_OPTION);
         $this->delete_legacy_state();
         $this->delete_legacy_files();
     }
@@ -643,6 +709,7 @@ class FrontendCssController extends OsecBaseClass
      */
     public function rebuild(): array
     {
+        $this->compile_started = microtime(true);
         try {
             $css = LessController::factory($this->app)->parse_less_files(null, false);
         } catch (Exception $e) {
@@ -653,23 +720,24 @@ class FrontendCssController extends OsecBaseClass
                 'error' => $e->getMessage(),
             ];
         }
-        $this->clear_cache();
         $this->compiled = null;
         try {
+            // Store first (R2): a failed write leaves the previous CSS in place.
             $this->update_persistence_layer($css);
         } catch (CacheWriteException $e) {
-            // Pages link the route, which compiles again.
             return [
                 'ok'    => false,
                 'error' => $e->getMessage(),
             ];
         }
+        $this->clear_other_copies($this->get_state() ?? []);
 
         return [
             'ok'     => true,
             'engine' => $this->get_state()['engine'] ?? '',
         ];
     }
+
 
     /**
      * Removes the 1.1.x option rows: the file cache index and the database copy.

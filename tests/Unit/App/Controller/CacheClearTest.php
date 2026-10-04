@@ -120,6 +120,7 @@ class CacheClearTest extends TestBase
         $this->assertSame(200, $response->get_status());
         $this->assertFalse($response->get_data()['css']['ok']);
         $this->assertStringContainsString('Simulated LESS error', $response->get_data()['message']);
+        $this->assertStringContainsString('previous CSS', $response->get_data()['message']);
         $this->assertSame('/* old */', $this->stored_css());
         $this->assertSame($state, $osec_app->options->get(FrontendCssController::CSS_OPTION));
         $this->assertFileDoesNotExist($twig);
@@ -227,5 +228,67 @@ class CacheClearTest extends TestBase
         } catch (\Osec\Cache\CacheNotSetException) {
             return null;
         }
+    }
+
+    /**
+     * R2: the new CSS is stored before anything is cleared, so a failed write keeps the previous CSS.
+     */
+    public function test_failed_write_keeps_the_previous_css()
+    {
+        global $osec_app;
+
+        FrontendCssController::factory($osec_app)->update_persistence_layer('/* old */');
+        $state = $osec_app->options->get(FrontendCssController::CSS_OPTION);
+        $file  = $this->css_cache;
+        $this->use_css_engine('broken', $this->failing_engine());
+        $this->as_admin();
+
+        $response = $this->clear();
+
+        $this->assertFalse($response->get_data()['css']['ok']);
+        $this->assertStringContainsString('previous CSS', $response->get_data()['message']);
+        $this->assertSame('/* old */', $file->get(FrontendCssController::css_file_name()));
+        $this->assertSame($state, $osec_app->options->get(FrontendCssController::CSS_OPTION));
+        $file->delete(FrontendCssController::css_file_name());
+    }
+
+    private function failing_engine(): \Osec\Cache\CacheInterface
+    {
+        return new class () implements \Osec\Cache\CacheInterface {
+            public static function is_available(): bool
+            {
+                return true;
+            }
+
+            public function set(string $key, mixed $value): bool
+            {
+                throw new \Osec\Cache\CacheWriteException('Simulated write failure');
+            }
+
+            public function add(string $key, mixed $value): bool
+            {
+                return $this->set($key, $value);
+            }
+
+            public function get(string $key, mixed $default = null): mixed
+            {
+                throw new \Osec\Cache\CacheNotSetException('none');
+            }
+
+            public function delete(string $key): bool
+            {
+                return true;
+            }
+
+            public function clear_cache(): bool
+            {
+                return true;
+            }
+
+            public function delete_matching(string $pattern): int
+            {
+                return 0;
+            }
+        };
     }
 }

@@ -275,4 +275,52 @@ class CssCompileSchedulingTest extends TestBase
         $this->assertFalse((bool) $osec_app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY));
         $this->assertNotNull($this->stored_css());
     }
+
+    /**
+     * R1: a compile that started earlier and finishes later (e.g. a visitor's route compile vs. a Theme Options
+     * save) must not overwrite the newer CSS.
+     */
+    public function test_older_compile_does_not_overwrite_newer_css()
+    {
+        global $osec_app;
+
+        $ctrl = FrontendCssController::factory($osec_app);
+        $ctrl->update_persistence_layer('/* newer */', 200.0);
+        $ctrl->update_persistence_layer('/* older */', 100.0);
+
+        $this->assertSame('/* newer */', $this->stored_css());
+        $this->assertSame(substr(md5('/* newer */'), 0, 7), $osec_app->options->get(FrontendCssController::CSS_OPTION)['ver']);
+    }
+
+    /**
+     * R1: a theme switch during a running compile keeps its flag; the compile was for the previous theme.
+     */
+    public function test_flag_set_during_a_compile_survives_it()
+    {
+        global $osec_app;
+
+        $ctrl    = FrontendCssController::factory($osec_app);
+        $started = microtime(true) - 5;
+        $ctrl->request_compile();
+
+        $ctrl->update_persistence_layer('/* previous theme */', $started);
+        $this->assertTrue((bool) $osec_app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY));
+
+        $ctrl->update_persistence_layer('/* new theme */', microtime(true) + 1);
+        $this->assertFalse((bool) $osec_app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY));
+    }
+
+    /**
+     * The flag of 1.1.x and of activation before this change is `1`: older than any compile.
+     */
+    public function test_legacy_flag_is_cleared_by_any_compile()
+    {
+        global $osec_app;
+
+        $osec_app->options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true, true);
+
+        FrontendCssController::factory($osec_app)->update_persistence_layer('/* css */');
+
+        $this->assertFalse((bool) $osec_app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY));
+    }
 }
