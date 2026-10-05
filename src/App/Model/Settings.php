@@ -832,6 +832,23 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => true,
             ],
+            'feeds_trust_server_ca' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'advanced',
+                    'label' => __("Trust this server's CA certificates for feeds", 'open-source-event-calendar'),
+                    'help'  => __(
+                        'Feeds are fetched with certificate verification against the list of certificate
+                            authorities that comes with WordPress. Enable to also accept certificates issued by
+                            authorities installed on this server, such as a company or local certificate authority
+                            ("cURL error 60: unable to get local issuer certificate").
+                            Certificates are still verified.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => false,
+            ],
             'calendar_css_selector' => [
                 'type'     => 'string',
                 'renderer' => [

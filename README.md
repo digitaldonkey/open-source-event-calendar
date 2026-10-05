@@ -294,7 +294,11 @@ If a plugin still adds unwanted content, enable *OSEC Settings → Advanced → 
 
 ### A feed fails with "cURL error 60: SSL certificate problem"
 
-Feeds are fetched with certificate verification, so a server with a self-signed, expired or incomplete certificate is refused (before 1.1.15 certificates were not checked). Ask the feed's provider to fix the certificate, or use `http://` if the provider offers it. If you trust that server anyway, you can exempt just its host with WordPress' `http_request_args` filter:
+Feeds are fetched with certificate verification, so a server with a self-signed, expired or incomplete certificate is refused (before 1.1.15 certificates were not checked). WordPress checks against its own list of certificate authorities, not the one of your server.
+
+If the certificate is issued by an authority installed on your server, such as a company or local certificate authority ("unable to get local issuer certificate"), enable *Settings → Advanced → Trust this server's CA certificates for feeds*. Certificates are still verified, against WordPress' list plus your server's.
+
+Otherwise ask the feed's provider to fix the certificate, or use `http://` if the provider offers it. If you trust that server anyway, you can exempt just its host with WordPress' `http_request_args` filter:
 
 ```php
 add_filter('http_request_args', function ($args, $url) {
