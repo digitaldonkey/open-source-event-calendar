@@ -422,13 +422,13 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                     $data['contact_name'] = $el;
                 }
             }
-            if ($organizer && ! (isset($data['contact_name']) || empty($data['contact_name']))) {
-                // If no contact name, default to organizer property.
-                $data['contact_name'] = $organizer;
-            }
-            if ($organizer_name && ! (isset($data['contact_name']) || empty($data['contact_name']))) {
-                // Default to name.
-                $data['contact_name'] = $organizer_name;
+            if (empty($data['contact_name'])) {
+                // No contact name: the organizer's name (CN), else its address.
+                if ($organizer_name) {
+                    $data['contact_name'] = $organizer_name;
+                } elseif ($organizer) {
+                    $data['contact_name'] = preg_replace('/^mailto:/i', '', $organizer);
+                }
             }
 
             // Store yet-unsaved values to the $data array.
