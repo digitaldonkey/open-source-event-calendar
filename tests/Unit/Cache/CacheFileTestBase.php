@@ -15,8 +15,8 @@ use Osec\Tests\Utilities\TestBase;
  *
  * E.g. (paths of the test site, OSEC_FILE_CACHE_DEFAULT_PATH is set in tests/Utilities/bootstrap.php)
  *  chmod 755 /tmp/wordpress/wp-content/osec-phpunit-cache/
- *  chmod 755 /tmp/wordpress/wp-content/uploads/open_source_event_calendar_cache
- *   or delete folder `open_source_event_calendar_cache` in wp-uploads dir.
+ *  chmod 755 /tmp/wordpress/wp-content/uploads/osec_cache
+ *   or delete folder `osec_cache` in wp-uploads dir.
  * We check/clear the dirs at test start in tests/Utilities/bootstrap.php.
  */
 class CacheFileTestBase extends TestBase

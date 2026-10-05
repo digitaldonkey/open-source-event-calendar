@@ -283,7 +283,7 @@ link, route. Since 1.2.0 (`feature/css-cache-rework`, plan `.claude/plans/css-ca
 
 | Engine | Location | How the page gets it |
 |---|---|---|
-| File (default) | `uploads[/sites/<id>]/open_source_event_calendar_cache/css/osec-compiled-<blog_id>.css`, or `OSEC_FILE_CACHE_DEFAULT_PATH` + `css/` when that constant is set and writable | `<link>` to the static file, `?ver=<hash>`; no PHP involved |
+| File (default) | `uploads[/sites/<id>]/osec_cache/css/osec-compiled-<blog_id>.css`, or `OSEC_FILE_CACHE_DEFAULT_PATH` + `css/` when that constant is set and writable | `<link>` to the static file, `?ver=<hash>`; no PHP involved |
 | Site transient (no writable folder, **only with a persistent object cache**: Redis, Memcached) | the object cache, key `osec_cache_osec-compiled-<blog_id>.css` | `<link>` to `?osec-css-cache=<hash>`, served by PHP |
 | APCu (no writable folder, no object cache) | APCu, keys prefixed with the site URL hash | `<link>` to `?osec-css-cache=<hash>`, served by PHP |
 | DB (neither) | option `osec_cache_osec-compiled-<blog_id>.css`, **autoload off** | same route |
@@ -362,7 +362,7 @@ Check, in order:
 1. **Did it compile?** `mysql -e "SELECT option_value FROM wp_options WHERE option_name='osec_css'"` - the `ver`
    changes with the CSS. Compile with Theme Options → Save, or "Clear all caches" in the cache report (Settings).
 2. **Which engine?** `engine` in `osec_css`. With `file`, read the file itself
-   (`wp-content/uploads/open_source_event_calendar_cache/css/osec-compiled-1.css` on the dev site) - diff it to see
+   (`wp-content/uploads/osec_cache/css/osec-compiled-1.css` on the dev site) - diff it to see
    what compiled. With `apcu`, the CSS lives in php-fpm's APCu: `supervisorctl restart php-fpm` clears it; a
    `wp eval 'apcu_clear_cache();'` does not (own CLI APCu).
 3. **Backoff after a failure?** A notice in wp-admin carries the LESS error; the transient
@@ -375,12 +375,18 @@ serves it through the route (H12), e.g. when static files misbehave on a host - 
 `twig/site-<id>/`). All take effect at the next compile. **Set them in `constants-local.php`, never in the tracked
 `constants.php`.**
 
-**Twig cache**: compiled templates (PHP files) per site in the override folder, else
-`wp-content/cache/osec/twig/site-<id>/`, else uploads `…/twig/`, else none - never the plugin folder (replaced by
-updates), independent of `OSEC_ENABLE_CACHE_FILE`. The folder found is stored in the setting `twig_cache` and
+**Twig cache**: compiled templates (PHP files) next to the CSS in the site's uploads folder
+(`uploads[/sites/<id>]/osec_cache/twig/`), or in the override (`twig/site-<id>/`, as it may be shared by a network),
+else none - never the plugin folder (replaced by updates), independent of `OSEC_ENABLE_CACHE_FILE`. Until 2026-10-03
+the plan had `wp-content/cache/osec/` (D2b); moved to uploads per the review guideline (plugin data in uploads),
+accepting that some security scanners flag PHP files there. The folder found is stored in the setting `twig_cache` and
 rescanned when it is no longer writable, on upgrade, by "Check again"/"Clear all caches", and once an hour while none
-was writable (transient `osec_twig_cache_rescan`). Deleting a site removes its Twig folder; a network-wide
-deactivation removes `wp-content/cache/osec/`.
+was writable (transient `osec_twig_cache_rescan`). WordPress deletes a site's uploads with the site; its override
+folder is removed on `wp_uninitialize_site`.
+
+**1.1.x leftovers**: the old upload cache folder `open_source_event_calendar_cache/` stays after the upgrade (pages
+cached with old HTML link its CSS) and is removed a week later (`osec_css_legacy_cleanup`) or by "Clear all caches" -
+unless `OSEC_FILE_CACHE_WP_UPLOAD_DIR` was set to that old name (`CachePath::legacy_upload_dir()`).
 
 **Multisite caveat (H10)**: OSEC keeps per-process singletons. A plugin that calls `switch_to_blog()` and renders
 OSEC output for another site in the same request gets this site's cache paths; the APCu prefix follows the site.

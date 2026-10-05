@@ -205,18 +205,7 @@ class ThemeLoader extends OsecBaseClass
     }
 
     /**
-     * Removes wp-content/cache/osec/ with the Twig folders of every site (network-wide deactivation, H7).
-     */
-    public function delete_network_cache(): void
-    {
-        $root = realpath(trailingslashit(WP_CONTENT_DIR) . 'cache/osec');
-        if ($root && is_dir($root)) {
-            CachePath::remove_dir($root);
-        }
-    }
-
-    /**
-     * Removes the Twig cache folders of a deleted site. Core removes the site's uploads folder itself.
+     * Removes a deleted site's Twig folder in the override folder. Core removes the site's uploads folder itself.
      *
      * @wp_hook wp_uninitialize_site
      */

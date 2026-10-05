@@ -31,7 +31,8 @@ class CacheClearTest extends TestBase
         parent::set_up();
         add_filter('osec_less_constants', [$this, 'maybe_fail']);
         $this->use_css_engine('file');
-        $dir = trailingslashit(wp_upload_dir()['basedir']) . OSEC_FILE_CACHE_WP_UPLOAD_DIR . 'css/';
+        // The 1.1.x upload cache folder.
+        $dir = trailingslashit(wp_upload_dir()['basedir']) . 'open_source_event_calendar_cache/css/';
         wp_mkdir_p($dir);
         $this->legacy_file = $dir . substr(md5(site_url()), 0, 8) . '_osec_compiled.css';
         file_put_contents($this->legacy_file, '/* 1.1.x */');
@@ -98,7 +99,7 @@ class CacheClearTest extends TestBase
         $this->assertSame(substr(md5($css), 0, 7), $osec_app->options->get(FrontendCssController::CSS_OPTION)['ver']);
         $this->assertNull($this->missing_or(new CacheApcu($osec_app), $name));
         $this->assertNull($this->missing_or(CacheDb::factory($osec_app), $name));
-        $this->assertFileDoesNotExist($this->legacy_file);
+        $this->assertDirectoryDoesNotExist(trailingslashit(wp_upload_dir()['basedir']) . 'open_source_event_calendar_cache');
         $this->assertFileDoesNotExist($twig);
     }
 
@@ -150,22 +151,6 @@ class CacheClearTest extends TestBase
     }
 
     /**
-     * H7: a network-wide deactivation removes the Twig folders of every site.
-     */
-    public function test_network_cache_removal()
-    {
-        global $osec_app;
-
-        $root = trailingslashit(WP_CONTENT_DIR) . 'cache/osec/';
-        wp_mkdir_p($root . 'twig/site-987/ab');
-        file_put_contents($root . 'twig/site-987/ab/template.php', '<?php');
-
-        ThemeLoader::factory($osec_app)->delete_network_cache();
-
-        $this->assertDirectoryDoesNotExist($root);
-    }
-
-    /**
      * H3: the upgrade keeps the 1.1.x CSS files for cached pages and removes them a week later.
      */
     public function test_upgrade_schedules_the_removal_of_legacy_files()
@@ -184,6 +169,7 @@ class CacheClearTest extends TestBase
         do_action(FrontendCssController::LEGACY_CLEANUP_HOOK);
 
         $this->assertFileDoesNotExist($this->legacy_file);
+        $this->assertDirectoryDoesNotExist(trailingslashit(wp_upload_dir()['basedir']) . 'open_source_event_calendar_cache');
         $this->assertSame('/* new */', $this->stored_css());
         wp_clear_scheduled_hook(FrontendCssController::LEGACY_CLEANUP_HOOK);
     }

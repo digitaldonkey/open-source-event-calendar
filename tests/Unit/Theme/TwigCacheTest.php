@@ -9,28 +9,21 @@ use Osec\Theme\ThemeLoader;
 use WP_Site;
 
 /**
- * Twig cache folder per site (D2b): the override, then wp-content/cache/osec/, then uploads, then none.
- * Never the plugin folder, which a plugin update replaces.
+ * Twig cache folder per site: the override (twig/site-<id>/, as it may be shared by the sites of a network), then
+ * the site's uploads (osec_cache/twig/, already per site), then none. Never the plugin folder, which a plugin update
+ * replaces, and not wp-content/cache/ (decided 2026-10-03, review guideline: plugin data in uploads).
  *
  * @group cache
  */
 class TwigCacheTest extends CacheFileTestBase
 {
-    private string $content_root;
-
-    public function set_up()
-    {
-        parent::set_up();
-        $this->content_root = trailingslashit(realpath(WP_CONTENT_DIR)) . 'cache/osec/';
-    }
-
     public function tear_down()
     {
         global $osec_app;
 
         $osec_app->inject_object(CachePath::class, new CachePath($osec_app));
         $osec_app->inject_object(ThemeLoader::class, new ThemeLoader($osec_app));
-        foreach ([$this->content_root, OSEC_FILE_CACHE_DEFAULT_PATH . 'twig/'] as $dir) {
+        foreach ([OSEC_FILE_CACHE_DEFAULT_PATH . 'twig/', $this->wp_upload_path . OSEC_FILE_CACHE_WP_UPLOAD_DIR . 'twig/'] as $dir) {
             if (is_dir($dir)) {
                 CachePath::delete_directory_content(untrailingslashit(realpath($dir)));
             }
@@ -48,26 +41,18 @@ class TwigCacheTest extends CacheFileTestBase
         );
     }
 
-    public function test_wp_content_cache_when_the_override_is_refused()
+    public function test_uploads_when_the_override_is_refused()
     {
         $this->assertSame(
-            $this->content_root . 'twig/site-' . get_current_blog_id() . '/',
+            $this->wp_upload_path . 'osec_cache/twig/',
             $this->refuse([OSEC_FILE_CACHE_DEFAULT_PATH])->get_twig_dir()
-        );
-    }
-
-    public function test_uploads_when_wp_content_cache_is_refused()
-    {
-        $this->assertSame(
-            $this->wp_upload_path . OSEC_FILE_CACHE_WP_UPLOAD_DIR . 'twig/',
-            $this->refuse([OSEC_FILE_CACHE_DEFAULT_PATH, $this->content_root])->get_twig_dir()
         );
     }
 
     public function test_none_when_all_are_refused()
     {
         $this->assertNull(
-            $this->refuse([OSEC_FILE_CACHE_DEFAULT_PATH, $this->content_root, $this->wp_upload_path])->get_twig_dir()
+            $this->refuse([OSEC_FILE_CACHE_DEFAULT_PATH, $this->wp_upload_path])->get_twig_dir()
         );
     }
 
@@ -77,6 +62,7 @@ class TwigCacheTest extends CacheFileTestBase
 
         foreach (CachePath::factory($osec_app)->twig_dirs() as $dir) {
             $this->assertStringStartsNotWith(OSEC_PATH, $dir);
+            $this->assertStringNotContainsString('/wp-content/cache/', $dir);
         }
     }
 
@@ -121,7 +107,7 @@ class TwigCacheTest extends CacheFileTestBase
     {
         global $osec_app;
 
-        $this->refuse([OSEC_FILE_CACHE_DEFAULT_PATH, $this->content_root, $this->wp_upload_path]);
+        $this->refuse([OSEC_FILE_CACHE_DEFAULT_PATH, $this->wp_upload_path]);
 
         $this->assertNull(ThemeLoader::factory($osec_app)->get_cache_dir(true));
         $this->assertSame(CacheFile::OSEC_FILE_CACHE_UNAVAILABLE, $osec_app->settings->get('twig_cache'));
@@ -183,15 +169,16 @@ class TwigCacheTest extends CacheFileTestBase
     }
 
     /**
-     * Core deletes the uploads folder of a deleted site; the other Twig folders are ours to remove.
+     * Core deletes the uploads folder of a deleted site; its folder in the shared override is ours to remove.
      */
-    public function test_deleting_a_site_removes_only_its_twig_folders()
+    public function test_deleting_a_site_removes_only_its_override_twig_folder()
     {
         global $osec_app;
 
         $path = CachePath::factory($osec_app);
         $mine = $path->twig_dirs();
-        $gone = array_filter($path->twig_dirs(987), fn($dir) => ! str_contains($dir, '/uploads/'));
+        $gone = $path->twig_dirs(987);
+        $this->assertSame([OSEC_FILE_CACHE_DEFAULT_PATH . 'twig/site-987/'], $gone);
         foreach (array_merge($mine, $gone) as $dir) {
             wp_mkdir_p($dir);
             file_put_contents($dir . 'template.php', '<?php');
@@ -201,9 +188,7 @@ class TwigCacheTest extends CacheFileTestBase
         require_once ABSPATH . WPINC . '/class-wp-site.php';
         do_action('wp_uninitialize_site', new WP_Site((object) ['blog_id' => 987]));
 
-        foreach ($gone as $dir) {
-            $this->assertDirectoryDoesNotExist($dir);
-        }
+        $this->assertDirectoryDoesNotExist($gone[0]);
         foreach ($mine as $dir) {
             $this->assertFileExists($dir . 'template.php');
         }

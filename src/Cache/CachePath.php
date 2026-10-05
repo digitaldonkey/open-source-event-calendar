@@ -30,6 +30,11 @@ class CachePath extends OsecBaseClass
     public const ROOT_UPLOADS = 'uploads';
 
     /**
+     * The upload cache folder of 1.1.x, below the uploads folder.
+     */
+    public const LEGACY_UPLOAD_DIR = 'open_source_event_calendar_cache/';
+
+    /**
      * Plain PHP file functions, as core uses for uploads: no credentials, no file owner test.
      *
      * Not WP_Filesystem(): on hosts where WordPress updates through FTP and has no credentials, it leaves an
@@ -150,28 +155,46 @@ class CachePath extends OsecBaseClass
     /**
      * Twig cache folders of a site, in order of preference, without creating them.
      *
-     * The override, then wp-content/cache/osec/ (compiled templates are PHP files: kept out of uploads where possible),
-     * then the site's uploads folder. Never the plugin folder, which a plugin update replaces.
+     * The override (twig/site-<id>/: it may be shared by the sites of a network), then the site's uploads folder
+     * (twig/, already per site). Never the plugin folder, which a plugin update replaces.
      *
-     * @param  int|null  $site_id  Default: the current site. Another site's uploads folder is not listed.
+     * @param  int|null  $site_id  Default: the current site. Another site's uploads folder is not listed: core deletes
+     *                             it with the site.
      *
      * @return string[] With trailing slash.
      */
     public function twig_dirs(?int $site_id = null): array
     {
         $current = null === $site_id || get_current_blog_id() === $site_id;
-        $site    = 'twig/site-' . ($current ? get_current_blog_id() : $site_id) . '/';
         $dirs    = [];
         if ('' !== OSEC_FILE_CACHE_DEFAULT_PATH) {
-            $dirs[] = trailingslashit(OSEC_FILE_CACHE_DEFAULT_PATH) . $site;
+            $dirs[] = trailingslashit(OSEC_FILE_CACHE_DEFAULT_PATH)
+                . 'twig/site-' . ($current ? get_current_blog_id() : $site_id) . '/';
         }
-        $dirs[] = trailingslashit(WP_CONTENT_DIR) . 'cache/osec/' . $site;
         $uploads = $current ? $this->root_dir(self::ROOT_UPLOADS, 'twig') : null;
         if ($uploads) {
             $dirs[] = $uploads;
         }
 
         return $dirs;
+    }
+
+    /**
+     * The 1.1.x upload cache folder of the current site, unless it is the folder in use (an admin may have set
+     * OSEC_FILE_CACHE_WP_UPLOAD_DIR to the old name).
+     *
+     * @param  string  $current  The upload cache folder in use.
+     *
+     * @return string|null With trailing slash; null if it is the folder in use or uploads report an error.
+     */
+    public function legacy_upload_dir(string $current = OSEC_FILE_CACHE_WP_UPLOAD_DIR): ?string
+    {
+        if (trailingslashit($current) === self::LEGACY_UPLOAD_DIR) {
+            return null;
+        }
+        $uploads = wp_get_upload_dir();
+
+        return empty($uploads['error']) ? trailingslashit($uploads['basedir']) . self::LEGACY_UPLOAD_DIR : null;
     }
 
     /**

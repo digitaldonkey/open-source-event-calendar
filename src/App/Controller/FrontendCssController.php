@@ -678,17 +678,28 @@ class FrontendCssController extends OsecBaseClass
     }
 
     /**
-     * Removes the 1.1.x CSS files: <site prefix>_osec_compiled.css in the uploads cache folder, without the prefix in
-     * debug mode. Kept on upgrade, because pages cached with old HTML may still link them; removed a week later
-     * (self::LEGACY_CLEANUP_HOOK) or by "Clear all caches".
+     * Removes the 1.1.x upload cache folder (open_source_event_calendar_cache/: <site prefix>_osec_compiled.css and
+     * Twig templates). Kept on upgrade, because pages cached with old HTML may still link the CSS; removed a week later
+     * (self::LEGACY_CLEANUP_HOOK) or by "Clear all caches". If that folder is still in use (an admin set
+     * OSEC_FILE_CACHE_WP_UPLOAD_DIR to the old name), only the 1.1.x CSS files in it go.
      */
     public function delete_legacy_files(): void
     {
-        $uploads = CachePath::factory($this->app)->root_dir(CachePath::ROOT_UPLOADS, 'css');
+        $path   = CachePath::factory($this->app);
+        $legacy = $path->legacy_upload_dir();
+        if ($legacy) {
+            if (is_dir($legacy)) {
+                CachePath::remove_dir($legacy);
+            }
+
+            return;
+        }
+        $uploads = $path->root_dir(CachePath::ROOT_UPLOADS, 'css');
         foreach ($uploads ? glob($uploads . '*osec_compiled.css') ?: [] : [] as $file) {
             wp_delete_file($file);
         }
     }
+
 
     /**
      * Upgrade from 1.1.x: drops the old option rows now, the old files in a week.

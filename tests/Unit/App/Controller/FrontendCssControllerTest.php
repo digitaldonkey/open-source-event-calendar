@@ -295,7 +295,8 @@ class FrontendCssControllerTest extends TestBase
 
     private function legacy_state(): array
     {
-        $dir = trailingslashit(wp_upload_dir()['basedir']) . OSEC_FILE_CACHE_WP_UPLOAD_DIR . 'css/';
+        // The 1.1.x upload cache folder.
+        $dir = trailingslashit(wp_upload_dir()['basedir']) . 'open_source_event_calendar_cache/css/';
         wp_mkdir_p($dir);
         $file = $dir . substr(md5(site_url()), 0, 8) . '_osec_compiled.css';
         file_put_contents($file, '/* 1.1.x */');

@@ -107,7 +107,7 @@ class CachePathTest extends CacheFileTestBase
         $file = $this->file($this->wp_upload_path . OSEC_FILE_CACHE_WP_UPLOAD_DIR . 'css/', 'osec-compiled-1.css');
 
         $this->assertSame(
-            'http://example.org/wp-content/uploads/open_source_event_calendar_cache/css/osec-compiled-1.css',
+            'http://example.org/wp-content/uploads/osec_cache/css/osec-compiled-1.css',
             CachePath::factory($osec_app)->path_to_url($file)
         );
     }
@@ -182,7 +182,7 @@ class CachePathTest extends CacheFileTestBase
         $file = $this->file($this->wp_upload_path . OSEC_FILE_CACHE_WP_UPLOAD_DIR . 'css/', 'osec-compiled-1.css');
 
         $this->assertSame(
-            'https://cdn.example.com/media/open_source_event_calendar_cache/css/osec-compiled-1.css',
+            'https://cdn.example.com/media/osec_cache/css/osec-compiled-1.css',
             CachePath::factory($osec_app)->path_to_url($file)
         );
     }
@@ -254,6 +254,17 @@ class CachePathTest extends CacheFileTestBase
                 throw new \TypeError('ftp_rmdir(): Argument #1 ($ftp) must be of type FTP\\Connection, null given');
             }
         };
+    }
+
+    public function test_legacy_upload_folder()
+    {
+        global $osec_app;
+
+        $path = CachePath::factory($osec_app);
+
+        $this->assertSame($this->wp_upload_path . 'open_source_event_calendar_cache/', $path->legacy_upload_dir());
+        // An admin may have set the upload cache folder to the 1.1.x name: then it is not a leftover.
+        $this->assertNull($path->legacy_upload_dir('open_source_event_calendar_cache/'));
     }
 
     public function test_delete_directory_content()
