@@ -15,6 +15,7 @@ use Osec\Exception\ImportExportParseException;
 use Osec\Exception\InvalidArgumentException;
 use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
+use Osec\Http\Request\TrustedCaBundle;
 use Osec\Http\Response\RenderJson;
 use Osec\Theme\ThemeLoader;
 use WP_Term;
@@ -464,12 +465,7 @@ class FeedsController extends OsecBaseClass
             // Certificates are verified (the WordPress default): without it anyone on
             // the network path could inject events. A feed server with a broken
             // certificate can be exempted with the http_request_args filter.
-            $response = wp_remote_get(
-                $feed->feed_url,
-                [
-                    'timeout' => (float) 120,
-                ]
-            );
+            $response = wp_remote_get($feed->feed_url, $this->fetch_args());
 
             if (
                 ! is_wp_error($response) &&
@@ -571,6 +567,16 @@ class FeedsController extends OsecBaseClass
                     ),
                     $response->get_error_message()
                 );
+                if (
+                    str_contains($response->get_error_message(), 'cURL error 60')
+                    && ! $this->app->settings->get('feeds_trust_server_ca')
+                ) {
+                    $message .= ' ' . __(
+                        "If a certificate authority installed on this server issued the feed's certificate, enable
+                            Settings → Advanced → \"Trust this server's CA certificates for feeds\".",
+                        'open-source-event-calendar'
+                    );
+                }
             } else {
                 $message = __(
                     'Calendar data could not be fetched. If your URL is valid and contains an iCalendar resource,
@@ -811,6 +817,23 @@ class FeedsController extends OsecBaseClass
             'twicedaily' => esc_html__('Twice Daily', 'open-source-event-calendar'),
             'daily' => esc_html__('Daily', 'open-source-event-calendar'),
         ];
+    }
+
+    /**
+     * Arguments for fetching a feed. Certificates are always verified; with "Trust this server's CA certificates for
+     * feeds" against WordPress' list plus the server's (TrustedCaBundle).
+     */
+    private function fetch_args(): array
+    {
+        $args = ['timeout' => (float) 120];
+        if ($this->app->settings->get('feeds_trust_server_ca')) {
+            $bundle = TrustedCaBundle::factory($this->app)->path();
+            if ($bundle) {
+                $args['sslcertificates'] = $bundle;
+            }
+        }
+
+        return $args;
     }
 
     /**

@@ -266,18 +266,34 @@ timely.define("domReady", [], function () {
     return t
 }), timely.define("scripts/setting/cache/cache_ajax_handlers", ["jquery_timely", "libs/utils"], function ($, utils) {
     var n = function (n) {
-        var r = $("#ai1ec-button-refresh"), i = $("#osec-cache-scan-success"), s = $("#ai1ec-cache-scan-danger"), o;
-        r.button("reset"), n.error ? o = utils.make_alert(n.message, "error") : "0" === n.state ? (i.toggleClass("ai1ec-hide", !0), s.toggleClass("ai1ec-hide", !1)) : (i.toggleClass("ai1ec-hide", !1), s.toggleClass("ai1ec-hide", !0))
+        var r = $("#ai1ec-button-refresh"), i = $("#osec-cache-scan-success"), s = $("#osec-cache-scan-danger"), o;
+        r.button("reset"), !n || n.error || n.success === !1 ? o = utils.make_alert(n && n.message ? n.message : "", "error") : "0" === String(n.state) ? (i.toggleClass("ai1ec-hide", !0), s.toggleClass("ai1ec-hide", !1)) : (i.toggleClass("ai1ec-hide", !1), s.toggleClass("ai1ec-hide", !0))
     };
     return {handle_rescan_cache: n}
 }), timely.define("scripts/setting/cache/cache_event_handlers", ["jquery_timely", "scripts/setting/cache/cache_ajax_handlers", "libs/utils"], function ($, cacheAjaxHandlers, utils) {
     var r = utils.get_ajax_url(), i = function () {
         var n = $(this);
         n.button("loading");
-        var i = {action: "osec_rescan_cache"};
-        return $.post(r, i, cacheAjaxHandlers.handle_rescan_cache, "json"), !1;
+        var i = {action: "osec_rescan_cache", nonce: n.data("nonce")};
+        return $.post(r, i, cacheAjaxHandlers.handle_rescan_cache, "json").fail(function () {
+            cacheAjaxHandlers.handle_rescan_cache({error: !0})
+        }), !1;
+    }, c = function () {
+        var t = $(this), m = $("#osec-clear-caches-result"), l = t.text();
+        return t.prop("disabled", !0).text(t.data("busy")), m.text(""), $.ajax({
+            url: t.data("url"),
+            method: "POST",
+            dataType: "json",
+            headers: {"X-WP-Nonce": t.data("nonce")}
+        }).done(function (e) {
+            m.text(e && e.message ? e.message : t.data("failed"))
+        }).fail(function (e) {
+            m.text(e.responseJSON && e.responseJSON.message ? e.responseJSON.message : t.data("failed"))
+        }).always(function () {
+            t.prop("disabled", !1).text(l)
+        }), !1;
     };
-    return {perform_rescan: i}
+    return {perform_rescan: i, perform_clear: c}
 }), timely.define("external_libs/bootstrap/button", ["jquery_timely"], function (e) {
     var t = function (n, r) {
         this.$element = e(n), this.options = e.extend({}, t.DEFAULTS, r)
@@ -1687,7 +1703,7 @@ timely.define("domReady", [], function () {
         domReady(function () {
             f(), a(), utils.activate_saved_tab_on_page_load($.cookie("osec_general_settings_active_tab")), $(document).on("click", '#ai1ec-general-settings .ai1ec-nav a[data-toggle="ai1ec-tab"]', o), $(document).on("click", "#disable_standard_filter_menu_toggler", function (e) {
                 e.preventDefault()
-            }), $(document).on("click", "#ai1ec-button-refresh", cacheEventHandlers.perform_rescan);
+            }), $(document).on("click", "#ai1ec-button-refresh", cacheEventHandlers.perform_rescan), $(document).on("click", "#osec-button-clear-caches", cacheEventHandlers.perform_clear);
             var t = $("#exact_date");
             t.datepicker({autoclose: !0}), s(), $(document).on("click", ".ai1ec-admin-view-settings .ai1ec-toggle-view", function () {
                 var t = $(this), n = t.parent().index() + 1;

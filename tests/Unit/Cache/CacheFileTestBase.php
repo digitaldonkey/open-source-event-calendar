@@ -13,10 +13,10 @@ use Osec\Tests\Utilities\TestBase;
  * In case tests crashed without tearDown() being called
  * you may end up with unwritable folders.
  *
- * E.g.
- *  chmod 777 /var/www/html/wp-content/plugins/open-source-event-calendar/cache/
- *  chmod 777 /var/www/html/phpunit_wp_cache/wordpress/wp-content/uploads/open_source_event_calendar_cache
- *   or delete folder `open_source_event_calendar_cache` in wp-uploads dir.
+ * E.g. (paths of the test site, OSEC_FILE_CACHE_DEFAULT_PATH is set in tests/Utilities/bootstrap.php)
+ *  chmod 755 /tmp/wordpress/wp-content/osec-phpunit-cache/
+ *  chmod 755 /tmp/wordpress/wp-content/uploads/osec_cache
+ *   or delete folder `osec_cache` in wp-uploads dir.
  * We check/clear the dirs at test start in tests/Utilities/bootstrap.php.
  */
 class CacheFileTestBase extends TestBase
@@ -83,16 +83,16 @@ class CacheFileTestBase extends TestBase
      * Let's try to ensure we don't delete or chmod anything bad.
      */
 
-    protected function setUp(): void
+    public function set_up()
     {
-        parent::setUp();
+        parent::set_up();
         $wp_upload = wp_upload_dir();
         if ( ! $wp_upload['error']) {
             $this->wp_upload_path = trailingslashit($wp_upload['basedir']);
         }
     }
 
-    protected function tearDown(): void
+    public function tear_down()
     {
         foreach ($this->_restorePermissions as $i => $restore) {
             $this->precheckDirectory($restore['path']);
@@ -105,6 +105,7 @@ class CacheFileTestBase extends TestBase
                 unset($this->_deleteDirectories[$i]);
             }
         }
+        parent::tear_down();
     }
 
 }

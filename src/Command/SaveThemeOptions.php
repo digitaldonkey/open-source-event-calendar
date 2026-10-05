@@ -48,7 +48,6 @@ class SaveThemeOptions extends SaveAbstract
         } elseif ($isReset) {
             // Handle reset of theme options.
             $this->app->options->delete(LessController::DB_KEY_FOR_LESS_VARIABLES);
-            $this->app->options->delete(FrontendCssController::REQUEST_CSS_PARAM);
             /**
              * Do something after Less variables are reset.
              */

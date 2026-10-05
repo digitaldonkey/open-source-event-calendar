@@ -13,8 +13,8 @@ Author URI: https://github.com/digitaldonkey
 Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 Text Domain: open-source-event-calendar
-Stable Tag: 1.1.15
-Version: 1.1.15
+Stable Tag: 1.1.16
+Version: 1.1.16
 
 An event calendar with native iCal / ICS import and export
 
@@ -114,6 +114,23 @@ Install as any other plugin, or from GitHub.
 Copy [constants-local.php.example](https://raw.githubusercontent.com/digitaldonkey/open-source-event-calendar/refs/heads/master/constants-local.php.example) and save as `constants-local.php`
 
 To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA', true);`
+
+== Caching ==
+
+
+The calendar compiles its theme stylesheet on your site and stores it as a static file in
+`wp-content/uploads/osec_cache/css/`, which the web server sends without PHP. Without a writable uploads folder it
+is kept in your object cache (Redis, Memcached), APCu or the database and served by PHP. Compiled Twig templates go
+next to it, to `wp-content/uploads/osec_cache/twig/`.
+
+- **Events → Settings → Cache Report** shows where the CSS and the templates are. **Clear all caches** rebuilds
+  the CSS right away; if it does not compile, the current CSS is kept and the error is shown.
+- The stylesheet is added to the page header for the calendar page, single events, and posts or pages with the
+  calendar shortcode or block. A calendar placed elsewhere (widgets, template parts, patterns, page builders) gets it
+  with the footer styles, which can show the calendar unstyled for a moment while the page loads.
+- In `constants-local.php`: `OSEC_FILE_CACHE_DEFAULT_PATH` moves the file cache to another folder;
+  `OSEC_ENABLE_CACHE_FILE` set to `false` keeps the CSS out of static files (served by PHP), e.g. if your host does
+  not serve them; templates are still cached as files. Changes take effect at the next compile (Theme Options → Save, or Clear all caches).
 
 ---
 
@@ -277,7 +294,11 @@ If a plugin still adds unwanted content, enable *OSEC Settings → Advanced → 
 
 ### A feed fails with "cURL error 60: SSL certificate problem"
 
-Feeds are fetched with certificate verification, so a server with a self-signed, expired or incomplete certificate is refused (before 1.1.15 certificates were not checked). Ask the feed's provider to fix the certificate, or use `http://` if the provider offers it. If you trust that server anyway, you can exempt just its host with WordPress' `http_request_args` filter:
+Feeds are fetched with certificate verification, so a server with a self-signed, expired or incomplete certificate is refused (before 1.1.15 certificates were not checked). WordPress checks against its own list of certificate authorities, not the one of your server.
+
+If the certificate is issued by an authority installed on your server, such as a company or local certificate authority ("unable to get local issuer certificate"), enable *Settings → Advanced → Trust this server's CA certificates for feeds*. Certificates are still verified, against WordPress' list plus your server's.
+
+Otherwise ask the feed's provider to fix the certificate, or use `http://` if the provider offers it. If you trust that server anyway, you can exempt just its host with WordPress' `http_request_args` filter:
 
 ```php
 add_filter('http_request_args', function ($args, $url) {
@@ -302,6 +323,9 @@ add_filter('http_request_args', function ($args, $url) {
 9. Schema.org/Event data validator
 
 == Changelog ==
+
+= 1.1.16 =
+- Security: title and description of events imported from feeds are sanitized, whoever runs the import. Every earlier version stored them unfiltered when a feed was added or refreshed by an administrator (since All-in-One Event Calendar 1.0, 2011, which this plugin is based on) or updated with `wp osec feed update` (1.1.15)
 
 = 1.1.15 =
 - Print support for all calendar views with a print header; overlapping events print side by side, busy days as a list; category colors print as event borders; a calendar block can hide the print icon #55

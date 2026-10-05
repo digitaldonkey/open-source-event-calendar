@@ -832,6 +832,23 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => true,
             ],
+            'feeds_trust_server_ca' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'advanced',
+                    'label' => __("Trust this server's CA certificates for feeds", 'open-source-event-calendar'),
+                    'help'  => __(
+                        'Feeds are fetched with certificate verification against the list of certificate
+                            authorities that comes with WordPress. Enable to also accept certificates issued by
+                            authorities installed on this server, such as a company or local certificate authority
+                            ("cURL error 60: unable to get local issuer certificate").
+                            Certificates are still verified.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => false,
+            ],
             'calendar_css_selector' => [
                 'type'     => 'string',
                 'renderer' => [
@@ -1250,7 +1267,9 @@ class Settings extends OsecBaseInitialized
         }
         $options = $this->app->options;
         $options->set('osec_force_flush_rewrite_rules', true, true);
-        $options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true, true);
+        FrontendCssController::factory($this->app)->request_compile();
         $options->set(ThemeLoader::OPTION_FORCE_CLEAN, true, true);
+        // Rows now (pages without CSS state link the compiling route), the 1.1.x CSS files in a week (cached pages).
+        FrontendCssController::factory($this->app)->migrate_legacy();
     }
 }

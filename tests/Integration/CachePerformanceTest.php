@@ -4,171 +4,92 @@ namespace Osec\Tests\Integration;
 
 use Osec\Cache\CacheApcu;
 use Osec\Cache\CacheDb;
+use Osec\Cache\CacheFactory;
 use Osec\Cache\CacheFile;
-use Osec\Cache\CacheMemory;
+use Osec\Cache\CacheInterface;
 use Osec\Tests\Unit\Cache\CacheFileTestBase;
 
 /**
- * Sample test case.
+ * The compiled-CSS workload per cache engine: one stylesheet-sized value written once, then read.
+ *
+ * Times are printed for comparison, not asserted. A page with a file-cached stylesheet reads nothing in PHP
+ * (the web server sends the file); the other engines are read by PHP on every `?osec-css-cache=` request.
+ * The DB read comes from the options already loaded in this request, as on a page after the first read.
+ *
+ * @group cache
  */
 class CachePerformanceTest extends CacheFileTestBase
 {
-    public const REPEAT_COUNT = 1000;
+    /** Size of the compiled vortex CSS, ~390 KB. */
+    private const CSS_BYTES = 400000;
 
-    public function test_apcu_with_timer()
+    private const READS = 20;
+
+    private string $css;
+
+    public function set_up()
+    {
+        parent::set_up();
+        // A unique head, so no engine can answer from a previous run.
+        $this->css = '/* ' . wp_generate_password(12, false) . ' */'
+            . str_repeat('.timely a{color:#333}', intdiv(self::CSS_BYTES, 21));
+    }
+
+    public function test_apcu()
     {
         global $osec_app;
+
         if ( ! CacheApcu::is_available()) {
-            $this->markTestSkipped('APCU not available');
+            // Without APCu the CSS must not end up in an engine that is not there.
+            $this->assertNotSame(
+                'CacheApcu',
+                CacheFactory::factory($osec_app)->createCache('css')->get_active_cache()
+            );
+
+            return;
         }
-
-        $key  = 'ABCDEF';
-        $DATA = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyz', 100)), 0, 100);
-
-        $repeats = [];
-        for ($i = 0; $i < self::REPEAT_COUNT; $i++) {
-            $repeats[$key . $i] = $DATA;
-        }
-
-        $start = $this->performance_report_start();
-
         $engine = CacheApcu::factory($osec_app);
-        foreach ($repeats as $k => $v) {
-            $engine->set($k, $v);
-        }
-        foreach ($repeats as $k => $v) {
-            $a = $engine->get($k);
-        }
-        $time_elapsed_secs = round(
-            microtime(true) - $start,
-            4
-        );
-        $this->assertEquals($repeats[$key . '0'], $engine->get($key . '0'));
-        $this->performance_report_print($start);
+        $this->measure('APCu', $engine, 'perf_css');
+        $engine->delete('perf_css');
     }
 
-    /**
-     * Helps to
-     *
-     * @return float
-     */
-    private function performance_report_start(): float
-    {
-        return microtime(true);
-    }
-
-    /**
-     * Prints duration time since $start.
-     *
-     * @param  float  $start
-     *
-     * @return void
-     * @see performance_report_start()
-     */
-    private function performance_report_print(float $start): void
-    {
-        $time_elapsed_secs = round(
-            microtime(true) - $start,
-            4
-        );
-        echo esc_html('   TIME: ' . $time_elapsed_secs . 's (Repeats: ' . self::REPEAT_COUNT . ")\n");
-    }
-
-    public function test_cache_db_with_timer()
+    public function test_file()
     {
         global $osec_app;
 
-        // DB uses WP Options autoload.Always available ;).
-        $this->assertTrue(CacheDb::is_available());
-
-        $key  = 'ABCDEF';
-        $DATA = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyz', 100)), 0, 100);
-
-        $repeats = [];
-        for ($i = 0; $i < self::REPEAT_COUNT; $i++) {
-            $repeats[$key . $i] = $DATA;
-        }
-
-        $start = $this->performance_report_start();
-
-        $engine = CacheDb::factory($osec_app);
-        foreach ($repeats as $k => $v) {
-            $engine->set($k, $v);
-        }
-        foreach ($repeats as $k => $v) {
-            $a = $engine->get($k);
-        }
-        $time_elapsed_secs = round(
-            microtime(true) - $start,
-            4
-        );
-        $this->assertEquals($repeats[$key . '0'], $engine->get($key . '0'));
-        $this->performance_report_print($start);
+        $engine = CacheFile::createFileCacheInstance($osec_app, 'perf_css');
+        $this->deleteAtTeardown($engine->getCachePath());
+        $this->measure('File', $engine, 'perf.css');
     }
 
-    public function test_cache_memory_with_timer()
+    public function test_db()
     {
         global $osec_app;
 
-        // DB uses WP Options autoload.Always available ;).
-        $this->assertTrue(CacheMemory::is_available());
-
-        $key  = 'ABCDEF';
-        $DATA = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyz', 100)), 0, 100);
-
-        $repeats = [];
-        for ($i = 0; $i < self::REPEAT_COUNT; $i++) {
-            $repeats[$key . $i] = $DATA;
-        }
-
-        $start = $this->performance_report_start();
-
-        // Some memory caches are assigned in Bootstrap. Original Limit was 50.
-        $engine = CacheMemory::factory($osec_app);
-        if ($engine->limit < self::REPEAT_COUNT) {
-            $engine->limit = self::REPEAT_COUNT + 100;
-        }
-
-        foreach ($repeats as $k => $v) {
-            $engine->set($k, $v);
-        }
-        foreach ($repeats as $k => $v) {
-            $a = $engine->get($k);
-        }
-        $time_elapsed_secs = round(
-            microtime(true) - $start,
-            4
-        );
-        $this->assertEquals($repeats[$key . '0'], $engine->get($key . '0'));
-        $this->performance_report_print($start);
+        $this->measure('DB', CacheDb::factory($osec_app), 'perf_css');
     }
 
-    public function test_filecache_with_timer()
+    private function measure(string $label, CacheInterface $engine, string $key): void
     {
-        global $osec_app;
-        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH); // Required as path be out of docroot in testing.
-        $key  = 'test_filecache';
-        $DATA = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyz', 100)), 0, 100);
+        $start = microtime(true);
+        $engine->set($key, $this->css);
+        $write = microtime(true) - $start;
 
-        $repeats = [];
-        for ($i = 0; $i < self::REPEAT_COUNT; $i++) {
-            $repeats[$key . $i] = $DATA;
+        $start = microtime(true);
+        for ($i = 0; $i < self::READS; $i++) {
+            $read = $engine->get($key);
         }
+        $per_read = (microtime(true) - $start) / self::READS;
 
-        $start = $this->performance_report_start();
-
-        $fileCache = CacheFile::createFileCacheInstance($osec_app, $key);
-        $this->deleteAtTeardown($fileCache->getCachePath());
-
-        foreach ($repeats as $k => $v) {
-            $fileCache->set($k, $v);
-        }
-        foreach ($repeats as $k => $v) {
-            $a = $fileCache->get($k);
-        }
-
-        $this->assertEquals($repeats[$key . '0'], $fileCache->get($key . '0'));
-        $this->performance_report_print($start);
-        // echo "   TIME: " . $time_elapsed_secs ."s (Repeats: " . self::REPEAT_COUNT ."\n";
+        $this->assertSame($this->css, $read);
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        echo sprintf(
+            "   %-4s %d KB: write %.2f ms, read %.3f ms (avg of %d)\n",
+            $label,
+            intdiv(strlen($this->css), 1000),
+            $write * 1000,
+            $per_read * 1000,
+            self::READS
+        );
     }
 }

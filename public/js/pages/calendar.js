@@ -398,9 +398,12 @@ timely.define("domReady", [], function () {
         r.isBuild ? n(null) : c(n)
     }, c
 }), timely.define("scripts/calendar/print", ["jquery_timely", "ai1ec_config"], function ($, config) {
-    // Week/day grids are scaled to one page: page height minus print header and margins (px, 96 dpi).
-    // Week prints landscape, day portrait; the smaller of A4 and Letter.
-    var PAGE_HEIGHT = {week: 660, oneday: 860},
+    // Week/day grids fill one page: the print CSS stretches the grid to the page area (10mm margins
+    // of @page osec-landscape/osec-portrait in calendar.less), and events and hour lines are placed
+    // in percent of it. PAGE_HEIGHT is only the estimate for minimum event height, line clamping and
+    // the list capacity: page area in px at 96 dpi, the smaller of A4 and Letter (A4 landscape 190mm,
+    // Letter portrait 259mm), minus print header and grid head.
+    var PAGE_HEIGHT = {week: 710, oneday: 970},
         PRINT_HEADER_HEIGHT = 80,
         MIN_GRID_HEIGHT = 300,
         // Events are at least this high, so the time and a title line stay readable.
@@ -489,9 +492,13 @@ timely.define("domReady", [], function () {
             $grid = $wrapper.clone();
 
         $grid.find('.ai1ec-popup, .ai1ec-popover, .ai1ec-tooltip, .ai1ec-now-marker').remove();
-        $grid.addClass('osec-print-grid').css({width: '', height: height + 'px'});
-        $grid.find('.ai1ec-day').css('height', height + 'px');
-        $grid.find('.ai1ec-hour-marker').css('height', (60 * factor) + 'px');
+        // Positions in percent of the grid, whose height comes from the print CSS.
+        var percent = function (px) {
+            return (px / height * 100) + '%';
+        };
+        $grid.addClass('osec-print-grid').css({width: '', height: ''});
+        $grid.find('.ai1ec-day').css('height', '');
+        $grid.find('.ai1ec-hour-marker').css('height', percent(60 * factor));
         if (15 * factor < 6) {
             $grid.find('.ai1ec-quarter-marker').remove();
         }
@@ -500,7 +507,7 @@ timely.define("domReady", [], function () {
             if (top < 0 || top >= height) {
                 $(this).remove();
             } else {
-                this.style.top = top + 'px';
+                this.style.top = percent(top);
             }
         });
         $grid.find('.ai1ec-day').each(function (day) {
@@ -519,8 +526,8 @@ timely.define("domReady", [], function () {
                     top = Math.max(0, top - (bottom - height));
                     bottom = height;
                 }
-                this.style.top = top + 'px';
-                this.style.height = (bottom - top) + 'px';
+                this.style.top = percent(top);
+                this.style.height = percent(bottom - top);
                 if (type === 'week') {
                     // Week columns are too narrow for every title: clamp to the lines the box
                     // can show, so the last one ends in an ellipsis instead of a cut letter.
@@ -5804,7 +5811,9 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
     }, g = function (t) {
         t.find(".osec-calendar-view-container").trigger("destroy_view.ai1ec");
         var n = t.find(".ai1ec-minical-trigger").data("datepicker");
-        typeof n != "undefined" && (n.picker.remove(), $(document).off("changeDate", ".ai1ec-minical-trigger")), t.find(".ai1ec-tooltip.ai1ec-in, .ai1ec-popup").remove(), t.find(".ai1ec-calendar-toolbar .ai1ec-btn-toolbar").remove()
+        // Drop the instance with its picker and handler, so a trigger that survives the reload
+        // gets a fresh picker for the new view on its next click.
+        typeof n != "undefined" && (n.picker.remove(), t.find(".ai1ec-minical-trigger").off("changeDate", k).removeData("datepicker")), t.find(".ai1ec-tooltip.ai1ec-in, .ai1ec-popup").remove(), t.find(".ai1ec-calendar-toolbar .ai1ec-btn-toolbar").remove()
     }, y = function () {
         var t = [], n = [], r = [], i;
         $(".ai1ec-category-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
@@ -5904,11 +5913,20 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
                     this.picker.css({left: "auto", right: $(document).width() - n.left - t.outerWidth()})
                 }
             }
-            $(document).one("changeDate", ".ai1ec-minical-trigger", k)
+            // On the trigger, for as long as its picker lives: a one-time handler was used up by
+            // the first pick, and a pick of the date already shown reloads nothing, so the next
+            // pick found no handler, did nothing and left the picker open.
+            n.on("changeDate", k)
         }
         n.datepicker("show")
     }, k = function (t) {
         var n, r = $(this), i = r.closest(".ai1ec-calendar"), s;
+        // Clicking the selected date deselects it (bootstrap-datepicker toggles dates): that
+        // date is already shown, so select it again and close instead of loading "no date".
+        if (!t.date) {
+            r.datepicker("update", r.attr("data-date")).datepicker("hide");
+            return;
+        }
         r.datepicker("hide"), n = r.data("href"), s = t.format(), s = s.replace(/\//g, "-"), n = n.replace("__DATE__", s), T(i, r.data("type"), n)
     }, L = function (t) {
         var n;
@@ -6130,6 +6148,9 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
             mouseleave: m
         }, ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container"), $(document).on("shown.bs.constrained_popover", ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container", anchor_popover), $(document).on("click", ".ai1ec-agenda-view .ai1ec-event-header--toggle", agendaView.toggle_event), $(document).on("click", "#ai1ec-agenda-expand-all", agendaView.expand_all), $(document).on("click", "#ai1ec-agenda-collapse-all", agendaView.collapse_all), $(document).on("click", "a.ai1ec-load-view", loadViews.handle_click_on_link_to_load_view), $(document).on("click", ".ai1ec-minical-trigger", loadViews.handle_minical_trigger), $(document).on("click", ".ai1ec-clear-filter", loadViews.clear_filters), $(document).on("click", "#ai1ec-print-button", print.handle_click_on_print_button), window.addEventListener("beforeprint", print.before_print), window.addEventListener("afterprint", print.after_print), $(document).on("click", ".ai1ec-reveal-full-day button", function () {
             var t = $(this).closest(".ai1ec-calendar");
+            // The tooltip closes on mouseleave, which a button fading out under a resting
+            // pointer never gets.
+            $(this).data("bs.tooltip") && $(this).tooltip("hide");
             $(this).fadeOut();
             var n = t.find(".ai1ec-oneday-view-original, .ai1ec-week-view-original"),
                 r = t.find(".tablescroll_wrapper").offset().top - n.offset().top;
