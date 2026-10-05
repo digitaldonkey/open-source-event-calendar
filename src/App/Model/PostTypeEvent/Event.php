@@ -23,26 +23,25 @@ use Osec\Helper\JsonHelper;
 class Event extends OsecBaseClass
 {
     /**
-     * VARCHAR sizes of the events table (DatabaseSchema), see prepare_store_entity().
+     * Free text columns shortened to their column width when too long, see prepare_store_entity().
+     * Too long values of the other text columns (addresses, URLs, identifiers) are not stored.
      */
-    private const COLUMN_LENGTHS = [
-        'timezone_name'   => 50,
-        'venue'           => 255,
-        'country'         => 255,
-        'address'         => 255,
-        'city'            => 255,
-        'province'        => 255,
-        'postal_code'     => 32,
-        'contact_name'    => 255,
-        'contact_phone'   => 32,
-        'contact_email'   => 128,
-        'contact_url'     => 255,
-        'cost'            => 255,
-        'ticket_url'      => 255,
-        'ical_feed_url'   => 768,
-        'ical_source_url' => 768,
-        'ical_uid'        => 255,
+    private const SHORTENED_COLUMNS = [
+        'venue',
+        'country',
+        'address',
+        'city',
+        'province',
+        'postal_code',
+        'contact_name',
+        'contact_phone',
+        'cost',
     ];
+
+    /**
+     * Columns that identify an imported event. Never shortened or dropped: the import refuses such an event instead.
+     */
+    private const KEY_COLUMNS = ['ical_uid', 'ical_feed_url'];
 
     /**
      * @var EventEntity Data store object reference.
@@ -763,15 +762,53 @@ class Event extends OsecBaseClass
             'longitude'        => $this->storage_format('longitude'),
         ];
 
-        // A value longer than its column made the whole save fail ("Error saving Post Data"),
-        // and with it a feed import - e.g. a CONTACT whose part with a digit counts as phone.
-        foreach (self::COLUMN_LENGTHS as $column => $length) {
-            if (is_string($entity[$column]) && mb_strlen($entity[$column]) > $length) {
-                $entity[$column] = mb_substr($entity[$column], 0, $length);
+        // A value longer than its column made the whole save fail ("Error saving Post Data"), and with it a
+        // feed import. Free text is shortened, other values are left out, both are reported.
+        foreach ($entity as $column => $value) {
+            if (! is_string($value) || in_array($column, self::KEY_COLUMNS, true)) {
+                continue;
             }
+            $length = self::column_length($column);
+            if (null === $length || mb_strlen($value) <= $length) {
+                continue;
+            }
+            $shortened       = in_array($column, self::SHORTENED_COLUMNS, true);
+            $entity[$column] = $shortened ? mb_substr($value, 0, $length) : null;
+            /**
+             * Act on an event value that did not fit its database column.
+             *
+             * Free text (venue, address, contact name, phone, cost, ...) is shortened to the column width,
+             * other values (e-mail, URLs) are not stored. Use this to tell an editor, or to log feeds.
+             *
+             * @since 1.2.0
+             *
+             * @param  string  $column  Column of the events table.
+             * @param  int  $length  Maximum length of the column, in characters.
+             * @param  bool  $shortened  True if the value was shortened, false if it was left out.
+             */
+            do_action('osec_event_value_too_long', $column, $length, $shortened);
         }
 
         return $entity;
+    }
+
+    /**
+     * Maximum length of a text column of the events table, in characters.
+     *
+     * @param  string  $column  Column name.
+     *
+     * @return int|null Null if the column has no length (not a text column) or it can not be read.
+     */
+    public static function column_length(string $column): ?int
+    {
+        global $wpdb;
+        static $lengths = [];
+        if (! array_key_exists($column, $lengths)) {
+            $info             = $wpdb->get_col_length($wpdb->prefix . OSEC_DB__EVENTS, $column);
+            $lengths[$column] = is_array($info) && 'char' === ($info['type'] ?? '') ? (int) $info['length'] : null;
+        }
+
+        return $lengths[$column];
     }
 
     /**
