@@ -1,3 +1,5 @@
+@.claude/shared/global/CLAUDE.md
+
 # Development Environment
 
 This project runs inside DDEV.
