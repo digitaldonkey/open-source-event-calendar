@@ -1250,7 +1250,9 @@ class Settings extends OsecBaseInitialized
         }
         $options = $this->app->options;
         $options->set('osec_force_flush_rewrite_rules', true, true);
-        $options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true, true);
+        FrontendCssController::factory($this->app)->request_compile();
         $options->set(ThemeLoader::OPTION_FORCE_CLEAN, true, true);
+        // Rows now (pages without CSS state link the compiling route), the 1.1.x CSS files in a week (cached pages).
+        FrontendCssController::factory($this->app)->migrate_legacy();
     }
 }

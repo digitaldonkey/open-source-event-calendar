@@ -245,9 +245,11 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                 ],
                 'div' => [
+                    'aria-live' => true,
                     'class' => true,
                     'data-*' => true,
                     'id' => true,
+                    'role' => true,
                     'style' => true,
                     'popover' => true,
                 ],

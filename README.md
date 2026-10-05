@@ -125,6 +125,22 @@ Copy [constants-local.php.example](https://raw.githubusercontent.com/digitaldonk
 
 To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA', true);`
 
+## Caching
+
+The calendar compiles its theme stylesheet on your site and stores it as a static file in
+`wp-content/uploads/osec_cache/css/`, which the web server sends without PHP. Without a writable uploads folder it
+is kept in your object cache (Redis, Memcached), APCu or the database and served by PHP. Compiled Twig templates go
+next to it, to `wp-content/uploads/osec_cache/twig/`.
+
+- **Events → Settings → Cache Report** shows where the CSS and the templates are. **Clear all caches** rebuilds
+  the CSS right away; if it does not compile, the current CSS is kept and the error is shown.
+- The stylesheet is added to the page header for the calendar page, single events, and posts or pages with the
+  calendar shortcode or block. A calendar placed elsewhere (widgets, template parts, patterns, page builders) gets it
+  with the footer styles, which can show the calendar unstyled for a moment while the page loads.
+- In `constants-local.php`: `OSEC_FILE_CACHE_DEFAULT_PATH` moves the file cache to another folder;
+  `OSEC_ENABLE_CACHE_FILE` set to `false` keeps the CSS out of static files (served by PHP), e.g. if your host does
+  not serve them; templates are still cached as files. Changes take effect at the next compile (Theme Options → Save, or Clear all caches).
+
 ---
 
 ## WP-CLI
