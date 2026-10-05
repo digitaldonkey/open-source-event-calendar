@@ -1,0 +1,4 @@
+[submodule ".claude/shared"]
+	path = .claude/shared
+	url = git@github.com:digitaldonkey/claude_marketplace.git
+	branch = main
