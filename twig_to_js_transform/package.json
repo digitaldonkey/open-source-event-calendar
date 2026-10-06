@@ -12,6 +12,6 @@
   "dependencies": {
     "escape-string-regexp": "^5.0.0",
     "npm": "^11.3.0",
-    "twig": "^0.7.2"
+    "twig": "^3.0.0"
   }
 }

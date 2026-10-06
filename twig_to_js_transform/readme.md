@@ -17,9 +17,15 @@ Only a very few templates are used in **frontend rendering**:
 public/osec_themes/vortex/twig/[agenda|oneday|month].twig
 ```
 
-**DO NOT UPDATE**
+It also replaces the twig.js runtime in `calendar.js` (between `/*BEGIN:twig.js runtime*/` and
+`/*END:twig.js runtime*/`) with `node_modules/twig/twig.min.js`, so the runtime always matches the
+version the templates were compiled with. Templates are created with `autoescape: true`.
 
-Is mandatory to use twig:"^0.7.2 for to keep old stuff from ai1ec working.
+**Updating twig.js**
+
+twig.js 3 needs Node.js >= 22 (`.nvmrc`). After `npm update twig`, run the build and check the
+calendar's views with "Use frontend rendering" on (the JS smoke suite, `npm run test:js` in
+`integration_tests/`, includes an escaping test).
 
 **Do I need this?**
 

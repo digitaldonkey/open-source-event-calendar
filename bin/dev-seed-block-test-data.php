@@ -190,6 +190,15 @@ $events = [
     // Titles that need entity decoding in the block's "Filter by Events" search.
     ['D&D Night "quoted" & <b>not bold</b>', '+4 days 19:00', '+3 hours', ['concerts'], []],
     ['Café & Bar – Special', '+5 days 17:00', '+2 hours', [], ['free']],
+    // Stored as is (the model does not sanitize): views rendered by twig.js must print it as text.
+    [
+        'Hostile venue',
+        '+6 days 13:00',
+        '+1 hour',
+        [],
+        [],
+        ['venue' => 'D&D <img src=x onerror="window.osecXss=1">'],
+    ],
     // Other months: navigation and fixed calendar date.
     ['Last month concert', '-1 month 19:00', '+2 hours', ['concerts'], []],
     ['Next month match', '+1 month 15:00', '+2 hours', ['football'], ['outdoor']],
