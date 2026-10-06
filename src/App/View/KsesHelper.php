@@ -95,6 +95,7 @@ class KsesHelper extends OsecBaseClass
                     'style'               => true,
                     'target'              => true,
                     'title'               => true,
+                    'aria-label'          => true,
                     'itemprop'    => true,
                     'itemscope'   => true,
                     'itemtype'    => true,
@@ -128,7 +129,6 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                 ],
                 'table'  => [
-                    'cellspacing' => true,
                     'class'       => true,
                     'style'       => true,
                 ],
@@ -185,10 +185,20 @@ class KsesHelper extends OsecBaseClass
                     'style'           => true,
                     'stroke'          => true,
                     'stroke-width'          => true,
+                    'stroke-linecap'        => true,
+                    'stroke-linejoin'       => true,
+                    'stroke-miterlimit'     => true,
                     'fill'          => true,
+                    'fill-rule'     => true,
+                    'clip-rule'     => true,
                 ],
                 'g'     => [ 'fill' => true ],
-                'title' => [ 'title' => true ],
+                // The print header's URL line (osec-print-url) and event descriptions.
+                'p'     => [
+                    'class' => true,
+                    'id'    => true,
+                ],
+                'title' => [],
                 'path'  => [
                     'd'    => true,
                     'fill' => true,
@@ -219,7 +229,6 @@ class KsesHelper extends OsecBaseClass
                 'meta'  => [
                     'itemprop'    => true,
                     'content'    => true,
-                    'url'    => true,
                 ],
             ];
         }
@@ -248,6 +257,7 @@ class KsesHelper extends OsecBaseClass
                     'style' => true,
                     'tabindex' => true,
                     'target' => true,
+                    'title' => true,
                 ],
                 'hr' => [
                     'class' => true,
@@ -265,6 +275,7 @@ class KsesHelper extends OsecBaseClass
                 ],
                 'button' => [
                     'class' => true,
+                    'aria-label' => true,
                     'aria-describedby' => true,
                     'aria-disabled' => true,
                     'aria-expanded' => true,
@@ -286,6 +297,7 @@ class KsesHelper extends OsecBaseClass
                     'role' => true,
                     'style' => true,
                     'popover' => true,
+                    'aria-label' => true,
                 ],
                 'em' => [
                     'class' => true,
@@ -316,10 +328,9 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                     'style' => true,
                 ],
-                'iframe' => [
-                ],
                 'img' => [
                     'alt' => true,
+                    'class' => true,
                     'draggable' => true,
                     'src' => true,
                     'style' => true,
@@ -331,7 +342,6 @@ class KsesHelper extends OsecBaseClass
                     'height'      => true,
                 ],
                 'input' => [
-                    1 => true,
                     'autocomplete' => true,
                     'checked' => true,
                     'class' => true,
@@ -347,6 +357,10 @@ class KsesHelper extends OsecBaseClass
                     'value' => true,
                     'readonly' => true,
                     'disabled' => true,
+                    'required' => true,
+                    'pattern' => true,
+                    'minlength' => true,
+                    'maxlength' => true,
                 ],
                 'label' => [
                     'class' => true,
@@ -395,8 +409,8 @@ class KsesHelper extends OsecBaseClass
                     'id' => true,
                     'style' => true,
                     'title' => true,
-                    'item*' => true,
                     'popover' => true,
+                    'role' => true,
                 ],
                 'strong' => [
                 ],
@@ -428,9 +442,6 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                 ],
                 'tr' => [
-                    'class' => true,
-                ],
-                'tt' => [
                     'class' => true,
                 ],
                 'ul' => [
