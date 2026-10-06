@@ -474,6 +474,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 ],
             ];
 
+            $data = $this->sanitize_feed_fields($data);
+
             /**
              * Alter FeedsData before processing.
              *
@@ -647,6 +649,31 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      *
      * @return void
      */
+    /**
+     * Feed values are untrusted: plain text, addresses keep their line breaks, URLs lose unsafe schemes.
+     *
+     * The calendar's frontend rendering (twig.js) prints them without escaping.
+     */
+    protected function sanitize_feed_fields(array $data): array
+    {
+        $text = ['venue', 'contact_name', 'contact_phone', 'contact_email', 'cost', 'ical_organizer', 'ical_contact'];
+        foreach ($text as $field) {
+            if (isset($data[$field]) && is_string($data[$field])) {
+                $data[$field] = sanitize_text_field($data[$field]);
+            }
+        }
+        if (isset($data['address']) && is_string($data['address'])) {
+            $data['address'] = sanitize_textarea_field($data['address']);
+        }
+        foreach (['contact_url', 'ticket_url', 'ical_source_url'] as $field) {
+            if (isset($data[$field]) && is_string($data[$field])) {
+                $data[$field] = esc_url_raw($data[$field]);
+            }
+        }
+
+        return $data;
+    }
+
     protected function export_recurrence_rule(
         Vevent $component,
         string $property,
