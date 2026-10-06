@@ -49,19 +49,41 @@ environment first.
 
 ## Database Safety
 
-The DDEV database is a development database and usually contains
-nothing important.
+The dev site's database `db` stays as it is unless the maintainer asks to add, change or remove
+something there. Before changing `db`, ask once per session: "Can I drop (or alter) the database?"
+After a yes, no further asking in that session. Read-only queries on `db` are always fine.
 
-Any change to the dev database is allowed, including destructive ones
-(altering settings/data, dropping, truncating, resetting). Ask once
-per session, the first time a change is needed: "Can I drop (or
-alter) the database?" After a yes, no further asking in that session.
+**For evaluating, reproducing and experimenting, use a sandbox database instead - no asking needed.**
+One DDEV MySQL holds them next to `db` (set up 2026-10-06):
 
-When a DB change is the straightforward route, ask for it instead of
-building workarounds to avoid the write (temporary mu-plugins, option
-filters, cookie or query-param overrides).
+| Database | Use |
+|---|---|
+| `db` | the dev site; only on request |
+| `claude` | Claude's permanent sandbox, a copy of `db` |
+| `try_<name>` | throwaway copies, create and drop freely |
+| `phpunit` | PHPUnit's own (`wp-tests-config.php`), unrelated |
 
-Prefer read-only queries when investigating problems.
+- **Select it**: browser `https://<name>.ddev-wordpress.ddev.site`, WP-CLI
+  `WP_SANDBOX_DB=<name> /usr/local/bin/wp ...`. **Set the variable on every call** - without it, WP-CLI uses `db`.
+  A name other than `claude` / `try_*` stops with "Unknown sandbox database", so a typo never reaches `db`.
+- **Create / reset / drop** (as `root`/`root`, which may create databases; `db` has grants on `claude` and `try\_%`):
+  ```bash
+  mysql -uroot -proot -h db -e "DROP DATABASE IF EXISTS try_x; CREATE DATABASE try_x CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+  mysqldump -uroot -proot -h db --single-transaction db | mysql -uroot -proot -h db try_x
+  mkdir -p /var/www/html/wp-content/uploads/osec-sandbox/try_x
+  ```
+- **What is separate and what is shared**: database, `WP_HOME` and the OSEC file cache
+  (`OSEC_FILE_CACHE_DEFAULT_PATH` = `uploads/osec-sandbox/<name>/`, so a sandbox compile never overwrites the dev site's
+  CSS) are per sandbox; APCu follows the URL. **Shared**: plugin code (a sandbox only matches the checked-out code),
+  uploads/media, everything else on disk.
+- **Where it lives** (not versioned - this section is the only record): a block in `/var/www/html/wp-config.php` before
+  the DDEV include sets `DB_NAME`, `WP_HOME`, `OSEC_FILE_CACHE_DEFAULT_PATH`; the wildcard hostname
+  `additional_hostnames: ["*.ddev-wordpress"]` in `.ddev/config.yaml`; the MySQL grants. WordPress here takes its URL
+  from `WP_HOME` (`wp-config-ddev.php`), so a copied database needs no search-replace.
+- The destructive Mocha/Selenium suite (see Testing) can run against a sandbox instead of the dev site.
+
+When a DB change is the straightforward route, make it in a sandbox instead of building workarounds to avoid the
+write (temporary mu-plugins, option filters, cookie or query-param overrides).
 
 Do not access production databases.
 
