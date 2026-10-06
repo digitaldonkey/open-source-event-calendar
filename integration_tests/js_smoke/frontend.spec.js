@@ -106,6 +106,25 @@ describe('JS smoke: frontend', function () {
             await h.assertNoConsoleErrors(driver, 'popover');
         });
 
+        for (const view of ['month', 'agenda']) {
+            it(`prints event values as text in ${view} view rendered by twig.js`, async function () {
+                // The seeded "Hostile venue" event: +6 days 13:00 in the site's timezone (bin/dev-seed-block-test-data.php).
+                const day = new Date(Date.now() + 6 * 864e5).toLocaleDateString('sv-SE', {timeZone: 'Europe/Berlin'});
+                // Start in the other view, so the checked one is rendered from JSON by twig.js.
+                await h.open(driver, `/calendar/action~${view === 'month' ? 'agenda' : 'month'}/exact_date~${day}/`, CAL);
+                const link = await driver.findElement(By.id(`ai1ec-view-${view}`));
+                await driver.executeScript('arguments[0].click();', link);
+                await h.visible(driver, `.ai1ec-${view}-view`);
+                const result = await driver.executeScript(`return {
+                    xss: window.osecXss || 0,
+                    handlers: document.querySelectorAll('#osec-calendar-view img[onerror]').length,
+                    asText: document.querySelector('#osec-calendar-view').textContent.includes('D&D <img src=x'),
+                };`);
+                assert.deepStrictEqual(result, {xss: 0, handlers: 0, asText: true});
+                await h.assertNoConsoleErrors(driver, `escaped ${view} view`);
+            });
+        }
+
         it('has a working print button', async function () {
             await h.open(driver, '/calendar/action~month/', CAL);
             await h.visible(driver, '#ai1ec-print-button');
