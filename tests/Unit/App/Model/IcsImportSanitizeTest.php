@@ -5,6 +5,7 @@ namespace Osec\Tests\Unit\App\Model;
 use Osec\App\Model\IcsImportExportParser;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventSearch;
+use Osec\App\View\Event\EventSingleView;
 use Osec\Tests\Utilities\HostileInput;
 use Osec\Tests\Utilities\TestBase;
 
@@ -116,6 +117,19 @@ class IcsImportSanitizeTest extends TestBase
 
         $this->assertSame('https://example.org/contact?a=1&b=2', $event->get('contact_url'));
         $this->assertSame('https://example.org/tickets?a=1&b=2', $event->get('ticket_url'));
+    }
+
+    public function test_source_url_is_imported_and_linked()
+    {
+        global $osec_app;
+
+        $event = $this->import_event(['URL:https://example.org/event?a=1&b=2']);
+
+        $this->assertSame('https://example.org/event?a=1&b=2', $event->get('ical_source_url'));
+        $this->assertStringContainsString(
+            'href="https://example.org/event?a=1&#038;b=2"',
+            EventSingleView::factory($osec_app)->get_footer($event)
+        );
     }
 
     private function import_event(array $lines): Event

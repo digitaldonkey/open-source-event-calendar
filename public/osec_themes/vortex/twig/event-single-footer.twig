@@ -2,7 +2,7 @@
     {% if event.get( 'ical_feed_url' ) is not empty %}
         {{ text_calendar_feed | raw }}
         {% if event.get( 'ical_source_url' ) is not empty %}
-            <a href="{{ event.get( 'ical_source_url' ) | e('html_attr') }}"
+            <a href="{{ event.get( 'ical_source_url' ) | esc_url }}"
                 class="ai1ec-btn ai1ec-btn-default ai1ec-btn-xs" target="_blank">
                 {{ text_view_post }}
                 <i class="ai1ec-fa ai1ec-fa-external-link"></i>
