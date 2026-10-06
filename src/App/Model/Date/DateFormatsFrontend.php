@@ -120,7 +120,7 @@ class DateFormatsFrontend extends OsecBaseInitialized
     public function renderShortNoYear(): void
     {
         $defaults       = self::$default[self::FORMAT_NO_YEAR];
-        $current_format = stripslashes(get_option(self::FORMAT_NO_YEAR, $defaults[0]));
+        $current_format = get_option(self::FORMAT_NO_YEAR, $defaults[0]);
         $is_custom      = ! in_array($current_format, $defaults, true);
         $args           = [
             'id'                         => self::FORMAT_NO_YEAR,
@@ -173,7 +173,7 @@ class DateFormatsFrontend extends OsecBaseInitialized
     public function renderShortDate(): void
     {
         $defaults       = self::$default[self::FORMAT_SHORT];
-        $current_format = stripslashes(get_option(self::FORMAT_SHORT, $defaults[0]));
+        $current_format = get_option(self::FORMAT_SHORT, $defaults[0]);
         $is_custom      = ! in_array($current_format, $defaults, true);
         $args           = [
             'id'                         => self::FORMAT_SHORT,
@@ -201,25 +201,30 @@ class DateFormatsFrontend extends OsecBaseInitialized
     }
 
     /**
-     * @throws Exception
+     * A preset, or the custom field when "custom" is selected.
+     *
+     * Runs twice when the option does not exist yet (update_option() → add_option()), the second
+     * time with the format already taken from the custom field, so any non-empty format is accepted.
+     * An empty one keeps the stored format and reports it.
      */
     private function sanitize(string $value, string $format): string
     {
-        $default = self::$default[$format];
-        if (in_array($value, $default, true)) {
+        if (in_array($value, self::$default[$format], true)) {
             return $value;
         }
-        $key = $format . '_custom';
-        if ($value === 'custom' && RequestParser::has_param($key)) {
-            $customVal = RequestParser::get_param($key);
-            // Check if it works.
-            if ($customVal && (bool) strtotime(date_format(date_create(), $customVal))) {
-                return $customVal;
-            }
+        $value = 'custom' === $value
+            ? RequestParser::get_param($format . '_custom')
+            : sanitize_text_field($value);
+        if ('' !== trim($value)) {
+            return $value;
         }
-        throw new Exception(esc_html(
-            'Unknown format. Got: ' . $format
-        ));
+        add_settings_error(
+            $format,
+            $format . '_empty',
+            __('The custom date format was empty, the previous format is kept.', 'open-source-event-calendar')
+        );
+
+        return (string)get_option($format);
     }
 
     public function sanitizeNoYear(string $value): string
