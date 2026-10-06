@@ -1,4 +1,4 @@
-<fieldset>
+<fieldset class="osec-date-format">
     <legend class="screen-reader-text">
         <span>Time Format Short</span>
     </legend>
@@ -7,7 +7,7 @@
             <input type='radio' name="{{ id }}"
                    value="{{format.escaped}}"
                    {%~ if current_format == format.raw ~%}checked="checked"{%~ endif ~%}
-                    onchange="const el = jQuery('#{{ id }}_custom'); el.val('{{ format.raw }}'); el.trigger('input');"
+                   data-osec-format="{{ format.raw }}"
             />
             &nbsp;<span class="date-time-text">{{ format.example }}</span>
             <code>{{ format.escaped }}</code>
@@ -16,6 +16,7 @@
     {% endfor %}
     <label for="{{ id }}_custom_radio">
         <input type="radio" name="{{ id }}" id="{{ id }}_custom_radio" value="custom"
+           class="osec-date-format-custom-radio"
            {% if is_custom %}checked="checked"{% endif %}
         />
         <span class="date-time-text date-time-custom-text"> {{ custom_label }}
@@ -24,9 +25,8 @@
             <label for="{{ id }}_custom" class="screen-reader-text">
                 <span class="date-time-text">{{ custom_accessibility_label }}</span>
             </label>
-            <input type="text" name="{{ id }}_custom" id="{{ id }}_custom" value="{{current_format}}" class="small-text"
-                onfocus="console.log(document.getElementById('{{ id }}_custom_radio').checked = true)"
-{#                onchange="document.getElementById('{{ id }}_custom_format_example').innerHTML = date(document.getElementById('{{ id }}_custom').value)"#}
+            <input type="text" name="{{ id }}_custom" id="{{ id }}_custom" value="{{current_format}}"
+                class="small-text osec-date-format-custom"
             />
             <br />
             <p><strong>{{ preview_label }}</strong>
@@ -35,33 +35,3 @@
             </p>
     </label>
 </fieldset>
-
-
-<script>
-/* Excerpt from wp-admin/includes/options.php */
-jQuery( function($) {
-    $('input[name="{{ id }}_custom"]').on('input', function () {
-        var format = $(this),
-            fieldset = format.closest('fieldset'),
-            example = fieldset.find('.example'),
-            spinner = fieldset.find('.spinner');
-
-        // Debounce the event callback while users are typing.
-        clearTimeout($.data(this, 'timer'));
-        $(this).data('timer', setTimeout(function () {
-            // If custom date is not empty.
-            if (format.val()) {
-                spinner.addClass('is-active');
-
-                $.post(ajaxurl, {
-                    action: 'date_format_custom' === format.attr('name') ? 'date_format' : 'time_format',
-                    date: format.val()
-                }, function (d) {
-                    spinner.removeClass('is-active');
-                    example.text(d);
-                });
-            }
-        }, 500));
-    });
-})
-</script>
