@@ -80,6 +80,10 @@ One DDEV MySQL holds them next to `db` (set up 2026-10-06):
   the DDEV include sets `DB_NAME`, `WP_HOME`, `OSEC_FILE_CACHE_DEFAULT_PATH`; the wildcard hostname
   `additional_hostnames: ["*.ddev-wordpress"]` in `.ddev/config.yaml`; the MySQL grants. WordPress here takes its URL
   from `WP_HOME` (`wp-config-ddev.php`), so a copied database needs no search-replace.
+- **The block only survives without the `#ddev-generated` marker** in `wp-config.php` (removed 2026-10-06). With the
+  marker, DDEV regenerates the file and drops the block, and then `WP_SANDBOX_DB` is silently ignored - WP-CLI writes to
+  `db` (happened 2026-10-06). Before a write, check `WP_SANDBOX_DB=claude /usr/local/bin/wp option get home` answers
+  `https://claude.ddev-wordpress.ddev.site`.
 - The destructive Mocha/Selenium suite (see Testing) can run against a sandbox instead of the dev site.
 
 When a DB change is the straightforward route, make it in a sandbox instead of building workarounds to avoid the
