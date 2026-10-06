@@ -444,7 +444,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 'ticket_url'       => $ticket_url,
                 'show_map'         => $event_do_show_map,
                 'ical_feed_url'    => $feed->feed_url,
-                'ical_source_url'  => $e->getXprop('url'),
+                'ical_source_url'  => $e->getUrl() ?: null,
                 'ical_organizer'   => $organizer,
                 'ical_contact'     => $contact,
                 'ical_uid'         => $this->getIcalUid($e, $allday),
