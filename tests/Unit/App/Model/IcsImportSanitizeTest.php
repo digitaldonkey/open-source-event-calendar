@@ -81,8 +81,7 @@ class IcsImportSanitizeTest extends TestBase
             'LOCATION:' . $value,
             'CONTACT:' . $value . '\\;' . $value . ' 1\\;' . $value . '@example.org\\;javascript://x%0Aalert(1)',
             'ORGANIZER;CN="' . str_replace('"', '', $value) . '":mailto:o@example.org',
-            // A plain number is B12 (numeric cost crashes the cost reader), not sanitizing.
-            'X-COST:' . $value . ' EUR',
+            'X-COST:' . $value,
             'X-TICKETS-URL:' . $value,
         ]);
 

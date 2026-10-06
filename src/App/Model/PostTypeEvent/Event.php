@@ -10,7 +10,6 @@ use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
 use Osec\Exception\TimezoneException;
-use Osec\Helper\JsonHelper;
 
 /**
  * Model representing an event or an event instance.
@@ -1141,13 +1140,13 @@ class Event extends OsecBaseClass
         $is_free = true;
         $hide_cost = false;
 
-        // Aggregated value from DB.
-        if (JsonHelper::isValidJson($value)) {
-            $data      = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
-            $is_free   = (bool)$data['is_free'];
+        // Aggregated value from DB. A plain cost can be valid JSON too ("10", "true").
+        $data = json_decode($value, true);
+        if (is_array($data) && array_key_exists('cost', $data)) {
+            $is_free   = (bool)($data['is_free'] ?? true);
             $cost      = is_null($data['cost']) ? '' : $data['cost'];
             $hide_cost = isset($data['hide_cost']) ? $data['hide_cost'] : false;
-        } elseif (OSEC_LEGACY_COST_SERIALIZED) {
+        } elseif (OSEC_LEGACY_COST_SERIALIZED && JSON_ERROR_NONE !== json_last_error()) {
             // Serialized array requirements and hopefully all currency symbols.
             $regex = '/^[a-zA-Z\d\s\-,;":{}_€$¢£¥ƒ₠₡₢₣₤₥₦₧₨₩₪₫₭₮₯₰₱₲₳₴₵₶₷₸₹₺₻₼₽₾₿$]*$/';
             /**
