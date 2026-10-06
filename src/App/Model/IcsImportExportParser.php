@@ -195,6 +195,13 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         };
         add_action('osec_recurrence_truncated', $on_truncated);
         add_action('osec_recurrence_rule_invalid', $on_invalid);
+        $too_long       = 0;
+        $on_too_long    = function () use (&$too_long) {
+            ++$too_long;
+        };
+        add_action('osec_event_value_too_long', $on_too_long);
+        $uid_too_long   = 0;
+        $uid_length     = Event::column_length('ical_uid');
 
         // Walk events.
         $walked = 0;
@@ -216,6 +223,12 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
 
             $event_timezone = $data['start']->getObject()->getTimezone()->getName();
             $allday = $data['allday'];
+
+            // Shortened, the UID would never match on the next import and the event would be duplicated each time.
+            if ($uid_length && mb_strlen($this->getIcalUid($e, $allday)) > $uid_length) {
+                ++$uid_too_long;
+                continue;
+            }
 
             /* Categories */
             // One call per CATEGORIES line, false after the last one.
@@ -401,21 +414,21 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 } elseif (str_contains($el, '://')) {
                     // Detected URL.
                     $data['contact_url'] = $el;
-                } elseif (preg_match('/\d/', $el)) {
-                    // Detected phone number.
+                } elseif (preg_match('/\d/', $el) && mb_strlen($el) <= (Event::column_length('contact_phone') ?? 32)) {
+                    // Detected phone number. A longer part with digits is text ("Jane Smith, Tel: ..."), kept as name.
                     $data['contact_phone'] = $el;
                 } else {
                     // Default to name.
                     $data['contact_name'] = $el;
                 }
             }
-            if ($organizer && ! (isset($data['contact_name']) || empty($data['contact_name']))) {
-                // If no contact name, default to organizer property.
-                $data['contact_name'] = $organizer;
-            }
-            if ($organizer_name && ! (isset($data['contact_name']) || empty($data['contact_name']))) {
-                // Default to name.
-                $data['contact_name'] = $organizer_name;
+            if (empty($data['contact_name'])) {
+                // No contact name: the organizer's name (CN), else its address.
+                if ($organizer_name) {
+                    $data['contact_name'] = $organizer_name;
+                } elseif ($organizer) {
+                    $data['contact_name'] = preg_replace('/^mailto:/i', '', $organizer);
+                }
             }
 
             // Store yet-unsaved values to the $data array.
@@ -561,6 +574,32 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
 
         remove_action('osec_recurrence_truncated', $on_truncated);
         remove_action('osec_recurrence_rule_invalid', $on_invalid);
+        remove_action('osec_event_value_too_long', $on_too_long);
+        if ($uid_too_long > 0) {
+            $output['messages'][] = sprintf(
+                /* translators: 1: number of events, 2: maximum length. */
+                _n(
+                    '%1$s event was not imported: its UID is longer than %2$s characters.',
+                    '%1$s events were not imported: their UIDs are longer than %2$s characters.',
+                    $uid_too_long,
+                    'open-source-event-calendar'
+                ),
+                number_format_i18n($uid_too_long),
+                number_format_i18n($uid_length)
+            );
+        }
+        if ($too_long > 0) {
+            $output['messages'][] = sprintf(
+                /* translators: %s: number of values. */
+                _n(
+                    '%s value was too long for the calendar and was shortened or left out.',
+                    '%s values were too long for the calendar and were shortened or left out.',
+                    $too_long,
+                    'open-source-event-calendar'
+                ),
+                number_format_i18n($too_long)
+            );
+        }
         if ($invalid > 0) {
             $output['messages'][] = sprintf(
                 /* translators: %s: number of events. */

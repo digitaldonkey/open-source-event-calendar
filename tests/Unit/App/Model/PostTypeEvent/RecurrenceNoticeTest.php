@@ -80,6 +80,34 @@ class RecurrenceNoticeTest extends TestBase
     }
 
     /**
+     * Values that did not fit their column (Event::prepare_store_entity()) are reported the same way.
+     */
+    public function test_values_too_long_become_admin_notices()
+    {
+        global $osec_app;
+
+        $post    = self::factory()->post->create_and_get([
+            'post_type'  => OSEC_POST_TYPE,
+            'post_title' => 'Summer fair',
+        ]);
+        $editing = EventEditing::factory($osec_app);
+
+        $this->call_protected($editing, 'listen_for_recurrence_notices', $post);
+        do_action('osec_event_value_too_long', 'venue', 768, true);
+        do_action('osec_event_value_too_long', 'ticket_url', 768, false);
+        $this->call_protected($editing, 'stop_listening_for_recurrence_notices');
+
+        $stored = $this->stored_messages();
+        $this->assertCount(2, $stored);
+        $venue = $this->message_containing($stored, 'Venue name');
+        $this->assertStringContainsString('Summer fair', $venue['message']);
+        $this->assertStringContainsString('shortened', $venue['message']);
+        $ticket = $this->message_containing($stored, 'Buy Tickets URL');
+        $this->assertStringContainsString('not saved', $ticket['message']);
+        $this->assertSame('error', $ticket['class']);
+    }
+
+    /**
      * A clean save reports nothing.
      */
     public function test_a_save_without_problems_stores_nothing()

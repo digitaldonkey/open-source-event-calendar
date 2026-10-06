@@ -1483,6 +1483,52 @@ do_action('osec_recurrence_rule_invalid', $rrule $message);
 </details>
 
 
+### osec_event_value_too_long <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Act on an event value that did not fit its database column.
+
+```php
+do_action('osec_event_value_too_long', $column $length $shortened);
+```
+
+#### Description
+
+
+Free text (venue, address, contact name, phone, cost, ...) is shortened to the column width, other values (e-mail, URLs) are not stored. Use this to tell an editor, or to log feeds.
+
+#### Parameters
+
+
+ - **$column** <span style="color:crimson"> </span> Column of the events table.
+ - **$length** <span style="color:crimson"> </span> Maximum length of the column, in characters.
+ - **$shortened** <span style="color:crimson"> </span> True if the value was shortened, false if it was left out.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Act on an event value that did not fit its database column.
+ *
+ * Free text (venue, address, contact name, phone, cost, ...) is shortened to the column width,
+ * other values (e-mail, URLs) are not stored. Use this to tell an editor, or to log feeds.
+ *
+ * @since 1.2.0
+ *
+ * @param  string  $column  Column of the events table.
+ * @param  int  $length  Maximum length of the column, in characters.
+ * @param  bool  $shortened  True if the value was shortened, false if it was left out.
+ *
+ * @file src/App/Model/PostTypeEvent/Event.php
+ */
+do_action('osec_event_value_too_long', $column $length $shortened);
+```
+
+</details>
+
+
 ### osec_sanitize_unserialize_cost_regex <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
@@ -6733,6 +6779,52 @@ The event is saved without the rule, as a single occurrence, instead of the save
  * @file src/App/Model/PostTypeEvent/Event.php
  */
 do_action('osec_recurrence_rule_invalid', $rrule $message);
+```
+
+</details>
+
+
+### osec_event_value_too_long <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Act on an event value that did not fit its database column.
+
+```php
+do_action('osec_event_value_too_long', $column $length $shortened);
+```
+
+#### Description
+
+
+Free text (venue, address, contact name, phone, cost, ...) is shortened to the column width, other values (e-mail, URLs) are not stored. Use this to tell an editor, or to log feeds.
+
+#### Parameters
+
+
+ - **$column** <span style="color:crimson"> </span> Column of the events table.
+ - **$length** <span style="color:crimson"> </span> Maximum length of the column, in characters.
+ - **$shortened** <span style="color:crimson"> </span> True if the value was shortened, false if it was left out.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Act on an event value that did not fit its database column.
+ *
+ * Free text (venue, address, contact name, phone, cost, ...) is shortened to the column width,
+ * other values (e-mail, URLs) are not stored. Use this to tell an editor, or to log feeds.
+ *
+ * @since 1.2.0
+ *
+ * @param  string  $column  Column of the events table.
+ * @param  int  $length  Maximum length of the column, in characters.
+ * @param  bool  $shortened  True if the value was shortened, false if it was left out.
+ *
+ * @file src/App/Model/PostTypeEvent/Event.php
+ */
+do_action('osec_event_value_too_long', $column $length $shortened);
 ```
 
 </details>
