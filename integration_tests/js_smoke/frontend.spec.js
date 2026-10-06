@@ -56,6 +56,35 @@ describe('JS smoke: frontend', function () {
             await h.assertNoConsoleErrors(driver, 'date picker');
         });
 
+        // Picking the date already shown used to leave the picker without its handler:
+        // the next pick did nothing and the picker stayed open.
+        it('date picker keeps working when the shown date is picked again', async function () {
+            const pickerOpen = () => driver.executeScript(
+                "return [...document.querySelectorAll('.ai1ec-datepicker')].some(p => p.offsetParent !== null);"
+            );
+            const clickDay = (css) => driver.executeScript(
+                "const c = [...document.querySelectorAll('.ai1ec-datepicker ' + arguments[0])].find(e => e.offsetParent !== null); if (c) { c.click(); } return !!c;",
+                css
+            );
+            await h.open(driver, '/calendar/action~month/', CAL);
+            for (let i = 1; i <= 3; i++) {
+                await h.click(driver, '.ai1ec-minical-trigger');
+                await driver.wait(pickerOpen, h.TIMEOUT, `picker did not open (${i})`);
+                assert.ok(await clickDay('td.ai1ec-today.ai1ec-day'), `no today cell (${i})`);
+                await driver.wait(async () => !(await pickerOpen()), h.TIMEOUT, `picker stayed open after pick ${i}`);
+            }
+            await h.click(driver, '.ai1ec-minical-trigger');
+            await driver.wait(pickerOpen, h.TIMEOUT, 'picker did not open');
+            const before = await driver.getCurrentUrl();
+            const day = (await driver.executeScript(
+                "return [...document.querySelectorAll('.ai1ec-datepicker td.ai1ec-day:not(.ai1ec-old):not(.ai1ec-new):not(.ai1ec-active):not(.ai1ec-today)')].find(e => e.offsetParent !== null).textContent.trim();"
+            ));
+            assert.ok(await clickDay(`td.ai1ec-day:not(.ai1ec-old):not(.ai1ec-new):not(.ai1ec-active):not(.ai1ec-today)`), 'no other day');
+            await driver.wait(async () => (await driver.getCurrentUrl()) !== before, h.TIMEOUT, 'picking another day did not navigate');
+            assert.ok((await driver.getCurrentUrl()).includes(`exact_date~${day}-`), 'navigated to the picked day');
+            await h.assertNoConsoleErrors(driver, 'date picker');
+        });
+
         it('opens the category filter', async function () {
             await h.open(driver, '/calendar/', CAL);
             await h.click(driver, '.ai1ec-category-filter .ai1ec-dropdown-toggle');
@@ -76,6 +105,25 @@ describe('JS smoke: frontend', function () {
             );
             await h.assertNoConsoleErrors(driver, 'popover');
         });
+
+        for (const view of ['month', 'agenda']) {
+            it(`prints event values as text in ${view} view rendered by twig.js`, async function () {
+                // The seeded "Hostile venue" event: +6 days 13:00 in the site's timezone (bin/dev-seed-block-test-data.php).
+                const day = new Date(Date.now() + 6 * 864e5).toLocaleDateString('sv-SE', {timeZone: 'Europe/Berlin'});
+                // Start in the other view, so the checked one is rendered from JSON by twig.js.
+                await h.open(driver, `/calendar/action~${view === 'month' ? 'agenda' : 'month'}/exact_date~${day}/`, CAL);
+                const link = await driver.findElement(By.id(`ai1ec-view-${view}`));
+                await driver.executeScript('arguments[0].click();', link);
+                await h.visible(driver, `.ai1ec-${view}-view`);
+                const result = await driver.executeScript(`return {
+                    xss: window.osecXss || 0,
+                    handlers: document.querySelectorAll('#osec-calendar-view img[onerror]').length,
+                    asText: document.querySelector('#osec-calendar-view').textContent.includes('D&D <img src=x'),
+                };`);
+                assert.deepStrictEqual(result, {xss: 0, handlers: 0, asText: true});
+                await h.assertNoConsoleErrors(driver, `escaped ${view} view`);
+            });
+        }
 
         it('has a working print button', async function () {
             await h.open(driver, '/calendar/action~month/', CAL);

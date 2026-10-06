@@ -239,6 +239,7 @@ class BootstrapController
 
         ScriptsFrontendController::add_actions($app, is_admin());
         TrashController::add_actions($app, is_admin());
+        FrontendCssController::add_actions($app, is_admin());
         EscapingRepairController::add_actions($app, is_admin());
 
         add_action('pre_http_request', function ($status, $output, $url) use ($app) {
@@ -249,6 +250,10 @@ class BootstrapController
         add_action('init', function () use ($app) {
             ThemeLoader::factory($app)->clean_cache_on_upgrade();
         }, PHP_INT_MAX);
+
+        add_action('wp_uninitialize_site', function (\WP_Site $site) use ($app) {
+            ThemeLoader::factory($app)->delete_site_cache((int) $site->blog_id);
+        });
 
         add_filter('get_the_excerpt', function (string $post_excerpt) use ($app) {
             return EventContentView::factory($app)->get_the_excerpt($post_excerpt);
@@ -453,7 +458,11 @@ class BootstrapController
             add_action(
                 'wp_ajax_osec_rescan_cache',
                 function () use ($app) {
-                    ThemeLoader::factory($this->app)->ajax_clear_cache();
+                    $loader = ThemeLoader::factory($this->app);
+                    if ( ! $loader->is_rescan_allowed()) {
+                        wp_send_json_error(null, 403);
+                    }
+                    $loader->ajax_clear_cache();
                 }
             );
 
@@ -550,18 +559,13 @@ class BootstrapController
     }
 
     /**
-     * Invalidates CSS cache if FrontendCssController::COMPILED_CSS_CACHE_KEY option was flagged.
-     * Deletes flag afterward.
+     * Compiles the CSS if FrontendCssController::COMPILED_CSS_CACHE_KEY is flagged.
+     *
+     * @see FrontendCssController::compile_flagged()
      */
     public function verifyCache()
     {
-        if (
-            $this->app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY)
-        ) {
-            FrontendCssController::factory($this->app)
-                                 ->invalidate_cache(null, true);
-            $this->app->options->delete(FrontendCssController::COMPILED_CSS_CACHE_KEY);
-        }
+        FrontendCssController::factory($this->app)->compile_flagged();
     }
 
     /**

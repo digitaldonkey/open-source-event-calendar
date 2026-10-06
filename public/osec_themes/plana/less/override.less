@@ -56,6 +56,15 @@
     color: @link-hover-color;
   }
 }
+// Month events are links inside the day cell. Plana's calendar.twig has no .timely wrapper,
+// so Bootstrap's ".timely a" link color does not reach them and they took the site's text
+// color. Same colors as week/day events above; a category color (inline style) still wins.
+.ai1ec-month-view .ai1ec-event-container {
+  color: @link-color;
+  &:hover {
+    color: @link-hover-color;
+  }
+}
 .ai1ec-full-event th,
 .ai1ec-excerpt .ai1ec-field-label {
   font-size: 1em;
@@ -144,4 +153,21 @@
 
 table.ai1ec-month-view {
   margin-bottom: .25rem;
+}
+
+.ai1ec-reveal-full-day {
+
+  .ai1ec-btn-xs {
+    line-height: 1;
+    padding: .2em;
+    border-radius: 0;
+    border: 1px solid currentColor;
+
+    &:hover {
+      background: @foregroundColor;
+      color: @backgroundColor;
+      border-color: @foregroundColor;
+    }
+  }
+
 }

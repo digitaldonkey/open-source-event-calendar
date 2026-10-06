@@ -116,9 +116,10 @@ Plugin Check's `EscapeOutput` sniff only checks PHP output points (`echo`, `prin
 It never flags values handed to Twig, and `.twig` files are not scanned.
 
 The TwigJs templates (`agenda`, `month`, `oneday`, see below) run in the browser, with frontend
-rendering on by default. twig.js does **not autoescape**, and PHP filters like `|esc_url` are not
-available there. Values reaching them must already be safe as stored, which is one more reason the
-sanitizer runs last (rule 6).
+rendering on by default. They are created with `autoescape: true` (twig.js 3), so they escape like PHP
+Twig: plain values are escaped, `|raw` marks HTML built by PHP, `|e('html_attr')` attributes. PHP
+filters like `|esc_url` are not available there, so URLs must already be safe as stored, which is one
+more reason the sanitizer runs last (rule 6).
 
 ## Tools
 
@@ -155,10 +156,11 @@ npm run build
 
 Three Twig templates, `public/osec_themes/vortex/twig/{agenda,month,oneday}.twig`, also exist as TwigJs templates inside `public/js/pages/calendar.js`, which are in use when [osec_use_frontend_rendering](https://github.com/digitaldonkey/open-source-event-calendar/blob/c3ecd0b20205f7830710506286a828b7049b27c4/src/App/Model/Settings.php#L830-L843) is set.
 
-After editing one of them, regenerate the copies in `calendar.js` (between the `/*REPLACE:<template>.twig*/` comments) with the following script.
+After editing one of them, regenerate the copies in `calendar.js` (between the `/*REPLACE:<template>.twig*/` comments) with the following script. It also writes the twig.js runtime they were compiled with (between `/*BEGIN:twig.js runtime*/` and `/*END:twig.js runtime*/`), so runtime and templates always match.
 
 ```bash
 cd open-source-event-calendar/twig_to_js_transform/
+nvm use
 npm install
 npm run build-twig-frontend
 ```

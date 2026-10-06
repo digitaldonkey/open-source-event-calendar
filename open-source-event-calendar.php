@@ -12,12 +12,12 @@
  * Requires at least: 6.7
  * Tested up to: 7.1
  * Requires PHP: 8.2
- * Stable Tag: 1.1.15
+ * Stable Tag: 1.1.16
  * License: GPL-3.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: open-source-event-calendar
  * Domain Path: /languages
- * Version: 1.1.15
+ * Version: 1.1.16
  */
 
 if (! defined('ABSPATH')) {
@@ -68,7 +68,7 @@ function osec_plugin_activate()
     }
     DatabaseSchema::factory($osec_app)->verifySqlSchema(true);
     $osec_app->options->set('osec_force_flush_rewrite_rules', true);
-    $osec_app->options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true);
+    FrontendCssController::factory($osec_app)->request_compile();
 }
 
 register_activation_hook(__FILE__, 'osec_plugin_activate');

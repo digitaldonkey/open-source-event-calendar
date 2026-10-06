@@ -14,9 +14,16 @@ const assert = require('node:assert');
 const {Builder, Browser, By, until, logging} = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
-const settings = fs.existsSync(__dirname + '/../settings.local.js')
-    ? require('../settings.local.js')
-    : require('../settings.js');
+const settings = {
+    ...(fs.existsSync(__dirname + '/../settings.local.js')
+        ? require('../settings.local.js')
+        : require('../settings.js')),
+};
+// E.g. a sandbox site: OSEC_TEST_DOMAIN=https://claude.ddev-wordpress.ddev.site
+// OSEC_TEST_HOST_RULES='MAP *.ddev-wordpress.ddev.site ddev-router' (the grid has no alias for wildcard hosts).
+if (process.env.OSEC_TEST_DOMAIN) {
+    settings.domain = process.env.OSEC_TEST_DOMAIN;
+}
 
 const TIMEOUT = 15000;
 
@@ -25,6 +32,7 @@ async function buildDriver() {
     prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
     const options = new chrome.Options()
         .addArguments('--headless=new', '--disable-gpu', '--ignore-certificate-errors')
+        .addArguments(...(process.env.OSEC_TEST_HOST_RULES ? [`--host-resolver-rules=${process.env.OSEC_TEST_HOST_RULES}`] : []))
         .windowSize(settings.screen);
     options.setAcceptInsecureCerts(true);
     const builder = new Builder()

@@ -65,10 +65,13 @@ class DateFormatsFrontend extends OsecBaseInitialized
             __('Osec Frontend Date Formats', 'open-source-event-calendar'),
             function () {
                 echo '<p>'
-                . esc_html__(
-                    'Osec calendar uses WordPress default "date_format" and "time_format" above and
+                . wp_kses(
+                    __(
+                        'Osec calendar uses WordPress default "date_format" and "time_format" above and
                         provides additional <strong>frontend date formats</strong>.',
-                    'open-source-event-calendar'
+                        'open-source-event-calendar'
+                    ),
+                    $this->app->kses->allowed_html('basic')
                 )
                 . '<br />'
                 . esc_html__(
@@ -100,12 +103,24 @@ class DateFormatsFrontend extends OsecBaseInitialized
             'general',
             self::SECTION_ID,
         );
+
+        add_action('admin_enqueue_scripts', function ($hook_suffix) {
+            if ('options-general.php' === $hook_suffix) {
+                wp_enqueue_script(
+                    'osec-settings-date-format',
+                    OSEC_ADMIN_THEME_JS_URL . 'admin/settings_date_format.js',
+                    ['jquery'],
+                    OSEC_VERSION,
+                    ['in_footer' => true]
+                );
+            }
+        });
     }
 
     public function renderShortNoYear(): void
     {
         $defaults       = self::$default[self::FORMAT_NO_YEAR];
-        $current_format = stripslashes(get_option(self::FORMAT_NO_YEAR, $defaults[0]));
+        $current_format = get_option(self::FORMAT_NO_YEAR, $defaults[0]);
         $is_custom      = ! in_array($current_format, $defaults, true);
         $args           = [
             'id'                         => self::FORMAT_NO_YEAR,
@@ -158,7 +173,7 @@ class DateFormatsFrontend extends OsecBaseInitialized
     public function renderShortDate(): void
     {
         $defaults       = self::$default[self::FORMAT_SHORT];
-        $current_format = stripslashes(get_option(self::FORMAT_SHORT, $defaults[0]));
+        $current_format = get_option(self::FORMAT_SHORT, $defaults[0]);
         $is_custom      = ! in_array($current_format, $defaults, true);
         $args           = [
             'id'                         => self::FORMAT_SHORT,
@@ -186,25 +201,30 @@ class DateFormatsFrontend extends OsecBaseInitialized
     }
 
     /**
-     * @throws Exception
+     * A preset, or the custom field when "custom" is selected.
+     *
+     * Runs twice when the option does not exist yet (update_option() → add_option()), the second
+     * time with the format already taken from the custom field, so any non-empty format is accepted.
+     * An empty one keeps the stored format and reports it.
      */
     private function sanitize(string $value, string $format): string
     {
-        $default = self::$default[$format];
-        if (in_array($value, $default, true)) {
+        if (in_array($value, self::$default[$format], true)) {
             return $value;
         }
-        $key = $format . '_custom';
-        if ($value === 'custom' && RequestParser::has_param($key)) {
-            $customVal = RequestParser::get_param($key);
-            // Check if it works.
-            if ($customVal && (bool) strtotime(date_format(date_create(), $customVal))) {
-                return $customVal;
-            }
+        $value = 'custom' === $value
+            ? RequestParser::get_param($format . '_custom')
+            : sanitize_text_field($value);
+        if ('' !== trim($value)) {
+            return $value;
         }
-        throw new Exception(esc_html(
-            'Unknown format. Got: ' . $format
-        ));
+        add_settings_error(
+            $format,
+            $format . '_empty',
+            __('The custom date format was empty, the previous format is kept.', 'open-source-event-calendar')
+        );
+
+        return (string)get_option($format);
     }
 
     public function sanitizeNoYear(string $value): string

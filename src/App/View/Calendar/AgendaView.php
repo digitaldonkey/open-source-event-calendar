@@ -101,11 +101,6 @@ class AgendaView extends AbstractView
         }
         $this->updateMeta($results['events']);
 
-        $titles = $this->makePagerTitle(
-            $use_time_limit ? $exact_date : $results['date_first']->format_to_gmt(),
-            $use_time_limit ? $view_args['time_limit'] : $results['date_last']->format_to_gmt()
-        );
-
         if (! count($results['events'])) {
             // Fixing that navigation jumps if there are no results.
             // There is still a "jump" when you page back on an empty
@@ -124,6 +119,12 @@ class AgendaView extends AbstractView
             // Force using no page_offset.
             $absolute_pager = true;
         }
+
+        // After the empty-result fallback: with no events, date_first is "now", not the requested month.
+        $titles = $this->makePagerTitle(
+            $use_time_limit ? $exact_date : $results['date_first']->format_to_gmt(),
+            $use_time_limit ? $view_args['time_limit'] : $results['date_last']->format_to_gmt()
+        );
 
         $dates = $this->get_agenda_like_date_array(
             $results['events'],
@@ -393,6 +394,12 @@ class AgendaView extends AbstractView
         // repeated the same page on days with more events than one page holds.
         $page_offset = (int)($args['page_offset'] ?? 0);
 
+        // The first page lists events from the requested date on (the picked day or today),
+        // so the picker names that date; any other page starts at its first event.
+        $picker_date = 0 === $page_offset && DT::is_timestamp($args['exact_date'] ?? null)
+            ? $args['exact_date']
+            : $date_first->format_to_gmt();
+
         if ($make_absolute) {
             $args['page_offset'] = 0;
             $args['exact_date']  = (new DT($date_first))->set_time(
@@ -416,7 +423,7 @@ class AgendaView extends AbstractView
         // Minical datepicker.
         $links[] = HtmlFactory::factory($this->app)->create_datepicker_link(
             $args,
-            $date_first->format_to_gmt(),
+            $picker_date,
             $title,
             $title_short
         );

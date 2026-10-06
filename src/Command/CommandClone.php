@@ -113,8 +113,8 @@ class CommandClone extends CommandAbstract
                         'The event %1$s was cloned succesfully. <a href="%2$s">Edit cloned event</a>',
                         'open-source-event-calendar'
                     ),
-                    ' <strong>' . $post->post_title . '</strong>',
-                    esc_attr(
+                    ' <strong>' . esc_html($post->post_title) . '</strong>',
+                    esc_url(
                         admin_url("post.php?post={$new_post_id}&action=edit")
                     )
                 )

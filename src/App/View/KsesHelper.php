@@ -20,6 +20,41 @@ use Osec\Bootstrap\OsecBaseClass;
  */
 class KsesHelper extends OsecBaseClass
 {
+    /**
+     * Allowed HTML by list name, for the Twig filter `kses('<name>')`.
+     *
+     * @throws \InvalidArgumentException On an unknown list name.
+     */
+    public function allowed_html(string $name): array
+    {
+        return match ($name) {
+            'basic' => $this->allowed_html_basic(),
+            default => throw new \InvalidArgumentException(esc_html('Unknown kses list: ' . $name)),
+        };
+    }
+
+    /**
+     * Text formatting and links, e.g. admin notices.
+     */
+    public function allowed_html_basic(): array
+    {
+        return [
+            'a'      => [
+                'class' => true,
+                'href'  => true,
+                'title' => true,
+            ],
+            'b'      => [],
+            'br'     => [],
+            'code'   => [],
+            'em'     => [],
+            'i'      => [],
+            'p'      => [],
+            'pre'    => [],
+            'strong' => [],
+        ];
+    }
+
     public function allowed_html_inline(): array
     {
         /**
@@ -220,7 +255,6 @@ class KsesHelper extends OsecBaseClass
                     'data-*' => true,
                     'href' => true,
                     'id' => true,
-                    'onclick' => true,
                     'rel' => true,
                     'style' => true,
                     'tabindex' => true,
@@ -258,12 +292,13 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                 ],
                 'div' => [
+                    'aria-live' => true,
                     'class' => true,
                     'data-*' => true,
                     'id' => true,
+                    'role' => true,
                     'style' => true,
                     'popover' => true,
-                    'role' => true,
                     'aria-label' => true,
                 ],
                 'em' => [
@@ -318,8 +353,6 @@ class KsesHelper extends OsecBaseClass
                     'data-*' => true,
                     'id' => true,
                     'name' => true,
-                    'onchange' => true,
-                    'onfocus' => true,
                     'placeholder' => true,
                     'size' => true,
                     'step' => true,
@@ -360,8 +393,6 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                     'data-*' => true,
                     'id' => true,
-                ],
-                'script' => [
                 ],
                 'select' => [
                     'class' => true,
