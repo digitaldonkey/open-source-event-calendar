@@ -129,7 +129,6 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                 ],
                 'table'  => [
-                    'cellspacing' => true,
                     'class'       => true,
                     'style'       => true,
                 ],
@@ -199,7 +198,7 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                     'id'    => true,
                 ],
-                'title' => [ 'title' => true ],
+                'title' => [],
                 'path'  => [
                     'd'    => true,
                     'fill' => true,
@@ -230,7 +229,6 @@ class KsesHelper extends OsecBaseClass
                 'meta'  => [
                     'itemprop'    => true,
                     'content'    => true,
-                    'url'    => true,
                 ],
             ];
         }
@@ -330,8 +328,6 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                     'style' => true,
                 ],
-                'iframe' => [
-                ],
                 'img' => [
                     'alt' => true,
                     'class' => true,
@@ -346,7 +342,6 @@ class KsesHelper extends OsecBaseClass
                     'height'      => true,
                 ],
                 'input' => [
-                    1 => true,
                     'autocomplete' => true,
                     'checked' => true,
                     'class' => true,
@@ -414,7 +409,6 @@ class KsesHelper extends OsecBaseClass
                     'id' => true,
                     'style' => true,
                     'title' => true,
-                    'item*' => true,
                     'popover' => true,
                     'role' => true,
                 ],
@@ -443,15 +437,11 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                     'colspan' => true,
                     'scope' => true,
-                    'valign' => true,
                 ],
                 'thead' => [
                     'class' => true,
                 ],
                 'tr' => [
-                    'class' => true,
-                ],
-                'tt' => [
                     'class' => true,
                 ],
                 'ul' => [

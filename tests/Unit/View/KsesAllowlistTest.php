@@ -34,7 +34,7 @@ class KsesAllowlistTest extends TestBase
             'feed url length'     => ['<input type="url" name="u" minlength="10" maxlength="768">'],
             'theme screenshot'    => ['<img src="https://example.org/s.png" class="theme-screenshot" alt="">'],
             'theme action title'  => ['<a href="#" title="Activate">Activate</a>'],
-            'form table heading'  => ['<th scope="row" valign="top">Color</th>'],
+            'form table heading'  => ['<th scope="row">Color</th>'],
         ];
     }
 
@@ -65,6 +65,33 @@ class KsesAllowlistTest extends TestBase
         foreach ($osec_app->kses->allowed_html_frontend() as $tag => $attributes) {
             foreach (array_keys((array) $attributes) as $attribute) {
                 $this->assertStringStartsNotWith('on', (string) $attribute, "$tag@$attribute");
+            }
+        }
+    }
+
+    /**
+     * No obsolete HTML, no stray keys, and no wildcard kses does not expand (only data-*).
+     */
+    public function test_lists_hold_only_current_html()
+    {
+        global $osec_app;
+        $obsolete_tags       = ['tt', 'center', 'font', 'iframe'];
+        $obsolete_attributes = ['valign', 'align', 'cellspacing', 'cellpadding', 'bgcolor', 'border'];
+        $lists               = [
+            'frontend' => $osec_app->kses->allowed_html_frontend(),
+            'backend'  => $osec_app->kses->allowed_html_backend(),
+            'basic'    => $osec_app->kses->allowed_html_basic(),
+        ];
+        foreach ($lists as $name => $list) {
+            foreach ($list as $tag => $attributes) {
+                $this->assertNotContains($tag, $obsolete_tags, "$name: <$tag>");
+                foreach (array_keys((array) $attributes) as $attribute) {
+                    $this->assertIsString($attribute, "$name: $tag has a numeric key");
+                    $this->assertNotContains($attribute, $obsolete_attributes, "$name: $tag@$attribute");
+                    if (str_contains($attribute, '*')) {
+                        $this->assertSame('data-*', $attribute, "$name: $tag@$attribute is not expanded by kses");
+                    }
+                }
             }
         }
     }

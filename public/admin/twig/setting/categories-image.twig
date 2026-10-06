@@ -1,14 +1,14 @@
 {% if edit %}
 
     <tr class="form-field">
-        <th scope="row" valign="top">
+        <th scope="row">
             <label for="tag-color">
                 {{ section_name | raw }}
             </label>
         </th>
         <td>
 
-            <img src='{{ image_src }}' style='{{ image_style }}' alt='' id='osec_category_imag_preview' />
+            <img src='{{ image_src }}' alt='' id='osec_category_imag_preview' />
             <input type="hidden" name="osec_category_image_url" id="osec_category_image_url" value="">
             <input class="button at-upload_image_button" type="button" id='osec_category_image_uploader' value="{{ label }}">
 
@@ -33,7 +33,7 @@
             {{ section_name | raw }}
         </label>
 
-        <img src='{{ image_src }}' style='{{ image_style }}' alt='' id='osec_category_imag_preview' />
+        <img src='{{ image_src }}' alt='' id='osec_category_imag_preview' />
         <input type="hidden" name="osec_category_image_url" id="osec_category_image_url" value="">
         <input class="button at-upload_image_button" type="button" id='osec_category_image_uploader' value="{{ label }}">
 
