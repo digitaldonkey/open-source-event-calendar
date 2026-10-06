@@ -65,10 +65,13 @@ class DateFormatsFrontend extends OsecBaseInitialized
             __('Osec Frontend Date Formats', 'open-source-event-calendar'),
             function () {
                 echo '<p>'
-                . esc_html__(
-                    'Osec calendar uses WordPress default "date_format" and "time_format" above and
+                . wp_kses(
+                    __(
+                        'Osec calendar uses WordPress default "date_format" and "time_format" above and
                         provides additional <strong>frontend date formats</strong>.',
-                    'open-source-event-calendar'
+                        'open-source-event-calendar'
+                    ),
+                    $this->app->kses->allowed_html('basic')
                 )
                 . '<br />'
                 . esc_html__(
@@ -100,6 +103,18 @@ class DateFormatsFrontend extends OsecBaseInitialized
             'general',
             self::SECTION_ID,
         );
+
+        add_action('admin_enqueue_scripts', function ($hook_suffix) {
+            if ('options-general.php' === $hook_suffix) {
+                wp_enqueue_script(
+                    'osec-settings-date-format',
+                    OSEC_ADMIN_THEME_JS_URL . 'admin/settings_date_format.js',
+                    ['jquery'],
+                    OSEC_VERSION,
+                    ['in_footer' => true]
+                );
+            }
+        });
     }
 
     public function renderShortNoYear(): void

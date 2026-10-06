@@ -3,7 +3,7 @@
     {% set label = text_label %}
     {% endif %}
     <p><strong>{{ label }}:</strong></p>
-    {{ message | raw }}
+    {{ message | kses }}
 
     {% if persistent and dismiss_nonce %}
         <button class="button button-primary ai1ec-dismissable"

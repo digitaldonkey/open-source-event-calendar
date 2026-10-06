@@ -273,7 +273,21 @@ class TwigExtension extends AbstractExtension
             new TwigFilter('theme_img_url', $this->theme_img_url(...)),
             // Output of esc_url() is attribute-safe, Twig must not escape it again.
             new TwigFilter('esc_url', $this->esc_url(...), ['is_safe' => ['html']]),
+            new TwigFilter('kses', $this->kses(...), ['is_safe' => ['html']]),
         ];
+    }
+
+    /**
+     * Twig filter kses - HTML limited to a named list of KsesHelper::allowed_html().
+     *
+     * @param  mixed  $html  HTML.
+     * @param  string  $name  List name, default `basic`.
+     *
+     * @return string
+     */
+    public function kses(mixed $html, string $name = 'basic'): string
+    {
+        return wp_kses((string)$html, $this->app->kses->allowed_html($name));
     }
 
     /**
