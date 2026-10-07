@@ -1,5 +1,7 @@
 <div class="timely {{ wrapper_classes|join(' ') }}">
     <a id="wp--skip-link--target"></a>
+    {# The theme prints the title outside the Event scope. #}
+    <meta itemprop="name" content="{{ title|striptags }}">
 
     <div class="ai1ec-actions">
         <div class="ai1ec-btn-group-vertical ai1ec-clearfix">
@@ -56,8 +58,8 @@
                         </div>
                         {% include 'recurrence.twig' %}
                     </div>
-                    <div class="ai1ec-hidden dt-start">{{ start }}</div>
-                    <div class="ai1ec-hidden dt-end">{{ end }}</div>
+                    <time class="ai1ec-hidden dt-start" itemprop="startDate" datetime="{{ start }}">{{ start }}</time>
+                    <time class="ai1ec-hidden dt-end" itemprop="endDate" datetime="{{ end }}">{{ end }}</time>
                 </div>
 
                 {% if location is not empty %}
@@ -72,8 +74,19 @@
                 {% if not hide_cost and (cost is not empty or is_free_event) %}
                     <div class="ai1ec-cost ai1ec-row">
                         <div class="ai1ec-field-label {{ col1 }}">{{ text_cost }}</div>
-                        <div class="ai1ec-field-value {{ col2 }}">
-                            {{ is_free_event ? text_free : cost }}
+                        <div class="ai1ec-field-value {{ col2 }}" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                            {% if is_free_event %}
+                                <meta itemprop="price" content="0">
+                                {{ text_free }}
+                            {% else %}
+                                {% if cost_iso_4217_currency %}
+                                    <meta itemprop="priceCurrency" content="{{ cost_iso_4217_currency }}">
+                                {% endif %}
+                                {% if cost_number is not null %}
+                                    <meta itemprop="price" content="{{ cost_number }}">
+                                {% endif %}
+                                {{ cost }}
+                            {% endif %}
                         </div>
                     </div>
                 {% endif %}
