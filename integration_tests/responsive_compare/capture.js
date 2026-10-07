@@ -105,7 +105,7 @@ async function shootView(driver, view) {
             // than grabbing an unrelated one, and the view container's own size either way.
             var view = document.querySelector('.ai1ec-${view}-view');
             var t = view && view.closest('.timely');
-            var link = document.querySelector('link[href*="osec_compiled"], link[href*="osec-css-cache"], link[href*="osec_parsed"]');
+            var link = document.querySelector('link[href*="osec-compiled"], link[href*="osec_compiled"], link[href*="osec-css-cache"], link[href*="osec_parsed"]');
             return {
                 timelyFontSize: t ? getComputedStyle(t).fontSize : null,
                 viewFontSize: view ? getComputedStyle(view).fontSize : null,

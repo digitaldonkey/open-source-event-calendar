@@ -6,6 +6,7 @@ use Osec\App\Controller\BootstrapController;
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\LessController;
 use Osec\Theme\ThemeLoader;
+use Osec\Tests\Utilities\CssEngineTrait;
 use Osec\Tests\Utilities\TestBase;
 
 /**
@@ -15,6 +16,8 @@ use Osec\Tests\Utilities\TestBase;
  */
 class ThemeSwitchCompileTest extends TestBase
 {
+    use CssEngineTrait;
+
     private array $saved = [];
 
     private string $custom_root;
@@ -24,7 +27,7 @@ class ThemeSwitchCompileTest extends TestBase
         global $osec_app;
 
         parent::set_up();
-        foreach (['osec_current_theme', FrontendCssController::COMPILED_CSS_KEY, FrontendCssController::COMPILED_CSS_CACHE_KEY] as $key) {
+        foreach (['osec_current_theme', FrontendCssController::CSS_OPTION, FrontendCssController::COMPILED_CSS_CACHE_KEY] as $key) {
             $this->saved[$key] = $osec_app->options->get($key);
         }
         // A custom theme root without a vortex folder, like wp-content/themes/osec_themes.
@@ -39,6 +42,7 @@ class ThemeSwitchCompileTest extends TestBase
         foreach ($this->saved as $key => $value) {
             $osec_app->options->set($key, $value, true);
         }
+        $this->reset_css_engine();
         $osec_app->inject_object(ThemeLoader::class, new ThemeLoader($osec_app));
         $files = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($this->custom_root, \FilesystemIterator::SKIP_DOTS),
@@ -49,6 +53,7 @@ class ThemeSwitchCompileTest extends TestBase
         }
         rmdir($this->custom_root);
         parent::tear_down();
+        $this->commit_css_cleanup();
     }
 
     /**
@@ -72,13 +77,17 @@ class ThemeSwitchCompileTest extends TestBase
     {
         global $osec_app;
 
-        $osec_app->options->set(FrontendCssController::COMPILED_CSS_KEY, 123, true);
+        $state = ['engine' => 'db', 'ver' => 'abcdef0'];
+        $osec_app->options->set(FrontendCssController::CSS_OPTION, $state, true);
         $osec_app->options->delete(FrontendCssController::COMPILED_CSS_CACHE_KEY);
+        set_transient(FrontendCssController::COMPILE_FAILED_TRANSIENT, 1, 30);
 
         ThemeLoader::factory($osec_app)->switch_theme($this->theme($this->custom_root, 'child_test'));
 
         $this->assertTrue((bool) $osec_app->options->get(FrontendCssController::COMPILED_CSS_CACHE_KEY));
-        $this->assertSame(123, $osec_app->options->get(FrontendCssController::COMPILED_CSS_KEY));
+        // Switching away from a theme that failed to compile must not wait for the backoff.
+        $this->assertFalse(get_transient(FrontendCssController::COMPILE_FAILED_TRANSIENT));
+        $this->assertSame($state, $osec_app->options->get(FrontendCssController::CSS_OPTION));
     }
 
     /**
@@ -96,15 +105,14 @@ class ThemeSwitchCompileTest extends TestBase
             "@import \"bootstrap/mixins.less\";\n.my-calendar-box { .ai1ec-clearfix(); color: @link-color; }\n"
         );
 
+        $this->use_css_engine('file');
         ThemeLoader::factory($osec_app)->switch_theme($this->theme($this->custom_root, 'child_test'));
 
         // Next request: the loader is built for the new theme, then 'init' runs verifyCache().
         $osec_app->inject_object(ThemeLoader::class, new ThemeLoader($osec_app));
         $this->verify_cache_callback()();
 
-        $ctrl  = FrontendCssController::factory($osec_app);
-        $cache = (new \ReflectionProperty($ctrl, 'cache'))->getValue($ctrl);
-        $css   = $cache->get(FrontendCssController::COMPILED_CSS_KEY);
+        $css = (string) $this->stored_css();
 
         // The example from README.md "Custom calendar themes".
         $this->assertMatchesRegularExpression('/\\.my-calendar-box\\{color:#[0-9a-f]{3,6}\\}/', $css);

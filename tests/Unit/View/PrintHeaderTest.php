@@ -58,6 +58,17 @@ class PrintHeaderTest extends TestBase
     }
 
     /**
+     * An empty agenda is titled with the requested month, not the current one.
+     */
+    public function test_empty_agenda_title_follows_requested_month()
+    {
+        $header = $this->get_print_header('agenda', ['exact_date' => '16-3-2031']);
+
+        $this->assertStringContainsString('>March 2031 · Agenda</h2>', $header);
+        $this->assertStringContainsString('exact_date~2031-3-1', $header);
+    }
+
+    /**
      * @dataProvider viewProvider
      */
     public function test_print_url_keeps_filters_but_not_display_options(string $view)

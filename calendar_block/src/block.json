@@ -74,6 +74,11 @@
 			"default": true,
 			"type": "boolean"
 		},
+		"printIcon": {
+			"default": "global",
+			"enum": ["global", "show", "hide"],
+			"type": "string"
+		},
 		"agendaToggle": {
 			"default": false,
 			"type": "boolean"

@@ -232,7 +232,11 @@ run, fails on any browser console error or failed script request, and does one o
 installs, uninstalls and trashes nothing, so it is safe to run on the dev site after every JS change. Not part
 of `npm run test`. CI runs it in `release_test_job` after the main suite, on its own calendar page
 (`osec-smoke-calendar`) with the seed data, in the local Chrome of the browsers image (`SELENIUM_LOCAL=1`).
-Other env: `BASE_URL`, `CALENDAR_PATH`, `WP_ADMIN_USER`/`WP_ADMIN_PASS`, `SELENIUM_REMOTE_URL`.
+Other env: `BASE_URL`, `CALENDAR_PATH`, `WP_ADMIN_USER`/`WP_ADMIN_PASS`, `SELENIUM_REMOTE_URL`, and
+`OSEC_TEST_HOST_RULES` for a sandbox (the grid cannot resolve its wildcard host):
+`BASE_URL=https://claude.ddev-wordpress.ddev.site OSEC_TEST_HOST_RULES='MAP *.ddev-wordpress.ddev.site ddev-router'`.
+Two tests check that event values print as text in views rendered by twig.js; they need the seed's
+"Hostile venue" event.
 
 ```bash
 /usr/local/bin/wp eval-file bin/dev-seed-block-test-data.php   # test data, once ([OSEC-TEST] events and terms)

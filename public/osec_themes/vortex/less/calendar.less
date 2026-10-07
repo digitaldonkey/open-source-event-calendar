@@ -1057,6 +1057,38 @@ table.ai1ec-oneday-view-original {
   .osec-print-grid {
     width: auto !important;
   }
+  // Week/day fill the page area like the month: the view takes the page height, the grid what
+  // the header and the all-day row leave. Events and hour lines are placed in percent of the
+  // grid (scripts/calendar/print), so they scale with it.
+  .osec-calendar-view:has(.osec-print-grid) {
+    display: flex;
+    flex-direction: column;
+    min-height: @print-landscape-height;
+    > .ai1ec-week-view,
+    > .ai1ec-oneday-view {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+    }
+  }
+  .osec-calendar-view--oneday:has(.osec-print-grid) {
+    min-height: @print-portrait-height;
+  }
+  .osec-print-grid {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1 1 auto;
+    > table {
+      flex: 1 1 auto;
+      height: 100%;
+    }
+    tr,
+    td,
+    .ai1ec-grid-container,
+    .ai1ec-day {
+      height: 100% !important;
+    }
+  }
   .osec-print-grid {
     overflow: hidden !important;
     .ai1ec-event-container {
@@ -1149,15 +1181,12 @@ table.ai1ec-oneday-view-original {
   }
   // Firefox does not paint the vertical borders of a collapsed-border table that is split
   // across pages (verified 2026-09-16: a one page month keeps them, a three page month
-  // loses them), so print with separated borders. Each cell draws its top and right line
-  // and the table closes the left and bottom edge, which keeps every line 1px.
+  // loses them), and the flex layout below drops table borders altogether. So every line
+  // comes from the cells: top and right on each, left on the first column, bottom on the
+  // last week, which keeps every line 1px.
   // The screen border color (#ddd) is also too light to print reliably.
   .ai1ec-month-view {
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
-    border-color: #999 !important;
-    border-top-width: 0 !important;
-    border-right-width: 0 !important;
+    border-width: 0 !important;
   }
   .ai1ec-month-view td,
   .ai1ec-month-view th {
@@ -1165,9 +1194,55 @@ table.ai1ec-oneday-view-original {
     border-style: solid !important;
     border-color: #999 !important;
   }
+  .ai1ec-month-view tr > :first-child {
+    border-left-width: 1px !important;
+  }
+  .ai1ec-month-view tbody tr:last-child td {
+    border-bottom-width: 1px !important;
+  }
   // Month: lower minimum row height, so wrapped titles still fit one page in most months.
   .ai1ec-month-view .ai1ec-day-stretcher {
     height: 3.5em;
+  }
+  // Month: fill the landscape page like a paper calendar. The view is as high as the page
+  // (print button: any paper, see html.ai1ec-print; Ctrl+P: the page area of the smaller
+  // paper, see @page osec-landscape) and the table takes what the print header leaves. A week
+  // with many events takes the height it needs and the other weeks share the rest equally
+  // (flex: 1 1 0 stops at the content height). A table cannot do this in both browsers:
+  // Chrome hands spare table height to rows in proportion to their content, Firefox fills
+  // percentage rows top-down (compared 2026-10-01, 8 variants). Cost: a month running over
+  // several pages repeats the weekday header only on the first page.
+  // The page height has to be a length: percentages do not reach the page through html and
+  // body in print, and Firefox sizes vh by the window, not the page.
+  .osec-calendar-view:has(> .ai1ec-month-view) {
+    display: flex;
+    flex-direction: column;
+    min-height: @print-landscape-height;
+  }
+  .ai1ec-month-view {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    thead,
+    tbody {
+      display: flex;
+      flex-direction: column;
+    }
+    tbody {
+      flex: 1 1 auto;
+    }
+    tr {
+      display: flex;
+    }
+    tbody tr {
+      flex: 1 1 0;
+    }
+    th,
+    td {
+      display: block;
+      flex: 1 1 0;
+      min-width: 0;
+    }
   }
   // Agenda: dates never split; events only split with enough lines on both pages.
   .ai1ec-agenda-view {
@@ -1239,8 +1314,20 @@ table.ai1ec-oneday-view-original {
   }
 }
 
+// Fixed margins make the page area known for Ctrl+P, where month, week and day fill it with
+// the fixed heights below (the print button fills any paper, see html.ai1ec-print). The print
+// dialog's default margins differ per browser and setting. PAGE_HEIGHT in
+// scripts/calendar/print (public/js/pages/calendar.js) estimates the same area.
+@print-page-margin: 10mm;
+// A4 landscape (210mm high, the shorter of A4 and Letter) minus the margins, minus 2mm so
+// rounding never pushes the last row onto a second page.
+@print-landscape-height: 188mm;
+// Letter portrait (279.4mm high, the shorter of A4 and Letter) minus margins and 2mm.
+@print-portrait-height: 257mm;
+
 @page osec-landscape {
   size: landscape;
+  margin: @print-page-margin;
 }
 
 // Day and agenda are sized for portrait: in landscape the day grid is taller than the page,
@@ -1248,6 +1335,7 @@ table.ai1ec-oneday-view-original {
 // overrides an orientation the print dialog remembers from a month or week print.
 @page osec-portrait {
   size: portrait;
+  margin: @print-page-margin;
 }
 
 @media print {
@@ -1257,6 +1345,34 @@ table.ai1ec-oneday-view-original {
   }
   body:has(.ai1ec-oneday-view, .ai1ec-agenda-view) {
     page: osec-portrait;
+  }
+  // Print button: the page holds only the calendar, so the page height can reach it whatever
+  // paper the print dialog uses. In print, html's percentage height is the page area; body
+  // takes it as a minimum (a little less, or Firefox adds an empty page) and passes it on
+  // through flex, and month table or week/day grid fill what the print header leaves. A busy
+  // month still grows onto more pages. Ctrl+P keeps the site around the calendar, so it uses
+  // the fixed heights in .osec-print-calendar(). Verified 2026-10-01 on A3, A4 and Letter in
+  // Chrome and Firefox; 100vh is not an option, Firefox sizes it by the window.
+  html.ai1ec-print {
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    body {
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: calc(100% - 1mm) !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    #ai1ec-calendar,
+    #osec-calendar-view-container,
+    #osec-calendar-view {
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+    }
   }
 }
 

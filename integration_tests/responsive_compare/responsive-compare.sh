@@ -188,13 +188,19 @@ switch_theme() {
     if [ -n "$BASE_FONT" ] && [ "$base_font" != "$BASE_FONT" ]; then
         fail "base font size is $base_font after switching to $1, expected $BASE_FONT"
     fi
-    # Force a real recompile. The cache-bust URL alone does not: with the file cache (APCu off,
-    # as constants-local.php sets for current) it hands back the existing
-    # cache/css/*_osec_compiled.css, so every shot after a theme switch silently kept the
-    # previous theme's stylesheet and base size (measured: 16px instead of a pinned 13px). The
-    # file has to go, and the option needs a fresh timestamp - see CLAUDE.md, "CSS Compile
-    # Caching".
-    rm -f "$PLUGIN_DIR"/cache/css/*_osec_compiled.css
+    # Force a real recompile. The cache-bust URL alone does not: a stored stylesheet is handed
+    # back, so every shot after a theme switch silently kept the previous theme's stylesheet and
+    # base size (measured: 16px instead of a pinned 13px). Both layouts, as the tagged release may
+    # be 1.1.x - see CLAUDE.md, "CSS Compile Caching":
+    #  - 1.1.x: <prefix>_osec_compiled.css in the plugin cache/css/ or open_source_event_calendar_cache/css/
+    #    in uploads; the option osec_compiled.css needs a fresh timestamp (a number links the route).
+    #  - 1.2+: osec-compiled-<blog_id>.css in osec_cache/css/ in uploads (or the override); without
+    #    the option osec_css the page links the route, which compiles.
+    local uploads=/var/www/html/wp-content/uploads
+    rm -f "$PLUGIN_DIR"/cache/css/*_osec_compiled.css "$PLUGIN_DIR"/cache/css/osec-compiled-*.css \
+        "$uploads"/open_source_event_calendar_cache/css/*osec_compiled.css \
+        "$uploads"/osec_cache/css/osec-compiled-*.css
+    $WP option delete osec_css --path=/var/www/html >/dev/null 2>&1 || true
     $WP option update osec_compiled.css "$(date +%s)" --path=/var/www/html >/dev/null 2>&1 \
         || fail "could not reset the compiled-CSS option for theme $1"
     curl -sk "$BASE_URL/?osec-css-cache=$(date +%s)" -o /dev/null

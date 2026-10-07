@@ -40,7 +40,7 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      */
     public function set($key, mixed $value): bool
     {
-        $dist_key = $this->_key($key);
+        $dist_key = $this->prefixed_key($key);
 
         return apcu_store($dist_key, $value);
     }
@@ -55,17 +55,20 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      *
      * @return string Key with prefix prepended
      */
-    protected function _key($key)
+    protected function prefixed_key($key)
     {
-        static $prefix = null;
-        if (null === $prefix) {
-            $prefix = substr(md5((string)get_site_url()), 0, 8) . '_';
-        }
-        if (0 !== strncmp($key, (string)$prefix, 8)) {
+        // Per call: the site can change within one process (switch_to_blog()).
+        $prefix = $this->prefix();
+        if ( ! str_starts_with((string) $key, $prefix)) {
             $key = $prefix . $key;
         }
 
         return $key;
+    }
+
+    private function prefix(): string
+    {
+        return substr(md5((string) get_site_url()), 0, 8) . '_';
     }
 
     /**
@@ -74,7 +77,7 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      */
     public function add($key, mixed $value): bool
     {
-        $dist_key = $this->_key($key);
+        $dist_key = $this->prefixed_key($key);
 
         return apcu_add($dist_key, $value);
     }
@@ -84,34 +87,40 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      */
     public function get($key, mixed $default = null): mixed
     {
-        $dist_key = $this->_key($key);
+        $dist_key = $this->prefixed_key($key);
         $data     = apcu_fetch($dist_key);
         if (false === $data && $default) {
             return $default;
         }
         if (false === $data) {
-            throw new CacheNotSetException(esc_html($dist_key) . " not set");
+            throw new CacheNotSetException(esc_html($dist_key) . ' not set');
         }
 
         return $data;
     }
 
+    /**
+     * Removes this site's keys only; APCu is shared with every application on the server.
+     */
     public function clear_cache(): bool
     {
-        return apcu_clear_cache();
+        $this->delete_matching('');
+
+        return true;
     }
 
+    /**
+     * Removes this site's keys containing $pattern (plain text, not a regex).
+     */
     public function delete_matching(string $pattern): int
     {
-        $i = 0;
-        foreach (new APCUIterator('/$pattern/') as $counter) {
-            $this->delete($counter['key']);
-            if (apc_dec($counter['key'], $counter['value'])) {
-                $i++;
-            }
+        $regex = '/^' . preg_quote($this->prefix(), '/') . '.*' . preg_quote($pattern, '/') . '/';
+        $keys  = [];
+        foreach (new APCUIterator($regex, APC_ITER_KEY) as $entry) {
+            $keys[] = $entry['key'];
         }
 
-        return $i;
+        return count(array_filter($keys, 'apcu_delete'));
     }
 
     /**
@@ -119,6 +128,6 @@ class CacheApcu extends OsecBaseClass implements CacheInterface
      */
     public function delete($key): bool
     {
-        return apcu_delete($this->_key($key));
+        return apcu_delete($this->prefixed_key($key));
     }
 }
