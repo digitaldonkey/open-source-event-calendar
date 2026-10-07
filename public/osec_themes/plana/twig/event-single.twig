@@ -25,10 +25,8 @@
                                 {% endif %}
                             </span>
                             {% include 'recurrence.twig' %}
-                            <div class="visually-hidden dt-start" itemprop="startDate" content="{{ start }}">
-                                {{ start }}
-                            </div>
-                            <div class="visually-hidden dt-end" itemprop="endDate" content="{{ end }}">{{ end }}</div>
+                            <time class="visually-hidden dt-start" itemprop="startDate" datetime="{{ start }}">{{ start }}</time>
+                            <time class="visually-hidden dt-end" itemprop="endDate" datetime="{{ end }}">{{ end }}</time>
                         </dd>
 
                         {% if location is not empty %}
@@ -42,11 +40,16 @@
                             <dt class="label label--cost">{{ text_cost }}</dt>
                             <dd class="cost" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
                                 {% if is_free_event %}
-                                    <meta itemprop="isAccessibleForFree" content="true"/>
+                                    <meta itemprop="price" content="0">
                                     {{ text_free }}
                                 {% else %}
-                                    <meta itemprop="priceCurrency" content="{{ cost_iso_4217_currency }}">
-                                    <span class="event-price" itemprop="price" content="{{ cost_number }}">
+                                    {% if cost_iso_4217_currency %}
+                                        <meta itemprop="priceCurrency" content="{{ cost_iso_4217_currency }}">
+                                    {% endif %}
+                                    {% if cost_number is not null %}
+                                        <meta itemprop="price" content="{{ cost_number }}">
+                                    {% endif %}
+                                    <span class="event-price">
                                         {{ cost }}
                                     </span>
                                 {% endif %}

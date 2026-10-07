@@ -199,6 +199,12 @@ class KsesHelper extends OsecBaseClass
                     'id'    => true,
                 ],
                 'title' => [],
+                // Microdata dates (startDate, endDate) on the single event page.
+                'time'  => [
+                    'class'    => true,
+                    'datetime' => true,
+                    'itemprop' => true,
+                ],
                 'path'  => [
                     'd'    => true,
                     'fill' => true,
