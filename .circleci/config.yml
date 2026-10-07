@@ -560,11 +560,20 @@ jobs:
             WP="php -d display_errors=stderr /tmp/wp-cli.phar --path=$WP_CORE_DIR"
             $WP --version
             $WP plugin activate open-source-event-calendar
+            # Pretty permalinks need WordPress' .htaccess; WP-CLI writes it only when told Apache has mod_rewrite.
+            printf 'apache_modules:\n  - mod_rewrite\n' > /tmp/wp-cli.yml
+            export WP_CLI_CONFIG_PATH=/tmp/wp-cli.yml
             $WP rewrite structure '/%postname%/' --hard
+            test -f "$WP_CORE_DIR/.htaccess"
             page=$($WP post create --post_type=page --post_status=publish --post_title='Smoke calendar' --post_name=osec-smoke-calendar --porcelain)
             [[ "$page" =~ ^[0-9]+$ ]] || { echo "No page ID: $page"; exit 1; }
             $WP eval "global \$osec_app; \$osec_app->settings->set('calendar_page_id', $page);"
             $WP eval-file bin/dev-seed-block-test-data.php
+            $WP rewrite flush --hard
+            for path in /osec-smoke-calendar/ /osec-smoke-calendar/action~month/ /wp-json/; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' "http://$WP_HOST$path")
+              [ "$code" = 200 ] || { echo "http://$WP_HOST$path answers $code"; exit 1; }
+            done
             (
               cd integration_tests/ &&
               BASE_URL="http://$WP_HOST" CALENDAR_PATH=/osec-smoke-calendar/ SELENIUM_LOCAL=1 \
