@@ -63,8 +63,10 @@ One DDEV MySQL holds them next to `db` (set up 2026-10-06):
 | `try_<name>` | throwaway copies, create and drop freely |
 | `phpunit` | PHPUnit's own (`wp-tests-config.php`), unrelated |
 
-- **Select it**: browser `https://<name>.ddev-wordpress.ddev.site`, WP-CLI
-  `WP_SANDBOX_DB=<name> /usr/local/bin/wp ...`. **Set the variable on every call** - without it, WP-CLI uses `db`.
+- **Select it**: browser `https://<name>.ddev-wordpress.ddev.site` with `-` for `_` (`try-x.ddev-wordpress.ddev.site`
+  is database `try_x`: the DDEV router answers "404: No Route Found" for underscores, while `curl` from the container
+  reaches the web server directly and hides that), WP-CLI `WP_SANDBOX_DB=<name> /usr/local/bin/wp ...` with the
+  database name. **Set the variable on every call** - without it, WP-CLI uses `db`.
   A name other than `claude` / `try_*` stops with "Unknown sandbox database", so a typo never reaches `db`.
 - **Create / reset / drop** (as `root`/`root`, which may create databases; `db` has grants on `claude` and `try\_%`):
   ```bash
