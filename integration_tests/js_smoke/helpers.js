@@ -8,30 +8,37 @@
  *
  *   npm run test:js                      # all groups
  *   npm run test:js -- --grep @js-calendar
+ *   BASE_URL=http://web:9400 npm run test:js     # another site
+ *   Env: BASE_URL, CALENDAR_PATH, WP_ADMIN_USER/WP_ADMIN_PASS, SELENIUM_REMOTE_URL, SELENIUM_LOCAL=1,
+ *        OSEC_TEST_HOST_RULES
  */
 const fs = require('fs');
 const assert = require('node:assert');
 const {Builder, Browser, By, until, logging} = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
-const settings = {
-    ...(fs.existsSync(__dirname + '/../settings.local.js')
-        ? require('../settings.local.js')
-        : require('../settings.js')),
-};
-// E.g. a sandbox site: OSEC_TEST_DOMAIN=https://claude.ddev-wordpress.ddev.site
-// OSEC_TEST_HOST_RULES='MAP *.ddev-wordpress.ddev.site ddev-router' (the grid has no alias for wildcard hosts).
-if (process.env.OSEC_TEST_DOMAIN) {
-    settings.domain = process.env.OSEC_TEST_DOMAIN;
+const settings = Object.assign({}, fs.existsSync(__dirname + '/../settings.local.js')
+    ? require('../settings.local.js')
+    : require('../settings.js'));
+// Another site than the settings name, e.g. in CI, a sandbox or a WordPress Playground (SQLite) server.
+if (process.env.BASE_URL) {
+    settings.domain = process.env.BASE_URL;
+}
+if (process.env.WP_ADMIN_USER) {
+    settings.wpLogin = {admin: {user: process.env.WP_ADMIN_USER, pass: process.env.WP_ADMIN_PASS || ''}};
 }
 
 const TIMEOUT = 15000;
+
+// Path of the calendar page, e.g. "/calendar-2/" where an older calendar page is in the trash.
+const CAL_PATH = (process.env.CALENDAR_PATH || '/calendar/').replace(/\/?$/, '/');
 
 async function buildDriver() {
     const prefs = new logging.Preferences();
     prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
     const options = new chrome.Options()
         .addArguments('--headless=new', '--disable-gpu', '--ignore-certificate-errors')
+        // A sandbox's wildcard host has no alias in the grid: OSEC_TEST_HOST_RULES='MAP *.ddev-wordpress.ddev.site ddev-router'.
         .addArguments(...(process.env.OSEC_TEST_HOST_RULES ? [`--host-resolver-rules=${process.env.OSEC_TEST_HOST_RULES}`] : []))
         .windowSize(settings.screen);
     options.setAcceptInsecureCerts(true);
@@ -39,7 +46,10 @@ async function buildDriver() {
         .forBrowser(Browser.CHROME)
         .setChromeOptions(options)
         .setLoggingPrefs(prefs);
-    builder.usingServer(process.env.SELENIUM_REMOTE_URL || 'http://selenium-chrome:4444/wd/hub');
+    // DDEV's Selenium grid by default; SELENIUM_LOCAL=1 starts a local Chrome (CI's browsers image).
+    if (! process.env.SELENIUM_LOCAL) {
+        builder.usingServer(process.env.SELENIUM_REMOTE_URL || 'http://selenium-chrome:4444/wd/hub');
+    }
     return builder.build();
 }
 
@@ -141,6 +151,6 @@ async function click(driver, css) {
 }
 
 module.exports = {
-    settings, TIMEOUT, By, until, assert,
+    settings, TIMEOUT, CAL_PATH, By, until, assert,
     buildDriver, url, login, open, definedModules, waitForModules, assertNoConsoleErrors, visible, click,
 };

@@ -17,7 +17,7 @@ describe('JS smoke: frontend', function () {
         const CAL = ['scripts/calendar'];
 
         it('loads the calendar bundle without errors', async function () {
-            await h.open(driver, '/calendar/', CAL);
+            await h.open(driver, h.CAL_PATH, CAL);
             await h.waitForModules(driver, ['scripts/calendar', 'scripts/calendar/load_views']);
             await h.assertNoConsoleErrors(driver, 'calendar');
         });
@@ -25,7 +25,7 @@ describe('JS smoke: frontend', function () {
         for (const view of views) {
             it(`switches to ${view} view by AJAX`, async function () {
                 // The current view has no link of its own.
-                await h.open(driver, view === 'month' ? '/calendar/action~agenda/' : '/calendar/action~month/', CAL);
+                await h.open(driver, h.CAL_PATH + (view === 'month' ? 'action~agenda/' : 'action~month/'), CAL);
                 const link = await driver.findElement(By.id(`ai1ec-view-${view}`));
                 // The view links live in a dropdown; trigger them as the dropdown item would.
                 await driver.executeScript('arguments[0].click();', link);
@@ -39,7 +39,7 @@ describe('JS smoke: frontend', function () {
         }
 
         it('pages forward and back', async function () {
-            await h.open(driver, '/calendar/action~agenda/', CAL);
+            await h.open(driver, h.CAL_PATH + 'action~agenda/', CAL);
             const start = await driver.getCurrentUrl();
             await h.click(driver, '.ai1ec-next-page');
             await driver.wait(async () => (await driver.getCurrentUrl()) !== start, h.TIMEOUT, 'next page did not load');
@@ -50,7 +50,7 @@ describe('JS smoke: frontend', function () {
         });
 
         it('opens the date picker', async function () {
-            await h.open(driver, '/calendar/action~month/', CAL);
+            await h.open(driver, h.CAL_PATH + 'action~month/', CAL);
             await h.click(driver, '.ai1ec-minical-trigger');
             await h.visible(driver, '.ai1ec-datepicker');
             await h.assertNoConsoleErrors(driver, 'date picker');
@@ -66,7 +66,7 @@ describe('JS smoke: frontend', function () {
                 "const c = [...document.querySelectorAll('.ai1ec-datepicker ' + arguments[0])].find(e => e.offsetParent !== null); if (c) { c.click(); } return !!c;",
                 css
             );
-            await h.open(driver, '/calendar/action~month/', CAL);
+            await h.open(driver, h.CAL_PATH + 'action~month/', CAL);
             for (let i = 1; i <= 3; i++) {
                 await h.click(driver, '.ai1ec-minical-trigger');
                 await driver.wait(pickerOpen, h.TIMEOUT, `picker did not open (${i})`);
@@ -86,7 +86,7 @@ describe('JS smoke: frontend', function () {
         });
 
         it('opens the category filter', async function () {
-            await h.open(driver, '/calendar/', CAL);
+            await h.open(driver, h.CAL_PATH, CAL);
             await h.click(driver, '.ai1ec-category-filter .ai1ec-dropdown-toggle');
             // vortex: bootstrap dropdown, plana: flyout menu.
             await h.visible(driver, '.ai1ec-category-filter .ai1ec-dropdown-menu, .ai1ec-category-filter .plana-flyout-menu--menu');
@@ -94,7 +94,7 @@ describe('JS smoke: frontend', function () {
         });
 
         it('shows an event popover in month view', async function () {
-            await h.open(driver, '/calendar/action~month/', CAL);
+            await h.open(driver, h.CAL_PATH + 'action~month/', CAL);
             const event = await h.visible(driver, '.ai1ec-month-view .ai1ec-event-container');
             await driver.actions({async: true}).move({origin: event}).perform();
             // Every event carries a hidden popover; hovering shows one.
@@ -111,7 +111,7 @@ describe('JS smoke: frontend', function () {
                 // The seeded "Hostile venue" event: +6 days 13:00 in the site's timezone (bin/dev-seed-block-test-data.php).
                 const day = new Date(Date.now() + 6 * 864e5).toLocaleDateString('sv-SE', {timeZone: 'Europe/Berlin'});
                 // Start in the other view, so the checked one is rendered from JSON by twig.js.
-                await h.open(driver, `/calendar/action~${view === 'month' ? 'agenda' : 'month'}/exact_date~${day}/`, CAL);
+                await h.open(driver, `${h.CAL_PATH}action~${view === 'month' ? 'agenda' : 'month'}/exact_date~${day}/`, CAL);
                 const link = await driver.findElement(By.id(`ai1ec-view-${view}`));
                 await driver.executeScript('arguments[0].click();', link);
                 await h.visible(driver, `.ai1ec-${view}-view`);
@@ -126,7 +126,7 @@ describe('JS smoke: frontend', function () {
         }
 
         it('has a working print button', async function () {
-            await h.open(driver, '/calendar/action~month/', CAL);
+            await h.open(driver, h.CAL_PATH + 'action~month/', CAL);
             await h.visible(driver, '#ai1ec-print-button');
             await h.waitForModules(driver, ['scripts/calendar/print']);
             await h.assertNoConsoleErrors(driver, 'print button');

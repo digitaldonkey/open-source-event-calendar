@@ -533,8 +533,38 @@ jobs:
               npm run test
             )
           when: always
+      - run:
+          name: JS smoke tests variables
+          command: |
+            echo "WP_HOST: $WP_HOST"
+            echo "WP_CORE_DIR: $WP_CORE_DIR"
+            echo "WP_CLI: $WP_CLI"
+            echo "wp --version: $($WP_CLI --version)"
+            echo "node --version: $(node --version)"
+          when: always
+      - run:
+          name: JS smoke tests
+          # Non-destructive (integration_tests/js_smoke): every page that loads an OSEC JS bundle,
+          # checked for console errors and a few interactions. After the suite above, which
+          # purges the plugin data and trashes its calendar pages, so it gets its own page and data.
+          command: |
+            set -Eeuxo pipefail
+            WP="$WP_CLI --path=$WP_CORE_DIR"
+            $WP plugin activate open-source-event-calendar
+            $WP rewrite structure '/%postname%/' --hard
+            page=$($WP post create --post_type=page --post_status=publish --post_title='Smoke calendar' --post_name=osec-smoke-calendar --porcelain)
+            $WP eval "global \$osec_app; \$osec_app->settings->set('calendar_page_id', $page);"
+            $WP eval-file bin/dev-seed-block-test-data.php
+            (
+              cd integration_tests/ &&
+              BASE_URL="http://$WP_HOST" CALENDAR_PATH=/osec-smoke-calendar/ SELENIUM_LOCAL=1 \
+              WP_ADMIN_USER=admin WP_ADMIN_PASS=password \
+              npx mocha "js_smoke/**/*.spec.js" --timeout 60000 \
+                --reporter mocha-junit-reporter --reporter-options mochaFile=/tmp/integration_test_results/smoke-junit.xml
+            )
+          when: always
       - store_test_results:
-          path: /tmp/integration_test_results/mocha-junit.xml
+          path: /tmp/integration_test_results
       - store_artifacts:
           path: /tmp/integration_test_results/screenshots
           when: always
