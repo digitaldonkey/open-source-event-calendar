@@ -556,11 +556,13 @@ jobs:
             curl -sSLo /tmp/wp-cli.phar \
               "https://github.com/wp-cli/wp-cli/releases/download/v$WP_CLI_PHAR_VERSION/wp-cli-$WP_CLI_PHAR_VERSION.phar"
             echo "$WP_CLI_PHAR_SHA512  /tmp/wp-cli.phar" | sha512sum -c -
-            WP="php /tmp/wp-cli.phar --path=$WP_CORE_DIR"
+            # Notices to stderr: on PHP 8.5 WP-CLI's deprecations otherwise land in captured output.
+            WP="php -d display_errors=stderr /tmp/wp-cli.phar --path=$WP_CORE_DIR"
             $WP --version
             $WP plugin activate open-source-event-calendar
             $WP rewrite structure '/%postname%/' --hard
             page=$($WP post create --post_type=page --post_status=publish --post_title='Smoke calendar' --post_name=osec-smoke-calendar --porcelain)
+            [[ "$page" =~ ^[0-9]+$ ]] || { echo "No page ID: $page"; exit 1; }
             $WP eval "global \$osec_app; \$osec_app->settings->set('calendar_page_id', $page);"
             $WP eval-file bin/dev-seed-block-test-data.php
             (
