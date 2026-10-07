@@ -394,6 +394,10 @@ jobs:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_VERSION: *WP_VERSION
       - WP_CLI: /tmp/vendor/bin/wp
+      # A standalone WP-CLI for steps that load the plugin: /tmp/vendor/bin/wp shares the Composer
+      # autoloader class name with the plugin's own vendor/ (same composer.json), which is fatal.
+      - WP_CLI_PHAR_VERSION: 2.12.0
+      - WP_CLI_PHAR_SHA512: be928f6b8ca1e8dfb9d2f4b75a13aa4aee0896f8a9a0a1c45cd5d2c98605e6172e6d014dda2e27f88c98befc16c040cbb2bd1bfa121510ea5cdf5f6a30fe8832
       - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
       - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
     steps:
@@ -538,8 +542,8 @@ jobs:
           command: |
             echo "WP_HOST: $WP_HOST"
             echo "WP_CORE_DIR: $WP_CORE_DIR"
-            echo "WP_CLI: $WP_CLI"
-            echo "wp --version: $($WP_CLI --version)"
+            echo "WP_CLI_PHAR_VERSION: $WP_CLI_PHAR_VERSION"
+            echo "WP_CLI_PHAR_SHA512: $WP_CLI_PHAR_SHA512"
             echo "node --version: $(node --version)"
           when: always
       - run:
@@ -549,7 +553,11 @@ jobs:
           # purges the plugin data and trashes its calendar pages, so it gets its own page and data.
           command: |
             set -Eeuxo pipefail
-            WP="$WP_CLI --path=$WP_CORE_DIR"
+            curl -sSLo /tmp/wp-cli.phar \
+              "https://github.com/wp-cli/wp-cli/releases/download/v$WP_CLI_PHAR_VERSION/wp-cli-$WP_CLI_PHAR_VERSION.phar"
+            echo "$WP_CLI_PHAR_SHA512  /tmp/wp-cli.phar" | sha512sum -c -
+            WP="php /tmp/wp-cli.phar --path=$WP_CORE_DIR"
+            $WP --version
             $WP plugin activate open-source-event-calendar
             $WP rewrite structure '/%postname%/' --hard
             page=$($WP post create --post_type=page --post_status=publish --post_title='Smoke calendar' --post_name=osec-smoke-calendar --porcelain)
