@@ -310,7 +310,9 @@ class AgendaView extends AbstractView
             $event_props['timespan_short']            = EventTimeView::factory($this->app)
                                                                      ->get_timespan_html($event, 'short');
             $event_props['avatar']                    = $event->getavatar();
-            $event_props['avatar_not_wrapped']        = $event->getavatar(false);
+            $event_props['image_html']                = $event->getavatar(false);
+            // avatar_not_wrapped: the name before 1.2.0, kept for theme templates written for it.
+            $event_props['avatar_not_wrapped']        = $event_props['image_html'];
             $event_props['avatar_url']                = EventAvatarView::factory($this->app)
                                                                        ->get_event_avatar_url($event);
             $event_props['category_divider_color']    = $event->get_runtime(

@@ -89,7 +89,7 @@
 
                             <a class="ai1ec-load-event"
                                 href="{{ event.permalink | e('html_attr') }}">
-                                {{ event.avatar_not_wrapped | raw }}
+                                {{ event.image_html | raw }}
                             </a>
                             {{ action_buttons | raw }}
                             {% if event.post_excerpt %}
@@ -225,7 +225,7 @@
 
                                 <a class="ai1ec-load-event"
                                     href="{{ event.permalink | e('html_attr') }}">
-                                    {{ event.avatar_not_wrapped | raw }}
+                                    {{ event.image_html | raw }}
                                 </a>
                                 {{ action_buttons | raw }}
                                 {% if event.post_excerpt %}
