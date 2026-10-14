@@ -165,13 +165,6 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
     }
 
     // =================
-    // = Admin Font URL =
-    // =================
-    if (! defined('OSEC_ADMIN_THEME_FONT_URL')) {
-        define('OSEC_ADMIN_THEME_FONT_URL', OSEC_URL . '/public/admin/font/');
-    }
-
-    // =================
     // = Admin Js  URL =
     // =================
     if (! defined('OSEC_ADMIN_THEME_JS_URL')) {

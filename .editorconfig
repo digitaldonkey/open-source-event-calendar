@@ -35,11 +35,11 @@ indent_size = unset
 # Generated or copied from upstream: whatever a rule changed here, the next
 # generator run or upstream refresh would undo.
 # - public/admin/css: lessc output (bin/compile-less-production.sh) without a
-#   final newline, and bootstrap.min.css, which cannot be rebuilt with Less 4
+#   final newline
 # - hooks-and-filters.md: hookster_markdown output
 # - plugin-check.ruleset.xml: bin/get-latest-plugin-review-phpcs-rulesets.sh
-# - require.js, jquery_timely20.js and the icon fonts: vendor copies
-[{public/admin/css/**,hooks-and-filters.md,plugin-check.ruleset.xml,public/js/require.js,public/js/jquery_timely20.js,public/admin/font/timely-icons.svg}]
+# - require.js, jquery_timely20.js: vendor copies
+[{public/admin/css/**,hooks-and-filters.md,plugin-check.ruleset.xml,public/js/require.js,public/js/jquery_timely20.js}]
 charset = unset
 end_of_line = unset
 insert_final_newline = unset
