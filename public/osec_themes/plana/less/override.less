@@ -157,7 +157,7 @@ table.ai1ec-month-view {
 
 // Weekday headings, the same in month, week and day. In week and day the heading is a link,
 // which the hard reset in style.less sets to normal weight through #osec-container - so the
-// link and the date inside it are pointed back at the heading with the same id.
+// link, the weekday name and the date inside it are pointed back at the heading with the same id.
 .ai1ec-month-view,
 .ai1ec-week-view,
 .ai1ec-oneday-view {
@@ -168,6 +168,7 @@ table.ai1ec-month-view {
 }
 #osec-container th.ai1ec-weekday {
   .ai1ec-load-view,
+  .ai1ec-weekday-day,
   .ai1ec-weekday-date {
     font-size: inherit;
     font-weight: inherit;
