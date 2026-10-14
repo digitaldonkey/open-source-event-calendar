@@ -272,7 +272,15 @@ class LessController extends OsecBaseClass
             // current config file (exceptions thrown if this is not handled here).
             if ( ! isset($variables_from_config[$name])) {
                 unset($variables[$name]);
-            } elseif ($with_description && isset($variables_from_config[$name]['description']) ) {
+                continue;
+            }
+            // A hidden variable is not in Theme Options, so the theme's value wins over a
+            // stored one, e.g. one saved before the theme hid it.
+            if ( ! empty($variables_from_config[$name]['hidden'])) {
+                $variables[$name]['value']  = $variables_from_config[$name]['value'];
+                $variables[$name]['hidden'] = true;
+            }
+            if ($with_description && isset($variables_from_config[$name]['description'])) {
                 // If description is requested and is available in config file, use it.
                 $variables[$name]['description'] =
                     $variables_from_config[$name]['description'];
