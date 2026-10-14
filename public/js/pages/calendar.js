@@ -2789,7 +2789,7 @@ timely.define("domReady", [], function () {
                     }
                     h.normalizeStore()
                 } else h.store = {}, h.normalizeStore();
-                h.Adapter.bind(e, "beforeunload", h.clearAllIntervals), h.Adapter.bind(e, "unload", h.clearAllIntervals), h.saveState(h.storeState(h.extractState(r.location.href, !0))), s && (h.onUnload = function () {
+                h.saveState(h.storeState(h.extractState(r.location.href, !0))), s && (h.onUnload = function () {
                     var e, t;
                     try {
                         e = l.parse(s.getItem("History.store")) || {}
@@ -2810,7 +2810,7 @@ timely.define("domReady", [], function () {
                         e.stateToId[t] = h.stateToId[t]
                     }
                     h.store = e, h.normalizeStore(), s.setItem("History.store", l.stringify(e))
-                }, h.intervalList.push(a(h.onUnload, h.options.storeInterval)), h.Adapter.bind(e, "beforeunload", h.onUnload), h.Adapter.bind(e, "unload", h.onUnload));
+                }, h.intervalList.push(a(h.onUnload, h.options.storeInterval)), h.Adapter.bind(e, "pagehide", h.onUnload));
                 if (!h.emulated.pushState) {
                     h.bugs.safariPoll && h.intervalList.push(a(h.safariStatePoll, h.options.safariPollInterval));
                     if (i.vendor === "Apple Computer, Inc." || (i.appCodeName || "") === "Mozilla") h.Adapter.bind(e, "hashchange", function () {
