@@ -4,7 +4,7 @@
             data-href="{{ clear_filter }}"
             {{ data_type | raw }}
             title="{{ text_clear_category_filter }}">
-            <i class="ai1ec-fa ai1ec-fa-times-circle"></i>
+            <i class="ai1ec-fa ai1ec-fa-remove"></i>
         </span>
         {{ text_categories }}
         <span class="caret">▾</span>
@@ -18,15 +18,15 @@
                     {% endif %}
                     {{ data_type | raw }}
                     href="{{ term.href | e('html_attr') }}">
+                    {% if term.term_id in selected_cat_ids %}
+                        <i class="ai1ec-fa ai1ec-fa-remove"></i>
+                    {% endif %}
                     {% if term.color is empty %}
                         <span class="ai1ec-color-swatch-empty"></span>
                     {% else %}
                         {{ term.color | raw }}
                     {% endif %}
                     {{ term.name | raw }}
-                    {% if term.term_id in selected_cat_ids %}
-                        <i class="ai1ec-fa ai1ec-fa-times-circle"></i>
-                    {% endif %}
                 </a>
             </span>
         {% endfor %}
