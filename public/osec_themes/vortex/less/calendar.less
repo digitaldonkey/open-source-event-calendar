@@ -1045,6 +1045,26 @@ table.ai1ec-oneday-view-original {
     display: block !important;
     -webkit-line-clamp: none !important;
   }
+  // Except multi-day bars: their position and the space kept free below them are inline px
+  // values calendar.js sets on screen, and print does not recalculate them. A bar grown to a
+  // second line covers the events below it and stretches its arrows, so it stays on one line
+  // and the title ends in an ellipsis. On the title, not the bar: overflow on the bar would
+  // clip the arrows, which reach into its border.
+  .ai1ec-month-view .ai1ec-multiday .ai1ec-event {
+    display: flex !important;
+    align-items: baseline;
+    gap: .3em;
+    white-space: nowrap !important;
+  }
+  .ai1ec-month-view .ai1ec-multiday .ai1ec-event-time {
+    flex: none;
+  }
+  .ai1ec-month-view .ai1ec-multiday .ai1ec-event-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .ai1ec-week-view .ai1ec-week .ai1ec-event-container,
   .ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
     overflow: visible !important;
