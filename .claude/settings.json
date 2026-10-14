@@ -3,6 +3,17 @@
     "./CLAUDE.md"
   ],
   "plansDirectory": ".claude/plans",
+  "extraKnownMarketplaces": {
+    "donkeymedia": {
+      "source": {
+        "source": "directory",
+        "path": "/var/www/html/wp-content/plugins/open-source-event-calendar/.claude/shared"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "wordpress@donkeymedia": true
+  },
   "hooks": {
     "PreToolUse": [
       {
