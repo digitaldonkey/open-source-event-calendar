@@ -39,7 +39,7 @@ indent_size = unset
 # - hooks-and-filters.md: hookster_markdown output
 # - plugin-check.ruleset.xml: bin/get-latest-plugin-review-phpcs-rulesets.sh
 # - require.js, jquery_timely20.js and the icon fonts: vendor copies
-[{public/admin/css/**,hooks-and-filters.md,plugin-check.ruleset.xml,public/js/require.js,public/js/jquery_timely20.js,public/admin/font/timely-icons.svg,public/osec_themes/vortex/font/fontawesome-webfont.svg}]
+[{public/admin/css/**,hooks-and-filters.md,plugin-check.ruleset.xml,public/js/require.js,public/js/jquery_timely20.js,public/admin/font/timely-icons.svg}]
 charset = unset
 end_of_line = unset
 insert_final_newline = unset
