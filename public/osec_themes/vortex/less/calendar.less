@@ -1002,9 +1002,11 @@ table.ai1ec-oneday-view-original {
     margin-left: @multiday-arrow-depth !important;
     position: relative;
   }
-  // Offsets resolve against the *padding* box: 100% is the inside of the border, so the arrow
-  // starts a border-width further out, on the outline's outer edge, and spans the outline's full
-  // height (top/bottom pulled out by the border too).
+  // Offsets resolve against the *padding* box: at 100% the arrow starts on the inside of the
+  // border and reaches across it, so its base lies under the outline. Starting it on the outer
+  // edge instead is exact in theory, but the border snaps to device pixels and the gradient does
+  // not, which left a 1px gap at fractional positions. top/bottom are pulled out by the border,
+  // so it spans the outline's full height.
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow1 ) .ai1ec-event:after,
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow2 ) .ai1ec-event:before {
     background-repeat: no-repeat;
@@ -1013,19 +1015,19 @@ table.ai1ec-oneday-view-original {
     content: '';
     position: absolute;
     top: -@print-event-border;
-    width: @multiday-arrow-depth;
+    // calc(), not LESS arithmetic: LESS adds mixed units by discarding the second one, so
+    // `.5em + 1px` would silently compile to `1.5em`.
+    width: calc( ~"@{multiday-arrow-depth} + @{print-event-border}" );
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
   // Points right, out of the last printed day - the event carries on past it.
-  // calc(), not LESS arithmetic: LESS adds mixed units by discarding the second one, so
-  // `100% + 1px` would silently compile to `101%`.
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow1 ) .ai1ec-event:after {
     background-image:
       linear-gradient( to top right, var(--osec-event-color, #999) 50%, transparent 50% ),
       linear-gradient( to bottom right, var(--osec-event-color, #999) 50%, transparent 50% );
     background-position: top left, bottom left;
-    left: calc( ~"100% + @{print-event-border}" );
+    left: 100%;
   }
   // Points left, into the first printed day - the event started before it.
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow2 ) .ai1ec-event:before {
@@ -1033,7 +1035,7 @@ table.ai1ec-oneday-view-original {
       linear-gradient( to top left, var(--osec-event-color, #999) 50%, transparent 50% ),
       linear-gradient( to bottom left, var(--osec-event-color, #999) 50%, transparent 50% );
     background-position: top right, bottom right;
-    right: calc( ~"100% + @{print-event-border}" );
+    right: 100%;
   }
   // Month/week/day: full titles and times instead of one truncated line.
   .ai1ec-month-view .ai1ec-event,
