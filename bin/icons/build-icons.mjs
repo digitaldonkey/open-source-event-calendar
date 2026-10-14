@@ -23,9 +23,10 @@ const sources = {
 const LUCIDE_SCALE = 1.1;
 const LUCIDE_SCALE_LARGE = 1.2;
 const LUCIDE_STROKE = 1.8;
-const LUCIDE_STROKE_ARROW = 2.6;
+const LUCIDE_STROKE_ARROW = 2.6;  // arrows, chevrons, circles
 const largeLucide = (name) => name.startsWith('calendar') || ['unfold-vertical', 'folder-tree'].includes(name);
-const arrowLucide = (name) => ['arrow', 'chevron', 'chevrons'].includes(name.split('-')[0]);
+// Arrows and circled signs (circle-plus, circle-x, ...) read too thin at 1.8.
+const arrowLucide = (name) => ['arrow', 'chevron', 'chevrons', 'circle'].includes(name.split('-')[0]);
 
 // Class (without the ai1ec- prefix) => [source, icon, options].
 const icons = {
