@@ -24,8 +24,8 @@
     vertical-align: -0.125em;
     scale: var(--osec-icon-scale, 1);
     background-color: currentColor;
-    -webkit-mask: var(--osec-icon) no-repeat center / contain;
-    mask: var(--osec-icon) no-repeat center / contain;
+    -webkit-mask: var(--osec-icon-active, var(--osec-icon)) no-repeat center / contain;
+    mask: var(--osec-icon-active, var(--osec-icon)) no-repeat center / contain;
     // Printing drops background colours, and with them the icons.
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -37,6 +37,12 @@
   .ai1ec-fa:before {
     background-color: CanvasText;
   }
+}
+
+// The remove icon inverts while its control is hovered, like the x of a Select2 tag.
+.ai1ec-clear-filter:hover > .ai1ec-fa-remove,
+a:hover > .ai1ec-fa-remove {
+  --osec-icon-active: var(--osec-icon-hover);
 }
 
 a.ai1ec-fa.ai1ec-hide {

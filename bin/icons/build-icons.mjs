@@ -77,7 +77,7 @@ const icons = {
   'fa-plus-circle': ['lucide', 'circle-plus'],
   'fa-minus-circle': ['lucide', 'circle-minus'],
   'fa-times-circle': ['lucide', 'circle-x'], // wp-admin status "failed"; custom themes
-  'fa-remove': ['lucide', 'x', { stroke: 2.6 }], // clear a filter, remove a selected term
+  'fa-remove': ['lucide', 'x', { stroke: 2.6, hover: 'knockout' }], // clear a filter, remove a selected term
   'fa-check': ['lucide', 'check'],
   'fa-check-circle': ['lucide', 'circle-check'],
   'fa-exclamation-triangle': ['lucide', 'triangle-alert'],
@@ -106,6 +106,15 @@ function svgFor(source, name, stroke) {
   return svg.replaceAll('currentColor', '#000');
 }
 
+// The icon cut out of a filled circle: shown on hover, it reads as the icon inverted on any background.
+function knockout(svg) {
+  const inner = svg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><mask id="k">'
+    + '<rect width="24" height="24" fill="#fff"/>'
+    + `<g fill="none" stroke="#000" stroke-width="${svg.match(/stroke-width="([\d.]+)"/)[1]}" stroke-linecap="round" stroke-linejoin="round">${inner}</g>`
+    + '</mask><circle cx="12" cy="12" r="12" mask="url(#k)"/></svg>';
+}
+
 // Quotes inside become single quotes; everything a CSS url("") or a URL would misread is escaped.
 function dataUri(svg) {
   const encoded = svg.replaceAll('"', "'").replace(/[%#<>{}"\n]/g, (c) => encodeURIComponent(c));
@@ -119,7 +128,11 @@ for (const [cls, [source, name, options = {}]] of Object.entries(icons)) {
     scale ??= largeLucide(name) ? LUCIDE_SCALE_LARGE : LUCIDE_SCALE;
     stroke ??= arrowLucide(name) ? LUCIDE_STROKE_ARROW : LUCIDE_STROKE;
   }
-  const declarations = [`--osec-icon: ${dataUri(svgFor(source, name, stroke))};`];
+  const svg = svgFor(source, name, stroke);
+  const declarations = [`--osec-icon: ${dataUri(svg)};`];
+  if (options.hover === 'knockout') {
+    declarations.push(`--osec-icon-hover: ${dataUri(knockout(svg))};`);
+  }
   if (scale !== undefined) {
     declarations.push(`--osec-icon-scale: ${scale};`);
   }
