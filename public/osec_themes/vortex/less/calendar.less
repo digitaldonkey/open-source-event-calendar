@@ -14,6 +14,9 @@
 // font-size - themes scale the title down (plana: .7em), which would shrink the indent alone.
 // Their height is not set here - see .ai1ec-multiday-arrow1.
 @multiday-arrow-depth: .5em;
+// Space below each month view event. Part of the event container's box but not of the
+// coloured .ai1ec-event, so the continuation arrows stretched over the container leave it out.
+@month-event-gap: 1px;
 
 // =================
 // = Calendar page =
@@ -521,17 +524,22 @@ table.ai1ec-oneday-view-original {
   // a longer one wraps and is cut after the second.
   .ai1ec-event {
     height: auto;
-    line-height: 14px;
-    margin: 0 0 1px;
+    // The line is set by the spans below. The block's own font can be larger than theirs
+    // (plana scales only the spans), and any line-height here would size the line by it.
+    line-height: 0;
+    margin: 0 0 @month-event-gap;
     white-space: normal;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     overflow: hidden;
   }
+  // Unitless, so the line follows the text: a fixed line-height smaller than the text lets
+  // overflow: hidden clip the descenders.
   .ai1ec-event-time,
   .ai1ec-event-title {
     display: inline;
+    line-height: 1.2;
   }
 
   .ai1ec-event-time {
@@ -544,7 +552,6 @@ table.ai1ec-oneday-view-original {
   // Day cells are about 40px wide on phones: smaller type, and the start time without the end.
   @media screen and ( max-width: (@screen-xs - 1) ) {
     .ai1ec-event {
-      line-height: 11px;
       padding-left: 1px;
       padding-right: 1px;
     }
@@ -611,8 +618,7 @@ table.ai1ec-oneday-view-original {
   // Continuation arrows. Each one is a mask painted in the page background colour over the
   // end of the bar: arrow1 cuts the right end down to a point, arrow2 cuts a V-notch into
   // the left end. The event colour is whatever shows through - the bar's own background -
-  // so these never need to know it (calendar.js still sets border colours on them inline;
-  // with no border-width left, that is inert).
+  // so these never need to know it.
   //
   // Two half-height layers, each a gradient split diagonally at 50%: the split of a
   // `to <corner>` gradient always runs corner to corner whatever the box's aspect ratio, so
@@ -635,6 +641,10 @@ table.ai1ec-oneday-view-original {
       linear-gradient( to bottom right, transparent 50%, @body-bg 50% );
     background-position: top right, bottom right;
     right: 0;
+  }
+  // Bars (.ai1ec-multiday-bar) reset the event's margin, so only the first segment has the gap.
+  .ai1ec-multiday:not( .ai1ec-multiday-bar ) > .ai1ec-multiday-arrow1 {
+    bottom: @month-event-gap;
   }
   .ai1ec-multiday-arrow2 {
     background-image:
@@ -965,30 +975,38 @@ table.ai1ec-oneday-view-original {
     print-color-adjust: exact;
   }
   // Multi-day continuation markers, the same construction as on screen - two half-height
-  // gradient triangles stretched with top/bottom, so they still follow the printed bar's
-  // height, which print grows to fit the full title. Inverted, though: on paper the shape
-  // is drawn in the category colour instead of masked out of the bar.
+  // gradient triangles stretched with top/bottom, so they follow the printed bar's height.
+  // Inverted, though: on paper the shape is drawn in the category colour instead of masked out
+  // of the bar, and it sits outside the outline as the bar's pointed end.
   //
   // They hang off .ai1ec-event rather than the .ai1ec-multiday-arrow* divs (hidden above)
   // because only .ai1ec-event carries --osec-event-color - the arrow divs are its siblings,
   // and a custom property only inherits downward. :has() is what reads across to them, so
   // each end is drawn only where calendar.js actually put an arrow.
   //
-  // The title has to clear them, and print overrides this element's padding with its own
-  // `padding-left: 3px !important` above, so both sides are re-stated here - !important and
-  // all - rather than left to the screen rule.
+  // The bar already reaches the edge of its day cell, so the outline gives way instead: a margin
+  // as wide as the arrow at the continuing end, which the arrow fills. The bar's outer size and
+  // the px values calendar.js set for it stay as they are. Print sets this element's padding
+  // with !important above, so the continuing side is re-stated here the same way.
+  // Square corners on that side, or the rounded outline leaves a notch at the arrow's base.
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow1 ) .ai1ec-event {
-    padding-right: (@multiday-arrow-depth + .2em) !important;
+    border-bottom-right-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    margin-right: @multiday-arrow-depth !important;
+    padding-right: 3px !important;
     position: relative;
   }
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow2 ) .ai1ec-event {
-    padding-left: (@multiday-arrow-depth + .2em) !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-left-radius: 0 !important;
+    margin-left: @multiday-arrow-depth !important;
     position: relative;
   }
-  // Offsets: top/right/bottom/left on an absolutely positioned child resolve against the
-  // *padding* box, so a plain 0 would leave the triangle sitting a border-width inside the
-  // outline - a white hairline along the top and bottom and an apex stopping short of the
-  // end. Pulling it out by @print-event-border lands its edges on the outline itself.
+  // Offsets resolve against the *padding* box: at 100% the arrow starts on the inside of the
+  // border and reaches across it, so its base lies under the outline. Starting it on the outer
+  // edge instead is exact in theory, but the border snaps to device pixels and the gradient does
+  // not, which left a 1px gap at fractional positions. top/bottom are pulled out by the border,
+  // so it spans the outline's full height.
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow1 ) .ai1ec-event:after,
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow2 ) .ai1ec-event:before {
     background-repeat: no-repeat;
@@ -1008,16 +1026,16 @@ table.ai1ec-oneday-view-original {
     background-image:
       linear-gradient( to top right, var(--osec-event-color, #999) 50%, transparent 50% ),
       linear-gradient( to bottom right, var(--osec-event-color, #999) 50%, transparent 50% );
-    background-position: top right, bottom right;
-    right: -@print-event-border;
+    background-position: top left, bottom left;
+    left: 100%;
   }
   // Points left, into the first printed day - the event started before it.
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow2 ) .ai1ec-event:before {
     background-image:
       linear-gradient( to top left, var(--osec-event-color, #999) 50%, transparent 50% ),
       linear-gradient( to bottom left, var(--osec-event-color, #999) 50%, transparent 50% );
-    background-position: top left, bottom left;
-    left: -@print-event-border;
+    background-position: top right, bottom right;
+    right: 100%;
   }
   // Month/week/day: full titles and times instead of one truncated line.
   .ai1ec-month-view .ai1ec-event,
@@ -1034,6 +1052,26 @@ table.ai1ec-oneday-view-original {
   .ai1ec-month-view .ai1ec-event {
     display: block !important;
     -webkit-line-clamp: none !important;
+  }
+  // Except multi-day bars: their position and the space kept free below them are inline px
+  // values calendar.js sets on screen, and print does not recalculate them. A bar grown to a
+  // second line covers the events below it and stretches its arrows, so it stays on one line
+  // and the title ends in an ellipsis. On the title, not the bar: overflow on the bar would
+  // clip the arrows, which reach into its border.
+  .ai1ec-month-view .ai1ec-multiday .ai1ec-event {
+    display: flex !important;
+    align-items: baseline;
+    gap: .3em;
+    white-space: nowrap !important;
+  }
+  .ai1ec-month-view .ai1ec-multiday .ai1ec-event-time {
+    flex: none;
+  }
+  .ai1ec-month-view .ai1ec-multiday .ai1ec-event-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .ai1ec-week-view .ai1ec-week .ai1ec-event-container,
   .ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
