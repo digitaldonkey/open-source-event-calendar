@@ -155,9 +155,10 @@ table.ai1ec-month-view {
   margin-bottom: .25rem;
 }
 
-// Weekday headings, the same in month, week and day. In week and day the heading is a link,
-// which the hard reset in style.less sets to normal weight through #osec-container - so the
-// link, the weekday name and the date inside it are pointed back at the heading with the same id.
+// Weekday headings, the same in month, week and day. The hard reset in style.less takes every
+// th's padding and the link's weight through #osec-container, so the padding is set with the
+// same id, and the link, the weekday name and the date inside it are pointed back at the heading.
+// The link's own line-height (2em in vortex) would make week and day taller than month.
 .ai1ec-month-view,
 .ai1ec-week-view,
 .ai1ec-oneday-view {
@@ -167,17 +168,30 @@ table.ai1ec-month-view {
   }
 }
 #osec-container th.ai1ec-weekday {
+  padding: .35em .25em;
+
   .ai1ec-load-view,
   .ai1ec-weekday-day,
   .ai1ec-weekday-date {
     font-size: inherit;
     font-weight: inherit;
+    line-height: inherit;
   }
 }
 
+// The expand button in the week and day heading: sized with the heading (Bootstrap's
+// .ai1ec-btn-xs uses 1rem) and centred in it, so it fits the heading's height.
+.ai1ec-week-view,
+.ai1ec-oneday-view {
+  .ai1ec-reveal-full-day {
+    top: 50%;
+    transform: translateY( -50% );
+  }
+}
 .ai1ec-reveal-full-day {
 
   .ai1ec-btn-xs {
+    font-size: .85em;
     line-height: 1;
     padding: .2em;
     border-radius: 0;
