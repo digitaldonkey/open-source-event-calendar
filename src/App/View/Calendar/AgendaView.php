@@ -417,6 +417,7 @@ class AgendaView extends AbstractView
                            ->create_href_helper_instance($args);
         $links[] = [
             'class'   => 'ai1ec-prev-page',
+            'label'   => __('Previous page', 'open-source-event-calendar'),
             'text'    => '<i class="ai1ec-fa ai1ec-fa-chevron-left"></i>',
             'href'    => $href->generate_href(),
             'enabled' => $prev,
@@ -445,6 +446,7 @@ class AgendaView extends AbstractView
 
         $links[] = [
             'class'   => 'ai1ec-next-page',
+            'label'   => __('Next page', 'open-source-event-calendar'),
             'text'    => '<i class="ai1ec-fa ai1ec-fa-chevron-right"></i>',
             'href'    => $href->generate_href(),
             'enabled' => $next,

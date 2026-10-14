@@ -5,6 +5,9 @@
             <{{ tag }} class="{{ link.class }} ai1ec-load-view ai1ec-btn ai1ec-btn-sm
                 ai1ec-btn-default {% if not link.enabled %}ai1ec-disabled{% endif %}"
                 {{ data_type | raw }}
+                {% if link.label %}
+                    aria-label="{{ link.label | e('html_attr') }}"
+                {% endif %}
                 {% if not link.enabled %}
                     disabled="disabled"
                 {% else %}

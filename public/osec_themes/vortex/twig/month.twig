@@ -103,10 +103,12 @@
                                             {{ event.popup_timespan | raw }}
                                         </div>
 
-                                        <a class="ai1ec-load-event"
-                                            href="{{ event.permalink | e('html_attr') }}">
-                                            {{ event.image_html | raw }}
-                                        </a>
+                                        {% if event.image_html is not empty %}
+                                            <a class="ai1ec-load-event"
+                                                href="{{ event.permalink | e('html_attr') }}">
+                                                {{ event.image_html | raw }}
+                                            </a>
+                                        {% endif %}
                                         {{ action_buttons | raw }}
 
                                         {% if event.post_excerpt %}

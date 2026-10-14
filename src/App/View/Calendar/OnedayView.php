@@ -366,6 +366,7 @@ class OnedayView extends AbstractView
         $links[]            = [
             'enabled' => true,
             'class'   => 'ai1ec-prev-day',
+            'label'   => __('Previous day', 'open-source-event-calendar'),
             'text'    => '<i class="ai1ec-fa ai1ec-fa-chevron-left"></i>',
             'href'    => $href->generate_href(),
         ];
@@ -391,6 +392,7 @@ class OnedayView extends AbstractView
         $links[]            = [
             'enabled' => true,
             'class'   => 'ai1ec-next-day',
+            'label'   => __('Next day', 'open-source-event-calendar'),
             'text'    => '<i class="ai1ec-fa ai1ec-fa-chevron-right"></i>',
             'href'    => $href->generate_href(),
         ];

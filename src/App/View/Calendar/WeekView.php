@@ -433,6 +433,7 @@ class WeekView extends AbstractView
         $links[]            = [
             'enabled' => true,
             'class'   => 'ai1ec-prev-week',
+            'label'   => __('Previous week', 'open-source-event-calendar'),
             'text'    => '<i class="ai1ec-fa ai1ec-fa-chevron-left"></i>',
             'href'    => $href->generate_href(),
         ];
@@ -460,6 +461,7 @@ class WeekView extends AbstractView
         $links[] = [
             'enabled' => true,
             'class'   => 'ai1ec-next-week',
+            'label'   => __('Next week', 'open-source-event-calendar'),
             'text'    => '<i class="ai1ec-fa ai1ec-fa-chevron-right"></i>',
             'href'    => $href,
         ];
