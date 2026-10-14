@@ -302,6 +302,10 @@ A listener registered around one operation must be removed afterwards (`EventEdi
 - REST API preferred over `admin-ajax.php`
 - Gutenberg blocks in `calendar_block/` use WordPress scripts
 - Legacy code may exist from original all-in-one-event-calendar
+- **No Internet Explorer support** (dropped 2026-10-14, from 1.2.0 on), frontend and wp-admin alike. Remove IE
+  hacks (`\9`, IE-only `-ms-`/`-khtml-` prefixes, `.eot` fonts, `filter:` gradients, `window.ActiveXObject`
+  branches) when touching that code, and use current CSS and JS freely (custom properties, CSS masks, `calc()`,
+  `scale`, `pagehide`). A rebuild that only drops IE-only output needs no porting back into the sources.
 
 ## Frontend CSS Delivery
 
