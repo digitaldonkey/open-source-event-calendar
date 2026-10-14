@@ -34,10 +34,10 @@
         {% endif %}
     </div>
 
-    {% if event.avatar_not_wrapped is not empty %}
+    {% if event.image_html is not empty %}
         <a class="ai1ec-load-event"
             href="{{ event.permalink | e('html_attr') }}">
-            {{ event.avatar_not_wrapped | raw }}
+            {{ event.image_html | raw }}
         </a>
     {% endif %}
 
