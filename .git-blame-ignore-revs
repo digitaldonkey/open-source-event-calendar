@@ -12,3 +12,5 @@ ea445990d0b50ab95764c688c68f2080481cfe24
 5b67a821553a9d3aa0911cebc28db11e4a523fcb
 # style: drop a space before a tab in DateAndTime.js - no functional change (#60)
 660c13618e97fc5b27888d135699b1838d1710fe
+# style: re-indent datepicker.scss with spaces - no functional change
+865d4b9fe3c6b09aa6a3e90fc2fd87665fa189c8

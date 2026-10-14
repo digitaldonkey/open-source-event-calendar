@@ -4,118 +4,140 @@ namespace Osec\Tests\Unit\Cache;
 
 use FilesystemIterator;
 use Osec\Cache\CacheFile;
+use Osec\Cache\CacheNotSetException;
+use Osec\Cache\CachePath;
+use Osec\Cache\CacheWriteException;
 
 /**
+ * A file cache is one folder; a key is the file name, stored nowhere else.
+ *
  * @group cache
- * Sample test case.
  */
 class CacheFileTest extends CacheFileTestBase
 {
-
-    public function test_file_cache_basic()
+    public function tear_down()
     {
         global $osec_app;
 
-        // Force to use wp-uploads based cache,
-        // as plugin might not be in $_SERVER['DOCUMENT_ROOT'],
-        // but wp-uploads will be as defined in tests/Utilities/bootstrap.php.
-        // Depending on DOCUMENT_ROOT for Uri generation at getCacheData().
-        // OSEC_FILE_CACHE_DEFAULT_PATH might be out of document root when testing.
-        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
-
-        $fileCache = CacheFile::createFileCacheInstance($osec_app);
-        $this->assertInstanceOf('\Osec\Cache\CacheFile', $fileCache);
+        $osec_app->inject_object(CachePath::class, new CachePath($osec_app));
+        parent::tear_down();
     }
 
-    public function test_file_cache_basic_unavailable()
+    public function test_write_and_read()
     {
-        global $osec_app;
+        $fileCache = $this->cache('testing_rw');
 
-        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
-        $this->makeDirReadonly($this->wp_upload_path . OSEC_FILE_CACHE_WP_UPLOAD_DIR);
+        $this->assertTrue($fileCache->set('osec-compiled-1.css', 'body{color:red}'));
 
-        $cacheFileIsAvailabe = CacheFile::is_available();
-        $this->assertFalse($cacheFileIsAvailabe);
-
-        $fileCache = CacheFile::createFileCacheInstance($osec_app);
-        $this->assertNull($fileCache);
-
-        $default_cache = $osec_app->options->get(CacheFile::optionKey('default_cache'));
-        $this->assertEquals('OSEC_FILE_CACHE_UNAVAILABLE', $default_cache);
+        $this->assertFileExists($fileCache->getCachePath() . 'osec-compiled-1.css');
+        $this->assertSame('body{color:red}', $fileCache->get('osec-compiled-1.css'));
+        $this->assertSame(CachePath::ROOT_OVERRIDE, $fileCache->get_root());
     }
 
-    public function test_file_cache_write_and_read()
+    public function test_no_index_options_are_written()
     {
-        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
+        global $wpdb;
 
+        $this->cache('testing_index')->set('osec-compiled-1.css', 'body{}');
+
+        $this->assertSame(
+            '0',
+            $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE 'osec\\_file\\_cache\\_\\_%'")
+        );
+    }
+
+    public function test_overwrite_replaces_the_file_and_leaves_no_temp_files()
+    {
+        $fileCache = $this->cache('testing_overwrite');
+
+        $fileCache->set('osec-compiled-1.css', 'body{color:red}');
+        $fileCache->set('osec-compiled-1.css', 'body{color:blue}');
+
+        $this->assertSame('body{color:blue}', $fileCache->get('osec-compiled-1.css'));
+        $this->assertSame(['osec-compiled-1.css'], $this->files($fileCache->getCachePath()));
+    }
+
+    public function test_missing_file_throws()
+    {
+        $this->expectException(CacheNotSetException::class);
+        $this->cache('testing_missing')->get('osec-compiled-1.css');
+    }
+
+    public function test_delete()
+    {
+        $fileCache = $this->cache('testing_delete');
+        $fileCache->set('osec-compiled-1.css', 'body{}');
+
+        $this->assertTrue($fileCache->delete('osec-compiled-1.css'));
+
+        $this->assertFileDoesNotExist($fileCache->getCachePath() . 'osec-compiled-1.css');
+        $this->assertTrue($fileCache->delete('osec-compiled-1.css'));
+    }
+
+    public function test_clear_cache_empties_the_folder()
+    {
+        $fileCache = $this->cache('testing_clear');
+        $fileCache->set('a.css', 'a{}');
+        $fileCache->set('b.css', 'b{}');
+
+        $this->assertTrue($fileCache->clear_cache());
+
+        $this->assertSame([], $this->files($fileCache->getCachePath()));
+    }
+
+    public function test_write_failure_throws()
+    {
         global $osec_app;
-        $value     = 'Curabitur blandit tempus porttitor.';
-        $fileCache = CacheFile::createFileCacheInstance($osec_app, 'testing_rw');
+
+        $fileCache = CacheFile::createFileCacheInstance($osec_app, 'testing_gone');
+        rmdir($fileCache->getCachePath());
+
+        $this->expectException(CacheWriteException::class);
+        $fileCache->set('osec-compiled-1.css', 'body{}');
+    }
+
+    public function test_key_must_be_a_plain_file_name()
+    {
+        $this->expectException(\Exception::class);
+        $this->cache('testing_names')->set('../escape.css', 'body{}');
+    }
+
+    public function test_unavailable_when_no_folder_is_writable()
+    {
+        global $osec_app;
+
+        $osec_app->inject_object(
+            CachePath::class,
+            new class ($osec_app) extends CachePath {
+                protected function is_writable_dir(string $dir): bool
+                {
+                    return false;
+                }
+            }
+        );
+
+        $this->assertFalse(CacheFile::is_available());
+        $this->assertNull(CacheFile::createFileCacheInstance($osec_app, 'css'));
+    }
+
+    private function cache(string $id): CacheFile
+    {
+        global $osec_app;
+
+        $fileCache = CacheFile::createFileCacheInstance($osec_app, $id);
         $this->deleteAtTeardown($fileCache->getCachePath());
 
-        $cacheInfo = $fileCache->setWithFileInfo('testfile', $value);
-
-        $this->assertTrue(file_exists($cacheInfo['path']));
-        $this->assertEquals($value, $fileCache->get('testfile'));
+        return $fileCache;
     }
 
-    public function test_file_cache_write_and_delete()
+    private function files(string $dir): array
     {
-        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
-
-        global $osec_app;
-        $value     = 'Curabitur blandit tempus porttitor.';
-        $fileCache = CacheFile::createFileCacheInstance($osec_app, 'another_context');
-        $this->deleteAtTeardown($fileCache->getCachePath());
-        $cacheInfo = $fileCache->setWithFileInfo('testfile.css', $value);
-        $this->assertEquals($value, $fileCache->get('testfile.css'));
-        $this->assertTrue($fileCache->delete('testfile.css'));
-        $this->assertFalse(file_exists($cacheInfo['path']));
-    }
-
-    public function test_file_cache_empty_all_caches()
-    {
-        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
-
-        global $osec_app;
-        $fileCache = CacheFile::createFileCacheInstance($osec_app);
-        $this->assertTrue($fileCache->empty_all_caches());
-
-        $isDirEmpty = ! (new FilesystemIterator($fileCache->getCachePath()))->valid();
-        $this->assertTrue($isDirEmpty);
-    }
-
-    public function test_file_cache_get_all_caches()
-    {
-        $this->makeDirReadonly(OSEC_FILE_CACHE_DEFAULT_PATH);
-
-        global $osec_app;
-        $fileCache = CacheFile::createFileCacheInstance($osec_app);
-        $fileCache->add('file.abc', 'Value1');
-        $this->deleteAtTeardown($fileCache->getCachePath());
-
-        $fileCache2 = CacheFile::createFileCacheInstance($osec_app, 'my_namespace');
-        $fileCache2->add('file2.cde', 'Value2');
-
-        $value = $fileCache->get_all_cache_files($osec_app);
-
-        $this->assertTrue(count($value) === 2);
-
-        $fileCacheX = CacheFile::createFileCacheInstance($osec_app, 'my_namespace');
-        $value_2    = $fileCacheX->get('file2.cde');
-        $this->assertTrue($value_2 === 'Value2');
-
-        // 'file2.cde' OR 'md5prefix_file2.cde' Depends on debug.
-        $filename_2 = $value[1]->filename;
-        if (OSEC_DEBUG) {
-            $this->assertEquals('file2.cde', basename($filename_2));
-        } else {
-            // @see https://regex101.com/r/LLSG7H/4
-            $re = '/^(?<prefix>[a-zA-Z0-9]*_)?(?<name>[a-zA-Z0-9_\.]*)\.(?<ext>[a-zA-Z0-9]*)$/';
-            preg_match_all($re, basename($filename_2), $matches, PREG_SET_ORDER, 0);
-            $matches = $matches[0];
-            $this->assertEquals(9, strlen($matches['prefix']));
-            $this->assertEquals('file2.cde', $matches['name'] . '.' . $matches['ext']);
+        $names = [];
+        foreach (new FilesystemIterator($dir) as $file) {
+            $names[] = $file->getFilename();
         }
+        sort($names);
+
+        return $names;
     }
 }

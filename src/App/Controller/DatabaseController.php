@@ -226,7 +226,7 @@ class DatabaseController extends OsecBaseClass
         $query = str_replace(array ("'%s'", '"%s"'), '%s', $query);
         $query = preg_replace('|(?<!%)%f|', '%F', $query); // Force floats to be locale unaware
         $query = preg_replace('|(?<!%)%s|', "'%s'", $query); // quote the strings, avoiding escaped strings like %%s
-        array_walk($args, [$this->wpdb, 'escape_by_ref']);
+        // $wpdb->prepare() escapes the values; escaping them here as well stored and searched them escaped twice.
         // False positive.
         // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
         return $this->wpdb->prepare($query, $args);

@@ -81,15 +81,9 @@ class ScriptsBackendController extends OsecBaseClass
             return $this->process_enqueue($enqueuables[$hook_suffix]);
         }
 
-        // Edit post type event.
-        $post_pages = [
-            'post.php'     => true,
-            'post-new.php' => true,
-        ];
-        if (
-            isset($post_pages[$hook_suffix]) ||
-            AccessControl::are_we_editing_our_post()
-        ) {
+        // Edit post type event. Not the event list (#65): global $post is its first event there.
+        $screen = get_current_screen();
+        if ($screen && 'post' === $screen->base && OSEC_POST_TYPE === $screen->post_type) {
             return $this->process_enqueue(
                 [
                     ['style', 'box-event-location.css'],

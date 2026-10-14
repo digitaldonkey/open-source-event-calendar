@@ -394,6 +394,12 @@ class AgendaView extends AbstractView
         // repeated the same page on days with more events than one page holds.
         $page_offset = (int)($args['page_offset'] ?? 0);
 
+        // The first page lists events from the requested date on (the picked day or today),
+        // so the picker names that date; any other page starts at its first event.
+        $picker_date = 0 === $page_offset && DT::is_timestamp($args['exact_date'] ?? null)
+            ? $args['exact_date']
+            : $date_first->format_to_gmt();
+
         if ($make_absolute) {
             $args['page_offset'] = 0;
             $args['exact_date']  = (new DT($date_first))->set_time(
@@ -417,7 +423,7 @@ class AgendaView extends AbstractView
         // Minical datepicker.
         $links[] = HtmlFactory::factory($this->app)->create_datepicker_link(
             $args,
-            $date_first->format_to_gmt(),
+            $picker_date,
             $title,
             $title_short
         );

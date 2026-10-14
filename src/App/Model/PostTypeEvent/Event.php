@@ -10,7 +10,6 @@ use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
 use Osec\Exception\TimezoneException;
-use Osec\Helper\JsonHelper;
 
 /**
  * Model representing an event or an event instance.
@@ -22,6 +21,27 @@ use Osec\Helper\JsonHelper;
  */
 class Event extends OsecBaseClass
 {
+    /**
+     * Free text columns shortened to their column width when too long, see prepare_store_entity().
+     * Too long values of the other text columns (addresses, URLs, identifiers) are not stored.
+     */
+    private const SHORTENED_COLUMNS = [
+        'venue',
+        'country',
+        'address',
+        'city',
+        'province',
+        'postal_code',
+        'contact_name',
+        'contact_phone',
+        'cost',
+    ];
+
+    /**
+     * Columns that identify an imported event. Never shortened or dropped: the import refuses such an event instead.
+     */
+    private const KEY_COLUMNS = ['ical_uid', 'ical_feed_url'];
+
     /**
      * @var EventEntity Data store object reference.
      */
@@ -741,7 +761,53 @@ class Event extends OsecBaseClass
             'longitude'        => $this->storage_format('longitude'),
         ];
 
+        // A value longer than its column made the whole save fail ("Error saving Post Data"), and with it a
+        // feed import. Free text is shortened, other values are left out, both are reported.
+        foreach ($entity as $column => $value) {
+            if (! is_string($value) || in_array($column, self::KEY_COLUMNS, true)) {
+                continue;
+            }
+            $length = self::column_length($column);
+            if (null === $length || mb_strlen($value) <= $length) {
+                continue;
+            }
+            $shortened       = in_array($column, self::SHORTENED_COLUMNS, true);
+            $entity[$column] = $shortened ? mb_substr($value, 0, $length) : null;
+            /**
+             * Act on an event value that did not fit its database column.
+             *
+             * Free text (venue, address, contact name, phone, cost, ...) is shortened to the column width,
+             * other values (e-mail, URLs) are not stored. Use this to tell an editor, or to log feeds.
+             *
+             * @since 1.2.0
+             *
+             * @param  string  $column  Column of the events table.
+             * @param  int  $length  Maximum length of the column, in characters.
+             * @param  bool  $shortened  True if the value was shortened, false if it was left out.
+             */
+            do_action('osec_event_value_too_long', $column, $length, $shortened);
+        }
+
         return $entity;
+    }
+
+    /**
+     * Maximum length of a text column of the events table, in characters.
+     *
+     * @param  string  $column  Column name.
+     *
+     * @return int|null Null if the column has no length (not a text column) or it can not be read.
+     */
+    public static function column_length(string $column): ?int
+    {
+        global $wpdb;
+        static $lengths = [];
+        if (! array_key_exists($column, $lengths)) {
+            $info             = $wpdb->get_col_length($wpdb->prefix . OSEC_DB__EVENTS, $column);
+            $lengths[$column] = is_array($info) && 'char' === ($info['type'] ?? '') ? (int) $info['length'] : null;
+        }
+
+        return $lengths[$column];
     }
 
     /**
@@ -1074,13 +1140,13 @@ class Event extends OsecBaseClass
         $is_free = true;
         $hide_cost = false;
 
-        // Aggregated value from DB.
-        if (JsonHelper::isValidJson($value)) {
-            $data      = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
-            $is_free   = (bool)$data['is_free'];
+        // Aggregated value from DB. A plain cost can be valid JSON too ("10", "true").
+        $data = json_decode($value, true);
+        if (is_array($data) && array_key_exists('cost', $data)) {
+            $is_free   = (bool)($data['is_free'] ?? true);
             $cost      = is_null($data['cost']) ? '' : $data['cost'];
             $hide_cost = isset($data['hide_cost']) ? $data['hide_cost'] : false;
-        } elseif (OSEC_LEGACY_COST_SERIALIZED) {
+        } elseif (OSEC_LEGACY_COST_SERIALIZED && JSON_ERROR_NONE !== json_last_error()) {
             // Serialized array requirements and hopefully all currency symbols.
             $regex = '/^[a-zA-Z\d\s\-,;":{}_€$¢£¥ƒ₠₡₢₣₤₥₦₧₨₩₪₫₭₮₯₰₱₲₳₴₵₶₷₸₹₺₻₼₽₾₿$]*$/';
             /**

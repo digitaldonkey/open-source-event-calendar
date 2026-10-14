@@ -37,11 +37,12 @@ parameters:
         # .editorconfig rules (armin/editorconfig-cli): trailing whitespace, final
         # newline, indent style, line endings, charset. Checks every tracked file
         # (< 1 s), not only staged ones, so a violation anywhere fails. calendar_block/
-        # is left to wp-scripts (its JSDoc " *" lines trip the tab check).
+        # is left to wp-scripts (its JSDoc " *" lines trip the tab check). .claude/shared
+        # is a submodule: git ls-files lists it as one path, which ec cannot read.
         editorconfig:
             triggered_by: ['php', 'js', 'twig', 'less', 'css', 'scss', 'md', 'txt', 'yml', 'yaml', 'json', 'xml', 'sh', 'svg', 'po', 'pot', 'ics', 'patch']
             scripts:
-                - ["-c", "vendor/bin/ec -n --no-progress --git-only --git-only-cmd=\"git ls-files -- . ':!calendar_block'\""]
+                - ["-c", "vendor/bin/ec -n --no-progress --git-only --git-only-cmd=\"git ls-files -- . ':!calendar_block' ':!.claude/shared'\""]
             metadata:
                 task: shell
         # Runs the Mocha/Selenium integration_tests suite.

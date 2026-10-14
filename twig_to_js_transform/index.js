@@ -7,8 +7,8 @@ const fs = require('node:fs').promises;
     Only a very few templates are used in frontend rendering:
       public/osec_themes/vortex/twig/[agenda|oneday|month].twig
 
-    DO NOT UPDATE:
-      Is mandatory to use twig:"^0.7.2 for to keep old stuff from ai1ec working.
+    Also writes the twig.js runtime (node_modules/twig/twig.min.js) into the bundle, so templates
+    and runtime always come from the same twig version. Templates autoescape like PHP Twig.
 
     May be turned off:
       Only applies if "use_frontend_rendering" is checked in Osec Settings.
@@ -61,6 +61,43 @@ async function updateTwigJsTemplates () {
     for (let template of config.templates) {
         await processTemplate(template);
     }
+    await updateRuntime();
+}
+
+/*
+    The twig.js runtime the templates were compiled with, as the module "external_libs/twig".
+    twig.min.js is UMD; given a local module object it takes its CommonJS branch.
+ */
+const updateRuntime = async () => {
+    const version = require('twig/package.json').version;
+    // BSD-2-Clause: the notice travels with the code. Its pointer to twig.min.js.LICENSE.txt and the
+    // source map reference go, neither file ships.
+    const license = (await fs.readFile(require.resolve('twig/LICENSE'), 'utf8')).trim().replace(/\*\//g, '* /');
+    const runtime = (await fs.readFile(require.resolve('twig/twig.min.js'), 'utf8'))
+        .replace(/^\/\*! For license information please see [^*]*\*\/\n?/, '')
+        .replace(/\n?\/\/# sourceMappingURL=\S+\s*$/, '')
+        .trim();
+    const begin = '/*BEGIN:twig.js runtime*/';
+    const end = '/*END:twig.js runtime*/';
+    const wrapped = begin + 'timely.define("external_libs/twig", [], function () {\n'
+        + `/*!\n * twig.js ${version}, https://github.com/twigjs/twig.js\n *\n`
+        + license.split('\n').map((line) => (' * ' + line).trimEnd()).join('\n') + '\n */\n'
+        + `    // twig.js ${version} (twig.min.js, UMD): its CommonJS branch fills this module object.\n`
+        + '    var module = {exports: {}}, exports = module.exports, define;\n'
+        + runtime + '\n'
+        + '    return module.exports;\n'
+        + '})' + end;
+    const regex = new RegExp(String.raw`${escapeStringRegexp(begin)}.+?${escapeStringRegexp(end)}`, 'gs');
+
+    for (const destFile of config.destFiles) {
+        const content = await fs.readFile(destFile, 'utf8');
+        if ((content.match(regex) || []).length !== 1) {
+            throw new Error(`Runtime markers not found exactly once in ${destFile}`);
+        }
+        // A function replacement: the minified runtime contains "$" sequences.
+        await fs.writeFile(destFile, content.replace(regex, () => wrapped), 'utf8');
+        console.log({runtime: version, destFile});
+    }
 }
 
 const processTemplate = async (template) => {
@@ -85,6 +122,11 @@ const processTemplate = async (template) => {
     //   Remove wrapper "twig(...);\n" and add chop-comments e.g: "/*REPLACE:'agenda.twig*/"
     let replacement = newTemplateRaw.replace(/^(twig\()/,"");
     replacement = replacement.replace(/(\);\n)$/,"");
+    // Escape like PHP Twig: the templates mark HTML with |raw and attributes with |e('html_attr').
+    if (!replacement.endsWith(', precompiled: true}')) {
+        throw new Error(`Unexpected compiled template format: ${template}`);
+    }
+    replacement = replacement.replace(/, precompiled: true}$/, ', precompiled: true, autoescape: true}');
     replacement = chopComment + replacement + chopComment;
 
     // process.stdout.write('replacement' + '\n')
@@ -107,7 +149,14 @@ const processFile = async (template, destFile, tempFile, regex, chopComment,  re
     const fileConetent = await fs.readFile(destFile, 'utf8');
 
     // Replace in JS files containing twig
-    const replacedConetent = await fileConetent.replace(regex, replacement);
+    if ((fileConetent.match(regex) || []).length !== 1) {
+        throw new Error(`${chopComment} markers not found exactly once in ${destFile}`);
+    }
+    // A function replacement: "$" sequences in the template must stay as they are.
+    const replacedConetent = fileConetent.replace(regex, () => replacement);
+    if (!replacedConetent.includes(`autoescape: true}${chopComment}`)) {
+        throw new Error(`${template} is not created with autoescape in ${destFile}`);
+    }
     const isWriteable = await isWritable(destFile);
 
     console.log({

@@ -394,6 +394,10 @@ jobs:
       - WP_ORG_PLUGIN_NAME: *WP_ORG_PLUGIN_NAME
       - WP_VERSION: *WP_VERSION
       - WP_CLI: /tmp/vendor/bin/wp
+      # A standalone WP-CLI for steps that load the plugin: /tmp/vendor/bin/wp shares the Composer
+      # autoloader class name with the plugin's own vendor/ (same composer.json), which is fatal.
+      - WP_CLI_PHAR_VERSION: 2.12.0
+      - WP_CLI_PHAR_SHA512: be928f6b8ca1e8dfb9d2f4b75a13aa4aee0896f8a9a0a1c45cd5d2c98605e6172e6d014dda2e27f88c98befc16c040cbb2bd1bfa121510ea5cdf5f6a30fe8832
       - OSEC_RELEASE_FILE: *OSEC_RELEASE_FILE
       - OSEC_RELEASE_WHITE_LIST: *OSEC_RELEASE_WHITE_LIST
     steps:
@@ -533,8 +537,53 @@ jobs:
               npm run test
             )
           when: always
+      - run:
+          name: JS smoke tests variables
+          command: |
+            echo "WP_HOST: $WP_HOST"
+            echo "WP_CORE_DIR: $WP_CORE_DIR"
+            echo "WP_CLI_PHAR_VERSION: $WP_CLI_PHAR_VERSION"
+            echo "WP_CLI_PHAR_SHA512: $WP_CLI_PHAR_SHA512"
+            echo "node --version: $(node --version)"
+          when: always
+      - run:
+          name: JS smoke tests
+          # Non-destructive (integration_tests/js_smoke): every page that loads an OSEC JS bundle,
+          # checked for console errors and a few interactions. After the suite above, which
+          # purges the plugin data and trashes its calendar pages, so it gets its own page and data.
+          command: |
+            set -Eeuxo pipefail
+            curl -sSLo /tmp/wp-cli.phar \
+              "https://github.com/wp-cli/wp-cli/releases/download/v$WP_CLI_PHAR_VERSION/wp-cli-$WP_CLI_PHAR_VERSION.phar"
+            echo "$WP_CLI_PHAR_SHA512  /tmp/wp-cli.phar" | sha512sum -c -
+            # Notices to stderr: on PHP 8.5 WP-CLI's deprecations otherwise land in captured output.
+            WP="php -d display_errors=stderr /tmp/wp-cli.phar --path=$WP_CORE_DIR"
+            $WP --version
+            $WP plugin activate open-source-event-calendar
+            # Pretty permalinks need WordPress' .htaccess; WP-CLI writes it only when told Apache has mod_rewrite.
+            printf 'apache_modules:\n  - mod_rewrite\n' > /tmp/wp-cli.yml
+            export WP_CLI_CONFIG_PATH=/tmp/wp-cli.yml
+            $WP rewrite structure '/%postname%/' --hard
+            test -f "$WP_CORE_DIR/.htaccess"
+            page=$($WP post create --post_type=page --post_status=publish --post_title='Smoke calendar' --post_name=osec-smoke-calendar --porcelain)
+            [[ "$page" =~ ^[0-9]+$ ]] || { echo "No page ID: $page"; exit 1; }
+            $WP eval "global \$osec_app; \$osec_app->settings->set('calendar_page_id', $page);"
+            $WP eval-file bin/dev-seed-block-test-data.php
+            $WP rewrite flush --hard
+            for path in /osec-smoke-calendar/ /osec-smoke-calendar/action~month/ /wp-json/; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' "http://$WP_HOST$path")
+              [ "$code" = 200 ] || { echo "http://$WP_HOST$path answers $code"; exit 1; }
+            done
+            (
+              cd integration_tests/ &&
+              BASE_URL="http://$WP_HOST" CALENDAR_PATH=/osec-smoke-calendar/ SELENIUM_LOCAL=1 \
+              WP_ADMIN_USER=admin WP_ADMIN_PASS=password \
+              npx mocha "js_smoke/**/*.spec.js" --timeout 60000 \
+                --reporter mocha-junit-reporter --reporter-options mochaFile=/tmp/integration_test_results/smoke-junit.xml
+            )
+          when: always
       - store_test_results:
-          path: /tmp/integration_test_results/mocha-junit.xml
+          path: /tmp/integration_test_results
       - store_artifacts:
           path: /tmp/integration_test_results/screenshots
           when: always

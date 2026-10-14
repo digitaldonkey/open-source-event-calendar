@@ -325,9 +325,43 @@ class EventEditing extends OsecBaseClass
                     true
                 );
             },
+            'osec_event_value_too_long'    => function ($column, $length, $shortened) use ($notification, $title) {
+                $labels = [
+                    'venue'         => __('Venue name:', 'open-source-event-calendar'),
+                    'address'       => __('Address:', 'open-source-event-calendar'),
+                    'contact_name'  => __('Contact name:', 'open-source-event-calendar'),
+                    'contact_phone' => __('Phone:', 'open-source-event-calendar'),
+                    'contact_email' => __('E-mail:', 'open-source-event-calendar'),
+                    'contact_url'   => __('Website URL:', 'open-source-event-calendar'),
+                    'ticket_url'    => __('Buy Tickets URL:', 'open-source-event-calendar'),
+                ];
+                $field  = rtrim($labels[$column] ?? $column, ':');
+                $notification->store(
+                    sprintf(
+                        $shortened
+                            /* translators: 1: event title, 2: field name, 3: maximum length. */
+                            ? __(
+                                '"%1$s": the field "%2$s" is longer than %3$s characters and was shortened.',
+                                'open-source-event-calendar'
+                            )
+                            /* translators: 1: event title, 2: field name, 3: maximum length. */
+                            : __(
+                                '"%1$s": the field "%2$s" is longer than %3$s characters and was not saved.',
+                                'open-source-event-calendar'
+                            ),
+                        $title,
+                        esc_html($field),
+                        number_format_i18n($length)
+                    ),
+                    'error',
+                    0,
+                    [NotificationAdmin::RCPT_ADMIN],
+                    true
+                );
+            },
         ];
         foreach ($this->recurrence_listeners as $hook => $listener) {
-            add_action($hook, $listener, 10, 2);
+            add_action($hook, $listener, 10, 3);
         }
     }
 
