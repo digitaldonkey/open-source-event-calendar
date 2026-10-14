@@ -76,7 +76,8 @@ const icons = {
   'fa-print': ['lucide', 'printer'],
   'fa-plus-circle': ['lucide', 'circle-plus'],
   'fa-minus-circle': ['lucide', 'circle-minus'],
-  'fa-times-circle': ['lucide', 'circle-x'],
+  'fa-times-circle': ['lucide', 'circle-x'], // wp-admin status "failed"; custom themes
+  'fa-remove': ['lucide', 'x', { stroke: 2.6 }], // clear a filter, remove a selected term
   'fa-check': ['lucide', 'check'],
   'fa-check-circle': ['lucide', 'circle-check'],
   'fa-exclamation-triangle': ['lucide', 'triangle-alert'],

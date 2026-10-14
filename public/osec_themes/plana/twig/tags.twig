@@ -4,7 +4,7 @@
               data-href="{{ clear_filter }}"
             {{ data_type | raw }}
             title="{{ text_clear_tag_filter }}">
-            <i class="ai1ec-fa ai1ec-fa-times-circle"></i>
+            <i class="ai1ec-fa ai1ec-fa-remove"></i>
         </span>
         {{ text_tags }}
         <span class="caret">▾</span>
@@ -19,10 +19,10 @@
                             {% endif %}
                                 {{ data_type | raw }}
                             href="{{ term.href | e('html_attr') }}">
-                            {{ term.name | raw }}
                             {% if term.term_id in selected_tag_ids %}
-                                <i class="ai1ec-fa ai1ec-fa-times-circle"></i>
+                                <i class="ai1ec-fa ai1ec-fa-remove"></i>
                             {% endif %}
+                            {{ term.name | raw }}
                         </a>
                     </span>
             {% endfor %}
