@@ -19,6 +19,21 @@ describe('JS smoke: backend', function () {
             await h.open(driver, '/wp-admin/edit.php?post_type=osec_event', COMMON);
             await h.assertNoConsoleErrors(driver, 'event list');
         });
+
+        // #65: the event editor's assets (and its 68rem width limit) belong to the event editor only.
+        for (const [screen, path] of [
+            ['event list', '/wp-admin/edit.php?post_type=osec_event'],
+            ['page editor', '/wp-admin/post-new.php?post_type=page'],
+        ]) {
+            it(`does not load the event editor assets on the ${screen}`, async function () {
+                await driver.get(h.url(path));
+                await driver.wait(h.until.elementLocated(h.By.id('wpbody-content')), h.TIMEOUT);
+                const loaded = await driver.executeScript(
+                    "return [...document.querySelectorAll('link[href*=\"osec-admin-page-edit-event\"], script[src*=\"leaflet\"]')].map(e => e.href || e.src);"
+                );
+                h.assert.deepStrictEqual(loaded, [], `event editor assets on the ${screen}`);
+            });
+        }
     });
 
     describe('@js-add-new-event event editor', function () {

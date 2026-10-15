@@ -52,12 +52,24 @@ class EventTicketView extends OsecBaseClass
 
 
     /**
-     * Get the number value of the stored coast
+     * The first number in the cost, e.g. for schema.org/Offer price.
+     *
+     * A separator followed by one or two digits at its end is the decimal separator, any other
+     * groups thousands: "12.50", "12,50 €", "€1.000", "1,000.50", "10 - 20 EUR" (10).
      */
     public function get_cost_value(Event $event): ?float
     {
-        $val = filter_var($event->get('cost'), FILTER_SANITIZE_NUMBER_FLOAT);
-        return $val ? (float)$val : null;
+        if (! preg_match('/\d[\d.,\s]*/u', (string)$event->get('cost'), $match)) {
+            return null;
+        }
+        $number   = rtrim($match[0], "., \t\n\r");
+        $decimals = '';
+        if (preg_match('/[.,](\d{1,2})$/', $number, $fraction)) {
+            $decimals = '.' . $fraction[1];
+            $number   = substr($number, 0, -strlen($fraction[0]));
+        }
+
+        return (float)(preg_replace('/\D/', '', $number) . $decimals);
     }
 
     /**

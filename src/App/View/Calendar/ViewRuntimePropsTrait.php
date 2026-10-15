@@ -24,14 +24,18 @@ trait ViewRuntimePropsTrait
         );
         $event->set_runtime('instance_permalink', $instance_permalink);
 
+        // The views print the title as HTML (|raw), in PHP and in the browser (twig.js).
         $event->set_runtime(
             'filtered_title',
-            apply_filters(
-                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                'the_title',
-                $event->get('post')->post_title,
-                $event->get('post_id'),
-                true
+            wp_kses(
+                apply_filters(
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                    'the_title',
+                    $event->get('post')->post_title,
+                    $event->get('post_id'),
+                    true
+                ),
+                $app->kses->allowed_html_inline()
             )
         );
 

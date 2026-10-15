@@ -1,3 +1,6 @@
+= 1.1.16 =
+- Security: title and description of events imported from feeds are sanitized, whoever runs the import. Every earlier version stored them unfiltered when a feed was added or refreshed by an administrator (since All-in-One Event Calendar 1.0, 2011, which this plugin is based on) or updated with `wp osec feed update` (1.1.15)
+
 = 1.1.15 =
 - Print support for all calendar views with a print header; overlapping events print side by side, busy days as a list; category colors print as event borders; a calendar block can hide the print icon #55
 - Fix: many overlapping events in week and day view ran into the next day's column

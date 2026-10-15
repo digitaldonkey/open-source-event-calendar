@@ -3,6 +3,7 @@ const WpPlugin = require('../page_objects/ActivatePluginAndSettings');
 
 const {
     By,
+    Key,
 } = require('selenium-webdriver');
 let pageObject = null;
 
@@ -74,6 +75,16 @@ describe('Frontend tests', function(){
                     const url = pageObject.settings.domain + '/wp-admin/post-new.php?post_type=osec_event';
                     await pageObject.go_and_do_login(url);
 
+                    // An all-day event on a single day, so no occurrence spans midnight (#13).
+                    // The defaults (start "now", end an hour later) cross midnight after 23:00,
+                    // and ticking all-day keeps that end date, so set it to the start date.
+                    const allDayCheckbox = await pageObject.getElement(By.id('osec_all_day_event'));
+                    await allDayCheckbox.click();
+                    const startDate = await (await pageObject.getElement(By.id('osec_start-date-input'))).getAttribute('value');
+                    const endDateInput = await pageObject.getElement(By.id('osec_end-date-input'));
+                    await endDateInput.clear();
+                    await endDateInput.sendKeys(startDate, Key.TAB);
+
                     // Repeat checkbox should be visible
                     const repeatCheckbox = await pageObject.getElement(By.id('osec_repeat'));
                     // Open repeat panel
@@ -125,7 +136,14 @@ describe('Frontend tests', function(){
                     const eventsInMonth = await pageObject.driver.findElements(By.className('ai1ec-event-title'));
                     const eventCountMonth = await eventsInMonth.length;
 
-                    const daysInNextMonth = new Date(new Date().getFullYear(), new Date().getUTCMonth()+2, 0).getDate()
+                    // "Next month" as the site sees it: in the site timezone, not the test runner's
+                    // (and not a local year mixed with a UTC month, which broke on the 1st and around New Year).
+                    const [year, month] = new Intl.DateTimeFormat('en-CA', {
+                        timeZone: pageObject.settings.AdminPageSettings.timeZone,
+                        year: 'numeric',
+                        month: 'numeric',
+                    }).format(new Date()).split('-').map(Number);
+                    const daysInNextMonth = new Date(year, month + 1, 0).getDate();
 
                     pageObject.assert.equal(
                         eventCountMonth,

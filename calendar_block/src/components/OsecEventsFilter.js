@@ -54,7 +54,7 @@ export default function OsecEventsFilter ({defaultValue = [], onChange}) {
 	return (
 		<p>
 			<label>
-				<small><strong>Filter by Events</strong></small>
+				<small><strong>{__('Filter by Events', 'open-source-event-calendar')}</strong></small>
 			</label>
 			<AsyncSelect
 				isMulti={true}
@@ -62,7 +62,7 @@ export default function OsecEventsFilter ({defaultValue = [], onChange}) {
 				components={animatedComponents}
 				cacheOptions
 				value={selectedOptions}
-				placeholder={<div>{__('Type to search events')}</div>}
+				placeholder={<div>{__('Type to search events', 'open-source-event-calendar')}</div>}
 				onChange={handleChange}
 			/>
 		</p>

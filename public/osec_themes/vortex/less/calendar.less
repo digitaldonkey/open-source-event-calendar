@@ -14,6 +14,9 @@
 // font-size - themes scale the title down (plana: .7em), which would shrink the indent alone.
 // Their height is not set here - see .ai1ec-multiday-arrow1.
 @multiday-arrow-depth: .5em;
+// Space below each month view event. Part of the event container's box but not of the
+// coloured .ai1ec-event, so the continuation arrows stretched over the container leave it out.
+@month-event-gap: 1px;
 
 // =================
 // = Calendar page =
@@ -102,9 +105,9 @@
   margin-bottom: .5em;
   // Icons
   i {
-    font-size: 1.9em;
+    font-size: 1.35em;
     line-height: 0.75em;
-    vertical-align: -37%;
+    vertical-align: -15%;
   }
   .ai1ec-dropdown-menu {
     min-width: 0;
@@ -141,6 +144,11 @@
     margin: 2px 0;
     width: 100%;
   }
+}
+
+// Expand / collapse all (agenda).
+.ai1ec-agenda-buttons .ai1ec-fa {
+  margin-right: .3em;
 }
 
 // Clear filter buttons.
@@ -521,17 +529,22 @@ table.ai1ec-oneday-view-original {
   // a longer one wraps and is cut after the second.
   .ai1ec-event {
     height: auto;
-    line-height: 14px;
-    margin: 0 0 1px;
+    // The line is set by the spans below. The block's own font can be larger than theirs
+    // (plana scales only the spans), and any line-height here would size the line by it.
+    line-height: 0;
+    margin: 0 0 @month-event-gap;
     white-space: normal;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     overflow: hidden;
   }
+  // Unitless, so the line follows the text: a fixed line-height smaller than the text lets
+  // overflow: hidden clip the descenders.
   .ai1ec-event-time,
   .ai1ec-event-title {
     display: inline;
+    line-height: 1.2;
   }
 
   .ai1ec-event-time {
@@ -544,7 +557,6 @@ table.ai1ec-oneday-view-original {
   // Day cells are about 40px wide on phones: smaller type, and the start time without the end.
   @media screen and ( max-width: (@screen-xs - 1) ) {
     .ai1ec-event {
-      line-height: 11px;
       padding-left: 1px;
       padding-right: 1px;
     }
@@ -611,8 +623,7 @@ table.ai1ec-oneday-view-original {
   // Continuation arrows. Each one is a mask painted in the page background colour over the
   // end of the bar: arrow1 cuts the right end down to a point, arrow2 cuts a V-notch into
   // the left end. The event colour is whatever shows through - the bar's own background -
-  // so these never need to know it (calendar.js still sets border colours on them inline;
-  // with no border-width left, that is inert).
+  // so these never need to know it.
   //
   // Two half-height layers, each a gradient split diagonally at 50%: the split of a
   // `to <corner>` gradient always runs corner to corner whatever the box's aspect ratio, so
@@ -635,6 +646,10 @@ table.ai1ec-oneday-view-original {
       linear-gradient( to bottom right, transparent 50%, @body-bg 50% );
     background-position: top right, bottom right;
     right: 0;
+  }
+  // Bars (.ai1ec-multiday-bar) reset the event's margin, so only the first segment has the gap.
+  .ai1ec-multiday:not( .ai1ec-multiday-bar ) > .ai1ec-multiday-arrow1 {
+    bottom: @month-event-gap;
   }
   .ai1ec-multiday-arrow2 {
     background-image:
@@ -965,30 +980,38 @@ table.ai1ec-oneday-view-original {
     print-color-adjust: exact;
   }
   // Multi-day continuation markers, the same construction as on screen - two half-height
-  // gradient triangles stretched with top/bottom, so they still follow the printed bar's
-  // height, which print grows to fit the full title. Inverted, though: on paper the shape
-  // is drawn in the category colour instead of masked out of the bar.
+  // gradient triangles stretched with top/bottom, so they follow the printed bar's height.
+  // Inverted, though: on paper the shape is drawn in the category colour instead of masked out
+  // of the bar, and it sits outside the outline as the bar's pointed end.
   //
   // They hang off .ai1ec-event rather than the .ai1ec-multiday-arrow* divs (hidden above)
   // because only .ai1ec-event carries --osec-event-color - the arrow divs are its siblings,
   // and a custom property only inherits downward. :has() is what reads across to them, so
   // each end is drawn only where calendar.js actually put an arrow.
   //
-  // The title has to clear them, and print overrides this element's padding with its own
-  // `padding-left: 3px !important` above, so both sides are re-stated here - !important and
-  // all - rather than left to the screen rule.
+  // The bar already reaches the edge of its day cell, so the outline gives way instead: a margin
+  // as wide as the arrow at the continuing end, which the arrow fills. The bar's outer size and
+  // the px values calendar.js set for it stay as they are. Print sets this element's padding
+  // with !important above, so the continuing side is re-stated here the same way.
+  // Square corners on that side, or the rounded outline leaves a notch at the arrow's base.
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow1 ) .ai1ec-event {
-    padding-right: (@multiday-arrow-depth + .2em) !important;
+    border-bottom-right-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    margin-right: @multiday-arrow-depth !important;
+    padding-right: 3px !important;
     position: relative;
   }
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow2 ) .ai1ec-event {
-    padding-left: (@multiday-arrow-depth + .2em) !important;
+    border-bottom-left-radius: 0 !important;
+    border-top-left-radius: 0 !important;
+    margin-left: @multiday-arrow-depth !important;
     position: relative;
   }
-  // Offsets: top/right/bottom/left on an absolutely positioned child resolve against the
-  // *padding* box, so a plain 0 would leave the triangle sitting a border-width inside the
-  // outline - a white hairline along the top and bottom and an apex stopping short of the
-  // end. Pulling it out by @print-event-border lands its edges on the outline itself.
+  // Offsets resolve against the *padding* box: at 100% the arrow starts on the inside of the
+  // border and reaches across it, so its base lies under the outline. Starting it on the outer
+  // edge instead is exact in theory, but the border snaps to device pixels and the gradient does
+  // not, which left a 1px gap at fractional positions. top/bottom are pulled out by the border,
+  // so it spans the outline's full height.
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow1 ) .ai1ec-event:after,
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow2 ) .ai1ec-event:before {
     background-repeat: no-repeat;
@@ -1008,16 +1031,16 @@ table.ai1ec-oneday-view-original {
     background-image:
       linear-gradient( to top right, var(--osec-event-color, #999) 50%, transparent 50% ),
       linear-gradient( to bottom right, var(--osec-event-color, #999) 50%, transparent 50% );
-    background-position: top right, bottom right;
-    right: -@print-event-border;
+    background-position: top left, bottom left;
+    left: 100%;
   }
   // Points left, into the first printed day - the event started before it.
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow2 ) .ai1ec-event:before {
     background-image:
       linear-gradient( to top left, var(--osec-event-color, #999) 50%, transparent 50% ),
       linear-gradient( to bottom left, var(--osec-event-color, #999) 50%, transparent 50% );
-    background-position: top left, bottom left;
-    left: -@print-event-border;
+    background-position: top right, bottom right;
+    right: 100%;
   }
   // Month/week/day: full titles and times instead of one truncated line.
   .ai1ec-month-view .ai1ec-event,
@@ -1034,6 +1057,26 @@ table.ai1ec-oneday-view-original {
   .ai1ec-month-view .ai1ec-event {
     display: block !important;
     -webkit-line-clamp: none !important;
+  }
+  // Except multi-day bars: their position and the space kept free below them are inline px
+  // values calendar.js sets on screen, and print does not recalculate them. A bar grown to a
+  // second line covers the events below it and stretches its arrows, so it stays on one line
+  // and the title ends in an ellipsis. On the title, not the bar: overflow on the bar would
+  // clip the arrows, which reach into its border.
+  .ai1ec-month-view .ai1ec-multiday .ai1ec-event {
+    display: flex !important;
+    align-items: baseline;
+    gap: .3em;
+    white-space: nowrap !important;
+  }
+  .ai1ec-month-view .ai1ec-multiday .ai1ec-event-time {
+    flex: none;
+  }
+  .ai1ec-month-view .ai1ec-multiday .ai1ec-event-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .ai1ec-week-view .ai1ec-week .ai1ec-event-container,
   .ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
@@ -1056,6 +1099,38 @@ table.ai1ec-oneday-view-original {
   .tablescroll_body td,
   .osec-print-grid {
     width: auto !important;
+  }
+  // Week/day fill the page area like the month: the view takes the page height, the grid what
+  // the header and the all-day row leave. Events and hour lines are placed in percent of the
+  // grid (scripts/calendar/print), so they scale with it.
+  .osec-calendar-view:has(.osec-print-grid) {
+    display: flex;
+    flex-direction: column;
+    min-height: @print-landscape-height;
+    > .ai1ec-week-view,
+    > .ai1ec-oneday-view {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+    }
+  }
+  .osec-calendar-view--oneday:has(.osec-print-grid) {
+    min-height: @print-portrait-height;
+  }
+  .osec-print-grid {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1 1 auto;
+    > table {
+      flex: 1 1 auto;
+      height: 100%;
+    }
+    tr,
+    td,
+    .ai1ec-grid-container,
+    .ai1ec-day {
+      height: 100% !important;
+    }
   }
   .osec-print-grid {
     overflow: hidden !important;
@@ -1149,15 +1224,12 @@ table.ai1ec-oneday-view-original {
   }
   // Firefox does not paint the vertical borders of a collapsed-border table that is split
   // across pages (verified 2026-09-16: a one page month keeps them, a three page month
-  // loses them), so print with separated borders. Each cell draws its top and right line
-  // and the table closes the left and bottom edge, which keeps every line 1px.
+  // loses them), and the flex layout below drops table borders altogether. So every line
+  // comes from the cells: top and right on each, left on the first column, bottom on the
+  // last week, which keeps every line 1px.
   // The screen border color (#ddd) is also too light to print reliably.
   .ai1ec-month-view {
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
-    border-color: #999 !important;
-    border-top-width: 0 !important;
-    border-right-width: 0 !important;
+    border-width: 0 !important;
   }
   .ai1ec-month-view td,
   .ai1ec-month-view th {
@@ -1165,9 +1237,55 @@ table.ai1ec-oneday-view-original {
     border-style: solid !important;
     border-color: #999 !important;
   }
+  .ai1ec-month-view tr > :first-child {
+    border-left-width: 1px !important;
+  }
+  .ai1ec-month-view tbody tr:last-child td {
+    border-bottom-width: 1px !important;
+  }
   // Month: lower minimum row height, so wrapped titles still fit one page in most months.
   .ai1ec-month-view .ai1ec-day-stretcher {
     height: 3.5em;
+  }
+  // Month: fill the landscape page like a paper calendar. The view is as high as the page
+  // (print button: any paper, see html.ai1ec-print; Ctrl+P: the page area of the smaller
+  // paper, see @page osec-landscape) and the table takes what the print header leaves. A week
+  // with many events takes the height it needs and the other weeks share the rest equally
+  // (flex: 1 1 0 stops at the content height). A table cannot do this in both browsers:
+  // Chrome hands spare table height to rows in proportion to their content, Firefox fills
+  // percentage rows top-down (compared 2026-10-01, 8 variants). Cost: a month running over
+  // several pages repeats the weekday header only on the first page.
+  // The page height has to be a length: percentages do not reach the page through html and
+  // body in print, and Firefox sizes vh by the window, not the page.
+  .osec-calendar-view:has(> .ai1ec-month-view) {
+    display: flex;
+    flex-direction: column;
+    min-height: @print-landscape-height;
+  }
+  .ai1ec-month-view {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    thead,
+    tbody {
+      display: flex;
+      flex-direction: column;
+    }
+    tbody {
+      flex: 1 1 auto;
+    }
+    tr {
+      display: flex;
+    }
+    tbody tr {
+      flex: 1 1 0;
+    }
+    th,
+    td {
+      display: block;
+      flex: 1 1 0;
+      min-width: 0;
+    }
   }
   // Agenda: dates never split; events only split with enough lines on both pages.
   .ai1ec-agenda-view {
@@ -1239,8 +1357,20 @@ table.ai1ec-oneday-view-original {
   }
 }
 
+// Fixed margins make the page area known for Ctrl+P, where month, week and day fill it with
+// the fixed heights below (the print button fills any paper, see html.ai1ec-print). The print
+// dialog's default margins differ per browser and setting. PAGE_HEIGHT in
+// scripts/calendar/print (public/js/pages/calendar.js) estimates the same area.
+@print-page-margin: 10mm;
+// A4 landscape (210mm high, the shorter of A4 and Letter) minus the margins, minus 2mm so
+// rounding never pushes the last row onto a second page.
+@print-landscape-height: 188mm;
+// Letter portrait (279.4mm high, the shorter of A4 and Letter) minus margins and 2mm.
+@print-portrait-height: 257mm;
+
 @page osec-landscape {
   size: landscape;
+  margin: @print-page-margin;
 }
 
 // Day and agenda are sized for portrait: in landscape the day grid is taller than the page,
@@ -1248,6 +1378,7 @@ table.ai1ec-oneday-view-original {
 // overrides an orientation the print dialog remembers from a month or week print.
 @page osec-portrait {
   size: portrait;
+  margin: @print-page-margin;
 }
 
 @media print {
@@ -1257,6 +1388,34 @@ table.ai1ec-oneday-view-original {
   }
   body:has(.ai1ec-oneday-view, .ai1ec-agenda-view) {
     page: osec-portrait;
+  }
+  // Print button: the page holds only the calendar, so the page height can reach it whatever
+  // paper the print dialog uses. In print, html's percentage height is the page area; body
+  // takes it as a minimum (a little less, or Firefox adds an empty page) and passes it on
+  // through flex, and month table or week/day grid fill what the print header leaves. A busy
+  // month still grows onto more pages. Ctrl+P keeps the site around the calendar, so it uses
+  // the fixed heights in .osec-print-calendar(). Verified 2026-10-01 on A3, A4 and Letter in
+  // Chrome and Firefox; 100vh is not an option, Firefox sizes it by the window.
+  html.ai1ec-print {
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    body {
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: calc(100% - 1mm) !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    #ai1ec-calendar,
+    #osec-calendar-view-container,
+    #osec-calendar-view {
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+    }
   }
 }
 

@@ -10,19 +10,19 @@ export default function ViewSelect ({defaultValue = [], onChange}) {
 
 	const [options, setOptions] = useState([
 		{
-			label: __("Agenda"),
+			label: __("Agenda", 'open-source-event-calendar'),
 			value: "agenda"
 		},
 		{
-			label: __("Monthly"),
+			label: __("Monthly", 'open-source-event-calendar'),
 			value: "month"
 		},
 		{
-			label: __("Weekly"),
+			label: __("Weekly", 'open-source-event-calendar'),
 			value: "week"
 		},
 		{
-			label: __("One Day"),
+			label: __("One Day", 'open-source-event-calendar'),
 			value: "oneday"
 		},
 	]);

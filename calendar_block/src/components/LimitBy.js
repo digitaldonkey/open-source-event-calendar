@@ -21,24 +21,24 @@ export default function BoolSwitch({defaultLimitBy, defaultLimit, onChange}) {
 		if (limitBy === 'days') {
 			return __(
 				'Limit by number of days (Disables date navigation)',
-				'open source-event-calendar'
+				'open-source-event-calendar'
 			)
 		}
 		return __(
 			'Limit by event count (pager)',
-			'open source-event-calendar'
+			'open-source-event-calendar'
 		)
 	}
 	const labelTextCounter = () => {
 		if (limitBy === 'days') {
 			return __(
 				'days',
-				'open source-event-calendar'
+				'open-source-event-calendar'
 			)
 		}
 		return __(
 			'events',
-			'open source-event-calendar'
+			'open-source-event-calendar'
 		)
 	}
 

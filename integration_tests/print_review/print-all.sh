@@ -22,6 +22,8 @@
 #   BUSY_DATE=23-9-2026     Date used for the "busy" run (many parallel events).
 #   QUIET_DATE=15-10-2026   Date used for the "quiet month" run.
 #   KEEP=1                  Keep existing PDFs instead of deleting them first.
+#   PAPER=a4                Print on A4 instead of Letter (the browsers' default); A4 landscape
+#                           is the shorter page, so it decides whether month and week fit.
 #
 # The print button and Ctrl+P are printed for every view; in addition one busy day/week/month
 # and one quiet month, which are the two cases that decide the page count.

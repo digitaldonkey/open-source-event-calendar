@@ -242,6 +242,7 @@ class OnedayView extends AbstractView
 
         foreach ($all_events[$day_start_ts] as $event_type => &$events) {
             foreach ($events as &$evt) {
+                $image_html = $evt->getavatar(false);
                 $event = [
                     'filtered_title'   => $evt->get_runtime('filtered_title'),
                     'post_excerpt'     => $evt->get_runtime('post_excerpt'),
@@ -263,7 +264,9 @@ class OnedayView extends AbstractView
                     'popup_timespan'   => EventTimeView::factory($this->app)
                                                        ->get_timespan_html($evt->get('orig'), 'short'),
                     'avatar'           => $evt->getavatar(true),
-                    'avatar_not_wrapped' => $evt->getavatar(false),
+                    'image_html'       => $image_html,
+                    // avatar_not_wrapped: the name before 1.2.0, kept for theme templates written for it.
+                    'avatar_not_wrapped' => $image_html,
                 ];
 
                 if ('notallday' === $event_type) {
@@ -363,6 +366,7 @@ class OnedayView extends AbstractView
         $links[]            = [
             'enabled' => true,
             'class'   => 'ai1ec-prev-day',
+            'label'   => __('Previous day', 'open-source-event-calendar'),
             'text'    => '<i class="ai1ec-fa ai1ec-fa-chevron-left"></i>',
             'href'    => $href->generate_href(),
         ];
@@ -388,6 +392,7 @@ class OnedayView extends AbstractView
         $links[]            = [
             'enabled' => true,
             'class'   => 'ai1ec-next-day',
+            'label'   => __('Next day', 'open-source-event-calendar'),
             'text'    => '<i class="ai1ec-fa ai1ec-fa-chevron-right"></i>',
             'href'    => $href->generate_href(),
         ];

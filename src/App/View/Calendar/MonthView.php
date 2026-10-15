@@ -292,7 +292,8 @@ class MonthView extends AbstractView
             $exact_date = UIDateFormats::factory($this->app)->format_date_for_url($day);
             $events     = [];
             foreach ($days_events[$i] as $evt) {
-                $events[] = [
+                $image_html = $evt->getavatar(false);
+                $events[]   = [
                     'filtered_title'   => $evt->get_runtime('filtered_title'),
                     'post_excerpt'     => $evt->get_runtime('post_excerpt'),
                     'color_style'      => $evt->get_runtime('color_style'),
@@ -318,7 +319,9 @@ class MonthView extends AbstractView
                     'end_truncated'    => $evt->get('end_truncated'),
                     'popup_timespan'   => TwigExtension::timespan($evt, 'short'),
                     'avatar'           => $evt->getavatar(true),
-                    'avatar_not_wrapped' => $evt->getavatar(false),
+                    'image_html'       => $image_html,
+                    // avatar_not_wrapped: the name before 1.2.0, kept for theme templates written for it.
+                    'avatar_not_wrapped' => $image_html,
                 ];
             }
             $weeks[$week][] = [
@@ -443,15 +446,15 @@ class MonthView extends AbstractView
         // ======================
         // = Minical datepicker =
         // ======================
-        // Align date to first of month, month offset applied.
-
+        // Align date to first of month, month offset applied, at local midnight like the
+        // links above. In UTC with the time of local midnight kept, it named the 2nd east of UTC.
         $orig_date
-            ->set_timezone('UTC')
             ->set_date(
                 $orig_date->format('Y'),
                 $orig_date->format('m') + $args['month_offset'],
                 1
-            );
+            )
+            ->set_time(0, 0, 0);
         $args['exact_date'] = $orig_date->format();
         $links[]            = HtmlFactory::factory($this->app)->create_datepicker_link(
             $args,

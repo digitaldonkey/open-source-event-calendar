@@ -52,6 +52,43 @@ class BlockPrintButtonTest extends TestBase
         }
     }
 
+    public function test_block_shows_print_button_when_setting_is_off_and_keeps_it_when_paging()
+    {
+        global $osec_app;
+        $osec_app->settings->set('display_print_button', false);
+        foreach (['agenda', 'month', 'week', 'oneday'] as $view) {
+            $html = $this->render('{"view":"' . $view . '","printIcon":"show"}');
+            $this->assertStringContainsString('ai1ec-print-buttons', $html, $view);
+            $this->assertStringContainsString('display_print~always', $html, $view);
+        }
+    }
+
+    public function test_block_hides_print_button_when_setting_is_on()
+    {
+        $html = $this->render('{"view":"month","printIcon":"hide"}');
+        $this->assertStringNotContainsString('ai1ec-print-buttons', $html);
+        $this->assertStringContainsString('display_print~false', $html);
+    }
+
+    public function test_global_follows_the_setting()
+    {
+        global $osec_app;
+        $this->assertStringContainsString('ai1ec-print-buttons', $this->render('{"printIcon":"global"}'));
+        $osec_app->settings->set('display_print_button', false);
+        $this->assertStringNotContainsString('ai1ec-print-buttons', $this->render('{"printIcon":"global"}'));
+    }
+
+    /**
+     * Blocks saved before printIcon existed keep what they had.
+     */
+    public function test_block_saved_with_display_print_false_stays_hidden()
+    {
+        $this->assertStringNotContainsString(
+            'ai1ec-print-buttons',
+            $this->render('{"view":"month","displayPrint":false}')
+        );
+    }
+
     public function test_setting_off_hides_print_button_in_block()
     {
         global $osec_app;

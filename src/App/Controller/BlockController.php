@@ -35,6 +35,7 @@ class BlockController extends OsecBaseClass
             $asset['version'],
             true
         );
+        wp_set_script_translations('osec-calendar-block-classic', 'open-source-event-calendar');
         // Dependencies of an editor style are loaded into the editor iframe as well.
         wp_register_style(
             'osec-editor-style',
@@ -124,6 +125,15 @@ class BlockController extends OsecBaseClass
             if (isset($atts[$jsProp])) {
                 $query[$query_prop] = CalendarPageView::booleanStringArg($atts[$jsProp]);
             }
+        }
+
+        // Print icon: the global setting, or shown/hidden for this block. Blocks saved
+        // before printIcon existed only carry displayPrint, which the loop above maps.
+        $print_icon = $atts['printIcon'] ?? 'global';
+        if ('show' === $print_icon) {
+            $query['display_print'] = 'always';
+        } elseif ('hide' === $print_icon) {
+            $query['display_print'] = 'false';
         }
 
         if (isset($atts['fixedDate']) && DT::isValidTimeStamp($atts['fixedDate'])) {
