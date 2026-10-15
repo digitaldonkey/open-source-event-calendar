@@ -239,8 +239,12 @@ bin/phpunit-sqlite.sh --filter ExceptionDateTest
 
 - Run it inside the DDEV container (`ddev ssh`, or `ddev exec bin/phpunit-sqlite.sh` from the plugin folder) after
   `bin/install-wp-tests.sh`; it stops with a hint when the test WordPress is missing (e.g. after a container restart).
-- The driver is pinned (version and the sha256 GitHub publishes for the release asset, at the top of the script). To
+- The driver is pinned in `bin/sqlite-dropin.sh` (version and the sha256 GitHub publishes for the release asset). To
   update it, change both. The copy is set up again when the driver or the test WordPress changes.
+- **The release test runs on SQLite too**: `release_test_job_sqlite` (CI, `master|release-*`, blocks the release) is
+  `release_test_job` with `db: sqlite` - the release zip on WordPress with the drop-in, the Mocha and JS smoke suites.
+  php-fpm runs as `circleci` there, because WP-CLI and the web server write the same database file (created `0600`).
+  plugin-check runs only in the MariaDB jobs.
 - The run fails if no SQLite database was written, so a run that silently fell back to MySQL never passes.
 - **Driver 3.1.0 evaluates `IF()` correctly**, so the #44 tests (`ExceptionDateTest`) no longer catch an `IF()` in our
   SQL; up to 3.0.2 they did (checked 2026-10-15). Keep `CASE WHEN` for sites on older drivers.
