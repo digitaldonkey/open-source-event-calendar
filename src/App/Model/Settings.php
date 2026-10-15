@@ -56,10 +56,18 @@ class Settings extends OsecBaseInitialized
     {
         global $wpdb;
         if ($purge) {
+            // "osec_" literally: a bare _ in LIKE matches any character (osecurity_*, osec-*).
+            // delete_option() so that the object cache forgets them too.
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-            $wpdb->query(
-                $wpdb->prepare("DELETE FROM {$wpdb->options} WHERE `option_name` LIKE %s", 'osec_%')
+            $names = $wpdb->get_col(
+                $wpdb->prepare(
+                    "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+                    $wpdb->esc_like('osec_') . '%'
+                )
             );
+            foreach ($names as $name) {
+                delete_option($name);
+            }
         }
     }
 
