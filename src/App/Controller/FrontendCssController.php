@@ -780,7 +780,9 @@ class FrontendCssController extends OsecBaseClass
      */
     public function uninstall(bool $purge = false)
     {
+        // Also removes the 1.1.x files, so their scheduled removal can go.
         $this->clear_cache();
+        wp_clear_scheduled_hook(self::LEGACY_CLEANUP_HOOK);
     }
 
     /**
