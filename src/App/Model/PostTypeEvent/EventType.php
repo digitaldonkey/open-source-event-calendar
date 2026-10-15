@@ -329,16 +329,7 @@ class EventType extends OsecBaseClass
                 }
             }
 
-            // Constants only. DB prepare is not required.
-            $post_type = OSEC_POST_TYPE;
-            $this->app->db->query(
-                "DELETE a,b,c FROM wp_posts a
-                    LEFT JOIN wp_term_relationships b
-                        ON (a.ID = b.object_id)
-                    LEFT JOIN wp_postmeta c
-                        ON (a.ID = c.post_id)
-                    WHERE a.post_type = '$post_type';"
-            );
+            $this->delete_event_posts();
 
             // Remove role
             remove_role('osec_event_assistant');
@@ -368,5 +359,22 @@ class EventType extends OsecBaseClass
             unregister_taxonomy_for_object_type($taxonomy, OSEC_POST_TYPE);
         }
         unregister_post_type(OSEC_POST_TYPE);
+    }
+
+    /**
+     * Deletes all event posts with their meta and term relations.
+     *
+     * One single-table DELETE per table, so it runs on MySQL, MariaDB and SQLite (no multi-table DELETE), with
+     * the site's table names.
+     */
+    public function delete_event_posts()
+    {
+        $db        = $this->app->db;
+        $posts     = $db->get_table_name('posts');
+        $event_ids = $db->prepare("SELECT ID FROM $posts WHERE post_type = %s", OSEC_POST_TYPE);
+
+        $db->query('DELETE FROM ' . $db->get_table_name('term_relationships') . " WHERE object_id IN ($event_ids)");
+        $db->query('DELETE FROM ' . $db->get_table_name('postmeta') . " WHERE post_id IN ($event_ids)");
+        $db->query($db->prepare("DELETE FROM $posts WHERE post_type = %s", OSEC_POST_TYPE));
     }
 }
