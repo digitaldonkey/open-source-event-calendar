@@ -2,6 +2,7 @@
 
 namespace Osec\App\Controller;
 
+use Osec\App\Model\DatabaseCharset;
 use Osec\App\Model\Date\DateValidator;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Theme\ThemeLoader;
@@ -26,6 +27,19 @@ class RestController extends OsecBaseClass
                         },
                         'permission_callback' => function () {
                             return current_user_can('read');
+                        },
+                    ],
+                );
+                register_rest_route(
+                    'osec/v1',
+                    '/database/convert',
+                    [
+                        'methods' => 'POST',
+                        'callback' => function () use ($app) {
+                            return RestController::factory($app)->convertTables();
+                        },
+                        'permission_callback' => function () {
+                            return current_user_can('manage_osec_options');
                         },
                     ],
                 );
@@ -77,6 +91,29 @@ class RestController extends OsecBaseClass
                 'message' => $message,
             ]
         );
+    }
+
+    /**
+     * "Convert database tables" on the Settings page: the plugin's tables to the site's utf8mb4 charset.
+     */
+    public function convertTables(): \WP_REST_Response
+    {
+        $result = DatabaseCharset::factory($this->app)->convert();
+        if ($result['ok']) {
+            $message = __('The tables were converted. They now store all characters.', 'open-source-event-calendar');
+        } else {
+            $errors = [];
+            foreach ($result['tables'] as $table => $state) {
+                if ( ! $state['ok']) {
+                    $errors[] = $table . ': ' . $state['error'];
+                }
+            }
+            $message = __('Not every table was converted; those keep their charset.', 'open-source-event-calendar')
+                . ' ' . implode(' ', $errors);
+        }
+        $result['message'] = $message;
+
+        return new \WP_REST_Response($result);
     }
 
     public function getSettings(WP_REST_Request $request)

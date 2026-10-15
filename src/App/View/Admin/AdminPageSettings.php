@@ -3,7 +3,9 @@
 namespace Osec\App\View\Admin;
 
 use Osec\App\Model\PostTypeEvent\RobotsTxt;
+use Osec\App\Model\DatabaseCharset;
 use Osec\Settings\Elements\SettingsCache;
+use Osec\Settings\Elements\SettingsDatabase;
 use Osec\Settings\Elements\SettingsShortcodesText;
 use Osec\Settings\SettingsRenderer;
 use Osec\Theme\ThemeLoader;
@@ -151,6 +153,19 @@ class AdminPageSettings extends AdminPageAbstract
             ],
         ];
 
+        // Only while a table needs converting (DatabaseCharset).
+        if (DatabaseCharset::factory($this->app)->tables_to_convert()) {
+            $meta_boxes[] = [
+                'osec_event_database',
+                __('Database', 'open-source-event-calendar'),
+                $this->display_meta_box_database(...),
+                $screen_id,
+                'normal',
+                'high',
+                'default_order' => 5,
+            ];
+        }
+
         if ($this->app->settings->get('feature_shortcodes')) {
             $meta_boxes[] = [
                 'osec_event_shortcode_info',
@@ -241,6 +256,14 @@ class AdminPageSettings extends AdminPageAbstract
     public function display_meta_box_cache_settings(mixed $obj, mixed $box)
     {
         SettingsCache::factory($this->app)->render();
+    }
+
+    /**
+     * Displays the database charset conversion on the settings page.
+     */
+    public function display_meta_box_database(mixed $obj, mixed $box)
+    {
+        SettingsDatabase::factory($this->app)->render();
     }
 
     /**
