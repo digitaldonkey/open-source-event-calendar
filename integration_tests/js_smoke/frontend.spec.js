@@ -3,6 +3,7 @@ const {By, assert} = h;
 
 describe('JS smoke: frontend', function () {
     let driver;
+    h.screenshotOnFailure(() => driver);
 
     before(async function () {
         driver = await h.buildDriver();

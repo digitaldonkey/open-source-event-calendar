@@ -53,6 +53,37 @@ async function buildDriver() {
     return builder.build();
 }
 
+/**
+ * Saves a screenshot of every failed test, and of a failed before() hook such as the login, to
+ * MOCHA_SCREENSHOT_DIR (CI keeps that folder as artifacts), else settings.screenshotsDir.
+ * Call it before the suite's own after() that quits the driver: after() hooks run in the order they were added.
+ */
+function screenshotOnFailure(getDriver) {
+    const save = async (runnable) => {
+        const driver = getDriver();
+        if ( ! driver || ! runnable || runnable.state !== 'failed') {
+            return;
+        }
+        const dir = process.env.MOCHA_SCREENSHOT_DIR || settings.screenshotsDir;
+        const file = `${dir}/smoke_${runnable.fullTitle().replace(/[^\w-]+/g, '_').slice(0, 120)}.png`;
+        try {
+            fs.mkdirSync(dir, {recursive: true});
+            fs.writeFileSync(file, await driver.takeScreenshot(), 'base64');
+            console.log(`      screenshot: ${file} (${await driver.getCurrentUrl()})`);
+        } catch (e) {
+            console.log(`      no screenshot: ${e.message}`);
+        }
+    };
+    afterEach(async function () {
+        await save(this.currentTest);
+    });
+    after(async function () {
+        for (const hook of this.test.parent._beforeAll || []) {
+            await save(hook);
+        }
+    });
+}
+
 function url(path) {
     return settings.domain.replace(/\/$/, '') + path;
 }
@@ -64,7 +95,16 @@ async function login(driver) {
     await user.sendKeys(settings.wpLogin.admin.user);
     await driver.findElement(By.id('user_pass')).sendKeys(settings.wpLogin.admin.pass);
     await driver.findElement(By.id('wp-submit')).click();
-    await driver.wait(until.elementLocated(By.id('wpadminbar')), TIMEOUT);
+    try {
+        await driver.wait(until.elementLocated(By.id('wpadminbar')), TIMEOUT);
+    } catch (e) {
+        // Say why in the log: WordPress' login error, or the page the login ended on.
+        const reason = await driver.executeScript(
+            "const e = document.getElementById('login_error'); return e ? e.textContent.trim() : '';"
+        ).catch(() => '');
+        throw new Error(`Login as "${settings.wpLogin.admin.user}" failed on ${await driver.getCurrentUrl()}: `
+            + (reason || e.message));
+    }
 }
 
 /**
@@ -152,5 +192,5 @@ async function click(driver, css) {
 
 module.exports = {
     settings, TIMEOUT, CAL_PATH, By, until, assert,
-    buildDriver, url, login, open, definedModules, waitForModules, assertNoConsoleErrors, visible, click,
+    buildDriver, screenshotOnFailure, url, login, open, definedModules, waitForModules, assertNoConsoleErrors, visible, click,
 };

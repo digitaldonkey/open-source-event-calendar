@@ -264,6 +264,10 @@ Other env: `BASE_URL`, `CALENDAR_PATH`, `WP_ADMIN_USER`/`WP_ADMIN_PASS`, `SELENI
 `BASE_URL=https://claude.ddev-wordpress.ddev.site OSEC_TEST_HOST_RULES='MAP *.ddev-wordpress.ddev.site ddev-router'`.
 Two tests check that event values print as text in views rendered by twig.js; they need the seed's
 "Hostile venue" event.
+A failure says what failed in the log itself: CI uses the `spec` reporter next to JUnit (`MOCHA_FILE`, as the
+main suite; never `--reporter mocha-junit-reporter` alone, which prints nothing), a failed login names WordPress'
+login error, and every failed test or `before` hook saves a screenshot to `MOCHA_SCREENSHOT_DIR` (CI artifacts),
+else `screenshotsDir` from the settings, and prints its path and the page URL.
 
 ```bash
 /usr/local/bin/wp eval-file bin/dev-seed-block-test-data.php   # test data, once ([OSEC-TEST] events and terms)
