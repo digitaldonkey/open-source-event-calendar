@@ -12,6 +12,7 @@ Run before pushing:
 [ ] composer install                                                        # sync dev deps
 [ ] vendor/bin/phpcs --standard=phpcs.xml --runtime-set testVersion 8.2-    # coding standards
 [ ] vendor/bin/phpunit                                                      # unit + integration tests
+[ ] bin/phpunit-sqlite.sh                                                   # the same on SQLite (~15 s)
 [ ] cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test  # Mocha/Selenium (~5 min)
 [ ] bin/plugin-check.sh                                                     # WordPress plugin-check gate (~13 s)
 [ ] vendor/bin/grumphp run --testsuite=all_tests                           # everything above, in one command
@@ -132,7 +133,7 @@ Task inventory as currently configured:
 
 Testsuites:
 - `git_pre_commit` — matched by name to GrumPHP's git hook (`PreCommitCommand` looks up a testsuite literally named `git_pre_commit`), so this is what actually runs on every commit: `composer`, `phpcs`, `editorconfig`, `phpunit`. Without this testsuite the hook would run every configured task, including `integration_tests` and the release checks. CI's "Run code quality tests" step deliberately does not use this testsuite (it runs `--tasks=composer,phpcs`, as that job has no database for `phpunit`).
-- `all_tests` — not hook-bound, for running everything on demand: `composer`, `phpcs`, `editorconfig`, `phpunit`, `plugin_check`, `integration_tests`.
+- `all_tests` — not hook-bound, for running everything on demand: `composer`, `phpcs`, `editorconfig`, `phpunit`, `phpunit_sqlite`, `plugin_check`, `integration_tests`.
 - `prepare_release` — `release_check` (`wp osec prepare_release`), `make_readme` (`wp osec make_readme --check`), `hooks_and_filters` (`hookster_markdown` check), `plugin_check` (`bin/plugin-check.sh`). Run after `all_tests`.
 
 The git pre-commit hook already runs inside DDEV — `git_hook_variables.EXEC_GRUMPHP_COMMAND` wraps it in `ddev exec -d "/var/www/html/wp-content/plugins/open-source-event-calendar"`. No extra setup needed; only reinit (`ddev exec grumphp git:init`) if the hook itself isn't installed.
@@ -228,13 +229,23 @@ Confirmed working (2026-09-11): 1 passing in 3s vs. the full suite's ~5 minutes.
 
 WordPress Playground, and with it the WordPress.org Live Preview, runs WordPress on SQLite through the SQLite
 Database Integration drop-in. `bin/phpunit-sqlite.sh` copies the MySQL test WordPress to `/tmp/osec-sqlite-tests`,
-adds the drop-in there (the MySQL setup stays untouched) and runs PHPUnit; arguments go to phpunit. CI runs the
-same in `db_job_sqlite`.
+adds the drop-in there (the MySQL setup stays untouched) and runs PHPUnit; arguments go to phpunit (default `tests`).
+CI runs the script in `db_job_sqlite`, which `release_decision_job` waits for; GrumPHP in `all_tests`.
 
 ```bash
 bin/phpunit-sqlite.sh
 bin/phpunit-sqlite.sh --filter ExceptionDateTest
 ```
+
+- Run it inside the DDEV container (`ddev ssh`, or `ddev exec bin/phpunit-sqlite.sh` from the plugin folder) after
+  `bin/install-wp-tests.sh`; it stops with a hint when the test WordPress is missing (e.g. after a container restart).
+- The driver is pinned (version and the sha256 GitHub publishes for the release asset, at the top of the script). To
+  update it, change both. The copy is set up again when the driver or the test WordPress changes.
+- The run fails if no SQLite database was written, so a run that silently fell back to MySQL never passes.
+- **Driver 3.1.0 evaluates `IF()` correctly**, so the #44 tests (`ExceptionDateTest`) no longer catch an `IF()` in our
+  SQL; up to 3.0.2 they did (checked 2026-10-15). Keep `CASE WHEN` for sites on older drivers.
+- SQLite hands out a post ID again after a test's rollback (MySQL does not). A test that relies on a shared object
+  caching per post ID can fail only here; use a new instance in the test (see `PrintHeaderTest`).
 
 ## JS smoke tests (non-destructive)
 

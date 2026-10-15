@@ -34,6 +34,14 @@ parameters:
             config_file: './phpunit.xml'
             # Run regardless of which files changed - see TESTING.md.
             always_execute: true
+        # PHPUnit on SQLite (bin/phpunit-sqlite.sh, see TESTING.md). Downloads the
+        # SQLite driver on the first run after a container restart.
+        phpunit_sqlite:
+            triggered_by: ['php']
+            scripts:
+                - ["-c", "bin/phpunit-sqlite.sh"]
+            metadata:
+                task: shell
         # .editorconfig rules (armin/editorconfig-cli): trailing whitespace, final
         # newline, indent style, line endings, charset. Checks every tracked file
         # (< 1 s), not only staged ones, so a violation anywhere fails. calendar_block/
@@ -100,6 +108,7 @@ parameters:
                 - phpcs
                 - editorconfig
                 - phpunit
+                - phpunit_sqlite
                 - plugin_check
                 - integration_tests
         # Release-readiness checks. Run after all_tests:

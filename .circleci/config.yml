@@ -98,6 +98,23 @@ references:
       name: Install subversion
       command: sudo apt-get update && sudo apt-get install -y subversion && sudo rm -rf /var/lib/apt/lists/*
 
+  # PHPUnit jobs (MySQL/MariaDB and SQLite).
+  set_php_timezone: &set_php_timezone
+    run:
+      name: Set PHP Timezone
+      command: |
+        echo $TZ
+        sudo bash -c "echo 'date.timezone = "$TZ"'  >>  /etc/php.d/timezone.ini"
+
+  install_apcu: &install_apcu
+    run:
+      name: Install apcu
+      command: |
+        sudo mkdir -p /tmp/pear/temp
+        sudo pecl channel-update pecl.php.net
+        echo no '' |  sudo pecl install apcu
+        sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
+
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
 jobs:
@@ -158,18 +175,8 @@ jobs:
 #          command: sudo apt-get update
 #                    && sudo apt-get install -y mysql-client
 #                    && sudo rm -rf /var/lib/apt/lists/*
-      - run:
-          name: Set PHP Timezone
-          command: |
-            echo $TZ
-            sudo bash -c "echo 'date.timezone = "$TZ"'  >>  /etc/php.d/timezone.ini"
-      - run:
-          name: Install apcu
-          command: |
-            sudo mkdir -p /tmp/pear/temp
-            sudo pecl channel-update pecl.php.net
-            echo no '' |  sudo pecl install apcu
-            sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
+      - *set_php_timezone
+      - *install_apcu
       - run:
           name: Test apcu in PHP.ini
           command: php -i | grep -i apc
@@ -240,60 +247,32 @@ jobs:
         <<: *ENV_DB_IMAGE
 
   # PHPUnit on SQLite, as WordPress Playground and the WordPress.org Live Preview run the
-  # plugin: the test WordPress gets the SQLite Database Integration drop-in (#44 was an
-  # IF() the SQLite driver evaluated wrongly). No database container.
+  # plugin (#44): bin/phpunit-sqlite.sh copies the test WordPress from the workspace, adds the
+  # SQLite Database Integration drop-in (pinned, checksum) and fails if no SQLite database was
+  # written. No database container, and unlike db_job no PHP server (add it if a test needs one).
   db_job_sqlite:
     <<: *container_config
     docker:
       - image: cimg/php:8.2
         <<: *ENV_PHP_IMAGE
-    environment:
-      SQLITE_PLUGIN_VERSION: 3.0.2
     steps:
       - checkout
       - *attach_workspace
       - *copy_vendor
+      - *set_php_timezone
+      - *install_apcu
       - run:
-          name: Set PHP Timezone
+          name: Run PHP unit tests (SQLite) variables
           command: |
-            echo $TZ
-            sudo bash -c "echo 'date.timezone = "$TZ"'  >>  /etc/php.d/timezone.ini"
-      - run:
-          name: Install apcu
-          command: |
-            sudo mkdir -p /tmp/pear/temp
-            sudo pecl channel-update pecl.php.net
-            echo no '' |  sudo pecl install apcu
-            sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
-      - run:
-          name: Set up SQLite test WordPress variables
-          command: |
-            echo "SQLITE_PLUGIN_VERSION: $SQLITE_PLUGIN_VERSION"
             echo "WP_CORE_DIR: $WP_CORE_DIR"
             echo "tests config (ls /tmp/wordpress-tests-lib/wp-tests-config.php): $(ls /tmp/wordpress-tests-lib/wp-tests-config.php)"
             echo "pdo_sqlite (php -m): $(php -m | grep -i sqlite | tr '\n' ' ')"
-      - run:
-          name: Set up SQLite test WordPress
-          command: |
-            set -Eeuxo pipefail
-            plugin=$WP_CORE_DIR/wp-content/plugins/sqlite-database-integration
-            curl -sSfL -o /tmp/sqlite.zip "https://downloads.wordpress.org/plugin/sqlite-database-integration.$SQLITE_PLUGIN_VERSION.zip"
-            unzip -q /tmp/sqlite.zip -d $WP_CORE_DIR/wp-content/plugins/
-            sed -e "s#{SQLITE_IMPLEMENTATION_FOLDER_PATH}#$plugin#" \
-                -e "s#{SQLITE_PLUGIN}#sqlite-database-integration/load.php#g" \
-                $plugin/db.copy > $WP_CORE_DIR/wp-content/db.php
-            mkdir -p /tmp/sqlite-db
-            sed -i "s#^define( 'ABSPATH'.*#&\ndefine( 'DB_DIR', '/tmp/sqlite-db/' );\ndefine( 'DB_FILE', 'phpunit.sqlite' );#" \
-                /tmp/wordpress-tests-lib/wp-tests-config.php
-            grep -nE "ABSPATH|DB_DIR|DB_FILE" /tmp/wordpress-tests-lib/wp-tests-config.php
       - run:
           name: Run PHP unit tests (SQLite)
           command: |
             set -Eeuxo pipefail
             mkdir -p ~/phpunit
-            vendor/bin/phpunit --log-junit ~/phpunit/junit.xml tests
-            # The run must have used SQLite, not fallen back to MySQL.
-            test -s /tmp/sqlite-db/phpunit.sqlite
+            bin/phpunit-sqlite.sh --log-junit ~/phpunit/junit.xml tests
           when: always
       - store_test_results:
           path: ~/phpunit
