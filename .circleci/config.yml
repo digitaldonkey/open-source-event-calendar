@@ -98,6 +98,23 @@ references:
       name: Install subversion
       command: sudo apt-get update && sudo apt-get install -y subversion && sudo rm -rf /var/lib/apt/lists/*
 
+  # PHPUnit jobs (MySQL/MariaDB and SQLite).
+  set_php_timezone: &set_php_timezone
+    run:
+      name: Set PHP Timezone
+      command: |
+        echo $TZ
+        sudo bash -c "echo 'date.timezone = "$TZ"'  >>  /etc/php.d/timezone.ini"
+
+  install_apcu: &install_apcu
+    run:
+      name: Install apcu
+      command: |
+        sudo mkdir -p /tmp/pear/temp
+        sudo pecl channel-update pecl.php.net
+        echo no '' |  sudo pecl install apcu
+        sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
+
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
 jobs:
@@ -158,18 +175,8 @@ jobs:
 #          command: sudo apt-get update
 #                    && sudo apt-get install -y mysql-client
 #                    && sudo rm -rf /var/lib/apt/lists/*
-      - run:
-          name: Set PHP Timezone
-          command: |
-            echo $TZ
-            sudo bash -c "echo 'date.timezone = "$TZ"'  >>  /etc/php.d/timezone.ini"
-      - run:
-          name: Install apcu
-          command: |
-            sudo mkdir -p /tmp/pear/temp
-            sudo pecl channel-update pecl.php.net
-            echo no '' |  sudo pecl install apcu
-            sudo bash -c "echo 'apc.enable_cli = 1'  >>  /etc/php.d/circleci.ini"
+      - *set_php_timezone
+      - *install_apcu
       - run:
           name: Test apcu in PHP.ini
           command: php -i | grep -i apc
@@ -238,6 +245,37 @@ jobs:
         <<: *ENV_PHP_IMAGE
       - image: cimg/mysql:8.0
         <<: *ENV_DB_IMAGE
+
+  # PHPUnit on SQLite, as WordPress Playground and the WordPress.org Live Preview run the
+  # plugin (#44): bin/phpunit-sqlite.sh copies the test WordPress from the workspace, adds the
+  # SQLite Database Integration drop-in (pinned, checksum) and fails if no SQLite database was
+  # written. No database container, and unlike db_job no PHP server (add it if a test needs one).
+  db_job_sqlite:
+    <<: *container_config
+    docker:
+      - image: cimg/php:8.2
+        <<: *ENV_PHP_IMAGE
+    steps:
+      - checkout
+      - *attach_workspace
+      - *copy_vendor
+      - *set_php_timezone
+      - *install_apcu
+      - run:
+          name: Run PHP unit tests (SQLite) variables
+          command: |
+            echo "WP_CORE_DIR: $WP_CORE_DIR"
+            echo "tests config (ls /tmp/wordpress-tests-lib/wp-tests-config.php): $(ls /tmp/wordpress-tests-lib/wp-tests-config.php)"
+            echo "pdo_sqlite (php -m): $(php -m | grep -i sqlite | tr '\n' ' ')"
+      - run:
+          name: Run PHP unit tests (SQLite)
+          command: |
+            set -Eeuxo pipefail
+            mkdir -p ~/phpunit
+            bin/phpunit-sqlite.sh --log-junit ~/phpunit/junit.xml tests
+          when: always
+      - store_test_results:
+          path: ~/phpunit
 
   create_release_job:
     <<: *container_config
@@ -379,8 +417,14 @@ jobs:
             fi
 
   # Integration tests
+  # db: sqlite runs the same tests against WordPress on SQLite (release_test_job_sqlite).
   release_test_job: &release_test_job
     <<: *db_job
+    parameters:
+      db:
+        type: enum
+        enum: [mariadb, sqlite]
+        default: mariadb
     docker:
       - image: cimg/php:8.2-browsers
         <<: *ENV_PHP_IMAGE
@@ -420,6 +464,20 @@ jobs:
             sudo apt-get update
             sudo apt-get install -y mysql-client apache2 php$PHP_VERSION-{fpm,cli,bz2,curl,mbstring,intl,bcmath,xml,mysql,zip,gd,mbstring,apcu}
             sudo rm -rf /var/lib/apt/lists/*
+      - when:
+          condition:
+            equal: [ sqlite, << parameters.db >> ]
+          steps:
+          - run:
+              name: Install PHP SQLite for php-fpm variables
+              command: |
+                echo "PHP_VERSION: $PHP_VERSION"
+          - run:
+              name: Install PHP SQLite for php-fpm
+              command: |
+                sudo apt-get update
+                sudo apt-get install -y php$PHP_VERSION-sqlite3
+                sudo rm -rf /var/lib/apt/lists/*
       - run:
           name: Add WordPress domain to hosts file
           command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
@@ -456,17 +514,52 @@ jobs:
             echo " WP_VERSION: $WP_VERSION"
             echo " $($WP_CLI --version) $WP_CLI"
             echo " PHP_VERSION: $PHP_VERSION"
-      - run:
-          name: Wait for DB
-          command: dockerize -wait tcp://localhost:3306 -timeout 2m
-      - run:
-          name: Install WordPress (DB, no unit test scripts)
-          command: |
-            sudo chown root:circleci $WP_CORE_DIR/.. && sudo chmod g+w $WP_CORE_DIR/.. && sudo rm -rf $WP_CORE_DIR
-            bash ./bin/install-wp-tests.sh $MYSQL_DATABASE $MYSQL_USER $MYSQL_PASSWORD $WP_HOST $WP_VERSION true true
-            $WP_CLI config create --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
-            $WP_CLI core install --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com" --skip-email
-            $WP_CLI config set FS_METHOD direct --path=$WP_CORE_DIR
+      - when:
+          condition:
+            equal: [ mariadb, << parameters.db >> ]
+          steps:
+          - run:
+              name: Wait for DB
+              command: dockerize -wait tcp://localhost:3306 -timeout 2m
+          - run:
+              name: Install WordPress (DB, no unit test scripts)
+              command: |
+                sudo chown root:circleci $WP_CORE_DIR/.. && sudo chmod g+w $WP_CORE_DIR/.. && sudo rm -rf $WP_CORE_DIR
+                bash ./bin/install-wp-tests.sh $MYSQL_DATABASE $MYSQL_USER $MYSQL_PASSWORD $WP_HOST $WP_VERSION true true
+                $WP_CLI config create --dbname=$MYSQL_DATABASE --dbuser=$MYSQL_USER --dbpass=$MYSQL_PASSWORD --path=$WP_CORE_DIR --dbhost=127.0.0.1
+                $WP_CLI core install --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com" --skip-email
+                $WP_CLI config set FS_METHOD direct --path=$WP_CORE_DIR
+      - when:
+          condition:
+            equal: [ sqlite, << parameters.db >> ]
+          steps:
+          - run:
+              name: Install WordPress (SQLite) variables
+              command: |
+                echo "WP_CORE_DIR: $WP_CORE_DIR"
+                echo "WP_HOST: $WP_HOST"
+                echo "WP_VERSION: $WP_VERSION"
+                echo "WP_CLI: $WP_CLI"
+                echo "SQLite driver: $(bin/sqlite-dropin.sh --version)"
+          - run:
+              name: Install WordPress (SQLite)
+              # As WordPress Playground and the WordPress.org Live Preview run it: the SQLite drop-in instead of a
+              # database server (bin/sqlite-dropin.sh pins the driver).
+              command: |
+                set -Eeuxo pipefail
+                sudo chown root:circleci $WP_CORE_DIR/.. && sudo chmod g+w $WP_CORE_DIR/.. && sudo rm -rf $WP_CORE_DIR
+                mkdir -p $WP_CORE_DIR
+                $WP_CLI core download --path=$WP_CORE_DIR --version=$WP_VERSION
+                $WP_CLI config create --path=$WP_CORE_DIR --dbname=unused --dbuser=unused --dbpass=unused --skip-check
+                bin/sqlite-dropin.sh $WP_CORE_DIR
+                mkdir -p $WP_CORE_DIR/wp-content/database
+                $WP_CLI config set DB_DIR $WP_CORE_DIR/wp-content/database/ --path=$WP_CORE_DIR
+                $WP_CLI config set DB_FILE osec.sqlite --path=$WP_CORE_DIR
+                $WP_CLI core install --url=$WP_HOST --title="OSEC" --path=$WP_CORE_DIR --admin_user="admin" --admin_password="password" --admin_email="no-one-cares@test.com" --skip-email
+                $WP_CLI config set FS_METHOD direct --path=$WP_CORE_DIR
+                # The site must run on SQLite.
+                test "$($WP_CLI --path=$WP_CORE_DIR eval 'echo DB_ENGINE;')" = sqlite
+                test -s $WP_CORE_DIR/wp-content/database/osec.sqlite
       - run:
           name: Install Open source event calendar plugin (release)
           command: |
@@ -481,22 +574,43 @@ jobs:
             sudo chmod 775 $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
             echo "ls -al $WP_CORE_DIR/wp-content/uploads" && ls -al $WP_CORE_DIR/wp-content/uploads
             echo "ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache" && ls -al $WP_CORE_DIR/wp-content/plugins/$WP_ORG_PLUGIN_NAME/cache
-      - run:
-          name: WordPress plugin-check (release build)
-          command: |
-            set -Eeuxo pipefail
-            # Runs before constants-local.php is written, so only files that
-            # are actually released are checked. plugin-check comes from the
-            # workspace vendor directory, i.e. the version composer.lock pins.
-            cp -R /tmp/vendor/plugin-check $WP_CORE_DIR/wp-content/plugins/plugin-check
-            $WP_CLI --path=$WP_CORE_DIR plugin activate plugin-check
-            bin/plugin-check.sh --release --wp=$WP_CLI --path=$WP_CORE_DIR --slug=$WP_ORG_PLUGIN_NAME
-            $WP_CLI --path=$WP_CORE_DIR plugin deactivate plugin-check
-            rm -rf $WP_CORE_DIR/wp-content/plugins/plugin-check
+      # The same zip is checked in the MariaDB jobs; plugin-check builds its own database tables.
+      - when:
+          condition:
+            equal: [ mariadb, << parameters.db >> ]
+          steps:
+          - run:
+              name: WordPress plugin-check (release build)
+              command: |
+                set -Eeuxo pipefail
+                # Runs before constants-local.php is written, so only files that
+                # are actually released are checked. plugin-check comes from the
+                # workspace vendor directory, i.e. the version composer.lock pins.
+                cp -R /tmp/vendor/plugin-check $WP_CORE_DIR/wp-content/plugins/plugin-check
+                $WP_CLI --path=$WP_CORE_DIR plugin activate plugin-check
+                bin/plugin-check.sh --release --wp=$WP_CLI --path=$WP_CORE_DIR --slug=$WP_ORG_PLUGIN_NAME
+                $WP_CLI --path=$WP_CORE_DIR plugin deactivate plugin-check
+                rm -rf $WP_CORE_DIR/wp-content/plugins/plugin-check
       - run:
           name: Add constants-local.php
           command: |
             echo "<?php define('OSEC_UNINSTALL_PLUGIN_DATA', true);" > /var/www/html/wp-content/plugins/open-source-event-calendar/constants-local.php
+      - when:
+          condition:
+            equal: [ sqlite, << parameters.db >> ]
+          steps:
+          - run:
+              name: php-fpm as circleci variables
+              command: |
+                echo "PHP_VERSION: $PHP_VERSION"
+          - run:
+              name: php-fpm as circleci
+              # WP-CLI (circleci) and the web server write the same database file and its journal files; the driver
+              # creates the database with mode 0600.
+              command: |
+                sudo sed -i -e 's/^user = www-data/user = circleci/' -e 's/^group = www-data/group = circleci/' \
+                  /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
+                grep -E '^(user|group) = ' /etc/php/$PHP_VERSION/fpm/pool.d/www.conf
       - run:
           name: Apache2 webserver
           command: |
@@ -618,6 +732,17 @@ jobs:
           PHP_VERSION: 8.5
       - image: cimg/mariadb:11.4
         <<: *ENV_DB_IMAGE
+  # The release test on WordPress with SQLite (Playground, Live Preview); no database container.
+  release_test_job_sqlite:
+    <<: *release_test_job
+    parameters:
+      db:
+        type: enum
+        enum: [mariadb, sqlite]
+        default: sqlite
+    docker:
+      - image: cimg/php:8.2-browsers
+        <<: *ENV_PHP_IMAGE
 
   # Decides what this pipeline releases (master and release tags only), after all tests.
   release_decision_job:
@@ -784,6 +909,10 @@ workflows:
           requires:
             - build
           filters: *main_branches
+      - db_job_sqlite:
+          requires:
+            - build
+          filters: *main_branches
       - create_release_job:
           requires:
             - db_job
@@ -805,6 +934,10 @@ workflows:
           requires:
             - create_release_job
           filters: *main_branches
+      - release_test_job_sqlite:
+          requires:
+            - create_release_job
+          filters: *main_branches
       - release_decision_job:
           requires:
             - static_job
@@ -815,10 +948,12 @@ workflows:
             - db_job_php_8_4
             - db_job_php_8_5
             - db_job_mysql_8
+            - db_job_sqlite
             - release_test_job
             - release_test_job_php_8_3
             - release_test_job_php_8_4
             - release_test_job_php_8_5
+            - release_test_job_sqlite
           filters: *deploy_branches
       - publish_github_release_job:
           requires:
