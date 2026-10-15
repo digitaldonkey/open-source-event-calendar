@@ -157,7 +157,7 @@ class AdminPageSettings extends AdminPageAbstract
         if (DatabaseCharset::factory($this->app)->tables_to_convert()) {
             $meta_boxes[] = [
                 'osec_event_database',
-                __('Database update needed', 'open-source-event-calendar'),
+                __('Upgrade database charset (utf8mb4)', 'open-source-event-calendar'),
                 $this->display_meta_box_database(...),
                 $screen_id,
                 'normal',

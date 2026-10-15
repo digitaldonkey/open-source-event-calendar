@@ -7,7 +7,8 @@ use Osec\Bootstrap\OsecBaseClass;
 use Osec\Theme\ThemeLoader;
 
 /**
- * The "Database update needed" box on the settings page: tables that are not utf8mb4 and the button converting them.
+ * The "Upgrade database charset (utf8mb4)" box on the settings page: tables that are not utf8mb4 and the
+ * button converting them.
  * Shown only while a table needs it (AdminPageSettings::add_meta_box()).
  */
 class SettingsDatabase extends OsecBaseClass
