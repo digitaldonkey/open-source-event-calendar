@@ -4,6 +4,7 @@ const COMMON = ['scripts/common_scripts/backend/common_backend'];
 
 describe('JS smoke: backend', function () {
     let driver;
+    h.screenshotOnFailure(() => driver);
 
     before(async function () {
         driver = await h.buildDriver();
