@@ -86,7 +86,8 @@ class DatabaseCharsetTest extends TestBase
 
         $this->assertFalse($result['ok']);
         $this->assertStringContainsString('Delete or change one of them', $result['tables'][$feeds]['error']);
-        $this->assertStringStartsWith('utf8mb3', $this->collation($feeds), 'unchanged');
+        // MariaDB before 10.6 names utf8mb3 "utf8" (utf8_general_ci).
+        $this->assertMatchesRegularExpression('/^utf8(mb3)?_/', $this->collation($feeds), 'unchanged');
 
         $wpdb->delete($feeds, ['feed_url' => self::FEED_URLS[1]]);
         $wpdb->query('COMMIT');
