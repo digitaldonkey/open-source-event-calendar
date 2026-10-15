@@ -151,7 +151,11 @@ class DatabaseSchema extends OsecBaseClass
      */
     public function get_current_db_schema()
     {
+        global $wpdb;
         $dbi = $this->app->db;
+        // The site's charset and collation, as WordPress' own tables (utf8mb4 on current sites). Existing tables
+        // keep theirs - dbDelta() does not convert; see DatabaseCharset.
+        $charset_collate = $wpdb->get_charset_collate();
         // =======================
         // = Create table events =
         // =======================
@@ -190,7 +194,7 @@ class DatabaseSchema extends OsecBaseClass
                 longitude decimal(20,15),
                 PRIMARY KEY  (post_id),
                 KEY feed_source (ical_feed_url)
-                ) CHARACTER SET utf8;";
+                ) $charset_collate;";
 
         // ==========================
         // = Create table instances =
@@ -203,7 +207,7 @@ class DatabaseSchema extends OsecBaseClass
                 end bigint unsigned NOT NULL,
                 PRIMARY KEY  (id),
                 UNIQUE KEY evt_instance (post_id,start)
-                ) CHARACTER SET utf8;";
+                ) $charset_collate;";
 
         // ================================
         // = Create table category colors =
@@ -214,7 +218,7 @@ class DatabaseSchema extends OsecBaseClass
             term_color varchar(255) NOT NULL,
             term_image varchar(254) NULL DEFAULT NULL,
             PRIMARY KEY  (term_id)
-            ) CHARACTER SET utf8;";
+            ) $charset_collate;";
 
         $table_name = $dbi->get_table_name(OSEC_DB__FEEDS);
         $sql        .= "CREATE TABLE $table_name (
@@ -232,7 +236,7 @@ class DatabaseSchema extends OsecBaseClass
                     hide_cost tinyint(1) NOT NULL DEFAULT '1',
                     PRIMARY KEY  (feed_id),
                     UNIQUE KEY feed (feed_url)
-                    ) CHARACTER SET utf8;";
+                    ) $charset_collate;";
 
         return $sql;
     }

@@ -279,7 +279,7 @@ timely.define("domReady", [], function () {
             cacheAjaxHandlers.handle_rescan_cache({error: !0})
         }), !1;
     }, c = function () {
-        var t = $(this), m = $("#osec-clear-caches-result"), l = t.text();
+        var t = $(this), m = $(t.data("result") || "#osec-clear-caches-result"), l = t.text();
         return t.prop("disabled", !0).text(t.data("busy")), m.text(""), $.ajax({
             url: t.data("url"),
             method: "POST",
@@ -1703,7 +1703,7 @@ timely.define("domReady", [], function () {
         domReady(function () {
             f(), a(), utils.activate_saved_tab_on_page_load($.cookie("osec_general_settings_active_tab")), $(document).on("click", '#ai1ec-general-settings .ai1ec-nav a[data-toggle="ai1ec-tab"]', o), $(document).on("click", "#disable_standard_filter_menu_toggler", function (e) {
                 e.preventDefault()
-            }), $(document).on("click", "#ai1ec-button-refresh", cacheEventHandlers.perform_rescan), $(document).on("click", "#osec-button-clear-caches", cacheEventHandlers.perform_clear);
+            }), $(document).on("click", "#ai1ec-button-refresh", cacheEventHandlers.perform_rescan), $(document).on("click", "#osec-button-clear-caches", cacheEventHandlers.perform_clear), $(document).on("click", "#osec-button-convert-tables", cacheEventHandlers.perform_clear);
             var t = $("#exact_date");
             t.datepicker({autoclose: !0}), s(), $(document).on("click", ".ai1ec-admin-view-settings .ai1ec-toggle-view", function () {
                 var t = $(this), n = t.parent().index() + 1;

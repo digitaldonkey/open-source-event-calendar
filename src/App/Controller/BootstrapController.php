@@ -2,6 +2,7 @@
 
 namespace Osec\App\Controller;
 
+use Osec\App\Model\DatabaseCharset;
 use Osec\App\Model\DatabaseSchema;
 use Osec\App\Model\Date\DateFormatsFrontend;
 use Osec\App\Model\Date\DT;
@@ -355,7 +356,15 @@ class BootstrapController
                 }
             );
 
+            add_filter(
+                'site_status_tests',
+                fn(array $tests) => DatabaseCharset::factory($app)->add_site_health_test($tests)
+            );
+
             add_action('current_screen', function (\WP_Screen $current_screen) use ($app) {
+                if (OSEC_POST_TYPE === $current_screen->post_type) {
+                    DatabaseCharset::factory($app)->notify();
+                }
                 // Menu page Meta boxes.
                 if (str_starts_with($current_screen->id, 'osec_event_page_')) {
                     $menu_slug = substr($current_screen->id, 16);
