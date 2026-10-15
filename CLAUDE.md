@@ -527,7 +527,7 @@ failure mode, not a compile error.
 See `TESTING.md` for the full checklist, one-time setup, integration-test prerequisites, and GrumPHP task inventory. Quick reference:
 
 - **PHPUnit**: `ddev phpunit` (or `ddev phpunit --filter test_name ./tests/Unit/...`)
-- **PHPUnit on SQLite** (Playground / Live Preview): `bin/phpunit-sqlite.sh` (CI `db_job_sqlite`, blocks the release; GrumPHP `all_tests`). Driver pinned to 3.1.0, which no longer catches `IF()` (#44) - see `TESTING.md`
+- **SQLite** (Playground / Live Preview): PHPUnit via `bin/phpunit-sqlite.sh` (CI `db_job_sqlite`; GrumPHP `all_tests`), the browser suites in CI `release_test_job_sqlite` (`release_test_job` with `db: sqlite`); both block the release. Driver pinned in `bin/sqlite-dropin.sh` (3.1.0, which no longer catches `IF()`, #44) - see `TESTING.md`
 - **Integration (Mocha/Selenium)**: `cd integration_tests && npm run test`
 - **Code quality**: `ddev composer run-script phpcs` or `ddev run-script phpcs`
 - **WordPress plugin-check**: `bin/plugin-check.sh` (~13 s; ERROR fails, `--strict` also fails on WARNING). Deliberately **not** in `git_pre_commit` - it runs in `all_tests`, `prepare_release` and CI
