@@ -27,6 +27,11 @@ const config = {
         'agenda',
         'month',
     ],
+    // Included by the templates above ({% include 'event-popup.twig' %}): registered in the runtime block under
+    // their file name, which is how twig.js finds them (with allowInlineIncludes on the including template).
+    partials: [
+        'event-popup',
+    ],
     /*
         The files where aggregated by Time.ly using unknown build script.
         So we just replace the Twig template parts, to be able to use frontend rendering.
@@ -36,6 +41,8 @@ const config = {
         '../public/js/pages/calendar.js',
     ]
 }
+
+const TEMPLATE_OPTIONS = 'autoescape: true, allowInlineIncludes: true';
 
 const twigOpts = {
     ...twigJsCompile.defaults,
@@ -47,7 +54,7 @@ const twigOpts = {
 
 async function compileTwigJsTemplates () {
     // Compile templates to twig-js.
-    const templates = config.templates.map((template) => config.sourcePath + template + '.twig');
+    const templates = [...config.templates, ...config.partials].map((template) => config.sourcePath + template + '.twig');
     console.log({sourceTemplates: templates})
     twigJsCompile.compile(twigOpts, templates);
     // Take some time to finish.
@@ -73,6 +80,15 @@ const updateRuntime = async () => {
     // BSD-2-Clause: the notice travels with the code. Its pointer to twig.min.js.LICENSE.txt and the
     // source map reference go, neither file ships.
     const license = (await fs.readFile(require.resolve('twig/LICENSE'), 'utf8')).trim().replace(/\*\//g, '* /');
+    let partials = '';
+    for (const partial of config.partials) {
+        const object = (await compiledTemplateObject(partial, 'autoescape: true'))
+            .replace(/^\{id:"[^"]*"/, `{id:"${partial}.twig"`);
+        if (!object.startsWith(`{id:"${partial}.twig"`)) {
+            throw new Error(`Unexpected compiled template id: ${partial}`);
+        }
+        partials += `    module.exports.twig(${object});\n`;
+    }
     const runtime = (await fs.readFile(require.resolve('twig/twig.min.js'), 'utf8'))
         .replace(/^\/\*! For license information please see [^*]*\*\/\n?/, '')
         .replace(/\n?\/\/# sourceMappingURL=\S+\s*$/, '')
@@ -85,6 +101,7 @@ const updateRuntime = async () => {
         + `    // twig.js ${version} (twig.min.js, UMD): its CommonJS branch fills this module object.\n`
         + '    var module = {exports: {}}, exports = module.exports, define;\n'
         + runtime + '\n'
+        + partials
         + '    return module.exports;\n'
         + '})' + end;
     const regex = new RegExp(String.raw`${escapeStringRegexp(begin)}.+?${escapeStringRegexp(end)}`, 'gs');
@@ -100,15 +117,23 @@ const updateRuntime = async () => {
     }
 }
 
+/*
+    The compiled file is "twig({id:…, data:[…], precompiled: true});": returns the object with the options
+    the bundle needs. Escape like PHP Twig: the templates mark HTML with |raw and attributes with |e('html_attr').
+ */
+const compiledTemplateObject = async (template, options) => {
+    const tempFile = `${config.replaceFilesPath}/${template}.twig.js`;
+    let object = (await fs.readFile(tempFile, 'utf8')).replace(/^(twig\()/, '').replace(/(\);\n)$/, '');
+    if (!object.endsWith(', precompiled: true}')) {
+        throw new Error(`Unexpected compiled template format: ${template}`);
+    }
+    await fs.rm(tempFile);
+    return object.replace(/, precompiled: true}$/, `, precompiled: true, ${options}}`);
+}
+
 const processTemplate = async (template) => {
 
-    // Load compiled template
     const tempFile = `${config.replaceFilesPath}/${template}.twig.js`;
-    const newTemplateRaw = await fs.readFile(
-        tempFile,
-        'utf8'
-    );
-
     const destFiles = config.destFiles;
 
     /*
@@ -118,16 +143,8 @@ const processTemplate = async (template) => {
     const chopComment = '/*REPLACE:' + template + '.twig*/';
     // const chopCommentEscaped = `\/\*REPLACE:${template}\.twig\*\/`;
 
-    // Prepare replacement
-    //   Remove wrapper "twig(...);\n" and add chop-comments e.g: "/*REPLACE:'agenda.twig*/"
-    let replacement = newTemplateRaw.replace(/^(twig\()/,"");
-    replacement = replacement.replace(/(\);\n)$/,"");
-    // Escape like PHP Twig: the templates mark HTML with |raw and attributes with |e('html_attr').
-    if (!replacement.endsWith(', precompiled: true}')) {
-        throw new Error(`Unexpected compiled template format: ${template}`);
-    }
-    replacement = replacement.replace(/, precompiled: true}$/, ', precompiled: true, autoescape: true}');
-    replacement = chopComment + replacement + chopComment;
+    // Add chop-comments e.g: "/*REPLACE:'agenda.twig*/"
+    const replacement = chopComment + await compiledTemplateObject(template, TEMPLATE_OPTIONS) + chopComment;
 
     // process.stdout.write('replacement' + '\n')
     // process.stdout.write(JSON.stringify(replacement) + '\n')
@@ -141,8 +158,6 @@ const processTemplate = async (template) => {
         await processFile(template, destFile, tempFile, regex, chopComment, replacement);
 
     }
-    // Cleanup temp file.
-    return fs.rm(tempFile);
 }
 
 const processFile = async (template, destFile, tempFile, regex, chopComment,  replacement) => {
@@ -154,7 +169,7 @@ const processFile = async (template, destFile, tempFile, regex, chopComment,  re
     }
     // A function replacement: "$" sequences in the template must stay as they are.
     const replacedConetent = fileConetent.replace(regex, () => replacement);
-    if (!replacedConetent.includes(`autoescape: true}${chopComment}`)) {
+    if (!replacedConetent.includes(`${TEMPLATE_OPTIONS}}${chopComment}`)) {
         throw new Error(`${template} is not created with autoescape in ${destFile}`);
     }
     const isWriteable = await isWritable(destFile);
