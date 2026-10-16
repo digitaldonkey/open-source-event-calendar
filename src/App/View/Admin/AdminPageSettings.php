@@ -2,8 +2,8 @@
 
 namespace Osec\App\View\Admin;
 
-use Osec\App\Model\PostTypeEvent\RobotsTxt;
 use Osec\App\Model\DatabaseCharset;
+use Osec\App\Model\PostTypeEvent\RobotsTxt;
 use Osec\Settings\Elements\SettingsCache;
 use Osec\Settings\Elements\SettingsDatabase;
 use Osec\Settings\Elements\SettingsShortcodesText;
@@ -39,6 +39,7 @@ class AdminPageSettings extends AdminPageAbstract
                 'nonce_name'     => self::$NONCE['nonce_name'],
                 'referrer' => false,
             ],
+            'cols'           => 2,
             'metabox_side' => [
                 'screen' => $this->app->settings->get('settings_page'),
                 'action' => 'side',
@@ -57,7 +58,7 @@ class AdminPageSettings extends AdminPageAbstract
             'action'  => admin_url('?controller=front&action=osec_save_settings&plugin=' . OSEC_PLUGIN_NAME),
         ];
         ThemeLoader::factory($this->app)
-                   ->get_file('page_two_col.twig', $args, true)
+                   ->get_file('page_n_col.twig', $args, true)
                    ->render();
 
         /**
