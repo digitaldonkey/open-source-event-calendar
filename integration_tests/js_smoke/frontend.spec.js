@@ -107,6 +107,28 @@ describe('JS smoke: frontend', function () {
             await h.assertNoConsoleErrors(driver, 'popover');
         });
 
+        // Multi-day bars are positioned by script; two crossing the same days used to share a row.
+        it('stacks multi-day bars without covering other events in month view', async function () {
+            // The seeded "Three-day workshop" (+3 days) and "Overlapping retreat" (+4 days) cross each other.
+            const day = new Date(Date.now() + 4 * 864e5).toLocaleDateString('sv-SE', {timeZone: 'Europe/Berlin'});
+            await h.open(driver, `${h.CAL_PATH}action~month/exact_date~${day}/`, CAL);
+            await h.visible(driver, '.ai1ec-month-view .ai1ec-multiday');
+            const overlaps = await driver.executeScript(`
+                const boxes = [...document.querySelectorAll('.ai1ec-month-view a.ai1ec-event-container')]
+                    .filter((e) => e.offsetParent)
+                    .map((e) => ({title: e.textContent.trim().replace(/\\s+/g, ' '), rect: e.getBoundingClientRect()}));
+                const found = [];
+                boxes.forEach((a, i) => boxes.slice(i + 1).forEach((b) => {
+                    const w = Math.min(a.rect.right, b.rect.right) - Math.max(a.rect.left, b.rect.left);
+                    const h = Math.min(a.rect.bottom, b.rect.bottom) - Math.max(a.rect.top, b.rect.top);
+                    // 1px: neighbouring boxes share an edge.
+                    if (w > 1 && h > 1) found.push(a.title + ' / ' + b.title);
+                }));
+                return found;`);
+            assert.deepStrictEqual(overlaps, [], 'event boxes cover each other');
+            await h.assertNoConsoleErrors(driver, 'month view bars');
+        });
+
         for (const view of ['month', 'agenda']) {
             it(`prints event values as text in ${view} view rendered by twig.js`, async function () {
                 // The seeded "Hostile venue" event: +6 days 13:00 in the site's timezone (bin/dev-seed-block-test-data.php).

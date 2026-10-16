@@ -690,86 +690,68 @@ timely.define("domReady", [], function () {
     }(window, window.document);
     return e
 }), timely.define("scripts/calendar/month_view", ["jquery_timely", "external_libs/modernizr"], function ($, modernizr) {
-    var n = navigator.userAgent.match(/opera/i), r = navigator.userAgent.match(/webkit/i), i = function (calendar) {
-        // Lays out multi-day events as bars across the day cells, and reserves room for them
-        // below the date numbers. Bar heights are measured, so events may span several lines.
-        var days = calendar.find(".ai1ec-day"), daysPerWeek = calendar.find(".ai1ec-week:first .ai1ec-day").length;
+    var i = function (calendar) {
+        // Lays out multi-day events as bars across the day cells: the bar itself in its first week, a copy at the
+        // start of every following week. Each of these segments goes below every segment already placed on any of
+        // its days, so bars never cover each other; then every day reserves room below its date down to its lowest
+        // bar, which pushes the day's own events below the bars. Heights are measured, so a bar may span several lines.
+        var days = calendar.find(".ai1ec-day"), cells = {}, taken = {};
+        days.each(function () {
+            var dayNumber = parseInt($(".ai1ec-date", this).text(), 10);
+            cells[dayNumber] = this;
+            taken[dayNumber] = 0;
+        });
         calendar.find(".ai1ec-month-view .ai1ec-multiday").each(function () {
-            var bar = $(this), date = $(".ai1ec-date", this.parentNode), barHeight = bar.outerHeight(!0),
-                startDay = parseInt(date.text(), 10), endTruncated = bar.data("endTruncated"),
+            var bar = $(this), startDay = parseInt($(".ai1ec-date", this.parentNode).text(), 10),
+                endTruncated = bar.data("endTruncated"),
                 endDay = parseInt(endTruncated ? $(days[days.length - 1]).text() : bar.data("endDay"), 10),
                 barColor = $(".ai1ec-event", bar)[0].style.backgroundColor,
-                rowsBelow = 0, remainingDays = endDay - startDay + 1, firstRowMargin, daysInFirstRow = 0;
-            days.each(function () {
-                var cellDate = $(".ai1ec-date", this), column = $(this.parentNode).index(),
-                    dayNumber = parseInt(cellDate.text(), 10);
-                if (dayNumber >= startDay && dayNumber <= endDay) {
-                    dayNumber === startDay && (firstRowMargin = parseInt(cellDate.css("marginBottom"), 10) + barHeight);
-                    rowsBelow === 0 && daysInFirstRow++;
-                    if (column === 0 && dayNumber > startDay && remainingDays !== 0) {
-                        // The event continues in the next week: repeat the bar there.
-                        var clone = bar.next(".ai1ec-popup").andSelf().clone(!1);
-                        cellDate.parent().append(clone);
-                        var cloneBar = clone.first();
-                        cloneBar.addClass("ai1ec-multiday-bar ai1ec-multiday-clone").css({
-                            position: "absolute",
-                            left: "1px",
-                            top: cellDate.height() + 1 + "px",
-                            backgroundColor: barColor
-                        });
-                        var cloneDays = remainingDays > daysPerWeek ? daysPerWeek : remainingDays;
-                        cloneBar.css("width", s(cloneDays)), remainingDays > daysPerWeek && cloneBar.append(o(1)), cloneBar.append(o(2))
-                    }
-                    rowsBelow === 0 ? cellDate.css({marginBottom: firstRowMargin + "px"}) : cellDate.css({marginBottom: "+=" + barHeight + "px"}), remainingDays--, remainingDays > 0 && column === 6 && rowsBelow++
+                // Copied before the bar gets its own position and arrows.
+                original = bar.next(".ai1ec-popup").andSelf().clone(!1),
+                segments = [], segment = null, dayNumber;
+            for (dayNumber = startDay; dayNumber <= endDay; dayNumber++) {
+                if (!cells[dayNumber]) continue;
+                if (!segment || $(cells[dayNumber].parentNode).index() === 0) {
+                    segment = [];
+                    segments.push(segment);
                 }
-            });
-            if (endTruncated) {
-                var lastSegment = bar.find("." + this.className.replace(/\s+/igm, ".")).last();
-                lastSegment.append(o(1))
+                segment.push(dayNumber);
             }
-            bar.css({
-                position: "absolute",
-                top: date.height() + 1 + "px",
-                left: "1px",
-                width: s(daysInFirstRow)
-            }), rowsBelow > 0 && bar.append(o(1)), bar.data("startTruncated") && bar.append(o(2)).addClass("ai1ec-multiday-bar")
-        }), days.each(function () {
-            // Push the day's own events below the bars crossing this day.
-            var date = $(".ai1ec-date", this), dayNumber = parseInt(date.text(), 10), week = date.closest(".ai1ec-week"),
-                eventCount = $(this).find("a.ai1ec-event-container:not(.ai1ec-multiday)").length, lowestBarBottom = null, bars;
-            if (0 === eventCount) return;
-            bars = week.find("a.ai1ec-multiday[data-end-day]").filter(function () {
-                return $(this).data("startDay") <= dayNumber && $(this).data("endDay") >= dayNumber;
-            }), bars.each(function () {
-                var bottom = $(this).prop("offsetTop") + $(this).outerHeight(!0);
-                if (null === lowestBarBottom || bottom > lowestBarBottom) lowestBarBottom = bottom
-            }), null !== lowestBarBottom && date.css("marginBottom", lowestBarBottom - date.height() + 1)
+            $.each(segments, function (index, segmentDays) {
+                var cell = $(cells[segmentDays[0]]), date = $(".ai1ec-date", cell), last = index === segments.length - 1,
+                    element = bar, top = 0, height;
+                if (index > 0) {
+                    // The event continues in this week: repeat the bar here.
+                    var clone = original.clone(!1);
+                    cell.append(clone);
+                    element = clone.first().addClass("ai1ec-multiday-bar ai1ec-multiday-clone")
+                        .css("backgroundColor", barColor).append(o(2));
+                } else if (bar.data("startTruncated")) {
+                    bar.append(o(2)).addClass("ai1ec-multiday-bar");
+                }
+                if (!last || endTruncated) element.append(o(1));
+                $.each(segmentDays, function (k, day) {
+                    top = Math.max(top, taken[day]);
+                });
+                element.css({
+                    position: "absolute",
+                    top: date.height() + 1 + top + "px",
+                    left: "1px",
+                    width: s(segmentDays.length)
+                });
+                height = element.outerHeight(!0);
+                $.each(segmentDays, function (k, day) {
+                    taken[day] = top + height;
+                });
+            });
+        });
+        days.each(function () {
+            var date = $(".ai1ec-date", this), dayNumber = parseInt(date.text(), 10);
+            taken[dayNumber] && date.css("marginBottom", "+=" + taken[dayNumber] + "px");
         })
-    }, s = function (e) {
-        var t;
-        switch (e) {
-            case 1:
-                t = 97.5;
-                break;
-            case 2:
-                t = 198.7;
-                break;
-            case 3:
-                t = 300;
-                break;
-            case 4:
-                t = 401;
-                break;
-            case 5:
-                r || n ? t = 507 : t = 503.4;
-                break;
-            case 6:
-                r || n ? t = 608 : t = 603.5;
-                break;
-            case 7:
-                r || n ? t = 709 : t = 705
-        }
-        return t + "%"
+    }, s = function (days) {
+        // A bar starts in its first day cell: n cells wide plus the n - 1 borders between them.
+        return "calc(" + days * 100 + "% + " + (days - 1) + "px)"
     }, o = function (t) {
         return $('<div class="ai1ec-multiday-arrow' + t + '"></div>')
     };
