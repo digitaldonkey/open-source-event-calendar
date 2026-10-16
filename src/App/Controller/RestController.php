@@ -86,6 +86,7 @@ class RestController extends OsecBaseClass
 
         return new \WP_REST_Response(
             [
+                'ok'      => $css['ok'],
                 'css'     => $css,
                 'twig'    => ['ok' => $twig],
                 'message' => $message,

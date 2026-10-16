@@ -279,16 +279,21 @@ timely.define("domReady", [], function () {
             cacheAjaxHandlers.handle_rescan_cache({error: !0})
         }), !1;
     }, c = function () {
-        var t = $(this), m = $(t.data("result") || "#osec-clear-caches-result"), l = t.text();
-        return t.prop("disabled", !0).text(t.data("busy")), m.text(""), $.ajax({
+        var t = $(this), m = $(t.data("result") || "#osec-clear-caches-result"), l = t.text(),
+            // As text: the message may carry a LESS or database error.
+            show = function (message, ok) {
+                m.removeClass("ai1ec-alert-success ai1ec-alert-danger")
+                    .addClass("ai1ec-alert " + (ok ? "ai1ec-alert-success" : "ai1ec-alert-danger")).text(message)
+            };
+        return t.prop("disabled", !0).text(t.data("busy")), m.removeClass("ai1ec-alert ai1ec-alert-success ai1ec-alert-danger").text(""), $.ajax({
             url: t.data("url"),
             method: "POST",
             dataType: "json",
             headers: {"X-WP-Nonce": t.data("nonce")}
         }).done(function (e) {
-            m.text(e && e.message ? e.message : t.data("failed"))
+            e && e.message ? show(e.message, e.ok === !0) : show(t.data("failed"), !1)
         }).fail(function (e) {
-            m.text(e.responseJSON && e.responseJSON.message ? e.responseJSON.message : t.data("failed"))
+            show(e.responseJSON && e.responseJSON.message ? e.responseJSON.message : t.data("failed"), !1)
         }).always(function () {
             t.prop("disabled", !1).text(l)
         }), !1;
