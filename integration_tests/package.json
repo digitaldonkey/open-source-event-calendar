@@ -9,6 +9,9 @@
     },
     "author": "digitaldonkey",
     "license": "Apache-2.0",
+    "workspaces": [
+        "playwright"
+    ],
     "devDependencies": {
         "assert": "2.1.0",
         "mocha": "^11.7.5",
