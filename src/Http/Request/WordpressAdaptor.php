@@ -157,7 +157,8 @@ class WordpressAdaptor extends OsecBaseClass implements QueryInterface
         $priority_val = ($priority > 0) ? 'top' : 'bottom';
         $regexp   = $this->injectRouteGroups($regexp);
         $existing = $this->rewrite->wp_rewrite_rules();
-        if ( ! isset($existing[$regexp])) {
+        // The target too: the calendar rule is keyed by the page slug, and a new page may take the old one's slug.
+        if (($existing[$regexp] ?? null) !== $landing) {
             $this->rewrite->add_rule(
                 $regexp,
                 $landing,
