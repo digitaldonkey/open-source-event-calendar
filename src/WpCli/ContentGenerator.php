@@ -18,8 +18,9 @@ use Osec\Theme\ThemeLoader;
  *
  * Used by `wp osec content generate` (ContentCommand). Everything goes through the plugin's own model:
  * Event::save() builds the recurrence instances, the feed is a real import, "edit this instance" is done as
- * EventParent does it. Pages and images it creates carry the post meta GENERATED_META, so the next run removes exactly
- * those (remove_generated()). The dataset format is described in tests/data/content/README.md.
+ * EventParent does it. Everything it creates is marked (post and term meta GENERATED_META, feeds by their URL), so the
+ * next run replaces exactly that (remove_generated()) and refuses any other calendar data: no purge needed. The dataset
+ * format is described in tests/data/content/README.md.
  *
  *     $manifest = ContentGenerator::from_file($app, 'dataset.json', ['anchor' => '2027-05-17'])->generate();
  *
@@ -140,14 +141,14 @@ class ContentGenerator
      * categories, tags, feeds, events and pages.
      *
      * @return array The manifest: anchor, timezone, set, calendar_theme, pages, events (id, title, start by key).
-     * @throws Exception When the site has calendar data, or the dataset is invalid (the run stops there).
+     * @throws Exception When the site has calendar data it did not generate, or the dataset is invalid.
      */
     public function generate(): array
     {
-        $this->require_clean_site();
-        $removed = self::remove_generated();
+        $this->require_no_foreign_data();
+        $removed = self::remove_generated($this->app);
         if ($removed) {
-            ($this->log)("Removed $removed pages and images of an earlier run.");
+            ($this->log)("Removed $removed events, terms, feeds, pages and images of an earlier run.");
         }
         $admins = get_users([
             'role'    => 'administrator',
@@ -223,39 +224,75 @@ class ContentGenerator
     }
 
     /**
-     * Removes the pages and images an earlier run created (post meta GENERATED_META) and this database's folder
-     * (feed files, image files). Other pages and media stay, and so do files outside that folder.
+     * Removes everything an earlier run created: events, categories and tags, pages and images (all carrying
+     * GENERATED_META), its feeds with their events (feed URL below uploads/osec-content/) and this database's folder
+     * (feed and image files). Nothing else is touched, and no file outside that folder is deleted.
      *
-     * @return int Number of removed posts and attachments.
+     * @param  App  $app
+     *
+     * @return int Number of removed posts, terms and feeds.
      */
-    public static function remove_generated(): int
+    public static function remove_generated(App $app): int
     {
-        $generated = get_posts([
-            'post_type'   => 'any',
-            'post_status' => 'any',
+        global $wpdb;
+
+        $removed = 0;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the plugin's own table.
+        $feed_events = $wpdb->get_col($wpdb->prepare(
+            'SELECT post_id FROM %i WHERE ical_feed_url LIKE %s',
+            $app->db->get_table_name(OSEC_DB__EVENTS),
+            self::feed_url_pattern()
+        ));
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the plugin's own table.
+        $feeds       = $wpdb->get_results($wpdb->prepare(
+            'SELECT feed_id, feed_url FROM %i WHERE feed_url LIKE %s',
+            $app->db->get_table_name(OSEC_DB__FEEDS),
+            self::feed_url_pattern()
+        ));
+        $marked = get_posts([
+            'post_type'   => ['page', OSEC_POST_TYPE, 'attachment'],
+            'post_status' => ['any', 'inherit', 'trash'],
             'numberposts' => -1,
             'fields'      => 'ids',
-            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- dev tool, a handful of posts.
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- dev tool, a few dozen posts.
             'meta_key'    => self::GENERATED_META,
         ]);
-        // 'any' leaves out attachments (status inherit).
-        $generated = array_unique(array_merge($generated, get_posts([
-            'post_type'   => 'attachment',
-            'post_status' => 'inherit',
-            'numberposts' => -1,
-            'fields'      => 'ids',
-            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- dev tool, a handful of posts.
-            'meta_key'    => self::GENERATED_META,
-        ])));
         // Generated files live in this database's folder, removed below. The attachment rows of a copied database
         // point to the files of the original one (uploads are shared), which must stay.
         add_filter('wp_delete_file', '__return_empty_string');
         try {
-            foreach ($generated as $post_id) {
-                wp_delete_post($post_id, true);
+            foreach (array_unique(array_merge(array_map('intval', $feed_events), $marked)) as $post_id) {
+                $removed += wp_delete_post($post_id, true) ? 1 : 0;
             }
         } finally {
             remove_filter('wp_delete_file', '__return_empty_string');
+        }
+        foreach ($feeds as $feed) {
+            $term_name = FeedsController::get_term_name_from_uri($feed->feed_url);
+            if (get_term_by('name', $term_name, 'osec_events_feeds')) {
+                // As the feeds page deletes a feed: its row and its feed term.
+                FeedsController::factory($app)->delete_ics_feed(false, (int) $feed->feed_id);
+            } else {
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the plugin's own table; import never ran.
+                $wpdb->delete($app->db->get_table_name(OSEC_DB__FEEDS), ['feed_id' => $feed->feed_id], ['%d']);
+            }
+            ++$removed;
+        }
+        foreach (['osec_events_categories', 'osec_events_tags'] as $taxonomy) {
+            $terms = get_terms([
+                'taxonomy'   => $taxonomy,
+                'hide_empty' => false,
+                'fields'     => 'ids',
+                // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- dev tool, a handful of terms.
+                'meta_key'   => self::GENERATED_META,
+            ]);
+            foreach ($terms as $term_id) {
+                wp_delete_term($term_id, $taxonomy);
+                // Color and image row (created_osec_events_categories); nothing removes it with the term.
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the plugin's own table.
+                $wpdb->delete($app->db->get_table_name(OSEC_DB__META), ['term_id' => $term_id], ['%d']);
+                ++$removed;
+            }
         }
         $filesystem = self::filesystem();
         $feed_dir   = self::feed_dir();
@@ -263,26 +300,36 @@ class ContentGenerator
             $filesystem->rmdir($feed_dir, true);
         }
 
-        return count($generated);
+        return $removed;
     }
 
     /**
-     * Stops on a site that has events, calendar categories or tags, or feeds: the content goes into a clean site only.
+     * Stops when the site has calendar data an earlier run did not create: events, categories, tags or feeds.
+     * Checked before anything is removed, so a refused run changes nothing.
      *
      * @throws Exception
      */
-    private function require_clean_site(): void
+    private function require_no_foreign_data(): void
     {
         global $wpdb;
 
-        $found  = [];
-        $events = get_posts([
-            'post_type'   => OSEC_POST_TYPE,
-            'post_status' => 'any',
-            'numberposts' => 1,
-            'fields'      => 'ids',
-        ]);
-        if ($events) {
+        $found = [];
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the plugin's own tables, read once.
+        $event = $wpdb->get_var($wpdb->prepare(
+            "SELECT p.ID FROM %i p
+                LEFT JOIN %i m ON m.post_id = p.ID AND m.meta_key = %s
+                LEFT JOIN %i e ON e.post_id = p.ID
+                WHERE p.post_type = %s AND p.post_status <> 'auto-draft' AND m.post_id IS NULL
+                    AND (e.ical_feed_url IS NULL OR e.ical_feed_url NOT LIKE %s)
+                LIMIT 1",
+            $wpdb->posts,
+            $wpdb->postmeta,
+            self::GENERATED_META,
+            $this->app->db->get_table_name(OSEC_DB__EVENTS),
+            OSEC_POST_TYPE,
+            self::feed_url_pattern()
+        ));
+        if ($event) {
             $found[] = 'events';
         }
         $taxonomies = [
@@ -290,22 +337,36 @@ class ContentGenerator
             'osec_events_tags'       => 'tags',
         ];
         foreach ($taxonomies as $taxonomy => $label) {
-            $count = wp_count_terms([
+            $foreign = get_terms([
                 'taxonomy'   => $taxonomy,
                 'hide_empty' => false,
+                'fields'     => 'ids',
+                'number'     => 1,
+                // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- dev tool, a handful of terms.
+                'meta_query' => [
+                    [
+                        'key'     => self::GENERATED_META,
+                        'compare' => 'NOT EXISTS',
+                    ],
+                ],
             ]);
-            if ($count) {
+            if ($foreign) {
                 $found[] = $label;
             }
         }
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the plugin's own table, read once.
-        if ($wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM %i', $this->app->db->get_table_name(OSEC_DB__FEEDS)))) {
+        $feed = $wpdb->get_var($wpdb->prepare(
+            'SELECT feed_id FROM %i WHERE feed_url NOT LIKE %s LIMIT 1',
+            $this->app->db->get_table_name(OSEC_DB__FEEDS),
+            self::feed_url_pattern()
+        ));
+        if ($feed) {
             $found[] = 'feeds';
         }
         if ($found) {
             throw new Exception(
-                'This site already has calendar ' . implode(', ', $found)
-                . '. The content goes into a clean site only: purge the plugin data first.'
+                'This site has calendar ' . implode(', ', $found) . ' that were not generated. The test content'
+                . ' replaces only its own earlier content; use a site without other calendar data.'
             );
         }
     }
@@ -410,6 +471,7 @@ class ContentGenerator
                 ['parent' => null === $parent ? 0 : $this->categories[$parent]]
             ));
             $this->categories[$category['key']] = (int) $term['term_id'];
+            add_term_meta((int) $term['term_id'], self::GENERATED_META, 1, true);
             // The plugin adds a row for every new category (created_osec_events_categories), without color or image.
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the plugin's own table, no API for it.
             $wpdb->replace($meta_table, [
@@ -423,6 +485,7 @@ class ContentGenerator
         foreach ($this->dataset['tags'] ?? [] as $name) {
             $term              = $this->checked(wp_insert_term($name, 'osec_events_tags'));
             $this->tags[$name] = (int) $term['term_id'];
+            add_term_meta((int) $term['term_id'], self::GENERATED_META, 1, true);
         }
     }
 
@@ -658,6 +721,7 @@ class ContentGenerator
             'post_content' => $row['content'] ?? '',
             'post_excerpt' => $row['excerpt'] ?? '',
         ], true));
+        update_post_meta($post_id, self::GENERATED_META, 1);
         $tz = $start->getTimezone()->getName();
         // Timestamps keep the instant, also for a time in the hour repeated when DST ends.
         (new Event($this->app, $fields + [
@@ -811,6 +875,19 @@ class ContentGenerator
     private static function feed_url(string $file): string
     {
         return wp_upload_dir()['baseurl'] . '/' . self::UPLOADS_FOLDER . '/' . DB_NAME . '/' . $file;
+    }
+
+    /**
+     * LIKE pattern matching the URL of every generated feed, of any database: a copied database keeps the feeds of
+     * the original one. Path only, since sandboxes have their own hostname.
+     */
+    private static function feed_url_pattern(): string
+    {
+        global $wpdb;
+
+        $uploads_path = (string) wp_parse_url(wp_upload_dir()['baseurl'], PHP_URL_PATH);
+
+        return '%' . $wpdb->esc_like($uploads_path . '/' . self::UPLOADS_FOLDER . '/') . '%';
     }
 
     /**

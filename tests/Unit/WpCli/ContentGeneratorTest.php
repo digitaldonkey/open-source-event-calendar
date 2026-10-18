@@ -2,7 +2,6 @@
 
 namespace Osec\Tests\Unit\WpCli;
 
-use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\Exception\Exception;
 use Osec\Exception\InvalidArgumentException;
 use Osec\Tests\Utilities\TestBase;
@@ -48,7 +47,8 @@ class ContentGeneratorTest extends TestBase
     {
         global $osec_app, $wpdb;
 
-        ContentGenerator::remove_generated();
+        // Files are not rolled back.
+        ContentGenerator::remove_generated($osec_app);
         remove_all_filters('pre_http_request');
         parent::tear_down();
 
@@ -142,7 +142,7 @@ class ContentGeneratorTest extends TestBase
     }
 
     /**
-     * Images go into this database's folder; a second run replaces them instead of adding numbered copies.
+     * A second run replaces the first one's content without a purge: no duplicates, images not renumbered.
      */
     public function test_images_in_own_folder_and_replaced_by_the_next_run()
     {
@@ -152,11 +152,22 @@ class ContentGeneratorTest extends TestBase
         $folder  = wp_upload_dir()['basedir'] . '/' . ContentGenerator::UPLOADS_FOLDER . '/' . DB_NAME;
         $this->assertSame($folder . '/jazz-guitar.jpg', $file);
 
-        $this->purge_calendar_data();
         $second = $this->generate($dataset);
 
         $this->assertNull(get_post($first['pages']['block']['id']));
+        $this->assertNull(get_post($first['events']['jazz']['id']));
         $this->assertSame($file, get_attached_file(get_post_thumbnail_id($second['events']['jazz']['id'])));
+        $events = get_posts([
+            'post_type'   => OSEC_POST_TYPE,
+            'post_status' => 'any',
+            'numberposts' => -1,
+            'fields'      => 'ids',
+        ]);
+        $this->assertCount(count($second['events']), $events);
+        $this->assertCount(
+            count($dataset['categories']),
+            get_terms(['taxonomy' => 'osec_events_categories', 'hide_empty' => false])
+        );
     }
 
     /**
@@ -168,19 +179,52 @@ class ContentGeneratorTest extends TestBase
         $id     = self::factory()->attachment->create_object($upload['file'], 0, ['post_mime_type' => 'text/plain']);
         update_post_meta($id, ContentGenerator::GENERATED_META, 1);
 
-        $this->assertSame(1, ContentGenerator::remove_generated());
+        $this->assertSame(1, ContentGenerator::remove_generated($GLOBALS['osec_app']));
 
         $this->assertNull(get_post($id));
         $this->assertFileExists($upload['file']);
         unlink($upload['file']);
     }
 
-    public function test_refuses_a_site_with_events()
+    /**
+     * Calendar data the generator did not create stops the run before anything is removed.
+     */
+    public function test_refuses_foreign_event_and_changes_nothing()
     {
-        self::factory()->post->create(['post_type' => OSEC_POST_TYPE]);
+        $first   = $this->generate($this->dataset_without_feeds());
+        $foreign = self::factory()->post->create(['post_type' => OSEC_POST_TYPE]);
+
+        try {
+            $this->generate($this->dataset_without_feeds());
+            $this->fail('No exception for a foreign event.');
+        } catch (Exception $e) {
+            $this->assertStringContainsString('calendar events that were not generated', $e->getMessage());
+        }
+        $this->assertNotNull(get_post($foreign));
+        $this->assertNotNull(get_post($first['events']['jazz']['id']));
+        $this->assertNotNull(get_post($first['pages']['block']['id']));
+    }
+
+    public function test_refuses_foreign_category()
+    {
+        wp_insert_term('Own category', 'osec_events_categories');
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('already has calendar events');
+        $this->expectExceptionMessage('calendar categories that were not generated');
+        $this->generate($this->dataset_without_feeds());
+    }
+
+    public function test_refuses_foreign_feed()
+    {
+        global $osec_app;
+
+        $osec_app->db->insert(
+            OSEC_DB__FEEDS,
+            ['feed_url' => 'https://example.org/own.ics', 'feed_name' => 'Own', 'feed_category' => '', 'feed_tags' => '']
+        );
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('calendar feeds that were not generated');
         $this->generate($this->dataset_without_feeds());
     }
 
@@ -222,6 +266,17 @@ class ContentGeneratorTest extends TestBase
         $this->assertSame(['feed-holiday', 'feed-founders', 'feed-harvest', 'feed-townhall'], array_keys($manifest['events']));
         $this->assertSame("Founders' Day", $manifest['events']['feed-founders']['title']);
         $this->assertSame('2027-05-20 18:00', $manifest['events']['feed-townhall']['start']);
+
+        // A second run replaces feed and imported events.
+        $second = $this->generate($dataset);
+        $this->assertNull(get_post($manifest['events']['feed-townhall']['id']));
+        $this->assertNotNull(get_post($second['events']['feed-townhall']['id']));
+        $this->assertSame(
+            1,
+            (int) $GLOBALS['osec_app']->db->get_var(
+                'SELECT COUNT(*) FROM ' . $GLOBALS['osec_app']->db->get_table_name(OSEC_DB__FEEDS)
+            )
+        );
     }
 
     /**
@@ -265,21 +320,6 @@ class ContentGeneratorTest extends TestBase
             ->generate();
     }
 
-    /**
-     * What the deactivation purge removes, as far as a second run checks it: events, terms, feeds.
-     */
-    private function purge_calendar_data(): void
-    {
-        foreach (get_posts(['post_type' => OSEC_POST_TYPE, 'post_status' => 'any', 'numberposts' => -1]) as $post) {
-            wp_delete_post($post->ID, true);
-        }
-        foreach (['osec_events_categories', 'osec_events_tags'] as $taxonomy) {
-            foreach (get_terms(['taxonomy' => $taxonomy, 'hide_empty' => false, 'fields' => 'ids']) as $term_id) {
-                wp_delete_term($term_id, $taxonomy);
-            }
-        }
-    }
-
     private function instance_count(int $post_id): int
     {
         global $osec_app;
@@ -307,22 +347,11 @@ class ContentGeneratorTest extends TestBase
     {
         global $osec_app;
 
-        $db = $osec_app->db;
-        foreach (EventSearch::factory($osec_app)->get_event_ids_for_feed(set_url_scheme($this->feed_url, 'http')) as $post_id) {
-            wp_delete_post((int) $post_id, true);
-            $db->delete(OSEC_DB__EVENTS, ['post_id' => $post_id], ['%d']);
-            $db->delete(OSEC_DB__INSTANCES, ['post_id' => $post_id], ['%d']);
-        }
-        foreach ($db->get_col('SELECT feed_id FROM ' . $db->get_table_name(OSEC_DB__FEEDS)) as $feed_id) {
+        $db       = $osec_app->db;
+        $feed_ids = $db->get_col('SELECT feed_id FROM ' . $db->get_table_name(OSEC_DB__FEEDS));
+        ContentGenerator::remove_generated($osec_app);
+        foreach ($feed_ids as $feed_id) {
             delete_option('osec_xlock_ics_import_' . $feed_id);
         }
-        $db->query('DELETE FROM ' . $db->get_table_name(OSEC_DB__FEEDS));
-        foreach (['osec_events_categories', 'osec_events_tags'] as $taxonomy) {
-            foreach (get_terms(['taxonomy' => $taxonomy, 'hide_empty' => false, 'fields' => 'ids']) as $term_id) {
-                wp_delete_term($term_id, $taxonomy);
-            }
-        }
-        $db->query('DELETE FROM ' . $db->get_table_name(OSEC_DB__META));
-        ContentGenerator::remove_generated();
     }
 }

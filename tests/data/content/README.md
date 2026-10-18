@@ -4,23 +4,22 @@ One dataset for reviewing the calendar, the plugin directory screenshots and the
 every kind of event the calendar knows, in every view, on dates around **May of next year**.
 
 `wp osec content generate` (`src/WpCli/ContentCommand.php`, logic in `src/WpCli/ContentGenerator.php`) fills a
-clean site with it. The command ships with the plugin; this folder (dataset, photos) does not.
+site with it. The command ships with the plugin; this folder (dataset, photos) does not.
 
 ```
-# Purge the plugin data first (the generator refuses a site with events, calendar categories/tags or feeds):
-/usr/local/bin/wp --require=<file with define('OSEC_UNINSTALL_PLUGIN_DATA', true);> plugin deactivate open-source-event-calendar
-/usr/local/bin/wp plugin activate open-source-event-calendar
-
 /usr/local/bin/wp osec content generate --dataset=tests/data/content/dataset.json --site-settings
 /usr/local/bin/wp osec content generate --dataset=tests/data/content/dataset.json --set=showcase --anchor=2027-05-17 \
     --theme=plana --manifest=/tmp/manifest.json
 ```
 
-The purge deletes events, categories, tags, feeds, settings, the plugin's tables and cache. Then `generate`:
+No purge needed: everything `generate` creates is marked, and a run replaces exactly that. It:
 
-1. stops if calendar events, categories, tags or feeds are left;
-2. removes what an earlier run created: pages and images marked with the post meta `_osec_content_generated`, the
-   feed folder `uploads/osec-content/<database>/`. Other posts, pages, media, users and the WordPress theme stay;
+1. stops, changing nothing, if the site has calendar events, categories, tags or feeds it did not create (a real
+   site's calendar data is never touched; run it on a site without any);
+2. removes what an earlier run created: events, categories and tags (post and term meta `_osec_content_generated`),
+   pages and images (same post meta), feeds whose URL lies below `uploads/osec-content/` with their imported events,
+   and the folder `uploads/osec-content/<database>/`. Other posts, pages, media, users and the WordPress theme stay;
+   no file outside that folder is deleted (a copied database's attachments point to the original site's files);
 3. creates the calendar page (setting `calendar_page_id`), switches the calendar theme (deleting saved Theme Options,
    as any switch does), applies the dataset's calendar settings, then categories, tags, feeds, events and pages;
 4. prints the manifest, or writes it with `--manifest=<file>`.

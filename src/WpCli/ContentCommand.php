@@ -30,11 +30,11 @@ class ContentCommand extends \WP_CLI_Command
     }
 
     /**
-     * Fills a clean site with the events, categories, tags, feeds and pages of a dataset file.
+     * Fills a site with the events, categories, tags, feeds and pages of a dataset file.
      *
-     * Refuses a site that has calendar events, categories, tags or feeds: purge the plugin data first (deactivate
-     * with OSEC_UNINSTALL_PLUGIN_DATA true, activate). Removes the pages and images an earlier run created, then
-     * generates. Sets the calendar page, the calendar theme and the dataset's calendar settings.
+     * Replaces what an earlier run created (all of it is marked) and deletes nothing else. Refuses a site with calendar
+     * events, categories, tags or feeds it did not create. Sets the calendar page, the calendar theme and the
+     * dataset's calendar settings.
      *
      * ## OPTIONS
      *
