@@ -102,4 +102,22 @@ class WordpressAdaptorTest extends TestBase
 
         $this->assertSame('2026-01-05', $request->get('exact_date'));
     }
+
+    /**
+     * T6: a rule with the same pattern but a new target replaces the stored one. The calendar rule is keyed by the
+     * page slug, so a new calendar page with the old page's slug kept routing to the deleted page's ID.
+     */
+    public function test_register_rule_updates_target_of_existing_pattern()
+    {
+        global $osec_app, $wp_rewrite;
+
+        $this->set_permalink_structure('/%postname%/');
+        $adaptor = WordpressAdaptor::factory($osec_app);
+        $regexp  = '(?:.+/)?osec-t6-calendar(\/[a-z]+)';
+
+        $adaptor->register_rule($regexp, 'index.php?page_id=101');
+        $adaptor->register_rule($regexp, 'index.php?page_id=202');
+
+        $this->assertSame('index.php?page_id=202', $wp_rewrite->wp_rewrite_rules()[$regexp]);
+    }
 }
