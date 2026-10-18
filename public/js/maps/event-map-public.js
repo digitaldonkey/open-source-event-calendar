@@ -1,5 +1,10 @@
 
 document.addEventListener("DOMContentLoaded", function(event) {
+    // Loaded on every single event page while maps are enabled. #osec-map is only missing when the
+    // event has no map; it is present, though hidden, while "Hide Maps until clicked" is on.
+    if (!document.getElementById('osec-map')) {
+        return;
+    }
     let mapIsInitialized = false;
     /**
      * Initialize public map.
@@ -37,8 +42,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
     /**
      * Init, when Maps placholder is clicked.
      */
-    const placeHolders = document.getElementsByClassName('osec-map-placeholder');
-    placeHolders[0].addEventListener("click", () =>{
-        initMap();
-    });
+    const placeHolder = document.querySelector('.osec-map-placeholder');
+    // No placeholder while "Hide Maps until clicked" is off.
+    if (placeHolder) {
+        placeHolder.addEventListener("click", () =>{
+            initMap();
+        });
+    }
 });
