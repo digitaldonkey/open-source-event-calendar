@@ -313,7 +313,6 @@ class AdminThemeList extends WP_List_Table
         foreach ($theme_names as $theme_id => $theme_name) {
             $theme = $themes[$theme_name];
             $theme_dir = esc_attr($theme->get_stylesheet_directory());
-            $theme_root = $themes[$theme_name]['Theme Root'];
 
             $theme_root_uri = esc_url($theme['Theme Root URI']);
 
@@ -330,10 +329,7 @@ class AdminThemeList extends WP_List_Table
                 'activate_link' => add_query_arg(
                     [
                             'osec_action' => AdminPageManageThemes::$NONCE['action'],
-                            'osec_theme_dir' => rawurlencode($theme_dir),
-                            'osec_theme' => $theme_name,
-                            'osec_theme_root' => rawurlencode(esc_url($theme_root)),
-                            'ai1ec_theme_url' => rawurlencode(esc_url($theme_root_uri . '/' . $theme_name)),
+                            'osec_theme' => rawurlencode($theme_name),
                             AdminPageManageThemes::$NONCE['nonce_name'] => $nonce,
                     ],
                     admin_url(OSEC_ADMIN_BASE_URL . '&page=' . AdminPageManageThemes::MENU_SLUG)
