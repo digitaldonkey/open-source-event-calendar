@@ -1,5 +1,5 @@
 {
-    "name": "osec-playwright",
+    "name": "osec-visual-regression",
     "version": "1.0.0",
     "private": true,
     "description": "Visual regression and review suite for the calendar (Playwright, local DDEV only).",

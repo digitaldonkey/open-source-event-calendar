@@ -2,7 +2,7 @@
 /**
  * Prints login cookies of the site's first administrator as JSON, for the Playwright setup project (content.setup.js).
  *
- *   /usr/local/bin/wp eval-file integration_tests/playwright/lib/auth-cookies.php
+ *   /usr/local/bin/wp eval-file integration_tests/visual_regression/lib/auth-cookies.php
  *
  * The setup adds them to the browser context instead of filling in wp-login.php, so they work on the dev site
  * without knowing its password. Valid for 2 hours. Output: [{name, value, domain, path, secure, httpOnly}, ...].

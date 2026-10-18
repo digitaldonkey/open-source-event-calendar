@@ -159,6 +159,6 @@
   ],
   "pages": [
     {"key": "block", "title": "Calendar block", "content": "<!-- wp:open-source-event-calendar/osec-calendar-classic /-->"},
-    {"key": "shortcode", "title": "Calendar shortcode", "content": "[osec view=\"agenda\"]"}
+    {"key": "shortcode", "title": "Calendar shortcode", "content": "[osec view=\"agenda\" agenda_toggle=\"true\"]"}
   ]
 }

@@ -8,7 +8,7 @@
  * Env:
  *   WP_SANDBOX_DB  Sandbox database (see the plugin's CLAUDE.md, "Database Safety"); unset: the DDEV dev site.
  *                  Passed on to every WP-CLI call, so the tests and WP-CLI always work on the same site.
- *   DDEV_HOSTNAME  Set by DDEV in the web container; gives the Chromium host-resolver rules.
+ *   DDEV_HOSTNAME  Set by DDEV in the web container; the hostnames sent to ddev-router (connectOptions()).
  *
  * Runs inside the DDEV web container only: WP-CLI is /usr/local/bin/wp, the browser the DDEV `playwright` service.
  */
@@ -49,17 +49,44 @@ function site() {
 }
 
 /**
- * Chromium --host-resolver-rules sending every DDEV hostname to ddev-router, as a real browser goes (TLS,
- * X-Forwarded-Proto). Without it, sandbox hostnames resolve inside the playwright container.
+ * Playwright connectOptions sending the browser to the DDEV sites through ddev-router, as a real browser goes (TLS,
+ * X-Forwarded-Proto; WordPress loops on wp-admin without it). Inside the playwright container the DDEV hostnames
+ * resolve to 127.0.0.1. Needs the service's `run-server --unsafe`, which passes these launch options on.
+ *
+ * Chromium: --host-resolver-rules for the DDEV hostnames (DDEV_HOSTNAME). Firefox has no such option:
+ * network.dns.forceResolve sends every hostname to the router, external ones too - fine for pages that load
+ * nothing from the internet (print views), not for maps.
+ *
+ * @param {'chromium'|'firefox'} browser
+ * @returns {{wsEndpoint: string, headers: Object<string, string>}}
+ */
+function connectOptions(browser) {
+    const launch = 'firefox' === browser
+        ? {firefoxUserPrefs: {'network.dns.forceResolve': routerIp()}}
+        : {
+            args: [`--host-resolver-rules=${(process.env.DDEV_HOSTNAME || '')
+                .split(',')
+                .filter(Boolean)
+                .map((host) => `MAP ${host} ddev-router`)
+                .join(', ')}`],
+        };
+    return {
+        wsEndpoint: process.env.PLAYWRIGHT_WS || 'ws://playwright:3000/',
+        headers: {'x-playwright-launch-options': JSON.stringify(launch)},
+    };
+}
+
+/**
+ * IP of ddev-router on the DDEV network (the playwright service is on the same network), kept in the environment
+ * for the worker processes.
  *
  * @returns {string}
  */
-function hostRules() {
-    return (process.env.DDEV_HOSTNAME || '')
-        .split(',')
-        .filter(Boolean)
-        .map((host) => `MAP ${host} ddev-router`)
-        .join(', ');
+function routerIp() {
+    if (!process.env.OSEC_PW_ROUTER_IP) {
+        process.env.OSEC_PW_ROUTER_IP = execFileSync('getent', ['hosts', 'ddev-router'], {encoding: 'utf8'}).split(/\s+/)[0];
+    }
+    return process.env.OSEC_PW_ROUTER_IP;
 }
 
-module.exports = {PLUGIN_DIR, STORAGE_STATE, MANIFEST, wp, site, hostRules};
+module.exports = {PLUGIN_DIR, STORAGE_STATE, MANIFEST, wp, site, connectOptions};
