@@ -12,8 +12,18 @@ WP_SANDBOX_DB=try_pw npm run review      # the same, plus a full-page screenshot
 WP_SANDBOX_DB=try_pw npm run update      # shoot the baseline set (accept the current look)
 ```
 
-From the host: `ddev exec -d /var/www/html/wp-content/plugins/open-source-event-calendar/integration_tests/visual_regression env WP_SANDBOX_DB=try_pw npm run test`.
-`npm install` once in `integration_tests/` (npm workspaces root).
+From the host, with the DDEV command `osec-review` (review mode, prints the report URL):
+
+```
+ddev osec-review try_pw                                   # everything, report with every screenshot
+ddev osec-review try_pw --set=master --update             # shoot a named baseline set
+ddev osec-review try_pw --set=master                      # compare with it
+ddev osec-review try_pw --project=chromium -g "month"     # other arguments go to playwright test
+```
+
+Install it once from the plugin root on the host (DDEV reads commands only from the project's `.ddev/`):
+`cp bin/ddev/commands/web/osec-review bin/ddev/commands/web/osec-screenshots ../../../.ddev/commands/web/`. Shared
+code stays in `bin/ddev/osec-lib.sh`. `npm install` in `integration_tests/` (npm workspaces root) runs on first use.
 
 | Env | Meaning |
 |---|---|
@@ -91,4 +101,3 @@ Uploads are shared by the dev site and the sandboxes, so the report and the sets
 | `lib/theme.js` | Themes of the run, activating one. |
 | `lib/pages.js` | Manifest, calendar URLs, waiting until a page is stable, printing through the print button. |
 | `lib/auth-cookies.php` | Login cookies of the first administrator (WP-CLI `eval-file`). |
-| `lib/site.js` | Helpers of the old screenshot runner (`integration_tests/screenshots/`), until it moves to `bin/screenshots/`. |

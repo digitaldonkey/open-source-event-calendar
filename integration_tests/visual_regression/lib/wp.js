@@ -29,9 +29,19 @@ const MANIFEST = path.resolve(__dirname, '../.auth/manifest.json');
  *
  * @param {string[]} args WP-CLI arguments.
  * @returns {string} Trimmed standard output.
+ * @throws {Error} With WP-CLI's error output (e.g. "Error: ...") when the command fails.
  */
 function wp(args) {
-    return execFileSync('/usr/local/bin/wp', args, {cwd: PLUGIN_DIR, encoding: 'utf8', env: process.env}).trim();
+    try {
+        return execFileSync('/usr/local/bin/wp', args, {
+            cwd: PLUGIN_DIR,
+            encoding: 'utf8',
+            env: process.env,
+            stdio: ['ignore', 'pipe', 'pipe'],
+        }).trim();
+    } catch (e) {
+        throw new Error((e.stderr || '').trim() || e.message);
+    }
 }
 
 /**

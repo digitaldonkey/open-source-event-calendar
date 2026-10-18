@@ -1,0 +1,22 @@
+{
+  "_comment": [
+    "The WordPress.org screenshots (assets/screenshot-*.png, captions in the plugin README.md), shot by shoot.js (see README.md).",
+    "{calendar} = calendar page path, {anchor} = anchor date (Y-m-d). Events are named by their dataset key. Keys: see README.md."
+  ],
+  "scale": 2,
+  "shots": [
+    {"file": "screenshot-1.png", "caption": "Month view", "path": "{calendar}action~month/exact_date~{anchor}/", "width": 1440, "height": 900,
+     "scroll_to": "h1.wp-block-post-title", "hover": ".ai1ec-month-view .ai1ec-event-container", "hover_event": "jazz"},
+    {"file": "screenshot-2.png", "caption": "Week view", "path": "{calendar}action~week/exact_date~{anchor}/", "width": 1440, "height": 900,
+     "scroll_to": "h1.wp-block-post-title", "click": ".ai1ec-category-filter .ai1ec-dropdown-toggle"},
+    {"file": "screenshot-3.png", "caption": "Agenda view", "path": "{calendar}action~agenda/exact_date~{anchor}/", "width": 1440, "height": 900,
+     "scroll_to": "h1.wp-block-post-title"},
+    {"file": "screenshot-4.png", "caption": "Calendar Block UI", "editor_block": "block", "width": 1280, "height": 2000},
+    {"file": "screenshot-5.png", "caption": "Manage iCal Feeds", "admin": true, "path": "/wp-admin/edit.php?post_type=osec_event&page=osec-admin-feeds", "width": 1024, "height": 900},
+    {"file": "screenshot-6.png", "caption": "Recurring Events", "admin": true, "edit_event": "repair", "click": "#osec_repeat_text a", "wait_for": "#osec_repeat_box.ai1ec-in", "width": 1024, "height": 700},
+    {"file": "screenshot-7.png", "caption": "Cache Settings", "admin": true, "path": "/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings", "scroll_to": "#osec_event_cache_settings", "width": 1280, "height": 1000},
+    {"file": "screenshot-8.png", "caption": "Mobile Agenda View", "path": "{calendar}action~agenda/exact_date~{anchor}/", "width": 430, "height": 750, "mobile": true,
+     "scroll_to": "h1.wp-block-post-title"},
+    {"file": "screenshot-9.png", "caption": "Schema.org/Event data validator", "manual": "Paste the HTML of a single event page (view-source) into https://validator.schema.org/ and take the screenshot by hand: the validator cannot reach a local site."}
+  ]
+}
