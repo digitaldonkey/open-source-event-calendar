@@ -279,9 +279,10 @@ timely.define("domReady", [], function () {
             cacheAjaxHandlers.handle_rescan_cache({error: !0})
         }), !1;
     }, c = function () {
-        var t = $(this), m = $(t.data("result") || "#osec-clear-caches-result"), l = t.text(),
+        var t = $(this), m = $(t.data("result") || "#osec-clear-caches-result"), l = t.text(), succeeded = !1,
             // As text: the message may carry a LESS or database error.
             show = function (message, ok) {
+                succeeded = ok;
                 m.removeClass("ai1ec-alert-success ai1ec-alert-danger")
                     .addClass("ai1ec-alert " + (ok ? "ai1ec-alert-success" : "ai1ec-alert-danger")).text(message)
             };
@@ -295,7 +296,8 @@ timely.define("domReady", [], function () {
         }).fail(function (e) {
             show(e.responseJSON && e.responseJSON.message ? e.responseJSON.message : t.data("failed"), !1)
         }).always(function () {
-            t.prop("disabled", !1).text(l)
+            // A one-time action (data-disable-on-success) stays disabled once it succeeded; after an error it can be retried.
+            t.prop("disabled", succeeded && !!t.data("disable-on-success")).text(l)
         }), !1;
     };
     return {perform_rescan: i, perform_clear: c}
