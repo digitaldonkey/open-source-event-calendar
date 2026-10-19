@@ -80,4 +80,16 @@ async function printView(page) {
     await settle(page);
 }
 
-module.exports = {manifest, calendarPath, lastSunday, settle, printView};
+/**
+ * Test details for the HTML report: a description, shown under the test's title.
+ *
+ *   test('Month view', about('What the test checks and why.'), async ({page}) => { ... });
+ *
+ * @param {string} description
+ * @returns {{annotation: {type: string, description: string}}}
+ */
+function about(description) {
+    return {annotation: {type: 'description', description}};
+}
+
+module.exports = {manifest, calendarPath, lastSunday, settle, printView, about};

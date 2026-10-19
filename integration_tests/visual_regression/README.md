@@ -18,7 +18,7 @@ From the host, with the DDEV command `osec-review` (review mode, prints the repo
 ddev osec-review try_pw                                   # everything, report with every screenshot
 ddev osec-review try_pw --set=master --update             # shoot a named baseline set
 ddev osec-review try_pw --set=master                      # compare with it
-ddev osec-review try_pw --project=chromium -g "month"     # other arguments go to playwright test
+ddev osec-review try_pw --project=chromium -g "Month view"   # other arguments go to playwright test
 ```
 
 Install it once from the plugin root on the host (DDEV reads commands only from the project's `.ddev/`):
@@ -29,7 +29,10 @@ code stays in `bin/ddev/osec-lib.sh`. `npm install` in `integration_tests/` (npm
 |---|---|
 | `WP_SANDBOX_DB` | Sandbox database (plugin `CLAUDE.md`, "Database Safety"); unset: the DDEV dev site. WP-CLI and the browser use the same site. |
 | `OSEC_BASELINE_SET` | Baseline set, default `local`. Shoot one per state to compare: `OSEC_BASELINE_SET=master npm run update`, switch the checkout, `OSEC_BASELINE_SET=master npm run test`. |
-| `OSEC_THEMES` | Calendar themes, default `plana,gamma`. |
+| `OSEC_THEMES` | Calendar themes, default `plana,vortex`: the default theme and the base theme the others build on. |
+| `OSEC_ANCHOR` | Anchor date of the generated content (default: the generator's, the week with 15 May of next year). Pin it when comparing with a set shot earlier. |
+| `OSEC_REMOTE_URL`, `OSEC_REMOTE_DIR` | Remote mode, see "Compare with an older release". |
+| `OSEC_MAX_DIFF_RATIO` | Share of pixels that may differ before a comparison fails, default `0.001` (0.1 %: single-pixel noise from map tiles and font rendering passes, a moved or recolored element does not). `0` for exact. |
 | `PLAYWRIGHT_WS` | Browser server, default `ws://playwright:3000/`. |
 
 Every run shoots everything: a failed comparison fails only its own test, the rest still runs, and the report lists
@@ -38,18 +41,65 @@ the first difference adds `--max-failures=1`.
 
 ### Run part of it
 
-The content is generated first in every case; npm passes arguments after `--` on to Playwright.
+The content is generated first in every case; npm passes arguments after `--` on to Playwright. `-g` matches the
+test titles joined by spaces (`Calendar theme plana 320 px wide Month view`; `--list` shows them with `›`); every test also carries a description,
+shown under its title in the report.
 
 ```
-WP_SANDBOX_DB=try_pw npm run test -- --project=chromium -g "320 px month"   # one view, both themes
-WP_SANDBOX_DB=try_pw OSEC_THEMES=gamma npm run test -- print.spec.js        # one theme, one spec, both browsers
+WP_SANDBOX_DB=try_pw npm run test -- --project=chromium -g "320 px wide Month view"     # one view, both themes
+WP_SANDBOX_DB=try_pw OSEC_THEMES=vortex npm run test -- print.spec.js       # one theme, one spec, both browsers
 WP_SANDBOX_DB=try_pw npm run test -- --project=admin                        # the wp-admin screens
-WP_SANDBOX_DB=try_pw npm run update -- -g "single event"                    # re-shoot only these baselines
-npx playwright test --list                                                  # all test names
+WP_SANDBOX_DB=try_pw npm run update -- -g "Single event"                    # re-shoot only these baselines
+npx playwright test --list --reporter=list                                  # all test names (a plain --list overwrites the report)
 ```
 
 **The site must hold no calendar data the generator did not create**: it replaces only its own earlier content
 (see `tests/data/content/README.md`). Use a sandbox when the site has own events.
+
+## Compare with an older release
+
+A release that has no `wp osec content generate` (1.1.x) runs in another DDEV project with an imported content
+database; the suite shoots it in **remote mode** (no WP-CLI there: login with a password, themes switched through the
+Calendar Themes page). Done for 1.1.16 on 2026-10-19:
+
+1. A content database from a fresh WordPress (`/%postname%/` permalinks, Twenty Twenty-Five, only this plugin):
+   `wp osec content generate --site-settings --anchor=2027-05-10` in a `try_*` sandbox, then the database dump, the
+   `uploads/osec-content/<db>/` folder, the manifest and the admin password into one folder
+   (`uploads/osec-visual-regression/v1116/`).
+2. In the other project (running the old release): `ddev import-db`, unpack the uploads, `ddev wp search-replace
+   <sandbox URL> <its URL> --all-tables`, `ddev wp rewrite flush --hard`.
+3. Shoot it into its own set:
+
+   ```
+   WP_SANDBOX_DB=try_pw OSEC_REMOTE_URL=https://ddev-wordpress-integration-test.ddev.site \
+     OSEC_REMOTE_DIR=/var/www/html/wp-content/uploads/osec-visual-regression/v1116 \
+     OSEC_BASELINE_SET=1.1.16 npm run update
+   ```
+
+4. Compare the current code with it, **same anchor**:
+
+   ```
+   ddev osec-review try_pw --set=1.1.16 --anchor=2027-05-10                       # from the host
+   WP_SANDBOX_DB=try_pw OSEC_ANCHOR=2027-05-10 OSEC_BASELINE_SET=1.1.16 npm run review   # inside the container
+   ```
+
+   Every failed test is a difference; its page in the report shows expected (1.1.16), actual and diff, with a slider.
+
+`OSEC_REMOTE_URL` / `OSEC_REMOTE_DIR`: see `lib/wp.js`. The other project must run behind the same `ddev-router`.
+
+### Backups of baseline sets
+
+`--update` overwrites a set. Archives of the sets lie in `uploads/osec-visual-regression/backups/`
+(`baselines-<set>-<date>[_<time>].tar.gz`, plus the import folder; the ones from 2026-10-19 without a time still hold
+gamma instead of vortex). Restore one:
+
+```
+cd /var/www/html/wp-content/uploads/osec-visual-regression/baselines
+rm -rf 1.1.16 && tar xzf ../backups/baselines-1.1.16-2026-10-19_1528.tar.gz
+```
+
+Make a new one before re-shooting a set you want to keep:
+`tar czf ../backups/baselines-<set>-$(date +%Y-%m-%d).tar.gz <set>` (from `baselines/`).
 
 ## Flow
 
@@ -81,7 +131,7 @@ change and make a single event fail, mask the map.
 
 | Path | Content |
 |---|---|
-| `wp-content/uploads/osec-visual-regression/baselines/<set>/<project>/[<theme>/]` | Baseline screenshots (`admin/`, `chromium/plana/`, `firefox/gamma/`, ...). |
+| `wp-content/uploads/osec-visual-regression/baselines/<set>/<project>/[<theme>/]` | Baseline screenshots (`admin/`, `chromium/plana/`, `firefox/vortex/`, ...). |
 | `wp-content/uploads/osec-visual-regression/report/` | HTML report of the last run: `<site>/wp-content/uploads/osec-visual-regression/report/index.html`. |
 | `wp-content/uploads/osec-visual-regression/test-results/` | Actual and diff images of failed comparisons. |
 

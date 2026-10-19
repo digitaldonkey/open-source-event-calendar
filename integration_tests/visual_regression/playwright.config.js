@@ -6,7 +6,8 @@
  *   npm run update    shoot the baseline set (accept the current look)
  *
  * Env: WP_SANDBOX_DB (site, see lib/wp.js), OSEC_BASELINE_SET (default "local"), OSEC_THEMES (default
- * "plana,gamma"), OSEC_REVIEW (set by `npm run review`), PLAYWRIGHT_WS.
+ * "plana,vortex"), OSEC_MAX_DIFF_RATIO (share of pixels that may differ, default 0.001), OSEC_REVIEW (set by
+ * `npm run review`), PLAYWRIGHT_WS.
  *
  * Projects (workers: 1, in this order): `content` generates the test content and logs in; `admin`, `chromium` (views
  * and print) and `firefox` (print) depend only on it, so a failed shot in one does not skip the others. The specs
@@ -18,7 +19,7 @@ const {site, connectOptions, STORAGE_STATE} = require('./lib/wp');
 
 const {baseURL, uploadsDir} = site();
 const outputRoot = path.join(uploadsDir, 'osec-visual-regression');
-const baselineSet = (process.env.OSEC_BASELINE_SET || 'local').replace(/[^a-z0-9_-]/gi, '');
+const baselineSet = (process.env.OSEC_BASELINE_SET || 'local').replace(/[^a-z0-9._-]/gi, '').replace(/^\.+/, '');
 
 /** No login: views are shot as visitors see them (no admin bar). */
 const LOGGED_OUT = {cookies: [], origins: []};
@@ -32,7 +33,8 @@ module.exports = defineConfig({
     outputDir: path.join(outputRoot, 'test-results'),
     snapshotPathTemplate: path.join(outputRoot, 'baselines', baselineSet, '{projectName}', '{arg}{ext}'),
     reporter: [['list'], ['html', {outputFolder: path.join(outputRoot, 'report'), open: 'never'}]],
-    expect: {toHaveScreenshot: {maxDiffPixelRatio: 0}},
+    // Share of pixels that may differ (default 0.1 %): map tiles and font rendering vary by single pixels between runs.
+    expect: {toHaveScreenshot: {maxDiffPixelRatio: Number(process.env.OSEC_MAX_DIFF_RATIO ?? 0.001)}},
     use: {
         baseURL,
         ignoreHTTPSErrors: true,

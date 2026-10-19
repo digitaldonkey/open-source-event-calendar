@@ -8,6 +8,11 @@
  * Env:
  *   WP_SANDBOX_DB  Sandbox database (see the plugin's CLAUDE.md, "Database Safety"); unset: the DDEV dev site.
  *                  Passed on to every WP-CLI call, so the tests and WP-CLI always work on the same site.
+ *   OSEC_REMOTE_URL, OSEC_REMOTE_DIR
+ *                  Remote mode: shoot a site WP-CLI cannot reach (e.g. another DDEV project running an older release
+ *                  with an imported content database). OSEC_REMOTE_DIR holds its manifest.json and
+ *                  admin-password.txt (user `admin`). No content generation; login and theme switching go through
+ *                  wp-admin. The local site (WP_SANDBOX_DB) only gives the uploads folder for the output.
  *   DDEV_HOSTNAME  Set by DDEV in the web container; the hostnames sent to ddev-router (connectOptions()).
  *
  * Runs inside the DDEV web container only: WP-CLI is /usr/local/bin/wp, the browser the DDEV `playwright` service.
@@ -21,8 +26,16 @@ const PLUGIN_DIR = path.resolve(__dirname, '../../..');
 /** Logged-in browser state, written by content.setup.js, used by every other project. */
 const STORAGE_STATE = path.resolve(__dirname, '../.auth/admin.json');
 
-/** Manifest of the generated content (anchor, pages, events by key), written by content.setup.js. */
-const MANIFEST = path.resolve(__dirname, '../.auth/manifest.json');
+/** Remote mode (see the header), or null. */
+const REMOTE = process.env.OSEC_REMOTE_URL
+    ? {url: process.env.OSEC_REMOTE_URL.replace(/\/$/, ''), dir: path.resolve(process.env.OSEC_REMOTE_DIR || '.')}
+    : null;
+
+/**
+ * Manifest of the content (anchor, pages, events by key): written by content.setup.js, or shipped with the imported
+ * database in remote mode.
+ */
+const MANIFEST = REMOTE ? path.join(REMOTE.dir, 'manifest.json') : path.resolve(__dirname, '../.auth/manifest.json');
 
 /**
  * Runs WP-CLI against the site under test.
@@ -53,6 +66,9 @@ function wp(args) {
 function site() {
     if (!process.env.OSEC_PW_SITE) {
         const facts = JSON.parse(wp(['eval', 'echo wp_json_encode(["baseURL" => home_url(), "uploadsDir" => wp_upload_dir()["basedir"]]);']));
+        if (REMOTE) {
+            facts.baseURL = REMOTE.url;
+        }
         process.env.OSEC_PW_SITE = JSON.stringify(facts);
     }
     return JSON.parse(process.env.OSEC_PW_SITE);
@@ -74,8 +90,7 @@ function connectOptions(browser) {
     const launch = 'firefox' === browser
         ? {firefoxUserPrefs: {'network.dns.forceResolve': routerIp()}}
         : {
-            args: [`--host-resolver-rules=${(process.env.DDEV_HOSTNAME || '')
-                .split(',')
+            args: [`--host-resolver-rules=${[...(process.env.DDEV_HOSTNAME || '').split(','), REMOTE ? new URL(REMOTE.url).hostname : '']
                 .filter(Boolean)
                 .map((host) => `MAP ${host} ddev-router`)
                 .join(', ')}`],
@@ -99,4 +114,13 @@ function routerIp() {
     return process.env.OSEC_PW_ROUTER_IP;
 }
 
-module.exports = {PLUGIN_DIR, STORAGE_STATE, MANIFEST, wp, site, connectOptions};
+/**
+ * Password of the user `admin` of the remote site (admin-password.txt in OSEC_REMOTE_DIR).
+ *
+ * @returns {string}
+ */
+function remotePassword() {
+    return require('fs').readFileSync(path.join(REMOTE.dir, 'admin-password.txt'), 'utf8').trim();
+}
+
+module.exports = {PLUGIN_DIR, STORAGE_STATE, MANIFEST, REMOTE, wp, site, connectOptions, remotePassword};
