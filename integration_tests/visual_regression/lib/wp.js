@@ -26,6 +26,9 @@ const PLUGIN_DIR = path.resolve(__dirname, '../../..');
 /** Logged-in browser state, written by content.setup.js, used by every other project. */
 const STORAGE_STATE = path.resolve(__dirname, '../.auth/admin.json');
 
+/** Where Firefox's silent print writes its PDF, inside the playwright container (connectOptions(), lib/pages.js). */
+const FIREFOX_PDF = '/tmp/osec-firefox-print.pdf';
+
 /** Remote mode (see the header), or null. */
 const REMOTE = process.env.OSEC_REMOTE_URL
     ? {url: process.env.OSEC_REMOTE_URL.replace(/\/$/, ''), dir: path.resolve(process.env.OSEC_REMOTE_DIR || '.')}
@@ -81,14 +84,24 @@ function site() {
  *
  * Chromium: --host-resolver-rules for the DDEV hostnames (DDEV_HOSTNAME). Firefox has no such option:
  * network.dns.forceResolve sends every hostname to the router, external ones too - fine for pages that load
- * nothing from the internet (print views), not for maps.
+ * nothing from the internet (print views), not for maps. Firefox also prints silently to FIREFOX_PDF.
  *
  * @param {'chromium'|'firefox'} browser
  * @returns {{wsEndpoint: string, headers: Object<string, string>}}
  */
 function connectOptions(browser) {
     const launch = 'firefox' === browser
-        ? {firefoxUserPrefs: {'network.dns.forceResolve': routerIp()}}
+        ? {
+            firefoxUserPrefs: {
+                'network.dns.forceResolve': routerIp(),
+                // window.print() saves a PDF without a dialog, inside the playwright container (lib/pages.js).
+                'print.always_print_silent': true,
+                'print.show_print_progress': false,
+                'print_printer': 'Mozilla Save to PDF',
+                'print.printer_Mozilla_Save_to_PDF.print_to_file': true,
+                'print.printer_Mozilla_Save_to_PDF.print_to_filename': FIREFOX_PDF,
+            },
+        }
         : {
             args: [`--host-resolver-rules=${[...(process.env.DDEV_HOSTNAME || '').split(','), REMOTE ? new URL(REMOTE.url).hostname : '']
                 .filter(Boolean)
@@ -123,4 +136,4 @@ function remotePassword() {
     return require('fs').readFileSync(path.join(REMOTE.dir, 'admin-password.txt'), 'utf8').trim();
 }
 
-module.exports = {PLUGIN_DIR, STORAGE_STATE, MANIFEST, REMOTE, wp, site, connectOptions, remotePassword};
+module.exports = {PLUGIN_DIR, STORAGE_STATE, MANIFEST, REMOTE, FIREFOX_PDF, wp, site, connectOptions, remotePassword};

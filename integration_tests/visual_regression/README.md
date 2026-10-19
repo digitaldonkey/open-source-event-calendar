@@ -3,7 +3,7 @@
 Screenshots of the calendar compared with a baseline set, run locally in DDEV. One run generates the test content
 (`wp osec content generate`), shoots the plugin's wp-admin screens, then every calendar theme in turn: agenda, week,
 day and month at 320, 480 and 1280 px, the DST-end day, two single events, the block and shortcode pages, and print
-(month, week, day) in Chromium and Firefox. About 1.5 minutes, 57 tests.
+(month, week, day) in Chromium and Firefox with the PDFs attached. About 1.5 minutes, 57 tests.
 
 ```
 cd integration_tests/visual_regression          # inside the DDEV web container (ddev claude, ddev ssh)
@@ -111,9 +111,11 @@ Projects run in this order (`workers: 1`):
    page) and the calendar block's edit form in the block editor. Notices, update counters and the admin footer are
    removed; dates of the run and the permalink are blanked in place.
 3. `chromium` (`visual.spec.js`, `print.spec.js`, logged out): per calendar theme, element shots of
-   `#osec-calendar-view` (or `.ai1ec-single-event`), print views full page with the printed URL masked; the PDF of
-   each print view is attached to the report.
-4. `firefox` (`print.spec.js`, logged out): the print views.
+   `#osec-container` (filters, navigation, view, subscribe buttons; single events `.osec-single-event`: title, details, description), print views full page with the printed URL blanked; the PDF of
+   each print view (`page.pdf()`) is attached to the report.
+4. `firefox` (`print.spec.js`, logged out): the print views, each with its PDF from Firefox's own print: silent
+   print-to-file in the playwright container (prefs in `lib/wp.js`), fetched as a download (`firefoxPdf()` in
+   `lib/pages.js`). Print button only, browser default paper size.
 
 The last three depend only on `content`, so a failed shot does not skip the others. Only one calendar theme can be
 active, so the specs run per theme in blocks that activate their theme first (`lib/theme.js`). A theme switch deletes

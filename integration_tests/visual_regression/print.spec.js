@@ -1,10 +1,10 @@
 /**
  * Print checks per calendar theme (lib/theme.js): the calendar's print button for month, week and day, shot full page with print
- * media (decision N5). Runs in the chromium and the firefox project; Chromium also attaches the
- * PDF (page.pdf() is Chromium only) for a look at the page breaks.
+ * media (decision N5). Runs in the chromium and the firefox project; both attach the PDF for a look at the page breaks
+ * (Chromium: page.pdf(); Firefox: silent print to a file in the playwright container, fetched as a download).
  */
 const {test, expect} = require('@playwright/test');
-const {manifest, calendarPath, printView, about} = require('./lib/pages');
+const {manifest, calendarPath, printView, firefoxPdf, about} = require('./lib/pages');
 const {themes, activateTheme} = require('./lib/theme');
 
 /** View paths, read per test (see visual.spec.js). */
@@ -23,7 +23,8 @@ for (const theme of themes()) {
         for (const [view, {title, path}] of Object.entries(VIEWS)) {
             test(title, about(
                 'The calendar\'s print button, shot full page with print media (the printed URL blanked: it carries the '
-                + 'hostname). Chromium also attaches the PDF for a look at the page breaks.',
+                + 'hostname). The PDF is attached for a look at the page breaks (Chromium: page.pdf(); Firefox: its own '
+                + 'silent print to a file).',
             ), async ({page, browserName}, testInfo) => {
                 await page.goto(path(manifest()));
                 await printView(page);
@@ -33,12 +34,13 @@ for (const theme of themes()) {
                 // another. CSS, not Playwright's mask: the mask leaves the print page empty.
                 await page.addStyleTag({content: '.osec-print-url { visibility: hidden !important; }'});
                 await expect(page).toHaveScreenshot([theme, `print-${view}.png`], {fullPage: true});
-                if ('chromium' === browserName) {
-                    await testInfo.attach(`${theme}-print-${view}.pdf`, {
-                        body: await page.pdf({preferCSSPageSize: true, printBackground: true}),
-                        contentType: 'application/pdf',
-                    });
-                }
+                // The PDF for a look at the page breaks: Chromium's page.pdf(), Firefox's own print (silent, to a file).
+                await testInfo.attach(`${theme}-print-${view}-${browserName}.pdf`, {
+                    body: 'chromium' === browserName
+                        ? await page.pdf({preferCSSPageSize: true, printBackground: true})
+                        : await firefoxPdf(page),
+                    contentType: 'application/pdf',
+                });
             });
         }
     });

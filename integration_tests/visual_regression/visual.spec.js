@@ -1,13 +1,16 @@
 /**
  * Visual checks per calendar theme (lib/theme.js), in Chromium, logged out. See README.md.
  *
- * Calendar views are compared as element shots of #osec-calendar-view (decision N13: a layout shift around the
+ * Calendar views are compared as element shots of #osec-container (decision N13: a layout shift around the
  * calendar would otherwise mark everything): agenda, week, day and month at 320, 480 and 1280 px; the DST-end day
  * expanded; two single events; the block and shortcode pages. Print lives in print.spec.js.
  */
 const {test, expect} = require('@playwright/test');
 const {themes, activateTheme, isThemeActive} = require('./lib/theme');
 const {manifest, calendarPath, lastSunday, settle, about} = require('./lib/pages');
+
+/** The calendar the plugin renders: filters, navigation, the view, subscribe buttons (decision N13: element shots). */
+const CALENDAR = '#osec-container';
 
 /** Widths below 800 px get mobile emulation (viewport meta tag, touch). */
 const WIDTHS = [320, 480, 1280];
@@ -56,10 +59,10 @@ for (const theme of themes()) {
                 test.use({viewport: {width, height: 900}, isMobile: width < 800, hasTouch: width < 800});
 
                 for (const [view, {title, description, path}] of Object.entries(VIEWS)) {
-                    test(title, about(`${description} Element shot of #osec-calendar-view${width < 800 ? ', phone emulation' : ''}.`), async ({page}) => {
+                    test(title, about(`${description} Element shot of #osec-container${width < 800 ? ', phone emulation' : ''}.`), async ({page}) => {
                         await page.goto(path(manifest()));
                         await settle(page);
-                        await expect(page.locator('#osec-calendar-view')).toHaveScreenshot([theme, `${view}-${width}.png`]);
+                        await expect(page.locator(CALENDAR)).toHaveScreenshot([theme, `${view}-${width}.png`]);
                     });
                 }
             });
@@ -75,7 +78,7 @@ for (const theme of themes()) {
             await settle(page);
             await page.locator('.ai1ec-reveal-full-day button').click();
             await settle(page);
-            await expect(page.locator('#osec-calendar-view')).toHaveScreenshot([theme, 'day-dst-end.png']);
+            await expect(page.locator(CALENDAR)).toHaveScreenshot([theme, 'day-dst-end.png']);
         });
 
         const singles = [
@@ -85,10 +88,11 @@ for (const theme of themes()) {
                 + 'the calendar timezone.'],
         ];
         for (const [key, title, description] of singles) {
-            test(title, about(`${description} Element shot of .ai1ec-single-event.`), async ({page}) => {
+            test(title, about(`${description} Element shot of .osec-single-event (title, details, description).`), async ({page}) => {
                 await page.goto(`/?p=${manifest().events[key].id}`);
                 await settle(page);
-                await expect(page.locator('.ai1ec-single-event')).toHaveScreenshot([theme, `single-${key}.png`]);
+                // The whole event the plugin wraps (title, details, description), not only the details box.
+                await expect(page.locator('.osec-single-event')).toHaveScreenshot([theme, `single-${key}.png`]);
             });
         }
 
@@ -99,10 +103,10 @@ for (const theme of themes()) {
                 + 'agenda_toggle="true"], the agenda expanded on purpose (stays so if the default changes).'],
         ];
         for (const [key, title, description] of pages) {
-            test(title, about(`${description} Element shot of #osec-calendar-view.`), async ({page}) => {
+            test(title, about(`${description} Element shot of #osec-container.`), async ({page}) => {
                 await page.goto(manifest().pages[key].path);
                 await settle(page);
-                await expect(page.locator('#osec-calendar-view')).toHaveScreenshot([theme, `page-${key}.png`]);
+                await expect(page.locator(CALENDAR)).toHaveScreenshot([theme, `page-${key}.png`]);
             });
         }
     });
