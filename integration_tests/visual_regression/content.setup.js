@@ -10,22 +10,24 @@
  */
 const fs = require('fs');
 const path = require('path');
-const {test: setup} = require('@playwright/test');
-const {wp, STORAGE_STATE, MANIFEST, REMOTE, remotePassword} = require('./lib/wp');
-const {about} = require('./lib/pages');
+const { test: setup } = require('@playwright/test');
+const { wp, STORAGE_STATE, MANIFEST, REMOTE, remotePassword } = require('./lib/wp');
+const { about } = require('./lib/pages');
 
 /** Events per page on the events list: short and the same on every site (a used site may show hundreds). */
 const EVENTS_PER_PAGE = 5;
 
 setup('Generate the test content', about(
-    'Runs `wp osec content generate --site-settings` with tests/data/content/dataset.json: replaces the content of an '
-    + 'earlier run, sets the calendar page, theme and settings, and writes the manifest (page paths, event IDs) the '
-    + 'other tests read. Fails on a site with calendar data the generator did not create.',
+    `Runs \`wp osec content generate --site-settings\` with tests/data/content/dataset.json: replaces the content of an
+    earlier run, sets the calendar page, theme and settings, and writes the manifest (page paths, event IDs) the
+    other tests read. Fails on a site with calendar data the generator did not create.`,
 ), async () => {
     setup.skip(!!REMOTE, 'Remote mode: the content was imported with the site.');
-    fs.mkdirSync(path.dirname(MANIFEST), {recursive: true});
+    fs.mkdirSync(path.dirname(MANIFEST), { recursive: true });
     wp([
-        'osec', 'content', 'generate',
+        'osec',
+        'content',
+        'generate',
         '--dataset=tests/data/content/dataset.json',
         '--site-settings',
         `--manifest=${MANIFEST}`,
@@ -34,9 +36,9 @@ setup('Generate the test content', about(
 });
 
 setup('Log in as the first administrator', about(
-    'Takes login cookies from WordPress (lib/auth-cookies.php, no password) and stores the browser state for the '
-    + 'wp-admin tests. The calendar views are shot logged out.',
-), async ({context, baseURL}) => {
+    `Takes login cookies from WordPress (lib/auth-cookies.php, no password) and stores the browser state for the
+    wp-admin tests. The calendar views are shot logged out.`,
+), async ({ context, baseURL }) => {
     const page = await context.newPage();
     if (REMOTE) {
         // No WP-CLI there: the login form with the password shipped with the imported database.
@@ -46,19 +48,26 @@ setup('Log in as the first administrator', about(
         await page.locator('#wp-submit').click();
     } else {
         // Login cookies from WordPress itself: no password needed, works on the dev site and every sandbox.
-        await context.addCookies(JSON.parse(wp(['eval-file', path.join(__dirname, 'lib', 'auth-cookies.php')])));
+        await context.addCookies(JSON.parse(wp([
+            'eval-file',
+            path.join(__dirname, 'lib', 'auth-cookies.php'),
+        ])));
         await page.goto(`${baseURL}/wp-admin/`);
     }
     await page.locator('#wpadminbar').waitFor();
-    await context.storageState({path: STORAGE_STATE});
+    await context.storageState({ path: STORAGE_STATE });
 });
 
 setup('Set the admin screen options', about(
-    `The events list's Screen Options, the same on every site: all columns shown, ${EVENTS_PER_PAGE} events per page, `
-    + 'extended view. They are stored per user, so a used site and a fresh one would differ otherwise. Set through the '
-    + 'Screen Options panel, which works on an older release in remote mode too.',
-), async ({browser, baseURL}) => {
-    const context = await browser.newContext({baseURL, ignoreHTTPSErrors: true, storageState: STORAGE_STATE});
+    `The events list's Screen Options, the same on every site: all columns shown, ${EVENTS_PER_PAGE} events per page,
+    extended view. They are stored per user, so a used site and a fresh one would differ otherwise. Set through the
+    Screen Options panel, which works on an older release in remote mode too.`,
+), async ({ browser, baseURL }) => {
+    const context = await browser.newContext({
+        baseURL,
+        ignoreHTTPSErrors: true,
+        storageState: STORAGE_STATE,
+    });
     const page = await context.newPage();
     try {
         await page.goto('/wp-admin/edit.php?post_type=osec_event');
@@ -74,7 +83,7 @@ setup('Set the admin screen options', about(
         await page.locator('#excerpt-view-mode').check();
         await page.locator('#screen-options-apply').click();
         await page.waitForLoadState('load');
-        await context.storageState({path: STORAGE_STATE});
+        await context.storageState({ path: STORAGE_STATE });
     } finally {
         await context.close();
     }

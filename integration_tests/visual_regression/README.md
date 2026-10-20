@@ -7,18 +7,18 @@ day and month at 320, 480 and 1280 px, the DST-end day, two single events, the b
 
 ```
 cd integration_tests/visual_regression          # inside the DDEV web container (ddev claude, ddev ssh)
-WP_SANDBOX_DB=try_pw npm run test        # compare with the baseline set
-WP_SANDBOX_DB=try_pw npm run review      # the same, plus a full-page screenshot of every test in the report
-WP_SANDBOX_DB=try_pw npm run update      # shoot the baseline set (accept the current look)
+WP_SANDBOX_DB=try_v1116 npm run test        # compare with the baseline set
+WP_SANDBOX_DB=try_v1116 npm run review      # the same, plus a full-page screenshot of every test in the report
+WP_SANDBOX_DB=try_v1116 npm run update      # shoot the baseline set (accept the current look)
 ```
 
 From the host, with the DDEV command `osec-review` (review mode, prints the report URL):
 
 ```
-ddev osec-review try_pw                                   # everything, report with every screenshot
-ddev osec-review try_pw --set=master --update             # shoot a named baseline set
-ddev osec-review try_pw --set=master                      # compare with it
-ddev osec-review try_pw --project=chromium -g "Month view"   # other arguments go to playwright test
+ddev osec-review try_v1116                                   # everything, report with every screenshot
+ddev osec-review try_v1116 --set=master --update             # shoot a named baseline set
+ddev osec-review try_v1116 --set=master                      # compare with it
+ddev osec-review try_v1116 --project=chromium -g "Month view"   # other arguments go to playwright test
 ```
 
 Install it once from the plugin root on the host (DDEV reads commands only from the project's `.ddev/`):
@@ -46,12 +46,17 @@ test titles joined by spaces (`Calendar theme plana 320 px wide Month view`; `--
 shown under its title in the report.
 
 ```
-WP_SANDBOX_DB=try_pw npm run test -- --project=chromium -g "320 px wide Month view"     # one view, both themes
-WP_SANDBOX_DB=try_pw OSEC_THEMES=vortex npm run test -- print.spec.js       # one theme, one spec, both browsers
-WP_SANDBOX_DB=try_pw npm run test -- --project=admin                        # the wp-admin screens
-WP_SANDBOX_DB=try_pw npm run update -- -g "Single event"                    # re-shoot only these baselines
+WP_SANDBOX_DB=try_v1116 npm run test -- --project=chromium -g "320 px wide Month view"     # one view, both themes
+WP_SANDBOX_DB=try_v1116 OSEC_THEMES=vortex npm run test -- print.spec.js       # one theme, one spec, both browsers
+WP_SANDBOX_DB=try_v1116 npm run test -- --project=admin                        # the wp-admin screens
+WP_SANDBOX_DB=try_v1116 npm run update -- -g "Single event"                    # re-shoot only these baselines
 npx playwright test --list --reporter=list                                  # all test names (a plain --list overwrites the report)
 ```
+
+**Which site**: the current side runs on the sandbox `try_v1116` - a fresh WordPress (Twenty Twenty-Five, only this
+plugin, default options), the same install whose database the 1.1.16 instance imported. A copy of a used site (the
+dev site, `try_pw`) carries extra plugins and per-user settings that show up as differences (2026-10-20: the event
+editor and categories differed only for that reason).
 
 **The site must hold no calendar data the generator did not create**: it replaces only its own earlier content
 (see `tests/data/content/README.md`). Use a sandbox when the site has own events.
@@ -71,7 +76,7 @@ Calendar Themes page). Done for 1.1.16 on 2026-10-19:
 3. Shoot it into its own set:
 
    ```
-   WP_SANDBOX_DB=try_pw OSEC_REMOTE_URL=https://ddev-wordpress-integration-test.ddev.site \
+   WP_SANDBOX_DB=try_v1116 OSEC_REMOTE_URL=https://ddev-wordpress-integration-test.ddev.site \
      OSEC_REMOTE_DIR=/var/www/html/wp-content/uploads/osec-visual-regression/v1116 \
      OSEC_BASELINE_SET=1.1.16 npm run update
    ```
@@ -79,8 +84,8 @@ Calendar Themes page). Done for 1.1.16 on 2026-10-19:
 4. Compare the current code with it, **same anchor**:
 
    ```
-   ddev osec-review try_pw --set=1.1.16 --anchor=2027-05-10                       # from the host
-   WP_SANDBOX_DB=try_pw OSEC_ANCHOR=2027-05-10 OSEC_BASELINE_SET=1.1.16 npm run review   # inside the container
+   ddev osec-review try_v1116 --set=1.1.16 --anchor=2027-05-10                       # from the host
+   WP_SANDBOX_DB=try_v1116 OSEC_ANCHOR=2027-05-10 OSEC_BASELINE_SET=1.1.16 npm run review   # inside the container
    ```
 
    Every failed test is a difference; its page in the report shows expected (1.1.16), actual and diff, with a slider.
@@ -182,6 +187,7 @@ Uploads are shared by the dev site and the sandboxes, so the report and the sets
 | File | Role |
 |---|---|
 | `playwright.config.js` | Projects, connection, baseline and report paths. |
+| `eslint.config.js` | Code style of the suite and `bin/screenshots/` (`npm run lint`, `npm run lint:fix`). |
 | `content.setup.js` | Setup project `content` (see Flow). |
 | `admin.spec.js`, `visual.spec.js`, `print.spec.js` | The checks. |
 | `lib/wp.js` | WP-CLI against the site under test, site URL and uploads folder, browser connection through ddev-router. |
@@ -190,3 +196,16 @@ Uploads are shared by the dev site and the sandboxes, so the report and the sets
 | `lib/auth-cookies.php` | Login cookies of the first administrator (WP-CLI `eval-file`). |
 | `lib/review-reporter.js`, `lib/review-page.html` | The review page (reporter and page template). |
 | `lib/approve.js` | Approves screenshots from a review page (`npm run approve`, `ddev osec-approve`). |
+
+## Code style
+
+Defined in `eslint.config.js` (ESLint + `@stylistic`), also used by `bin/screenshots/`. `npm run lint` checks,
+`npm run lint:fix` repairs what it can:
+
+- 4 spaces, single quotes, semicolons, lines up to 120 characters;
+- `{ a, b }` with inner spaces (WordPress style);
+- object and array literals with two or more entries: one entry per line, trailing comma;
+- template literals instead of `+` on strings.
+
+Long test descriptions may span lines inside their template literal: `about()` collapses the whitespace for the
+report. The rules cover only these two folders; the plugin's other JS keeps its own style.

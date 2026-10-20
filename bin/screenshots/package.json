@@ -5,7 +5,9 @@
   "description": "Takes the WordPress.org plugin directory screenshots (assets/screenshot-*.png) with Playwright",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "shoot": "node shoot.js"
+    "shoot": "node shoot.js",
+    "lint": "node ../../integration_tests/node_modules/eslint/bin/eslint.js .",
+    "lint:fix": "node ../../integration_tests/node_modules/eslint/bin/eslint.js . --fix"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0"

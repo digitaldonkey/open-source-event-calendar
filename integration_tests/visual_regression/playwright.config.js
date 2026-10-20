@@ -14,15 +14,18 @@
  * switch the calendar theme per block (lib/theme.js).
  */
 const path = require('path');
-const {defineConfig, devices} = require('@playwright/test');
-const {site, connectOptions, STORAGE_STATE} = require('./lib/wp');
+const { defineConfig, devices } = require('@playwright/test');
+const { site, connectOptions, STORAGE_STATE } = require('./lib/wp');
 
-const {baseURL, uploadsDir} = site();
+const { baseURL, uploadsDir } = site();
 const outputRoot = path.join(uploadsDir, 'osec-visual-regression');
 const baselineSet = (process.env.OSEC_BASELINE_SET || 'local').replace(/[^a-z0-9._-]/gi, '').replace(/^\.+/, '');
 
 /** No login: views are shot as visitors see them (no admin bar). */
-const LOGGED_OUT = {cookies: [], origins: []};
+const LOGGED_OUT = {
+    cookies: [],
+    origins: [],
+};
 
 module.exports = defineConfig({
     testDir: __dirname,
@@ -35,14 +38,23 @@ module.exports = defineConfig({
     snapshotPathTemplate: path.join(outputRoot, 'baselines', baselineSet, '{projectName}', '{arg}{ext}'),
     reporter: [
         ['list'],
-        ['html', {outputFolder: path.join(outputRoot, 'report', baselineSet), open: 'never'}],
+        [
+            'html',
+            {
+                outputFolder: path.join(outputRoot, 'report', baselineSet),
+                open: 'never',
+            },
+        ],
         // The review page: baseline | diff | current per screenshot (lib/review-reporter.js).
-        ['./lib/review-reporter.js', {
-            outputFolder: path.join(outputRoot, 'review', baselineSet),
-            baselinesFolder: path.join(outputRoot, 'baselines', baselineSet),
-            set: baselineSet,
-            site: baseURL,
-        }],
+        [
+            './lib/review-reporter.js',
+            {
+                outputFolder: path.join(outputRoot, 'review', baselineSet),
+                baselinesFolder: path.join(outputRoot, 'baselines', baselineSet),
+                set: baselineSet,
+                site: baseURL,
+            },
+        ],
     ],
     // Share of pixels that may differ (default 0.1 %): map tiles and font rendering vary by single pixels between runs.
     expect: {
@@ -58,24 +70,43 @@ module.exports = defineConfig({
         baseURL,
         ignoreHTTPSErrors: true,
         storageState: STORAGE_STATE,
-        screenshot: process.env.OSEC_REVIEW ? {mode: 'on', fullPage: true} : 'only-on-failure',
+        screenshot: process.env.OSEC_REVIEW ? {
+            mode: 'on',
+            fullPage: true,
+        } : 'only-on-failure',
         connectOptions: connectOptions('chromium'),
     },
     projects: [
         // Starts logged out: it writes the login state the admin project uses.
-        {name: 'content', testMatch: /content\.setup\.js/, use: {storageState: LOGGED_OUT}},
-        {name: 'admin', testMatch: /admin\.spec\.js/, dependencies: ['content'], use: devices['Desktop Chrome']},
+        {
+            name: 'content',
+            testMatch: /content\.setup\.js/,
+            use: { storageState: LOGGED_OUT },
+        },
+        {
+            name: 'admin',
+            testMatch: /admin\.spec\.js/,
+            dependencies: ['content'],
+            use: devices['Desktop Chrome'],
+        },
         {
             name: 'chromium',
             testMatch: /(visual|print)\.spec\.js/,
             dependencies: ['content'],
-            use: {...devices['Desktop Chrome'], storageState: LOGGED_OUT},
+            use: {
+                ...devices['Desktop Chrome'],
+                storageState: LOGGED_OUT,
+            },
         },
         {
             name: 'firefox',
             testMatch: /print\.spec\.js/,
             dependencies: ['content'],
-            use: {...devices['Desktop Firefox'], storageState: LOGGED_OUT, connectOptions: connectOptions('firefox')},
+            use: {
+                ...devices['Desktop Firefox'],
+                storageState: LOGGED_OUT,
+                connectOptions: connectOptions('firefox'),
+            },
         },
     ],
 });

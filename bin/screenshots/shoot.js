@@ -11,20 +11,22 @@
  * (default: the plugin's assets/). A failing shot is reported and the run goes on; exit code 1 if any failed. Manual
  * shots are listed at the end. Shot keys: README.md.
  *
- * Browser connection, WP-CLI and login come from the visual regression suite (integration_tests/visual_regression/lib/).
+ * Browser connection, WP-CLI and login come from the visual regression suite
+ * (integration_tests/visual_regression/lib/).
  */
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const {chromium} = require('@playwright/test');
-const {PLUGIN_DIR, wp, site, connectOptions} = require('../../integration_tests/visual_regression/lib/wp');
-const {settle} = require('../../integration_tests/visual_regression/lib/pages');
+const { chromium } = require('@playwright/test');
+const { PLUGIN_DIR, wp, site, connectOptions } = require('../../integration_tests/visual_regression/lib/wp');
+const { settle } = require('../../integration_tests/visual_regression/lib/pages');
 
 const DATASET = 'tests/data/content/dataset.json';
 const AUTH_COOKIES = path.join(PLUGIN_DIR, 'integration_tests/visual_regression/lib/auth-cookies.php');
 
 const args = process.argv.slice(2);
-const outDir = path.resolve((args.find((a) => a.startsWith('--out=')) || `--out=${path.join(PLUGIN_DIR, 'assets')}`).slice(6));
+const outArg = args.find((a) => a.startsWith('--out='));
+const outDir = path.resolve(outArg ? outArg.slice(6) : path.join(PLUGIN_DIR, 'assets'));
 const only = args.filter((a) => !a.startsWith('--'));
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'shots.json'), 'utf8'));
 
@@ -36,10 +38,18 @@ const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'shots.json'), 'u
 function generate() {
     const file = path.join(os.tmpdir(), `osec-screenshots-${process.pid}.json`);
     try {
-        wp(['osec', 'content', 'generate', `--dataset=${DATASET}`, '--set=showcase', '--site-settings', `--manifest=${file}`]);
+        wp([
+            'osec',
+            'content',
+            'generate',
+            `--dataset=${DATASET}`,
+            '--set=showcase',
+            '--site-settings',
+            `--manifest=${file}`,
+        ]);
         return JSON.parse(fs.readFileSync(file, 'utf8'));
     } finally {
-        fs.rmSync(file, {force: true});
+        fs.rmSync(file, { force: true });
     }
 }
 
@@ -48,9 +58,16 @@ function generate() {
  */
 function checkWordPressTheme() {
     const wanted = JSON.parse(fs.readFileSync(path.join(PLUGIN_DIR, DATASET), 'utf8')).site.theme;
-    const active = wp(['theme', 'list', '--status=active', '--field=name']);
+    const active = wp([
+        'theme',
+        'list',
+        '--status=active',
+        '--field=name',
+    ]);
     if (wanted && active !== wanted) {
-        console.warn(`warning: the WordPress theme is ${active}, the dataset expects ${wanted} (wp theme activate ${wanted}).`);
+        console.warn(
+            `warning: the WordPress theme is ${active}, the dataset expects ${wanted} (wp theme activate ${wanted}).`,
+        );
     }
 }
 
@@ -84,13 +101,14 @@ async function editorBlock(page, m, pageKey) {
     await page.waitForFunction(() => window.wp?.data?.select('core/block-editor').getBlocks().length);
     await page.evaluate(() => {
         wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuide', false);
-        const block = wp.data.select('core/block-editor').getBlocks().find((b) => b.name.endsWith('osec-calendar-classic'));
+        const block = wp.data.select('core/block-editor').getBlocks()
+            .find((b) => b.name.endsWith('osec-calendar-classic'));
         wp.data.dispatch('core/block-editor').selectBlock(block.clientId);
     });
     const block = page.frameLocator('iframe[name="editor-canvas"]').locator('[data-type$="osec-calendar-classic"]');
     await block.waitFor();
     await block.scrollIntoViewIfNeeded();
-    await settle(page, {networkIdle: false});
+    await settle(page, { networkIdle: false });
     return block;
 }
 
@@ -106,7 +124,10 @@ async function editorBlock(page, m, pageKey) {
 async function shoot(browser, m, shot, cookies) {
     const context = await browser.newContext({
         baseURL: site().baseURL,
-        viewport: {width: shot.width, height: shot.height},
+        viewport: {
+            width: shot.width,
+            height: shot.height,
+        },
         deviceScaleFactor: config.scale || 2,
         isMobile: !!shot.mobile,
         hasTouch: !!shot.mobile,
@@ -126,7 +147,7 @@ async function shoot(browser, m, shot, cookies) {
         }
         if (shot.scroll_to) {
             await page.locator(shot.scroll_to).first().evaluate((el) => {
-                el.scrollIntoView({block: 'start'});
+                el.scrollIntoView({ block: 'start' });
                 window.scrollBy(0, -50);
             });
         }
@@ -138,17 +159,19 @@ async function shoot(browser, m, shot, cookies) {
                 throw new Error(`event "${shot.hover_event}" is not in the manifest`);
             }
             const title = shot.hover_event ? m.events[shot.hover_event].title : null;
-            const target = title ? page.locator(shot.hover).filter({hasText: title}).first() : page.locator(shot.hover).first();
+            const target = title
+                ? page.locator(shot.hover).filter({ hasText: title }).first()
+                : page.locator(shot.hover).first();
             await target.hover();
         } else {
             await page.mouse.move(shot.width - 2, shot.height - 2);
         }
         if (shot.wait_for) {
-            await page.locator(shot.wait_for).first().waitFor({state: 'visible'});
+            await page.locator(shot.wait_for).first().waitFor({ state: 'visible' });
         }
         await page.waitForTimeout(800);
         const file = path.join(outDir, shot.file);
-        await (element ? element.screenshot({path: file}) : page.screenshot({path: file}));
+        await (element ? element.screenshot({ path: file }) : page.screenshot({ path: file }));
     } finally {
         await context.close();
     }
@@ -157,10 +180,13 @@ async function shoot(browser, m, shot, cookies) {
 (async () => {
     const m = generate();
     checkWordPressTheme();
-    const cookies = JSON.parse(wp(['eval-file', AUTH_COOKIES]));
-    fs.mkdirSync(outDir, {recursive: true});
-    const {wsEndpoint, headers} = connectOptions('chromium');
-    const browser = await chromium.connect(wsEndpoint, {headers});
+    const cookies = JSON.parse(wp([
+        'eval-file',
+        AUTH_COOKIES,
+    ]));
+    fs.mkdirSync(outDir, { recursive: true });
+    const { wsEndpoint, headers } = connectOptions('chromium');
+    const browser = await chromium.connect(wsEndpoint, { headers });
     const manual = [];
     let failed = 0;
     try {
@@ -185,7 +211,8 @@ async function shoot(browser, m, shot, cookies) {
     }
     manual.forEach((line) => console.log(`manual: ${line}`));
     const inRepository = !path.relative(PLUGIN_DIR, outDir).startsWith('..');
-    console.log(`Written to ${outDir}${inRepository ? `; review with: git diff --stat ${path.relative(PLUGIN_DIR, outDir)}` : ''}`);
+    const hint = inRepository ? `; review with: git diff --stat ${path.relative(PLUGIN_DIR, outDir)}` : '';
+    console.log(`Written to ${outDir}${hint}`);
     process.exit(failed ? 1 : 0);
 })().catch((e) => {
     console.error(e.message);

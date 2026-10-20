@@ -17,7 +17,7 @@
  *
  * Runs inside the DDEV web container only: WP-CLI is /usr/local/bin/wp, the browser the DDEV `playwright` service.
  */
-const {execFileSync} = require('child_process');
+const { execFileSync } = require('child_process');
 const path = require('path');
 
 /** The plugin directory: WP-CLI runs there, so relative dataset paths work. */
@@ -31,7 +31,10 @@ const FIREFOX_PDF = '/tmp/osec-firefox-print.pdf';
 
 /** Remote mode (see the header), or null. */
 const REMOTE = process.env.OSEC_REMOTE_URL
-    ? {url: process.env.OSEC_REMOTE_URL.replace(/\/$/, ''), dir: path.resolve(process.env.OSEC_REMOTE_DIR || '.')}
+    ? {
+        url: process.env.OSEC_REMOTE_URL.replace(/\/$/, ''),
+        dir: path.resolve(process.env.OSEC_REMOTE_DIR || '.'),
+    }
     : null;
 
 /**
@@ -53,7 +56,11 @@ function wp(args) {
             cwd: PLUGIN_DIR,
             encoding: 'utf8',
             env: process.env,
-            stdio: ['ignore', 'pipe', 'pipe'],
+            stdio: [
+                'ignore',
+                'pipe',
+                'pipe',
+            ],
         }).trim();
     } catch (e) {
         throw new Error((e.stderr || '').trim() || e.message);
@@ -68,7 +75,10 @@ function wp(args) {
  */
 function site() {
     if (!process.env.OSEC_PW_SITE) {
-        const facts = JSON.parse(wp(['eval', 'echo wp_json_encode(["baseURL" => home_url(), "uploadsDir" => wp_upload_dir()["basedir"]]);']));
+        const facts = JSON.parse(wp([
+            'eval',
+            'echo wp_json_encode(["baseURL" => home_url(), "uploadsDir" => wp_upload_dir()["basedir"]]);',
+        ]));
         if (REMOTE) {
             facts.baseURL = REMOTE.url;
         }
@@ -103,14 +113,19 @@ function connectOptions(browser) {
             },
         }
         : {
-            args: [`--host-resolver-rules=${[...(process.env.DDEV_HOSTNAME || '').split(','), REMOTE ? new URL(REMOTE.url).hostname : '']
-                .filter(Boolean)
-                .map((host) => `MAP ${host} ddev-router`)
-                .join(', ')}`],
+            args: [
+                `--host-resolver-rules=${[
+                    ...(process.env.DDEV_HOSTNAME || '').split(','),
+                    REMOTE ? new URL(REMOTE.url).hostname : '',
+                ]
+                    .filter(Boolean)
+                    .map((host) => `MAP ${host} ddev-router`)
+                    .join(', ')}`,
+            ],
         };
     return {
         wsEndpoint: process.env.PLAYWRIGHT_WS || 'ws://playwright:3000/',
-        headers: {'x-playwright-launch-options': JSON.stringify(launch)},
+        headers: { 'x-playwright-launch-options': JSON.stringify(launch) },
     };
 }
 
@@ -122,7 +137,10 @@ function connectOptions(browser) {
  */
 function routerIp() {
     if (!process.env.OSEC_PW_ROUTER_IP) {
-        process.env.OSEC_PW_ROUTER_IP = execFileSync('getent', ['hosts', 'ddev-router'], {encoding: 'utf8'}).split(/\s+/)[0];
+        process.env.OSEC_PW_ROUTER_IP = execFileSync('getent', [
+            'hosts',
+            'ddev-router',
+        ], { encoding: 'utf8' }).split(/\s+/)[0];
     }
     return process.env.OSEC_PW_ROUTER_IP;
 }
@@ -136,4 +154,14 @@ function remotePassword() {
     return require('fs').readFileSync(path.join(REMOTE.dir, 'admin-password.txt'), 'utf8').trim();
 }
 
-module.exports = {PLUGIN_DIR, STORAGE_STATE, MANIFEST, REMOTE, FIREFOX_PDF, wp, site, connectOptions, remotePassword};
+module.exports = {
+    PLUGIN_DIR,
+    STORAGE_STATE,
+    MANIFEST,
+    REMOTE,
+    FIREFOX_PDF,
+    wp,
+    site,
+    connectOptions,
+    remotePassword,
+};

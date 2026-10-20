@@ -38,7 +38,7 @@ class ReviewReporter {
         if (!review) {
             return;
         }
-        const {name} = JSON.parse(review.body.toString());
+        const { name } = JSON.parse(review.body.toString());
         const project = test.parent.project().name;
         const find = (suffix) => result.attachments.find((a) => a.name.endsWith(suffix) && a.path);
         const titles = test.titlePath().slice(3);
@@ -47,7 +47,10 @@ class ReviewReporter {
         const size = error.match(/Expected an image (\d+)px by (\d+)px, received (\d+)px by (\d+)px/);
         this.rows.push({
             // Reference ID: the baseline's path inside its set (stable across runs; lib/approve.js takes it).
-            ref: [project, ...name].join('/'),
+            ref: [
+                project,
+                ...name,
+            ].join('/'),
             project,
             titles,
             theme: (titles.find((t) => t.startsWith('Calendar theme ')) || '').replace('Calendar theme ', ''),
@@ -73,9 +76,12 @@ class ReviewReporter {
      */
     onEnd() {
         const out = this.options.outputFolder;
-        fs.rmSync(out, {recursive: true, force: true});
-        fs.mkdirSync(path.join(out, 'images'), {recursive: true});
-        fs.mkdirSync(path.join(out, 'pdf'), {recursive: true});
+        fs.rmSync(out, {
+            recursive: true,
+            force: true,
+        });
+        fs.mkdirSync(path.join(out, 'images'), { recursive: true });
+        fs.mkdirSync(path.join(out, 'pdf'), { recursive: true });
         const rows = this.rows.map((row, i) => {
             const id = String(i + 1).padStart(3, '0');
             const copy = (source, kind) => {
@@ -94,10 +100,20 @@ class ReviewReporter {
             const pdfs = row.pdfs.map((a, n) => {
                 const file = `pdf/${id}-${n + 1}-${a.name.replace(/[^a-z0-9._-]/gi, '_')}`;
                 a.path ? fs.copyFileSync(a.path, path.join(out, file)) : fs.writeFileSync(path.join(out, file), a.body);
-                return {name: a.name, file};
+                return {
+                    name: a.name,
+                    file,
+                };
             });
-            const {sources, ...data} = row;
-            return {...data, id, old: copy(sources.old, 'old'), diff: copy(sources.diff, 'diff'), current, pdfs};
+            const { sources, ...data } = row;
+            return {
+                ...data,
+                id,
+                old: copy(sources.old, 'old'),
+                diff: copy(sources.diff, 'diff'),
+                current,
+                pdfs,
+            };
         });
         const data = {
             set: this.options.set,

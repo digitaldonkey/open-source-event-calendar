@@ -2,7 +2,7 @@
 
 ## Description: Open Source Event Calendar visual regression: approve screenshots of a review page (the reviewed current image becomes the baseline).
 ## Usage: osec-approve [dev|claude|try_<name>] [--set=<baseline set>] <ref> [<ref> ...]
-## Example: ddev osec-approve --set=local chromium/plana/month-1280.png\nddev osec-approve try_pw --set=local admin/admin-events.png firefox/vortex/print-day.png
+## Example: ddev osec-approve --set=local chromium/plana/month-1280.png\nddev osec-approve try_v1116 --set=local admin/admin-events.png firefox/vortex/print-day.png
 
 # Copy to .ddev/commands/web/ of the DDEV project (see integration_tests/visual_regression/README.md).
 # The reference IDs and ready-made commands are on the review page (review/<set>/index.html). The previous baseline

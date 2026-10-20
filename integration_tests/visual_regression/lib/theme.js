@@ -14,8 +14,8 @@
  * Locally through WP-CLI; in remote mode (lib/wp.js) through the Activate link of wp-admin's Calendar Themes page,
  * logged in with the state content.setup.js stored.
  */
-const {request} = require('@playwright/test');
-const {wp, site, REMOTE, STORAGE_STATE} = require('./wp');
+const { request } = require('@playwright/test');
+const { wp, site, REMOTE, STORAGE_STATE } = require('./wp');
 
 const THEMES_PAGE = '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-themes';
 
@@ -50,12 +50,26 @@ async function activateTheme(theme, browser) {
         });
         return;
     }
-    const rows = JSON.parse(wp(['osec', 'theme', 'list', '--fields=name,status', '--format=json']));
+    const rows = JSON.parse(wp([
+        'osec',
+        'theme',
+        'list',
+        '--fields=name,status',
+        '--format=json',
+    ]));
     if (rows.some((row) => row.name === theme && 'active' === row.status)) {
         return;
     }
-    wp(['osec', 'theme', 'activate', theme]);
-    const context = await request.newContext({baseURL: site().baseURL, ignoreHTTPSErrors: true});
+    wp([
+        'osec',
+        'theme',
+        'activate',
+        theme,
+    ]);
+    const context = await request.newContext({
+        baseURL: site().baseURL,
+        ignoreHTTPSErrors: true,
+    });
     try {
         await context.get('/');
     } finally {
@@ -79,7 +93,13 @@ async function isThemeActive(theme, browser) {
                 && await page.locator('.activatelink').count() > 0;
         });
     }
-    return JSON.parse(wp(['osec', 'theme', 'list', '--fields=name,status', '--format=json']))
+    return JSON.parse(wp([
+        'osec',
+        'theme',
+        'list',
+        '--fields=name,status',
+        '--format=json',
+    ]))
         .some((row) => row.name === theme && 'active' === row.status);
 }
 
@@ -91,7 +111,11 @@ async function isThemeActive(theme, browser) {
  * @returns {Promise<*>} The callback's result.
  */
 async function withAdminPage(browser, callback) {
-    const context = await browser.newContext({baseURL: site().baseURL, ignoreHTTPSErrors: true, storageState: STORAGE_STATE});
+    const context = await browser.newContext({
+        baseURL: site().baseURL,
+        ignoreHTTPSErrors: true,
+        storageState: STORAGE_STATE,
+    });
     try {
         return await callback(await context.newPage());
     } finally {
@@ -99,4 +123,8 @@ async function withAdminPage(browser, callback) {
     }
 }
 
-module.exports = {themes, activateTheme, isThemeActive};
+module.exports = {
+    themes,
+    activateTheme,
+    isThemeActive,
+};

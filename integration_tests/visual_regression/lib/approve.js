@@ -14,7 +14,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const {site} = require('./wp');
+const { site } = require('./wp');
 
 const args = process.argv.slice(2);
 const set = ((args.find((a) => a.startsWith('--set=')) || '').slice(6) || process.env.OSEC_BASELINE_SET || 'local')
@@ -38,17 +38,20 @@ let failed = 0;
 for (const ref of refs) {
     const row = data.rows.find((r) => r.ref === ref);
     if (!row || !row.current) {
-        console.error(`${ref}: ${row ? 'no current image in the review (e.g. the test did not get to its shot)' : 'unknown reference'}`);
+        const reason = row
+            ? 'no current image in the review (e.g. the test did not get to its shot)'
+            : 'unknown reference';
+        console.error(`${ref}: ${reason}`);
         failed++;
         continue;
     }
     const baseline = path.join(root, 'baselines', set, ref);
     if (fs.existsSync(baseline)) {
         const backup = path.join(root, 'backups', 'approved', stamp, set, ref);
-        fs.mkdirSync(path.dirname(backup), {recursive: true});
+        fs.mkdirSync(path.dirname(backup), { recursive: true });
         fs.copyFileSync(baseline, backup);
     }
-    fs.mkdirSync(path.dirname(baseline), {recursive: true});
+    fs.mkdirSync(path.dirname(baseline), { recursive: true });
     fs.copyFileSync(path.join(reviewDir, row.current), baseline);
     // Mark it on the review page: after a reload the row shows "approved" with previous and new baseline.
     row.approvedAt = new Date().toISOString();

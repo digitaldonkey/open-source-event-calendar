@@ -5,9 +5,9 @@
  * header/footer): agenda, week, day and month at 320, 480 and 1280 px; the DST-end day expanded; two single events;
  * the block and shortcode pages. Print lives in print.spec.js.
  */
-const {test, expect} = require('@playwright/test');
-const {themes, activateTheme, isThemeActive} = require('./lib/theme');
-const {manifest, calendarPath, lastSunday, settle, about, compareShot} = require('./lib/pages');
+const { test, expect } = require('@playwright/test');
+const { themes, activateTheme, isThemeActive } = require('./lib/theme');
+const { manifest, calendarPath, lastSunday, settle, about, compareShot } = require('./lib/pages');
 
 /**
  * What every front-end shot shows: the page's <main> - the plugin's output with the page title and the theme's
@@ -17,99 +17,147 @@ const {manifest, calendarPath, lastSunday, settle, about, compareShot} = require
 const MAIN = 'main';
 
 /** Widths below 800 px get mobile emulation (viewport meta tag, touch). */
-const WIDTHS = [320, 480, 1280];
+const WIDTHS = [
+    320,
+    480,
+    1280,
+];
 
 /**
- * View paths. Read per test: spec files load before the content setup runs, so a manifest read at load time would
- * be missing (first run) or hold the previous run's post IDs.
+ * Calendar views, shot at every width. Paths are read per test: spec files load before the content setup runs, so a
+ * manifest read at load time would be missing (first run) or hold the previous run's post IDs.
  */
-const VIEWS = {
-    agenda: {
+const VIEWS = [
+    {
+        name: 'agenda',
         title: 'Agenda view',
         description: 'The agenda from the anchor week on, expanded (plugin default).',
         path: (m) => calendarPath(m, 'agenda', m.anchor),
     },
-    week: {
+    {
+        name: 'week',
         title: 'Week view',
-        description: 'The anchor week: overlapping talks, all-day bars crossing the week, an event crossing midnight, '
-            + 'an instant event, the Tokyo event on the day it falls on in Berlin.',
+        description: `The anchor week: overlapping talks, all-day bars crossing the week, an event crossing midnight,
+            an instant event, the Tokyo event on the day it falls on in Berlin.`,
         path: (m) => calendarPath(m, 'week', m.anchor),
     },
-    day: {
+    {
+        name: 'day',
         title: 'Day view: busy day',
         description: 'The day with eight consecutive events next to a multi-day bar and a series.',
         path: (m) => calendarPath(m, 'oneday', m.events['busy-1'].start.slice(0, 10)),
     },
-    month: {
+    {
+        name: 'month',
         title: 'Month view',
-        description: 'The anchor month (May): multi-day bars across weeks and the month end, many events on one day, '
-            + 'long titles, category colors, series.',
+        description: `The anchor month (May): multi-day bars across weeks and the month end, many events on one day,
+            long titles, category colors, series.`,
         path: (m) => calendarPath(m, 'month', m.anchor),
     },
-};
+];
+
+/** Single events, by their key in the manifest. */
+const SINGLES = [
+    {
+        key: 'jazz',
+        title: 'Single event: Jazz in the Park',
+        description: `Recurring event with featured image, map (OpenStreetMap tiles), cost, ticket button and
+            organizer contact.`,
+    },
+    {
+        key: 'tokyo',
+        title: 'Single event: Early call from Tokyo',
+        description: 'An event in another timezone (07:00 Asia/Tokyo), shown in the calendar timezone.',
+    },
+];
+
+/** Other pages showing the calendar, by their key in the manifest. */
+const PAGES = [
+    {
+        key: 'block',
+        title: 'Page with the calendar block',
+        description: 'The "Calendar block" page: the calendar rendered by the block with its default settings.',
+    },
+    {
+        key: 'shortcode',
+        title: 'Page with the [osec] shortcode',
+        description: `The "Calendar shortcode" page: [osec view="agenda" agenda_toggle="true"], the agenda expanded on
+            purpose (stays so if the default changes).`,
+    },
+];
 
 for (const theme of themes()) {
     test.describe(`Calendar theme ${theme}`, () => {
-        test.beforeAll(({browser}) => activateTheme(theme, browser));
+        test.beforeAll(({ browser }) => activateTheme(theme, browser));
 
         test('The calendar theme is active', about(
-            `Checks that "${theme}" is the active calendar theme before its screenshots (the specs switch themes per block).`,
-        ), async ({browser}) => {
+            `Checks that "${theme}" is the active calendar theme before its screenshots (the specs switch themes per
+            block).`,
+        ), async ({ browser }) => {
             expect(await isThemeActive(theme, browser)).toBe(true);
         });
 
         for (const width of WIDTHS) {
             test.describe(`${width} px wide`, () => {
-                test.use({viewport: {width, height: 900}, isMobile: width < 800, hasTouch: width < 800});
+                test.use({
+                    viewport: {
+                        width,
+                        height: 900,
+                    },
+                    isMobile: width < 800,
+                    hasTouch: width < 800,
+                });
 
-                for (const [view, {title, description, path}] of Object.entries(VIEWS)) {
-                    test(title, about(`${description} Shot of <main>${width < 800 ? ', phone emulation' : ''}.`), async ({page}) => {
+                for (const { name, title, description, path } of VIEWS) {
+                    const emulation = width < 800 ? ', phone emulation' : '';
+                    test(title, about(`${description} Shot of <main>${emulation}.`), async ({ page }) => {
                         await page.goto(path(manifest()));
                         await settle(page);
-                        await compareShot(page.locator(MAIN), [theme, `${view}-${width}.png`]);
+                        await compareShot(page.locator(MAIN), [
+                            theme,
+                            `${name}-${width}.png`,
+                        ]);
                     });
                 }
             });
         }
 
         test('Day view: end of DST, full day revealed', about(
-            'The last Sunday of October (25 hours in Europe/Berlin) with the "show full day" button clicked: the night bus '
-            + 'series at 00:30 and two events at 02:15, one in summer time and one in standard time (side finding T3: the '
-            + 'grid has 24 rows).',
-        ), async ({page}) => {
+            `The last Sunday of October (25 hours in Europe/Berlin) with the "show full day" button clicked: the night
+            bus series at 00:30 and two events at 02:15, one in summer time and one in standard time (side finding
+            T3: the grid has 24 rows).`,
+        ), async ({ page }) => {
             const m = manifest();
             await page.goto(calendarPath(m, 'oneday', lastSunday(Number(m.anchor.slice(0, 4)), 10)));
             await settle(page);
             await page.locator('.ai1ec-reveal-full-day button').click();
             await settle(page);
-            await compareShot(page.locator(MAIN), [theme, 'day-dst-end.png']);
+            await compareShot(page.locator(MAIN), [
+                theme,
+                'day-dst-end.png',
+            ]);
         });
 
-        const singles = [
-            ['jazz', 'Single event: Jazz in the Park', 'Recurring event with featured image, map (OpenStreetMap tiles), '
-                + 'cost, ticket button and organizer contact.'],
-            ['tokyo', 'Single event: Early call from Tokyo', 'An event in another timezone (07:00 Asia/Tokyo), shown in '
-                + 'the calendar timezone.'],
-        ];
-        for (const [key, title, description] of singles) {
-            test(title, about(`${description} Shot of <main> (title, details, description, post navigation).`), async ({page}) => {
+        for (const { key, title, description } of SINGLES) {
+            const details = `${description} Shot of <main> (title, details, description, post navigation).`;
+            test(title, about(details), async ({ page }) => {
                 await page.goto(`/?p=${manifest().events[key].id}`);
                 await settle(page);
-                await compareShot(page.locator(MAIN), [theme, `single-${key}.png`]);
+                await compareShot(page.locator(MAIN), [
+                    theme,
+                    `single-${key}.png`,
+                ]);
             });
         }
 
-        const pages = [
-            ['block', 'Page with the calendar block', 'The "Calendar block" page: the calendar rendered by the block with '
-                + 'its default settings.'],
-            ['shortcode', 'Page with the [osec] shortcode', 'The "Calendar shortcode" page: [osec view="agenda" '
-                + 'agenda_toggle="true"], the agenda expanded on purpose (stays so if the default changes).'],
-        ];
-        for (const [key, title, description] of pages) {
-            test(title, about(`${description} Shot of <main>.`), async ({page}) => {
+        for (const { key, title, description } of PAGES) {
+            test(title, about(`${description} Shot of <main>.`), async ({ page }) => {
                 await page.goto(manifest().pages[key].path);
                 await settle(page);
-                await compareShot(page.locator(MAIN), [theme, `page-${key}.png`]);
+                await compareShot(page.locator(MAIN), [
+                    theme,
+                    `page-${key}.png`,
+                ]);
             });
         }
     });
