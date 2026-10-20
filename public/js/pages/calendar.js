@@ -4088,7 +4088,10 @@ timely.define("domReady", [], function () {
         })
     }, S = !1, x = function (t) {
         var n = History.getState(), r = $(".ai1ec-calendar:first");
-        if (n.data.ai1ec !== undefined && !0 === n.data.ai1ec || !0 === S) S = !0, E(r, n.url, "json")
+        if (n.data.ai1ec !== undefined && !0 === n.data.ai1ec) S = !0, E(r, n.url, "json");
+        // Back to the entry the page was opened with: its address is the page's own (a page with a calendar
+        // block or shortcode answers it with the whole page, not with a view), so load the page again.
+        else if (!0 === S) window.location.reload()
     }, T = function (e, t, n) {
         if (t === "json") {
             var r = {ai1ec: !0};
