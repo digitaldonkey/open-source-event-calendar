@@ -709,10 +709,11 @@ class Settings extends OsecBaseInitialized
                         'open-source-event-calendar'
                     ),
                     'help'  => __(
-                        'Select if your want to use category images as featured image fallback on event page.
-                         Fallbacks can be influenced by hook <code>osec_avatar_valid_callbacks</code> and
-                          <code>osec_avatar_fallback_order</code>.
-                        ',
+                        'Select if you want an event without featured image to use its category image (or content
+                         image) as its WordPress featured image, e.g. where your theme shows featured images. The
+                         calendar views show the category image either way. Fallbacks can be influenced by the hooks
+                         <code>osec_avatar_fallback_order</code>, <code>osec_avatar_valid_media_callbacks</code>
+                         and <code>osec_avatar_valid_url_callbacks</code>.',
                         'open-source-event-calendar'
                     ),
                 ],
