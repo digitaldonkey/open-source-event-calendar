@@ -5,20 +5,21 @@
 //
 /*! DO NOT EDIT source: public/admin/less/admin-pages/osec-admin-page-all-events.less */
 
-// Event list (Events > All Events): the all-day label in the "Event date/time" column, as the label it was while
-// bootstrap.min.css loaded here (before #65), in the admin color scheme's accent color.
+// Event list (Events > All Events): the all-day label in the "Event date/time" column, a small outlined pill in the
+// date's own text color, centered on the date.
 .ai1ec-allday-badge {
-  display: inline;
-  padding: .2em .6em .3em;
-  font-size: 75%;
-  font-weight: bold;
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: -.15em;
+  padding: .25em .55em;
+  font-size: 70%;
+  font-weight: normal;
   line-height: 1;
-  color: #fff;
-  text-align: center;
   white-space: nowrap;
-  vertical-align: baseline;
+  color: currentColor;
   border-radius: 1em;
-  background-color: var(--wp-admin-theme-color, #3858e9);
+  // An inset shadow instead of a border: the outline adds nothing to the pill's size.
+  box-shadow: inset 0 0 0 1px currentColor;
 }
 
 // The date under the title (public/js/admin/all_events_date.js): only in the compact layout, where WordPress hides
