@@ -291,7 +291,8 @@ class EventAvatarView extends OsecBaseClass
             return null;
         }
 
-        $url  = $matches[2];
+        // An attribute value in HTML: `&` is written `&amp;` there, and the URL is escaped again where it is printed.
+        $url  = html_entity_decode($matches[2], ENT_QUOTES, get_bloginfo('charset'));
         $size = [0, 0];
 
         // Try to detect width and height.
@@ -422,7 +423,7 @@ class EventAvatarView extends OsecBaseClass
         bool $wrap_permalink = true,
         bool $hide_featured_image = false
     ): string {
-        $data = $this->get_event_avatar_data($event, $fallback_order);
+        $data = $this->avatar_data($event, $fallback_order);
 
         if (empty($data['url'])) {
             return '';
@@ -454,7 +455,38 @@ class EventAvatarView extends OsecBaseClass
                    ->get_content();
     }
 
+    /**
+     * Avatar data with url and alt escaped for an HTML attribute (as since 1.0.7; code outside the plugin may print
+     * them as they are). The plugin's own template gets plain values from avatar_data() and escapes them once.
+     *
+     * @param  Event  $event
+     * @param  ?array  $fallback_order  See get_event_avatar_url().
+     *
+     * @return ?array url, alt, size, post_link, image_source, ratio; null without an image.
+     */
     public function get_event_avatar_data(Event $event, $fallback_order = null): ?array
+    {
+        $data = $this->avatar_data($event, $fallback_order);
+        if (null === $data) {
+            return null;
+        }
+        $data['url'] = esc_attr($data['url']);
+        $data['alt'] = esc_attr($data['alt']);
+
+        return $data;
+    }
+
+    /**
+     * Avatar data with plain values, for a template that escapes them (Twig autoescape). Escaping here as well made the
+     * alt text show entities (T7: "D&amp;amp;D Night").
+     *
+     * @param  Event  $event
+     * @param  ?array  $fallback_order  See get_event_avatar_url().
+     *
+     * @return ?array url, alt (text: no tags, entities decoded), size, post_link, image_source, ratio; null without an
+     *                image.
+     */
+    private function avatar_data(Event $event, $fallback_order = null): ?array
     {
         $source = null;
         $size = null;
@@ -488,8 +520,9 @@ class EventAvatarView extends OsecBaseClass
             $ratio = ($size['width'] > $size['height']) ? 'landscape' : 'portrait';
         }
         return [
-            'url'     => esc_attr($url),
-            'alt'     => esc_attr($alt),
+            'url'     => $url,
+            // Text for an attribute, as the_title_attribute(): a title may carry tags or stored entities.
+            'alt'     => html_entity_decode(wp_strip_all_tags($alt), ENT_QUOTES, get_bloginfo('charset')),
             'size'      => $size,
             'post_link' => $permalink,
             'image_source' => $source,
@@ -605,7 +638,8 @@ class EventAvatarView extends OsecBaseClass
         $uri = '';
         $matches = $this->get_image_from_content($content);
         if (isset($matches[2])) {
-            $uri = $matches[2];
+            // An attribute value in HTML, see get_content_img_url().
+            $uri = html_entity_decode($matches[2], ENT_QUOTES, get_bloginfo('charset'));
         }
         return $uri;
     }
