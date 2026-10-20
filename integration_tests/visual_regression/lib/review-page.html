@@ -110,8 +110,8 @@
 <script>
     (function () {
         const data = window.OSEC_REVIEW || {rows: []};
-        // Images and PDFs are named by row number, which shifts between runs, and the site may cache them for long:
-        // the run's date in the URL keeps a browser from showing an earlier run's file under this run's title.
+        // Images and PDFs keep their names from run to run (named by the row's UID) and a site may cache them: the
+        // run's date in the URL keeps a browser from showing an earlier run's file.
         const fresh = (file) => file && `${file}?run=${encodeURIComponent(data.date || '')}`;
         // Row kinds: approved (by lib/approve.js after this run), failed (differs), passed (unchanged).
         const approved = (row) => !!row.approvedAt;
@@ -227,7 +227,7 @@
                         figure(`Baseline (${data.set})`, r.old, r, 'old'),
                         failed(r) ? figure('Diff', r.diff, r, 'diff') : '',
                         figure('Current', r.current, r, 'current'));
-                return el('section', {class: `row ${kind(r)}${pending ? ' pending' : ''}`},
+                return el('section', {id: r.id, class: `row ${kind(r)}${pending ? ' pending' : ''}`},
                     el('div', {class: 'head'},
                         el('span', {class: 'title'}, r.titles.join(' › ')),
                         el('span', {class: 'chip'}, r.project),

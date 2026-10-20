@@ -82,24 +82,26 @@ class ReviewReporter {
         });
         fs.mkdirSync(path.join(out, 'images'), { recursive: true });
         fs.mkdirSync(path.join(out, 'pdf'), { recursive: true });
-        const rows = this.rows.map((row, i) => {
-            const id = String(i + 1).padStart(3, '0');
-            const copy = (source, kind) => {
-                if (!source || !fs.existsSync(source)) {
-                    return null;
-                }
-                const file = `images/${id}-${kind}.png`;
-                fs.copyFileSync(source, path.join(out, file));
+        const rows = this.rows.map((row) => {
+            // The row's UID: its reference without the extension (e.g. chromium/plana/month-1280), unique and the
+            // same in every run, unlike a row number, which shifts when screens are added. Its files go below it.
+            const id = row.ref.replace(/\.png$/, '');
+            const write = (file, store) => {
+                fs.mkdirSync(path.dirname(path.join(out, file)), { recursive: true });
+                store(path.join(out, file));
                 return file;
             };
+            const copy = (source, kind) => (source && fs.existsSync(source)
+                ? write(`images/${id}/${kind}.png`, (to) => fs.copyFileSync(source, to))
+                : null);
             let current = copy(row.sources.current, 'current');
             if (!current && row.sources.currentBody) {
-                current = `images/${id}-current.png`;
-                fs.writeFileSync(path.join(out, current), row.sources.currentBody);
+                current = write(`images/${id}/current.png`, (to) => fs.writeFileSync(to, row.sources.currentBody));
             }
             const pdfs = row.pdfs.map((a, n) => {
-                const file = `pdf/${id}-${n + 1}-${a.name.replace(/[^a-z0-9._-]/gi, '_')}`;
-                a.path ? fs.copyFileSync(a.path, path.join(out, file)) : fs.writeFileSync(path.join(out, file), a.body);
+                const file = write(`pdf/${id}/${n + 1}-${a.name.replace(/[^a-z0-9._-]/gi, '_')}`, (to) => (a.path
+                    ? fs.copyFileSync(a.path, to)
+                    : fs.writeFileSync(to, a.body)));
                 return {
                     name: a.name,
                     file,
