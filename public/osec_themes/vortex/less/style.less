@@ -492,15 +492,31 @@ input.ai1ec-timepicker[readonly] {
 // = Namespaced overrides =
 // ========================
 #osec-container {
+  max-width: var(--wp--style--global--wide-size);
   margin: 0 auto;
-  .alignfull & {
-    margin-left:.5em;
-    margin-right: .5em;
-  }
-  // Only agenda is restricted in width.
-  .entry-content.alignfull > &.view-agenda {
-    margin: 0 auto;
+  .ai1ec-agenda-view {
     max-width: var(--wp--style--global--wide-size);
+  }
+  // Applies for calendar page and Shortcode. Not in Blocks.
+  .wp-block-post-content > & {
+    .ai1ec-agenda-view {
+      max-width: var(--wp--style--global--content-size);
+      margin: 0 auto;
+      @media (min-width: @screen-sm) {
+        padding: 2em var(--wp--style--root--padding-right) 2em var(--wp--style--root--padding-left);
+      }
+    }
+  }
+  // Calendar block set to full width (its own wrapper, not a full width template part around it): all views use the
+  // whole width with a small margin, only agenda is restricted in width.
+  .alignfull.wp-block-open-source-event-calendar-osec-calendar-classic > & {
+    max-width: none;
+    margin-left: .5em;
+    margin-right: .5em;
+    &.view-agenda {
+      margin: 0 auto;
+      max-width: var(--wp--style--global--wide-size);
+    }
   }
 }
 

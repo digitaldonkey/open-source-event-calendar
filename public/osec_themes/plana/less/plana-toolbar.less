@@ -142,17 +142,27 @@
 .wp-block-post-content > #osec-container.view-agenda {
   .osec-taxonomy-filters,
   .plana-toolbar {
+    max-width: var(--wp--style--global--content-size);
     margin-left: auto;
     margin-right: auto;
-    // Match agenda view event boxes width.
-    padding-left: 1em;
-    padding-right: 1em;
-
+    @media (min-width: @screen-sm) {
+      padding-left: var(--wp--style--root--padding-left);
+      padding-right: var(--wp--style--root--padding-right);
+    }
   }
 
   // Items wrapping to a second row (the view switcher next to "Collapse All")
   // stay on the right, next to the print button.
   .plana-toolbar {
     justify-content: flex-end;
+  }
+}
+
+// Calendar block set to full width: the agenda's filters and toolbar match the event boxes.
+.alignfull.wp-block-open-source-event-calendar-osec-calendar-classic > #osec-container.view-agenda {
+  .osec-taxonomy-filters,
+  .plana-toolbar {
+    padding-left: 1em;
+    padding-right: 1em;
   }
 }
