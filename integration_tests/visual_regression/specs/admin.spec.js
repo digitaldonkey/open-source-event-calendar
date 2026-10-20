@@ -30,7 +30,11 @@ const BLANK = [
 
 const STYLE = `${REMOVE} { display: none !important; } ${BLANK} { visibility: hidden !important; }`;
 
-/** wp-admin screens, shot full page; `name` is the snapshot name. */
+/**
+ * wp-admin screens, shot full page; `name` is the snapshot name. `widths` (default [1280]) adds narrower shots: below
+ * 800 px with phone emulation, as in visual.spec.js. 768 is a tablet just below WordPress' 782 px breakpoint, where
+ * list tables switch to their compact layout.
+ */
 const SCREENS = [
     {
         name: 'events',
@@ -39,6 +43,11 @@ const SCREENS = [
             default order is not stable), as the Screen Options setup sets it: 5 per page, extended view
             (excerpts), all columns.`,
         path: () => '/wp-admin/edit.php?post_type=osec_event&orderby=title&order=asc',
+        widths: [
+            320,
+            768,
+            1280,
+        ],
     },
     {
         name: 'edit-event',
@@ -73,21 +82,32 @@ const SCREENS = [
     },
 ];
 
-test.use({
-    viewport: {
-        width: 1280,
-        height: 900,
-    },
-});
+for (const { name, title, description, path, widths = [1280] } of SCREENS) {
+    for (const width of widths) {
+        // 1280 keeps the name without a width, as in sets shot before screens had widths (e.g. 1.1.16).
+        const file = 1280 === width ? `admin-${name}.png` : `admin-${name}-${width}.png`;
+        const emulation = width < 800 ? ', phone emulation' : '';
+        const details = `${description} Full page${emulation}; notices, footer and dates of the run removed or blanked
+            (decision N1).`;
 
-for (const { name, title, description, path } of SCREENS) {
-    const details = `${description} Full page; notices, footer and dates of the run removed or blanked (decision N1).`;
-    test(title, about(details), async ({ page }) => {
-        await page.goto(path(manifest()));
-        await settle(page);
-        await page.addStyleTag({ content: STYLE });
-        await compareShot(page, [`admin-${name}.png`], { fullPage: true });
-    });
+        test.describe(`${width} px wide`, () => {
+            test.use({
+                viewport: {
+                    width,
+                    height: 900,
+                },
+                isMobile: width < 800,
+                hasTouch: width < 800,
+            });
+
+            test(title, about(details), async ({ page }) => {
+                await page.goto(path(manifest()));
+                await settle(page);
+                await page.addStyleTag({ content: STYLE });
+                await compareShot(page, [file], { fullPage: true });
+            });
+        });
+    }
 }
 
 test.describe('Block editor', () => {

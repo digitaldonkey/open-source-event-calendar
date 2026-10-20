@@ -287,11 +287,11 @@ local names (or reformatted, or changed comments), compare the terser-minified o
 at a git revision with the working tree; it must be byte-identical:
 
 ```bash
-node integration_tests/js-equivalent.js public/js/pages/calendar.js              # vs HEAD
-node integration_tests/js-equivalent.js --rev=master public/js/pages/*.js        # exit 1 if any file differs
+node bin/js-equivalent/js-equivalent.js public/js/pages/calendar.js              # vs HEAD
+node bin/js-equivalent/js-equivalent.js --rev=master public/js/pages/*.js        # exit 1 if any file differs
 ```
 
-Needs `npm install` in `integration_tests/` (terser is a dev dependency there). Run the JS smoke tests as well:
+Needs `npm install` in `bin/js-equivalent/` once (`bin/js-equivalent/README.md`). Run the JS smoke tests as well:
 the check says nothing about edits that are meant to change behaviour.
 
 ## Firefox (second browser)
@@ -317,23 +317,23 @@ Firefox has no CDP, so anything driving Chrome through `sendAndGetDevToolsComman
 PDFs come from the WebDriver *Print Page* command (`driver.printPage()`), screenshots from
 `driver.takeScreenshot()` instead of `Emulation.setDeviceMetricsOverride`.
 
-## Print output review
+## Visual regression, print output and test content
 
-`integration_tests/print_review/print-all.sh` regenerates every print PDF and prints a summary table
-(file, orientation, page count). It prints each view with the print button **and** with Ctrl+P, plus a busy
-day/week/month and a quiet month - the two cases that decide the page count.
+`integration_tests/visual_regression/` (Playwright, DDEV service `playwright`) generates its own test content
+(`wp osec content generate`, dataset in `tests/data/content/`), shoots the wp-admin screens, every calendar view per
+theme at several widths and every print view in Chromium and Firefox (with the PDFs), and compares them with a
+baseline set on a review page with approval. Run it in a sandbox:
 
 ```
-integration_tests/print_review/print-all.sh
-THEMES=plana BROWSERS=chrome,firefox integration_tests/print_review/print-all.sh
+ddev osec-review try_v1116                         # from the host: run, print the review page URL
+ddev osec-approve --set=local <reference>          # accept a reviewed difference
 ```
 
-Options: `THEMES`, `BROWSERS`, `OUT`, `BASE_URL`, `DATE`, `BUSY_DATE`, `QUIET_DATE`, `KEEP=1`. The script switches
-the OSEC theme in the **dev database** and restores the original on exit. `LONG_TEXT=1` (on `print-pdfs.js`
-directly) inflates agenda descriptions to test page breaks inside events.
+Details, including comparing with an older release: `integration_tests/visual_regression/README.md`.
 
-Neither browser fires `beforeprint` for a programmatic print, so the script dispatches it by hand for the Ctrl+P
-path and stubs `window.print` for the button path.
+The WordPress.org screenshots (`assets/screenshot-*.png`) come from the same content: `ddev osec-screenshots
+try_<name>` (`bin/screenshots/README.md`). Review them with `git diff --stat assets/` before committing (`assets/` is
+deployed from master).
 
 ## Manual/UI feed testing
 

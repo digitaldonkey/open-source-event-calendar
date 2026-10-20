@@ -445,9 +445,7 @@ plugin's own wrapper element (`.timely`, via `bootstrap/scaffolding.less` import
 umbra `0.8rem`), so *switching theme changes the base font size* unless a value is saved in
 `osec_less_variables`. Rendered box heights then shift - don't read that as a LESS edit having
 broken something. **Check the base font size after every theme switch**, and when comparing two
-themes, pin them to the same value so only one variable moves
-(`integration_tests/responsive_compare/responsive-compare.sh` takes `BASE_FONT=13px` for this
-and prints the effective value after each switch).
+themes, pin them to the same value so only one variable moves.
 
 Note that switching theme *deletes* `osec_less_variables`, discarding any tuned theme options -
 capture and restore them around anything that switches themes.
@@ -578,6 +576,12 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
   - `compile-less-production.sh` - Compiles LESS for production
   - `get-latest-plugin-review-phpcs-rulesets.sh` - Fetch latest PHPCS rulesets
   - `install-wp-tests.sh` - WordPress test environment setup
+- `wp osec content generate` - test content around May of next year (dataset `tests/data/content/`); replaces only
+  its own earlier content and refuses foreign calendar data, so use a `try_*` sandbox on a used site
+- `integration_tests/visual_regression/` (`ddev osec-review`, `ddev osec-approve`) - Playwright screenshots compared
+  with a baseline set, review page with approval. See its `README.md`
+- `bin/screenshots/` (`ddev osec-screenshots`) - the WordPress.org `assets/screenshot-*.png`
+- `bin/js-equivalent/` - proves a hand edit of a minified bundle changed only names/formatting
 - `twig_to_js_transform/` - Converts Twig templates for frontend use
 
 ### PhpStorm MCP (JetBrains IDE integration)

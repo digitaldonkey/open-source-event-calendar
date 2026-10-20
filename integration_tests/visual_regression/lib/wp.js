@@ -38,8 +38,8 @@ const REMOTE = process.env.OSEC_REMOTE_URL
     : null;
 
 /**
- * Manifest of the content (anchor, pages, events by key): written by specs/content.setup.js, or shipped with the imported
- * database in remote mode.
+ * Manifest of the content (anchor, pages, events by key): written by specs/content.setup.js, or shipped with the
+ * imported database in remote mode.
  */
 const MANIFEST = REMOTE ? path.join(REMOTE.dir, 'manifest.json') : path.resolve(__dirname, '../.auth/manifest.json');
 
