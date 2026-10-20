@@ -110,6 +110,9 @@
 <script>
     (function () {
         const data = window.OSEC_REVIEW || {rows: []};
+        // Images and PDFs are named by row number, which shifts between runs, and the site may cache them for long:
+        // the run's date in the URL keeps a browser from showing an earlier run's file under this run's title.
+        const fresh = (file) => file && `${file}?run=${encodeURIComponent(data.date || '')}`;
         // Row kinds: approved (by lib/approve.js after this run), failed (differs), passed (unchanged).
         const approved = (row) => !!row.approvedAt;
         const failed = (row) => 'passed' !== row.status && !approved(row);
@@ -190,7 +193,7 @@
 
         const figure = (caption, src, row, view) => el('figure', {},
             el('figcaption', {}, caption),
-            src ? Object.assign(el('img', {src, loading: 'lazy', alt: `${caption}: ${row.titles.join(' › ')}`}), {onclick: () => zoom(row, view)})
+            src ? Object.assign(el('img', {src: fresh(src), loading: 'lazy', alt: `${caption}: ${row.titles.join(' › ')}`}), {onclick: () => zoom(row, view)})
                 : el('div', {class: 'none'}, 'old' === view ? 'no baseline' : 'diff' === view ? 'no difference' : 'not taken'));
 
         /** Rows the filters show, in page order (up/down in the full-size view). */
@@ -236,7 +239,7 @@
                         failed(r) && !r.ratio ? el('div', {class: 'error'}, r.error) : '',
                         r.description ? el('div', {class: 'desc'}, r.description) : '',
                         refLine(r),
-                        r.pdfs.length ? el('div', {class: 'pdfs'}, 'PDF: ', r.pdfs.map((p) => el('a', {href: p.file, target: '_blank'}, p.name))) : ''));
+                        r.pdfs.length ? el('div', {class: 'pdfs'}, 'PDF: ', r.pdfs.map((p) => el('a', {href: fresh(p.file), target: '_blank'}, p.name))) : ''));
             }));
             renderApprovals();
             $('empty').hidden = rows.length > 0;
@@ -270,8 +273,8 @@
             });
             $('slider-pos').hidden = 'slider' !== view;
             if ('slider' === view) {
-                const top = el('div', {class: 'top'}, el('img', {src: r.old}));
-                const slider = el('div', {id: 'slider'}, el('img', {src: r.current}), top);
+                const top = el('div', {class: 'top'}, el('img', {src: fresh(r.old)}));
+                const slider = el('div', {id: 'slider'}, el('img', {src: fresh(r.current)}), top);
                 const move = () => (top.style.width = `${$('slider-pos').value}%`);
                 // Click on the image to jump there, hold and drag to move the divider.
                 const follow = (e) => {
@@ -289,7 +292,7 @@
                 move();
                 $('stage').replaceChildren(slider);
             } else {
-                $('stage').replaceChildren(r[view] ? el('img', {src: r[view]}) : el('div', {}, 'none'));
+                $('stage').replaceChildren(r[view] ? el('img', {src: fresh(r[view])}) : el('div', {}, 'none'));
             }
         }
         document.querySelectorAll('#zoom [data-view]').forEach((b) => b.addEventListener('click', () => show(b.dataset.view)));
