@@ -240,10 +240,6 @@ class EventContentView extends OsecBaseClass
             $raw_excerpt = $content['main'];
         }
 
-        if ( ! isset($raw_excerpt[0])) {
-            $raw_excerpt = '&nbsp;';
-        }
-
         $text = wp_strip_all_tags(
             $raw_excerpt
         );
