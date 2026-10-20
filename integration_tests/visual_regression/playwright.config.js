@@ -28,7 +28,7 @@ const LOGGED_OUT = {
 };
 
 module.exports = defineConfig({
-    testDir: __dirname,
+    testDir: path.join(__dirname, 'specs'),
     workers: 1,
     fullyParallel: false,
     retries: 0,

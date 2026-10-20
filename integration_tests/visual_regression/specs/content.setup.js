@@ -11,8 +11,8 @@
 const fs = require('fs');
 const path = require('path');
 const { test: setup } = require('@playwright/test');
-const { wp, STORAGE_STATE, MANIFEST, REMOTE, remotePassword } = require('./lib/wp');
-const { about } = require('./lib/pages');
+const { wp, STORAGE_STATE, MANIFEST, REMOTE, remotePassword } = require('../lib/wp');
+const { about } = require('../lib/pages');
 
 /** Events per page on the events list: short and the same on every site (a used site may show hundreds). */
 const EVENTS_PER_PAGE = 5;
@@ -50,7 +50,7 @@ setup('Log in as the first administrator', about(
         // Login cookies from WordPress itself: no password needed, works on the dev site and every sandbox.
         await context.addCookies(JSON.parse(wp([
             'eval-file',
-            path.join(__dirname, 'lib', 'auth-cookies.php'),
+            path.join(__dirname, '..', 'lib', 'auth-cookies.php'),
         ])));
         await page.goto(`${baseURL}/wp-admin/`);
     }

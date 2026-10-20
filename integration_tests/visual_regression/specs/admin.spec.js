@@ -6,7 +6,7 @@
  * WordPress shows it (update counters, help tabs, permalink with the site's hostname).
  */
 const { test, expect } = require('@playwright/test');
-const { manifest, settle, about, compareShot } = require('./lib/pages');
+const { manifest, settle, about, compareShot } = require('../lib/pages');
 
 /**
  * Removed from every admin shot (decision N1): notices and the footer with the WordPress version come and go with

@@ -6,8 +6,8 @@
  * the block and shortcode pages. Print lives in print.spec.js.
  */
 const { test, expect } = require('@playwright/test');
-const { themes, activateTheme, isThemeActive } = require('./lib/theme');
-const { manifest, calendarPath, lastSunday, settle, about, compareShot } = require('./lib/pages');
+const { themes, activateTheme, isThemeActive } = require('../lib/theme');
+const { manifest, calendarPath, lastSunday, settle, about, compareShot } = require('../lib/pages');
 
 /**
  * What every front-end shot shows: the page's <main> - the plugin's output with the page title and the theme's

@@ -12,7 +12,7 @@
  *
  * Reads what lib/pages.js compareShot() attaches: `osec-review` (the snapshot name) and, for a passing comparison,
  * `osec-current` (the current shot); for a failed one Playwright's own `*-expected.png`, `*-actual.png`, `*-diff.png`.
- * PDFs attached by print.spec.js are linked. All images are copied, so a page keeps showing its run when the
+ * PDFs attached by specs/print.spec.js are linked. All images are copied, so a page keeps showing its run when the
  * baselines change later.
  */
 const fs = require('fs');

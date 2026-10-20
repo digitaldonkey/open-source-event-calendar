@@ -23,7 +23,7 @@ const path = require('path');
 /** The plugin directory: WP-CLI runs there, so relative dataset paths work. */
 const PLUGIN_DIR = path.resolve(__dirname, '../../..');
 
-/** Logged-in browser state, written by content.setup.js, used by every other project. */
+/** Logged-in browser state, written by specs/content.setup.js, used by every other project. */
 const STORAGE_STATE = path.resolve(__dirname, '../.auth/admin.json');
 
 /** Where Firefox's silent print writes its PDF, inside the playwright container (connectOptions(), lib/pages.js). */
@@ -38,7 +38,7 @@ const REMOTE = process.env.OSEC_REMOTE_URL
     : null;
 
 /**
- * Manifest of the content (anchor, pages, events by key): written by content.setup.js, or shipped with the imported
+ * Manifest of the content (anchor, pages, events by key): written by specs/content.setup.js, or shipped with the imported
  * database in remote mode.
  */
 const MANIFEST = REMOTE ? path.join(REMOTE.dir, 'manifest.json') : path.resolve(__dirname, '../.auth/manifest.json');

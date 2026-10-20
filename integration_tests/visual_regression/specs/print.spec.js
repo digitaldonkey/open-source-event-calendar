@@ -5,8 +5,8 @@
  * a download).
  */
 const { test, expect } = require('@playwright/test');
-const { manifest, calendarPath, printView, firefoxPdf, about, compareShot } = require('./lib/pages');
-const { themes, activateTheme } = require('./lib/theme');
+const { manifest, calendarPath, printView, firefoxPdf, about, compareShot } = require('../lib/pages');
+const { themes, activateTheme } = require('../lib/theme');
 
 /** Printed views, paths read per test (see visual.spec.js); `name` goes into the snapshot name. */
 const VIEWS = [

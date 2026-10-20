@@ -12,7 +12,7 @@
  * tests in order); each block activates its theme first. A failed shot does not stop the other blocks.
  *
  * Locally through WP-CLI; in remote mode (lib/wp.js) through the Activate link of wp-admin's Calendar Themes page,
- * logged in with the state content.setup.js stored.
+ * logged in with the state specs/content.setup.js stored.
  */
 const { request } = require('@playwright/test');
 const { wp, site, REMOTE, STORAGE_STATE } = require('./wp');
