@@ -31,6 +31,8 @@ class ContentGeneratorTest extends TestBase
 
     private ?string $feed_url = null;
 
+    private string $saved_permalinks = '';
+
     public function set_up()
     {
         global $osec_app;
@@ -41,6 +43,7 @@ class ContentGeneratorTest extends TestBase
         foreach (['blogname', 'timezone_string', 'gmt_offset', 'date_format', 'time_format', 'start_of_week'] as $name) {
             $this->saved_options[$name] = get_option($name);
         }
+        $this->saved_permalinks = (string) get_option('permalink_structure');
     }
 
     public function tear_down()
@@ -61,6 +64,7 @@ class ContentGeneratorTest extends TestBase
         foreach ($this->saved_options as $name => $value) {
             update_option($name, $value);
         }
+        $GLOBALS['wp_rewrite']->set_permalink_structure($this->saved_permalinks);
         $osec_app->inject_object(ThemeLoader::class, new ThemeLoader($osec_app));
         if ($this->feed_url) {
             $this->delete_committed_content();
@@ -101,6 +105,33 @@ class ContentGeneratorTest extends TestBase
     /**
      * T3: two events at 02:15 on the day DST ends, one hour apart.
      */
+    public function test_site_settings_set_the_permalink_structure()
+    {
+        $GLOBALS['wp_rewrite']->set_permalink_structure('');
+
+        $manifest = $this->generate($this->dataset_without_feeds(), ['site_settings' => true]);
+
+        $this->assertSame('/%postname%/', get_option('permalink_structure'));
+        foreach ($manifest['pages'] as $key => $page) {
+            $path = is_array($page) ? $page['path'] : $page;
+            $this->assertStringNotContainsString('?', $path, "Page $key");
+            $this->assertStringEndsWith('/', $path, "Page $key");
+        }
+        // TestBase has a calendar page of its own, so the slug may carry a suffix.
+        $calendar_page = (int) $GLOBALS['osec_app']->settings->get('calendar_page_id');
+        $this->assertSame('/' . get_post_field('post_name', $calendar_page) . '/', $manifest['pages']['calendar']);
+    }
+
+    public function test_without_site_settings_permalinks_stay()
+    {
+        $GLOBALS['wp_rewrite']->set_permalink_structure('');
+
+        $manifest = $this->generate($this->dataset_without_feeds());
+
+        $this->assertSame('', get_option('permalink_structure'));
+        $this->assertStringContainsString('page_id=', $manifest['pages']['calendar']);
+    }
+
     public function test_repeated_hour_events_are_an_hour_apart()
     {
         $events = $this->generate($this->dataset_without_feeds(), ['site_settings' => true])['events'];

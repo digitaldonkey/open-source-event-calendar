@@ -10,6 +10,7 @@
     "timezone": "Europe/Berlin",
     "date_format": "d/m/Y",
     "time_format": "H:i",
+    "permalink_structure": "/%postname%/",
     "calendar_theme": "vortex",
     "theme": "twentytwentyfive",
     "calendar_page": "Calendar",

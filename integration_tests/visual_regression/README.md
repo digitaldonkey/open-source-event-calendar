@@ -89,7 +89,7 @@ The DDEV commands take the same as options: `ddev osec-review try_v1116 --set=ma
 Releases without `wp osec content generate` (1.1.x) run in another DDEV project with an imported content database.
 The suite shoots that site in **remote mode**: login with a password, themes switched in the browser.
 
-1. Build the content in a fresh `try_*` sandbox (`/%postname%/` permalinks):
+1. Build the content in a fresh `try_*` sandbox (`--site-settings` also sets the dataset's `/%postname%/` permalinks):
    `wp osec content generate --site-settings --anchor=2027-05-10`. Put the database dump, `uploads/osec-content/<db>/`,
    the manifest and the admin password into one folder, e.g. `uploads/osec-visual-regression/v1116/`.
 2. In the other project: `ddev import-db`, unpack the uploads, `ddev wp search-replace <sandbox URL> <its URL>

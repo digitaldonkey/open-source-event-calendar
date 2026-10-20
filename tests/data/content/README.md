@@ -30,7 +30,7 @@ No purge needed: everything `generate` creates is marked, and a run replaces exa
 | `--anchor=<date>` | Base week of every date: default the week with 15 May of **next** year (moves every January), `today` the current week, or a date (moved to its Monday). |
 | `--set=all\|showcase` | `showcase`: only the events of that group (feed events always). |
 | `--theme=<name>` | Calendar theme instead of the dataset's (`wp osec theme list`). |
-| `--site-settings` | Also set site title, timezone, date/time format and week start from `site`. Without it the site's timezone is used for all dates. |
+| `--site-settings` | Also set site title, timezone, date/time format, week start and permalink structure from `site`. Without it the site's timezone and permalinks are used. The rewrite rules are flushed in the database only; on Apache, save Settings › Permalinks once so `.htaccess` gets its block. |
 | `--manifest=<file>` | Write the manifest there instead of printing it. |
 
 Why May: nothing depends on "today" (no today marker, no "now" line, no agenda cut-off inside the month), and there
@@ -54,7 +54,7 @@ twice; PHP picks either one depending on how the time was built. `repeated_hour`
 
 ## `dataset.json`
 
-- `site`: `title`, `timezone`, `date_format`, `time_format`, `theme` (WordPress options; only with
+- `site`: `title`, `timezone`, `date_format`, `time_format`, `permalink_structure`, `theme` (WordPress options; only with
   `--site-settings`; `theme` is not applied by the command), `calendar_theme`, `calendar_page` (title), `settings`
   (OSEC settings, set as given).
 - `categories[]`: `{key, name, color, parent?, image?}`; `parent` is a key defined earlier (sub-category), `image` a

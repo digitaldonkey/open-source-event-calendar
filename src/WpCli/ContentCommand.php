@@ -58,7 +58,8 @@ class ContentCommand extends \WP_CLI_Command
      * : Calendar theme instead of the dataset's (see `wp osec theme list`).
      *
      * [--site-settings]
-     * : Also set the WordPress options of the dataset: site title, timezone, date and time format, start of week.
+     * : Also set the WordPress options of the dataset: site title, timezone, date and time format, start of week,
+     * permalink structure (rules flushed in the database only: on Apache, save Settings > Permalinks once).
      *
      * [--manifest=<file>]
      * : Write the manifest (anchor, timezone, page paths, event IDs, titles and starts by key) to this file instead

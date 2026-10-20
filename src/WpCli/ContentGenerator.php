@@ -26,7 +26,7 @@ use Osec\Theme\ThemeLoader;
  *
  * Options: anchor ('' = the week with 15 May of next year, 'today', or a date), set ('all' or 'showcase'),
  * theme (calendar theme name, default the dataset's), site_settings (true: also set the WordPress options of the
- * dataset's `site` block: title, timezone, date and time format, start of week).
+ * dataset's `site` block: title, timezone, date and time format, start of week, permalink structure).
  */
 // Messages of the exceptions below are for WP-CLI output only, never HTML.
 // phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -168,6 +168,14 @@ class ContentGenerator
             update_option('date_format', $site['date_format']);
             update_option('time_format', $site['time_format']);
             update_option('start_of_week', (int) ($site['settings']['week_start_day'] ?? 1));
+            if ( ! empty($site['permalink_structure'])) {
+                // Before the pages exist, so the manifest gets their pretty paths. A soft flush (database only, no
+                // .htaccess); the calendar page's own rule follows on the next request
+                // (WordpressAdaptor::register_rule()).
+                global $wp_rewrite;
+                $wp_rewrite->set_permalink_structure($site['permalink_structure']);
+                flush_rewrite_rules(false);
+            }
         }
         $this->zone   = wp_timezone();
         $this->anchor = $this->anchor_for((string) $this->options['anchor']);
