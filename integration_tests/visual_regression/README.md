@@ -75,7 +75,9 @@ Environment variables:
 - `OSEC_BASELINE_SET`: the baseline set, default `local`. Use one set per state you want to compare.
 - `OSEC_THEMES`: calendar themes, default `plana,vortex` (the default theme and the base theme).
 - `OSEC_ANCHOR`: anchor date of the content. Pin it when comparing with a set shot on another day.
-- `OSEC_MAX_DIFF_RATIO`: share of pixels that may differ, default `0.001` (0.1 %). `0` for exact.
+- `OSEC_MAX_DIFF_PIXELS`: pixels per shot that may differ, default `20`. `0` for exact. Measured 2026-10-20: three
+  runs at `0` against an unchanged state differed by 0 px; the smallest real change seen was 186 px (icons). Measure
+  again the same way (three runs with `0`) before changing it.
 - `OSEC_REMOTE_URL`, `OSEC_REMOTE_DIR`: remote mode, see the next section.
 - `PLAYWRIGHT_WS`: the browser server, default `ws://playwright:3000/`.
 
@@ -139,7 +141,7 @@ Nothing is hidden unless listed here:
 - the print button's `window.print()` stubbed;
 - the DST day's "show full day" button and the block's settings toggle clicked.
 
-Map tiles are compared as they load. If they make a test fail, raise `OSEC_MAX_DIFF_RATIO` rather than hiding the map.
+Map tiles are compared as they load. When OpenStreetMap changes its tiles, the shot fails: review and approve it, rather than raising `OSEC_MAX_DIFF_PIXELS` or hiding the map.
 
 ## Output
 

@@ -6,7 +6,7 @@
  *   npm run update    shoot the baseline set (accept the current look)
  *
  * Env: WP_SANDBOX_DB (site, see lib/wp.js), OSEC_BASELINE_SET (default "local"), OSEC_THEMES (default
- * "plana,vortex"), OSEC_MAX_DIFF_RATIO (share of pixels that may differ, default 0.001), OSEC_REVIEW (set by
+ * "plana,vortex"), OSEC_MAX_DIFF_PIXELS (pixels per shot that may differ, default 20), OSEC_REVIEW (set by
  * `npm run review`), PLAYWRIGHT_WS.
  *
  * Projects (workers: 1, in this order): `content` generates the test content and logs in; `admin`, `chromium` (views
@@ -56,10 +56,12 @@ module.exports = defineConfig({
             },
         ],
     ],
-    // Share of pixels that may differ (default 0.1 %): map tiles and font rendering vary by single pixels between runs.
+    // Pixels per shot that may differ, the same for every shot (decision A2): three runs at 0 differed by 0 px
+    // (2026-10-20); the smallest real change seen was 186 px. A share of the image (0.1 % before) let changes of up
+    // to 6,886 px pass on tall pages. The per-pixel color tolerance stays Playwright's `threshold` default (0.2).
     expect: {
         toHaveScreenshot: {
-            maxDiffPixelRatio: Number(process.env.OSEC_MAX_DIFF_RATIO ?? 0.001),
+            maxDiffPixels: Number(process.env.OSEC_MAX_DIFF_PIXELS ?? 20),
             // Playwright's defaults, set on purpose (maintainer 2026-10-19): CSS animations and transitions frozen,
             // text cursor hidden.
             animations: 'disabled',
