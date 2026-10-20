@@ -3,11 +3,12 @@
  *
  * Every page is compared as a shot of its <main> (the plugin's output with page title and theme margins, no theme
  * header/footer): agenda, week, day and month at 320, 480 and 1280 px; the DST-end day expanded; two single events;
- * the block and shortcode pages. Print lives in print.spec.js.
+ * the block and shortcode pages. The lists are in screens.js; print lives in print.spec.js.
  */
 const { test, expect } = require('@playwright/test');
 const { themes, activateTheme, isThemeActive } = require('../lib/theme');
 const { manifest, calendarPath, lastSunday, settle, about, compareShot } = require('../lib/pages');
+const { WIDTHS, VIEWS, SINGLES, PAGES } = require('./screens');
 
 /**
  * What every front-end shot shows: the page's <main> - the plugin's output with the page title and the theme's
@@ -15,76 +16,6 @@ const { manifest, calendarPath, lastSunday, settle, about, compareShot } = requi
  * has exactly one <main>; there is deliberately no fallback for other themes.
  */
 const MAIN = 'main';
-
-/** Widths below 800 px get mobile emulation (viewport meta tag, touch). */
-const WIDTHS = [
-    320,
-    480,
-    1280,
-];
-
-/**
- * Calendar views, shot at every width. Paths are read per test: spec files load before the content setup runs, so a
- * manifest read at load time would be missing (first run) or hold the previous run's post IDs.
- */
-const VIEWS = [
-    {
-        name: 'agenda',
-        title: 'Agenda view',
-        description: 'The agenda from the anchor week on, expanded (plugin default).',
-        path: (m) => calendarPath(m, 'agenda', m.anchor),
-    },
-    {
-        name: 'week',
-        title: 'Week view',
-        description: `The anchor week: overlapping talks, all-day bars crossing the week, an event crossing midnight,
-            an instant event, the Tokyo event on the day it falls on in Berlin.`,
-        path: (m) => calendarPath(m, 'week', m.anchor),
-    },
-    {
-        name: 'day',
-        title: 'Day view: busy day',
-        description: 'The day with eight consecutive events next to a multi-day bar and a series.',
-        path: (m) => calendarPath(m, 'oneday', m.events['busy-1'].start.slice(0, 10)),
-    },
-    {
-        name: 'month',
-        title: 'Month view',
-        description: `The anchor month (May): multi-day bars across weeks and the month end, many events on one day,
-            long titles, category colors, series.`,
-        path: (m) => calendarPath(m, 'month', m.anchor),
-    },
-];
-
-/** Single events, by their key in the manifest. */
-const SINGLES = [
-    {
-        key: 'jazz',
-        title: 'Single event: Jazz in the Park',
-        description: `Recurring event with featured image, map (OpenStreetMap tiles), cost, ticket button and
-            organizer contact.`,
-    },
-    {
-        key: 'tokyo',
-        title: 'Single event: Early call from Tokyo',
-        description: 'An event in another timezone (07:00 Asia/Tokyo), shown in the calendar timezone.',
-    },
-];
-
-/** Other pages showing the calendar, by their key in the manifest. */
-const PAGES = [
-    {
-        key: 'block',
-        title: 'Page with the calendar block',
-        description: 'The "Calendar block" page: the calendar rendered by the block with its default settings.',
-    },
-    {
-        key: 'shortcode',
-        title: 'Page with the [osec] shortcode',
-        description: `The "Calendar shortcode" page: [osec view="agenda" agenda_toggle="true"], the agenda expanded on
-            purpose (stays so if the default changes).`,
-    },
-];
 
 for (const theme of themes()) {
     test.describe(`Calendar theme ${theme}`, () => {

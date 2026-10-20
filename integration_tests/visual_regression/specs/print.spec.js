@@ -2,30 +2,12 @@
  * Print checks per calendar theme (lib/theme.js): the calendar's print button for month, week and day, shot full
  * page with print media (decision N5). Runs in the chromium and the firefox project; both attach the PDF for a look
  * at the page breaks (Chromium: page.pdf(); Firefox: silent print to a file in the playwright container, fetched as
- * a download).
+ * a download). The printed views are listed in screens.js (PRINT, paths from VIEWS).
  */
 const { test, expect } = require('@playwright/test');
-const { manifest, calendarPath, printView, firefoxPdf, about, compareShot } = require('../lib/pages');
+const { manifest, printView, firefoxPdf, about, compareShot } = require('../lib/pages');
 const { themes, activateTheme } = require('../lib/theme');
-
-/** Printed views, paths read per test (see visual.spec.js); `name` goes into the snapshot name. */
-const VIEWS = [
-    {
-        name: 'month',
-        title: 'Print: month view',
-        path: (m) => calendarPath(m, 'month', m.anchor),
-    },
-    {
-        name: 'week',
-        title: 'Print: week view',
-        path: (m) => calendarPath(m, 'week', m.anchor),
-    },
-    {
-        name: 'day',
-        title: 'Print: busy day',
-        path: (m) => calendarPath(m, 'oneday', m.events['busy-1'].start.slice(0, 10)),
-    },
-];
+const { VIEWS, PRINT } = require('./screens');
 
 test.use({
     viewport: {
@@ -38,7 +20,8 @@ for (const theme of themes()) {
     test.describe(`Calendar theme ${theme}`, () => {
         test.beforeAll(({ browser }) => activateTheme(theme, browser));
 
-        for (const { name, title, path } of VIEWS) {
+        for (const { view: name, title } of PRINT) {
+            const { path } = VIEWS.find((v) => v.name === name);
             test(title, about(
                 `The calendar's print button, shot full page with print media, exactly as printed (the header
                 carries the site URL, so sets from different sites differ there). The PDF is attached for a look at

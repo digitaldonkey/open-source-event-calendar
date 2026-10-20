@@ -165,6 +165,13 @@ tar czf ../backups/baselines-local-$(date +%Y-%m-%d_%H%M).tar.gz local       # b
 rm -rf local && tar xzf ../backups/baselines-local-<date>.tar.gz              # restore it
 ```
 
+## Add a screen
+
+Add an entry to `specs/screens.js`: a calendar view (shot at every width of `WIDTHS`, per theme), a printed view, a
+single event or page (by its manifest key), or a wp-admin screen. The specs loop over these lists. A screen that needs
+clicks or its own setup (like the DST day or the block form) gets its own test in its spec. A new screen has no
+baseline yet: shoot it with `npm run update` (or approve it from the review page).
+
 ## Files
 
 ```
@@ -172,6 +179,7 @@ visual_regression/
 ├── playwright.config.js     projects, threshold, output paths
 ├── eslint.config.js         code style (also used by bin/screenshots/)
 ├── specs/
+│   ├── screens.js           the screens to shoot: add a screen here
 │   ├── content.setup.js     content, login, Screen Options
 │   ├── admin.spec.js        wp-admin screens
 │   ├── visual.spec.js       calendar views, single events, block and shortcode pages

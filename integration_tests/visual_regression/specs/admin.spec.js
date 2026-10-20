@@ -3,10 +3,12 @@
  *
  * Only what decision N1 names is hidden before the shot: notices and the admin footer (WordPress version) are removed,
  * so one that comes or goes does not shift the page; dates of the run are removed or blanked. Everything else stays as
- * WordPress shows it (update counters, help tabs, permalink with the site's hostname).
+ * WordPress shows it (update counters, help tabs, permalink with the site's hostname). The screens are listed in
+ * screens.js (ADMIN); the block form needs the block editor and keeps its own test here.
  */
 const { test, expect } = require('@playwright/test');
 const { manifest, settle, about, compareShot } = require('../lib/pages');
+const { ADMIN } = require('./screens');
 
 /**
  * Removed from every admin shot (decision N1): notices and the footer with the WordPress version come and go with
@@ -30,59 +32,7 @@ const BLANK = [
 
 const STYLE = `${REMOVE} { display: none !important; } ${BLANK} { visibility: hidden !important; }`;
 
-/**
- * wp-admin screens, shot full page; `name` is the snapshot name. `widths` (default [1280]) adds narrower shots: below
- * 800 px with phone emulation, as in visual.spec.js. 768 is a tablet just below WordPress' 782 px breakpoint, where
- * list tables switch to their compact layout.
- */
-const SCREENS = [
-    {
-        name: 'events',
-        title: 'Events list',
-        description: `The first page of the events list, sorted by title (all share the post date of the run, so the
-            default order is not stable), as the Screen Options setup sets it: 5 per page, extended view
-            (excerpts), all columns.`,
-        path: () => '/wp-admin/edit.php?post_type=osec_event&orderby=title&order=asc',
-        widths: [
-            320,
-            768,
-            1280,
-        ],
-    },
-    {
-        name: 'edit-event',
-        title: 'Edit event: Jazz in the Park',
-        description: `The event editor with every box filled: date and time, weekly recurrence, venue with map and
-            coordinates, cost and ticket URL, organizer contact, featured image.`,
-        path: (m) => `/wp-admin/post.php?post=${m.events.jazz.id}&action=edit`,
-    },
-    {
-        name: 'feeds',
-        title: 'Calendar feeds',
-        description: 'The feeds page with the imported "Public holidays" feed of the test content.',
-        path: () => '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-feeds',
-    },
-    {
-        name: 'settings',
-        title: 'Settings',
-        description: 'The plugin settings page, including the cache report and the charset box.',
-        path: () => '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings',
-    },
-    {
-        name: 'themes',
-        title: 'Calendar themes',
-        description: 'The list of calendar themes with the active one first.',
-        path: () => '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-themes',
-    },
-    {
-        name: 'categories',
-        title: 'Event categories',
-        description: 'Categories with colors, images and a sub-category (Football under Sports).',
-        path: () => '/wp-admin/edit-tags.php?taxonomy=osec_events_categories&post_type=osec_event',
-    },
-];
-
-for (const { name, title, description, path, widths = [1280] } of SCREENS) {
+for (const { name, title, description, path, widths = [1280] } of ADMIN) {
     for (const width of widths) {
         // 1280 keeps the name without a width, as in sets shot before screens had widths (e.g. 1.1.16).
         const file = 1280 === width ? `admin-${name}.png` : `admin-${name}-${width}.png`;
