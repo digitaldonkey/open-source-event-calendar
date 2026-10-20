@@ -99,7 +99,7 @@ vendor/bin/grumphp run --testsuite=all_tests        # the full TESTING.md checkl
 vendor/bin/grumphp run --testsuite=prepare_release  # release-readiness checks, run after all_tests
 ```
 
-> **Warning:** `integration_tests` runs the Mocha/Selenium suite against whatever `settings.local.js` points
+> **Warning:** `integration_tests` runs the Mocha/Selenium suite against whatever `mocha/settings.local.js` points
 > at. It installs/uninstalls the plugin, exercises the `OSEC_UNINSTALL_PLUGIN_DATA` purge and **trashes every
 > calendar page on teardown**, leaving `calendar_page_id` pointing at a trashed post. Bare `grumphp run`,
 > `--testsuite=all_tests` and `ddev grumphp all` all include it. Use `--testsuite=git_pre_commit` when you only
@@ -178,16 +178,20 @@ afterwards so it cannot affect the integration tests that follow.
 
 ## Integration tests (Mocha/Selenium)
 
+The suite lives in `integration_tests/mocha/`, its own npm workspace. `integration_tests/` is the workspaces root
+(`mocha/`, `visual_regression/`): `npm install` there installs both, and its `npm run test` / `npm run test:js`
+forward to `mocha/`.
+
 ```
 cd integration_tests
 npm install
-cp settings.local.js.example settings.local.js   # if not already present
+cp mocha/settings.local.js.example mocha/settings.local.js   # if not already present
 SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test   # see Prerequisites below — plain `npm run test` tries to spawn a local chromedriver and fails
 ```
 
-Edit `settings.local.js` to point `domain` at your local DDEV URL (e.g. `https://ddev-wordpress.ddev.site`) — it's gitignored, for your personal local values.
+Edit `mocha/settings.local.js` to point `domain` at your local DDEV URL (e.g. `https://ddev-wordpress.ddev.site`) — it's gitignored, for your personal local values.
 
-**Not a per-key overlay** — `page_objects/BasePage.js`'s `build()` picks one file or the other, not both:
+**Not a per-key overlay** — `mocha/page_objects/BasePage.js`'s `build()` picks one file or the other, not both:
 ```js
 if (fs.existsSync(__dirname + '/../settings.local.js')) {
     settings = require('../settings.local.js');
@@ -199,7 +203,7 @@ If `settings.local.js` exists, it **wholesale replaces** `settings.js` — every
 
 Prerequisites:
 - A Chrome browser + matching chromedriver. Two ways to get one:
-  - **Inside DDEV (recommended)**: install the [`ddev/ddev-selenium-standalone-chrome`](https://github.com/ddev/ddev-selenium-standalone-chrome) add-on (`ddev get ddev/ddev-selenium-standalone-chrome && ddev restart`). This adds a `selenium-chrome` service reachable at `http://selenium-chrome:4444/wd/hub` from other DDEV containers, including the web container. `page_objects/BasePage.js` builds its WebDriver with plain `new Builder().forBrowser(Browser.CHROME)...build()` (no `.usingServer()`), so `selenium-webdriver` picks up the `SELENIUM_REMOTE_URL` env var automatically — no code changes needed:
+  - **Inside DDEV (recommended)**: install the [`ddev/ddev-selenium-standalone-chrome`](https://github.com/ddev/ddev-selenium-standalone-chrome) add-on (`ddev get ddev/ddev-selenium-standalone-chrome && ddev restart`). This adds a `selenium-chrome` service reachable at `http://selenium-chrome:4444/wd/hub` from other DDEV containers, including the web container. `mocha/page_objects/BasePage.js` builds its WebDriver with plain `new Builder().forBrowser(Browser.CHROME)...build()` (no `.usingServer()`), so `selenium-webdriver` picks up the `SELENIUM_REMOTE_URL` env var automatically — no code changes needed:
     ```
     cd integration_tests
     SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test
@@ -213,7 +217,7 @@ This suite runs directly against your working repo checkout — no need to build
 
 A full run takes ~5 minutes (21+ specs across 4 themes: `gamma`, `plana`, `umbra`, `vortex`). Run it in the background rather than blocking on it — e.g. `npm run test &`, or when driving it from an agent/non-interactive shell, backgrounded with output captured to a file and polled/tailed rather than awaited synchronously.
 
-**Running against one theme only**: `settings.local.js`'s `currentThemeOnly: true` (default is `false`, i.e. all 4 themes) makes `test/03_OsecPluginFrontend.spec.js`'s `before` hook read whichever theme is *currently active* in wp-admin's OSEC theme settings page (`page_objects/ActivatePluginAndSettings.js`'s `getActiveTheme()`) and skip the other three theme blocks (`this.skip()`). Only the theme-looped Frontend suite is affected — "Plugin install & Setup" and "Backend tests" aren't per-theme and always run once. Set your active theme in wp-admin first, then flip the setting; this cuts the Frontend portion to ~1/4 its normal length.
+**Running against one theme only**: `settings.local.js`'s `currentThemeOnly: true` (default is `false`, i.e. all 4 themes) makes `mocha/test/03_OsecPluginFrontend.spec.js`'s `before` hook read whichever theme is *currently active* in wp-admin's OSEC theme settings page (`mocha/page_objects/ActivatePluginAndSettings.js`'s `getActiveTheme()`) and skip the other three theme blocks (`this.skip()`). Only the theme-looped Frontend suite is affected — "Plugin install & Setup" and "Backend tests" aren't per-theme and always run once. Set your active theme in wp-admin first, then flip the setting; this cuts the Frontend portion to ~1/4 its normal length.
 
 **Running a single test**: append `--grep "<test or describe title>"` to a direct `npx mocha` invocation, e.g.:
 ```
@@ -223,7 +227,7 @@ Confirmed working (2026-09-11): 1 passing in 3s vs. the full suite's ~5 minutes.
 
 **Don't drive this suite through PhpStorm's `execute_run_configuration` MCP tool** — tested repeatedly on 2026-09-11; root cause now confirmed: the call returns early/asynchronously (sometimes immediately with a timeout, sometimes with truncated in-progress output) while the actual npm/mocha process keeps running **detached** on the host afterward. There's no way to block on or be notified of completion through that tool — the only way to see the real outcome is to separately poll the `fullOutputPath` log file it returns, which itself requires host filesystem access outside the project (`read_file` refuses it as outside project/library/SDK roots). A plain shell invocation (as above), run in the foreground or backgrounded and awaited/polled directly, is the only reliable way to get pass/fail results back.
 
-**Known flakiness**: the `afterEach` hook in `test/01_OsecPluginInstall.spec.js` (`doLogout()` in `page_objects/WpLogin.js`, which hovers the admin bar then clicks Log Out) can intermittently hit a `TimeoutError: Waiting until element is visible` right after the very first plugin activation in a run — most likely first-page-load timing rather than a real regression. It hasn't reproduced on a re-run in practice; if it fails, re-run just that spec (`npx mocha test/01_OsecPluginInstall.spec.js --timeout 60000`) before assuming a real break.
+**Known flakiness**: the `afterEach` hook in `mocha/test/01_OsecPluginInstall.spec.js` (`doLogout()` in `mocha/page_objects/WpLogin.js`, which hovers the admin bar then clicks Log Out) can intermittently hit a `TimeoutError: Waiting until element is visible` right after the very first plugin activation in a run — most likely first-page-load timing rather than a real regression. It hasn't reproduced on a re-run in practice; if it fails, re-run just that spec (`cd mocha && npx mocha test/01_OsecPluginInstall.spec.js --timeout 60000`) before assuming a real break.
 
 ## PHPUnit on SQLite
 
@@ -253,7 +257,7 @@ bin/phpunit-sqlite.sh --filter ExceptionDateTest
 
 ## JS smoke tests (non-destructive)
 
-`integration_tests/js_smoke/` visits every page that loads an OSEC JS bundle, waits for its requirejs modules to
+`integration_tests/mocha/js_smoke/` visits every page that loads an OSEC JS bundle, waits for its requirejs modules to
 run, fails on any browser console error or failed script request, and does one or two interactions per page
 (view switching, paging, date pickers, filters, popover, maps, repeat dialog, color pickers). Unlike `test/` it
 installs, uninstalls and trashes nothing, so it is safe to run on the dev site after every JS change. Not part
