@@ -157,7 +157,7 @@ class AdminPageAddEvent extends OsecBaseClass
                     'view_url' => get_post_permalink($child->get('post_id')),
                     'edit_url' => get_edit_post_link($child->get('post_id')),
                     'title'    => $child->get('post')->post_title,
-                    'time' => EventTimeView::factory($this->app)->get_timespan_html($child, 'long'),
+                    'time' => EventTimeView::factory($this->app)->get_timespan_html($child, 'backend'),
                 ];
             }
             ThemeLoader::factory($this->app)->get_file('box_event_children.twig', $args, true)->render();
@@ -455,7 +455,7 @@ class AdminPageAddEvent extends OsecBaseClass
             'parent' => [
                 'view_url' => get_post_permalink($parent->get('post_id')),
                 'edit_url'       => get_edit_post_link($parent->get('post_id')),
-                'time' => EventTimeView::factory($this->app)->get_timespan_html($parent, 'long'),
+                'time' => EventTimeView::factory($this->app)->get_timespan_html($parent, 'backend'),
                 'title'     => apply_filters(
                 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
                     'the_title',

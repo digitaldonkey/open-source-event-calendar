@@ -190,7 +190,7 @@ class AdminPageAllEvents extends OsecBaseClass
             try {
                 $event = new Event($this->app, $post_id);
                 echo wp_kses(
-                    EventTimeView::factory($this->app)->get_timespan_html($event),
+                    EventTimeView::factory($this->app)->get_timespan_html($event, 'backend'),
                     $this->app->kses->allowed_html_frontend()
                 );
             } catch (Exception) {
