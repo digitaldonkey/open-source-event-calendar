@@ -327,10 +327,10 @@ class EventAvatarView extends OsecBaseClass
         $url = null;
         $term_depths = $this->get_term_hierarchy($event->get('post_id'));
 
-        // Starting at deepest depth, find the first category that has an avatar.
-        foreach ($term_depths as $term_id => $depth) {
+        // Starting at deepest depth, find the first category that has an avatar (a list of term IDs).
+        foreach ($term_depths as $term_id) {
             $term_image = TaxonomyAdapter::factory($this->app)->get_category_image($term_id);
-            if (empty($term_image)) {
+            if ( ! empty($term_image)) {
                 $url = $term_image;
                 break;
             }
