@@ -161,21 +161,79 @@ class BootstrapController
     protected function verifyTheme(): void
     {
         $theme = $this->app->options->get('osec_current_theme', []);
-
-        // Theme setting is undefined; default to Vortex.
-        if (empty($theme)) {
-            $theme = $this->defaultTheme;
-
-            /**
-             * Alter default theme if no theme is set.
-             *
-             * @since 1.0
-             *
-             * @param  array  $theme  Array of Less variables
-             */
-            $theme = apply_filters('osec_pre_save_current_theme', $theme);
-            $this->app->options->set('osec_current_theme', $theme);
+        if ( ! empty($theme) && self::is_valid_theme($theme)) {
+            return;
         }
+
+        // Undefined, or a value the theme loader cannot use (T5: a fatal error on every request): the default theme.
+        $default = $this->defaultTheme;
+
+        /**
+         * Alter default theme if no theme is set.
+         *
+         * @since 1.0
+         *
+         * @param  array  $theme  Array of Less variables
+         */
+        $default = apply_filters('osec_pre_save_current_theme', $default);
+        if ( ! self::is_valid_theme($default)) {
+            $default = $this->defaultTheme;
+        }
+        $this->app->options->set('osec_current_theme', $default);
+        if (empty($theme)) {
+            return;
+        }
+
+        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- a broken setting repaired, for the admin.
+        error_log(
+            sprintf(
+                'osec: option osec_current_theme was %s, reset to the calendar theme "%s".',
+                is_array($theme) ? 'an array without stylesheet, theme_dir or theme_url' : gettype($theme),
+                $default['stylesheet']
+            )
+        );
+        NotificationAdmin::factory($this->app)->store(
+            esc_html(
+                sprintf(
+                    /* translators: %s: calendar theme name, e.g. plana */
+                    __(
+                        'The calendar theme setting was invalid and has been reset to the theme "%s".',
+                        'open-source-event-calendar'
+                    ),
+                    $default['stylesheet']
+                ) . ' ' . __(
+                    'Choose your calendar theme again under Events > Calendar Themes.',
+                    'open-source-event-calendar'
+                )
+            ),
+            'error',
+            2,
+            [NotificationAdmin::RCPT_ADMIN],
+            true
+        );
+        // Theme Options stay (decision F4); the CSS is compiled for the new theme.
+        FrontendCssController::factory($this->app)->request_compile();
+    }
+
+    /**
+     * Whether a value of the option osec_current_theme can be used by the theme loader.
+     *
+     * @param  mixed  $theme
+     *
+     * @return bool An array with non-empty strings in stylesheet, theme_dir and theme_url.
+     */
+    private static function is_valid_theme($theme): bool
+    {
+        if ( ! is_array($theme)) {
+            return false;
+        }
+        foreach (['stylesheet', 'theme_dir', 'theme_url'] as $key) {
+            if (empty($theme[$key]) || ! is_string($theme[$key])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
