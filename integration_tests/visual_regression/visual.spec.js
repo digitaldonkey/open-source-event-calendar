@@ -1,16 +1,20 @@
 /**
  * Visual checks per calendar theme (lib/theme.js), in Chromium, logged out. See README.md.
  *
- * Calendar views are compared as element shots of #osec-container (decision N13: a layout shift around the
- * calendar would otherwise mark everything): agenda, week, day and month at 320, 480 and 1280 px; the DST-end day
- * expanded; two single events; the block and shortcode pages. Print lives in print.spec.js.
+ * Every page is compared as a shot of its <main> (the plugin's output with page title and theme margins, no theme
+ * header/footer): agenda, week, day and month at 320, 480 and 1280 px; the DST-end day expanded; two single events;
+ * the block and shortcode pages. Print lives in print.spec.js.
  */
 const {test, expect} = require('@playwright/test');
 const {themes, activateTheme, isThemeActive} = require('./lib/theme');
-const {manifest, calendarPath, lastSunday, settle, about} = require('./lib/pages');
+const {manifest, calendarPath, lastSunday, settle, about, compareShot} = require('./lib/pages');
 
-/** The calendar the plugin renders: filters, navigation, the view, subscribe buttons (decision N13: element shots). */
-const CALENDAR = '#osec-container';
+/**
+ * What every front-end shot shows: the page's <main> - the plugin's output with the page title and the theme's
+ * margins, without the theme's header and footer. All runs use the same WordPress theme (Twenty Twenty-Five), which
+ * has exactly one <main>; there is deliberately no fallback for other themes.
+ */
+const MAIN = 'main';
 
 /** Widths below 800 px get mobile emulation (viewport meta tag, touch). */
 const WIDTHS = [320, 480, 1280];
@@ -59,10 +63,10 @@ for (const theme of themes()) {
                 test.use({viewport: {width, height: 900}, isMobile: width < 800, hasTouch: width < 800});
 
                 for (const [view, {title, description, path}] of Object.entries(VIEWS)) {
-                    test(title, about(`${description} Element shot of #osec-container${width < 800 ? ', phone emulation' : ''}.`), async ({page}) => {
+                    test(title, about(`${description} Shot of <main>${width < 800 ? ', phone emulation' : ''}.`), async ({page}) => {
                         await page.goto(path(manifest()));
                         await settle(page);
-                        await expect(page.locator(CALENDAR)).toHaveScreenshot([theme, `${view}-${width}.png`]);
+                        await compareShot(page.locator(MAIN), [theme, `${view}-${width}.png`]);
                     });
                 }
             });
@@ -78,7 +82,7 @@ for (const theme of themes()) {
             await settle(page);
             await page.locator('.ai1ec-reveal-full-day button').click();
             await settle(page);
-            await expect(page.locator(CALENDAR)).toHaveScreenshot([theme, 'day-dst-end.png']);
+            await compareShot(page.locator(MAIN), [theme, 'day-dst-end.png']);
         });
 
         const singles = [
@@ -88,11 +92,10 @@ for (const theme of themes()) {
                 + 'the calendar timezone.'],
         ];
         for (const [key, title, description] of singles) {
-            test(title, about(`${description} Element shot of .osec-single-event (title, details, description).`), async ({page}) => {
+            test(title, about(`${description} Shot of <main> (title, details, description, post navigation).`), async ({page}) => {
                 await page.goto(`/?p=${manifest().events[key].id}`);
                 await settle(page);
-                // The whole event the plugin wraps (title, details, description), not only the details box.
-                await expect(page.locator('.osec-single-event')).toHaveScreenshot([theme, `single-${key}.png`]);
+                await compareShot(page.locator(MAIN), [theme, `single-${key}.png`]);
             });
         }
 
@@ -103,10 +106,10 @@ for (const theme of themes()) {
                 + 'agenda_toggle="true"], the agenda expanded on purpose (stays so if the default changes).'],
         ];
         for (const [key, title, description] of pages) {
-            test(title, about(`${description} Element shot of #osec-container.`), async ({page}) => {
+            test(title, about(`${description} Shot of <main>.`), async ({page}) => {
                 await page.goto(manifest().pages[key].path);
                 await settle(page);
-                await expect(page.locator(CALENDAR)).toHaveScreenshot([theme, `page-${key}.png`]);
+                await compareShot(page.locator(MAIN), [theme, `page-${key}.png`]);
             });
         }
     });

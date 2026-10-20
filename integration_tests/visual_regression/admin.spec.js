@@ -1,31 +1,30 @@
 /**
  * The plugin's wp-admin screens, once per run (project `admin`, logged in), compared full page (decision N1).
  *
- * WordPress-dependent and run-dependent areas are hidden before the shot, not just masked, so a notice that comes or
- * goes does not shift the page: notices, update counters, the admin footer (WordPress version), help tabs; dates of the
- * run and the permalink (site hostname) are blanked in place.
+ * Only what decision N1 names is hidden before the shot: notices and the admin footer (WordPress version) are removed,
+ * so one that comes or goes does not shift the page; dates of the run are removed or blanked. Everything else stays as
+ * WordPress shows it (update counters, help tabs, permalink with the site's hostname).
  */
 const {test, expect} = require('@playwright/test');
-const {manifest, settle, about} = require('./lib/pages');
+const {manifest, settle, about, compareShot} = require('./lib/pages');
 
-/** Removed from every admin shot: they come and go with WordPress and the site's state. */
-const REMOVE = [
-    '.notice', '.update-nag', 'div.updated', 'div.error', '#wpfooter', '#screen-meta-links',
-    // Update counters (admin bar, menu badges).
-    '#wp-admin-bar-updates', '.update-plugins', '.awaiting-mod',
-    // Post dates (the time of the run): blanking keeps their text's wrapping, which changes the row heights.
-    '.column-date',
-].join(', ');
+/**
+ * Removed from every admin shot (decision N1): notices and the footer with the WordPress version come and go with
+ * WordPress and the site's state; the post date column holds the time of the run (blanking it would keep its
+ * wrapping, which changes the row heights).
+ */
+const REMOVE = ['.notice', '.update-nag', 'div.updated', 'div.error', '#wpfooter', '.column-date'].join(', ');
 
-/** Blanked, keeping their space: dates of the run, the permalink (site hostname). */
-const BLANK = ['#timestamp', '#last-edit', '#sample-permalink'].join(', ');
+/** Blanked in place (decision N1): dates of the run in the event editor. */
+const BLANK = ['#timestamp', '#last-edit'].join(', ');
 
 const STYLE = `${REMOVE} { display: none !important; } ${BLANK} { visibility: hidden !important; }`;
 
 /** [snapshot name, title, description, path]. */
 const SCREENS = [
-    ['events', 'Events list', 'All events of the test content, sorted by title (all share the post date of the run, so '
-        + 'the default order is not stable). Columns: event date and time, recurrence, categories, author.',
+    ['events', 'Events list', 'The first page of the events list, sorted by title (all share the post date of the run, '
+        + 'so the default order is not stable), as the Screen Options setup sets it: 5 per page, extended view (excerpts), '
+        + 'all columns.',
     // By title: all events share the post date of the run.
     () => '/wp-admin/edit.php?post_type=osec_event&orderby=title&order=asc'],
     ['edit-event', 'Edit event: Jazz in the Park', 'The event editor with every box filled: date and time, weekly '
@@ -44,11 +43,11 @@ const SCREENS = [
 test.use({viewport: {width: 1280, height: 900}});
 
 for (const [name, title, description, path] of SCREENS) {
-    test(title, about(`${description} Full page; notices, update counters, footer and dates removed or blanked.`), async ({page}) => {
+    test(title, about(`${description} Full page; notices, footer and dates of the run removed or blanked (decision N1).`), async ({page}) => {
         await page.goto(path(manifest()));
         await settle(page);
         await page.addStyleTag({content: STYLE});
-        await expect(page).toHaveScreenshot(`admin-${name}.png`, {fullPage: true});
+        await compareShot(page, [`admin-${name}.png`], {fullPage: true});
     });
 }
 
@@ -58,7 +57,8 @@ test.describe('Block editor', () => {
 
     test('Calendar block: edit form', about(
         'The "Calendar block" page in the block editor with the block\'s settings opened: view, agenda options, fixed '
-        + 'date, category/tag/event filters, view settings. Only the block is shot; the editor around it is WordPress.',
+        + 'date, category/tag/event filters, view settings. Only the block is shot (WordPress\' block toolbar may '
+        + 'overlap it, as in the editor).',
     ), async ({page}) => {
         await page.goto(`/wp-admin/post.php?post=${manifest().pages.block.id}&action=edit`);
         await page.waitForFunction(() => window.wp?.data?.select('core/block-editor').getBlocks().length);
@@ -67,9 +67,7 @@ test.describe('Block editor', () => {
         const block = page.frameLocator('iframe[name="editor-canvas"]').locator('[data-type$="osec-calendar-classic"]');
         // "Settings" since 1.2.0, "Edit" in 1.1.x.
         await block.getByText(/^(Settings|Edit)\b/).first().click();
-        // WordPress' block toolbar and breadcrumb bar overlap the block.
-        await page.addStyleTag({content: '.block-editor-block-contextual-toolbar, .block-editor-block-popover, .interface-interface-skeleton__footer { display: none !important; }'});
         await settle(page, {networkIdle: false});
-        await expect(block).toHaveScreenshot('admin-block-form.png');
+        await compareShot(block, ['admin-block-form.png']);
     });
 });

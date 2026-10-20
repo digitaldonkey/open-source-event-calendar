@@ -30,5 +30,5 @@ osec_playwright_ready
 cd "$suite" || exit 1
 npm run "$script" -- "${pass[@]}"
 status=$?
-echo "Report: $(osec_home)/wp-content/uploads/osec-visual-regression/report/index.html"
+echo "Report: $(osec_home)/wp-content/uploads/osec-visual-regression/report/${OSEC_BASELINE_SET:-local}/index.html"
 exit $status

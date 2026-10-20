@@ -4,7 +4,7 @@
  * (Chromium: page.pdf(); Firefox: silent print to a file in the playwright container, fetched as a download).
  */
 const {test, expect} = require('@playwright/test');
-const {manifest, calendarPath, printView, firefoxPdf, about} = require('./lib/pages');
+const {manifest, calendarPath, printView, firefoxPdf, about, compareShot} = require('./lib/pages');
 const {themes, activateTheme} = require('./lib/theme');
 
 /** View paths, read per test (see visual.spec.js). */
@@ -22,25 +22,26 @@ for (const theme of themes()) {
 
         for (const [view, {title, path}] of Object.entries(VIEWS)) {
             test(title, about(
-                'The calendar\'s print button, shot full page with print media (the printed URL blanked: it carries the '
-                + 'hostname). The PDF is attached for a look at the page breaks (Chromium: page.pdf(); Firefox: its own '
-                + 'silent print to a file).',
+                'The calendar\'s print button, shot full page with print media, exactly as printed (the header carries '
+                + 'the site URL, so sets from different sites differ there). The PDF is attached for a look at the page '
+                + 'breaks (Chromium: page.pdf(); Firefox: its own silent print to a file).',
             ), async ({page, browserName}, testInfo) => {
                 await page.goto(path(manifest()));
                 await printView(page);
                 // Guard: the print page must show the calendar, or an empty shot would match an empty baseline.
                 await expect(page.locator('.ai1ec-calendar').first()).toBeVisible();
-                // The printed URL carries the site's hostname: blanked, so a set shot on one site stays comparable on
-                // another. CSS, not Playwright's mask: the mask leaves the print page empty.
-                await page.addStyleTag({content: '.osec-print-url { visibility: hidden !important; }'});
-                await expect(page).toHaveScreenshot([theme, `print-${view}.png`], {fullPage: true});
-                // The PDF for a look at the page breaks: Chromium's page.pdf(), Firefox's own print (silent, to a file).
-                await testInfo.attach(`${theme}-print-${view}-${browserName}.pdf`, {
-                    body: 'chromium' === browserName
-                        ? await page.pdf({preferCSSPageSize: true, printBackground: true})
-                        : await firefoxPdf(page),
-                    contentType: 'application/pdf',
-                });
+                try {
+                    await compareShot(page, [theme, `print-${view}.png`], {fullPage: true});
+                } finally {
+                    // The PDF for a look at the page breaks, also when the comparison failed. After the shot: Firefox's
+                    // real print fires afterprint, which the calendar's script may react to.
+                    await testInfo.attach(`${theme}-print-${view}-${browserName}.pdf`, {
+                        body: 'chromium' === browserName
+                            ? await page.pdf({preferCSSPageSize: true, printBackground: true})
+                            : await firefoxPdf(page),
+                        contentType: 'application/pdf',
+                    });
+                }
             });
         }
     });

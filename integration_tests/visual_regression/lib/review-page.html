@@ -1,0 +1,327 @@
+<!doctype html>
+<!--
+  Review page of the visual regression suite: baseline | diff | current per screenshot, filters, full-size view.
+  Copied to review/<set>/index.html by lib/review-reporter.js; the data comes from data.js (window.OSEC_REVIEW).
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Visual review</title>
+    <style>
+        :root {
+            --bg: #f4f5f7; --card: #fff; --text: #1d2327; --muted: #646970; --line: #dcdcde;
+            --fail: #d63638; --pass: #00a32a; --accent: #2271b1;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+        header { position: sticky; top: 0; z-index: 5; background: var(--card); border-bottom: 1px solid var(--line); padding: 12px 16px; }
+        h1 { margin: 0 0 4px; font-size: 18px; }
+        .meta { color: var(--muted); font-size: 13px; }
+        .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+        .controls button, .controls select, .controls input { font: inherit; padding: 4px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--card); }
+        .controls button.on { background: var(--text); color: #fff; border-color: var(--text); }
+        .controls input { min-width: 200px; }
+        main { padding: 16px; display: grid; gap: 16px; }
+        .row { background: var(--card); border: 1px solid var(--line); border-left: 6px solid var(--pass); border-radius: 4px; padding: 12px; }
+        .row.failed, .row.timedOut { border-left-color: var(--fail); }
+        .row.approved { border-left-color: var(--accent); }
+        .row.pending { border-left-color: #dba617; background: #fffbea; }
+        .approve { display: inline-flex; gap: 4px; align-items: center; margin-left: auto; font-weight: 600; cursor: pointer; }
+        .approve input { width: 18px; height: 18px; cursor: pointer; }
+        .row.approved .status { color: var(--accent); }
+        .row.pending .status { color: #996800; }
+        .after { margin-top: 8px; }
+        #approvals { display: none; gap: 8px; align-items: center; margin-top: 10px; padding: 6px 10px; background: #fffbea; border: 1px solid #dba617; border-radius: 4px; }
+        #approvals.on { display: flex; flex-wrap: wrap; }
+        #approvals button { font: inherit; padding: 2px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--card); cursor: pointer; }
+        .head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+        .title { font-weight: 600; font-size: 15px; }
+        .chip { font-size: 12px; padding: 1px 8px; border-radius: 10px; background: var(--bg); color: var(--muted); }
+        .status { font-weight: 600; }
+        .row.failed .status, .row.timedOut .status { color: var(--fail); }
+        .row.passed .status { color: var(--pass); }
+        .desc { color: var(--muted); margin: 4px 0 8px; }
+        .error { color: var(--fail); font-family: ui-monospace, monospace; font-size: 12px; margin: 4px 0 8px; white-space: pre-wrap; }
+        .images { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        .images.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .images figure { margin: 0; }
+        .images figcaption { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+        .images img { display: block; width: 100%; max-height: 520px; object-fit: contain; object-position: top; border: 1px solid var(--line); background: #fff; cursor: zoom-in; }
+        .images .none { height: 80px; display: grid; place-items: center; border: 1px dashed var(--line); color: var(--muted); font-size: 12px; }
+        .ref { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0 8px; font-size: 12px; color: var(--muted); }
+        .ref code { font: 12px ui-monospace, monospace; background: var(--bg); padding: 2px 6px; border-radius: 3px; color: var(--text); }
+        .ref button { font: inherit; padding: 1px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--card); cursor: pointer; }
+        .pdfs { margin-top: 8px; font-size: 13px; }
+        .pdfs a { margin-right: 12px; color: var(--accent); }
+        #empty { color: var(--muted); padding: 32px; text-align: center; }
+        /* Full-size view */
+        #zoom { position: fixed; inset: 0; z-index: 10; background: rgba(0, 0, 0, .85); display: none; flex-direction: column; }
+        #zoom.open { display: flex; }
+        #zoom .bar { display: flex; gap: 8px; padding: 10px 16px; align-items: center; color: #fff; flex-wrap: wrap; }
+        #zoom .bar button { font: inherit; padding: 4px 12px; border: 1px solid #888; border-radius: 4px; background: #222; color: #fff; cursor: pointer; }
+        #zoom .bar button.on { background: #fff; color: #000; }
+        #zoom .bar .close { margin-left: auto; }
+        #zoom .bar .hint { color: #aaa; font-size: 12px; margin-left: auto; }
+        #zoom .bar code { font: 12px ui-monospace, monospace; color: #ddd; }
+        #zoom .bar .hint + .close { margin-left: 8px; }
+        #zoom .stage { flex: 1; overflow: auto; padding: 0 16px 16px; }
+        #zoom .stage img { display: block; max-width: none; background: #fff; }
+        #slider { position: relative; display: inline-block; cursor: ew-resize; user-select: none; touch-action: none; }
+        #slider img { pointer-events: none; }
+        #slider img { display: block; }
+        #slider .top { position: absolute; inset: 0 auto 0 0; overflow: hidden; border-right: 3px solid var(--fail); }
+        #slider .top img { max-width: none; }
+        @media (max-width: 800px) { .images { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Visual review</h1>
+    <div class="meta" id="meta"></div>
+    <div class="controls">
+        <button data-status="failed">Failed</button>
+        <button data-status="passed">Passed</button>
+        <button data-status="approved">Approved</button>
+        <button data-status="all">All</button>
+        <select id="project"></select>
+        <select id="theme"></select>
+        <select id="width"></select>
+        <input id="search" type="search" placeholder="Search titles">
+    </div>
+    <div id="approvals"></div>
+</header>
+<main id="rows"></main>
+<div id="empty" hidden>No screenshots match the filters.</div>
+<div id="zoom">
+    <div class="bar">
+        <span id="zoom-title"></span>
+        <button data-view="old">Baseline</button>
+        <button data-view="diff">Diff</button>
+        <button data-view="current">Current</button>
+        <button data-view="slider">Slider (s)</button>
+        <input id="slider-pos" type="range" min="0" max="100" value="50" hidden>
+        <span class="hint">← → image · ↑ ↓ row · s slider (click or drag on the image)</span>
+        <button class="close">Close (Esc)</button>
+    </div>
+    <div class="stage" id="stage"></div>
+</div>
+<script src="data.js"></script>
+<script>
+    (function () {
+        const data = window.OSEC_REVIEW || {rows: []};
+        // Row kinds: approved (by lib/approve.js after this run), failed (differs), passed (unchanged).
+        const approved = (row) => !!row.approvedAt;
+        const failed = (row) => 'passed' !== row.status && !approved(row);
+        const kind = (row) => (approved(row) ? 'approved' : failed(row) ? 'failed' : 'passed');
+        const state = {status: 'all', project: '', theme: '', width: '', search: ''};
+        const $ = (id) => document.getElementById(id);
+        const el = (tag, attrs, ...children) => {
+            const node = document.createElement(tag);
+            Object.entries(attrs || {}).forEach(([k, v]) => (k === 'class' ? (node.className = v) : node.setAttribute(k, v)));
+            children.flat().forEach((c) => node.append(c instanceof Node ? c : document.createTextNode(String(c))));
+            return node;
+        };
+
+        /** Console commands that approve a row's current image as its baseline (lib/approve.js). */
+        const commands = (r) => ({
+            ddev: `ddev osec-approve --set=${data.set} ${r.ref}`,
+            npm: `npm run approve -- --set=${data.set} ${r.ref}`,
+        });
+        const copyButton = (label, text) => Object.assign(el('button', {type: 'button', title: text}, label), {
+            onclick: (e) => {
+                navigator.clipboard.writeText(text).then(() => {
+                    e.target.textContent = 'copied';
+                    setTimeout(() => (e.target.textContent = label), 1200);
+                });
+            },
+        });
+        // Approve commands only where there is something to approve (a differing row with a current image).
+        const refLine = (r) => r.ref ? el('div', {class: 'ref'},
+            'Reference', el('code', {}, r.ref), copyButton('copy ID', r.ref),
+            ...(approvable(r) ? ['Approve current:', copyButton('ddev command', commands(r).ddev), copyButton('npm command', commands(r).npm)] : [])) : '';
+
+        const count = (k) => data.rows.filter((r) => kind(r) === k).length;
+        state.status = count('failed') ? 'failed' : 'all';
+        $('meta').textContent = `Baseline set ${data.set} · ${data.site} · ${new Date(data.date).toLocaleString()} · `
+            + `${count('failed')} differ, ${count('passed')} unchanged, ${count('approved')} approved`;
+
+        // Rows checked for approval: kept for this browser window (sessionStorage), per set and run.
+        const storeKey = `osec-review:${data.set}:${data.date}`;
+        const checked = new Set((() => {
+            try {
+                return JSON.parse(sessionStorage.getItem(storeKey) || '[]');
+            } catch (e) {
+                return [];
+            }
+        })());
+        const saveChecked = () => {
+            try {
+                sessionStorage.setItem(storeKey, JSON.stringify([...checked]));
+            } catch (e) {
+                // Storage unavailable (private window): the selection lasts until the page is left.
+            }
+        };
+        const approvable = (r) => failed(r) && r.current && r.ref;
+        function renderApprovals() {
+            const refs = data.rows.filter((r) => approvable(r) && checked.has(r.ref)).map((r) => r.ref);
+            $('approvals').classList.toggle('on', refs.length > 0);
+            $('approvals').replaceChildren(
+                `${refs.length} checked for approval:`,
+                copyButton('copy ddev command', `ddev osec-approve --set=${data.set} ${refs.join(' ')}`),
+                copyButton('copy npm command', `npm run approve -- --set=${data.set} ${refs.join(' ')}`),
+                Object.assign(el('button', {type: 'button'}, 'clear'), {onclick: () => { checked.clear(); saveChecked(); render(); }}),
+                el('span', {class: 'meta'}, 'Run the command, then reload: approved rows show their new baseline.'));
+        }
+
+        // Filter options from the data.
+        const fill = (id, label, values) => {
+            const select = $(id);
+            select.append(el('option', {value: ''}, `All ${label}`));
+            [...new Set(values.filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), undefined, {numeric: true}))
+                .forEach((v) => select.append(el('option', {value: v}, v)));
+            select.addEventListener('change', () => { state[id] = select.value; render(); });
+        };
+        fill('project', 'projects', data.rows.map((r) => r.project));
+        fill('theme', 'themes', data.rows.map((r) => r.theme));
+        fill('width', 'widths', data.rows.map((r) => r.width && `${r.width} px`));
+        $('search').addEventListener('input', (e) => { state.search = e.target.value.toLowerCase(); render(); });
+        document.querySelectorAll('[data-status]').forEach((b) => b.addEventListener('click', () => { state.status = b.dataset.status; render(); }));
+
+        const figure = (caption, src, row, view) => el('figure', {},
+            el('figcaption', {}, caption),
+            src ? Object.assign(el('img', {src, loading: 'lazy', alt: `${caption}: ${row.titles.join(' › ')}`}), {onclick: () => zoom(row, view)})
+                : el('div', {class: 'none'}, 'old' === view ? 'no baseline' : 'diff' === view ? 'no difference' : 'not taken'));
+
+        /** Rows the filters show, in page order (up/down in the full-size view). */
+        let visible = [];
+
+        function render() {
+            document.querySelectorAll('[data-status]').forEach((b) => b.classList.toggle('on', b.dataset.status === state.status));
+            const rows = data.rows.filter((r) => ('all' === state.status || kind(r) === state.status)
+                && (!state.project || r.project === state.project)
+                && (!state.theme || r.theme === state.theme)
+                && (!state.width || `${r.width} px` === state.width)
+                && (!state.search || r.titles.join(' ').toLowerCase().includes(state.search)));
+            visible = rows;
+            $('rows').replaceChildren(...rows.map((r) => {
+                const pending = approvable(r) && checked.has(r.ref);
+                const status = approved(r)
+                    ? `approved ${new Date(r.approvedAt).toLocaleString()}`
+                    : pending ? 'approval pending (run the command)'
+                        : failed(r) ? (r.ratio ? `differs: ${(r.ratio * 100).toFixed(2)} % (${r.pixels} px)` : r.status) : 'unchanged';
+                const box = approvable(r) ? el('label', {class: 'approve'},
+                    Object.assign(el('input', {type: 'checkbox'}), {
+                        checked: pending,
+                        onchange: (e) => { e.target.checked ? checked.add(r.ref) : checked.delete(r.ref); saveChecked(); render(); },
+                    }), 'approve') : '';
+                // Approved: the previous baseline and the approved current image (now the baseline).
+                const images = approved(r)
+                    ? el('div', {class: 'images two'},
+                        figure(`Previous baseline (${data.set})`, r.old, r, 'old'),
+                        figure('Current (approved, now the baseline)', r.current, r, 'current'))
+                    : el('div', {class: failed(r) ? 'images' : 'images two'},
+                        figure(`Baseline (${data.set})`, r.old, r, 'old'),
+                        failed(r) ? figure('Diff', r.diff, r, 'diff') : '',
+                        figure('Current', r.current, r, 'current'));
+                return el('section', {class: `row ${kind(r)}${pending ? ' pending' : ''}`},
+                    el('div', {class: 'head'},
+                        el('span', {class: 'title'}, r.titles.join(' › ')),
+                        el('span', {class: 'chip'}, r.project),
+                        el('span', {class: 'status'}, status),
+                        r.size ? el('span', {class: 'chip'}, `size ${r.size}`) : '',
+                        box),
+                    images,
+                    el('div', {class: 'after'},
+                        failed(r) && !r.ratio ? el('div', {class: 'error'}, r.error) : '',
+                        r.description ? el('div', {class: 'desc'}, r.description) : '',
+                        refLine(r),
+                        r.pdfs.length ? el('div', {class: 'pdfs'}, 'PDF: ', r.pdfs.map((p) => el('a', {href: p.file, target: '_blank'}, p.name))) : ''));
+            }));
+            renderApprovals();
+            $('empty').hidden = rows.length > 0;
+        }
+
+        // Full-size view with Baseline / Diff / Current and a slider between baseline and current.
+        // Left/right arrow keys cycle through the images the row has (Baseline, Diff, Current); up/down go to the
+        // previous/next row the filters show; s toggles the slider.
+        const IMAGES = ['old', 'diff', 'current'];
+        let zoomed = null;
+        let shown = null;
+        let lastImage = 'old';
+        function zoom(row, view) {
+            zoomed = row;
+            const at = visible.indexOf(row);
+            $('zoom-title').replaceChildren(`${at + 1} / ${visible.length} · ${row.titles.join(' › ')} · `, el('code', {}, row.ref || row.project));
+            $('zoom').classList.add('open');
+            // The same view on the next row, or the first image it has.
+            const has = (v) => ('slider' === v ? row.old && row.current : row[v]);
+            show(has(view) ? view : IMAGES.find((v) => row[v]));
+        }
+        function show(view) {
+            const r = zoomed;
+            shown = view;
+            if ('slider' !== view) {
+                lastImage = view;
+            }
+            document.querySelectorAll('#zoom [data-view]').forEach((b) => {
+                b.classList.toggle('on', b.dataset.view === view);
+                b.disabled = 'slider' === b.dataset.view ? !(r.old && r.current) : !r[b.dataset.view];
+            });
+            $('slider-pos').hidden = 'slider' !== view;
+            if ('slider' === view) {
+                const top = el('div', {class: 'top'}, el('img', {src: r.old}));
+                const slider = el('div', {id: 'slider'}, el('img', {src: r.current}), top);
+                const move = () => (top.style.width = `${$('slider-pos').value}%`);
+                // Click on the image to jump there, hold and drag to move the divider.
+                const follow = (e) => {
+                    const box = slider.getBoundingClientRect();
+                    $('slider-pos').value = Math.min(100, Math.max(0, ((e.clientX - box.left) / box.width) * 100));
+                    move();
+                };
+                slider.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    slider.setPointerCapture(e.pointerId);
+                    follow(e);
+                });
+                slider.addEventListener('pointermove', (e) => slider.hasPointerCapture(e.pointerId) && follow(e));
+                $('slider-pos').oninput = move;
+                move();
+                $('stage').replaceChildren(slider);
+            } else {
+                $('stage').replaceChildren(r[view] ? el('img', {src: r[view]}) : el('div', {}, 'none'));
+            }
+        }
+        document.querySelectorAll('#zoom [data-view]').forEach((b) => b.addEventListener('click', () => show(b.dataset.view)));
+        document.querySelector('#zoom .close').addEventListener('click', () => $('zoom').classList.remove('open'));
+        document.addEventListener('keydown', (e) => {
+            if (!$('zoom').classList.contains('open')) {
+                return;
+            }
+            if ('Escape' === e.key) {
+                $('zoom').classList.remove('open');
+            } else if ('s' === e.key.toLowerCase() && zoomed.old && zoomed.current) {
+                // s: slider, again s: back to the image shown before.
+                show('slider' === shown ? lastImage : 'slider');
+            } else if ('ArrowDown' === e.key || 'ArrowUp' === e.key) {
+                // Previous/next row of the filtered list; stops at both ends.
+                e.preventDefault();
+                const next = visible[visible.indexOf(zoomed) + ('ArrowDown' === e.key ? 1 : -1)];
+                if (next) {
+                    zoom(next, shown);
+                }
+            } else if ('ArrowRight' === e.key || 'ArrowLeft' === e.key) {
+                e.preventDefault();
+                const available = IMAGES.filter((v) => zoomed[v]);
+                // From the slider: count from the image shown before it.
+                const at = Math.max(available.indexOf('slider' === shown ? lastImage : shown), 0);
+                const step = 'ArrowRight' === e.key ? 1 : -1;
+                show(available[(at + step + available.length) % available.length]);
+            }
+        });
+
+        render();
+    })();
+</script>
+</body>
+</html>

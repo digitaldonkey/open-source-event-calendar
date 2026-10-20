@@ -30,11 +30,30 @@ module.exports = defineConfig({
     fullyParallel: false,
     retries: 0,
     timeout: 60000,
-    outputDir: path.join(outputRoot, 'test-results'),
+    // Per baseline set, so a run against one set never replaces the report of a comparison with another.
+    outputDir: path.join(outputRoot, 'test-results', baselineSet),
     snapshotPathTemplate: path.join(outputRoot, 'baselines', baselineSet, '{projectName}', '{arg}{ext}'),
-    reporter: [['list'], ['html', {outputFolder: path.join(outputRoot, 'report'), open: 'never'}]],
+    reporter: [
+        ['list'],
+        ['html', {outputFolder: path.join(outputRoot, 'report', baselineSet), open: 'never'}],
+        // The review page: baseline | diff | current per screenshot (lib/review-reporter.js).
+        ['./lib/review-reporter.js', {
+            outputFolder: path.join(outputRoot, 'review', baselineSet),
+            baselinesFolder: path.join(outputRoot, 'baselines', baselineSet),
+            set: baselineSet,
+            site: baseURL,
+        }],
+    ],
     // Share of pixels that may differ (default 0.1 %): map tiles and font rendering vary by single pixels between runs.
-    expect: {toHaveScreenshot: {maxDiffPixelRatio: Number(process.env.OSEC_MAX_DIFF_RATIO ?? 0.001)}},
+    expect: {
+        toHaveScreenshot: {
+            maxDiffPixelRatio: Number(process.env.OSEC_MAX_DIFF_RATIO ?? 0.001),
+            // Playwright's defaults, set on purpose (maintainer 2026-10-19): CSS animations and transitions frozen,
+            // text cursor hidden.
+            animations: 'disabled',
+            caret: 'hide',
+        },
+    },
     use: {
         baseURL,
         ignoreHTTPSErrors: true,

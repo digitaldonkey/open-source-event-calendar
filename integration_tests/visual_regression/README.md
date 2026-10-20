@@ -22,7 +22,7 @@ ddev osec-review try_pw --project=chromium -g "Month view"   # other arguments g
 ```
 
 Install it once from the plugin root on the host (DDEV reads commands only from the project's `.ddev/`):
-`cp bin/ddev/commands/web/osec-review bin/ddev/commands/web/osec-screenshots ../../../.ddev/commands/web/`. Shared
+`cp bin/ddev/commands/web/osec-review bin/ddev/commands/web/osec-approve bin/ddev/commands/web/osec-screenshots ../../../.ddev/commands/web/`. Shared
 code stays in `bin/ddev/osec-lib.sh`. `npm install` in `integration_tests/` (npm workspaces root) runs on first use.
 
 | Env | Meaning |
@@ -87,6 +87,32 @@ Calendar Themes page). Done for 1.1.16 on 2026-10-19:
 
 `OSEC_REMOTE_URL` / `OSEC_REMOTE_DIR`: see `lib/wp.js`. The other project must run behind the same `ddev-router`.
 
+### Review page and approving single screenshots
+
+Every run also writes `uploads/osec-visual-regression/review/<set>/index.html` (`lib/review-reporter.js`,
+`lib/review-page.html`): one row per screenshot with Baseline | Diff | Current (unchanged rows: Baseline | Current),
+then description, reference and PDF links below; filters (failed / passed / approved / all, project, theme, width,
+title search). Click an image
+for full size: ← → switch Baseline / Diff / Current, `s` toggles the slider, ↑ ↓ go to the previous/next row the filters show, the
+slider follows a click or drag on the image, Esc closes. Images are copied, so a review keeps showing its run.
+
+Each row shows its **reference ID** - the baseline's path inside the set, e.g. `chromium/plana/month-1280.png`, the
+same in every run - with copy buttons for the approve command. Approving copies the reviewed current image over the
+baseline, without a new run (the previous one goes to `backups/approved/<date_time>/`):
+
+```
+ddev osec-approve --set=local chromium/plana/month-1280.png      # from the host
+npm run approve -- --set=local chromium/plana/month-1280.png     # inside the container
+```
+
+Several references at once are fine. **On the page**, the "approve" checkbox of a differing row marks it "approval
+pending" (kept for this browser window and run, in sessionStorage); the bar at the top then offers the ddev and npm
+command for all checked rows. The command also marks the rows in the review's `data.js`: after a reload they show
+"approved <time>" with the previous baseline and the approved image, under the "Approved" filter.
+
+To re-shoot instead (a fresh run of only that test):
+`npm run update -- --project=chromium -g "plana 1280 px wide Month view"`.
+
 ### Backups of baseline sets
 
 `--update` overwrites a set. Archives of the sets lie in `uploads/osec-visual-regression/backups/`
@@ -106,12 +132,15 @@ Make a new one before re-shooting a set you want to keep:
 Projects run in this order (`workers: 1`):
 
 1. `content` (`content.setup.js`): `wp osec content generate --site-settings`, manifest to `.auth/manifest.json`, login
-   cookies from WordPress (`lib/auth-cookies.php`, no password) saved as `.auth/admin.json`.
+   cookies from WordPress (`lib/auth-cookies.php`, no password) saved as `.auth/admin.json`, then the events list's
+   Screen Options through WordPress's panel: all columns, 5 per page, extended view (stored per user, so a used site
+   and a fresh one would otherwise differ).
 2. `admin` (`admin.spec.js`, Chromium, logged in): events list, edit event, feeds, settings, themes, categories (full
-   page) and the calendar block's edit form in the block editor. Notices, update counters and the admin footer are
-   removed; dates of the run and the permalink are blanked in place.
+   page) and the calendar block's edit form in the block editor. Only decision N1's areas are hidden: notices and
+   the admin footer (WordPress version) removed, dates of the run removed or blanked. Nothing else is hidden.
 3. `chromium` (`visual.spec.js`, `print.spec.js`, logged out): per calendar theme, element shots of
-   `#osec-container` (filters, navigation, view, subscribe buttons; single events `.osec-single-event`: title, details, description), print views full page with the printed URL blanked; the PDF of
+   the page's `<main>` (the plugin's output with page title and theme margins, no theme header/footer; Twenty
+   Twenty-Five has exactly one, no fallback for other themes), print views full page exactly as printed (the header carries the site URL); the PDF of
    each print view (`page.pdf()`) is attached to the report.
 4. `firefox` (`print.spec.js`, logged out): the print views, each with its PDF from Firefox's own print: silent
    print-to-file in the playwright container (prefs in `lib/wp.js`), fetched as a download (`firefoxPdf()` in
@@ -127,15 +156,21 @@ to the router (every hostname, so Firefox only shoots pages that load nothing fr
 service's `run-server --unsafe`. See `lib/wp.js`.
 
 Views are shot logged out (no admin bar). Map tiles come from OpenStreetMap and are compared as they load; if they
-change and make a single event fail, mask the map.
+change and make a single event fail, raise `OSEC_MAX_DIFF_RATIO` rather than hiding the map.
+
+**What the suite changes before a shot, and nothing else** (maintainer 2026-10-19: no unasked hides): wp-admin notices,
+footer and run dates (decision N1); the events list sorted by title, with its Screen Options set (all columns, 5 per
+page, extended view); views logged out; phone emulation below 800 px;
+Playwright's frozen animations and hidden text cursor; the print button's `window.print()` stubbed; the DST day's
+"show full day" and the block's settings toggle clicked.
 
 ## Output (outside the repository)
 
 | Path | Content |
 |---|---|
 | `wp-content/uploads/osec-visual-regression/baselines/<set>/<project>/[<theme>/]` | Baseline screenshots (`admin/`, `chromium/plana/`, `firefox/vortex/`, ...). |
-| `wp-content/uploads/osec-visual-regression/report/` | HTML report of the last run: `<site>/wp-content/uploads/osec-visual-regression/report/index.html`. |
-| `wp-content/uploads/osec-visual-regression/test-results/` | Actual and diff images of failed comparisons. |
+| `wp-content/uploads/osec-visual-regression/report/<set>/` | HTML report of the last run against that set: `<site>/wp-content/uploads/osec-visual-regression/report/<set>/index.html` (e.g. `report/1.1.16/`). One per set, so a local run does not replace a comparison with a release. |
+| `wp-content/uploads/osec-visual-regression/test-results/<set>/` | Actual and diff images of failed comparisons. |
 
 Uploads are shared by the dev site and the sandboxes, so the report and the sets are too.
 
@@ -153,3 +188,5 @@ Uploads are shared by the dev site and the sandboxes, so the report and the sets
 | `lib/theme.js` | Themes of the run, activating one. |
 | `lib/pages.js` | Manifest, calendar URLs, waiting until a page is stable, printing through the print button. |
 | `lib/auth-cookies.php` | Login cookies of the first administrator (WP-CLI `eval-file`). |
+| `lib/review-reporter.js`, `lib/review-page.html` | The review page (reporter and page template). |
+| `lib/approve.js` | Approves screenshots from a review page (`npm run approve`, `ddev osec-approve`). |

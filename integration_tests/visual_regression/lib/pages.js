@@ -8,6 +8,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const {test, expect} = require('@playwright/test');
 const {MANIFEST, FIREFOX_PDF} = require('./wp');
 
 /**
@@ -133,6 +134,32 @@ async function readFirefoxPdf(context) {
 }
 
 /**
+ * Compares a page or element with its baseline (toHaveScreenshot) and records what the review page
+ * (lib/review-reporter.js) shows: the baseline's name, and for a passing test the current shot (Playwright keeps
+ * actual and diff images of failed comparisons only). A failed comparison still fails the test.
+ *
+ *   await compareShot(page.locator('main'), [theme, 'month-1280.png']);
+ *   await compareShot(page, ['admin-events.png'], {fullPage: true});
+ *
+ * @param {import('@playwright/test').Page|import('@playwright/test').Locator} target
+ * @param {string[]} name Snapshot name segments, as for toHaveScreenshot().
+ * @param {object} [options] toHaveScreenshot() options (fullPage for pages).
+ */
+async function compareShot(target, name, options = {}) {
+    const testInfo = test.info();
+    await testInfo.attach('osec-review', {body: JSON.stringify({name}), contentType: 'application/json'});
+    // A failed comparison throws here; Playwright attaches expected, actual and diff itself.
+    await expect(target).toHaveScreenshot(name, options);
+    // Passed: the current shot as the comparison took it (same settings as the config's toHaveScreenshot).
+    const shot = await target.screenshot({
+        animations: 'disabled',
+        caret: 'hide',
+        ...(options.fullPage ? {fullPage: true} : {}),
+    });
+    await testInfo.attach('osec-current', {body: shot, contentType: 'image/png'});
+}
+
+/**
  * Test details for the HTML report: a description, shown under the test's title.
  *
  *   test('Month view', about('What the test checks and why.'), async ({page}) => { ... });
@@ -144,4 +171,4 @@ function about(description) {
     return {annotation: {type: 'description', description}};
 }
 
-module.exports = {manifest, calendarPath, lastSunday, settle, printView, firefoxPdf, about};
+module.exports = {manifest, calendarPath, lastSunday, settle, printView, firefoxPdf, compareShot, about};
