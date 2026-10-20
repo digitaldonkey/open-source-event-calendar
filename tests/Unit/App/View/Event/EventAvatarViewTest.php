@@ -85,7 +85,8 @@ class EventAvatarViewTest extends TestBase
         // "Use featured image fallbacks" off: its post_thumbnail_id filter is not hooked.
         remove_all_filters('post_thumbnail_id');
 
-        $html = EventAvatarView::factory($osec_app)->get_event_avatar($this->stored_event($post_id));
+        // A new instance: its per-post caches must not hold an earlier test's post of the same ID (SQLite).
+        $html = (new EventAvatarView($osec_app))->get_event_avatar($this->stored_event($post_id));
 
         $this->assertStringContainsString('ai1ec-category_avatar', $html);
         $this->assertStringContainsString('src="' . self::CATEGORY_IMAGE . '"', $html);

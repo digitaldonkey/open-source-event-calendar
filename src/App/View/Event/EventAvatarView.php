@@ -20,6 +20,12 @@ use WP_Post;
  */
 class EventAvatarView extends OsecBaseClass
 {
+    /**
+     * @var array Term IDs per post ID (get_term_hierarchy()). On the instance, not static: a post ID can come back
+     *            within one PHP process (SQLite reuses it after a test's rollback), with other terms.
+     */
+    private array $termHierarchy = [];
+
     public static function add_actions(App $app, bool $is_admin)
     {
         /**
@@ -706,15 +712,14 @@ class EventAvatarView extends OsecBaseClass
      */
     protected function get_term_hierarchy(int $post_id): array
     {
-        static $cached = [];
-        if (isset($cached[$post_id])) {
-            return $cached[$post_id];
+        if (isset($this->termHierarchy[$post_id])) {
+            return $this->termHierarchy[$post_id];
         }
 
         $terms = TaxonomyAdapter::factory($this->app)->get_post_categories($post_id);
         // No Terms, no images.
         if (empty($terms)) {
-            $cached[$post_id] = [];
+            $this->termHierarchy[$post_id] = [];
             return [];
         }
 
@@ -738,7 +743,7 @@ class EventAvatarView extends OsecBaseClass
                 $terms_by_id[] = $anchestor_id;
             }
         }
-        $cached[$post_id] = $terms_by_id;
+        $this->termHierarchy[$post_id] = $terms_by_id;
         return $terms_by_id;
     }
 }
