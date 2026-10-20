@@ -23,7 +23,8 @@
 }
 
 // The date under the title (public/js/admin/all_events_date.js): only in the compact layout, where WordPress hides
-// the date column, and not in an expanded row, which shows the column.
+// the date column. It stays there in an expanded row, so the column's own "Event date/time" line is hidden instead
+// (WordPress shows every column of an expanded row with !important).
 .osec-row-date {
   display: none;
 }
@@ -34,7 +35,7 @@
     margin: .2em 0;
   }
 
-  .is-expanded .osec-row-date {
-    display: none;
+  .wp-list-table tr.is-expanded td.column-osec_event_date {
+    display: none !important;
   }
 }

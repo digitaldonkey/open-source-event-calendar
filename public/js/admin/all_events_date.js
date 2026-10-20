@@ -4,7 +4,7 @@
  *
  * WordPress prints nothing between the title and the excerpt that could carry markup, so each row gets a copy of its
  * "Event date/time" cell here, right after the title. osec-admin-page-all-events.less shows the copy only in the
- * compact layout and not in an expanded row (the cell itself shows there). Quick Edit replaces a row with a fresh one
+ * compact layout, also in an expanded row, where it hides the cell instead. Quick Edit replaces a row with a fresh one
  * from the server, so rows are filled again whenever the list changes.
  */
 ( () => {
