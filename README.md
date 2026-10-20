@@ -189,7 +189,7 @@ Exit code is 1 if any event or feed failed.
 The calendar has its own themes (Events › Calendar Themes), independent of your WordPress theme. A custom calendar theme is based on Vortex: it only contains the files that add to or replace Vortex's.
 
 1. Create a folder in `wp-content/themes/osec_themes/`, e.g. `wp-content/themes/osec_themes/my-calendar/`. The plugin's Gamma theme (`public/osec_themes/gamma/`) is an empty skeleton you can copy.
-2. Add a `style.css` with a theme header, and optionally a `screenshot.png`:
+2. Add an empty `index.php` (WordPress lists a theme folder only with one) and a `style.css` with a theme header, and optionally a `screenshot.png`:
 
         /**
          * Theme Name: My Calendar

@@ -5,6 +5,7 @@ namespace Osec\Tests\Unit\App\Model;
 use Osec\App\Model\IcsImportExportParser;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventSearch;
+use Osec\App\View\Calendar\AbstractView;
 use Osec\App\View\Event\EventSingleView;
 use Osec\Tests\Utilities\HostileInput;
 use Osec\Tests\Utilities\TestBase;
@@ -49,6 +50,43 @@ class IcsImportSanitizeTest extends TestBase
         $this->assertStringNotContainsString('onclick', $post->post_content);
         $this->assertStringContainsString('<a href="https://example.org/">tickets</a>', $post->post_content);
         $this->assertStringContainsString('<p class="lead">', $post->post_content);
+    }
+
+    public static function encodedTitles(): array
+    {
+        $cases = [];
+        foreach ([
+            'named entities'   => '&lt;img src=x onerror=alert(1)&gt;',
+            'numeric entities' => '&#60;img src=x onerror=alert(1)&#62;',
+            'double encoded'   => '&amp;lt;img src=x onerror=alert(1)&amp;gt;',
+        ] as $name => $summary) {
+            foreach (self::users() as $user => [$role]) {
+                $cases["$name, $user"] = [$summary, $role];
+            }
+        }
+
+        return $cases;
+    }
+
+    /**
+     * T8: titles are printed as HTML (|raw, in PHP and twig.js), so a feed must not get markup into them by encoding
+     * it either; whatever is stored stays text in the view's filtered_title.
+     *
+     * @dataProvider encodedTitles
+     */
+    public function test_encoded_markup_in_a_feed_title_stays_text(string $summary, ?string $role)
+    {
+        global $osec_app;
+        wp_set_current_user($role ? self::factory()->user->create(['role' => $role]) : 0);
+
+        $post  = $this->import('SUMMARY:' . $summary, 'DESCRIPTION:x');
+        $event = new Event($osec_app, $post->ID);
+        AbstractView::addRuntimePropertiesStatic($osec_app, $event);
+        $title = $event->get_runtime('filtered_title');
+
+        $this->assertStringNotContainsString('<', $post->post_title);
+        $this->assertStringNotContainsString('<img', $title);
+        $this->assertStringNotContainsString('<', $title);
     }
 
     public function test_plain_text_description_keeps_its_line_breaks()
