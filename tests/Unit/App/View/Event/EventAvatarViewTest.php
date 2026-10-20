@@ -71,17 +71,20 @@ class EventAvatarViewTest extends TestBase
         wp_set_object_terms($post_id, [$term_id], 'osec_events_categories');
         // The category's image, as stored in the categories' meta table (cached once per request, hence a double).
         $this->saved_adapter = TaxonomyAdapter::factory($osec_app);
-        $osec_app->inject_object(TaxonomyAdapter::class, new class ($osec_app, $term_id) extends TaxonomyAdapter {
-            public function __construct($app, private int $term_id)
-            {
-                parent::__construct($app);
-            }
+        $osec_app->inject_object(
+            TaxonomyAdapter::class,
+            new class ($osec_app, $term_id, self::CATEGORY_IMAGE) extends TaxonomyAdapter {
+                public function __construct($app, private int $term_id, private string $image)
+                {
+                    parent::__construct($app);
+                }
 
-            public function get_category_image($term_id)
-            {
-                return $this->term_id === (int) $term_id ? 'https://example.org/category.png' : null;
+                public function get_category_image($term_id)
+                {
+                    return $this->term_id === (int) $term_id ? $this->image : null;
+                }
             }
-        });
+        );
         // "Use featured image fallbacks" off: its post_thumbnail_id filter is not hooked.
         remove_all_filters('post_thumbnail_id');
 
