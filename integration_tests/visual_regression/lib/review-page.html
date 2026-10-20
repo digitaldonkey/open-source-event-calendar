@@ -166,6 +166,10 @@
             }
         };
         const approvable = (r) => failed(r) && r.current && r.ref;
+        const statusText = (r) => (approved(r)
+            ? `approved ${new Date(r.approvedAt).toLocaleString()}`
+            : approvable(r) && checked.has(r.ref) ? 'approval pending (run the command)'
+                : failed(r) ? (r.ratio ? `differs: ${(r.ratio * 100).toFixed(2)} % (${r.pixels} px)` : r.status) : 'unchanged');
         function renderApprovals() {
             const refs = data.rows.filter((r) => approvable(r) && checked.has(r.ref)).map((r) => r.ref);
             $('approvals').classList.toggle('on', refs.length > 0);
@@ -201,7 +205,8 @@
 
         function render() {
             document.querySelectorAll('[data-status]').forEach((b) => b.classList.toggle('on', b.dataset.status === state.status));
-            const rows = data.rows.filter((r) => ('all' === state.status || kind(r) === state.status)
+            const rows = data.rows.filter((r) => ('all' === state.status || kind(r) === state.status
+                    || ('approved' === state.status && approvable(r) && checked.has(r.ref)))
                 && (!state.project || r.project === state.project)
                 && (!state.theme || r.theme === state.theme)
                 && (!state.width || `${r.width} px` === state.width)
@@ -209,14 +214,21 @@
             visible = rows;
             $('rows').replaceChildren(...rows.map((r) => {
                 const pending = approvable(r) && checked.has(r.ref);
-                const status = approved(r)
-                    ? `approved ${new Date(r.approvedAt).toLocaleString()}`
-                    : pending ? 'approval pending (run the command)'
-                        : failed(r) ? (r.ratio ? `differs: ${(r.ratio * 100).toFixed(2)} % (${r.pixels} px)` : r.status) : 'unchanged';
+                // Checking a box updates only its row and the approvals bar: a re-render rebuilt every row (images
+                // reload with no height) and the page jumped. The scroll position is kept on the row.
                 const box = approvable(r) ? el('label', {class: 'approve'},
                     Object.assign(el('input', {type: 'checkbox'}), {
                         checked: pending,
-                        onchange: (e) => { e.target.checked ? checked.add(r.ref) : checked.delete(r.ref); saveChecked(); render(); },
+                        onchange: (e) => {
+                            const section = e.target.closest('section');
+                            const top = section.getBoundingClientRect().top;
+                            e.target.checked ? checked.add(r.ref) : checked.delete(r.ref);
+                            saveChecked();
+                            section.classList.toggle('pending', e.target.checked);
+                            section.querySelector('.status').textContent = statusText(r);
+                            renderApprovals();
+                            window.scrollBy(0, section.getBoundingClientRect().top - top);
+                        },
                     }), 'approve') : '';
                 // Approved: the previous baseline and the approved current image (now the baseline).
                 const images = approved(r)
@@ -231,7 +243,7 @@
                     el('div', {class: 'head'},
                         el('span', {class: 'title'}, r.titles.join(' › ')),
                         el('span', {class: 'chip'}, r.project),
-                        el('span', {class: 'status'}, status),
+                        el('span', {class: 'status'}, statusText(r)),
                         r.size ? el('span', {class: 'chip'}, `size ${r.size}`) : '',
                         box),
                     images,
