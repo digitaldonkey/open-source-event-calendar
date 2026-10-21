@@ -25,6 +25,7 @@ use Osec\App\View\Admin\AdminPageManageTaxonomies;
 use Osec\App\View\Admin\AdminPageManageThemes;
 use Osec\App\View\Admin\AdminPageSettings;
 use Osec\App\View\Admin\AdminPageThemeOptions;
+use Osec\App\View\Calendar\CalendarPageView;
 use Osec\App\View\Calendar\CalendarShortcodeView;
 use Osec\App\View\Event\EventAvatarView;
 use Osec\App\View\Event\EventContentView;
@@ -388,6 +389,10 @@ class BootstrapController
             function ($atts) use ($app) {
                 if (EventContentView::factory($app)->is_filtering_content()) {
                     // No calendars inside event content, see EventContentView::is_filtering_content().
+                    return '';
+                }
+                if (CalendarPageView::factory($app)->is_calendar_page_request()) {
+                    // The calendar page shows its own calendar only.
                     return '';
                 }
                 if ($this->app->settings->get('feature_shortcodes')) {

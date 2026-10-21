@@ -65,7 +65,14 @@ class BlockController extends OsecBaseClass
                             // No calendars inside event content, see EventContentView::is_filtering_content().
                             return '';
                         }
-                        $content .= '<div ' . get_block_wrapper_attributes() . '>';
+                        if (CalendarPageView::factory($this->app)->is_calendar_page_request()) {
+                            // The calendar page shows its own calendar only.
+                            return '';
+                        }
+                        $wrapper = 'full' === ($attributes['align'] ?? '')
+                            ? ['class' => CalendarPageView::edge_padding_class()]
+                            : [];
+                        $content .= '<div ' . get_block_wrapper_attributes($wrapper) . '>';
                         $content .= $this->getContent($this->transformAttributes($attributes));
                         $content .= '</div>';
 
@@ -190,7 +197,7 @@ class BlockController extends OsecBaseClass
     {
         $request = new RequestParser($this->app, $query, $query['action']);
         $request->parse();
-        $page_content = CalendarPageView::factory($this->app)->get_content($request);
+        $page_content = CalendarPageView::factory($this->app)->get_content($request, 'render-command', 'none');
         FrontendCssController::factory($this->app)
                              ->add_link_to_html_for_frontend();
         ScriptsFrontendController::factory($this->app)->load_frontend_js(true);
