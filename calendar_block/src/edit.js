@@ -173,20 +173,38 @@ export default function Edit(props) {
 									setAttributes(obj)
 								}}
 							/>
-							<p>
-								<BoolSwitch
-									labelText={__(
-										'Keep all events expanded (disables toggler)',
-										'open-source-event-calendar'
-									)}
-									value={attributes.agendaToggle}
-									onChange={(val) => {
-										setAttributes({
-											agendaToggle: val
-										})
-									}}
-								/>
-							</p>
+							<RadioControl
+								label={__(
+									'Agenda events',
+									'open-source-event-calendar'
+								)}
+								selected={
+									// Blocks saved before agendaEvents existed only carry agendaToggle.
+									attributes.agendaEvents !== 'global'
+										? attributes.agendaEvents
+										: (attributes.agendaToggle === true ? 'expanded' : 'global')
+								}
+								options={[
+									{
+										label: __('Use the global setting', 'open-source-event-calendar'),
+										value: 'global'
+									},
+									{
+										label: __('Expanded (no Expand/Collapse all)', 'open-source-event-calendar'),
+										value: 'expanded'
+									},
+									{
+										label: __('Collapsed, with Expand/Collapse all', 'open-source-event-calendar'),
+										value: 'collapsed'
+									},
+								]}
+								onChange={(val) => {
+									setAttributes({
+										agendaEvents: val,
+										agendaToggle: false
+									})
+								}}
+							/>
 						</Reveal>
 				<p>
 				<strong>{__(
