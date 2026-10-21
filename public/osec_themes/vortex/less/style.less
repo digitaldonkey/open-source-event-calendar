@@ -949,6 +949,24 @@ a.ai1ec-custom-filter {
   &.ai1ec-left.ai1ec-popup-in-oneday-view {
     margin-left: 49px;
   }
+
+  // Week/day popover above or below the event (anchor_popover in calendar.js): a transparent strip as tall as the
+  // arrow's overhang belongs to the popover, so the pointer moving from the event to the popover never crosses an
+  // empty gap that closes it, also away from the arrow. calendar.js sets --osec-popover-bridge to the measured overhang.
+  &.ai1ec-top::before,
+  &.ai1ec-bottom::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: var(--osec-popover-bridge, 0);
+  }
+  &.ai1ec-top::before {
+    top: 100%;
+  }
+  &.ai1ec-bottom::before {
+    bottom: 100%;
+  }
 }
 
 .ai1ec-popup-title {
