@@ -194,7 +194,12 @@ class CalendarShortcodeView extends OsecBaseClass
         }
         $request = new RequestParser($this->app, $query, $view);
         $request->parse();
-        $page_content = CalendarPageView::factory($this->app)->get_content($request, 'shortcode');
+        // WordPress alignment like a block, "wide" unless the shortcode asks for another.
+        $align = isset($atts['align']) ? strtolower(trim((string) $atts['align'])) : 'wide';
+        if ( ! in_array($align, CalendarPageView::ALIGNMENTS, true)) {
+            $align = 'wide';
+        }
+        $page_content = CalendarPageView::factory($this->app)->get_content($request, 'shortcode', $align);
         FrontendCssController::factory($this->app)
                              ->add_link_to_html_for_frontend();
         ScriptsFrontendController::factory($this->app)->load_frontend_js(true);

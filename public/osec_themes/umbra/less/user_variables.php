@@ -47,6 +47,13 @@ return [
         'tab'         => 'general',
         'type'        => 'size',
     ],
+    'agendaMaxWidth' => [
+        'value'       => '45em',
+        'description' => __('Agenda maximum width', 'open-source-event-calendar'),
+        'tab'         => 'agenda',
+        'type'        => 'size',
+        'placeholder' => __('CSS width, e.g. 45em', 'open-source-event-calendar'),
+    ],
     'tableBackground' => [
         'value'       => '#000000',
         'description' => __('Table background', 'open-source-event-calendar'),

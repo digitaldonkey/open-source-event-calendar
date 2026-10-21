@@ -489,35 +489,28 @@ input.ai1ec-timepicker[readonly] {
 }
 
 // ========================
-// = Namespaced overrides =
+// = Calendar width       =
 // ========================
-#osec-container {
-  max-width: var(--wp--style--global--wide-size);
-  margin: 0 auto;
-  .ai1ec-agenda-view {
-    max-width: var(--wp--style--global--wide-size);
-  }
-  // Applies for calendar page and Shortcode. Not in Blocks.
-  .wp-block-post-content > & {
-    .ai1ec-agenda-view {
-      max-width: var(--wp--style--global--content-size);
-      margin: 0 auto;
-      @media (min-width: @screen-sm) {
-        padding: 2em var(--wp--style--root--padding-right) 2em var(--wp--style--root--padding-left);
-      }
-    }
-  }
-  // Calendar block set to full width (its own wrapper, not a full width template part around it): all views use the
-  // whole width with a small margin, only agenda is restricted in width.
-  .alignfull.wp-block-open-source-event-calendar-osec-calendar-classic > & {
+// The calendar sets no width of its own: like a block, it takes the width of where it is placed (the theme's layout,
+// the page template, the block's alignment, the alignment class of the calendar page and shortcode). It adds only:
+// - the agenda limit: filters, toolbar and list stay within the Theme Option "Agenda maximum width", unless
+//   --osec-agenda-max-width is set above the calendar (Additional CSS, a page, a block's Custom CSS). :has() follows a
+//   view switch in the browser, which leaves #osec-container's view-* class as rendered.
+// - edge padding at full width: has-global-padding in block themes (WordPress' root padding), this class elsewhere.
+#ai1ec-calendar:has(.ai1ec-agenda-view) {
+  max-width: var(--osec-agenda-max-width, @agenda-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  @media print {
     max-width: none;
-    margin-left: .5em;
-    margin-right: .5em;
-    &.view-agenda {
-      margin: 0 auto;
-      max-width: var(--wp--style--global--wide-size);
-    }
   }
+}
+
+// On the inner box: themes reset the padding of .alignfull (Kadence: `.entry-content .alignfull`). The class sits on a
+// block's wrapper or on the shortcode's and calendar page's #osec-container.
+.osec-edge-padding #ai1ec-calendar {
+  padding-left: 1em;
+  padding-right: 1em;
 }
 
 .timely {

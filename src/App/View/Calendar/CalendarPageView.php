@@ -61,16 +61,70 @@ class CalendarPageView extends OsecBaseClass
     }
 
     /**
+     * WordPress alignments the calendar page and the shortcode accept ("none" = the content width).
+     */
+    public const ALIGNMENTS = ['none', 'wide', 'full'];
+
+    /**
+     * CSS classes for a calendar aligned like a block: the theme's alignwide/alignfull rules size it, and a full-width
+     * calendar keeps its content off the window edges.
+     *
+     * @param  string  $align  One of self::ALIGNMENTS; anything else counts as "wide".
+     *
+     * @return string Space-separated classes, '' for "none".
+     */
+    public static function alignment_classes(string $align): string
+    {
+        return match ($align) {
+            'none' => '',
+            'full' => 'alignfull ' . self::edge_padding_class(),
+            default => 'alignwide',
+        };
+    }
+
+    /**
+     * Class that keeps a full-width calendar's content off the window edges.
+     *
+     * Block themes: has-global-padding, WordPress' own root padding (the inset of the theme's header and footer when
+     * the theme uses root padding aware alignments; otherwise the body is padded already and the class does nothing).
+     * Classic themes have no root padding: the plugin's own padding.
+     *
+     * @return string
+     */
+    public static function edge_padding_class(): string
+    {
+        return wp_is_block_theme() ? 'has-global-padding' : 'osec-edge-padding';
+    }
+
+    /**
+     * Whether this request shows the calendar page set in the settings.
+     *
+     * Its calendar is appended to the page (RenderHtml) and follows the calendar URLs; a calendar block or shortcode on
+     * the same page renders nothing, so it shows exactly one calendar.
+     *
+     * @return bool
+     */
+    public function is_calendar_page_request(): bool
+    {
+        $page_id = (int) $this->app->settings->get('calendar_page_id');
+
+        return $page_id > 0 && is_page($page_id);
+    }
+
+    /**
      * Get the content if the calendar page
      *
      * @param  RequestParser  $request  Request object.
      * @param  string  $caller  Method caller, expected one of
      *                                            ['shortcode', 'render-command']
      *                                            Defaults to 'render-command'.
+     * @param  string  $align  WordPress alignment of the calendar, one of self::ALIGNMENTS: 'wide' for the calendar
+     *                         page and the shortcode by default, 'none' for a block (its wrapper carries the
+     *                         alignment).
      *
      * @return string|array Content (arbitrary WTF)
      */
-    public function get_content(RequestParser $request, $caller = 'render-command')
+    public function get_content(RequestParser $request, $caller = 'render-command', string $align = 'wide')
     {
         // Get args for the current view; required to generate HTML for views
         // dropdown list, categories, tags, subscribe buttons, and the view itself.
@@ -210,7 +264,9 @@ class CalendarPageView extends OsecBaseClass
                 'subscribe_buttons' => $subscribe_buttons,
                 'agenda_events_expanded' => $this->app->settings->get('agenda_events_expanded'),
                 'view_type' => $action,
-                'osec_calendar_classes' => 'view-' . esc_attr($view_args['action']),
+                'osec_calendar_classes' => trim(
+                    'view-' . esc_attr($view_args['action']) . ' ' . self::alignment_classes($align)
+                ),
 
                 /**
                  * Add Html above calendar
