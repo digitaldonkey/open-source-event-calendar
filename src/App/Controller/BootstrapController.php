@@ -44,6 +44,7 @@ use Osec\Exception\TimezoneException;
 use Osec\Http\Request\Request;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Request\RequestRedirect;
+use Osec\Theme\ThemeFinder;
 use Osec\Theme\ThemeLoader;
 use ErrorException;
 use WP_Post;
@@ -152,8 +153,8 @@ class BootstrapController
     }
 
     /**
-     * Set the default theme if no theme is set, or populate theme info array if
-     * insufficient information is currently being stored.
+     * Keeps the option osec_current_theme usable: sets the default theme if none is set or the value is invalid,
+     * and finds the theme again by name when its folder is no longer at the stored path.
      *
      * @uses apply_filters() Calls 'osec_pre_save_current_theme' hook to allow
      *       overwriting of theme information before being stored.
@@ -161,46 +162,66 @@ class BootstrapController
     protected function verifyTheme(): void
     {
         $theme = $this->app->options->get('osec_current_theme', []);
-        if ( ! empty($theme) && self::is_valid_theme($theme)) {
+        $valid = ! empty($theme) && self::is_valid_theme($theme);
+        if ($valid && is_dir($theme['theme_dir'])) {
             return;
         }
 
-        // Undefined, or a value the theme loader cannot use (T5: a fatal error on every request): the default theme.
-        $default = $this->defaultTheme;
+        // The stored paths are absolute, so a site moved to another path or a renamed plugin folder leaves them
+        // stale (T11): the same theme by name, Theme Options kept.
+        if ($valid) {
+            $found = ThemeFinder::factory($this->app)->find_theme($theme['stylesheet']);
+            if (null !== $found) {
+                $found = $this->pre_save_theme($found);
+                $this->app->options->set('osec_current_theme', $found);
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- a stale setting repaired.
+                error_log(
+                    sprintf(
+                        'osec: calendar theme folder %s not found, theme "%s" now read from %s.',
+                        $theme['theme_dir'],
+                        $found['stylesheet'],
+                        $found['theme_dir']
+                    )
+                );
+                FrontendCssController::factory($this->app)->request_compile();
 
-        /**
-         * Alter default theme if no theme is set.
-         *
-         * @since 1.0
-         *
-         * @param  array  $theme  Array of Less variables
-         */
-        $default = apply_filters('osec_pre_save_current_theme', $default);
-        if ( ! self::is_valid_theme($default)) {
-            $default = $this->defaultTheme;
+                return;
+            }
         }
+
+        // Undefined, a value the theme loader cannot use (T5: a fatal error on every request) or a theme that no
+        // longer exists: the default theme.
+        $default = $this->pre_save_theme($this->defaultTheme);
         $this->app->options->set('osec_current_theme', $default);
         if (empty($theme)) {
             return;
         }
 
+        if ($valid) {
+            $log_message = sprintf('osec: calendar theme "%s" not found', $theme['stylesheet']);
+            /* translators: 1: calendar theme name that was not found, 2: calendar theme name now used, e.g. plana */
+            $notice = __(
+                'The calendar theme "%1$s" was not found and has been replaced by the theme "%2$s".',
+                'open-source-event-calendar'
+            );
+        } else {
+            $log_message = sprintf(
+                'osec: option osec_current_theme was %s',
+                is_array($theme) ? 'an array without stylesheet, theme_dir or theme_url' : gettype($theme)
+            );
+            /* translators: %s: calendar theme name, e.g. plana */
+            $notice = __(
+                'The calendar theme setting was invalid and has been reset to the theme "%s".',
+                'open-source-event-calendar'
+            );
+        }
         // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- a broken setting repaired, for the admin.
-        error_log(
-            sprintf(
-                'osec: option osec_current_theme was %s, reset to the calendar theme "%s".',
-                is_array($theme) ? 'an array without stylesheet, theme_dir or theme_url' : gettype($theme),
-                $default['stylesheet']
-            )
-        );
+        error_log(sprintf('%s, reset to the calendar theme "%s".', $log_message, $default['stylesheet']));
         NotificationAdmin::factory($this->app)->store(
             esc_html(
-                sprintf(
-                    /* translators: %s: calendar theme name, e.g. plana */
-                    __(
-                        'The calendar theme setting was invalid and has been reset to the theme "%s".',
-                        'open-source-event-calendar'
-                    ),
-                    $default['stylesheet']
+                ($valid
+                    ? sprintf($notice, $theme['stylesheet'], $default['stylesheet'])
+                    : sprintf($notice, $default['stylesheet'])
                 ) . ' ' . __(
                     'Choose your calendar theme again under Events > Calendar Themes.',
                     'open-source-event-calendar'
@@ -213,6 +234,31 @@ class BootstrapController
         );
         // Theme Options stay (decision F4); the CSS is compiled for the new theme.
         FrontendCssController::factory($this->app)->request_compile();
+    }
+
+    /**
+     * Runs a theme the bootstrap is about to store through the filter osec_pre_save_current_theme.
+     *
+     * @param  array  $theme  Value for the option osec_current_theme.
+     *
+     * @return array The filtered value if the theme loader can use it and its folder exists, else $theme.
+     */
+    private function pre_save_theme(array $theme): array
+    {
+        /**
+         * Alter the calendar theme before the plugin stores it by itself: the default theme when none is set or the
+         * setting is invalid, or the active theme found again by name when its folder moved (e.g. a site moved to
+         * another path). Not called when an admin activates a theme.
+         *
+         * A value without stylesheet, theme_dir and theme_url, or whose theme_dir is not a folder, is ignored.
+         *
+         * @since 1.0
+         *
+         * @param  array  $theme  Keys theme_root, theme_dir, theme_url, stylesheet.
+         */
+        $filtered = apply_filters('osec_pre_save_current_theme', $theme);
+
+        return self::is_valid_theme($filtered) && is_dir($filtered['theme_dir']) ? $filtered : $theme;
     }
 
     /**
