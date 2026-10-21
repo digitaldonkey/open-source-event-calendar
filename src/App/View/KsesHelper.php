@@ -146,6 +146,9 @@ class KsesHelper extends OsecBaseClass
                     'class'               => true,
                     'data-*'           => true,
                     'title'               => true,
+                    // The agenda's disabled pagination button (pagination.twig).
+                    'aria-label'          => true,
+                    'disabled'            => true,
                 ],
                 'td'     => [
                     'class' => true,
