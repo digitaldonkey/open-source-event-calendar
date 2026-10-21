@@ -147,10 +147,10 @@ $events = [
     ['Instant reminder (no end)', '12:00', null, [], ['free']],
     ['All-day family fair', '+1 day', '+1 day', ['sports'], ['family', 'outdoor'], ['allday' => true]],
     ['Three-day workshop', '+3 days 09:00', '+2 days 8 hours', ['workshops'], ['family']],
-    // Crosses the workshop: month view stacks the two bars (integration_tests/js_smoke).
+    // Crosses the workshop: month view stacks the two bars (integration_tests/mocha/js_smoke).
     ['Overlapping retreat (multi-day)', '+4 days 10:00', '+3 days', ['sports'], []],
     ['No category, no tag', '+2 days 15:00', '+1 hour', [], []],
-    // Single event page with a map (integration_tests/js_smoke).
+    // Single event page with a map (integration_tests/mocha/js_smoke).
     [
         'Open-air cinema (map)',
         '+2 days 21:00',

@@ -9,13 +9,14 @@ use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Cache\CacheFile;
 use Osec\Cache\CachePath;
-use Osec\Exception\BootstrapException;
 use Osec\Exception\Exception;
+use Osec\Exception\InvalidArgumentException;
 use Osec\Http\Response\RenderJson;
 use Osec\Twig\TwigDebugExtension;
 use Osec\Twig\TwigExtension;
 use Osec\Twig\TwigLoader;
 use Twig\Environment;
+use WP_Theme;
 
 /**
  * Loads files for admin and frontend.
@@ -535,8 +536,8 @@ class ThemeLoader extends OsecBaseClass
      *
      * @param  bool  $silent  Whether notify admin or not.
      *
-     * @return array Method does not return.
-     * @throws BootstrapException
+     * @return array The activated theme (osec_current_theme).
+     * @throws InvalidArgumentException When vortex is missing.
      */
     public function switch_to_vortex($silent = false): array
     {
@@ -544,14 +545,7 @@ class ThemeLoader extends OsecBaseClass
         if (isset($current_theme['stylesheet']) && 'vortex' === $current_theme['stylesheet']) {
             return $current_theme;
         }
-        $root  = OSEC_PATH . 'public/' . OSEC_THEME_FOLDER;
-        $theme = [
-            'theme_root' => $root,
-            'theme_dir'  => $root . DIRECTORY_SEPARATOR . 'vortex',
-            'theme_url'  => OSEC_URL . '/public/' . OSEC_THEME_FOLDER . '/vortex',
-            'stylesheet' => 'vortex',
-        ];
-        $this->switch_theme($theme);
+        $theme = $this->switch_to('vortex');
         if ( ! $silent) {
             NotificationAdmin::factory($this->app)->store(
                 __(
@@ -566,6 +560,39 @@ class ThemeLoader extends OsecBaseClass
                 true
             );
         }
+
+        return $theme;
+    }
+
+    /**
+     * Activates a calendar theme by name.
+     *
+     * Paths and URL come from the theme scan (ThemeFinder::get_themes()), never from the caller. When two theme
+     * folders hold a theme of the same name, the one the admin Themes list shows is activated: the later folder in
+     * ThemeFinder::get_theme_dirs(), i.e. the plugin's own theme over an unrenamed copy in wp-content/themes.
+     *
+     * @param  string  $name  Theme folder name (stylesheet), e.g. "plana".
+     * @param  bool  $delete_variables  See switch_theme().
+     *
+     * @return array The activated theme (osec_current_theme).
+     * @throws InvalidArgumentException When no theme without errors has that name.
+     */
+    public function switch_to(string $name, bool $delete_variables = true): array
+    {
+        $themes = ThemeFinder::factory($this->app)->get_themes();
+        $found  = $themes[$name] ?? null;
+        if ( ! $found instanceof WP_Theme || false !== $found->errors()) {
+            throw new InvalidArgumentException(
+                sprintf('Unknown calendar theme "%s".', esc_html($name))
+            );
+        }
+        $theme = [
+            'theme_root' => $found->get_theme_root(),
+            'theme_dir'  => $found->get_stylesheet_directory(),
+            'theme_url'  => $found->get_stylesheet_directory_uri(),
+            'stylesheet' => $found->get_stylesheet(),
+        ];
+        $this->switch_theme($theme, $delete_variables);
 
         return $theme;
     }

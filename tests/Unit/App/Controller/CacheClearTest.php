@@ -93,6 +93,7 @@ class CacheClearTest extends TestBase
 
         $this->assertSame(200, $response->get_status());
         $this->assertTrue($response->get_data()['css']['ok']);
+        $this->assertTrue($response->get_data()['ok'], 'The settings page colors the result by ok.');
         $this->assertNotEmpty($response->get_data()['message']);
         $css = $this->stored_css();
         $this->assertGreaterThan(100000, strlen((string) $css));
@@ -120,6 +121,7 @@ class CacheClearTest extends TestBase
 
         $this->assertSame(200, $response->get_status());
         $this->assertFalse($response->get_data()['css']['ok']);
+        $this->assertFalse($response->get_data()['ok']);
         $this->assertStringContainsString('Simulated LESS error', $response->get_data()['message']);
         $this->assertStringContainsString('previous CSS', $response->get_data()['message']);
         $this->assertSame('/* old */', $this->stored_css());

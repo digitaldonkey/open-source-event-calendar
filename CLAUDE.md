@@ -121,7 +121,7 @@ Do not access production databases.
 | `public/osec_themes/` | Plugin-specific themes (based on `vortex/`) |
 | `calendar_block/` | WordPress Gutenberg blocks |
 | `tests/` | PHPUnit unit tests |
-| `integration_tests/` | Mocha/Selenium automated browser tests |
+| `integration_tests/` | Browser tests, npm workspaces root: `mocha/` (Mocha/Selenium), `visual_regression/` (Playwright) |
 | `languages/` | WordPress localization files |
 | `vendor/` | Composer dependencies |
 | `assets/` | WordPress.org plugin assets (screenshots, banners) |
@@ -445,9 +445,7 @@ plugin's own wrapper element (`.timely`, via `bootstrap/scaffolding.less` import
 umbra `0.8rem`), so *switching theme changes the base font size* unless a value is saved in
 `osec_less_variables`. Rendered box heights then shift - don't read that as a LESS edit having
 broken something. **Check the base font size after every theme switch**, and when comparing two
-themes, pin them to the same value so only one variable moves
-(`integration_tests/responsive_compare/responsive-compare.sh` takes `BASE_FONT=13px` for this
-and prints the effective value after each switch).
+themes, pin them to the same value so only one variable moves.
 
 Note that switching theme *deletes* `osec_less_variables`, discarding any tuned theme options -
 capture and restore them around anything that switches themes.
@@ -491,7 +489,7 @@ failure mode, not a compile error.
   ```
 - What it does: compiles each `.twig` file to twig-js, then splices the compiled output into `public/js/pages/calendar.js` (the only served copy, inherited from the original vendor's unknown build tooling) — replacing only the content between matching `/*REPLACE:<template>.twig*/` marker comments — and writes the twig.js runtime (`node_modules/twig/twig.min.js`) between `/*BEGIN:twig.js runtime*/` and `/*END:twig.js runtime*/`. The standalone `public/js/{agenda,oneday,month}.js` copies were never loaded and are gone since 1.2.0.
 - **twig.js 3 with `autoescape: true`** since 1.2.0 (B18; 0.7.2 had no autoescape and printed event values raw). The templates escape like PHP Twig, so `|raw` / `|e('html_attr')` in them mean the same in both. The browser output was byte-identical to 0.7.2 before autoescape and identical to PHP after it (except the view links the server builds per request). twig 3 needs Node >= 22 (`twig_to_js_transform/.nvmrc`: `lts/krypton`).
-- **Escaping test**: `integration_tests/js_smoke/frontend.spec.js` "prints event values as text in a view rendered by twig.js", with the seeded "Hostile venue" event. The smoke suite runs against a sandbox with `BASE_URL=https://claude.ddev-wordpress.ddev.site OSEC_TEST_HOST_RULES='MAP *.ddev-wordpress.ddev.site ddev-router'` (seed it there first: `WP_SANDBOX_DB=claude /usr/local/bin/wp eval-file bin/dev-seed-block-test-data.php`).
+- **Escaping test**: `integration_tests/mocha/js_smoke/frontend.spec.js` "prints event values as text in a view rendered by twig.js", with the seeded "Hostile venue" event. The smoke suite runs against a sandbox with `BASE_URL=https://claude.ddev-wordpress.ddev.site OSEC_TEST_HOST_RULES='MAP *.ddev-wordpress.ddev.site ddev-router'` (seed it there first: `WP_SANDBOX_DB=claude /usr/local/bin/wp eval-file bin/dev-seed-block-test-data.php`).
 - **The calendar bundle is served through PHP** (`?osec_render_js=calendar.js`, `max-age=0`), not as a static file - a fresh browser session always gets the current build.
 - No original build tooling exists for these templates (this script is a workaround). If you'd rather not deal with it after a Twig edit, `use_frontend_rendering` can be turned off in OSEC Settings so only backend rendering is used.
 
@@ -552,7 +550,7 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
   calendar page on teardown** - including one you were using - leaving `calendar_page_id` pointing at a
   trashed post, i.e. the "no calendar page set" state described below. Ask before running it, and know the
   ways to trigger it *indirectly*:
-  - `vendor/bin/grumphp run` with no `--testsuite` (the `integration_tests` task, `grumphp.yml:40-43`)
+  - `vendor/bin/grumphp run` with no `--testsuite` (the `integration_tests` task in `grumphp.yml`)
   - `vendor/bin/grumphp run --testsuite=all_tests`, and `ddev grumphp all`
   - Recovery: untrash the page, restore its slug and `publish` status, set `calendar_page_id` back to it, and
     reset the `CacheMemory` `calendar_base_page` - all four, or routing stays broken.
@@ -578,6 +576,12 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
   - `compile-less-production.sh` - Compiles LESS for production
   - `get-latest-plugin-review-phpcs-rulesets.sh` - Fetch latest PHPCS rulesets
   - `install-wp-tests.sh` - WordPress test environment setup
+- `wp osec content generate` - test content around May of next year (dataset `tests/data/content/`); replaces only
+  its own earlier content and refuses foreign calendar data, so use a `try_*` sandbox on a used site
+- `integration_tests/visual_regression/` (`ddev osec-review`, `ddev osec-approve`) - Playwright screenshots compared
+  with a baseline set, review page with approval. See its `README.md`
+- `bin/screenshots/` (`ddev osec-screenshots`) - the WordPress.org `assets/screenshot-*.png`
+- `bin/js-rename-check/` - proves a hand edit of a minified bundle changed only names/formatting
 - `twig_to_js_transform/` - Converts Twig templates for frontend use
 
 ### PhpStorm MCP (JetBrains IDE integration)
@@ -887,7 +891,7 @@ Two things this surfaced on 2026-09-24, worth re-checking rather than re-derivin
 
 - **The `Add daily repeating event` flakes are the near-midnight bug.** All flakes (3× per theme)
   came from one workflow created `2026-09-22T22:23:06Z`. CI runs `TZ: "Europe/Berlin"`
-  (`.circleci/config.yml:51`, matching `integration_tests/settings.js`), so that is **00:23 local** —
+  (`.circleci/config.yml:51`, matching `integration_tests/mocha/settings.js`), so that is **00:23 local** —
   inside the `[00:00, 01:00)` window described under *Data Model: Events & Recurrence*. One workflow
   is corroboration, not proof.
 - **The Selenium matrix is ~69% of CI credits** (`release_test_job` ×4 ≈ 16,956 of 24,604 over ~42

@@ -3,7 +3,7 @@
 namespace Osec\Command;
 
 use Osec\App\View\Admin\AdminPageManageThemes;
-use Osec\Http\Request\ParamType;
+use Osec\Exception\InvalidArgumentException;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderRedirect;
 use Osec\Theme\ThemeLoader;
@@ -32,21 +32,12 @@ class ChangeTheme extends SaveAbstract
                 sanitize_key($_REQUEST[AdminPageManageThemes::$NONCE['nonce_name']],),
                 AdminPageManageThemes::$NONCE['action']
             )
-            && RequestParser::has_param('osec_theme')
-            && RequestParser::has_param('osec_theme_root')
-            && RequestParser::has_param('osec_theme_dir')
-            && RequestParser::has_param('ai1ec_theme_url')
         ) {
-            $stylesheet = preg_replace('|[^a-z_\-]+|i', '', RequestParser::get_param('osec_theme'));
-
-            ThemeLoader::factory($this->app)->switch_theme(
-                [
-                    'theme_root' => realpath(RequestParser::get_param('osec_theme_root')),
-                    'theme_dir'  => realpath(RequestParser::get_param('osec_theme_dir')),
-                    'theme_url'  => RequestParser::get_param('ai1ec_theme_url', '', ParamType::Url),
-                    'stylesheet' => $stylesheet,
-                ]
-            );
+            try {
+                ThemeLoader::factory($this->app)->switch_to(RequestParser::get_param('osec_theme'));
+            } catch (InvalidArgumentException $e) {
+                wp_die(esc_html__('Unknown calendar theme.', 'open-source-event-calendar'));
+            }
 
             // Return user to themes list page with success message.
             return [
@@ -77,8 +68,6 @@ class ChangeTheme extends SaveAbstract
     {
         return RequestParser::get_param('osec_action') === AdminPageManageThemes::$NONCE['action']
                 && current_user_can('switch_osec_themes')
-                && is_dir(RequestParser::get_param('osec_theme_dir'))
-                && is_dir(RequestParser::get_param('osec_theme_root'))
                 && RequestParser::has_param('osec_theme')
                 && check_admin_referer(
                     AdminPageManageThemes::$NONCE['action'],
