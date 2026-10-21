@@ -101,6 +101,9 @@ class KsesHelper extends OsecBaseClass
                     'itemtype'    => true,
                 ],
                 'i'      => [
+                    // Category colour (event-categories.twig), icon tooltips (event-single.twig).
+                    'style' => true,
+                    'title' => true,
                     'class' => true,
                 ],
                 'span'   => [
@@ -258,6 +261,9 @@ class KsesHelper extends OsecBaseClass
         if (null === $backend) {
             $backend = [
                 'a' => [
+                    // Organize Events dropdown (organize/header.twig).
+                    'aria-expanded' => true,
+                    'role' => true,
                     'class' => true,
                     'data-*' => true,
                     'href' => true,
@@ -312,6 +318,8 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                 ],
                 'fieldset' => [
+                    // Setting fieldsets (setting/select-fieldsets.twig).
+                    'id' => true,
                     'class' => true,
                 ],
                 'form' => [
@@ -380,6 +388,8 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                 ],
                 'li' => [
+                    // Organize Events tabs (organize/header.twig, tab.twig).
+                    'role' => true,
                     'class' => true,
                     'id' => true,
                 ],
@@ -458,6 +468,8 @@ class KsesHelper extends OsecBaseClass
                     'role' => true,
                 ],
                 'details' => [
+                    // Feed row (feed_row.twig).
+                    'id' => true,
                     'class' => true,
                 ],
                 'summary' => [
