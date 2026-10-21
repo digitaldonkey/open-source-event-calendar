@@ -581,7 +581,7 @@ See `TESTING.md` for the full checklist, one-time setup, integration-test prereq
 - `integration_tests/visual_regression/` (`ddev osec-review`, `ddev osec-approve`) - Playwright screenshots compared
   with a baseline set, review page with approval. See its `README.md`
 - `bin/screenshots/` (`ddev osec-screenshots`) - the WordPress.org `assets/screenshot-*.png`
-- `bin/js-equivalent/` - proves a hand edit of a minified bundle changed only names/formatting
+- `bin/js-rename-check/` - proves a hand edit of a minified bundle changed only names/formatting
 - `twig_to_js_transform/` - Converts Twig templates for frontend use
 
 ### PhpStorm MCP (JetBrains IDE integration)

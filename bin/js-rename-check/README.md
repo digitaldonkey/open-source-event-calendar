@@ -1,12 +1,12 @@
-# js-equivalent
+# js-rename-check
 
 Proves that a hand edit of a JS bundle (`public/js/pages/*.js`, whose original build tooling is lost) only renamed
 local names, changed formatting or comments.
 
 ```
-cd bin/js-equivalent && npm install && cd ../..                              # once
-node bin/js-equivalent/js-equivalent.js public/js/pages/calendar.js          # working tree vs HEAD
-node bin/js-equivalent/js-equivalent.js --rev=master public/js/pages/*.js    # vs another revision
+cd bin/js-rename-check && npm install && cd ../..                            # once
+node bin/js-rename-check/rename-check.js public/js/pages/calendar.js         # working tree vs HEAD
+node bin/js-rename-check/rename-check.js --rev=master public/js/pages/*.js   # vs another revision
 ```
 
 Or `npm run check -- <files>` from this folder (paths relative to where npm was called).
@@ -22,5 +22,5 @@ byte-identical exactly when nothing but local names, formatting and comments cha
 
 | File | Role |
 |---|---|
-| `js-equivalent.js` | The check (moved from `integration_tests/js-equivalent.js`, 2026-10-18). |
+| `rename-check.js` | The check (was `integration_tests/js-equivalent.js`, then `bin/js-equivalent/`). |
 | `package.json` | terser, pinned. |

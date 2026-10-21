@@ -284,18 +284,18 @@ Groups, one per bundle: `@js-calendar`, `@js-event`, `@js-backend` (common backe
 `@js-settings`, `@js-feeds`, `@js-categories`, `@js-less-variables`. The grid defaults to
 `http://selenium-chrome:4444/wd/hub` (`SELENIUM_REMOTE_URL` overrides it).
 
-### Checking a hand edit of a bundle: `js-equivalent.js`
+### Checking a hand edit of a bundle: `rename-check.js`
 
 `public/js/pages/*.js` are minified bundles without build tooling, edited by hand. To prove an edit only renamed
 local names (or reformatted, or changed comments), compare the terser-minified output (mangle on, compress off)
 at a git revision with the working tree; it must be byte-identical:
 
 ```bash
-node bin/js-equivalent/js-equivalent.js public/js/pages/calendar.js              # vs HEAD
-node bin/js-equivalent/js-equivalent.js --rev=master public/js/pages/*.js        # exit 1 if any file differs
+node bin/js-rename-check/rename-check.js public/js/pages/calendar.js             # vs HEAD
+node bin/js-rename-check/rename-check.js --rev=master public/js/pages/*.js       # exit 1 if any file differs
 ```
 
-Needs `npm install` in `bin/js-equivalent/` once (`bin/js-equivalent/README.md`). Run the JS smoke tests as well:
+Needs `npm install` in `bin/js-rename-check/` once (`bin/js-rename-check/README.md`). Run the JS smoke tests as well:
 the check says nothing about edits that are meant to change behaviour.
 
 ## Firefox (second browser)

@@ -1,11 +1,11 @@
 {
-  "name": "osec-js-equivalent",
+  "name": "osec-js-rename-check",
   "version": "1.0.0",
   "private": true,
   "description": "Proves that a hand edit of a JS bundle only renamed local names (terser, mangle on, compress off)",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "check": "node js-equivalent.js"
+    "check": "node rename-check.js"
   },
   "devDependencies": {
     "terser": "5.51.2"

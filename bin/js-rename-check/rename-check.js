@@ -6,9 +6,9 @@
  * deterministic short name, so the two outputs are byte-identical exactly when
  * nothing but local names, formatting and comments changed.
  *
- * From the plugin root (once: `npm install` in bin/js-equivalent/):
- *   node bin/js-equivalent/js-equivalent.js public/js/pages/calendar.js   # vs HEAD
- *   node bin/js-equivalent/js-equivalent.js --rev=master public/js/pages/*.js
+ * From the plugin root (once: `npm install` in bin/js-rename-check/):
+ *   node bin/js-rename-check/rename-check.js public/js/pages/calendar.js   # vs HEAD
+ *   node bin/js-rename-check/rename-check.js --rev=master public/js/pages/*.js
  *
  * Paths are relative to the current directory (for `npm run check`, the
  * directory npm was called from). Exit code 1 if any file differs.
@@ -26,7 +26,7 @@ const files = args.filter(a => !a.startsWith('--rev='));
 const options = {compress: false, mangle: true, format: {comments: false}};
 
 if (!files.length) {
-    console.error('usage: node bin/js-equivalent/js-equivalent.js [--rev=<git rev>] <file>...');
+    console.error('usage: node bin/js-rename-check/rename-check.js [--rev=<git rev>] <file>...');
     process.exit(2);
 }
 
