@@ -16,7 +16,6 @@ use Osec\Twig\TwigDebugExtension;
 use Osec\Twig\TwigExtension;
 use Osec\Twig\TwigLoader;
 use Twig\Environment;
-use WP_Theme;
 
 /**
  * Loads files for admin and frontend.
@@ -579,19 +578,12 @@ class ThemeLoader extends OsecBaseClass
      */
     public function switch_to(string $name, bool $delete_variables = true): array
     {
-        $themes = ThemeFinder::factory($this->app)->get_themes();
-        $found  = $themes[$name] ?? null;
-        if ( ! $found instanceof WP_Theme || false !== $found->errors()) {
+        $theme = ThemeFinder::factory($this->app)->find_theme($name);
+        if (null === $theme) {
             throw new InvalidArgumentException(
                 sprintf('Unknown calendar theme "%s".', esc_html($name))
             );
         }
-        $theme = [
-            'theme_root' => $found->get_theme_root(),
-            'theme_dir'  => $found->get_stylesheet_directory(),
-            'theme_url'  => $found->get_stylesheet_directory_uri(),
-            'stylesheet' => $found->get_stylesheet(),
-        ];
         $this->switch_theme($theme, $delete_variables);
 
         return $theme;

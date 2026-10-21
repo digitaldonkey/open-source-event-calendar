@@ -60,16 +60,21 @@ add_filter('osec_block_query_alter', $query $atts);
 ### osec_pre_save_current_theme <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter default theme if no theme is set.
+Alter the calendar theme before the plugin stores it by itself: the default theme when none is set or the setting is invalid, or the active theme found again by name when its folder moved (e.g. a site moved to another path). Not called when an admin activates a theme.
 
 ```php
 add_filter('osec_pre_save_current_theme', $theme);
 ```
 
+#### Description
+
+
+A value without stylesheet, theme_dir and theme_url, or whose theme_dir is not a folder, is ignored.
+
 #### Parameters
 
 
- - **$theme** <span style="color:crimson"> </span> Array of Less variables
+ - **$theme** <span style="color:crimson"> </span> Keys theme_root, theme_dir, theme_url, stylesheet.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -77,11 +82,15 @@ add_filter('osec_pre_save_current_theme', $theme);
 
 ```php
 /**
- * Alter default theme if no theme is set.
+ * Alter the calendar theme before the plugin stores it by itself: the default theme when none is set or the
+ * setting is invalid, or the active theme found again by name when its folder moved (e.g. a site moved to
+ * another path). Not called when an admin activates a theme.
+ *
+ * A value without stylesheet, theme_dir and theme_url, or whose theme_dir is not a folder, is ignored.
  *
  * @since 1.0
  *
- * @param  array  $theme  Array of Less variables
+ * @param  array  $theme  Keys theme_root, theme_dir, theme_url, stylesheet.
  *
  * @file src/App/Controller/BootstrapController.php
  */
@@ -5361,16 +5370,21 @@ add_filter('osec_block_query_alter', $query $atts);
 ### osec_pre_save_current_theme <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter default theme if no theme is set.
+Alter the calendar theme before the plugin stores it by itself: the default theme when none is set or the setting is invalid, or the active theme found again by name when its folder moved (e.g. a site moved to another path). Not called when an admin activates a theme.
 
 ```php
 add_filter('osec_pre_save_current_theme', $theme);
 ```
 
+#### Description
+
+
+A value without stylesheet, theme_dir and theme_url, or whose theme_dir is not a folder, is ignored.
+
 #### Parameters
 
 
- - **$theme** <span style="color:crimson"> </span> Array of Less variables
+ - **$theme** <span style="color:crimson"> </span> Keys theme_root, theme_dir, theme_url, stylesheet.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -5378,11 +5392,15 @@ add_filter('osec_pre_save_current_theme', $theme);
 
 ```php
 /**
- * Alter default theme if no theme is set.
+ * Alter the calendar theme before the plugin stores it by itself: the default theme when none is set or the
+ * setting is invalid, or the active theme found again by name when its folder moved (e.g. a site moved to
+ * another path). Not called when an admin activates a theme.
+ *
+ * A value without stylesheet, theme_dir and theme_url, or whose theme_dir is not a folder, is ignored.
  *
  * @since 1.0
  *
- * @param  array  $theme  Array of Less variables
+ * @param  array  $theme  Keys theme_root, theme_dir, theme_url, stylesheet.
  *
  * @file src/App/Controller/BootstrapController.php
  */
