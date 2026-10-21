@@ -196,6 +196,60 @@ class CalenderPageViewTest extends TestBase
         $this->run_get_exact_date($request, 1735686000);
     }
 
+    /**
+     * `exact_date` forms per input date format, all meaning 2 October 2026 unless noted. ISO is read under every
+     * format (the datepicker sends ISO since T13); the input format is read for older URLs, with `-` or `.` for `/`
+     * in def/us; anything else is not a date (false, the view then shows today). A query `?exact_date=` keeps its
+     * slashes; in a path segment they split it before it gets here (see the `21` row above).
+     */
+    public static function urlFormsAcrossFormatsProvider(): array
+    {
+        $oct2  = 1790892000; // 2026-10-02 00:00 Europe/Berlin
+        $feb10 = 1770678000; // 2026-02-10 00:00 Europe/Berlin, the same digits read the other way round
+
+        return [
+            'def iso'              => ['def', '2026-10-2', $oct2],
+            'def iso zero-padded'  => ['def', '2026-10-02', $oct2],
+            'def dashes'           => ['def', '2-10-2026', $oct2],
+            'def slashes (query)'  => ['def', '2/10/2026', $oct2],
+            'def dots'             => ['def', '2.10.2026', $oct2],
+            'def us order'         => ['def', '10-2-2026', $feb10],
+            'def iso slashes'      => ['def', '2026/10/02', false],
+            'us iso'               => ['us', '2026-10-2', $oct2],
+            'us dashes'            => ['us', '10-2-2026', $oct2],
+            'us slashes (query)'   => ['us', '10/2/2026', $oct2],
+            'us def order'         => ['us', '2-10-2026', $feb10],
+            'iso iso'              => ['iso', '2026-10-2', $oct2],
+            'iso iso zero-padded'  => ['iso', '2026-10-02', $oct2],
+            'iso def dashes'       => ['iso', '2-10-2026', false],
+            'iso dots'             => ['iso', '2.10.2026', false],
+            'iso iso slashes'      => ['iso', '2026/10/2', false],
+            'dot iso'              => ['dot', '2026-10-2', $oct2],
+            'dot dots'             => ['dot', '2.10.2026', $oct2],
+            'dot dashes'           => ['dot', '2-10-2026', false],
+            'dot slashes (query)'  => ['dot', '2/10/2026', false],
+        ];
+    }
+
+    /**
+     * T13: which `exact_date` values the calendar reads, for each input date format.
+     *
+     * @dataProvider urlFormsAcrossFormatsProvider
+     * @group request_params
+     */
+    public function test_get_exact_date_url_forms_across_formats(string $format, string $value, int|bool $expected)
+    {
+        global $osec_app;
+        $osec_app->settings->set('input_date_format', $format);
+        $osec_app->settings->set('exact_date', '');
+
+        $request = new RequestParser($osec_app, ['exact_date' => $value], 'month');
+        $request->parse();
+
+        $method = self::getPrivateMethod(CalendarPageView::class, 'get_exact_date');
+        $this->assertSame($expected, $method->invokeArgs(new CalendarPageView($osec_app), [$request]));
+    }
+
     public static function requestProviderBareAcrossFormats(): array
     {
         return [

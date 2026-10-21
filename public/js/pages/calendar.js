@@ -4134,7 +4134,8 @@ timely.define("domReady", [], function () {
             r.datepicker("update", r.attr("data-date")).datepicker("hide");
             return;
         }
-        r.datepicker("hide"), n = r.data("href"), s = t.format(), s = s.replace(/\//g, "-"), n = n.replace("__DATE__", s), T(i, r.data("type"), n)
+        // ISO like every other calendar link, whatever the input date format (the picker's display format).
+        r.datepicker("hide"), n = r.data("href"), s = t.format("yyyy-m-d"), n = n.replace("__DATE__", s), T(i, r.data("type"), n)
     }, L = function (t) {
         var n;
         typeof t.added != "undefined" ? n = $(t.added.element).data("href") : n = $("option[value=" + t.removed.id + "]", t.target).data("href"), data = {ai1ec: !0}, History.pushState(data, null, n)

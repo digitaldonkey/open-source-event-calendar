@@ -82,7 +82,7 @@ describe('JS smoke: frontend', function () {
             ));
             assert.ok(await clickDay(`td.ai1ec-day:not(.ai1ec-old):not(.ai1ec-new):not(.ai1ec-active):not(.ai1ec-today)`), 'no other day');
             await driver.wait(async () => (await driver.getCurrentUrl()) !== before, h.TIMEOUT, 'picking another day did not navigate');
-            assert.ok((await driver.getCurrentUrl()).includes(`exact_date~${day}-`), 'navigated to the picked day');
+            assert.match(await driver.getCurrentUrl(), new RegExp(`exact_date~\\d{4}-\\d{1,2}-${day}/`), 'ISO date of the picked day in the URL');
             await h.assertNoConsoleErrors(driver, 'date picker');
         });
 
@@ -168,4 +168,85 @@ describe('JS smoke: frontend', function () {
             await h.assertNoConsoleErrors(driver, 'single event');
         });
     });
+});
+
+/**
+ * T13: the date picker sends an ISO date whatever the input date format (Settings, "Input date format"), and the
+ * calendar opens the picked day. Each format is set in wp-admin, the picker is used in the day view, and the format
+ * found before the test is set back afterwards.
+ */
+describe('JS smoke: date picker per input date format', function () {
+    const SETTINGS = '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings';
+    // The day view opens on 15 January 2027; the picker goes to February and picks the 3rd. Read the other way
+    // round (2 March) the day would differ, so a day/month mix-up fails.
+    const START = 'action~oneday/exact_date~2027-1-15/';
+    const PICKED = {y: 2027, m: 2, d: 3};
+    // The picker's data-date as the server writes it for that day (UIDateFormats patterns, no zero padding).
+    const SHOWN = {def: '3/2/2027', us: '2/3/2027', iso: '2027-2-3', dot: '3.2.2027'};
+    let driver;
+    let original;
+    h.screenshotOnFailure(() => driver);
+
+    /**
+     * Saves the setting "Input date format" on the settings page.
+     *
+     * @param {string} format One of def, us, iso, dot.
+     */
+    async function setInputDateFormat(format) {
+        await h.open(driver, SETTINGS, ['scripts/admin_settings']);
+        await driver.executeScript(
+            "const s = document.getElementById('input_date_format'); s.value = arguments[0]; s.dispatchEvent(new Event('change'));",
+            format
+        );
+        const save = await h.click(driver, '#osec_save_settings');
+        await driver.wait(h.until.stalenessOf(save), h.TIMEOUT, 'settings form not sent');
+        await driver.wait(h.until.elementLocated(By.id('input_date_format')), h.TIMEOUT);
+        assert.strictEqual(
+            await driver.executeScript("return document.getElementById('input_date_format').value;"),
+            format,
+            `input date format ${format} not saved`
+        );
+    }
+
+    before(async function () {
+        driver = await h.buildDriver();
+        await h.login(driver);
+        await h.open(driver, SETTINGS, ['scripts/admin_settings']);
+        original = await driver.executeScript("return document.getElementById('input_date_format').value;");
+    });
+
+    after(async function () {
+        if (driver && original) {
+            await setInputDateFormat(original);
+        }
+        await driver?.quit();
+    });
+
+    for (const format of Object.keys(SHOWN)) {
+        it(`opens the picked day with input date format ${format}`, async function () {
+            await setInputDateFormat(format);
+            await h.open(driver, h.CAL_PATH + START, ['scripts/calendar']);
+            const before = await driver.getCurrentUrl();
+            await h.click(driver, '.ai1ec-minical-trigger');
+            await h.click(driver, '.ai1ec-datepicker .ai1ec-datepicker-days th.ai1ec-next');
+            assert.ok(await driver.executeScript(
+                "const c = [...document.querySelectorAll('.ai1ec-datepicker .ai1ec-datepicker-days td.ai1ec-day:not(.ai1ec-old):not(.ai1ec-new)')].find(e => e.offsetParent !== null && e.textContent.trim() === arguments[0]); if (c) { c.click(); } return !!c;",
+                String(PICKED.d)
+            ), `no day ${PICKED.d} in the picker`);
+            await driver.wait(async () => (await driver.getCurrentUrl()) !== before, h.TIMEOUT, 'picking a day did not navigate');
+
+            assert.ok(
+                (await driver.getCurrentUrl()).includes(`exact_date~${PICKED.y}-${PICKED.m}-${PICKED.d}/`),
+                `ISO date in the URL: ${await driver.getCurrentUrl()}`
+            );
+            await driver.wait(
+                async () => SHOWN[format] === await driver.executeScript(
+                    "return document.querySelector('.ai1ec-minical-trigger')?.getAttribute('data-date');"
+                ),
+                h.TIMEOUT,
+                `day view does not show ${SHOWN[format]}`
+            );
+            await h.assertNoConsoleErrors(driver, `date picker (${format})`);
+        });
+    }
 });
