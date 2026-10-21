@@ -89,6 +89,15 @@
     "agendaToggle": {
       "default": false,
       "type": "boolean"
+    },
+    "agendaEvents": {
+      "default": "global",
+      "enum": [
+        "global",
+        "expanded",
+        "collapsed"
+      ],
+      "type": "string"
     }
   }
 }

@@ -208,7 +208,9 @@ class CalendarPageView extends OsecBaseClass
                 'filter_menu'       => $filter_menu,
                 'view'              => $view,
                 'subscribe_buttons' => $subscribe_buttons,
-                'agenda_events_expanded' => $this->app->settings->get('agenda_events_expanded'),
+                // This calendar's own state (block, shortcode or the setting), so the matching
+                // Expand all / Collapse all button shows.
+                'agenda_events_expanded' => 'false' !== $request->get('agenda_toggle'),
                 'view_type' => $action,
                 'osec_calendar_classes' => 'view-' . esc_attr($view_args['action']),
 

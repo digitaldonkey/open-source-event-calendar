@@ -184,6 +184,11 @@ class CalendarShortcodeView extends OsecBaseClass
                 $query[$query_prop] = CalendarPageView::booleanStringArg($atts[$query_prop]);
             }
         }
+        // agenda_expanded="true|false": events expanded (no toggle) or collapsed with Expand/Collapse all. Same values
+        // as agenda_toggle, whose name says the opposite and which stays as an older spelling.
+        if (isset($atts['agenda_expanded'])) {
+            $query['agenda_toggle'] = CalendarPageView::booleanStringArg($atts['agenda_expanded']);
+        }
 
 
         foreach ($custom_taxonomies as $taxonomy) {

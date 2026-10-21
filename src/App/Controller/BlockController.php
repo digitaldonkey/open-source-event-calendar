@@ -97,7 +97,6 @@ class BlockController extends OsecBaseClass
             'display_filters' => 'true',
             'display_subscribe' => 'true',
             'display_print' => 'true',
-            'agenda_toggle' => 'true',
             'display_view_switch' => 'true',
             'display_date_navigation' => 'true',
             'events_limit' => $this->app->settings->get('agenda_events_per_page'),
@@ -119,12 +118,23 @@ class BlockController extends OsecBaseClass
             'displayPrint' => 'display_print',
             'displayViewSwitch' => 'display_view_switch',
             'displayDateNavigation' => 'display_date_navigation',
-            'agendaToggle' => 'agenda_toggle',
 
         ] as $jsProp => $query_prop) {
             if (isset($atts[$jsProp])) {
                 $query[$query_prop] = CalendarPageView::booleanStringArg($atts[$jsProp]);
             }
+        }
+
+        // Agenda events: the global setting (RequestParser's default for agenda_toggle), or expanded/collapsed for
+        // this block. Blocks saved before agendaEvents existed carry agendaToggle true for "expanded".
+        $agenda_events = $atts['agendaEvents'] ?? 'global';
+        if ('global' === $agenda_events && ! empty($atts['agendaToggle'])) {
+            $agenda_events = 'expanded';
+        }
+        if ('expanded' === $agenda_events) {
+            $query['agenda_toggle'] = 'true';
+        } elseif ('collapsed' === $agenda_events) {
+            $query['agenda_toggle'] = 'false';
         }
 
         // Print icon: the global setting, or shown/hidden for this block. Blocks saved
