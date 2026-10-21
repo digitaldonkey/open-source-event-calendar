@@ -86,7 +86,8 @@ One DDEV MySQL holds them next to `db` (set up 2026-10-06):
   marker, DDEV regenerates the file and drops the block, and then `WP_SANDBOX_DB` is silently ignored - WP-CLI writes to
   `db` (happened 2026-10-06). Before a write, check `WP_SANDBOX_DB=claude /usr/local/bin/wp option get home` answers
   `https://claude.ddev-wordpress.ddev.site`.
-- The destructive Mocha/Selenium suite (see Testing) can run against a sandbox instead of the dev site.
+- The destructive Mocha/Selenium suite (see Testing) belongs in a sandbox, not on the dev site: `BASE_URL` +
+  `OSEC_TEST_HOST_RULES`, see `TESTING.md` "Running against a sandbox".
 
 When a DB change is the straightforward route, make it in a sandbox instead of building workarounds to avoid the
 write (temporary mu-plugins, option filters, cookie or query-param overrides).
@@ -109,6 +110,9 @@ Do not access production databases.
 - WordPress PHP Coding Standards (custom WordPress-PSR-12, see `phpcs.xml`)
 - OOP preferred where it improves modularity (see `src/` structure)
 - Minimal comments—only for non-obvious logic
+- **Document generated code before calling it ready**: every new file gets a header (what it is, usage, options),
+  every new function/class a docblock (PHPDoc / JSDoc: purpose, params, return), a tool folder a `README.md`
+  (flow, files, data format). Inline comments stay minimal; documentation is not optional
 
 ## Project Architecture
 
@@ -171,93 +175,35 @@ Do not access production databases.
 - Use `$wpdb` abstraction layer exclusively
 - Always use `$wpdb->prepare()` for dynamic queries
 - Use `dbDelta()` for schema changes
-- **Charset**: new tables get the site's charset and collation (`$wpdb->get_charset_collate()`, utf8mb4).
-  `dbDelta()` never converts an existing table, so tables from older releases or restored backups stay utf8
-  (utf8mb3) and reject emoji / 4-byte characters (the row fails to save). `DatabaseCharset` finds them (only on
-  the calendar's admin screens and in Site Health, never per request) and converts them **on demand**: the
-  "Upgrade database charset (utf8mb4)" box on the Settings page, shown only while a table needs it (REST `POST osec/v1/database/convert`).
-  The conversion is one `ALTER TABLE ... CONVERT` per table; it fails atomically on a duplicate under the new
-  collation or a too-long index, and then says why. `wpdb` caches table charsets per request - a save in the same
-  request as the conversion still sees utf8mb3. SQLite reports every table as utf8mb4: nothing to convert there.
 - Use Transients API for caching
+- **Charset**: tables from older releases can still be utf8mb3 (`dbDelta()` never converts them);
+  `DatabaseCharset` converts on demand. Details: `.claude/rules/database-charset.md`
+
+## Where the details live
+
+This file is the core, loaded every session. Topic details load on demand:
+
+- **Path-scoped rules** in `.claude/rules/` load when working on matching files. Read one directly when the topic
+  comes up before any such file is open:
+  - `recurrence-feeds.md` - data model, recurrence, EXDATE/RDATE, ICS import/export, rule gates
+  - `css.md` - frontend CSS delivery, CSS compile caching, base font size, LESS unit traps
+  - `twig-js.md` - the twig→JS transform for agenda/oneday/month
+  - `testing.md` - PHPUnit/SQLite/Selenium details, test DB traps
+  - `admin-notifications.md` - the NotificationAdmin mechanism in full
+  - `database-charset.md` - utf8mb4 conversion
+- **Skills** in `.claude/skills/`: `circleci-results` (reading CI runs, token), `release-pipeline` (CI release gates,
+  branch behaviour, tagging), `prepare-release`, `phpstorm-mcp`, `compare-old-release`, `process-tickets`
 
 ## Data Model: Events & Recurrence
 
-- Events are posts (post type `osec_event`), ID-linked to the `wp_osec_events` table
-- Recurring events follow the [RFC-5545 recurrence concept](https://devguide.calconnect.org/iCalendar-Topics/Recurrences/); instances live in `wp_osec_event_instances` (start/end as Unix timestamps + ID only)
-- "Edit this instance" can fork a child event/post — see the "Base recurrence event" / "Modified recurrence events" editor tabs
-- Debug helper — human-readable instance dates via SQL view:
-  ```sql
-  CREATE VIEW wp_osec_event_instances_readable_date AS
-  SELECT id, post_id, `start`, DATE_FORMAT(FROM_UNIXTIME(`start`), '%Y-%m-%d %H:%i') AS 'start_formatted',
-         `end`, DATE_FORMAT(FROM_UNIXTIME(`end`), '%Y-%m-%d %H:%i') AS 'end_formatted' FROM wp_osec_event_instances;
-  ```
-- **Recurrence is expanded in the event's own timezone**, not UTC, so occurrences keep their wall clock time
-  across DST transitions (`EventInstance::process_rrule_freq()` hands php-rrule a DTSTART carrying a real
-  timezone and uses its occurrences as-is). Beware `new DateTime('@' . $ts, new DateTimeZone($tz))`: PHP
-  **silently ignores the timezone argument** whenever the time string starts with `@`, always yielding
-  `+00:00`. That one line made every recurrence drift an hour per DST change from 1.1.5 to 1.1.14.
-- **Instances are only (re)built by `Event::save()` → `EventInstance::recreate()`.** Nothing regenerates them
-  on read, so a fix to the generator does **not** repair events already in the database - they stay wrong
-  until each is re-saved or its ICS feed re-imported. Expect correct and broken events side by side on the
-  same install, and re-save before judging whether a recurrence fix worked. `wp osec event regenerate` rebuilds them
-  in bulk (keyset batches, flat memory, resumable with `--start-after`) and removes rows of deleted posts.
-- **Near-midnight start times are the edge case that matters.** An hour of drift is only *visible* when it
-  crosses a calendar-day boundary, so bugs here hide unless the start time is within an hour of midnight:
-  a summer-created event at `[00:00, 01:00)` doubles the autumn transition day; a winter-created one at
-  `[23:00, 24:00)` loses the spring transition day. Integration tests that create events at "now" therefore
-  pass or fail depending on what time the pipeline ran - see
-  `.claude/plans/13-one-hour-before-midnight-test-fails.md`.
-- **Two limits bound how many instances one event may generate**, and they do different jobs:
-  `OSEC_REOCCURRENCE_TIMEFRAME` (`+ 3years`) is applied **only to a rule that names no end of its own** - it is
-  what keeps an open-ended `FREQ=DAILY` finite. An explicit `UNTIL` is honoured in full, however far out, and
-  `OSEC_REOCCURRENCE_MAX_INSTANCES` (2000) is the ceiling that actually bounds the table. Do **not** clamp
-  `UNTIL` to the timeframe: it costs a yearly series to 2099 70 of its 74 occurrences (monthly: 843 of 888)
-  while saving nothing the ceiling does not already bound (daily to 2099 is 27023 occurrences either way
-  capped at 2000).
-- **`UNTIL` and `COUNT` in one rule are repaired, not rejected.** RFC 5545 forbids the combination and
-  php-rrule throws on it, but real exporters emit it: `process_rrule_freq()` lifts `UNTIL` out before
-  `new RRule()` and applies it while iterating, so whichever part ends the series first wins.
-- **A rule the generator cannot use is never stored.** `Event::save()` asks
-  `EventInstance::get_rule_error()` before writing the row and drops the rule (reporting it) if php-rrule
-  would refuse it, so the editor, the feed import, the clone and "edit this instance" all get the same gate.
-  Storing such a rule instead forces *every* reader to guard against it - the generator, the ICS export and
-  the repeat text each produced their own bug that way - and leaves the event claiming a recurrence it does
-  not have. The downstream guards stay as a net for rules stored by older versions: the generator drops and
-  reports (`createCollection()` has already cached the single occurrence), the export leaves the rule out,
-  and `RepeatRuleToText` skips months it cannot name.
-- **`exception_dates` (EXDATE) stores the date in the series' own timezone; the time part is ignored.**
-  `EventInstance::process_rrule_datelist()` reads only `Ymd` and applies the series' start time, so every
-  writer must convert first - `EventParent::add_exception_date()` does, the feed import does since `4b34a211`
-  (`IcsImportExportParser::exclusion_date()`, also used for RECURRENCE-ID overrides). A UTC date there names
-  the wrong day whenever the local start falls on another UTC date: after midnight east of UTC, in the
-  evening west of it (New York from ~19:00), a far wider window than the "hour before midnight" above.
-  `recurrence_dates` (RDATE) follows the same convention since `45f0e747`; the import reads RDATE and EXDATE through
-  `IcsImportExportParser::recurrence_dates()` (a DATE or floating value keeps its date). Stored alone, the dates
-  also stand in as the rule `RDATE=<dates>` (the editor's "custom dates"); next to a real RRULE both are kept.
-- Further reading: [wiki: Understanding data model](https://github.com/digitaldonkey/open-source-event-calendar/wiki/Understanding-data-modell)
-
-## Feeds (iCalendar)
-
-- RFC 5545 iCal feed support via `kigkonsult/icalcreator` + `rlanvin/php-rrule`
-- **Manual/UI testing**: `tests/Unit/App/Model/ical_feeds/*.ics` doubles as sample feed data you can subscribe to from any real calendar client (Google Calendar, Apple Calendar, etc.) to eyeball feed output end-to-end, e.g. `https://ddev-wordpress.ddev.site/wp-content/plugins/open-source-event-calendar/tests/Unit/App/Model/ical_feeds/google_cycling_halifax.ics`
-- **Automated/unit testing**: the same fixture files back `tests/Unit/App/Model/IcsImportExportParserTest.php`, which exercises `IcsImportExportParser->add_vcalendar_events_to_db(Vcalendar $v, array $args)` — the core ICS-import parsing logic
-- **The two libraries reject different rules, in three different places** — know which gate you are looking at
-  before debugging a "broken" feed:
-
-  | Rule | iCalcreator (`Vcalendar::parse()`, `setRrule()`) | php-rrule (the generator) |
-  |---|---|---|
-  | `FREQ=WEEKLY;BYMONTHDAY=15`, `FREQ=DAILY;BYWEEKNO=10` (structural) | rejects | rejects |
-  | `BYMONTH=13`, `BYMONTHDAY=32` (out of range), `INTERVAL=0` | accepts | rejects |
-  | `UNTIL` + `COUNT` together | accepts | rejects (we repair it, see above) |
-
-  `Vcalendar::parse()` validates the **whole calendar**, so a structural violation anywhere rejects the entire
-  feed before any event is processed - that gate sits in front of the per-event handling and no amount of
-  per-event recovery helps. It is caught in `IcsImportExportParser::import()` and rethrown as
-  `ImportExportParseException` carrying the library's reason.
-- **The export is the second place a stored bad rule surfaces.** Since an invalid rule is stored on the event,
-  `setRrule()` would throw and break the feed for every other event in it; `export_recurrence_rule()` leaves
-  the rule out instead, and the event exports as a single occurrence, matching what the calendar shows.
+- Events are posts (post type `osec_event`), ID-linked to the `wp_osec_events` table; instances live in
+  `wp_osec_event_instances` (start/end Unix timestamps)
+- **Instances are only (re)built by `Event::save()`**: a generator fix does not repair stored events until they are
+  re-saved (`wp osec event regenerate` in bulk)
+- Recurrence is expanded in the event's own timezone; near-midnight start times are the edge case that matters
+- Full rules (limits, UNTIL/COUNT, EXDATE/RDATE timezone convention, which library rejects what):
+  `.claude/rules/recurrence-feeds.md`
+- [wiki: Understanding data model](https://github.com/digitaldonkey/open-source-event-calendar/wiki/Understanding-data-modell)
 
 ## Hooks & Extensions
 
@@ -267,42 +213,11 @@ Do not access production databases.
 
 ## Admin Notifications
 
-**Never hand-roll an `admin_notices` callback.** The plugin has one notification mechanism and everything
-that needs to tell an admin something goes through it:
-
-- `NotificationAdmin::factory($app)->store($message, $class, $importance, $recipients, $persistent)` queues a
-  message; `BootstrapController` already registers the `admin_notices` **and** `network_admin_notices`
-  dispatch (`->send()`), so a new notice needs **no new hook registration**.
-- `are_notices_available($importance)` does the screen gating for you: importance `0` shows only on the
-  calendar's own screens (`AccessControl::is_all_events_page()`, `are_we_editing_our_post()` — i.e. the event
-  edit screen), `1` adds Plugins/Updates, `2` adds the Dashboard.
-- `$persistent = true` renders the dismiss button wired to `wp_ajax_osec_dismiss_notice`
-  (`NotificationAdmin::dismiss_notice()`). A non-persistent message is deleted the first time it is shown.
-- Messages are keyed by `sha1` of the entity, so storing the same message twice does not stack it.
-- **`notification/admin.twig` prints `{{ message | raw }}`** — escape every interpolated value with
-  `esc_html()` *before* calling `store()`, never at render time.
-- Dispatch is delayed by design: `store()` during a `save_post` or a cron run, and the notice appears on the
-  next admin page load.
-- The `osec_admin_notification_pre_store` filter short-circuits `store()`. The WP-CLI commands hook it for
-  the length of a run (`Osec\WpCli\PrintsAdminNotices`) to print instead of store. Keep it scoped like that:
-  `wp cron event run` is also WP-CLI, and a global redirect would send nightly feed failures to a cron log.
-
-**Anything that runs without a browser to answer to must use it.** Scheduled feed imports call
-`FeedsController::update_ics($feed_id)` with `$ajax === false`, and that return value — error message and all —
-is simply discarded. Before this was noticed, a nightly feed could fail forever in silence. The same applies to
-the ICS export, which runs unauthenticated: `ImportExportController::export_events()` subscribes to the export
-problem hook and stores a notice rather than answering the fetcher.
-
-**In tests**, notices live in the `osec_admin_notifications` option and therefore leak between tests in a
-class (and the bootstrap leaves one behind). Clear it in `set_up()`:
-`$osec_app->options->delete(NotificationAdmin::OPTION_KEY);` — see
-`tests/Unit/App/Model/PostTypeEvent/RecurrenceNoticeTest.php`.
-
-**Degrade and report, do not throw.** The pattern used for recurrence problems: the model fires a documented
-action, the caller decides how to surface it (editor notice, feed result message, admin notice). Current
-actions: `osec_recurrence_truncated`, `osec_recurrence_rule_invalid`, `osec_recurrence_rule_not_exportable`.
-A listener registered around one operation must be removed afterwards (`EventEditing` does this around
-`$event->save()`), or it outlives the request that wanted it.
+**Never hand-roll an `admin_notices` callback.** Everything that tells an admin something goes through
+`NotificationAdmin::factory($app)->store(...)` (dispatch is already registered). Escape interpolated values with
+`esc_html()` before `store()` (the template prints `|raw`). Anything that runs without a browser (cron feed imports,
+the ICS export) must report through it. Degrade and report, do not throw. Details:
+`.claude/rules/admin-notifications.md`
 
 ## Assets & JavaScript
 
@@ -315,183 +230,23 @@ A listener registered around one operation must be removed afterwards (`EventEdi
   branches) when touching that code, and use current CSS and JS freely (custom properties, CSS masks, `calc()`,
   `scale`, `pagehide`). A rebuild that only drops IE-only output needs no porting back into the sources.
 
-## Frontend CSS Delivery
+## Frontend CSS and Theme LESS
 
-No theme ships precompiled CSS (dropped in 1.0.8), so every site compiles its own LESS into one stylesheet
-(~400 KB). `FrontendCssController` (`src/App/Controller/FrontendCssController.php`) owns all of it: compile, store,
-link, route. Since 1.2.0 (`feature/css-cache-rework`, plan `.claude/plans/css-cache-rework.md`):
-
-**Where the CSS is stored** - decided only when it is compiled (`CacheFactory::createCache('css')`), first that works:
-
-| Engine | Location | How the page gets it |
-|---|---|---|
-| File (default) | `uploads[/sites/<id>]/osec_cache/css/osec-compiled-<blog_id>.css`, or `OSEC_FILE_CACHE_DEFAULT_PATH` + `css/` when that constant is set and writable | `<link>` to the static file, `?ver=<hash>`; no PHP involved |
-| Site transient (no writable folder, **only with a persistent object cache**: Redis, Memcached) | the object cache, key `osec_cache_osec-compiled-<blog_id>.css` | `<link>` to `?osec-css-cache=<hash>`, served by PHP |
-| APCu (no writable folder, no object cache) | APCu, keys prefixed with the site URL hash | `<link>` to `?osec-css-cache=<hash>`, served by PHP |
-| DB (neither) | option `osec_cache_osec-compiled-<blog_id>.css`, **autoload off** | same route |
-
-- **The option `osec_css`** (autoloaded) holds `[engine, root, file, ver]` of the last compile; `ver` is the first 7
-  characters of the CSS md5, so the URL changes only when the CSS does. It replaced the 1.1.x option
-  `osec_compiled.css` and the `osec_file_cache__*` index rows (deleted on upgrade; the 1.1.x files a week later,
-  because pages cached with old HTML still link them).
-- **The URL is built on every page view** from the stored root (`CachePath::path_to_url()`: uploads, `wp-content`, the
-  WordPress folder, `DOCUMENT_ROOT`), never stored. A missing file, or a file outside all of them, links the route.
-  Page views test no folders.
-- **The route reads the engine named in `osec_css`**, not the one the factory would pick today.
-- **Inline variant**: with `render_css_as_link` off (and no file URL) or `OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST`,
-  the CSS is printed as `<style id="osec-frontend-css-inline-css">` instead of a link.
-
-**Where on the page** - `add_link_to_html_for_frontend()`:
-
-- **Early**, on `wp_enqueue_scripts`, for pages known to show a calendar (`page_shows_calendar()`: calendar page,
-  single event, singular content with the shortcode or the `osec-calendar-classic` block): in `<head>`.
-- **Late**, by every calendar while it renders: still in `<head>` before `wp_head` (calendar page route, block themes),
-  otherwise **with the footer styles, as a direct child of `<body>`**. That is the case for calendars in widgets,
-  template parts, patterns, reusable blocks and page builders on classic themes (H9: not detected early).
-- Requested twice, the CSS is printed once. Before 1.2.0 the inline variant hooked onto `wp_head` after `wp_head`
-  had run on classic themes and printed **nothing** (C3).
-
-**Consequences to keep in mind:**
-
-- **Any JS that clears, replaces or detaches the body can destroy the calendar's styling** when the CSS came late
-  (footer styles are children of `<body>`). This is what made the print button produce an unstyled page
-  (`handle_click_on_print_button` in `public/js/pages/calendar.js`; fixed by detaching everything *except*
-  `style, link, script, noscript, template`). Exclude non-rendered elements, or work on a container.
-- **A local `OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST` flips the dev site to the inline variant** and compiles on
-  every request. Check it first when a CSS bug reproduces in one place and not the other:
-  `curl -s <url> | grep -c 'id="osec-frontend-css-inline-css"'` (1 = inline, 0 = link; without the `id=` the grep
-  also matches the comment WordPress appends, so it counts 2). It also makes
-  `tests/Unit/ConstantsTest.php::test_is_less_debug_disabled` fail locally (expected; CI is unaffected).
-
-## CSS Compile Caching
-
-**When the CSS is compiled:**
-
-| Trigger | When | Notes |
-|---|---|---|
-| Theme Options save | in that request (`invalidate_cache()`) | ignores lock and backoff; the admin sees the error at once |
-| Theme switch, activation, plugin update | next request's `init` (`verifyCache()` → `compile_flagged()`) | `request_compile()` sets the flag `osec_invalidate_css_cache` and ends the backoff |
-| No CSS stored (fresh install, file lost) | the CSS route `?osec-css-cache=` | answers a `no-store` comment while it cannot compile |
-| "Clear all caches" (cache report) | in that request (REST `POST osec/v1/cache/clear`) | compiles in memory first, stores, then clears the other copies; a LESS or write error keeps the previous CSS and says so |
-
-- **One compile at a time**: lock `osec_css_compile` (`ExecutionLimitController`, 120 s). A request that cannot get
-  it skips (flag kept; route: `no-store` comment).
-- **Backoff**: a failed automatic compile sets the transient `osec_css_compile_failed` for 30 minutes; flag and route
-  wait for it. Every admin action and every successful compile ends it.
-- **A successful compile clears the flag.** Before 1.2.0 it set it again, so everything compiled twice (D-CSS2).
-- **Overlapping compiles: the later start wins.** `osec_css` stores when its compile *started*; a compile that
-  started earlier is not stored (a visitor's route compile cannot overwrite a newer Theme Options save). The flag holds
-  the time `request_compile()` set it; a compile clears it only if it was set before the compile started, so a theme
-  switch during a running compile still gets its own compile. Both are read from the DB (`$wpdb`), because the
-  option caches of the request do not see what other requests wrote.
-- **A failed compile never removes working CSS**: the CSS and `osec_css` are written only after a successful compile.
-- **WP-CLI and cron have their own APCu.** When the CSS would go to APCu, they leave the compile to the next web
-  request (flag kept); with the file engine or an object cache (shared with web requests) they compile normally.
-- **Why transients only with an object cache**: without one, a transient without expiration is an autoloaded option
-  row - 400 KB on every page. The DB engine writes its own row with autoload off instead.
-- **Loading WordPress is never read-only for the CSS**: any request that boots WordPress, WP-CLI included, compiles
-  when the flag is set (incident 2026-10-02). Read cache state with `mysql`, not WP-CLI.
-- `get_compiled_css()` keeps the CSS of the current request in a property; nothing else outlives a request except
-  the engines and the browser cache.
-
-**The browser cache**: the static file is linked with `?ver=<hash>`; the route sends a one-year `max-age` and an
-ETag from its `?osec-css-cache=` value, and answers weak ETags (`W/"…"`, sent back after gzip) with 304. The URL
-changes with the CSS, so an edit is never hidden by the browser cache once it compiled.
-
-**If a LESS/theme-CSS edit doesn't seem to take effect**, it is never PHP opcache (`.less` files are read as text).
-Check, in order:
-
-1. **Did it compile?** `mysql -e "SELECT option_value FROM wp_options WHERE option_name='osec_css'"` - the `ver`
-   changes with the CSS. Compile with Theme Options → Save, or "Clear all caches" in the cache report (Settings).
-2. **Which engine?** `engine` in `osec_css`. With `file`, read the file itself
-   (`wp-content/uploads/osec_cache/css/osec-compiled-1.css` on the dev site) - diff it to see
-   what compiled. With `apcu`, the CSS lives in php-fpm's APCu: `supervisorctl restart php-fpm` clears it; a
-   `wp eval 'apcu_clear_cache();'` does not (own CLI APCu).
-3. **Backoff after a failure?** A notice in wp-admin carries the LESS error; the transient
-   `osec_css_compile_failed` blocks automatic retries for 30 minutes. Saving Theme Options compiles anyway.
-
-**Escape hatches**: `OSEC_ENABLE_CACHE_FILE` `false` keeps the CSS in the object cache, APCu or the database and
-serves it through the route (H12), e.g. when static files misbehave on a host - Twig still uses files;
-`OSEC_ENABLE_CACHE_TRANSIENT` `false` skips the object cache (without one it has no effect);
-`OSEC_ENABLE_CACHE_APCU` `false` skips APCu. `OSEC_FILE_CACHE_DEFAULT_PATH` moves the file cache (CSS `css/`, Twig
-`twig/site-<id>/`). All take effect at the next compile. **Set them in `constants-local.php`, never in the tracked
-`constants.php`.**
-
-**Twig cache**: compiled templates (PHP files) next to the CSS in the site's uploads folder
-(`uploads[/sites/<id>]/osec_cache/twig/`), or in the override (`twig/site-<id>/`, as it may be shared by a network),
-else none - never the plugin folder (replaced by updates), independent of `OSEC_ENABLE_CACHE_FILE`. Until 2026-10-03
-the plan had `wp-content/cache/osec/` (D2b); moved to uploads per the review guideline (plugin data in uploads),
-accepting that some security scanners flag PHP files there. The folder found is stored in the setting `twig_cache` and
-rescanned when it is no longer writable, on upgrade, by "Check again"/"Clear all caches", and once an hour while none
-was writable (transient `osec_twig_cache_rescan`). WordPress deletes a site's uploads with the site; its override
-folder is removed on `wp_uninitialize_site`.
-
-**1.1.x leftovers**: the old upload cache folder `open_source_event_calendar_cache/` stays after the upgrade (pages
-cached with old HTML link its CSS) and is removed a week later (`osec_css_legacy_cleanup`) or by "Clear all caches" -
-unless `OSEC_FILE_CACHE_WP_UPLOAD_DIR` was set to that old name (`CachePath::legacy_upload_dir()`).
-
-**Multisite caveat (H10)**: OSEC keeps per-process singletons. A plugin that calls `switch_to_blog()` and renders
-OSEC output for another site in the same request gets this site's cache paths; the APCu prefix follows the site.
-
-## Base Font Size (Theme Setting)
-
-The "Base font size" option (Calendar Theme Options) compiles to `@font-size-base`
-(`@baseFontSize`, set in `public/osec_themes/vortex/less/user_variables.php` /
-`user-variable-map.less`) and is applied as a literal, LESS-compiled px value on the
-plugin's own wrapper element (`.timely`, via `bootstrap/scaffolding.less` imported inside
-`.timely { }` in `style.less`) - not on `<html>`.
-
-**Each theme ships its own default for it** (`user_variables.php`: vortex `13px`, plana `1rem`,
-umbra `0.8rem`), so *switching theme changes the base font size* unless a value is saved in
-`osec_less_variables`. Rendered box heights then shift - don't read that as a LESS edit having
-broken something. **Check the base font size after every theme switch**, and when comparing two
-themes, pin them to the same value so only one variable moves.
-
-Note that switching theme *deletes* `osec_less_variables`, discarding any tuned theme options -
-capture and restore them around anything that switches themes.
-
-**All font sizes in the plugin's LESS/CSS must be relative to that wrapper, using `em` or
-`%` - never `rem`, and never a hardcoded `px` value.** `rem` is always relative to the root
-`<html>` element's font-size, which belongs to the surrounding theme/site, not to
-`.timely`. A hardcoded `px` value doesn't move with the setting at all. Either one silently
-breaks "Base font size" for that element.
-
-Note: `@font-size-base * <factor>` is a LESS-side exception, not a third unit - it still
-compiles down to a `px` value in the output CSS, but that value is derived from the setting
-at compile time, so it moves when the setting changes. Use it in LESS source for a
-size that should track the base but not equal it; the rule above is about hand-written
-`px`/`rem` literals in the CSS.
-
-**Exception: print styles** (`@media print`, `.osec-print-calendar()`, `.ai1ec-print` in
-`calendar.less`) may use fixed `px`/`pt` sizes - physical paper output isn't meant to track
-a screen font-size setting.
-
-When adding or reviewing CSS/LESS outside print styles, check every `font-size:` for a bare
-`px`/`rem` value.
-
-**Never add two LESS values of different units.** `less.php` keeps the *first* operand's unit
-and silently discards the second's, with no warning: `@a: .5em; @b: 1px; (@a + @b)` compiles to
-`1.5em`, not `calc(.5em + 1px)`. Mixing `em` with `px` is easy to hit here precisely because the
-rule above pushes everything towards `em` while borders and hairlines stay `px`. Use
-`calc( ~"@{a} + @{b}" )` (the `~""` escape keeps LESS from evaluating it) and check the compiled
-output in the CSS file (`osec_css` names it) - a plausible-looking wrong number is the normal
-failure mode, not a compile error.
+- Every site compiles its own LESS into one stylesheet; `FrontendCssController` owns compile, store, link and route
+- **Font sizes in LESS/CSS use `em` or `%`, never `rem` or a hardcoded `px`** (print styles excepted)
+- **Never add two LESS values of different units** - `less.php` silently keeps the first unit; use `calc( ~"..." )`
+- **Loading WordPress (WP-CLI too) can compile the CSS** when the invalidate flag is set - read cache state with `mysql`
+- Engines, compile triggers, lock/backoff, debugging a LESS edit that "doesn't take", escape-hatch constants:
+  `.claude/rules/css.md`
 
 ## Twig → JS Frontend Templates
 
-- Three Twig templates double as the **frontend-rendering** (client-side JS) templates: `public/osec_themes/vortex/twig/{agenda,oneday,month}.twig`. Frontend rendering only applies when the OSEC Settings option `use_frontend_rendering` is enabled — otherwise only their backend (PHP) rendering matters.
-- **If you edit `agenda.twig`, `oneday.twig`, or `month.twig`, you must re-run the transform**, or the JS-side templates silently go stale:
-  ```bash
-  cd twig_to_js_transform
-  nvm use
-  npm install
-  npm run build-twig-frontend
-  ```
-- What it does: compiles each `.twig` file to twig-js, then splices the compiled output into `public/js/pages/calendar.js` (the only served copy, inherited from the original vendor's unknown build tooling) — replacing only the content between matching `/*REPLACE:<template>.twig*/` marker comments — and writes the twig.js runtime (`node_modules/twig/twig.min.js`) between `/*BEGIN:twig.js runtime*/` and `/*END:twig.js runtime*/`. The standalone `public/js/{agenda,oneday,month}.js` copies were never loaded and are gone since 1.2.0.
-- **twig.js 3 with `autoescape: true`** since 1.2.0 (B18; 0.7.2 had no autoescape and printed event values raw). The templates escape like PHP Twig, so `|raw` / `|e('html_attr')` in them mean the same in both. The browser output was byte-identical to 0.7.2 before autoescape and identical to PHP after it (except the view links the server builds per request). twig 3 needs Node >= 22 (`twig_to_js_transform/.nvmrc`: `lts/krypton`).
-- **Escaping test**: `integration_tests/mocha/js_smoke/frontend.spec.js` "prints event values as text in a view rendered by twig.js", with the seeded "Hostile venue" event. The smoke suite runs against a sandbox with `BASE_URL=https://claude.ddev-wordpress.ddev.site OSEC_TEST_HOST_RULES='MAP *.ddev-wordpress.ddev.site ddev-router'` (seed it there first: `WP_SANDBOX_DB=claude /usr/local/bin/wp eval-file bin/dev-seed-block-test-data.php`).
-- **The calendar bundle is served through PHP** (`?osec_render_js=calendar.js`, `max-age=0`), not as a static file - a fresh browser session always gets the current build.
-- No original build tooling exists for these templates (this script is a workaround). If you'd rather not deal with it after a Twig edit, `use_frontend_rendering` can be turned off in OSEC Settings so only backend rendering is used.
+**If you edit `agenda.twig`, `oneday.twig` or `month.twig`, re-run the transform**, or the JS-side templates in
+`public/js/pages/calendar.js` silently go stale:
+```bash
+cd twig_to_js_transform && nvm use && npm install && npm run build-twig-frontend
+```
+Details (twig.js 3 autoescape, markers, escaping test): `.claude/rules/twig-js.md`
 
 ## Security
 
@@ -530,421 +285,44 @@ failure mode, not a compile error.
 
 ## Testing
 
-See `TESTING.md` for the full checklist, one-time setup, integration-test prerequisites, and GrumPHP task inventory. Quick reference:
+See `TESTING.md` and `.claude/rules/testing.md`. Quick reference:
 
-- **PHPUnit**: `ddev phpunit` (or `ddev phpunit --filter test_name ./tests/Unit/...`)
-- **SQLite** (Playground / Live Preview): PHPUnit via `bin/phpunit-sqlite.sh` (CI `db_job_sqlite`; GrumPHP `all_tests`), the browser suites in CI `release_test_job_sqlite` (`release_test_job` with `db: sqlite`); both block the release. Driver pinned in `bin/sqlite-dropin.sh` (3.1.0, which no longer catches `IF()`, #44) - see `TESTING.md`
-- **Integration (Mocha/Selenium)**: `cd integration_tests && npm run test`
-- **Code quality**: `ddev composer run-script phpcs` or `ddev run-script phpcs`
-- **WordPress plugin-check**: `bin/plugin-check.sh` (~13 s; ERROR fails, `--strict` also fails on WARNING). Deliberately **not** in `git_pre_commit` - it runs in `all_tests`, `prepare_release` and CI
-- **GrumPHP**: `vendor/bin/grumphp run --testsuite=git_pre_commit` (what the pre-commit hook runs)
-- **PHPUnit has its own file cache**: `tests/Utilities/bootstrap.php` sets `OSEC_FILE_CACHE_DEFAULT_PATH` to the test
-  site's `wp-content/osec-phpunit-cache/` and empties it on start. Before 1.2.0 it emptied the dev site's plugin
-  `cache/` (the test site shares the plugin folder) - on older branches, snapshot `cache/` around a run.
-- **The compile lock commits the test transaction** (`ExecutionLimitController::acquire()`), like the feed import:
-  CSS tests clean up after `parent::tear_down()` (`Tests\Utilities\CssEngineTrait::commit_css_cleanup()`), which
-  also gives the engine switch (`use_css_engine()`), a web-request controller (PHPUnit is always CLI) and the next
-  request's `init` (`css_next_request()`).
-- **The Mocha/Selenium integration suite is destructive to the dev site.** It installs/uninstalls the plugin,
-  exercises the `OSEC_UNINSTALL_PLUGIN_DATA` purge, creates its own `Calendar` page, and **trashes every
-  calendar page on teardown** - including one you were using - leaving `calendar_page_id` pointing at a
-  trashed post, i.e. the "no calendar page set" state described below. Ask before running it, and know the
-  ways to trigger it *indirectly*:
-  - `vendor/bin/grumphp run` with no `--testsuite` (the `integration_tests` task in `grumphp.yml`)
-  - `vendor/bin/grumphp run --testsuite=all_tests`, and `ddev grumphp all`
-  - Recovery: untrash the page, restore its slug and `publish` status, set `calendar_page_id` back to it, and
-    reset the `CacheMemory` `calendar_base_page` - all four, or routing stays broken.
+- **PHPUnit**: `vendor/bin/phpunit tests` (CI's command) - **check the exit code**: `phpunit.xml` fails on skipped,
+  risky and incomplete tests, so "OK, but … skipped" fails CI. No `markTestSkipped()` for multisite variants
+- **SQLite**: `bin/phpunit-sqlite.sh`
+- **Code quality**: `vendor/bin/phpcs --standard=phpcs.xml <paths>`; WordPress plugin-check: `bin/plugin-check.sh`
+- **GrumPHP**: `vendor/bin/grumphp run --testsuite=git_pre_commit`
+- **The Mocha/Selenium suite is destructive to the dev site** (reinstalls the plugin, trashes every calendar page on
+  teardown). Ask before running it, also indirectly: bare `grumphp run`, `--testsuite=all_tests`, `ddev grumphp all`.
+  Run it in a fresh `try_*` sandbox (`BASE_URL`, purge constant scoped to that `DB_NAME`; `TESTING.md`)
+- **A calendar page must be set for any testing**: "no calendar page set" is a setup error, not a code bug. Check
+  `calendar_page_id` points to a published page before judging calendar output
 - When fixing bugs, add tests where appropriate
-- **`phpcs.xml` excludes `/tests/`**, so GrumPHP and CI never lint test files. Passing a test file to
-  `vendor/bin/phpcs` explicitly still checks it; worth doing for a new test, but a style slip there will not
-  fail the build
-- **Two DB traps in tests.** `$app->db->update()` does **not** add the table prefix (`insert()` and `delete()`
-  do), so `update(OSEC_DB__EVENTS, …)` silently hits a missing table - pass `get_table_name()`.
-  `ExecutionLimitController::acquire()` runs its own `COMMIT`, which ends the test framework's transaction, so
-  anything a test writes before a feed import survives the rollback - clean up after `parent::tear_down()` and
-  `COMMIT` (see `tests/Unit/App/Controller/FeedsControllerLockTest.php`)
-- **No skipped tests**: `phpunit.xml` has `failOnSkipped`/`failOnRisky`/`failOnIncomplete` — "OK, but … skipped" exits 1 and fails CI. Check the exit code, don't use `markTestSkipped()` for multisite-only variants (CI is single site), and run CI's command `vendor/bin/phpunit tests` (see `TESTING.md`)
-- **A calendar page must be set for any testing**: "no calendar page set" (`calendar_page_id` empty or pointing to a missing page) is a setup error, not a code bug. wp-admin shows the "installed, but has not been configured" notice (`EnvironmentCheck`). Don't fix or work around problems that only derive from that state; check the setup first when links, URLs or routing look wrong.
-  - **PHPUnit**: `TestBase::set_up()` creates a published page per test and sets `calendar_page_id` plus the `CacheMemory` `calendar_base_page`. It can't be created once in the bootstrap, because the WP test lib's `_delete_all_data()` deletes all posts after each test class. Tests not extending `TestBase` must do the same.
-  - **Dev site / Selenium**: verify `calendar_page_id` points to a published page before judging calendar output.
-
-**Updating the PHPUnit version**: WordPress core's test framework only supports specific PHPUnit versions per WP release — before bumping the project's target WordPress or PHP version, check the [WP core PHPUnit compatibility chart](https://make.wordpress.org/core/handbook/references/phpunit-compatibility-and-wordpress-versions/#supported-version-chart) and cross-check the candidate PHPUnit release on [Packagist](https://packagist.org/packages/phpunit/phpunit) against the project's PHP floor (8.2+). Update with `composer require --dev phpunit/phpunit:^<version>` and `composer require --dev yoast/phpunit-polyfills:^<version>` (polyfills bridge PHPUnit API differences so WP's test scaffolding keeps working across versions); `wp scaffold plugin-tests open-source-event-calendar` can regenerate the test bootstrap if it drifts. The currently pinned versions are always whatever's in `composer.json`/`composer.lock` — check there rather than assuming a version from memory.
 
 ## Developer Tooling
 
-- `bin/` - Developer scripts:
-  - `compile-less-production.sh` - Compiles LESS for production
-  - `get-latest-plugin-review-phpcs-rulesets.sh` - Fetch latest PHPCS rulesets
-  - `install-wp-tests.sh` - WordPress test environment setup
+- `bin/` - developer scripts (`compile-less-production.sh`, `get-latest-plugin-review-phpcs-rulesets.sh`,
+  `install-wp-tests.sh`)
 - `wp osec content generate` - test content around May of next year (dataset `tests/data/content/`); replaces only
   its own earlier content and refuses foreign calendar data, so use a `try_*` sandbox on a used site
 - `integration_tests/visual_regression/` (`ddev osec-review`, `ddev osec-approve`) - Playwright screenshots compared
   with a baseline set, review page with approval. See its `README.md`
 - `bin/screenshots/` (`ddev osec-screenshots`) - the WordPress.org `assets/screenshot-*.png`
 - `bin/js-rename-check/` - proves a hand edit of a minified bundle changed only names/formatting
-- `twig_to_js_transform/` - Converts Twig templates for frontend use
-
-### PhpStorm MCP (JetBrains IDE integration)
-
-- When running via `ddev claude`, the PhpStorm MCP server (started by the IDE on the host) is reached from inside the container at `http://host.docker.internal:<port>/stream`. Its built-in DNS-rebinding protection rejects the `Host: host.docker.internal:<port>` header the container sends by default — add a header override `Host: localhost:<port>` on that MCP server entry, or requests get a bare `403 Forbidden`.
-- PhpStorm identifies the open project only by its **host** filesystem path (e.g. the Mac path where the repo actually lives), never the container path (`/var/www/html/...`). Always pass `projectPath` as that host root, and give any file/directory arguments relative to it — a container path is rejected with "doesn't correspond to any open project."
-- **`execute_terminal_command` runs on the host Mac, not the DDEV container** — confirmed via `pwd`/`uname -a` returning host paths and `Darwin`. It has no path restriction of its own (unlike `read_file`/`list_directory_tree`, which do reject paths outside the project/library/SDK roots): tested 2026-09-11 with `ls -la /Users/tho`, well outside the project, and it returned the full listing. PhpStorm's own **"sandboxed" toggle for this tool did not confine it** — same test, same unrestricted result with the toggle enabled; treat that setting as non-functional. **"Manual approval" mode, however, verified as a real gate**: with it on, a call the user actively rejects in PhpStorm's UI returns `"User rejected command execution"` instead of executing. If this tool needs to stay enabled, manual-approval is the one setting confirmed to actually stop an unwanted command — don't rely on "sandboxed" instead, and don't rely on Claude Code's own auto-mode classifier as a backstop either (separately observed to be inconsistent — auto-denied a call once, then let an identical retry through to a manual prompt with no code change in between).
-  - **The approval prompt does not steal focus or otherwise notify** — PhpStorm doesn't switch windows or alert on it, so the user has to already be looking at the IDE to see and act on it. When about to call `execute_terminal_command` (or invoking anything that may route through it, e.g. `execute_run_configuration`), explicitly tell the user beforehand to switch to PhpStorm and watch for the prompt — don't assume they'll notice it on their own.
-- When the PhpStorm MCP tool (`mcp__phpstorm__execute_tool`) is available, prefer it over generic CLI equivalents for the tasks below — it uses PhpStorm's real PHP/WordPress index and live debugger rather than text-matching or manual instrumentation. Fall back to Bash/grep-based tools when the MCP isn't connected, or for anything not listed here (e.g. running `ddev phpunit`, `composer`, `wp-cli`).
-  - **Symbol search / find usages** — `search_symbol`, `get_symbol_info`, `analyze_calls` instead of `grep`/`Explore` when looking for a class/function/hook definition or all its call sites.
-  - **Text/pattern search across the repo** — `search_text`, `search_regex`, `search_structural` instead of Bash `grep`/`find` for anything scoped to this project's indexed files.
-  - **Renaming a symbol** — `rename_refactoring` instead of a manual multi-file `sed`/`Edit` pass, so references (including string-based ones PhpStorm tracks) get updated consistently.
-  - **PHP inspections** — `get_inspections` / `get_file_problems` as a complement to `phpcs` (`phpcs.xml`); PhpStorm's inspections catch some things `phpcs` doesn't (e.g. type/dead-code issues).
-  - **Debugging a live bug** — `xdebug_*` tools (`xdebug_start_debugger_session`, `xdebug_set_breakpoint`, `xdebug_get_stack`, `xdebug_get_frame_values`, `xdebug_evaluate_expression`, etc.) instead of adding temporary `var_dump`/`error_log` statements, when reproducing the bug through the running DDEV site is feasible.
-    - `xdebug_start_debugger_session` does **not** attach to an incoming web request — it spins up a standalone "PHP Script configuration" and runs the target file as a CLI script. For a real HTTP-triggered breakpoint: (1) `xdebug_set_breakpoint --filePath <path-relative-to-projectPath> --line <N>`; (2) `invoke_ide_action --actionId PhpListenDebugAction` to toggle PhpStorm's "Listen for Debug Connections" — this has no queryable on/off state via MCP, so if unsure whether it's already listening, check from inside the container with `timeout 3 bash -c "cat < /dev/null > /dev/tcp/host.docker.internal/9003"` (port open = listening) rather than re-toggling blind; (3) fire the request as a **backgrounded** `curl ".../?XDEBUG_TRIGGER=1"` (it blocks for the whole pause — a synchronous `curl` or browser navigation will hang); (4) poll `xdebug_get_debugger_status` for `"state":"paused"` — the paused session is stable (not racy) across subsequent `xdebug_get_stack` / `xdebug_get_frame_values` / `xdebug_evaluate_expression` calls; (5) `xdebug_control_session --sessionId <id> --action RESUME` to let the request finish, then `xdebug_remove_breakpoint` to clean up.
-  - **Ad-hoc read-only DB investigation** — `execute_sql_query` / `preview_table_data` / `list_database_schemas` as an alternative to raw `mysql`/`wp db query`, still subject to the read-only rule in "Database Safety" above.
-  - **Editing files opened in the IDE** — `apply_patch` / `reformat_file` are fine for changes the user is actively watching in PhpStorm; for everything else the standard Edit/Write tools remain the default.
-
-## Release & Build Tooling
-
-- Two jobs gate a release: `static_release_job` (four generated files - see the inventory below for which, and for the three it does *not* cover) and `release_test_job`, which runs WordPress plugin-check against the built zip. Anything shipped **must be committed to git first**, or the first job's `git status` checks fail
-- `README.txt` is generated from `README.md` — never hand-edit it: `ddev wp osec make_readme`
-- `hooks-and-filters.md` is generated from PHPDoc by the separate [`hookster_markdown`](https://github.com/digitaldonkey/hookster_markdown) tool and must be regenerated before each release:
-  ```bash
-  git clone git@github.com:digitaldonkey/hookster_markdown.git
-  cd hookster_markdown && npm install && npm run build
-  ```
-
-### What `static_release_job` gates - and what it does not
-
-Four steps in one job under `set -Eeuxo pipefail`, so **the job stops at the first failing gate** and
-the later ones never run. Each was verified in both directions on 2026-09-24 - a passing run *and* a
-deliberately broken commit that turned it red:
-
-| Step | Regenerates | What actually gates |
-|---|---|---|
-| Verify WordPress version metadata | nothing - `osec prepare_release` is read-only by design | the command's own `WP_CLI::error()` exit 1; the `git status` wrapper around it is vestigial and can never fire |
-| Verify Readme.txt | `README.txt` from `README.md` + plugin headers | `git status --porcelain` at the repo root |
-| Verify Twig frontend templates | `public/js/pages/calendar.js` | `git status -s` from `twig_to_js_transform/` |
-| Verify hooks-and-filters.md | `hooks-and-filters.md` | `git status --porcelain` at the repo root |
-
-**The hooks gate was inert until `fcaab93d`**, and its failure mode is the one to watch for: it ran
-`git status` *after* `cd hookster_markdown`, a separately **cloned repository**, so it inspected a tree
-the build never touches and answered "No changes detected" unconditionally. The Twig step uses the same
-`cd` + `git status` shape and is fine, because `twig_to_js_transform/` is a subdirectory of *this* repo
-and `git status` from a subdirectory reports the whole repo with `../`-prefixed paths. **A nested clone
-breaks such a check; a subdirectory does not.**
-
-A hand-edit alone does not reproduce a readme failure: `make_readme` overwrites `README.txt`, so an
-uncommitted edit is silently restored and the tree comes back clean. The stale content must be committed.
-
-**Not gated, though shipped in `OSEC_RELEASE_WHITE_LIST`:**
-
-- **`languages/`** - stale as of 2026-09-24. The committed `.pot` carries `POT-Creation-Date: 2025-05-20`
-  and `Project-Id-Version: … 1.0.2` with 512 msgids; `wp i18n make-pot` yields 569. Strings added since
-  (e.g. the recurrence-truncated notice) are absent, so they are untranslatable in all three locales, and
-  the `.po` files sit at 512 too. `a58d837b` hand-edited 4 lines of the `.pot` rather than regenerating it.
-- **`calendar_block/build/`** - tracked output of `wp-scripts build` from `calendar_block/src/`. In sync
-  today (both last touched by `1d6c041f`), but nothing stops the next `src/` edit shipping a stale bundle.
-
-**A probe branch's name must match the job's own filter, and the right name differs per job** - get it
-wrong and the probe passes by never running the gate, the same false pass one level up.
-`static_release_job` is filtered to `only: /^(master|release-.*)$/`, so **probe it from a `release-…`
-branch**. Use **one branch per gate** (`set -e` hides every gate after the first failure), and trim the
-workflow to `build -> static_job -> static_release_job` to keep the probe off the Selenium matrix. For the
-plugin-check gate the rule inverts - see below. Nothing can publish from such a branch: all three deploy
-jobs are `only: /master/` *and* carry a `circleci-agent step halt` guard.
-
-### The other release gate: plugin-check in `release_test_job`
-
-`bin/plugin-check.sh` (run locally, by GrumPHP's `all_tests` / `prepare_release`, and by
-`release_test_job`'s "WordPress plugin-check (release build)" step against the unzipped release).
-**`wp plugin check` always exits 0**, so the wrapper is what makes it a gate: ERROR fails, WARNING only
-prints unless `--strict`. Mechanics, filtering and the one known false positive are in `TESTING.md`.
-
-Verified in both directions (2026-09-24):
-
-- green - `a5627205` on `feature/plugin-check-gate`, run `0b4e26c9…`: step `exit=0`,
-  `0 error(s), 1 warning(s)`. This also settles that the WP-CLI 3.0 dev build at `$WP_CLI` registers
-  plugin-check's command;
-- red - probe `ci-probe-plugin-check` (`6e27471b`), run `b67fed37…`: one line putting
-  `leaflet.js` back on `https://unpkg.com/` made the step `exit=1` with
-  `PluginCheck.CodeAnalysis.Offloading.OffloadedContent` and failed the job.
-
-**Do not name this probe branch `release-…`.** `release_test_job` (8.2) carries **no** branch filter,
-while `release_test_job_php_8_{3,4,5}` are `master|release-*` - a `release-…` name buys four Selenium
-jobs instead of one.
-
-Two things a probe of *this* gate must get right, or it proves nothing:
-
-- **inject into a file that ships** (`src/`, i.e. in `OSEC_RELEASE_WHITE_LIST` and not in `.distignore`) -
-  the wrapper drops findings in files the zip never contains, so a probe in `tests/` or `bin/` is filtered
-  away. Verify by rebuilding the release tree locally and grepping for the line;
-- **keep `phpcs` and `phpunit` green**, because `create_release_job` requires `static_job` and `db_job`;
-  a probe that trips one of those never reaches the gate. A probe commit therefore still deserves a
-  `phpcs` run.
-
-Cost is small: once the step fails, the later steps are skipped, so Apache and `node/install-packages`
-never run and the `when: always` integration step dies in seconds for lack of `node_modules` - no Selenium
-time. The whole red run took 3m07s.
-
-
-## CircleCI Behavior by Branch
-
-What the CircleCI pipeline (`.circleci/config.yml`) does differently depending on which branch or tag triggers it:
-
-- `master` — runs the full test matrix; replaces the WordPress.org SVN **trunk** and the GitHub `dev` prerelease, on every push (skipped when master has moved on, so a rerun never rolls back); contains the latest bugfixes
-- tag `X.Y.Z` — runs the full test matrix, then creates SVN `tags/X.Y.Z` and the GitHub release `X.Y.Z` (see below)
-- tag `X.Y.Z-dryrun` — the same, but prints what it would commit and publishes nothing
-- `release-*` — runs the full test matrix; does not create a release
-- Next-release branch (e.g. `1.2.x-dev` if the current release is `1.1.x`) — a dev branch for the next semantic major version; should include all bugfixes from master; no release
-
-### Releasing to WordPress.org
-
-```bash
-# on master, once the release commit (version bumped everywhere) is pushed and green
-git tag -a 1.2.0 -m "Release 1.2.0"
-git push origin 1.2.0
-```
-
-- **`.circleci/release-context.sh` decides, once, in `release_decision_job`** (master and release tags only,
-  after all tests; `build` stays release-free) and writes `/tmp/release.env` (`RELEASE_MODE`
-  none/dev/tagged/dryrun, `RELEASE_VERSION`, `RELEASE_UPDATE_TRUNK`) for the GitHub and SVN jobs. A tag that
-  fails a check fails that job, so nothing is deployed:
-  - `X.Y.Z` or `X.Y.Z-dryrun` only;
-  - the tagged commit is on master;
-  - the tag equals plugin header `Version` and `Stable Tag`, `README.txt` `Stable Tag` and `OSEC_VERSION`;
-  - the tag is higher than every other `X.Y.Z` tag.
-- **Trunk (and the GitHub `dev` release) is only replaced while the pipeline's commit is master's HEAD.**
-  Checked in `release_decision_job` and again right before each deploy (`.circleci/still-master-head.sh`), because
-  master can move on while the pipeline runs. A master pipeline that was overtaken deploys nothing; a tag on
-  an older master commit creates just `tags/X.Y.Z`. If the check itself fails (fetch error), the job fails.
-- **The release commit reaches trunk through its master pipeline before the tag exists** - WordPress.org
-  serves trunk as that version until the tag pipeline finishes. Tag it before pushing anything else to master.
-- **An existing `tags/X.Y.Z` is never touched**, so rerunning a tag pipeline is harmless.
-- **The tag is committed as a working-copy copy of the updated trunk**, so a release uploads only what differs
-  from trunk. A whole-tag upload (~1,500 files) timed out on "Committing transaction..." in 2026-09.
-- **Only the maintainer can push `X.Y.Z` tags**: GitHub tag ruleset "Release tags" (`refs/tags/*.*.*`,
-  creation/update/deletion restricted, bypass: repository admin). `ghr` therefore must not use `-delete`
-  for a release tag.
-- **`.circleci/tests/test-release-scripts.sh`** (run in `release_decision_job`) covers the release scripts against a local git
-  origin and a local `file://` SVN repository. Run it after any change to them.
-- Before 2026-09-29 a pushed tag ran nothing and the "tagged" branch of the old deploy script could never
-  be taken, so 1.1.12 - 1.1.14 never got SVN tags; `tags/1.1.14` and a repaired `tags/1.1.5` were added by
-  hand (r3719399).
-
-## Reading CI Results
-
-The `circleci` CLI is installed in the web container so pipeline results can be read directly
-instead of being pasted in by hand. Set up 2026-09-24; verified working against real runs.
-
-### The setup is NOT in version control
-
-`/var/www/html/.ddev` sits **outside** this git repo (the repo is the plugin directory, the DDEV
-config lives at the WordPress root), so none of the three files below are tracked anywhere. On a
-fresh machine or a wiped DDEV config they must be recreated by hand — this section is the only
-record of them.
-
-| File | Contents |
-|---|---|
-| `.ddev/web-build/Dockerfile.circleci` | `RUN curl -1sLf 'https://packages.circleci.com/public/setup.deb.sh' \| bash && apt-get install -y --no-install-recommends circleci && rm -rf /var/lib/apt/lists/*` |
-| `.ddev/.env.web` | `CIRCLE_NO_INTERACTIVE=1` (shared, no secret) |
-| `.ddev/.env.web.local` | `CIRCLE_TOKEN=<the PAT>` — gitignored by DDEV ≥ 1.25.4 via `/.env.*.local` |
-| `.ddev/config.circleci.yaml` | `post-start` hooks: `circleci setting set telemetry off \|\| true` and `… update-check off \|\| true` |
-
-The `post-start` hooks are needed because the container home is not persisted across rebuilds, so
-the CLI's own config is lost on every `ddev restart`. Both settings work without a token.
-
-### The token
-
-**The CLI cannot run without one** — with none set it exits 3 with `auth.token_missing`,
-client-side, before any network call. The token is a **Read-scoped OAuth PAT**, the only CircleCI
-credential that both drives the v2 API and is read-only at the API level:
-
-| Token type | Works with the CLI (v2)? | Can change project settings/env vars/contexts? |
-|---|---|---|
-| Project token, *Read Only* scope | **No** — v1 API only | No |
-| Personal API token (created manually) | Yes | **Yes** — full read *and* write |
-| OAuth PAT, *Read* scope | Yes | **No** — enforced server-side |
-| OAuth PAT, *Write* / *Admin* | Yes | Undocumented for Write; assume yes |
-
-**It expires after 90 days with no refresh token** (issued 2026-09-24, so due ≈ 2026-12-23; the
-symptom is 401 from every command). Renew on the **host** — the browser + `127.0.0.1` loopback +
-keyring flow cannot run headless in the container:
-
-```bash
-brew install circleci
-circleci auth login --insecure-storage   # choose "Read" on the consent screen
-grep token ~/.config/circleci/config.yml # --insecure-storage writes it here instead of the keyring
-ddev dotenv set .ddev/.env.web.local --circle-token="<PAT>"
-ddev restart
-```
-
-`--insecure-storage` is documented only in `circleci auth login`'s *Details* prose, not its flag
-table; if a build rejects it, the token goes to the keyring and `circleci setting list` prints it.
-
-Check a token before wiring it in — `200` means it drives the CLI, `401` means it is a v1-only
-project token:
-
-```bash
-curl -s -o /dev/null -w '%{http_code}\n' -H "Circle-Token: $TOKEN" https://circleci.com/api/v2/me
-```
-
-Prove the Read scope is real (expect **403**; a `201` means the token is not read-only — delete the
-var with `DELETE …/envvar/OSEC_SCOPE_PROBE` and re-issue the token):
-
-```bash
-curl -s -o /dev/null -w '%{http_code}\n' -X POST \
-  -H "Circle-Token: $CIRCLE_TOKEN" -H 'Content-Type: application/json' \
-  -d '{"name":"OSEC_SCOPE_PROBE","value":"x"}' \
-  "https://circleci.com/api/v2/project/gh/digitaldonkey/open-source-event-calendar/envvar"
-```
-
-### Commands
-
-**Triage order for a red build** — `run get` (which job failed) → `testresult list` (which tests)
-→ artifact screenshot if it is a frontend test → `job output list` only when the failure is
-*outside* a test (apt, composer, install). Then check whether a later commit already fixed it.
-Reaching for `job output list` first means grepping logs for something `testresult list` prints
-as a table.
-
-The project is auto-detected from the git remote, so `--project` is only needed for another repo.
-Job arguments are **UUIDs**, not the job numbers in the web UI — passing a number fails with
-`invalid UUID length: 4`. Get the UUIDs from `circleci run get`.
-
-```bash
-SLUG=gh/digitaldonkey/open-source-event-calendar
-
-circleci run list --current-branch                  # recent runs, this branch
-circleci run list --limit 60 --json                 # all branches
-circleci run get <run-id>                           # workflows + job UUIDs
-circleci job get <job-uuid>
-circleci testresult list <job-uuid>                 # failing test names as a table — start here
-circleci artifact <job-uuid>                        # screenshots etc. (NOT `artifact list`)
-circleci config validate                            # before pushing a .circleci/config.yml edit
-
-# why did it fail — output of every non-zero step
-circleci job output list <job-uuid> --json \
-  | jq '.steps[] | select(.exit_code != 0) | .output'
-
-# most recent failure across all branches
-circleci run list --limit 60 --json \
-  | jq -r '.[] | select(.current_outcome != "succeeded")
-           | "\(.created_at)  \(.current_outcome)  \(.branch)  \(.id)  \(.commit.subject)"'
-```
-
-`run list --json` returns a **top-level array** whose outcome field is `current_outcome`
-(`succeeded` / `failed` / `not_run`) — not `.items[]` and not `.status`.
-
-### Always read source at the run's revision, never the working tree
-
-`circleci run get` prints the run's `Commit`. Read the failing file **at that revision** —
-`git show <rev>:<path>` — before explaining a failure:
-
-```bash
-git show 3af4c8e:integration_tests/test/03_OsecPluginFrontend.spec.js | sed -n '305,322p'
-```
-
-A CI run is a snapshot of the past, and the fix is often already in the working tree, so quoting
-`path:line` from disk can show code that **would have passed** — which is self-evidently not what
-failed. This happened on 2026-09-24: the failed `release_test_job` on `fix/recurrence-dst-drift`
-(`3af4c8e`) asserted `markerImgUrl.startsWith('https://unpkg.com/leaflet')`, but Leaflet had moved
-to local delivery so the marker `src` was `<DOMAIN>/public/js/external_libs/leaflet/…` — a **stale
-test**, not a plugin regression. The working-tree copy already carried the fix from `96a73aed`
-(`startsWith(pageObject.settings.domain)`), which hid the entire cause.
-
-Sanity check before reporting: *does the code I am quoting actually explain the failure?* If it
-looks like it would pass, the revision is wrong.
-
-**Then check whether it is already fixed before reporting anything.** A failed run is history, and
-the maintainer may have fixed it hours later — reporting a fresh diagnosis of a solved problem
-wastes their time. List what landed on the failing file since that revision:
-
-```bash
-P=integration_tests/test/03_OsecPluginFrontend.spec.js
-git log --oneline 3af4c8e..HEAD -- "$P"     # run's commit is an ancestor of HEAD
-git log --oneline --all --since='2026-09-23 08:59' -- "$P"   # fallback: unmerged branch
-```
-
-Use the second form when `git merge-base --is-ancestor <rev> HEAD` fails. Either would have
-returned `96a73aed "Fix map integration test, remove unpkg.com references, as we moved to local
-delivery."` in the case above, making the correct report "that build failed on a stale test,
-already fixed in 96a73aed" rather than a diagnosis.
-
-### Insights and artifacts (what the logs cannot tell you)
-
-```bash
-S=gh/digitaldonkey/open-source-event-calendar
-H="Circle-Token: $CIRCLE_TOKEN"
-
-# intermittent failures, with counts and the workflow timestamp of each flake
-curl -s -H "$H" "https://circleci.com/api/v2/insights/$S/flaky-tests" \
-  | jq -r '.flaky_tests[] | "\(.times_flaked)x \(.workflow_created_at) \(.job_name) \(.test_name)"'
-
-# per-job success rate, p95 duration and credits over ~90 days
-curl -s -H "$H" "https://circleci.com/api/v2/insights/$S/workflows/build_test_deploy/jobs?branch=master" \
-  | jq -r '.items[] | "\(.name) \(.metrics.success_rate) \(.metrics.duration_metrics.p95)s \(.metrics.total_credits_used)"'
-```
-
-**Selenium screenshots are downloadable and can be looked at.** `circleci artifact <job-uuid> --json`
-gives `{path, url}`; the URL **302s to a presigned host, so `curl` needs `-L`** — without it you get
-a 0-byte file and `HTTP:302`. Reading the screenshot of a failing frontend test is often faster than
-any log: on 2026-09-24 it showed the map and marker rendering correctly, proving the failure was a
-stale assertion rather than a plugin regression.
-
-Two things this surfaced on 2026-09-24, worth re-checking rather than re-deriving:
-
-- **The `Add daily repeating event` flakes are the near-midnight bug.** All flakes (3× per theme)
-  came from one workflow created `2026-09-22T22:23:06Z`. CI runs `TZ: "Europe/Berlin"`
-  (`.circleci/config.yml:51`, matching `integration_tests/mocha/settings.js`), so that is **00:23 local** —
-  inside the `[00:00, 01:00)` window described under *Data Model: Events & Recurrence*. One workflow
-  is corroboration, not proof.
-- **The Selenium matrix is ~69% of CI credits** (`release_test_job` ×4 ≈ 16,956 of 24,604 over ~42
-  master runs), while the whole PHPUnit matrix is ~2,180. Test jobs sit at 90–92% success while
-  `build` and `static_job` are at 100% — flakiness, not breakage.
-
-### Guardrails: two independent gates, only one of which binds
-
-`.claude/settings.json` gates what Claude may *type*; the **token scope** gates what CircleCI will
-*do*. The token is the binding one, and it cannot be talked around.
-
-`run trigger`, `run cancel`, `workflow rerun` and `workflow cancel` are **denied**. They were
-briefly allowed on 2026-09-24 to test them, and the test showed the allow entries were inert: with
-the Read-scoped PAT every one fails `403 Permission denied` at the API. They were reverted to deny,
-so both gates now agree. Re-allowing them changes nothing unless the token is also re-minted with
-**Write** scope — read the caveat below before doing that.
-
-Also denied, because these change project state rather than pipeline runs: `envvar`, `context`,
-`project`, `policy`, `runner`, `deploy`, `dlc`, `setting set/unset`, `orb publish`, `namespace`,
-`auth login/logout`, plus `Read()` on `.env.web.local`. Keep deny patterns narrow — a blanket
-`Bash(circleci setting:*)` also blocks the harmless read `circleci setting list`.
-
-**To test what a scope really permits, hit the API endpoint directly — not the CLI.** The CLI
-short-circuits client-side and never reaches the server: `circleci run cancel <finished-run>`
-answers *"has no active workflows to cancel"* and exits 0, which says nothing about permissions.
-The honest probes are:
-
-```bash
-# write to pipeline state (harmless on a finished workflow)
-curl -s -w '%{http_code}\n' -X POST -H "Circle-Token: $CIRCLE_TOKEN" \
-  https://circleci.com/api/v2/workflow/<finished-workflow-id>/cancel
-
-# write to project settings — 403 is the answer that keeps the safety promise
-curl -s -o /dev/null -w '%{http_code}\n' -X POST \
-  -H "Circle-Token: $CIRCLE_TOKEN" -H 'Content-Type: application/json' \
-  -d '{"name":"OSEC_SCOPE_PROBE","value":"x"}' \
-  "https://circleci.com/api/v2/project/$SLUG/envvar"
-```
-
-**Before upgrading to a Write-scoped token, run the second probe.** CircleCI documents that OAuth
-scopes are Read / Write / Admin but never says whether **Write** also permits changing env vars and
-contexts. If it does, a Write token breaks the original requirement that CI access must not be able
-to touch project settings. Mint it, probe it, and drop back to Read if the probe returns `201`
-(deleting `OSEC_SCOPE_PROBE` afterwards).
-
-### Fallback when the token is expired or revoked
-
-The project is public, so the REST API answers these reads **unauthenticated**:
-`/api/v2/project/{slug}/pipeline` → `/api/v2/pipeline/{id}/workflow` →
-`/api/v2/workflow/{id}/job` covers status, and `/api/v2/project/{slug}/{job_number}/artifacts`
-and `.../tests` work too. Step logs are the exception: they need the **deprecated v1.1** endpoint
-`/api/v1.1/project/github/{org}/{repo}/{job_number}`, whose `output_url` values are presigned and
-expire within minutes, so fetch them immediately.
+- `twig_to_js_transform/` - converts Twig templates for frontend use
+- **PhpStorm MCP**: when connected, prefer it for symbol search, renames, inspections and Xdebug. Its
+  `execute_terminal_command` runs **on the host Mac** - load the `phpstorm-mcp` skill before using it
+
+## Release, CI and Generated Files
+
+- `README.txt` is generated from `README.md` - never hand-edit it: `/usr/local/bin/wp osec make_readme`
+- `hooks-and-filters.md` is generated from PHPDoc by `hookster_markdown`; regenerate it in the same commit as a hook
+  docblock change, or `static_release_job` fails
+- Anything shipped must be committed first, or the release jobs' `git status` checks fail
+- Gates, probe branches, branch/tag behaviour and tagging a WordPress.org release: skill `release-pipeline`;
+  checklist: skill `prepare-release`
+- Reading CI results (`circleci` CLI, triage order, **read source at the run's revision**, token renewal ≈ 2026-12-23):
+  skill `circleci-results`. `run trigger/cancel`, `workflow rerun/cancel` and project-settings commands are denied
 
 ## Key Conventions
 
@@ -980,28 +358,8 @@ Skip this for low-stakes or easily-reversible changes — it's overkill there. R
 - When refactoring, maintain backward compatibility where possible
 - Prefer updating to modern WordPress standards over maintaining legacy patterns
 - When uncertain about original JavaScript behavior, check available sources in `assets/` or `public/`
-
-### Comparing behaviour against an older release
-
-To answer "did this work in <tag>?", **do not** `git worktree add` and symlink `vendor/` into it.
-`vendor/composer/autoload_psr4.php` maps `Osec\` to `$baseDir . '/src'`, where `$baseDir` is resolved from the
-autoloader's own location - so a symlinked `vendor/` silently loads `src/` from the **main checkout**, and the
-old tag appears to behave like current `HEAD`. Verify with
-`php -r 'require "vendor/autoload.php"; echo (new ReflectionClass(Osec\App\Model\PostTypeEvent\EventInstance::class))->getFileName();'`
-before trusting any worktree result. A real `cp -a vendor` works, but the old tag's bootstrap may not survive a
-current dev database (e.g. pre-77524dd5 `verifySqlSchema()` aborts the PHPUnit bootstrap).
-
-What works reliably instead, on the live dev site:
-
-1. `git checkout <tag> -- <the few files in the code path>` (or all of `src/`)
-2. drive the real path with `/usr/local/bin/wp eval-file <script>` - each WP-CLI call is a fresh process, so
-   there is no opcache/worker staleness to fight
-3. `git checkout HEAD -- <same paths>` to restore
-
-Two traps when restoring: `git checkout <tag> -- src/` **resurrects files deleted since** that tag (they come
-back staged as added, and `git checkout HEAD -- src/` will not remove them - `git rm` them explicitly), and a
-`git diff --stat <tag>..HEAD -- <path>` that prints nothing means the file is byte-identical, which is usually
-a faster answer than any checkout.
+- "Did this work in <tag>?": never a `git worktree` with symlinked `vendor/` (it loads `src/` from this checkout);
+  see skill `compare-old-release`
 
 ## Documentation
 

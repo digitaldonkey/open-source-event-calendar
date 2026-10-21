@@ -100,7 +100,7 @@ vendor/bin/grumphp run --testsuite=prepare_release  # release-readiness checks, 
 ```
 
 > **Warning:** `integration_tests` runs the Mocha/Selenium suite against whatever `mocha/settings.local.js` points
-> at. It installs/uninstalls the plugin, exercises the `OSEC_UNINSTALL_PLUGIN_DATA` purge and **trashes every
+> at (or `BASE_URL`, see [Running against a sandbox](#integration-tests-mochaselenium)). It installs/uninstalls the plugin, exercises the `OSEC_UNINSTALL_PLUGIN_DATA` purge and **trashes every
 > calendar page on teardown**, leaving `calendar_page_id` pointing at a trashed post. Bare `grumphp run`,
 > `--testsuite=all_tests` and `ddev grumphp all` all include it. Use `--testsuite=git_pre_commit` when you only
 > want the code-quality gate.
@@ -216,6 +216,27 @@ Prerequisites:
 This suite runs directly against your working repo checkout — no need to build a release zip first. It's the same suite CI runs (against a packaged release build) as its release test.
 
 A full run takes ~5 minutes (21+ specs across 4 themes: `gamma`, `plana`, `umbra`, `vortex`). Run it in the background rather than blocking on it — e.g. `npm run test &`, or when driving it from an agent/non-interactive shell, backgrounded with output captured to a file and polled/tailed rather than awaited synchronously.
+
+**Running against a sandbox** (recommended - the suite then leaves the dev site alone): `BASE_URL` replaces
+`settings.local.js`'s `domain`, and `OSEC_TEST_HOST_RULES` lets the Selenium grid resolve the sandbox's wildcard
+hostname. Scope the purge constant to the sandbox in `constants-local.php`, so the dev site keeps `false`:
+```
+// in osec_initiate_constants_local():
+if (! defined('OSEC_UNINSTALL_PLUGIN_DATA') && defined('DB_NAME') && DB_NAME === 'try_grumphp') {
+    define('OSEC_UNINSTALL_PLUGIN_DATA', true);
+}
+```
+```
+# fresh copy of the dev database (see CLAUDE.md "Database Safety")
+mysql -uroot -proot -h db -e "DROP DATABASE IF EXISTS try_grumphp; CREATE DATABASE try_grumphp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+mysqldump -uroot -proot -h db --single-transaction db | mysql -uroot -proot -h db try_grumphp
+mkdir -p ../../uploads/osec-sandbox/try_grumphp
+cd integration_tests
+BASE_URL=https://try-grumphp.ddev-wordpress.ddev.site \
+OSEC_TEST_HOST_RULES='MAP *.ddev-wordpress.ddev.site ddev-router' \
+SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test
+```
+GrumPHP's `integration_tests` task passes neither variable, so it still targets `settings.local.js`.
 
 **Running against one theme only**: `settings.local.js`'s `currentThemeOnly: true` (default is `false`, i.e. all 4 themes) makes `mocha/test/03_OsecPluginFrontend.spec.js`'s `before` hook read whichever theme is *currently active* in wp-admin's OSEC theme settings page (`mocha/page_objects/ActivatePluginAndSettings.js`'s `getActiveTheme()`) and skip the other three theme blocks (`this.skip()`). Only the theme-looped Frontend suite is affected — "Plugin install & Setup" and "Backend tests" aren't per-theme and always run once. Set your active theme in wp-admin first, then flip the setting; this cuts the Frontend portion to ~1/4 its normal length.
 
