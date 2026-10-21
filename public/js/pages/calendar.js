@@ -4328,21 +4328,37 @@ timely.define("domReady", [], function () {
     }, anchor_popover = function () {
         // Stacked week/day events stretch to the column's right edge and can be hours tall, so the
         // popover the shared handler places beside the whole box lands far from the pointer, often
-        // off-screen. Re-place it at the pointer: above it (below if there is no room), so the row
-        // the pointer sweeps along to reach the other stacked events stays free. The shared handler
-        // lives in the minified common_frontend.js, so this hooks its "shown" event instead.
+        // off-screen. Re-place it on the event's time side, at the pointer's x: above the event, the
+        // arrow on its top edge (start), or below it, the arrow on its bottom edge (end), whichever
+        // fits. The way from the pointer to the popover then runs inside the event straight into the
+        // arrow, which belongs to the popover, so it stays open (R4: a gap closed it on the way). Only
+        // an event taller than the window falls back to the pointer. The shared handler lives in the
+        // minified common_frontend.js, so this hooks its "shown" event instead.
         var data = $(this).data("ai1ec.constrained_popover");
         if (!data) return;
-        var tip = data.tip(), $win = $(window),
+        var $event = $(this), tip = data.tip(), $win = $(window),
             width = tip.outerWidth(), height = tip.outerHeight(),
-            // Room for the arrow (11px) plus a small gap.
-            reach = 14,
             left = Math.max($win.scrollLeft() + 4, Math.min(pointer.x - width / 2, $win.scrollLeft() + $win.width() - width - 4)),
-            above = pointer.y - reach - height >= $win.scrollTop();
+            eventTop = $event.offset().top, eventBottom = eventTop + $event.outerHeight(),
+            viewTop = $win.scrollTop(), viewBottom = viewTop + $win.height(),
+            // Room for the box plus a generous arrow, before the arrow is measured.
+            need = height + 16,
+            edgeAbove = eventTop - need >= viewTop, edgeBelow = eventBottom + need <= viewBottom,
+            above = edgeAbove || (!edgeBelow && pointer.y - need >= viewTop),
+            // The arrow's tip overlaps the event by 1px, so there is no gap to cross.
+            target = edgeAbove ? eventTop + 1 : (edgeBelow ? eventBottom - 1 : pointer.y),
+            arrow, box, overhang;
         tip.removeClass("ai1ec-left ai1ec-right ai1ec-top ai1ec-bottom")
             .addClass(above ? "ai1ec-top" : "ai1ec-bottom")
-            .offset({top: above ? pointer.y - reach - height : pointer.y + reach, left: left});
-        tip.find(".ai1ec-arrow").css({top: "", left: (pointer.x - left) + "px"})
+            .offset({top: above ? target - height : target, left: left});
+        tip.find(".ai1ec-arrow").css({top: "", left: (pointer.x - left) + "px"});
+        // The arrow's overhang depends on the calendar theme, so it is measured.
+        arrow = tip.find(".ai1ec-arrow")[0].getBoundingClientRect();
+        box = tip[0].getBoundingClientRect();
+        overhang = above ? arrow.bottom - box.bottom : box.top - arrow.top;
+        // A transparent strip of the popover fills the overhang over its whole width (style.less), not only the arrow.
+        tip[0].style.setProperty("--osec-popover-bridge", overhang + "px");
+        tip.offset({top: above ? target - overhang - height : target + overhang, left: left})
     }, y = function () {
         // Capture phase: runs before the jQuery handlers, including the shared one that opens the
         // popover, so anchor_popover already sees the position of the pointer that opened it.
