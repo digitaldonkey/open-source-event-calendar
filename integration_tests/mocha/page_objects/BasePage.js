@@ -33,6 +33,11 @@ class BasePage {
         else {
             settings = require('../settings.js');
         }
+        settings = Object.assign({}, settings);
+        // Another site than the settings name, e.g. a sandbox: BASE_URL=https://try-x.ddev-wordpress.ddev.site.
+        if (process.env.BASE_URL) {
+            settings.domain = process.env.BASE_URL;
+        }
         const theClass = this;
         const driver = await this.setupWebDriver(settings);
         return new theClass(settings, driver)
@@ -41,10 +46,14 @@ class BasePage {
     /**
      * Set up selenium webdriver.
      *
-     * @param isHeadless
+     * A sandbox's wildcard host has no alias in the Selenium grid; pass
+     * OSEC_TEST_HOST_RULES='MAP *.ddev-wordpress.ddev.site ddev-router' to resolve it.
+     *
+     * @param settings
      * @returns {!ThenableWebDriver}
      */
     static setupWebDriver (settings) {
+        const hostRules = process.env.OSEC_TEST_HOST_RULES ? [`--host-resolver-rules=${process.env.OSEC_TEST_HOST_RULES}`] : [];
         if (settings.headless) {
             return new Builder()
                 .forBrowser(Browser.CHROME)
@@ -53,6 +62,7 @@ class BasePage {
                     .addArguments('--headless')
                     .addArguments('--disable-gpu')
                     .addArguments('--ignore-certificate-errors')
+                    .addArguments(...hostRules)
                 )
                 .setFirefoxOptions(
                     new firefox.Options()
@@ -66,6 +76,7 @@ class BasePage {
             new chrome.Options()
                 .addArguments('--ignore-certificate-errors')
                 .addArguments('--incognito')
+                .addArguments(...hostRules)
         )
         .build();
     }

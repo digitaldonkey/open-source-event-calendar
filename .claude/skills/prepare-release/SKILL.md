@@ -5,6 +5,8 @@ description: Interactively walks through this plugin's pre-release checklist - r
 
 # Prepare Release
 
+How the CI gates and the tag release work: skill `release-pipeline`.
+
 Walks through this plugin's release-readiness checklist end to end, asking
 before every file edit or environment change. Never commits - that's left
 to the user.
