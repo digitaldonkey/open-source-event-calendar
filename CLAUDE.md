@@ -304,7 +304,8 @@ See `TESTING.md` and `.claude/rules/testing.md`. Quick reference:
 - `bin/` - developer scripts (`compile-less-production.sh`, `get-latest-plugin-review-phpcs-rulesets.sh`,
   `install-wp-tests.sh`)
 - `wp osec content generate` - test content around May of next year (dataset `tests/data/content/`); replaces only
-  its own earlier content and refuses foreign calendar data, so use a `try_*` sandbox on a used site
+  its own earlier content and keeps other calendar data next to it; `--only-generated` (used by the screenshot and
+  regression tools) refuses a site with other calendar data, so use a `try_*` sandbox on a used site
 - `integration_tests/visual_regression/` (`ddev osec-review`, `ddev osec-approve`) - Playwright screenshots compared
   with a baseline set, review page with approval. See its `README.md`
 - `bin/screenshots/` (`ddev osec-screenshots`) - the WordPress.org `assets/screenshot-*.png`

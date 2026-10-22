@@ -11,7 +11,7 @@ WP_SANDBOX_DB=try_pw node bin/screenshots/shoot.js screenshot-2.png --out=/tmp/s
 
 From the host: `ddev osec-screenshots [try_<name>] [screenshot-N.png …] [--out=<dir>]` (`bin/ddev/commands/web/`).
 
-1. `wp osec content generate --set=showcase --site-settings`: it replaces only content it created earlier and refuses
+1. `wp osec content generate --set=showcase --site-settings --only-generated`: it replaces only content it created earlier and refuses
    a site with other calendar data, so use a sandbox (`WP_SANDBOX_DB`) when the site has own events.
 2. Warns when the site's WordPress theme is not the dataset's (`site.theme`, Twenty Twenty-Five): the images would
    show another theme around the calendar.
