@@ -218,15 +218,44 @@ class ContentGeneratorTest extends TestBase
     }
 
     /**
-     * Calendar data the generator did not create stops the run before anything is removed.
+     * Calendar data the generator did not create stays as it is, through repeated runs.
      */
-    public function test_refuses_foreign_event_and_changes_nothing()
+    public function test_keeps_foreign_data()
+    {
+        global $osec_app;
+
+        $event    = self::factory()->post->create(['post_type' => OSEC_POST_TYPE]);
+        $category = wp_insert_term('Own category', 'osec_events_categories');
+        $tag      = wp_insert_term('Own tag', 'osec_events_tags');
+        $osec_app->db->insert(
+            OSEC_DB__FEEDS,
+            ['feed_url' => 'https://example.org/own.ics', 'feed_name' => 'Own', 'feed_category' => '', 'feed_tags' => '']
+        );
+
+        $first  = $this->generate($this->dataset_without_feeds());
+        $second = $this->generate($this->dataset_without_feeds());
+
+        $this->assertNotNull(get_post($event));
+        $this->assertNotNull(get_term($category['term_id'], 'osec_events_categories'));
+        $this->assertNotNull(get_term($tag['term_id'], 'osec_events_tags'));
+        $this->assertSame(
+            ['https://example.org/own.ics'],
+            $osec_app->db->get_col('SELECT feed_url FROM ' . $osec_app->db->get_table_name(OSEC_DB__FEEDS))
+        );
+        $this->assertNull(get_post($first['events']['jazz']['id']), 'The first run is replaced by the second.');
+        $this->assertNotNull(get_post($second['events']['jazz']['id']));
+    }
+
+    /**
+     * only_generated: calendar data the generator did not create stops the run before anything is removed.
+     */
+    public function test_only_generated_refuses_foreign_event_and_changes_nothing()
     {
         $first   = $this->generate($this->dataset_without_feeds());
         $foreign = self::factory()->post->create(['post_type' => OSEC_POST_TYPE]);
 
         try {
-            $this->generate($this->dataset_without_feeds());
+            $this->generate($this->dataset_without_feeds(), ['only_generated' => true]);
             $this->fail('No exception for a foreign event.');
         } catch (Exception $e) {
             $this->assertStringContainsString('calendar events that were not generated', $e->getMessage());
@@ -236,16 +265,16 @@ class ContentGeneratorTest extends TestBase
         $this->assertNotNull(get_post($first['pages']['block']['id']));
     }
 
-    public function test_refuses_foreign_category()
+    public function test_only_generated_refuses_foreign_category()
     {
         wp_insert_term('Own category', 'osec_events_categories');
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('calendar categories that were not generated');
-        $this->generate($this->dataset_without_feeds());
+        $this->generate($this->dataset_without_feeds(), ['only_generated' => true]);
     }
 
-    public function test_refuses_foreign_feed()
+    public function test_only_generated_refuses_foreign_feed()
     {
         global $osec_app;
 
@@ -256,7 +285,51 @@ class ContentGeneratorTest extends TestBase
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('calendar feeds that were not generated');
-        $this->generate($this->dataset_without_feeds());
+        $this->generate($this->dataset_without_feeds(), ['only_generated' => true]);
+    }
+
+    /**
+     * only_generated accepts a site holding nothing but an earlier run's content.
+     */
+    public function test_only_generated_replaces_an_earlier_run()
+    {
+        $first  = $this->generate($this->dataset_without_feeds());
+        $second = $this->generate($this->dataset_without_feeds(), ['only_generated' => true]);
+
+        $this->assertNull(get_post($first['events']['jazz']['id']));
+        $this->assertNotNull(get_post($second['events']['jazz']['id']));
+    }
+
+    public static function dataset_term_names(): array
+    {
+        return [
+            'category' => ['osec_events_categories', 'Concerts'],
+            'tag'      => ['osec_events_tags', 'outdoor'],
+        ];
+    }
+
+    /**
+     * A foreign term named like a dataset one would make wp_insert_term() fail halfway: refused before anything is
+     * removed.
+     *
+     * @dataProvider dataset_term_names
+     */
+    public function test_refuses_a_term_named_like_the_dataset(string $taxonomy, string $name)
+    {
+        $first = $this->generate($this->dataset_without_feeds());
+        // The first run's term has the name already, so the foreign one gets it by renaming.
+        $term  = wp_insert_term($name . ' (own)', $taxonomy);
+        wp_update_term($term['term_id'], $taxonomy, ['name' => $name]);
+        $this->assertSame($name, get_term($term['term_id'], $taxonomy)->name);
+
+        try {
+            $this->generate($this->dataset_without_feeds());
+            $this->fail("No exception for a foreign term named \"$name\".");
+        } catch (Exception $e) {
+            $this->assertStringContainsString("\"$name\"", $e->getMessage());
+        }
+        $this->assertNotNull(get_post($first['events']['jazz']['id']), 'A refused run changes nothing.');
+        $this->assertNotNull(get_post($first['pages']['block']['id']));
     }
 
     public function test_unknown_theme_stops()

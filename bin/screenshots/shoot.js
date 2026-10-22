@@ -6,10 +6,10 @@
  *
  * Env: WP_SANDBOX_DB (site; unset: the DDEV dev site), PLAYWRIGHT_WS.
  *
- * First generates the showcase content (`wp osec content generate --set=showcase --site-settings`; it refuses a site
- * with calendar data it did not create), then shoots every listed shot, or only the named files, into --out
- * (default: the plugin's assets/). A failing shot is reported and the run goes on; exit code 1 if any failed. Manual
- * shots are listed at the end. Shot keys: README.md.
+ * First generates the showcase content (`wp osec content generate --set=showcase --site-settings --only-generated`;
+ * it refuses a site with calendar data it did not create), then shoots every listed shot, or only the named files,
+ * into --out (default: the plugin's assets/). A failing shot is reported and the run goes on; exit code 1 if any
+ * failed. Manual shots are listed at the end. Shot keys: README.md.
  *
  * Browser connection, WP-CLI and login come from the visual regression suite
  * (integration_tests/visual_regression/lib/).
@@ -45,6 +45,7 @@ function generate() {
             `--dataset=${DATASET}`,
             '--set=showcase',
             '--site-settings',
+            '--only-generated',
             `--manifest=${file}`,
         ]);
         return JSON.parse(fs.readFileSync(file, 'utf8'));

@@ -11,7 +11,7 @@ use WP_CLI\Utils;
  * Generates test content for reviews, screenshots and regression tests.
  *
  *     wp osec content generate --dataset=<file> [--anchor=<date>] [--set=<set>] [--theme=<name>] [--site-settings]
- *         [--manifest=<file>]
+ *         [--only-generated] [--manifest=<file>]
  *
  * The dataset (tests/data/content/dataset.json in the plugin repository, not shipped) is described in
  * tests/data/content/README.md. The logic lives in ContentGenerator.
@@ -32,9 +32,10 @@ class ContentCommand extends \WP_CLI_Command
     /**
      * Fills a site with the events, categories, tags, feeds and pages of a dataset file.
      *
-     * Replaces what an earlier run created (all of it is marked) and deletes nothing else. Refuses a site with calendar
-     * events, categories, tags or feeds it did not create. Sets the calendar page, the calendar theme and the
-     * dataset's calendar settings.
+     * Replaces what an earlier run created (all of it is marked) and deletes nothing else: calendar events, categories,
+     * tags and feeds it did not create stay and show up next to the test content. Stops, changing nothing, if a
+     * category or tag it did not create has the name of a dataset one (with --only-generated: if the site has any
+     * calendar data it did not create). Sets the calendar page, the calendar theme and the dataset's calendar settings.
      *
      * ## OPTIONS
      *
@@ -61,6 +62,10 @@ class ContentCommand extends \WP_CLI_Command
      * : Also set the WordPress options of the dataset: site title, timezone, date and time format, start of week,
      * permalink structure (rules flushed in the database only: on Apache, save Settings > Permalinks once).
      *
+     * [--only-generated]
+     * : Refuse a site with calendar events, categories, tags or feeds the test content did not create, so the
+     * calendar shows the test content only (screenshots, regression baselines).
+     *
      * [--manifest=<file>]
      * : Write the manifest (anchor, timezone, page paths, event IDs, titles and starts by key) to this file instead
      * of printing it.
@@ -75,10 +80,11 @@ class ContentCommand extends \WP_CLI_Command
     public function generate($args, $assoc_args)
     {
         $options = [
-            'anchor'        => (string) Utils\get_flag_value($assoc_args, 'anchor', ''),
-            'set'           => (string) Utils\get_flag_value($assoc_args, 'set', 'all'),
-            'theme'         => (string) Utils\get_flag_value($assoc_args, 'theme', ''),
-            'site_settings' => (bool) Utils\get_flag_value($assoc_args, 'site-settings', false),
+            'anchor'         => (string) Utils\get_flag_value($assoc_args, 'anchor', ''),
+            'set'            => (string) Utils\get_flag_value($assoc_args, 'set', 'all'),
+            'theme'          => (string) Utils\get_flag_value($assoc_args, 'theme', ''),
+            'site_settings'  => (bool) Utils\get_flag_value($assoc_args, 'site-settings', false),
+            'only_generated' => (bool) Utils\get_flag_value($assoc_args, 'only-generated', false),
         ];
         try {
             $manifest = ContentGenerator::from_file(

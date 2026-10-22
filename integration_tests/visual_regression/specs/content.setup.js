@@ -1,9 +1,10 @@
 /**
  * Setup project `content`: generates the test content and stores a logged-in browser state for wp-admin pages.
  *
- * `wp osec content generate` replaces what an earlier run created and refuses a site with other calendar data
- * (see tests/data/content/README.md). The manifest goes to .auth/manifest.json for the specs. OSEC_ANCHOR pins the
- * anchor (default: the generator's, the week with 15 May of next year).
+ * `wp osec content generate --only-generated` replaces what an earlier run created and refuses a site with other
+ * calendar data, which would show up in the shots (see tests/data/content/README.md). The manifest goes to
+ * .auth/manifest.json for the specs. OSEC_ANCHOR pins the anchor (default: the generator's, the week with 15 May of
+ * next year).
  *
  * Remote mode (OSEC_REMOTE_URL, lib/wp.js): the content was imported with the site, so nothing is generated, and the
  * login goes through wp-login.php with the shipped password.
@@ -30,6 +31,7 @@ setup('Generate the test content', about(
         'generate',
         '--dataset=tests/data/content/dataset.json',
         '--site-settings',
+        '--only-generated',
         `--manifest=${MANIFEST}`,
         ...(process.env.OSEC_ANCHOR ? [`--anchor=${process.env.OSEC_ANCHOR}`] : []),
     ]);

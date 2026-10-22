@@ -14,8 +14,9 @@ site with it. The command ships with the plugin; this folder (dataset, photos) d
 
 No purge needed: everything `generate` creates is marked, and a run replaces exactly that. It:
 
-1. stops, changing nothing, if the site has calendar events, categories, tags or feeds it did not create (a real
-   site's calendar data is never touched; run it on a site without any);
+1. stops, changing nothing, if a category or tag it did not create has the name of a dataset one. Other calendar
+   events, categories, tags and feeds are never touched; they show up in the calendar next to the test content.
+   With `--only-generated` it stops if there is any (the screenshot and regression tools use it);
 2. removes what an earlier run created: events, categories and tags (post and term meta `_osec_content_generated`),
    pages and images (same post meta), feeds whose URL lies below `uploads/osec-content/` with their imported events,
    and the folder `uploads/osec-content/<database>/`. Other posts, pages, media, users and the WordPress theme stay;
@@ -31,6 +32,7 @@ No purge needed: everything `generate` creates is marked, and a run replaces exa
 | `--set=all\|showcase` | `showcase`: only the events of that group (feed events always). |
 | `--theme=<name>` | Calendar theme instead of the dataset's (`wp osec theme list`). |
 | `--site-settings` | Also set site title, timezone, date/time format, week start and permalink structure from `site`. Without it the site's timezone and permalinks are used. The rewrite rules are flushed in the database only; on Apache, save Settings › Permalinks once so `.htaccess` gets its block. |
+| `--only-generated` | Stop, changing nothing, if the site has calendar events, categories, tags or feeds the test content did not create, so the calendar shows the test content alone. |
 | `--manifest=<file>` | Write the manifest there instead of printing it. |
 
 Why May: nothing depends on "today" (no today marker, no "now" line, no agenda cut-off inside the month), and there

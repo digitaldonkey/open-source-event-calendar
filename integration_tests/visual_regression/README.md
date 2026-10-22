@@ -64,8 +64,8 @@ WP_SANDBOX_DB=try_v1116 npm run update -- -g "Single event"  # re-shoot some bas
 Use the sandbox `try_v1116`: a fresh WordPress with Twenty Twenty-Five and only this plugin. A copy of a used site
 (e.g. the dev site) carries extra plugins and per-user settings, which show up as differences.
 
-The site must hold no calendar data the generator did not create. The generator replaces only its own earlier content
-and refuses otherwise (`tests/data/content/README.md`).
+The site must hold no calendar data the generator did not create. The suite runs the generator with `--only-generated`,
+which replaces only its own earlier content and refuses otherwise (`tests/data/content/README.md`).
 
 ## Settings
 
