@@ -945,7 +945,7 @@ timely.define("domReady", [], function () {
             placement: o,
             trigger: "manual",
             html: !0,
-            template: '<div class="timely ai1ec-popover ' + s + '">' + '<div class="ai1ec-arrow"></div>' + '<div class="ai1ec-popover-inner">' + '<div class="ai1ec-popover-content"><div></div></div>' + "</div>" + "</div>",
+            template: '<div class="' + (n.closest(".timely").length ? "timely " : "") + 'ai1ec-popover ' + s + '">' + '<div class="ai1ec-arrow"></div>' + '<div class="ai1ec-popover-inner">' + '<div class="ai1ec-popover-content"><div></div></div>' + "</div>" + "</div>",
             container: "body"
         }).constrained_popover("show")
     }, n = function (t) {
@@ -960,7 +960,7 @@ timely.define("domReady", [], function () {
             return
         }
         var n = $(this), r = {
-            template: '<div class="timely ai1ec-tooltip"><div class="ai1ec-tooltip-arrow"></div><div class="ai1ec-tooltip-inner"></div></div>',
+            template: '<div class="' + (n.closest(".timely").length ? "timely " : "") + 'ai1ec-tooltip"><div class="ai1ec-tooltip-arrow"></div><div class="ai1ec-tooltip-inner"></div></div>',
             trigger: "manual",
             container: "body"
         };

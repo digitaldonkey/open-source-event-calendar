@@ -1,0 +1,33 @@
+//
+// Event popovers (month, week and day view): sized from the site's font sizes instead of vortex's fixed ones.
+// Overrides the rules in vortex/less/style.less ("Event popovers appended to body tag"); `unset` drops a vortex
+// value plana does not replace, so the popover takes it from the site.
+//
+
+.ai1ec-popover.ai1ec-popup {
+  width: 10.625em;
+
+  .ai1ec-popover-content {
+    font-size: var(--wp--preset--font-size--medium);
+    font-weight: unset;
+  }
+  .ai1ec-event-time {
+    font-size: .7em;
+  }
+  .ai1ec-allday-badge {
+    font-size: .8em;
+  }
+  .post-edit-link {
+    font-size: .68em;
+  }
+}
+
+.ai1ec-popup-title {
+  font-size: .9em;
+  line-height: unset;
+}
+
+.ai1ec-popup-excerpt {
+  font-size: unset;
+  line-height: 1.2;
+}
