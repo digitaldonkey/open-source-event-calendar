@@ -137,8 +137,8 @@ Nothing is hidden unless listed here:
 - wp-admin: notices and the admin footer removed, the run's dates removed or blanked;
 - the events list sorted by title, with the Screen Options above;
 - views logged out, phone emulation below 800 px;
-- week, day and month from 800 px: the window grown to the page's height and one event hovered, so its popover is in
-  the shot (`popover` in `specs/screens.js`; phones have no hover);
+- week, day and month: the window grown to the page's height and one event hovered, so its popover is in the shot
+  (`popover` in `specs/screens.js`, an event with image and excerpt inside the configured day hours);
 - animations frozen, text cursor hidden;
 - the print button's `window.print()` stubbed;
 - the DST day's "show full day" button and the block's settings toggle clicked.
