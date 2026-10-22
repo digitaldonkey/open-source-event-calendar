@@ -41,18 +41,18 @@ const VIEWS = [
         name: 'day',
         title: 'Day view: busy day',
         description: `The day with eight consecutive events next to a multi-day bar and a series. From 800 px with the
-            popover of "Busy day 4" open.`,
+            popover of "Repair Café" open (image, excerpt; Jazz in the Park is not on that day).`,
         path: (m) => calendarPath(m, 'oneday', m.events['busy-1'].start.slice(0, 10)),
-        popover: 'busy-4',
+        popover: 'repair',
     },
     {
         name: 'month',
         title: 'Month view',
         description: `The anchor month (May): multi-day bars across weeks and the month end, many events on one day,
-            long titles, category colors, series. From 800 px with the popover of the multi-day bar "School
-            Holidays" open (it crosses into the next week).`,
+            long titles, category colors, series. From 800 px with the popover of "Jazz in the Park" open (image,
+            excerpt).`,
         path: (m) => calendarPath(m, 'month', m.anchor),
-        popover: 'school-holidays',
+        popover: 'jazz',
     },
 ];
 
