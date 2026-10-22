@@ -64,8 +64,8 @@ WP_SANDBOX_DB=try_v1116 npm run update -- -g "Single event"  # re-shoot some bas
 Use the sandbox `try_v1116`: a fresh WordPress with Twenty Twenty-Five and only this plugin. A copy of a used site
 (e.g. the dev site) carries extra plugins and per-user settings, which show up as differences.
 
-The site must hold no calendar data the generator did not create. The generator replaces only its own earlier content
-and refuses otherwise (`tests/data/content/README.md`).
+The site must hold no calendar data the generator did not create. The suite runs the generator with `--only-generated`,
+which replaces only its own earlier content and refuses otherwise (`tests/data/content/README.md`).
 
 ## Settings
 
@@ -137,6 +137,8 @@ Nothing is hidden unless listed here:
 - wp-admin: notices and the admin footer removed, the run's dates removed or blanked;
 - the events list sorted by title, with the Screen Options above;
 - views logged out, phone emulation below 800 px;
+- week, day and month from 800 px: the window grown to the page's height and one event hovered, so its popover is in
+  the shot (`popover` in `specs/screens.js`; phones have no hover);
 - animations frozen, text cursor hidden;
 - the print button's `window.print()` stubbed;
 - the DST day's "show full day" button and the block's settings toggle clicked.

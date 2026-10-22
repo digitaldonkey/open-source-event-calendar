@@ -17,7 +17,10 @@ const WIDTHS = [
     1280,
 ];
 
-/** Calendar views (visual.spec.js), shot at every width of WIDTHS: `<theme>/<name>-<width>.png`. */
+/**
+ * Calendar views (visual.spec.js), shot at every width of WIDTHS: `<theme>/<name>-<width>.png`. `popover`: the manifest
+ * key of an event whose popover is open in the shot, at widths from POPOVER_MIN_WIDTH on (phones have no hover).
+ */
 const VIEWS = [
     {
         name: 'agenda',
@@ -29,23 +32,32 @@ const VIEWS = [
         name: 'week',
         title: 'Week view',
         description: `The anchor week: overlapping talks, all-day bars crossing the week, an event crossing midnight,
-            an instant event, the Tokyo event on the day it falls on in Berlin.`,
+            an instant event, the Tokyo event on the day it falls on in Berlin. From 800 px with the popover of
+            "Jazz in the Park" open (image, excerpt).`,
         path: (m) => calendarPath(m, 'week', m.anchor),
+        popover: 'jazz',
     },
     {
         name: 'day',
         title: 'Day view: busy day',
-        description: 'The day with eight consecutive events next to a multi-day bar and a series.',
+        description: `The day with eight consecutive events next to a multi-day bar and a series. From 800 px with the
+            popover of "Busy day 4" open.`,
         path: (m) => calendarPath(m, 'oneday', m.events['busy-1'].start.slice(0, 10)),
+        popover: 'busy-4',
     },
     {
         name: 'month',
         title: 'Month view',
         description: `The anchor month (May): multi-day bars across weeks and the month end, many events on one day,
-            long titles, category colors, series.`,
+            long titles, category colors, series. From 800 px with the popover of the multi-day bar "School
+            Holidays" open (it crosses into the next week).`,
         path: (m) => calendarPath(m, 'month', m.anchor),
+        popover: 'school-holidays',
     },
 ];
+
+/** Narrowest width at which VIEWS shots open their `popover`; below it the views run with phone emulation. */
+const POPOVER_MIN_WIDTH = 800;
 
 /**
  * Printed views (print.spec.js), by their name in VIEWS, which gives the path: `<theme>/print-<view>.png`, in Chromium
@@ -151,6 +163,7 @@ const ADMIN = [
 module.exports = {
     WIDTHS,
     VIEWS,
+    POPOVER_MIN_WIDTH,
     PRINT,
     SINGLES,
     PAGES,

@@ -14,19 +14,20 @@ use Osec\Exception\InvalidArgumentException;
 use Osec\Theme\ThemeLoader;
 
 /**
- * Fills a clean site with the test content of a dataset file, for reviews, screenshots and regression tests.
+ * Fills a site with the test content of a dataset file, for reviews, screenshots and regression tests.
  *
  * Used by `wp osec content generate` (ContentCommand). Everything goes through the plugin's own model:
  * Event::save() builds the recurrence instances, the feed is a real import, "edit this instance" is done as
  * EventParent does it. Everything it creates is marked (post and term meta GENERATED_META, feeds by their URL), so the
- * next run replaces exactly that (remove_generated()) and refuses any other calendar data: no purge needed. The dataset
- * format is described in tests/data/content/README.md.
+ * next run replaces exactly that (remove_generated()) and leaves any other calendar data as it is: no purge needed.
+ * The dataset format is described in tests/data/content/README.md.
  *
  *     $manifest = ContentGenerator::from_file($app, 'dataset.json', ['anchor' => '2027-05-17'])->generate();
  *
  * Options: anchor ('' = the week with 15 May of next year, 'today', or a date), set ('all' or 'showcase'),
  * theme (calendar theme name, default the dataset's), site_settings (true: also set the WordPress options of the
- * dataset's `site` block: title, timezone, date and time format, start of week, permalink structure).
+ * dataset's `site` block: title, timezone, date and time format, start of week, permalink structure), only_generated
+ * (true: refuse a site with calendar data it did not create, so screenshots and baselines show the test content only).
  */
 // Messages of the exceptions below are for WP-CLI output only, never HTML.
 // phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -86,7 +87,7 @@ class ContentGenerator
      * @param  App  $app
      * @param  array  $dataset  Decoded dataset.
      * @param  string  $dataset_dir  Folder holding images/.
-     * @param  array  $options  anchor, set, theme, site_settings (see the class description).
+     * @param  array  $options  anchor, set, theme, site_settings, only_generated (see the class description).
      * @param  callable|null  $log  Receives progress messages (string).
      */
     public function __construct(
@@ -100,10 +101,11 @@ class ContentGenerator
         $this->dataset     = $dataset;
         $this->dataset_dir = rtrim($dataset_dir, '/');
         $this->options     = $options + [
-            'anchor'        => '',
-            'set'           => 'all',
-            'theme'         => '',
-            'site_settings' => false,
+            'anchor'         => '',
+            'set'            => 'all',
+            'theme'          => '',
+            'site_settings'  => false,
+            'only_generated' => false,
         ];
         $this->log         = $log ?? static function () {
         };
@@ -141,11 +143,16 @@ class ContentGenerator
      * categories, tags, feeds, events and pages.
      *
      * @return array The manifest: anchor, timezone, set, calendar_theme, pages, events (id, title, start by key).
-     * @throws Exception When the site has calendar data it did not generate, or the dataset is invalid.
+     * @throws Exception When a category or tag it did not generate has the name of one in the dataset (with
+     *                   only_generated: any calendar data it did not generate), or the dataset is invalid.
      */
     public function generate(): array
     {
-        $this->require_no_foreign_data();
+        if ($this->options['only_generated']) {
+            $this->require_no_foreign_data();
+        } else {
+            $this->require_no_term_collision();
+        }
         $removed = self::remove_generated($this->app);
         if ($removed) {
             ($this->log)("Removed $removed events, terms, feeds, pages and images of an earlier run.");
@@ -312,8 +319,49 @@ class ContentGenerator
     }
 
     /**
-     * Stops when the site has calendar data an earlier run did not create: events, categories, tags or feeds.
-     * Checked before anything is removed, so a refused run changes nothing.
+     * Stops when a category or tag an earlier run did not create has the name of one in the dataset, as
+     * wp_insert_term() would refuse it halfway through the run. Checked before anything is removed, so a refused run
+     * changes nothing. Other calendar data the generator did not create is left as it is.
+     *
+     * @throws Exception
+     */
+    private function require_no_term_collision(): void
+    {
+        $names = [
+            'osec_events_categories' => array_column($this->dataset['categories'] ?? [], 'name'),
+            'osec_events_tags'       => $this->dataset['tags'] ?? [],
+        ];
+        $found = [];
+        foreach ($names as $taxonomy => $list) {
+            if ( ! $list) {
+                continue;
+            }
+            $foreign = get_terms([
+                'taxonomy'   => $taxonomy,
+                'hide_empty' => false,
+                'fields'     => 'names',
+                'name'       => $list,
+                // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- dev tool, a handful of terms.
+                'meta_query' => [
+                    [
+                        'key'     => self::GENERATED_META,
+                        'compare' => 'NOT EXISTS',
+                    ],
+                ],
+            ]);
+            $found = array_merge($found, is_array($foreign) ? $foreign : []);
+        }
+        if ($found) {
+            throw new Exception(
+                'Categories or tags not created by the test content have the names of dataset ones: "'
+                . implode('", "', $found) . '". Rename or delete them.'
+            );
+        }
+    }
+
+    /**
+     * With only_generated: stops when the site has calendar data an earlier run did not create: events, categories,
+     * tags or feeds. Checked before anything is removed, so a refused run changes nothing.
      *
      * @throws Exception
      */
@@ -373,8 +421,8 @@ class ContentGenerator
         }
         if ($found) {
             throw new Exception(
-                'This site has calendar ' . implode(', ', $found) . ' that were not generated. The test content'
-                . ' replaces only its own earlier content; use a site without other calendar data.'
+                'This site has calendar ' . implode(', ', $found) . ' that were not generated, and --only-generated'
+                . ' wants the test content alone. Use a site without other calendar data.'
             );
         }
     }
