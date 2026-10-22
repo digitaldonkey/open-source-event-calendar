@@ -4326,9 +4326,9 @@ timely.define("domReady", [], function () {
     }, pointer = {x: 0, y: 0}, track_pointer = function (t) {
         pointer = {x: t.pageX, y: t.pageY}
     }, anchor_popover = function () {
-        // Stacked week/day events stretch to the column's right edge and can be hours tall, so the
-        // popover the shared handler places beside the whole box lands far from the pointer, often
-        // off-screen. Re-place it on the event's time side, at the pointer's x: above the event, the
+        // Stacked week/day events stretch to the column's right edge and can be hours tall, and month
+        // multi-day bars span up to a whole week, so the popover the shared handler places beside the
+        // whole box lands far from the pointer, often off-screen. Re-place it on the event's time side, at the pointer's x: above the event, the
         // arrow on its top edge (start), or below it, the arrow on its bottom edge (end), whichever
         // fits. The way from the pointer to the popover then runs inside the event straight into the
         // arrow, which belongs to the popover, so it stays open (R4: a gap closed it on the way). Only
@@ -4370,7 +4370,7 @@ timely.define("domReady", [], function () {
         }, ".ai1ec-event-container.ai1ec-multiday"), $(document).on({
             mouseenter: v,
             mouseleave: m
-        }, ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container"), $(document).on("shown.bs.constrained_popover", ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container", anchor_popover), $(document).on("click", ".ai1ec-agenda-view .ai1ec-event-header--toggle", agendaView.toggle_event), $(document).on("click", "#ai1ec-agenda-expand-all", agendaView.expand_all), $(document).on("click", "#ai1ec-agenda-collapse-all", agendaView.collapse_all), $(document).on("click", "a.ai1ec-load-view", loadViews.handle_click_on_link_to_load_view), $(document).on("click", ".ai1ec-minical-trigger", loadViews.handle_minical_trigger), $(document).on("click", ".ai1ec-clear-filter", loadViews.clear_filters), $(document).on("click", "#ai1ec-print-button", print.handle_click_on_print_button), window.addEventListener("beforeprint", print.before_print), window.addEventListener("afterprint", print.after_print), $(document).on("click", ".ai1ec-reveal-full-day button", function () {
+        }, ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container"), $(document).on("shown.bs.constrained_popover", ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container, .ai1ec-month-view .ai1ec-multiday", anchor_popover), $(document).on("click", ".ai1ec-agenda-view .ai1ec-event-header--toggle", agendaView.toggle_event), $(document).on("click", "#ai1ec-agenda-expand-all", agendaView.expand_all), $(document).on("click", "#ai1ec-agenda-collapse-all", agendaView.collapse_all), $(document).on("click", "a.ai1ec-load-view", loadViews.handle_click_on_link_to_load_view), $(document).on("click", ".ai1ec-minical-trigger", loadViews.handle_minical_trigger), $(document).on("click", ".ai1ec-clear-filter", loadViews.clear_filters), $(document).on("click", "#ai1ec-print-button", print.handle_click_on_print_button), window.addEventListener("beforeprint", print.before_print), window.addEventListener("afterprint", print.after_print), $(document).on("click", ".ai1ec-reveal-full-day button", function () {
             var t = $(this).closest(".ai1ec-calendar");
             // The tooltip closes on mouseleave, which a button fading out under a resting
             // pointer never gets.
