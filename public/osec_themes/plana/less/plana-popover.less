@@ -12,19 +12,37 @@
     font-weight: unset;
   }
   .ai1ec-event-time {
-    font-size: .7em;
+    font-size: .75em;
+    padding-top: 0.4em;
+    padding-bottom: .2em;
+    line-height: normal;
   }
-  .ai1ec-allday-badge {
-    font-size: .8em;
-  }
+  //.ai1ec-allday-badge {
+  //  font-size: 78%;
+  //  margin-left: .5em;
+  //  font-weight: bold;
+  //}
   .post-edit-link {
-    font-size: .68em;
+    font-size: .6em;
+    padding: .25em;
+    border-radius: 1em;
+    line-height: 2;
+    &:hover {
+      background: rgba(128, 128, 128,  0.25);
+    }
   }
 }
 
 .ai1ec-popup-title {
   font-size: .9em;
   line-height: unset;
+  > a {
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 .ai1ec-popup-excerpt {

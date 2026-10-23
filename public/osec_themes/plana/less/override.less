@@ -180,6 +180,29 @@ table.ai1ec-month-view {
   }
 }
 
+// Agenda event footer: categories and tags relative to the base font size (vortex keeps 8pt).
+.ai1ec-agenda-view {
+  .ai1ec-categories,
+  .ai1ec-tags {
+    font-size: .9em;
+    .ai1ec-category {
+      font-size: .75em;
+    }
+    .ai1ec-color-swatch,
+    .ai1ec-color-swatch-empty {
+      height: .6em;
+      width: .6em;
+    }
+  }
+}
+
+.ai1ec-allday-badge {
+  line-height: normal;
+  font-weight: bold;
+  font-size: 70%;
+  margin-left: .5em;
+}
+
 // The expand button in the week and day heading: sized with the heading (Bootstrap's
 // .ai1ec-btn-xs uses 1rem) and centred in it, so it fits the heading's height.
 .ai1ec-week-view,
