@@ -54,6 +54,50 @@ function generate() {
     }
 }
 
+/** Calendar theme active on the site right now, as far as this run knows (set by activateTheme()). */
+let activeTheme = null;
+
+/**
+ * Activates a calendar theme with WP-CLI unless it is active already; the next page view compiles its CSS.
+ *
+ * @param {string} name Calendar theme folder name, e.g. "plana".
+ */
+function activateTheme(name) {
+    if (name && name !== activeTheme) {
+        wp([
+            'osec',
+            'theme',
+            'activate',
+            name,
+        ]);
+        activeTheme = name;
+    }
+}
+
+/**
+ * Sets OSEC settings (Settings page values) with WP-CLI and returns the previous values, so the caller can restore
+ * them after the shot.
+ *
+ * @param {Object<string, *>} values Setting name => value, e.g. {"agenda_events_expanded": false}.
+ * @returns {Object<string, *>} Setting name => value before the change.
+ */
+function setOsecSettings(values) {
+    const json = Buffer.from(JSON.stringify(values)).toString('base64');
+    const php = [
+        'global $osec_app;',
+        '$old = [];',
+        `foreach (json_decode(base64_decode('${json}'), true) as $k => $v) {`,
+        '$old[$k] = $osec_app->settings->get($k);',
+        '$osec_app->settings->set($k, $v);',
+        '}',
+        'echo wp_json_encode($old);',
+    ];
+    return JSON.parse(wp([
+        'eval',
+        php.join(' '),
+    ]));
+}
+
 /**
  * Warns when the site's WordPress theme is not the dataset's: the images would show another theme around the calendar.
  */
@@ -96,8 +140,11 @@ function shotPath(m, shot) {
  * @param {import('@playwright/test').Page} page
  * @param {object} m Manifest.
  * @param {string} pageKey Key under manifest.pages, e.g. "block".
+ * @param {string} [title] Title shown in the editor for the shot (not saved); with it, the shot is clipped from the
+ *     title down to the block's end, so the headline is in the image.
+ * @returns {Promise<import('@playwright/test').Locator|{clip: object}>} The block, or a clip box when a title is set.
  */
-async function editorBlock(page, m, pageKey) {
+async function editorBlock(page, m, pageKey, title) {
     await page.goto(`/wp-admin/post.php?post=${m.pages[pageKey].id}&action=edit`);
     await page.waitForFunction(() => window.wp?.data?.select('core/block-editor').getBlocks().length);
     await page.evaluate(() => {
@@ -106,11 +153,37 @@ async function editorBlock(page, m, pageKey) {
             .find((b) => b.name.endsWith('osec-calendar-classic'));
         wp.data.dispatch('core/block-editor').selectBlock(block.clientId);
     });
+    if (title) {
+        await page.evaluate((t) => wp.data.dispatch('core/editor').editPost({ title: t }), title);
+    }
     const block = page.frameLocator('iframe[name="editor-canvas"]').locator('[data-type$="osec-calendar-classic"]');
     await block.waitFor();
+    // Focused, not only selected: WordPress draws the blue block outline for a focused block only.
+    await block.focus();
     await block.scrollIntoViewIfNeeded();
     await settle(page, { networkIdle: false });
-    return block;
+    if (!title) {
+        return block;
+    }
+    const heading = page.frameLocator('iframe[name="editor-canvas"]').locator('.editor-post-title');
+    await heading.scrollIntoViewIfNeeded();
+    await settle(page, { networkIdle: false });
+    const [
+        a, b,
+    ] = [
+        await heading.boundingBox(),
+        await block.boundingBox(),
+    ];
+    const x = Math.min(a.x, b.x) - 8;
+    const y = Math.max(0, a.y - 8);
+    return {
+        clip: {
+            x,
+            y,
+            width: Math.max(a.x + a.width, b.x + b.width) + 8 - x,
+            height: b.y + b.height + 8 - y,
+        },
+    };
 }
 
 /**
@@ -141,16 +214,16 @@ async function shoot(browser, m, shot, cookies) {
     try {
         let element = null;
         if (shot.editor_block) {
-            element = await editorBlock(page, m, shot.editor_block);
+            element = await editorBlock(page, m, shot.editor_block, shot.editor_title);
         } else {
             await page.goto(shotPath(m, shot));
             await settle(page);
         }
         if (shot.scroll_to) {
-            await page.locator(shot.scroll_to).first().evaluate((el) => {
+            await page.locator(shot.scroll_to).first().evaluate((el, offset) => {
                 el.scrollIntoView({ block: 'start' });
-                window.scrollBy(0, -50);
-            });
+                window.scrollBy(0, -offset);
+            }, shot.scroll_offset ?? 50);
         }
         if (shot.click) {
             await page.locator(shot.click).first().click();
@@ -172,7 +245,14 @@ async function shoot(browser, m, shot, cookies) {
         }
         await page.waitForTimeout(800);
         const file = path.join(outDir, shot.file);
-        await (element ? element.screenshot({ path: file }) : page.screenshot({ path: file }));
+        if (element && element.clip) {
+            await page.screenshot({
+                path: file,
+                clip: element.clip,
+            });
+        } else {
+            await (element ? element.screenshot({ path: file }) : page.screenshot({ path: file }));
+        }
     } finally {
         await context.close();
     }
@@ -199,12 +279,19 @@ async function shoot(browser, m, shot, cookies) {
                 manual.push(`${shot.file}  ${shot.caption}: ${shot.manual}`);
                 continue;
             }
+            let previous = null;
             try {
+                activateTheme(shot.calendar_theme || config.calendar_theme);
+                previous = shot.osec_settings ? setOsecSettings(shot.osec_settings) : null;
                 await shoot(browser, m, shot, cookies);
                 console.log(`${shot.file}  ${shot.caption}`);
             } catch (e) {
                 failed++;
                 console.error(`${shot.file}  FAILED: ${e.message.split('\n')[0]}`);
+            } finally {
+                if (previous) {
+                    setOsecSettings(previous);
+                }
             }
         }
     } finally {
