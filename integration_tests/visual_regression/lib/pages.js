@@ -186,6 +186,41 @@ function about(description) {
     };
 }
 
+/**
+ * Replaces values that change from run to run with a visible marker, so the shot stays comparable and nobody mistakes
+ * the marker for real output: the text becomes "<label (replaced by test)>" in red. Every replacement in a shot goes
+ * through here and is listed where the screen is defined (screens.js `replace`); never hide or blank such a value
+ * silently. Fails when an entry finds nothing, so a renamed element cannot turn a replacement into a no-op.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {Array<{label: string, selector: string, text?: string, target?: string}>} replacements `selector` finds the
+ *     element, `text` (optional) the start of its text that picks it among several, `target` (optional) a child of it
+ *     whose text is replaced instead of the whole element; `label` names the value in the marker.
+ */
+async function replaceForShot(page, replacements = []) {
+    for (const { label, selector, text, target } of replacements) {
+        const count = await page.evaluate(({ label: name, selector: css, text: start, target: child }) => {
+            const found = [...document.querySelectorAll(css)]
+                .filter((element) => !start || element.textContent.trim().startsWith(start))
+                .map((element) => (child ? element.querySelector(child) : element))
+                .filter(Boolean);
+            found.forEach((element) => {
+                element.textContent = `<${name} (replaced by test)>`;
+                element.style.color = 'red';
+            });
+            return found.length;
+        }, {
+            label,
+            selector,
+            text,
+            target,
+        });
+        if (!count) {
+            throw new Error(`replaceForShot: "${label}" not found (${selector}${text ? `, text "${text}"` : ''})`);
+        }
+    }
+}
+
 module.exports = {
     manifest,
     calendarPath,
@@ -194,5 +229,6 @@ module.exports = {
     printView,
     firefoxPdf,
     compareShot,
+    replaceForShot,
     about,
 };

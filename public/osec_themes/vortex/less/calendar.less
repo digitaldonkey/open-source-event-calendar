@@ -38,8 +38,22 @@
   -webkit-transform: translateZ(0);
   z-index: 1;
 }
-#osec-calendar-view .post-edit-link {
+// Edit links in the calendar and in the event popovers (appended to <body>). Scoped: WordPress uses the same class for
+// the edit links of posts and pages.
+#osec-calendar-view .post-edit-link,
+.ai1ec-popover.ai1ec-popup .post-edit-link {
   white-space: nowrap;
+  font-size: .85em;
+  color: @link-color;
+  padding: .25em .5em;
+  border-radius: .75em;
+
+  .ai1ec-fa-pencil {
+    --osec-icon-scale: .9;
+  }
+  &:hover {
+    background: rgba(128, 128, 128,  0.25);
+  }
 }
 
 // Calendar toolbar.
@@ -80,12 +94,47 @@
 }
 .ai1ec-title-buttons {
   .ai1ec-btn-group {
-    margin-right: .5em;
+    margin-block-end: .5em;
+  }
+  // The large calendar icon would raise the date button's line box above the other buttons.
+  .ai1ec-minical-trigger .ai1ec-fa-lg {
+    vertical-align: middle;
   }
   .ai1ec-contribution-buttons {
     float: right;
     margin-top: 5px;
   }
+}
+// Pagination arrows on very small screens: a box as wide as the arrow, like the font glyphs were, so the month
+// pagination still fits one line at 320 px. The mask keeps its 1em size; only the empty sides are cut. Vortex's
+// pagination only; plana's (.plana-pagination) hides its arrows on small screens itself.
+@media (max-width: 478px) {
+  .ai1ec-pagination {
+    .ai1ec-fa-angle-left,
+    .ai1ec-fa-angle-right {
+      &:before {
+        width: .4em;
+        -webkit-mask-size: 1em;
+        mask-size: 1em;
+      }
+    }
+    .ai1ec-fa-angle-double-left,
+    .ai1ec-fa-angle-double-right {
+      &:before {
+        width: .62em;
+        -webkit-mask-size: 1em;
+        mask-size: 1em;
+      }
+    }
+  }
+}
+// The print and the agenda's collapse/expand all buttons have the small size of the toolbar's other buttons
+// (pagination, date, view switch), so all have one height. Vortex's buttons only; plana's links have no .ai1ec-btn.
+.ai1ec-print-buttons .ai1ec-btn,
+.ai1ec-agenda-buttons .ai1ec-btn {
+  .ai1ec-button-size(@padding-small-vertical; @padding-small-horizontal; @font-size-small; @line-height-small; @border-radius-small);
+  // As style.less resets .ai1ec-btn-sm in a button group.
+  font-size: .92 * @font-size-small;
 }
 // Hidden elements to detect current window mode.
 #ai1ec-bs-modes {
@@ -171,12 +220,13 @@
     min-width: 3.5em;
     text-transform: uppercase;
   }
+  .ai1ec-calendar-title,
+  .ai1ec-calendar-title-short {
+    font-size: (@font-size-base * .9);
+    line-height: 1em;
+  }
 }
-.ai1ec-calendar-title,
-.ai1ec-calendar-title-short {
-  font-size: @font-size-base;
-  line-height: 1em;
-}
+
 .ai1ec-calendar-title {
   width: 16em;
   display: inline-block;
@@ -248,8 +298,21 @@ table.ai1ec-oneday-view-original {
   }
   .ai1ec-reveal-full-day {
     position: absolute;
-    right: .2em;
+    right: 0;
     top:.2em;
+    background: inherit;
+    border-bottom: inherit;
+    border-right: inherit;
+    border-top: inherit;
+    padding: 0 .5em;
+    height: 100%;
+    display: flex;
+    align-content: center;
+    align-items: center;
+    // All 24 hours shown already (calendar.js keeps them for the next views).
+    .osec-full-day & {
+      display: none;
+    }
   }
   .ai1ec-day {
     height: 1440px;
@@ -895,13 +958,15 @@ table.ai1ec-oneday-view-original {
     display: block !important;
     margin: 0 0 1em;
   }
+  // Fixed sizes (vortex's 13px default x 1.5 and x .85): with a theme that follows the site's
+  // font size (plana), em would print the header as large as the site's text.
   .osec-print-title {
     margin: 0 0 0.25em;
-    font-size: 1.5em;
+    font-size: 19.5px;
   }
   .osec-print-url {
     margin: 0;
-    font-size: 0.85em;
+    font-size: 11.05px;
     word-break: break-all;
   }
   // Bootstrap print styles append the URL to every link.

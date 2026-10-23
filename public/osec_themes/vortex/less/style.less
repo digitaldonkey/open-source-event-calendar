@@ -501,6 +501,12 @@ input.ai1ec-timepicker[readonly] {
   max-width: var(--osec-agenda-max-width, @agenda-max-width);
   margin-left: auto;
   margin-right: auto;
+  @media (min-width: @screen-sm) {
+    padding-bottom: var(--wp--preset--spacing--50, 2em);
+    & > .ai1ec-date:first-of-type {
+      margin-top: var(--wp--preset--spacing--50, 2em);
+    }
+  }
   @media print {
     max-width: none;
   }

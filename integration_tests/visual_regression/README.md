@@ -50,6 +50,11 @@ npm run approve -- --set=local chromium/plana/month-1280.png     # inside the co
 Approving copies the reviewed image over the baseline without a new run. The old baseline goes to
 `backups/approved/<date_time>/`.
 
+Ticked rows are kept per baseline set in this browser (`localStorage`), across runs and tabs, together with a
+fingerprint of the image they were ticked on. After a new run a tick stays while that row's current image is unchanged;
+if the image changed, the tick is dropped and the row says "image changed since you checked it" until the next run (the
+bar has a button listing those rows). A row approved with the command, or one that passes now, loses its tick.
+
 ### Accept the current look
 
 ```
@@ -135,6 +140,9 @@ fonts differently.
 Nothing is hidden unless listed here:
 
 - wp-admin: notices and the admin footer removed, the run's dates removed or blanked;
+- values that change from run to run replaced by a red `<what (replaced by test)>` marker, never silently: per screen
+  in `replace` (`specs/screens.js`), done by `replaceForShot()` (`lib/pages.js`), which fails when the value is not
+  found. Today: the compiled CSS's version hash on the settings page (`<version tag (replaced by test)>`);
 - the events list sorted by title, with the Screen Options above;
 - views logged out, phone emulation below 800 px;
 - week, day and month: the window grown to the page's height and one event hovered, so its popover is in the shot

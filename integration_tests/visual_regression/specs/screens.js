@@ -96,20 +96,22 @@ const PAGES = [
     {
         key: 'block',
         title: 'Page with the calendar block',
-        description: 'The "Calendar block" page: the calendar rendered by the block with its default settings.',
+        description: `The "Calendar block" page: the calendar block with its defaults except the agenda events set to
+            collapsed (Expand/Collapse all), while the calendar page's agenda shows them expanded.`,
     },
     {
         key: 'shortcode',
         title: 'Page with the [osec] shortcode',
-        description: `The "Calendar shortcode" page: [osec view="agenda" agenda_toggle="true"], the agenda expanded on
-            purpose (stays so if the default changes).`,
+        description: `The "Calendar shortcode" page: [osec view="oneday" exact_date="<busy day>" align="none"], the
+            busy day of "Day view: busy day" at the theme's content width instead of the default wide alignment.`,
     },
 ];
 
 /**
  * wp-admin screens (admin.spec.js), shot full page: `admin/admin-<name>.png` at 1280 px, `admin-<name>-<width>.png` at
  * other widths. `widths` (default [1280]) adds narrower shots, below 800 px with phone emulation; 768 is a tablet just
- * below WordPress' 782 px breakpoint, where list tables switch to their compact layout.
+ * below WordPress' 782 px breakpoint, where list tables switch to their compact layout. `replace`: values that change
+ * per run, shown as a red "<label (replaced by test)>" marker (lib/pages.js replaceForShot()).
  */
 const ADMIN = [
     {
@@ -143,6 +145,15 @@ const ADMIN = [
         title: 'Settings',
         description: 'The plugin settings page, including the cache report and the charset box.',
         path: () => '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings',
+        // The compiled CSS's version hash changes with every compile.
+        replace: [
+            {
+                label: 'version tag',
+                selector: '.timely li',
+                text: 'Version:',
+                target: 'span',
+            },
+        ],
     },
     {
         name: 'themes',

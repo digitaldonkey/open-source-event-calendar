@@ -35,6 +35,10 @@ class SaveThemeOptions extends SaveAbstract
         if (RequestParser::has_param(AdminPageThemeOptions::SUBMIT_ID)) {
             $variables = LessController::factory($this->app)->get_saved_variables();
             foreach ($variables as $variable_name => $variable_params) {
+                // Not in the form, and get_saved_variables() keeps the theme's value anyway.
+                if ( ! empty($variable_params['hidden'])) {
+                    continue;
+                }
                 $var = RequestParser::get_param($variable_name, null);
                 if (null !== $var) {
                     if (ThemeVariableFont::CUSTOM_FONT === $var) {

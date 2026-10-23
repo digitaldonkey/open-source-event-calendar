@@ -8,6 +8,7 @@
 @import "plana-flyout-menu";
 @import "plana-toolbar";
 @import "event-single";
+@import "plana-popover";
 
 @lineheight: 2.5;
 // Height of the toolbar controls on the right (print button, view switcher). Set as a
@@ -43,6 +44,14 @@
 .ai1ec-agenda-widget-view .ai1ec-date.ai1ec-today {
   background: rgba(244, 244, 191, 0.5);
   border-top: 1px dotted mix( @today-color, @text-color, 80% ) !important;
+}
+// The space above the first date goes below its dotted line, so the line stays under the toolbar
+// (vortex uses a margin there, against a grey band from its date background).
+#osec-container .ai1ec-agenda-view > .ai1ec-date:first-of-type {
+  @media (min-width: @screen-sm) {
+    margin-top: 0;
+    padding-top: var(--wp--preset--spacing--50, 2em);
+  }
 }
 .ai1ec-agenda-view .ai1ec-date-title,
 .ai1ec-agenda-widget-view .ai1ec-date-title,
@@ -179,15 +188,47 @@ table.ai1ec-month-view {
   }
 }
 
+// Agenda event footer: categories and tags relative to the base font size (vortex keeps 8pt).
+.ai1ec-agenda-view {
+  .ai1ec-categories,
+  .ai1ec-tags {
+    font-size: .9em;
+    .ai1ec-category {
+      font-size: .75em;
+    }
+    .ai1ec-color-swatch,
+    .ai1ec-color-swatch-empty {
+      height: .6em;
+      width: .6em;
+    }
+  }
+}
+
+.ai1ec-allday-badge {
+  line-height: normal;
+  font-weight: bold;
+  font-size: 70%;
+  margin-left: .5em;
+}
+
 // The expand button in the week and day heading: sized with the heading (Bootstrap's
 // .ai1ec-btn-xs uses 1rem) and centred in it, so it fits the heading's height.
 .ai1ec-week-view,
 .ai1ec-oneday-view {
   .ai1ec-reveal-full-day {
     top: 50%;
-    transform: translateY( -50% );
+    transform: translate(0,  -50% );
   }
 }
+
+.ai1ec-week-view .ai1ec-reveal-full-day {
+  // Move the expand button,
+  // to not overlay the day.
+  @media (max-width: 48em) {
+    transform: translate(100%, -50%);
+  }
+}
+
 .ai1ec-reveal-full-day {
 
   .ai1ec-btn-xs {
@@ -202,5 +243,17 @@ table.ai1ec-month-view {
       color: @backgroundColor;
       border-color: @foregroundColor;
     }
+  }
+}
+
+// The date picker and the tooltips hang in <body>, outside the calendar, so 1em (theirs, or that of .timely, which
+// they carry when opened inside a .timely element) is the site's body text size. They take the toolbar's size
+// instead (plana-toolbar.less).
+.timely.ai1ec-datepicker,
+.ai1ec-tooltip,
+.timely.ai1ec-tooltip {
+  font-size: var(--wp--preset--font-size--small, .875rem);
+  @media (min-width: 36.25rem) {
+    font-size: var(--wp--preset--font-size--normal, 1rem);
   }
 }

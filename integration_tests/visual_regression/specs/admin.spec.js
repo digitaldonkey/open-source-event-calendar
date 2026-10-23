@@ -2,12 +2,13 @@
  * The plugin's wp-admin screens, once per run (project `admin`, logged in), compared full page (decision N1).
  *
  * Only what decision N1 names is hidden before the shot: notices and the admin footer (WordPress version) are removed,
- * so one that comes or goes does not shift the page; dates of the run are removed or blanked. Everything else stays as
+ * so one that comes or goes does not shift the page; dates of the run are removed or blanked; values that change per
+ * run are replaced by a red "<… (replaced by test)>" marker (screens.js `replace`). Everything else stays as
  * WordPress shows it (update counters, help tabs, permalink with the site's hostname). The screens are listed in
  * screens.js (ADMIN); the block form needs the block editor and keeps its own test here.
  */
 const { test, expect } = require('@playwright/test');
-const { manifest, settle, about, compareShot } = require('../lib/pages');
+const { manifest, settle, about, compareShot, replaceForShot } = require('../lib/pages');
 const { ADMIN } = require('./screens');
 
 /**
@@ -32,13 +33,14 @@ const BLANK = [
 
 const STYLE = `${REMOVE} { display: none !important; } ${BLANK} { visibility: hidden !important; }`;
 
-for (const { name, title, description, path, widths = [1280] } of ADMIN) {
+for (const { name, title, description, path, widths = [1280], replace = [] } of ADMIN) {
     for (const width of widths) {
         // 1280 keeps the name without a width, as in sets shot before screens had widths (e.g. 1.1.16).
         const file = 1280 === width ? `admin-${name}.png` : `admin-${name}-${width}.png`;
         const emulation = width < 800 ? ', phone emulation' : '';
+        const replaced = replace.length ? ` Replaced by a red marker: ${replace.map((r) => r.label).join(', ')}.` : '';
         const details = `${description} Full page${emulation}; notices, footer and dates of the run removed or blanked
-            (decision N1).`;
+            (decision N1).${replaced}`;
 
         test.describe(`${width} px wide`, () => {
             test.use({
@@ -54,6 +56,7 @@ for (const { name, title, description, path, widths = [1280] } of ADMIN) {
                 await page.goto(path(manifest()));
                 await settle(page);
                 await page.addStyleTag({ content: STYLE });
+                await replaceForShot(page, replace);
                 await compareShot(page, [file], { fullPage: true });
             });
         });

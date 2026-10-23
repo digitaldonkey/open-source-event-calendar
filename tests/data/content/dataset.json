@@ -159,7 +159,7 @@
     {"key": "private", "group": "edge", "title": "Private event (hidden)", "start": "+1 day 16:00", "end": "+1 hour", "categories": ["concerts"], "status": "private"}
   ],
   "pages": [
-    {"key": "block", "title": "Calendar block", "content": "<!-- wp:open-source-event-calendar/osec-calendar-classic /-->"},
-    {"key": "shortcode", "title": "Calendar shortcode", "content": "[osec view=\"agenda\" agenda_toggle=\"true\"]"}
+    {"key": "block", "title": "Calendar block", "content": "<!-- wp:open-source-event-calendar/osec-calendar-classic {\"agendaEvents\":\"collapsed\"} /-->"},
+    {"key": "shortcode", "title": "Calendar shortcode", "content": "[osec view=\"oneday\" exact_date=\"{date:+8 days}\" align=\"none\"]"}
   ]
 }

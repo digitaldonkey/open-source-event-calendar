@@ -97,6 +97,8 @@ abstract class AbstractView extends OsecBaseClass
      */
     public function get_extra_template_arguments(array $args)
     {
+        // Edit links of the agenda and of the event popovers (month, week, day).
+        $args['text_edit'] = __('Edit', 'open-source-event-calendar');
         /**
          * Change the Twig arguments
          *

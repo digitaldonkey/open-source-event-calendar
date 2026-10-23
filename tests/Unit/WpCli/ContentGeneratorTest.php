@@ -349,6 +349,40 @@ class ContentGeneratorTest extends TestBase
         $this->generate($dataset);
     }
 
+    public function test_page_dates_are_resolved_from_the_anchor()
+    {
+        $dataset          = $this->dataset_without_feeds();
+        $dataset['pages'] = [
+            [
+                'key'     => 'day',
+                'title'   => 'Day',
+                'content' => '[osec view="oneday" exact_date="{date:+8 days}"] {date: last day of this month }',
+            ],
+        ];
+        $manifest = $this->generate($dataset);
+
+        $this->assertSame(
+            '[osec view="oneday" exact_date="2027-05-25"] 2027-05-31',
+            get_post_field('post_content', $manifest['pages']['day']['id'])
+        );
+    }
+
+    public function test_invalid_page_date_stops()
+    {
+        $dataset          = $this->dataset_without_feeds();
+        $dataset['pages'] = [
+            [
+                'key'     => 'day',
+                'title'   => 'Day',
+                'content' => '{date:not a date at all}',
+            ],
+        ];
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid date modifier');
+        $this->generate($dataset);
+    }
+
     public function test_unreadable_dataset_file()
     {
         $this->expectException(InvalidArgumentException::class);

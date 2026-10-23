@@ -65,7 +65,8 @@ twice; PHP picks either one depending on how the time was built. `repeated_hour`
 - `feeds[]`: `{name, file, categories, tags, events}`, events `{key, title, start, end, allday}` (timed ones written
   in UTC). The `.ics` goes to `uploads/osec-content/<database>/` and is imported over http, so a scheduled re-import
   finds the same events.
-- `pages[]`: `{key, title, content}`, e.g. the calendar block and the `[osec]` shortcode.
+- `pages[]`: `{key, title, content}`, e.g. the calendar block and the `[osec]` shortcode. `{date:<modifier>}` in
+  `content` becomes that date (`Y-m-d`) from the anchor, e.g. `exact_date="{date:+8 days}"` (see *The anchor and dates*).
 
 ### Events
 
