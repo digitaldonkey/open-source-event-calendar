@@ -207,7 +207,6 @@ class AgendaView extends AbstractView
                 'There are no upcoming events to display at this time.',
                 'open-source-event-calendar'
             ),
-            'text_edit'                 => __('Edit', 'open-source-event-calendar'),
             'text_read_more'            => __('Read more', 'open-source-event-calendar'),
             'text_categories'           => __('Categories:', 'open-source-event-calendar'),
             'text_tags'                 => __('Tags:', 'open-source-event-calendar'),

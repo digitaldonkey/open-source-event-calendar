@@ -38,8 +38,22 @@
   -webkit-transform: translateZ(0);
   z-index: 1;
 }
-#osec-calendar-view .post-edit-link {
+// Edit links in the calendar and in the event popovers (appended to <body>). Scoped: WordPress uses the same class for
+// the edit links of posts and pages.
+#osec-calendar-view .post-edit-link,
+.ai1ec-popover.ai1ec-popup .post-edit-link {
   white-space: nowrap;
+  font-size: .85em;
+  color: @link-color;
+  padding: .25em .5em;
+  border-radius: .75em;
+
+  .ai1ec-fa-pencil {
+    --osec-icon-scale: .9;
+  }
+  &:hover {
+    background: rgba(128, 128, 128,  0.25);
+  }
 }
 
 // Calendar toolbar.
