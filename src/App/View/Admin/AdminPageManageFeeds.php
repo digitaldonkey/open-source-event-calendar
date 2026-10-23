@@ -72,20 +72,21 @@ class AdminPageManageFeeds extends AdminPageAbstract
     {
         $settings_page = $this->app->settings->get('feeds_page');
         $args = [
-            'title'             => __('OSEC: Calendar Feeds', 'open-source-event-calendar'),
+            'title'          => __('OSEC: Calendar Feeds', 'open-source-event-calendar'),
+            'cols'           => 1,
             'metabox_normal' => [
                 'screen' => $settings_page,
                 'action' => 'normal',
                 'data_object' => null,
             ],
-            'metabox_side' => [
+            'metabox_side'   => [
                 'screen' => $settings_page,
                 'action' => 'side',
                 'data_object' => null,
             ],
         ];
         ThemeLoader::factory($this->app)
-                   ->get_file('page_two_col.twig', $args, true)
+                   ->get_file('page_n_col.twig', $args, true)
                    ->render();
     }
 

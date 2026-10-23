@@ -1,0 +1,86 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Open Source Event Calendar//Sample feed: categories and tags//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Neighbourhood Club
+X-WR-TIMEZONE:Europe/Berlin
+X-WR-CALDESC:Sample feed for the category and tag import: CATEGORIES on one
+  or several lines\, X-TAGS lists\, terms shared by events\, special characters.
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+X-LIC-LOCATION:Europe/Berlin
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+DTSTART:19700329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+DTSTART:19701025T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:game-night-2027@neighbourhood-club.example.org
+DTSTAMP:20260901T100000Z
+DTSTART;TZID=Europe/Berlin:20270409T190000
+DTEND;TZID=Europe/Berlin:20270409T230000
+SUMMARY:Board game night: D&D one-shot
+DESCRIPTION:Two CATEGORIES lines\, one of them a list. Bring dice!
+LOCATION:Club house\, Hauptstraße 1\, Berlin
+CATEGORIES:Games,Community
+CATEGORIES:Evening
+X-TAGS:D&D\,board games
+END:VEVENT
+BEGIN:VEVENT
+UID:cycling-tour-2027@neighbourhood-club.example.org
+DTSTAMP:20260901T100000Z
+DTSTART;TZID=Europe/Berlin:20270417T100000
+DTEND;TZID=Europe/Berlin:20270417T160000
+SUMMARY:Spring cycling tour
+DESCRIPTION:"Outdoor" is shared with the open-air concert.
+CATEGORIES:Sports,Outdoor
+X-TAGS:bike\,outdoor
+END:VEVENT
+BEGIN:VEVENT
+UID:open-air-concert-2027@neighbourhood-club.example.org
+DTSTAMP:20260901T100000Z
+DTSTART;TZID=Europe/Berlin:20270522T200000
+DTEND;TZID=Europe/Berlin:20270522T223000
+SUMMARY:Open-air concert
+CATEGORIES:Music,Outdoor
+X-TAGS:free\,outdoor
+END:VEVENT
+BEGIN:VEVENT
+UID:crepes-workshop-2027@neighbourhood-club.example.org
+DTSTAMP:20260901T100000Z
+DTSTART;TZID=Europe/Berlin:20270424T150000
+DTEND;TZID=Europe/Berlin:20270424T170000
+SUMMARY:Café & crêpes workshop
+CATEGORIES:Food & Drink
+X-TAGS:café\,workshop
+END:VEVENT
+BEGIN:VEVENT
+UID:weekly-meetup-2027@neighbourhood-club.example.org
+DTSTAMP:20260901T100000Z
+DTSTART;TZID=Europe/Berlin:20270406T183000
+DTEND;TZID=Europe/Berlin:20270406T200000
+RRULE:FREQ=WEEKLY;COUNT=4
+SUMMARY:Weekly meetup
+DESCRIPTION:A category\, no tags.
+CATEGORIES:Community
+END:VEVENT
+BEGIN:VEVENT
+UID:spring-cleaning-2027@neighbourhood-club.example.org
+DTSTAMP:20260901T100000Z
+DTSTART;VALUE=DATE:20270501
+DTEND;VALUE=DATE:20270502
+SUMMARY:Spring cleaning day
+DESCRIPTION:Neither categories nor tags.
+END:VEVENT
+END:VCALENDAR

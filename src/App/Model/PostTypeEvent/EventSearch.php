@@ -561,62 +561,62 @@ class EventSearch extends OsecBaseClass
         }
 
         $sql = '
-			SELECT
-				`p`.*,
-				`e`.`post_id`,
-				`i`.`id` AS `instance_id`,
-				`i`.`start` AS `start`,
-				`i`.`end` AS `end`,
-				`e`.`timezone_name` AS `timezone_name`,
-				`e`.`allday` AS `event_allday`,
-				`e`.`recurrence_rules`,
-				`e`.`exception_rules`,
-				`e`.`recurrence_dates`,
-				`e`.`exception_dates`,
-				`e`.`venue`,
-				`e`.`country`,
-				`e`.`address`,
-				`e`.`city`,
-				`e`.`province`,
-				`e`.`postal_code`,
-				`e`.`instant_event`,
-				`e`.`show_map`,
-				`e`.`contact_name`,
-				`e`.`contact_phone`,
-				`e`.`contact_email`,
-				`e`.`contact_url`,
-				`e`.`cost`,
-				`e`.`ticket_url`,
-				`e`.`ical_feed_url`,
-				`e`.`ical_source_url`,
-				`e`.`ical_organizer`,
-				`e`.`ical_contact`,
-				`e`.`ical_uid`,
-				`e`.`longitude`,
-				`e`.`latitude`
-			FROM
-				' . $this->db->get_table_name(OSEC_DB__EVENTS) . ' e
-				INNER JOIN
-					' . $this->db->get_table_name('posts') . ' p
-						ON ( `p`.`ID` = `e`.`post_id` )
-				' . $wpml_join_particle . '
-				INNER JOIN
-					' . $this->db->get_table_name(OSEC_DB__INSTANCES) . ' i
-					ON ( `e`.`post_id` = `i`.`post_id` )
-				' . $filter['filter_join'] . '
-			WHERE
-				post_type = \'' . OSEC_POST_TYPE . '\'
-				' . $wpml_where_particle . '
-			AND
-				' . $spanning_string . '
-				' . $filter['filter_where'] . '
-				' . $post_status_where . '
-			GROUP BY
-				`i`.`id`
-			ORDER BY
-				`e` . `allday`     DESC,
-				`i` . `start`      ASC,
-				`p` . `post_title` ASC';
+            SELECT
+                `p`.*,
+                `e`.`post_id`,
+                `i`.`id` AS `instance_id`,
+                `i`.`start` AS `start`,
+                `i`.`end` AS `end`,
+                `e`.`timezone_name` AS `timezone_name`,
+                `e`.`allday` AS `event_allday`,
+                `e`.`recurrence_rules`,
+                `e`.`exception_rules`,
+                `e`.`recurrence_dates`,
+                `e`.`exception_dates`,
+                `e`.`venue`,
+                `e`.`country`,
+                `e`.`address`,
+                `e`.`city`,
+                `e`.`province`,
+                `e`.`postal_code`,
+                `e`.`instant_event`,
+                `e`.`show_map`,
+                `e`.`contact_name`,
+                `e`.`contact_phone`,
+                `e`.`contact_email`,
+                `e`.`contact_url`,
+                `e`.`cost`,
+                `e`.`ticket_url`,
+                `e`.`ical_feed_url`,
+                `e`.`ical_source_url`,
+                `e`.`ical_organizer`,
+                `e`.`ical_contact`,
+                `e`.`ical_uid`,
+                `e`.`longitude`,
+                `e`.`latitude`
+            FROM
+                ' . $this->db->get_table_name(OSEC_DB__EVENTS) . ' e
+                INNER JOIN
+                    ' . $this->db->get_table_name('posts') . ' p
+                        ON ( `p`.`ID` = `e`.`post_id` )
+                ' . $wpml_join_particle . '
+                INNER JOIN
+                    ' . $this->db->get_table_name(OSEC_DB__INSTANCES) . ' i
+                    ON ( `e`.`post_id` = `i`.`post_id` )
+                ' . $filter['filter_join'] . '
+            WHERE
+                post_type = \'' . OSEC_POST_TYPE . '\'
+                ' . $wpml_where_particle . '
+            AND
+                ' . $spanning_string . '
+                ' . $filter['filter_where'] . '
+                ' . $post_status_where . '
+            GROUP BY
+                `i`.`id`
+            ORDER BY
+                `e` . `allday`     DESC,
+                `i` . `start`      ASC,
+                `p` . `post_title` ASC';
 
         $query  = $this->db->prepare($sql, $args);
         $events = $this->db->get_results($query, ARRAY_A);
@@ -671,9 +671,9 @@ class EventSearch extends OsecBaseClass
     ) {
         $table_name = $this->db->get_table_name(OSEC_DB__EVENTS);
         $query      = 'SELECT `post_id` FROM ' . $table_name . '
-			WHERE ical_feed_url   = %s
-				AND ical_uid        = %s
-				AND start           = %d ' .
+            WHERE ical_feed_url   = %s
+                AND ical_uid        = %s
+                AND start           = %d ' .
                       ($has_recurrence ? 'AND NOT ' : 'AND ') .
                       ' ( recurrence_rules IS NULL OR recurrence_rules = \'\' )';
         $args       = [$feed, $uid];
@@ -761,8 +761,8 @@ class EventSearch extends OsecBaseClass
         $results = $this->db->get_results(
             $this->db->prepare(
                 "
-                        SELECT i.id, i.post_id FROM {$this->db->get_table_name(OSEC_DB__INSTANCES)} i 
-                        WHERE {$where_events_ids} i.start > %d 
+                        SELECT i.id, i.post_id FROM {$this->db->get_table_name(OSEC_DB__INSTANCES)} i
+                        WHERE {$where_events_ids} i.start > %d
                         GROUP BY i.post_id
                       ",
                 $today->format('U')

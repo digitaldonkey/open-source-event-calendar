@@ -398,9 +398,12 @@ timely.define("domReady", [], function () {
         r.isBuild ? n(null) : c(n)
     }, c
 }), timely.define("scripts/calendar/print", ["jquery_timely", "ai1ec_config"], function ($, config) {
-    // Week/day grids are scaled to one page: page height minus print header and margins (px, 96 dpi).
-    // Week prints landscape, day portrait; the smaller of A4 and Letter.
-    var PAGE_HEIGHT = {week: 660, oneday: 860},
+    // Week/day grids fill one page: the print CSS stretches the grid to the page area (10mm margins
+    // of @page osec-landscape/osec-portrait in calendar.less), and events and hour lines are placed
+    // in percent of it. PAGE_HEIGHT is only the estimate for minimum event height, line clamping and
+    // the list capacity: page area in px at 96 dpi, the smaller of A4 and Letter (A4 landscape 190mm,
+    // Letter portrait 259mm), minus print header and grid head.
+    var PAGE_HEIGHT = {week: 710, oneday: 970},
         PRINT_HEADER_HEIGHT = 80,
         MIN_GRID_HEIGHT = 300,
         // Events are at least this high, so the time and a title line stay readable.
@@ -489,9 +492,13 @@ timely.define("domReady", [], function () {
             $grid = $wrapper.clone();
 
         $grid.find('.ai1ec-popup, .ai1ec-popover, .ai1ec-tooltip, .ai1ec-now-marker').remove();
-        $grid.addClass('osec-print-grid').css({width: '', height: height + 'px'});
-        $grid.find('.ai1ec-day').css('height', height + 'px');
-        $grid.find('.ai1ec-hour-marker').css('height', (60 * factor) + 'px');
+        // Positions in percent of the grid, whose height comes from the print CSS.
+        var percent = function (px) {
+            return (px / height * 100) + '%';
+        };
+        $grid.addClass('osec-print-grid').css({width: '', height: ''});
+        $grid.find('.ai1ec-day').css('height', '');
+        $grid.find('.ai1ec-hour-marker').css('height', percent(60 * factor));
         if (15 * factor < 6) {
             $grid.find('.ai1ec-quarter-marker').remove();
         }
@@ -500,7 +507,7 @@ timely.define("domReady", [], function () {
             if (top < 0 || top >= height) {
                 $(this).remove();
             } else {
-                this.style.top = top + 'px';
+                this.style.top = percent(top);
             }
         });
         $grid.find('.ai1ec-day').each(function (day) {
@@ -519,8 +526,8 @@ timely.define("domReady", [], function () {
                     top = Math.max(0, top - (bottom - height));
                     bottom = height;
                 }
-                this.style.top = top + 'px';
-                this.style.height = (bottom - top) + 'px';
+                this.style.top = percent(top);
+                this.style.height = percent(bottom - top);
                 if (type === 'week') {
                     // Week columns are too narrow for every title: clamp to the lines the box
                     // can show, so the last one ends in an ellipsis instead of a cut letter.
@@ -563,6 +570,9 @@ timely.define("domReady", [], function () {
         // Detach instead of re-rendering the page HTML, so event handlers and state survive.
         // Styles and scripts stay where they are: WordPress prints the calendar CSS in the body
         // (wp_add_inline_style in the footer), and re-appending a script element runs it again.
+        // A theme with font-family: inherit (plana) would take the font from <html> once body is .timely,
+        // not the site's body font it shows on screen. Read before detaching: detached, it has no style.
+        $print.css('font-family', window.getComputedStyle($calendar[0]).fontFamily);
         $page = $body.children().not('style, link, script, noscript, template').detach();
         $body.addClass('timely').append($print);
         $html.addClass('ai1ec-print');
@@ -600,17 +610,17 @@ timely.define("domReady", [], function () {
         before_print: before_print,
         after_print: after_print
     }
-}), timely.define("scripts/calendar/agenda_view", ["jquery_timely"], function (e) {
+}), timely.define("scripts/calendar/agenda_view", ["jquery_timely"], function ($) {
     var t = function () {
-        e(this).closest(".ai1ec-event").toggleClass("ai1ec-expanded").find(".ai1ec-event-summary").slideToggle(300)
+        $(this).closest(".ai1ec-event").toggleClass("ai1ec-expanded").find(".ai1ec-event-summary").slideToggle(300)
     }, collapse_all = function () {
-        var t = e(this).closest(".ai1ec-calendar");
+        var t = $(this).closest(".ai1ec-calendar");
         t.find(".ai1ec-expanded .ai1ec-event-toggle").click();
-        e('#osec-calendar-view').toggleClass('osec-all-events-collapsed', true).toggleClass('osec-all-events-expanded', false)
+        $('#osec-calendar-view').toggleClass('osec-all-events-collapsed', true).toggleClass('osec-all-events-expanded', false)
     }, expand_all = function () {
-        var t = e(this).closest(".ai1ec-calendar");
+        var t = $(this).closest(".ai1ec-calendar");
         t.find(".ai1ec-event:not(.ai1ec-expanded) .ai1ec-event-toggle").click();
-        e('#osec-calendar-view').toggleClass('osec-all-events-collapsed', false).toggleClass('osec-all-events-expanded', true)
+        $('#osec-calendar-view').toggleClass('osec-all-events-collapsed', false).toggleClass('osec-all-events-expanded', true)
     };
     return {toggle_event: t, collapse_all: collapse_all, expand_all: expand_all}
 }), timely.define("external_libs/modernizr", [], function () {
@@ -682,7 +692,7 @@ timely.define("domReady", [], function () {
         return S(""), a = l = null, i._version = r, i._prefixes = h, i.testStyles = b, o.className = o.className.replace(/(^|\s)no-js(\s|$)/, "$1$2") + (s ? " js " + m.join(" ") : ""), i
     }(window, window.document);
     return e
-}), timely.define("scripts/calendar/month_view", ["jquery_timely", "external_libs/modernizr"], function (e, t) {
+}), timely.define("scripts/calendar/month_view", ["jquery_timely", "external_libs/modernizr"], function ($, modernizr) {
     var i = function (calendar) {
         // Lays out multi-day events as bars across the day cells: the bar itself in its first week, a copy at the
         // start of every following week. Each of these segments goes below every segment already placed on any of
@@ -690,40 +700,40 @@ timely.define("domReady", [], function () {
         // bar, which pushes the day's own events below the bars. Heights are measured, so a bar may span several lines.
         var days = calendar.find(".ai1ec-day"), cells = {}, taken = {};
         days.each(function () {
-            var dayNumber = parseInt(e(".ai1ec-date", this).text(), 10);
+            var dayNumber = parseInt($(".ai1ec-date", this).text(), 10);
             cells[dayNumber] = this;
             taken[dayNumber] = 0;
         });
         calendar.find(".ai1ec-month-view .ai1ec-multiday").each(function () {
-            var bar = e(this), startDay = parseInt(e(".ai1ec-date", this.parentNode).text(), 10),
+            var bar = $(this), startDay = parseInt($(".ai1ec-date", this.parentNode).text(), 10),
                 endTruncated = bar.data("endTruncated"),
-                endDay = parseInt(endTruncated ? e(days[days.length - 1]).text() : bar.data("endDay"), 10),
-                barColor = e(".ai1ec-event", bar)[0].style.backgroundColor,
+                endDay = parseInt(endTruncated ? $(days[days.length - 1]).text() : bar.data("endDay"), 10),
+                barColor = $(".ai1ec-event", bar)[0].style.backgroundColor,
                 // Copied before the bar gets its own position and arrows.
                 original = bar.next(".ai1ec-popup").andSelf().clone(!1),
                 segments = [], segment = null, dayNumber;
             for (dayNumber = startDay; dayNumber <= endDay; dayNumber++) {
                 if (!cells[dayNumber]) continue;
-                if (!segment || e(cells[dayNumber].parentNode).index() === 0) {
+                if (!segment || $(cells[dayNumber].parentNode).index() === 0) {
                     segment = [];
                     segments.push(segment);
                 }
                 segment.push(dayNumber);
             }
-            e.each(segments, function (index, segmentDays) {
-                var cell = e(cells[segmentDays[0]]), date = e(".ai1ec-date", cell), last = index === segments.length - 1,
+            $.each(segments, function (index, segmentDays) {
+                var cell = $(cells[segmentDays[0]]), date = $(".ai1ec-date", cell), last = index === segments.length - 1,
                     element = bar, top = 0, height;
                 if (index > 0) {
                     // The event continues in this week: repeat the bar here.
                     var clone = original.clone(!1);
                     cell.append(clone);
                     element = clone.first().addClass("ai1ec-multiday-bar ai1ec-multiday-clone")
-                        .css("backgroundColor", barColor).append(o(2, barColor));
+                        .css("backgroundColor", barColor).append(o(2));
                 } else if (bar.data("startTruncated")) {
-                    bar.append(o(2, barColor)).addClass("ai1ec-multiday-bar");
+                    bar.append(o(2)).addClass("ai1ec-multiday-bar");
                 }
-                if (!last || endTruncated) element.append(o(1, barColor));
-                e.each(segmentDays, function (k, day) {
+                if (!last || endTruncated) element.append(o(1));
+                $.each(segmentDays, function (k, day) {
                     top = Math.max(top, taken[day]);
                 });
                 element.css({
@@ -733,25 +743,20 @@ timely.define("domReady", [], function () {
                     width: s(segmentDays.length)
                 });
                 height = element.outerHeight(!0);
-                e.each(segmentDays, function (k, day) {
+                $.each(segmentDays, function (k, day) {
                     taken[day] = top + height;
                 });
             });
         });
         days.each(function () {
-            var date = e(".ai1ec-date", this), dayNumber = parseInt(date.text(), 10);
+            var date = $(".ai1ec-date", this), dayNumber = parseInt(date.text(), 10);
             taken[dayNumber] && date.css("marginBottom", "+=" + taken[dayNumber] + "px");
         })
     }, s = function (days) {
         // A bar starts in its first day cell: n cells wide plus the n - 1 borders between them.
         return "calc(" + days * 100 + "% + " + (days - 1) + "px)"
-    }, o = function (t, n) {
-        var r = e('<div class="ai1ec-multiday-arrow' + t + '"></div>');
-        return t === 1 ? r.css({borderLeftColor: n}) : r.css({
-            borderTopColor: n,
-            borderRightColor: n,
-            borderBottomColor: n
-        }), r
+    }, o = function (t) {
+        return $('<div class="ai1ec-multiday-arrow' + t + '"></div>')
     };
     return {extend_multiday_events: i}
 }), timely.define("libs/frontend_utils", [], function () {
@@ -824,7 +829,7 @@ timely.define("domReady", [], function () {
     }, e(document).on("click.bs.tab.data-api", '[data-toggle="ai1ec-tab"], [data-toggle="ai1ec-pill"]', function (t) {
         t.preventDefault(), e(this).tab("show")
     })
-}), timely.define("libs/utils", ["jquery_timely", "external_libs/bootstrap/tab"], function (e) {
+}), timely.define("libs/utils", ["jquery_timely", "external_libs/bootstrap/tab"], function ($) {
     var t = function () {
         return {
             is_float: function (e) {
@@ -835,8 +840,8 @@ timely.define("domReady", [], function () {
             }, convert_comma_to_dot: function (e) {
                 return e.replace(",", ".")
             }, field_has_value: function (t) {
-                var n = "#" + t, r = e(n), i = !1;
-                return r.length === 1 && (i = e.trim(r.val()) !== ""), i
+                var n = "#" + t, r = $(n), i = !1;
+                return r.length === 1 && (i = $.trim(r.val()) !== ""), i;
             }, make_alert: function (t, n, r) {
                 var i = "";
                 switch (n) {
@@ -849,9 +854,9 @@ timely.define("domReady", [], function () {
                     default:
                         i = "ai1ec-alert ai1ec-alert-info"
                 }
-                var s = e("<div />", {"class": i, html: t});
+                var s = $("<div />", {"class": i, html: t});
                 if (!r) {
-                    var o = e("<button>", {
+                    var o = $("<button>", {
                         type: "button",
                         "class": "ai1ec-close",
                         "data-dismiss": "ai1ec-alert",
@@ -869,28 +874,28 @@ timely.define("domReady", [], function () {
                 var t = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                 return t.test(e)
             }, activate_saved_tab_on_page_load: function (t) {
-                null === t || undefined === t ? e("ul.ai1ec-nav a:first").tab("show") : e("ul.ai1ec-nav a[href=" + t + "]").tab("show")
+                null === t || undefined === t ? $("ul.ai1ec-nav a:first").tab("show") : $("ul.ai1ec-nav a[href=" + t + "]").tab("show")
             }, add_query_arg: function (e, t) {
                 if ("string" != typeof e) return !1;
                 var n = e.indexOf("?") === -1 ? "?" : "&";
                 return -1 !== e.indexOf(n + t[0] + "=") ? e : e + n + t[0] + "=" + t[1]
             }, create_ai1ec_to_send: function (t) {
-                var n = e(t), r = [],
+                var n = $(t), r = [],
                     i = ["action", "cat_ids", "auth_ids", "tag_ids", "exact_date", "display_filters", "no_navigation", "events_limit"];
                 return n.each(function () {
-                    e.each(this.attributes, function () {
-                        this.specified && this.value && this.name.match(/^data-/) && (-1 < e.inArray(this.name.replace(/^data\-/, ""), i) || this.name.match(/_ids$/)) && r.push(this.name.replace(/^data\-/, "") + "~" + this.value)
+                    $.each(this.attributes, function () {
+                        this.specified && this.value && this.name.match(/^data-/) && (-1 < $.inArray(this.name.replace(/^data\-/, ""), i) || this.name.match(/_ids$/)) && r.push(this.name.replace(/^data\-/, "") + "~" + this.value)
                     })
-                }), r.join("|")
+                }), r.join("|");
             }, init_autoselect: function () {
-                e(document).on("click", ".ai1ec-autoselect", function (t) {
-                    if (e(this).data("clicked") && t.originalEvent.detail < 2) return;
-                    e(this).data("clicked", !0);
+                $(document).on("click", ".ai1ec-autoselect", function (t) {
+                    if ($(this).data("clicked") && t.originalEvent.detail < 2) return;
+                    $(this).data("clicked", !0);
                     var n;
                     document.body.createTextRange ? (n = document.body.createTextRange(), n.moveToElementText(this), n.select()) : window.getSelection && (selection = window.getSelection(), n = document.createRange(), n.selectNodeContents(this), selection.removeAllRanges(), selection.addRange(n))
                 })
             }
-        }
+        };
     }();
     return t
 }), timely.define("external_libs/bootstrap/affix", ["jquery_timely"], function (e) {
@@ -931,51 +936,51 @@ timely.define("domReady", [], function () {
             n.offset = n.offset || {}, n.offsetBottom && (n.offset.bottom = n.offsetBottom), n.offsetTop && (n.offset.top = n.offsetTop), t.affix(n)
         })
     })
-}), timely.define("scripts/common_scripts/frontend/common_event_handlers", ["jquery_timely", "external_libs/bootstrap/affix"], function (e) {
+}), timely.define("scripts/common_scripts/frontend/common_event_handlers", ["jquery_timely", "external_libs/bootstrap/affix"], function ($) {
     var t = function (t) {
-        var n = e(this), r = n.next(".ai1ec-popup"), i, s, o;
+        var n = $(this), r = n.next(".ai1ec-popup"), i, s, o;
         if (r.length === 0) return;
         i = r.html(), s = r.attr("class");
         var u = n.closest("#osec-calendar-view");
-        u.length === 0 && (u = e("body")), n.offset().left - u.offset().left > 182 ? o = "left" : o = "right", n.constrained_popover({
+        u.length === 0 && (u = $("body")), n.offset().left - u.offset().left > 182 ? o = "left" : o = "right", n.constrained_popover({
             content: i,
             title: "",
             placement: o,
             trigger: "manual",
             html: !0,
-            template: '<div class="timely ai1ec-popover ' + s + '">' + '<div class="ai1ec-arrow"></div>' + '<div class="ai1ec-popover-inner">' + '<div class="ai1ec-popover-content"><div></div></div>' + "</div>" + "</div>",
+            template: '<div class="' + (n.closest(".timely").length ? "timely " : "") + 'ai1ec-popover ' + s + '">' + '<div class="ai1ec-arrow"></div>' + '<div class="ai1ec-popover-inner">' + '<div class="ai1ec-popover-content"><div></div></div>' + "</div>" + "</div>",
             container: "body"
         }).constrained_popover("show")
     }, n = function (t) {
-        var n = e(t.toElement || t.relatedTarget);
-        n.closest(".ai1ec-popup").length === 0 && e(this).constrained_popover("hide")
+        var n = $(t.toElement || t.relatedTarget);
+        n.closest(".ai1ec-popup").length === 0 && $(this).constrained_popover("hide")
     }, r = function (t) {
-        var n = e(t.toElement || t.relatedTarget);
-        n.closest(".ai1ec-tooltip").length === 0 && (e(this).remove(), e("body > .ai1ec-tooltip").remove())
+        var n = $(t.toElement || t.relatedTarget);
+        n.closest(".ai1ec-tooltip").length === 0 && ($(this).remove(), $("body > .ai1ec-tooltip").remove())
     }, i = function (t) {
         if ("ontouchstart" in document.documentElement) {
             t.preventDefault();
             return
         }
-        var n = e(this), r = {
-            template: '<div class="timely ai1ec-tooltip"><div class="ai1ec-tooltip-arrow"></div><div class="ai1ec-tooltip-inner"></div></div>',
+        var n = $(this), r = {
+            template: '<div class="' + (n.closest(".timely").length ? "timely " : "") + 'ai1ec-tooltip"><div class="ai1ec-tooltip-arrow"></div><div class="ai1ec-tooltip-inner"></div></div>',
             trigger: "manual",
             container: "body"
         };
         if (n.is(".ai1ec-category .ai1ec-color-swatch") || n.is(".ai1ec-custom-filter .ai1ec-color-swatch")) return;
         n.is(".ai1ec-tooltip-auto") && (r.placement = u(250)), n.tooltip(r), n.tooltip("show")
     }, s = function (t) {
-        e(this).tooltip("hide")
+        $(this).tooltip("hide")
     }, o = function (t) {
-        var n = e(t.toElement || t.relatedTarget);
-        n.closest(".ai1ec-tooltip-trigger").length === 0 && e(this).remove(), n.closest(".ai1ec-popup").length === 0 && e("body > .ai1ec-popup").remove()
+        var n = $(t.toElement || t.relatedTarget);
+        n.closest(".ai1ec-tooltip-trigger").length === 0 && $(this).remove(), n.closest(".ai1ec-popup").length === 0 && $("body > .ai1ec-popup").remove()
     }, u = function (t) {
         return function (n, r) {
-            var i, s, o = e(r), u = o.attr("data-placement"),
-                a = e.extend({}, o.offset(), {width: r.offsetWidth, height: r.offsetHeight}), f = function () {
+            var i, s, o = $(r), u = o.attr("data-placement"),
+                a = $.extend({}, o.offset(), {width: r.offsetWidth, height: r.offsetHeight}), f = function () {
                     return !1 === i ? !1 : (i = a.left - t >= 0, i ? "left" : !1)
                 }, l = function () {
-                    return !1 === s ? !1 : (s = a.left + t <= e(window).width(), s ? "right" : !1)
+                    return !1 === s ? !1 : (s = a.left + t <= $(window).width(), s ? "right" : !1);
                 };
             switch (u) {
                 case"top":
@@ -991,7 +996,7 @@ timely.define("domReady", [], function () {
                     if (l()) return "right";
                     return u
             }
-        }
+        };
     };
     return {
         handle_popover_over: t,
@@ -1282,11 +1287,11 @@ timely.define("domReady", [], function () {
     }, e(document).on("click.bs.dropdown.data-api", i).on("click.bs.dropdown.data-api", ".ai1ec-dropdown form", function (e) {
         e.stopPropagation()
     }).on("click.bs.dropdown.data-api", n, r.prototype.toggle).on("keydown.bs.dropdown.data-api", n + ", [role=menu]", r.prototype.keydown)
-}), timely.define("scripts/common_scripts/frontend/common_frontend", ["jquery_timely", "domReady", "scripts/common_scripts/frontend/common_event_handlers", "ai1ec_calendar", "external_libs/modernizr", "external_libs/bootstrap/tooltip", "external_libs/constrained_popover", "external_libs/bootstrap/dropdown"], function (e, t, n, r, i) {
+}), timely.define("scripts/common_scripts/frontend/common_frontend", ["jquery_timely", "domReady", "scripts/common_scripts/frontend/common_event_handlers", "ai1ec_calendar", "external_libs/modernizr", "external_libs/bootstrap/tooltip", "external_libs/constrained_popover", "external_libs/bootstrap/dropdown"], function ($, domReady, commonEventHandlers, calendarPage, modernizr) {
     var s = !1, o = function () {
-        s = !0, e(document).on("mouseenter", ".ai1ec-popup-trigger", n.handle_popover_over), e(document).on("mouseleave", ".ai1ec-popup-trigger", n.handle_popover_out), e(document).on("mouseleave", ".ai1ec-popup", n.handle_popover_self_out), e(document).on("mouseenter", ".ai1ec-tooltip-trigger", n.handle_tooltip_over), e(document).on("mouseleave", ".ai1ec-tooltip-trigger", n.handle_tooltip_out), e(document).on("mouseleave", ".ai1ec-tooltip", n.handle_tooltip_self_out)
+        s = !0, $(document).on("mouseenter", ".ai1ec-popup-trigger", commonEventHandlers.handle_popover_over), $(document).on("mouseleave", ".ai1ec-popup-trigger", commonEventHandlers.handle_popover_out), $(document).on("mouseleave", ".ai1ec-popup", commonEventHandlers.handle_popover_self_out), $(document).on("mouseenter", ".ai1ec-tooltip-trigger", commonEventHandlers.handle_tooltip_over), $(document).on("mouseleave", ".ai1ec-tooltip-trigger", commonEventHandlers.handle_tooltip_out), $(document).on("mouseleave", ".ai1ec-tooltip", commonEventHandlers.handle_tooltip_self_out)
     }, u = function () {
-        t(function () {
+        domReady(function () {
             o()
         })
     }, a = function () {
@@ -2332,15 +2337,15 @@ timely.define("domReady", [], function () {
             }
         }
     }(e)
-}), timely.define("libs/select2_multiselect_helper", ["jquery_timely", "external_libs/select2"], function (e) {
+}), timely.define("libs/select2_multiselect_helper", ["jquery_timely", "external_libs/select2"], function ($) {
     var t = function (t) {
-        var n = e(t.element), r = n.data("color"), i = n.data("description"), s = "";
+        var n = $(t.element), r = n.data("color"), i = n.data("description"), s = "";
         return typeof r != "undefined" && r !== "" && (s += '<span class="ai1ec-color-swatch" style="background: ' + n.data("color") + '"></span> '), s += t.text, s = '<span title="' + i + '">' + s + "</span>", s
     }, n = function (t) {
-        var n = e(t.element), r = n.data("color"), i = n.data("description"), s = "";
+        var n = $(t.element), r = n.data("color"), i = n.data("description"), s = "";
         return typeof r != "undefined" && r !== "" ? s += '<span class="ai1ec-color-swatch" style="background: ' + n.data("color") + '"></span> ' : s += '<span class="ai1ec-color-swatch-empty"></span> ', s += t.text, s = '<span title="' + i + '">' + s + "</span>", s
     }, r = function (r) {
-        typeof r == "undefined" && (r = e(document)), e(".ai1ec-select2-multiselect-selector", r).select2({
+        typeof r == "undefined" && (r = $(document)), $(".ai1ec-select2-multiselect-selector", r).select2({
             allowClear: !0,
             formatResult: n,
             formatSelection: t,
@@ -2349,1816 +2354,43 @@ timely.define("domReady", [], function () {
             }
         })
     }, i = function (t) {
-        e(".ai1ec-select2-multiselect-selector.select2-container", t).each(function () {
-            e(this).data("select2").resizeSearch()
+        $(".ai1ec-select2-multiselect-selector.select2-container", t).each(function () {
+            $(this).data("select2").resizeSearch()
         })
     };
     return {init: r, refresh: i}
 });
-var Twig = function (e) {
-    return e.VERSION = "0.7.2", e
-}(Twig || {}), Twig = function (e) {
-    function t(e, t) {
-        var n = Object.prototype.toString.call(t).slice(8, -1);
-        return t !== undefined && t !== null && n === e
-    }
-
-    function n(t, n) {
-        var r, i, s = "/", o = [], u;
-        if (t.url) typeof t.base != "undefined" ? r = t.base + (t.base.charAt(t.base.length - 1) === "/" ? "" : "/") : r = t.url; else {
-            if (!t.path) throw new e.Error("Cannot extend an inline template.");
-            var a = require("path"), f = a.sep || s, l = new RegExp("^\\.{1,2}" + f.replace("\\", "\\\\"));
-            n = n.replace(/\//g, f), t.base !== undefined && n.match(l) == null ? (n = n.replace(t.base, ""), r = t.base + f) : r = t.path, r = r.replace(f + f, f), s = f
-        }
-        i = r.split(s), i.pop(), i = i.concat(n.split(s));
-        while (i.length > 0) u = i.shift(), u != "." && (u == ".." && o.length > 0 && o[o.length - 1] != ".." ? o.pop() : o.push(u));
-        return o.join(s)
-    }
-
-    return e.trace = !1, e.debug = !1, e.cache = !0, e.placeholders = {parent: "{{|PARENT|}}"}, e.indexOf = function (e, t) {
-        if (Array.prototype.hasOwnProperty("indexOf")) return e.indexOf(t);
-        if (e === void 0 || e === null) throw new TypeError;
-        var n = Object(e), r = n.length >>> 0;
-        if (r === 0) return -1;
-        var i = 0;
-        arguments.length > 0 && (i = Number(arguments[1]), i !== i ? i = 0 : i !== 0 && i !== Infinity && i !== -Infinity && (i = (i > 0 || -1) * Math.floor(Math.abs(i))));
-        if (i >= r) return -1;
-        var s = i >= 0 ? i : Math.max(r - Math.abs(i), 0);
-        for (; s < r; s++) if (s in n && n[s] === t) return s;
-        return e == t ? 0 : -1
-    }, e.forEach = function (e, t, n) {
-        if (Array.prototype.forEach) return e.forEach(t, n);
-        var r, i;
-        if (e == null) throw new TypeError(" this is null or not defined");
-        var s = Object(e), o = s.length >>> 0;
-        if ({}.toString.call(t) != "[object Function]") throw new TypeError(t + " is not a function");
-        n && (r = n), i = 0;
-        while (i < o) {
-            var u;
-            i in s && (u = s[i], t.call(r, u, i, s)), i++
-        }
-    }, e.Error = function (e) {
-        this.message = e, this.name = "TwigException", this.type = "TwigException"
-    }, e.Error.prototype.toString = function () {
-        var e = this.name + ": " + this.message;
-        return e
-    }, e.log = {
-        trace: function () {
-            e.trace && console && console.log(Array.prototype.slice.call(arguments))
-        }, debug: function () {
-            e.debug && console && console.log(Array.prototype.slice.call(arguments))
-        }
-    }, typeof console != "undefined" && typeof console.log != "undefined" ? e.log.error = function () {
-        console.log.apply(console, arguments)
-    } : e.log.error = function () {
-    }, e.token = {}, e.token.type = {
-        output: "output",
-        logic: "logic",
-        comment: "comment",
-        raw: "raw"
-    }, e.token.definitions = [{
-        type: e.token.type.raw,
-        open: "{% raw %}",
-        close: "{% endraw %}"
-    }, {type: e.token.type.output, open: "{{", close: "}}"}, {
-        type: e.token.type.logic,
-        open: "{%",
-        close: "%}"
-    }, {
-        type: e.token.type.comment,
-        open: "{#",
-        close: "#}"
-    }], e.token.strings = ['"', "'"], e.token.findStart = function (t) {
-        var n = {position: null, def: null}, r, i, s;
-        for (r = 0; r < e.token.definitions.length; r++) i = e.token.definitions[r], s = t.indexOf(i.open), e.log.trace("Twig.token.findStart: ", "Searching for ", i.open, " found at ", s), s >= 0 && (n.position === null || s < n.position) && (n.position = s, n.def = i);
-        return n
-    }, e.token.findEnd = function (t, n, r) {
-        var i = null, s = !1, o = 0, u = null, a = null, f = null, l = null, c = null, h = null, p, d;
-        while (!s) {
-            u = null, a = null, f = t.indexOf(n.close, o);
-            if (!(f >= 0)) throw new e.Error("Unable to find closing bracket '" + n.close + "'" + " opened near template position " + r);
-            i = f, s = !0;
-            if (n.type === e.token.type.comment) break;
-            d = e.token.strings.length;
-            for (p = 0; p < d; p += 1) c = t.indexOf(e.token.strings[p], o), c > 0 && c < f && (u === null || c < u) && (u = c, a = e.token.strings[p]);
-            if (u !== null) {
-                l = u + 1, i = null, s = !1;
-                for (; ;) {
-                    h = t.indexOf(a, l);
-                    if (h < 0) throw "Unclosed string in template";
-                    if (t.substr(h - 1, 1) !== "\\") {
-                        o = h + 1;
-                        break
-                    }
-                    l = h + 1
-                }
-            }
-        }
-        return i
-    }, e.tokenize = function (t) {
-        var n = [], r = 0, i = null, s = null;
-        while (t.length > 0) i = e.token.findStart(t), e.log.trace("Twig.tokenize: ", "Found token: ", i), i.position !== null ? (i.position > 0 && n.push({
-            type: e.token.type.raw,
-            value: t.substring(0, i.position)
-        }), t = t.substr(i.position + i.def.open.length), r += i.position + i.def.open.length, s = e.token.findEnd(t, i.def, r), e.log.trace("Twig.tokenize: ", "Token ends at ", s), n.push({
-            type: i.def.type,
-            value: t.substring(0, s).trim()
-        }), i.def.type === "logic" && t.substr(s + i.def.close.length, 1) === "\n" && (s += 1), t = t.substr(s + i.def.close.length), r += s + i.def.close.length) : (n.push({
-            type: e.token.type.raw,
-            value: t
-        }), t = "");
-        return n
-    }, e.compile = function (t) {
-        try {
-            var n = [], r = [], i = [], s = null, o = null, u = null, a = null, f = null, l = null, c = null, h = null,
-                p = null;
-            while (t.length > 0) {
-                s = t.shift(), e.log.trace("Compiling token ", s);
-                switch (s.type) {
-                    case e.token.type.raw:
-                        r.length > 0 ? i.push(s) : n.push(s);
-                        break;
-                    case e.token.type.logic:
-                        o = e.logic.compile.apply(this, [s]), c = o.type, h = e.logic.handler[c].open, p = e.logic.handler[c].next, e.log.trace("Twig.compile: ", "Compiled logic token to ", o, " next is: ", p, " open is : ", h);
-                        if (h !== undefined && !h) {
-                            a = r.pop(), f = e.logic.handler[a.type];
-                            if (e.indexOf(f.next, c) < 0) throw new Error(c + " not expected after a " + a.type);
-                            a.output = a.output || [], a.output = a.output.concat(i), i = [], l = {
-                                type: e.token.type.logic,
-                                token: a
-                            }, r.length > 0 ? i.push(l) : n.push(l)
-                        }
-                        p !== undefined && p.length > 0 ? (e.log.trace("Twig.compile: ", "Pushing ", o, " to logic stack."), r.length > 0 && (a = r.pop(), a.output = a.output || [], a.output = a.output.concat(i), r.push(a), i = []), r.push(o)) : h !== undefined && h && (l = {
-                            type: e.token.type.logic,
-                            token: o
-                        }, r.length > 0 ? i.push(l) : n.push(l));
-                        break;
-                    case e.token.type.comment:
-                        break;
-                    case e.token.type.output:
-                        e.expression.compile.apply(this, [s]), r.length > 0 ? i.push(s) : n.push(s)
-                }
-                e.log.trace("Twig.compile: ", " Output: ", n, " Logic Stack: ", r, " Pending Output: ", i)
-            }
-            if (r.length > 0) throw u = r.pop(), new Error("Unable to find an end tag for " + u.type + ", expecting one of " + u.next);
-            return n
-        } catch (d) {
-            e.log.error("Error compiling twig template " + this.id + ": "), d.stack ? e.log.error(d.stack) : e.log.error(d.toString());
-            if (this.options.rethrow) throw d
-        }
-    }, e.parse = function (t, n) {
-        try {
-            var r = [], i = !0, s = this;
-            return n = n || {}, e.forEach(t, function (o) {
-                e.log.debug("Twig.parse: ", "Parsing token: ", o);
-                switch (o.type) {
-                    case e.token.type.raw:
-                        r.push(o.value);
-                        break;
-                    case e.token.type.logic:
-                        var u = o.token, a = e.logic.parse.apply(s, [u, n, i]);
-                        a.chain !== undefined && (i = a.chain), a.context !== undefined && (n = a.context), a.output !== undefined && r.push(a.output);
-                        break;
-                    case e.token.type.comment:
-                        break;
-                    case e.token.type.output:
-                        e.log.debug("Twig.parse: ", "Output token: ", o.stack), r.push(e.expression.parse.apply(s, [o.stack, n]))
-                }
-            }), r.join("")
-        } catch (o) {
-            e.log.error("Error parsing twig template " + this.id + ": "), o.stack ? e.log.error(o.stack) : e.log.error(o.toString());
-            if (this.options.rethrow) throw o;
-            if (e.debug) return o.toString()
-        }
-    }, e.prepare = function (t) {
-        var n, r;
-        return e.log.debug("Twig.prepare: ", "Tokenizing ", t), r = e.tokenize.apply(this, [t]), e.log.debug("Twig.prepare: ", "Compiling ", r), n = e.compile.apply(this, [r]), e.log.debug("Twig.prepare: ", "Compiled ", n), n
-    }, e.Templates = {registry: {}}, e.validateId = function (t) {
-        if (t === "prototype") throw new e.Error(t + " is not a valid twig identifier");
-        if (e.Templates.registry.hasOwnProperty(t)) throw new e.Error("There is already a template with the ID " + t);
-        return !0
-    }, e.Templates.save = function (t) {
-        if (t.id === undefined) throw new e.Error("Unable to save template with no id");
-        e.Templates.registry[t.id] = t
-    }, e.Templates.load = function (t) {
-        return e.Templates.registry.hasOwnProperty(t) ? e.Templates.registry[t] : null
-    }, e.Templates.loadRemote = function (t, n, r, i) {
-        var s = n.id, o = n.method, u = n.async, a = n.precompiled, f = null;
-        u === undefined && (u = !0), s === undefined && (s = t), n.id = s;
-        if (e.cache && e.Templates.registry.hasOwnProperty(s)) return r && r(e.Templates.registry[s]), e.Templates.registry[s];
-        if (o == "ajax") {
-            if (typeof XMLHttpRequest == "undefined") throw new e.Error("Unsupported platform: Unable to do remote requests because there is no XMLHTTPRequest implementation");
-            var l = new XMLHttpRequest;
-            l.onreadystatechange = function () {
-                var s = null;
-                l.readyState == 4 && (l.status == 200 ? (e.log.debug("Got template ", l.responseText), a === !0 ? s = JSON.parse(l.responseText) : s = l.responseText, n.url = t, n.data = s, f = new e.Template(n), r && r(f)) : i && i(l))
-            }, l.open("GET", t, u), l.send()
-        } else (function () {
-            var s = require("fs"), o = require("path"), l = null, c = function (s, o) {
-                if (s) {
-                    i && i(s);
-                    return
-                }
-                a === !0 && (o = JSON.parse(o)), n.data = o, n.path = t, f = new e.Template(n), r && r(f)
-            };
-            if (u === !0) s.stat(t, function (n, r) {
-                if (n || !r.isFile()) throw new e.Error("Unable to find template file " + t);
-                s.readFile(t, "utf8", c)
-            }); else {
-                if (!s.statSync(t).isFile()) throw new e.Error("Unable to find template file " + t);
-                l = s.readFileSync(t, "utf8"), c(undefined, l)
-            }
-        })();
-        return u === !1 ? f : !0
-    }, e.Template = function (n) {
-        var r = n.data, i = n.id, s = n.blocks, o = n.macros || {}, u = n.base, a = n.path, f = n.url, l = n.options;
-        this.id = i, this.base = u, this.path = a, this.url = f, this.macros = o, this.options = l, this.reset(s), t("String", r) ? this.tokens = e.prepare.apply(this, [r]) : this.tokens = r, i !== undefined && e.Templates.save(this)
-    }, e.Template.prototype.reset = function (t) {
-        e.log.debug("Twig.Template.reset", "Reseting template " + this.id), this.blocks = {}, this.child = {blocks: t || {}}, this.extend = null
-    }, e.Template.prototype.render = function (t, r) {
-        r = r || {};
-        var i, s;
-        this.context = t || {}, this.reset(), r.blocks && (this.blocks = r.blocks), r.macros && (this.macros = r.macros), i = e.parse.apply(this, [this.tokens, this.context]);
-        if (this.extend) {
-            var o;
-            return this.options.allowInlineIncludes && (o = e.Templates.load(this.extend), o && (o.options = this.options)), o || (s = n(this, this.extend), o = e.Templates.loadRemote(s, {
-                method: this.url ? "ajax" : "fs",
-                base: this.base,
-                async: !1,
-                id: s,
-                options: this.options
-            })), this.parent = o, this.parent.render(this.context, {blocks: this.blocks})
-        }
-        return r.output == "blocks" ? this.blocks : r.output == "macros" ? this.macros : i
-    }, e.Template.prototype.importFile = function (t) {
-        var r, i;
-        if (!this.url && !this.path && this.options.allowInlineIncludes) {
-            i = e.Templates.load(t), i.options = this.options;
-            if (i) return i;
-            throw new e.Error("Didn't find the inline template by id")
-        }
-        return r = n(this, t), i = e.Templates.loadRemote(r, {
-            method: this.url ? "ajax" : "fs",
-            base: this.base,
-            async: !1,
-            options: this.options,
-            id: r
-        }), i
-    }, e.Template.prototype.importBlocks = function (t, n) {
-        var r = this.importFile(t), i = this.context, s = this, o;
-        n = n || !1, r.render(i), e.forEach(Object.keys(r.blocks), function (e) {
-            if (n || s.blocks[e] === undefined) s.blocks[e] = r.blocks[e]
-        })
-    }, e.Template.prototype.importMacros = function (t) {
-        var r = n(this, t), i = e.Templates.loadRemote(r, {method: this.url ? "ajax" : "fs", async: !1, id: r});
-        return i
-    }, e.Template.prototype.compile = function (t) {
-        return e.compiler.compile(this, t)
-    }, e
-}(Twig || {});
-(function () {
-    String.prototype.trim || (String.prototype.trim = function () {
-        return this.replace(/^\s+|\s+$/g, "")
-    }), Object.keys || (Object.keys = function (e) {
-        if (e !== Object(e)) throw new TypeError("Object.keys called on non-object");
-        var t = [], n;
-        for (n in e) Object.prototype.hasOwnProperty.call(e, n) && t.push(n);
-        return t
-    })
-})();
-var Twig = function (e) {
-    e.lib = {};
-    var t = function () {
-        function e(e) {
-            return Object.prototype.toString.call(e).slice(8, -1).toLowerCase()
-        }
-
-        function n(e, t) {
-            for (var n = []; t > 0; n[--t] = e) ;
-            return n.join("")
-        }
-
-        var r = function () {
-            return r.cache.hasOwnProperty(arguments[0]) || (r.cache[arguments[0]] = r.parse(arguments[0])), r.format.call(null, r.cache[arguments[0]], arguments)
-        };
-        return r.format = function (r, i) {
-            var s = 1, o = r.length, u = "", a, f = [], l, c, h, p, d, v;
-            for (l = 0; l < o; l++) {
-                u = e(r[l]);
-                if (u === "string") f.push(r[l]); else if (u === "array") {
-                    h = r[l];
-                    if (h[2]) {
-                        a = i[s];
-                        for (c = 0; c < h[2].length; c++) {
-                            if (!a.hasOwnProperty(h[2][c])) throw t('[sprintf] property "%s" does not exist', h[2][c]);
-                            a = a[h[2][c]]
-                        }
-                    } else h[1] ? a = i[h[1]] : a = i[s++];
-                    if (/[^s]/.test(h[8]) && e(a) != "number") throw t("[sprintf] expecting number but found %s", e(a));
-                    switch (h[8]) {
-                        case"b":
-                            a = a.toString(2);
-                            break;
-                        case"c":
-                            a = String.fromCharCode(a);
-                            break;
-                        case"d":
-                            a = parseInt(a, 10);
-                            break;
-                        case"e":
-                            a = h[7] ? a.toExponential(h[7]) : a.toExponential();
-                            break;
-                        case"f":
-                            a = h[7] ? parseFloat(a).toFixed(h[7]) : parseFloat(a);
-                            break;
-                        case"o":
-                            a = a.toString(8);
-                            break;
-                        case"s":
-                            a = (a = String(a)) && h[7] ? a.substring(0, h[7]) : a;
-                            break;
-                        case"u":
-                            a = Math.abs(a);
-                            break;
-                        case"x":
-                            a = a.toString(16);
-                            break;
-                        case"X":
-                            a = a.toString(16).toUpperCase()
-                    }
-                    a = /[def]/.test(h[8]) && h[3] && a >= 0 ? "+" + a : a, d = h[4] ? h[4] == "0" ? "0" : h[4].charAt(1) : " ", v = h[6] - String(a).length, p = h[6] ? n(d, v) : "", f.push(h[5] ? a + p : p + a)
-                }
-            }
-            return f.join("")
-        }, r.cache = {}, r.parse = function (e) {
-            var t = e, n = [], r = [], i = 0;
-            while (t) {
-                if ((n = /^[^\x25]+/.exec(t)) !== null) r.push(n[0]); else if ((n = /^\x25{2}/.exec(t)) !== null) r.push("%"); else {
-                    if ((n = /^\x25(?:([1-9]\d*)\$|\(([^\)]+)\))?(\+)?(0|'[^$])?(-)?(\d+)?(?:\.(\d+))?([b-fosuxX])/.exec(t)) === null) throw "[sprintf] huh?";
-                    if (n[2]) {
-                        i |= 1;
-                        var s = [], o = n[2], u = [];
-                        if ((u = /^([a-z_][a-z_\d]*)/i.exec(o)) === null) throw "[sprintf] huh?";
-                        s.push(u[1]);
-                        while ((o = o.substring(u[0].length)) !== "") if ((u = /^\.([a-z_][a-z_\d]*)/i.exec(o)) !== null) s.push(u[1]); else {
-                            if ((u = /^\[(\d+)\]/.exec(o)) === null) throw "[sprintf] huh?";
-                            s.push(u[1])
-                        }
-                        n[2] = s
-                    } else i |= 2;
-                    if (i === 3) throw "[sprintf] mixing positional and named placeholders is not (yet) supported";
-                    r.push(n)
-                }
-                t = t.substring(n[0].length)
-            }
-            return r
-        }, r
-    }(), n = function (e, n) {
-        return n.unshift(e), t.apply(null, n)
-    };
-    return e.lib.sprintf = t, e.lib.vsprintf = n, function () {
-        function s(e) {
-            return (e = Math.abs(e) % 100) % 10 == 1 && e != 11 ? "st" : e % 10 == 2 && e != 12 ? "nd" : e % 10 == 3 && e != 13 ? "rd" : "th"
-        }
-
-        function o(e) {
-            var t = new Date(e.getFullYear() + 1, 0, 4);
-            return (t - e) / 864e5 < 7 && (e.getDay() + 6) % 7 < (t.getDay() + 6) % 7 ? t.getFullYear() : e.getMonth() > 0 || e.getDate() >= 4 ? e.getFullYear() : e.getFullYear() - ((e.getDay() + 6) % 7 - e.getDate() > 2 ? 1 : 0)
-        }
-
-        function u(e) {
-            var t = new Date(o(e), 0, 4);
-            return t.setDate(t.getDate() - (t.getDay() + 6) % 7), parseInt((e - t) / 6048e5) + 1
-        }
-
-        var t = "Sun,Mon,Tue,Wed,Thu,Fri,Sat".split(","),
-            n = "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday".split(","),
-            r = "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec".split(","),
-            i = "January,February,March,April,May,June,July,August,September,October,November,December".split(",");
-        e.lib.formatDate = function (e, a) {
-            if (typeof a != "string" || /^\s*$/.test(a)) return e + "";
-            var f = new Date(e.getFullYear(), 0, 1), l = e;
-            return a.replace(/[dDjlNSwzWFmMntLoYyaABgGhHisuU]/g, function (e) {
-                switch (e) {
-                    case"d":
-                        return ("0" + l.getDate()).replace(/^.+(..)$/, "$1");
-                    case"D":
-                        return t[l.getDay()];
-                    case"j":
-                        return l.getDate();
-                    case"l":
-                        return n[l.getDay()];
-                    case"N":
-                        return (l.getDay() + 6) % 7 + 1;
-                    case"S":
-                        return s(l.getDate());
-                    case"w":
-                        return l.getDay();
-                    case"z":
-                        return Math.ceil((f - l) / 864e5);
-                    case"W":
-                        return ("0" + u(l)).replace(/^.(..)$/, "$1");
-                    case"F":
-                        return i[l.getMonth()];
-                    case"m":
-                        return ("0" + (l.getMonth() + 1)).replace(/^.+(..)$/, "$1");
-                    case"M":
-                        return r[l.getMonth()];
-                    case"n":
-                        return l.getMonth() + 1;
-                    case"t":
-                        return (new Date(l.getFullYear(), l.getMonth() + 1, -1)).getDate();
-                    case"L":
-                        return (new Date(l.getFullYear(), 1, 29)).getDate() == 29 ? 1 : 0;
-                    case"o":
-                        return o(l);
-                    case"Y":
-                        return l.getFullYear();
-                    case"y":
-                        return (l.getFullYear() + "").replace(/^.+(..)$/, "$1");
-                    case"a":
-                        return l.getHours() < 12 ? "am" : "pm";
-                    case"A":
-                        return l.getHours() < 12 ? "AM" : "PM";
-                    case"B":
-                        return Math.floor(((l.getUTCHours() + 1) % 24 + l.getUTCMinutes() / 60 + l.getUTCSeconds() / 3600) * 1e3 / 24);
-                    case"g":
-                        return l.getHours() % 12 != 0 ? l.getHours() % 12 : 12;
-                    case"G":
-                        return l.getHours();
-                    case"h":
-                        return ("0" + (l.getHours() % 12 != 0 ? l.getHours() % 12 : 12)).replace(/^.+(..)$/, "$1");
-                    case"H":
-                        return ("0" + l.getHours()).replace(/^.+(..)$/, "$1");
-                    case"i":
-                        return ("0" + l.getMinutes()).replace(/^.+(..)$/, "$1");
-                    case"s":
-                        return ("0" + l.getSeconds()).replace(/^.+(..)$/, "$1");
-                    case"u":
-                        return l.getMilliseconds();
-                    case"U":
-                        return l.getTime() / 1e3
-                }
-            })
-        }
-    }(), e.lib.strip_tags = function (e, t) {
-        t = (((t || "") + "").toLowerCase().match(/<[a-z][a-z0-9]*>/g) || []).join("");
-        var n = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi, r = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi;
-        return e.replace(r, "").replace(n, function (e, n) {
-            return t.indexOf("<" + n.toLowerCase() + ">") > -1 ? e : ""
-        })
-    }, e.lib.parseISO8601Date = function (e) {
-        var t = /(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(\.\d+)?(Z|([+-])(\d\d):(\d\d))/, n = [];
-        n = e.match(t);
-        if (!n) throw "Couldn't parse ISO 8601 date string '" + e + "'";
-        var r = [1, 2, 3, 4, 5, 6, 10, 11];
-        for (var i in r) n[r[i]] = parseInt(n[r[i]], 10);
-        n[7] = parseFloat(n[7]);
-        var s = Date.UTC(n[1], n[2] - 1, n[3], n[4], n[5], n[6]);
-        n[7] > 0 && (s += Math.round(n[7] * 1e3));
-        if (n[8] != "Z" && n[10]) {
-            var o = n[10] * 60 * 60 * 1e3;
-            n[11] && (o += n[11] * 60 * 1e3), n[9] == "-" ? s -= o : s += o
-        }
-        return new Date(s)
-    }, e.lib.strtotime = function (t, n) {
-        var r, i, s, o, u = "";
-        t = t.replace(/\s{2,}|^\s|\s$/g, " "), t = t.replace(/[\t\r\n]/g, "");
-        if (t === "now") return n === null || isNaN(n) ? (new Date).getTime() / 1e3 | 0 : n | 0;
-        if (!isNaN(u = Date.parse(t))) return u / 1e3 | 0;
-        n ? n = new Date(n * 1e3) : n = new Date;
-        var a = t;
-        t = t.toLowerCase();
-        var f = {
-            day: {sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6},
-            mon: ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
-        }, l = function (e) {
-            var t = e[2] && e[2] === "ago", r = (r = e[0] === "last" ? -1 : 1) * (t ? -1 : 1);
-            switch (e[0]) {
-                case"last":
-                case"next":
-                    switch (e[1].substring(0, 3)) {
-                        case"yea":
-                            n.setFullYear(n.getFullYear() + r);
-                            break;
-                        case"wee":
-                            n.setDate(n.getDate() + r * 7);
-                            break;
-                        case"day":
-                            n.setDate(n.getDate() + r);
-                            break;
-                        case"hou":
-                            n.setHours(n.getHours() + r);
-                            break;
-                        case"min":
-                            n.setMinutes(n.getMinutes() + r);
-                            break;
-                        case"sec":
-                            n.setSeconds(n.getSeconds() + r);
-                            break;
-                        case"mon":
-                            if (e[1] === "month") {
-                                n.setMonth(n.getMonth() + r);
-                                break
-                            }
-
-                        default:
-                            var i = f.day[e[1].substring(0, 3)];
-                            if (typeof i != "undefined") {
-                                var s = i - n.getDay();
-                                s === 0 ? s = 7 * r : s > 0 ? e[0] === "last" && (s -= 7) : e[0] === "next" && (s += 7), n.setDate(n.getDate() + s), n.setHours(0, 0, 0, 0)
-                            }
-                    }
-                    break;
-                default:
-                    if (!/\d+/.test(e[0])) return !1;
-                    r *= parseInt(e[0], 10);
-                    switch (e[1].substring(0, 3)) {
-                        case"yea":
-                            n.setFullYear(n.getFullYear() + r);
-                            break;
-                        case"mon":
-                            n.setMonth(n.getMonth() + r);
-                            break;
-                        case"wee":
-                            n.setDate(n.getDate() + r * 7);
-                            break;
-                        case"day":
-                            n.setDate(n.getDate() + r);
-                            break;
-                        case"hou":
-                            n.setHours(n.getHours() + r);
-                            break;
-                        case"min":
-                            n.setMinutes(n.getMinutes() + r);
-                            break;
-                        case"sec":
-                            n.setSeconds(n.getSeconds() + r)
-                    }
-            }
-            return !0
-        };
-        s = t.match(/^(\d{2,4}-\d{2}-\d{2})(?:\s(\d{1,2}:\d{2}(:\d{2})?)?(?:\.(\d+))?)?$/);
-        if (s !== null) return s[2] ? s[3] || (s[2] += ":00") : s[2] = "00:00:00", o = s[1].split(/-/g), o[1] = f.mon[o[1] - 1] || o[1], o[0] = +o[0], o[0] = o[0] >= 0 && o[0] <= 69 ? "20" + (o[0] < 10 ? "0" + o[0] : o[0] + "") : o[0] >= 70 && o[0] <= 99 ? "19" + o[0] : o[0] + "", parseInt(this.strtotime(o[2] + " " + o[1] + " " + o[0] + " " + s[2]) + (s[4] ? s[4] / 1e3 : ""), 10);
-        var c = "([+-]?\\d+\\s(years?|months?|weeks?|days?|hours?|min|minutes?|sec|seconds?|sun\\.?|sunday|mon\\.?|monday|tue\\.?|tuesday|wed\\.?|wednesday|thu\\.?|thursday|fri\\.?|friday|sat\\.?|saturday)|(last|next)\\s(years?|months?|weeks?|days?|hours?|min|minutes?|sec|seconds?|sun\\.?|sunday|mon\\.?|monday|tue\\.?|tuesday|wed\\.?|wednesday|thu\\.?|thursday|fri\\.?|friday|sat\\.?|saturday))(\\sago)?";
-        s = t.match(new RegExp(c, "gi"));
-        if (s === null) {
-            try {
-                num = e.lib.parseISO8601Date(a);
-                if (num) return num / 1e3 | 0
-            } catch (h) {
-                return !1
-            }
-            return !1
-        }
-        for (r = 0, i = s.length; r < i; r++) if (!l(s[r].split(" "))) return !1;
-        return n.getTime() / 1e3 | 0
-    }, e.lib.is = function (e, t) {
-        var n = Object.prototype.toString.call(t).slice(8, -1);
-        return t !== undefined && t !== null && n === e
-    }, e.lib.copy = function (e) {
-        var t = {}, n;
-        for (n in e) t[n] = e[n];
-        return t
-    }, e.lib.replaceAll = function (e, t, n) {
-        return e.split(t).join(n)
-    }, e.lib.chunkArray = function (t, n) {
-        var r = [], i = 0, s = t.length;
-        if (n < 1 || !e.lib.is("Array", t)) return [];
-        while (i < s) r.push(t.slice(i, i += n));
-        return r
-    }, e.lib.round = function (t, n, r) {
-        var i, s, o, u;
-        n |= 0, i = Math.pow(10, n), t *= i, u = t > 0 | -(t < 0), o = t % 1 === .5 * u, s = Math.floor(t);
-        if (o) switch (r) {
-            case"PHP_ROUND_HALF_DOWN":
-                t = s + (u < 0);
-                break;
-            case"PHP_ROUND_HALF_EVEN":
-                t = s + s % 2 * u;
-                break;
-            case"PHP_ROUND_HALF_ODD":
-                t = s + !(s % 2);
-                break;
-            default:
-                t = s + (u > 0)
-        }
-        return (o ? t : Math.round(t)) / i
-    }, e
-}(Twig || {}), Twig = function (e) {
-    e.logic = {}, e.logic.type = {
-        if_: "Twig.logic.type.if",
-        endif: "Twig.logic.type.endif",
-        for_: "Twig.logic.type.for",
-        endfor: "Twig.logic.type.endfor",
-        else_: "Twig.logic.type.else",
-        elseif: "Twig.logic.type.elseif",
-        set: "Twig.logic.type.set",
-        setcapture: "Twig.logic.type.setcapture",
-        endset: "Twig.logic.type.endset",
-        filter: "Twig.logic.type.filter",
-        endfilter: "Twig.logic.type.endfilter",
-        block: "Twig.logic.type.block",
-        endblock: "Twig.logic.type.endblock",
-        extends_: "Twig.logic.type.extends",
-        use: "Twig.logic.type.use",
-        include: "Twig.logic.type.include",
-        spaceless: "Twig.logic.type.spaceless",
-        endspaceless: "Twig.logic.type.endspaceless",
-        macro: "Twig.logic.type.macro",
-        endmacro: "Twig.logic.type.endmacro",
-        import_: "Twig.logic.type.import",
-        from: "Twig.logic.type.from"
-    }, e.logic.definitions = [{
-        type: e.logic.type.if_,
-        regex: /^if\s+([^\s].+)$/,
-        next: [e.logic.type.else_, e.logic.type.elseif, e.logic.type.endif],
-        open: !0,
-        compile: function (t) {
-            var n = t.match[1];
-            return t.stack = e.expression.compile.apply(this, [{
-                type: e.expression.type.expression,
-                value: n
-            }]).stack, delete t.match, t
-        },
-        parse: function (t, n, r) {
-            var i = "", s = e.expression.parse.apply(this, [t.stack, n]);
-            return r = !0, s && (r = !1, i = e.parse.apply(this, [t.output, n])), {chain: r, output: i}
-        }
-    }, {
-        type: e.logic.type.elseif,
-        regex: /^elseif\s+([^\s].*)$/,
-        next: [e.logic.type.else_, e.logic.type.elseif, e.logic.type.endif],
-        open: !1,
-        compile: function (t) {
-            var n = t.match[1];
-            return t.stack = e.expression.compile.apply(this, [{
-                type: e.expression.type.expression,
-                value: n
-            }]).stack, delete t.match, t
-        },
-        parse: function (t, n, r) {
-            var i = "";
-            return r && e.expression.parse.apply(this, [t.stack, n]) === !0 && (r = !1, i = e.parse.apply(this, [t.output, n])), {
-                chain: r,
-                output: i
-            }
-        }
-    }, {
-        type: e.logic.type.else_,
-        regex: /^else$/,
-        next: [e.logic.type.endif, e.logic.type.endfor],
-        open: !1,
-        parse: function (t, n, r) {
-            var i = "";
-            return r && (i = e.parse.apply(this, [t.output, n])), {chain: r, output: i}
-        }
-    }, {type: e.logic.type.endif, regex: /^endif$/, next: [], open: !1}, {
-        type: e.logic.type.for_,
-        regex: /^for\s+([a-zA-Z0-9_,\s]+)\s+in\s+([^\s].*?)(?:\s+if\s+([^\s].*))?$/,
-        next: [e.logic.type.else_, e.logic.type.endfor],
-        open: !0,
-        compile: function (t) {
-            var n = t.match[1], r = t.match[2], i = t.match[3], s = null;
-            t.key_var = null, t.value_var = null;
-            if (n.indexOf(",") >= 0) {
-                s = n.split(",");
-                if (s.length !== 2) throw new e.Error("Invalid expression in for loop: " + n);
-                t.key_var = s[0].trim(), t.value_var = s[1].trim()
-            } else t.value_var = n;
-            return t.expression = e.expression.compile.apply(this, [{
-                type: e.expression.type.expression,
-                value: r
-            }]).stack, i && (t.conditional = e.expression.compile.apply(this, [{
-                type: e.expression.type.expression,
-                value: i
-            }]).stack), delete t.match, t
-        },
-        parse: function (t, n, r) {
-            var i = e.expression.parse.apply(this, [t.expression, n]), s = [], o, u = 0, a, f = this, l = t.conditional,
-                c = function (e, t) {
-                    var r = l !== undefined;
-                    return {
-                        index: e + 1,
-                        index0: e,
-                        revindex: r ? undefined : t - e,
-                        revindex0: r ? undefined : t - e - 1,
-                        first: e === 0,
-                        last: r ? undefined : e === t - 1,
-                        length: r ? undefined : t,
-                        parent: n
-                    }
-                }, h = function (r, i) {
-                    var a = e.lib.copy(n);
-                    a[t.value_var] = i, t.key_var && (a[t.key_var] = r), a.loop = c(u, o);
-                    if (l === undefined || e.expression.parse.apply(f, [l, a])) s.push(e.parse.apply(f, [t.output, a])), u += 1
-                };
-            return i instanceof Array ? (o = i.length, e.forEach(i, function (e) {
-                var t = u;
-                h(t, e)
-            })) : i instanceof Object && (i._keys !== undefined ? a = i._keys : a = Object.keys(i), o = a.length, e.forEach(a, function (e) {
-                if (e === "_keys") return;
-                h(e, i[e])
-            })), r = s.length === 0, {chain: r, output: s.join("")}
-        }
-    }, {type: e.logic.type.endfor, regex: /^endfor$/, next: [], open: !1}, {
-        type: e.logic.type.set,
-        regex: /^set\s+([a-zA-Z0-9_,\s]+)\s*=\s*(.+)$/,
-        next: [],
-        open: !0,
-        compile: function (t) {
-            var n = t.match[1].trim(), r = t.match[2],
-                i = e.expression.compile.apply(this, [{type: e.expression.type.expression, value: r}]).stack;
-            return t.key = n, t.expression = i, delete t.match, t
-        },
-        parse: function (t, n, r) {
-            var i = e.expression.parse.apply(this, [t.expression, n]), s = t.key;
-            return this.context[s] = i, n[s] = i, {chain: r, context: n}
-        }
-    }, {
-        type: e.logic.type.setcapture,
-        regex: /^set\s+([a-zA-Z0-9_,\s]+)$/,
-        next: [e.logic.type.endset],
-        open: !0,
-        compile: function (e) {
-            var t = e.match[1].trim();
-            return e.key = t, delete e.match, e
-        },
-        parse: function (t, n, r) {
-            var i = e.parse.apply(this, [t.output, n]), s = t.key;
-            return this.context[s] = i, n[s] = i, {chain: r, context: n}
-        }
-    }, {type: e.logic.type.endset, regex: /^endset$/, next: [], open: !1}, {
-        type: e.logic.type.filter,
-        regex: /^filter\s+(.+)$/,
-        next: [e.logic.type.endfilter],
-        open: !0,
-        compile: function (t) {
-            var n = "|" + t.match[1].trim();
-            return t.stack = e.expression.compile.apply(this, [{
-                type: e.expression.type.expression,
-                value: n
-            }]).stack, delete t.match, t
-        },
-        parse: function (t, n, r) {
-            var i = e.parse.apply(this, [t.output, n]),
-                s = [{type: e.expression.type.string, value: i}].concat(t.stack),
-                o = e.expression.parse.apply(this, [s, n]);
-            return {chain: r, output: o}
-        }
-    }, {type: e.logic.type.endfilter, regex: /^endfilter$/, next: [], open: !1}, {
-        type: e.logic.type.block,
-        regex: /^block\s+([a-zA-Z0-9_]+)$/,
-        next: [e.logic.type.endblock],
-        open: !0,
-        compile: function (e) {
-            return e.block = e.match[1].trim(), delete e.match, e
-        },
-        parse: function (t, n, r) {
-            var i = "", s = "", o = this.blocks[t.block] && this.blocks[t.block].indexOf(e.placeholders.parent) > -1;
-            if (this.blocks[t.block] === undefined || o || n.loop) i = e.expression.parse.apply(this, [{
-                type: e.expression.type.string,
-                value: e.parse.apply(this, [t.output, n])
-            }, n]), o ? this.blocks[t.block] = this.blocks[t.block].replace(e.placeholders.parent, i) : this.blocks[t.block] = i;
-            return this.child.blocks[t.block] ? s = this.child.blocks[t.block] : s = this.blocks[t.block], {
-                chain: r,
-                output: s
-            }
-        }
-    }, {
-        type: e.logic.type.endblock,
-        regex: /^endblock(?:\s+([a-zA-Z0-9_]+))?$/,
-        next: [],
-        open: !1
-    }, {
-        type: e.logic.type.extends_, regex: /^extends\s+(.+)$/, next: [], open: !0, compile: function (t) {
-            var n = t.match[1].trim();
-            return delete t.match, t.stack = e.expression.compile.apply(this, [{
-                type: e.expression.type.expression,
-                value: n
-            }]).stack, t
-        }, parse: function (t, n, r) {
-            var i = e.expression.parse.apply(this, [t.stack, n]);
-            return this.extend = i, {chain: r, output: ""}
-        }
-    }, {
-        type: e.logic.type.use, regex: /^use\s+(.+)$/, next: [], open: !0, compile: function (t) {
-            var n = t.match[1].trim();
-            return delete t.match, t.stack = e.expression.compile.apply(this, [{
-                type: e.expression.type.expression,
-                value: n
-            }]).stack, t
-        }, parse: function (t, n, r) {
-            var i = e.expression.parse.apply(this, [t.stack, n]);
-            return this.importBlocks(i), {chain: r, output: ""}
-        }
-    }, {
-        type: e.logic.type.include,
-        regex: /^include\s+(ignore missing\s+)?(.+?)\s*(?:with\s+(.+?))?\s*(only)?$/,
-        next: [],
-        open: !0,
-        compile: function (t) {
-            var n = t.match, r = n[1] !== undefined, i = n[2].trim(), s = n[3], o = n[4] !== undefined && n[4].length;
-            return delete t.match, t.only = o, t.includeMissing = r, t.stack = e.expression.compile.apply(this, [{
-                type: e.expression.type.expression,
-                value: i
-            }]).stack, s !== undefined && (t.withStack = e.expression.compile.apply(this, [{
-                type: e.expression.type.expression,
-                value: s.trim()
-            }]).stack), t
-        },
-        parse: function (t, n, r) {
-            var i = {}, s, o, u;
-            if (!t.only) for (o in n) n.hasOwnProperty(o) && (i[o] = n[o]);
-            if (t.withStack !== undefined) {
-                s = e.expression.parse.apply(this, [t.withStack, n]);
-                for (o in s) s.hasOwnProperty(o) && (i[o] = s[o])
-            }
-            var a = e.expression.parse.apply(this, [t.stack, i]);
-            return u = this.importFile(a), {chain: r, output: u.render(i)}
-        }
-    }, {
-        type: e.logic.type.spaceless,
-        regex: /^spaceless$/,
-        next: [e.logic.type.endspaceless],
-        open: !0,
-        parse: function (t, n, r) {
-            var i = e.parse.apply(this, [t.output, n]), s = />\s+</g, o = i.replace(s, "><").trim();
-            return {chain: r, output: o}
-        }
-    }, {type: e.logic.type.endspaceless, regex: /^endspaceless$/, next: [], open: !1}, {
-        type: e.logic.type.macro,
-        regex: /^macro\s+([a-zA-Z0-9_]+)\s?\((([a-zA-Z0-9_]+(,\s?)?)*)\)$/,
-        next: [e.logic.type.endmacro],
-        open: !0,
-        compile: function (t) {
-            var n = t.match[1], r = t.match[2].split(/[ ,]+/);
-            for (var i = 0; i < r.length; i++) for (var s = 0; s < r.length; s++) if (r[i] === r[s] && i !== s) throw new e.Error("Duplicate arguments for parameter: " + r[i]);
-            return t.macroName = n, t.parameters = r, delete t.match, t
-        },
-        parse: function (t, n, r) {
-            var i = this;
-            return this.macros[t.macroName] = function () {
-                var n = {_self: i.macros};
-                for (var r = 0; r < t.parameters.length; r++) {
-                    var s = t.parameters[r];
-                    typeof arguments[r] != "undefined" ? n[s] = arguments[r] : n[s] = undefined
-                }
-                return e.parse.apply(i, [t.output, n])
-            }, {chain: r, output: ""}
-        }
-    }, {type: e.logic.type.endmacro, regex: /^endmacro$/, next: [], open: !1}, {
-        type: e.logic.type.import_,
-        regex: /^import\s+(.+)\s+as\s+([a-zA-Z0-9_]+)$/,
-        next: [],
-        open: !0,
-        compile: function (t) {
-            var n = t.match[1].trim(), r = t.match[2].trim();
-            return delete t.match, t.expression = n, t.contextName = r, t.stack = e.expression.compile.apply(this, [{
-                type: e.expression.type.expression,
-                value: n
-            }]).stack, t
-        },
-        parse: function (t, n, r) {
-            if (t.expression !== "_self") {
-                var i = e.expression.parse.apply(this, [t.stack, n]), s = this.importMacros(i || t.expression);
-                n[t.contextName] = s.render({}, {output: "macros"})
-            } else n[t.contextName] = this.macros;
-            return {chain: r, output: ""}
-        }
-    }, {
-        type: e.logic.type.from,
-        regex: /^from\s+(.+)\s+import\s+([a-zA-Z0-9_, ]+)$/,
-        next: [],
-        open: !0,
-        compile: function (t) {
-            var n = t.match[1].trim(), r = t.match[2].trim().split(/[ ,]+/), i = {};
-            for (var s = 0; s < r.length; s++) {
-                var o = r[s], u = o.match(/^([a-zA-Z0-9_]+)\s+(.+)\s+as\s+([a-zA-Z0-9_]+)$/);
-                u ? i[u[1].trim()] = u[2].trim() : o.match(/^([a-zA-Z0-9_]+)$/) && (i[o] = o)
-            }
-            return delete t.match, t.expression = n, t.macroNames = i, t.stack = e.expression.compile.apply(this, [{
-                type: e.expression.type.expression,
-                value: n
-            }]).stack, t
-        },
-        parse: function (t, n, r) {
-            var i;
-            if (t.expression !== "_self") {
-                var s = e.expression.parse.apply(this, [t.stack, n]), o = this.importMacros(s || t.expression);
-                i = o.render({}, {output: "macros"})
-            } else i = this.macros;
-            for (var u in t.macroNames) i.hasOwnProperty(u) && (n[t.macroNames[u]] = i[u]);
-            return {chain: r, output: ""}
-        }
-    }], e.logic.handler = {}, e.logic.extendType = function (t, n) {
-        n = n || "Twig.logic.type" + t, e.logic.type[t] = n
-    }, e.logic.extend = function (t) {
-        if (!t.type) throw new e.Error("Unable to extend logic definition. No type provided for " + t);
-        if (e.logic.type[t.type]) throw new e.Error("Unable to extend logic definitions. Type " + t.type + " is already defined.");
-        e.logic.extendType(t.type), e.logic.handler[t.type] = t
-    };
-    while (e.logic.definitions.length > 0) e.logic.extend(e.logic.definitions.shift());
-    return e.logic.compile = function (t) {
-        var n = t.value.trim(), r = e.logic.tokenize.apply(this, [n]), i = e.logic.handler[r.type];
-        return i.compile && (r = i.compile.apply(this, [r]), e.log.trace("Twig.logic.compile: ", "Compiled logic token to ", r)), r
-    }, e.logic.tokenize = function (t) {
-        var n = {}, r = null, i = null, s = null, o = null, u = null, a = null;
-        t = t.trim();
-        for (r in e.logic.handler) if (e.logic.handler.hasOwnProperty(r)) {
-            i = e.logic.handler[r].type, s = e.logic.handler[r].regex, o = [], s instanceof Array ? o = s : o.push(s);
-            while (o.length > 0) {
-                u = o.shift(), a = u.exec(t.trim());
-                if (a !== null) return n.type = i, n.match = a, e.log.trace("Twig.logic.tokenize: ", "Matched a ", i, " regular expression of ", a), n
-            }
-        }
-        throw new e.Error("Unable to parse '" + t.trim() + "'")
-    }, e.logic.parse = function (t, n, r) {
-        var i = "", s;
-        return n = n || {}, e.log.debug("Twig.logic.parse: ", "Parsing logic token ", t), s = e.logic.handler[t.type], s.parse && (i = s.parse.apply(this, [t, n, r])), i
-    }, e
-}(Twig || {}), Twig = function (e) {
-    e.expression = {}, e.expression.reservedWords = ["true", "false", "null", "_context"], e.expression.type = {
-        comma: "Twig.expression.type.comma",
-        operator: {unary: "Twig.expression.type.operator.unary", binary: "Twig.expression.type.operator.binary"},
-        string: "Twig.expression.type.string",
-        bool: "Twig.expression.type.bool",
-        array: {start: "Twig.expression.type.array.start", end: "Twig.expression.type.array.end"},
-        object: {start: "Twig.expression.type.object.start", end: "Twig.expression.type.object.end"},
-        parameter: {start: "Twig.expression.type.parameter.start", end: "Twig.expression.type.parameter.end"},
-        key: {period: "Twig.expression.type.key.period", brackets: "Twig.expression.type.key.brackets"},
-        filter: "Twig.expression.type.filter",
-        _function: "Twig.expression.type._function",
-        variable: "Twig.expression.type.variable",
-        number: "Twig.expression.type.number",
-        _null: "Twig.expression.type.null",
-        context: "Twig.expression.type.context",
-        test: "Twig.expression.type.test"
-    }, e.expression.set = {
-        operations: [e.expression.type.filter, e.expression.type.operator.unary, e.expression.type.operator.binary, e.expression.type.array.end, e.expression.type.object.end, e.expression.type.parameter.end, e.expression.type.comma, e.expression.type.test],
-        expressions: [e.expression.type._function, e.expression.type.bool, e.expression.type.string, e.expression.type.variable, e.expression.type.number, e.expression.type._null, e.expression.type.context, e.expression.type.parameter.start, e.expression.type.array.start, e.expression.type.object.start]
-    }, e.expression.set.operations_extended = e.expression.set.operations.concat([e.expression.type.key.period, e.expression.type.key.brackets]), e.expression.fn = {
-        compile: {
-            push: function (e, t, n) {
-                n.push(e)
-            }, push_both: function (e, t, n) {
-                n.push(e), t.push(e)
-            }
-        }, parse: {
-            push: function (e, t, n) {
-                t.push(e)
-            }, push_value: function (e, t, n) {
-                t.push(e.value)
-            }
-        }
-    }, e.expression.definitions = [{
-        type: e.expression.type.test,
-        regex: /^is\s+(not)?\s*([a-zA-Z_][a-zA-Z0-9_]*)/,
-        next: e.expression.set.operations.concat([e.expression.type.parameter.start]),
-        compile: function (e, t, n) {
-            e.filter = e.match[2], e.modifier = e.match[1], delete e.match, delete e.value, n.push(e)
-        },
-        parse: function (t, n, r) {
-            var i = n.pop(), s = t.params && e.expression.parse.apply(this, [t.params, r]), o = e.test(t.filter, i, s);
-            t.modifier == "not" ? n.push(!o) : n.push(o)
-        }
-    }, {
-        type: e.expression.type.comma,
-        regex: /^,/,
-        next: e.expression.set.expressions.concat([e.expression.type.array.end, e.expression.type.object.end]),
-        compile: function (t, n, r) {
-            var i = n.length - 1, s;
-            delete t.match, delete t.value;
-            for (; i >= 0; i--) {
-                s = n.pop();
-                if (s.type === e.expression.type.object.start || s.type === e.expression.type.parameter.start || s.type === e.expression.type.array.start) {
-                    n.push(s);
-                    break
-                }
-                r.push(s)
-            }
-            r.push(t)
-        }
-    }, {
-        type: e.expression.type.operator.binary,
-        regex: /(^[\+\-~%\?\:]|^[!=]==?|^[!<>]=?|^\*\*?|^\/\/?|^and\s+|^or\s+|^in\s+|^not in\s+|^\.\.)/,
-        next: e.expression.set.expressions.concat([e.expression.type.operator.unary]),
-        compile: function (t, n, r) {
-            delete t.match, t.value = t.value.trim();
-            var i = t.value, s = e.expression.operator.lookup(i, t);
-            e.log.trace("Twig.expression.compile: ", "Operator: ", s, " from ", i);
-            while (n.length > 0 && (n[n.length - 1].type == e.expression.type.operator.unary || n[n.length - 1].type == e.expression.type.operator.binary) && (s.associativity === e.expression.operator.leftToRight && s.precidence >= n[n.length - 1].precidence || s.associativity === e.expression.operator.rightToLeft && s.precidence > n[n.length - 1].precidence)) {
-                var o = n.pop();
-                r.push(o)
-            }
-            if (i === ":") {
-                if (!n[n.length - 1] || n[n.length - 1].value !== "?") {
-                    var u = r.pop();
-                    if (u.type !== e.expression.type.string && u.type !== e.expression.type.variable && u.type !== e.expression.type.number) throw new e.Error("Unexpected value before ':' of " + u.type + " = " + u.value);
-                    t.key = u.value, r.push(t);
-
-                }
-            } else n.push(s)
-        },
-        parse: function (t, n, r) {
-            t.key ? n.push(t) : e.expression.operator.parse(t.value, n)
-        }
-    }, {
-        type: e.expression.type.operator.unary,
-        regex: /(^not\s+)/,
-        next: e.expression.set.expressions,
-        compile: function (t, n, r) {
-            delete t.match, t.value = t.value.trim();
-            var i = t.value, s = e.expression.operator.lookup(i, t);
-            e.log.trace("Twig.expression.compile: ", "Operator: ", s, " from ", i);
-            while (n.length > 0 && (n[n.length - 1].type == e.expression.type.operator.unary || n[n.length - 1].type == e.expression.type.operator.binary) && (s.associativity === e.expression.operator.leftToRight && s.precidence >= n[n.length - 1].precidence || s.associativity === e.expression.operator.rightToLeft && s.precidence > n[n.length - 1].precidence)) {
-                var o = n.pop();
-                r.push(o)
-            }
-            n.push(s)
-        },
-        parse: function (t, n, r) {
-            e.expression.operator.parse(t.value, n)
-        }
-    }, {
-        type: e.expression.type.string,
-        regex: /^(["'])(?:(?=(\\?))\2.)*?\1/,
-        next: e.expression.set.operations,
-        compile: function (t, n, r) {
-            var i = t.value;
-            delete t.match, i.substring(0, 1) === '"' ? i = i.replace('\\"', '"') : i = i.replace("\\'", "'"), t.value = i.substring(1, i.length - 1).replace(/\\n/g, "\n").replace(/\\r/g, "\r"), e.log.trace("Twig.expression.compile: ", "String value: ", t.value), r.push(t)
-        },
-        parse: e.expression.fn.parse.push_value
-    }, {
-        type: e.expression.type.parameter.start,
-        regex: /^\(/,
-        next: e.expression.set.expressions.concat([e.expression.type.parameter.end]),
-        compile: e.expression.fn.compile.push_both,
-        parse: e.expression.fn.parse.push
-    }, {
-        type: e.expression.type.parameter.end,
-        regex: /^\)/,
-        next: e.expression.set.operations_extended,
-        compile: function (t, n, r) {
-            var i, s = t;
-            i = n.pop();
-            while (n.length > 0 && i.type != e.expression.type.parameter.start) r.push(i), i = n.pop();
-            var o = [];
-            while (t.type !== e.expression.type.parameter.start) o.unshift(t), t = r.pop();
-            o.unshift(t);
-            var u = !1;
-            t = r[r.length - 1], t === undefined || t.type !== e.expression.type._function && t.type !== e.expression.type.filter && t.type !== e.expression.type.test && t.type !== e.expression.type.key.brackets && t.type !== e.expression.type.key.period ? (s.expression = !0, o.pop(), o.shift(), s.params = o, r.push(s)) : (s.expression = !1, t.params = o)
-        },
-        parse: function (t, n, r) {
-            var i = [], s = !1, o = null;
-            if (t.expression) o = e.expression.parse.apply(this, [t.params, r]), n.push(o); else {
-                while (n.length > 0) {
-                    o = n.pop();
-                    if (o && o.type && o.type == e.expression.type.parameter.start) {
-                        s = !0;
-                        break
-                    }
-                    i.unshift(o)
-                }
-                if (!s) throw new e.Error("Expected end of parameter set.");
-                n.push(i)
-            }
-        }
-    }, {
-        type: e.expression.type.array.start,
-        regex: /^\[/,
-        next: e.expression.set.expressions.concat([e.expression.type.array.end]),
-        compile: e.expression.fn.compile.push_both,
-        parse: e.expression.fn.parse.push
-    }, {
-        type: e.expression.type.array.end,
-        regex: /^\]/,
-        next: e.expression.set.operations_extended,
-        compile: function (t, n, r) {
-            var i = n.length - 1, s;
-            for (; i >= 0; i--) {
-                s = n.pop();
-                if (s.type === e.expression.type.array.start) break;
-                r.push(s)
-            }
-            r.push(t)
-        },
-        parse: function (t, n, r) {
-            var i = [], s = !1, o = null;
-            while (n.length > 0) {
-                o = n.pop();
-                if (o.type && o.type == e.expression.type.array.start) {
-                    s = !0;
-                    break
-                }
-                i.unshift(o)
-            }
-            if (!s) throw new e.Error("Expected end of array.");
-            n.push(i)
-        }
-    }, {
-        type: e.expression.type.object.start,
-        regex: /^\{/,
-        next: e.expression.set.expressions.concat([e.expression.type.object.end]),
-        compile: e.expression.fn.compile.push_both,
-        parse: e.expression.fn.parse.push
-    }, {
-        type: e.expression.type.object.end,
-        regex: /^\}/,
-        next: e.expression.set.operations_extended,
-        compile: function (t, n, r) {
-            var i = n.length - 1, s;
-            for (; i >= 0; i--) {
-                s = n.pop();
-                if (s && s.type === e.expression.type.object.start) break;
-                r.push(s)
-            }
-            r.push(t)
-        },
-        parse: function (t, n, r) {
-            var i = {}, s = !1, o = null, u = null, a = !1, f = null;
-            while (n.length > 0) {
-                o = n.pop();
-                if (o && o.type && o.type === e.expression.type.object.start) {
-                    s = !0;
-                    break
-                }
-                if (o && o.type && (o.type === e.expression.type.operator.binary || o.type === e.expression.type.operator.unary) && o.key) {
-                    if (!a) throw new e.Error("Missing value for key '" + o.key + "' in object definition.");
-                    i[o.key] = f, i._keys === undefined && (i._keys = []), i._keys.unshift(o.key), f = null, a = !1
-                } else a = !0, f = o
-            }
-            if (!s) throw new e.Error("Unexpected end of object.");
-            n.push(i)
-        }
-    }, {
-        type: e.expression.type.filter,
-        regex: /^\|\s?([a-zA-Z_][a-zA-Z0-9_\-]*)/,
-        next: e.expression.set.operations_extended.concat([e.expression.type.parameter.start]),
-        compile: function (e, t, n) {
-            e.value = e.match[1], n.push(e)
-        },
-        parse: function (t, n, r) {
-            var i = n.pop(), s = t.params && e.expression.parse.apply(this, [t.params, r]);
-            n.push(e.filter.apply(this, [t.value, i, s]))
-        }
-    }, {
-        type: e.expression.type._function,
-        regex: /^([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/,
-        next: e.expression.type.parameter.start,
-        transform: function (e, t) {
-            return "("
-        },
-        compile: function (e, t, n) {
-            var r = e.match[1];
-            e.fn = r, delete e.match, delete e.value, n.push(e)
-        },
-        parse: function (t, n, r) {
-            var i = t.params && e.expression.parse.apply(this, [t.params, r]), s = t.fn, o;
-            if (e.functions[s]) o = e.functions[s].apply(this, i); else {
-                if (typeof r[s] != "function") throw new e.Error(s + " function does not exist and is not defined in the context");
-                o = r[s].apply(r, i)
-            }
-            n.push(o)
-        }
-    }, {
-        type: e.expression.type.variable,
-        regex: /^[a-zA-Z_][a-zA-Z0-9_]*/,
-        next: e.expression.set.operations_extended.concat([e.expression.type.parameter.start]),
-        compile: e.expression.fn.compile.push,
-        validate: function (t, n) {
-            return e.indexOf(e.expression.reservedWords, t[0]) < 0
-        },
-        parse: function (t, n, r) {
-            var i = e.expression.resolve(r[t.value], r);
-            n.push(i)
-        }
-    }, {
-        type: e.expression.type.key.period,
-        regex: /^\.([a-zA-Z0-9_]+)/,
-        next: e.expression.set.operations_extended.concat([e.expression.type.parameter.start]),
-        compile: function (e, t, n) {
-            e.key = e.match[1], delete e.match, delete e.value, n.push(e)
-        },
-        parse: function (t, n, r) {
-            var i = t.params && e.expression.parse.apply(this, [t.params, r]), s = t.key, o = n.pop(), u;
-            if (o === null || o === undefined) {
-                if (this.options.strict_variables) throw new e.Error("Can't access a key " + s + " on an null or undefined object.");
-                return null
-            }
-            var a = function (e) {
-                return e.substr(0, 1).toUpperCase() + e.substr(1)
-            };
-            typeof o == "object" && s in o ? u = o[s] : o["get" + a(s)] !== undefined ? u = o["get" + a(s)] : o["is" + a(s)] !== undefined ? u = o["is" + a(s)] : u = null, n.push(e.expression.resolve(u, o, i))
-        }
-    }, {
-        type: e.expression.type.key.brackets,
-        regex: /^\[([^\]]*)\]/,
-        next: e.expression.set.operations_extended.concat([e.expression.type.parameter.start]),
-        compile: function (t, n, r) {
-            var i = t.match[1];
-            delete t.value, delete t.match, t.stack = e.expression.compile({value: i}).stack, r.push(t)
-        },
-        parse: function (t, n, r) {
-            var i = t.params && e.expression.parse.apply(this, [t.params, r]),
-                s = e.expression.parse.apply(this, [t.stack, r]), o = n.pop(), u;
-            if (o === null || o === undefined) {
-                if (this.options.strict_variables) throw new e.Error("Can't access a key " + s + " on an null or undefined object.");
-                return null
-            }
-            typeof o == "object" && s in o ? u = o[s] : u = null, n.push(e.expression.resolve(u, o, i))
-        }
-    }, {
-        type: e.expression.type._null, regex: /^null/, next: e.expression.set.operations, compile: function (e, t, n) {
-            delete e.match, e.value = null, n.push(e)
-        }, parse: e.expression.fn.parse.push_value
-    }, {
-        type: e.expression.type.context,
-        regex: /^_context/,
-        next: e.expression.set.operations_extended.concat([e.expression.type.parameter.start]),
-        compile: e.expression.fn.compile.push,
-        parse: function (e, t, n) {
-            t.push(n)
-        }
-    }, {
-        type: e.expression.type.number,
-        regex: /^\-?\d+(\.\d+)?/,
-        next: e.expression.set.operations,
-        compile: function (e, t, n) {
-            e.value = Number(e.value), n.push(e)
-        },
-        parse: e.expression.fn.parse.push_value
-    }, {
-        type: e.expression.type.bool,
-        regex: /^(true|false)/,
-        next: e.expression.set.operations,
-        compile: function (e, t, n) {
-            e.value = e.match[0] == "true", delete e.match, n.push(e)
-        },
-        parse: e.expression.fn.parse.push_value
-    }], e.expression.resolve = function (e, t, n) {
-        return typeof e == "function" ? e.apply(t, n || []) : e
-    }, e.expression.handler = {}, e.expression.extendType = function (t) {
-        e.expression.type[t] = "Twig.expression.type." + t
-    }, e.expression.extend = function (t) {
-        if (!t.type) throw new e.Error("Unable to extend logic definition. No type provided for " + t);
-        e.expression.handler[t.type] = t
-    };
-    while (e.expression.definitions.length > 0) e.expression.extend(e.expression.definitions.shift());
-    return e.expression.tokenize = function (t) {
-        var n = [], r = 0, i = null, s, o, u, a, f, l = [], c;
-        c = function () {
-            var t = Array.prototype.slice.apply(arguments), o = t.pop(), u = t.pop();
-            return e.log.trace("Twig.expression.tokenize", "Matched a ", s, " regular expression of ", t), i && e.indexOf(i, s) < 0 ? (l.push(s + " cannot follow a " + n[n.length - 1].type + " at template:" + r + " near '" + t[0].substring(0, 20) + "...'"), t[0]) : e.expression.handler[s].validate && !e.expression.handler[s].validate(t, n) ? t[0] : (l = [], n.push({
-                type: s,
-                value: t[0],
-                match: t
-            }), f = !0, i = a, r += t[0].length, e.expression.handler[s].transform ? e.expression.handler[s].transform(t, n) : "")
-        }, e.log.debug("Twig.expression.tokenize", "Tokenizing expression ", t);
-        while (t.length > 0) {
-            t = t.trim();
-            for (s in e.expression.handler) if (e.expression.handler.hasOwnProperty(s)) {
-                a = e.expression.handler[s].next, o = e.expression.handler[s].regex, o instanceof Array ? u = o : u = [o], f = !1;
-                while (u.length > 0) o = u.pop(), t = t.replace(o, c);
-                if (f) break
-            }
-            if (!f) throw l.length > 0 ? new e.Error(l.join(" OR ")) : new e.Error("Unable to parse '" + t + "' at template position" + r)
-        }
-        return e.log.trace("Twig.expression.tokenize", "Tokenized to ", n), n
-    }, e.expression.compile = function (t) {
-        var n = t.value, r = e.expression.tokenize(n), i = null, s = [], o = [], u = null;
-        e.log.trace("Twig.expression.compile: ", "Compiling ", n);
-        while (r.length > 0) i = r.shift(), u = e.expression.handler[i.type], e.log.trace("Twig.expression.compile: ", "Compiling ", i), u.compile && u.compile(i, o, s), e.log.trace("Twig.expression.compile: ", "Stack is", o), e.log.trace("Twig.expression.compile: ", "Output is", s);
-        while (o.length > 0) s.push(o.pop());
-        return e.log.trace("Twig.expression.compile: ", "Final output is", s), t.stack = s, delete t.value, t
-    }, e.expression.parse = function (t, n) {
-        var r = this;
-        t instanceof Array || (t = [t]);
-        var i = [], s = null;
-        return e.forEach(t, function (t) {
-            s = e.expression.handler[t.type], s.parse && s.parse.apply(r, [t, i, n])
-        }), i.pop()
-    }, e
-}(Twig || {}), Twig = function (e) {
-    e.expression.operator = {leftToRight: "leftToRight", rightToLeft: "rightToLeft"};
-    var t = function (e, t) {
-        if (t.indexOf !== undefined) return e === t || e !== "" && t.indexOf(e) > -1;
-        var n;
-        for (n in t) if (t.hasOwnProperty(n) && t[n] === e) return !0;
-        return !1
-    };
-    return e.expression.operator.lookup = function (t, n) {
-        switch (t) {
-            case"..":
-            case"not in":
-            case"in":
-                n.precidence = 20, n.associativity = e.expression.operator.leftToRight;
-                break;
-            case",":
-                n.precidence = 18, n.associativity = e.expression.operator.leftToRight;
-                break;
-            case"?":
-            case":":
-                n.precidence = 16, n.associativity = e.expression.operator.rightToLeft;
-                break;
-            case"or":
-                n.precidence = 14, n.associativity = e.expression.operator.leftToRight;
-                break;
-            case"and":
-                n.precidence = 13, n.associativity = e.expression.operator.leftToRight;
-                break;
-            case"==":
-            case"!=":
-                n.precidence = 9, n.associativity = e.expression.operator.leftToRight;
-                break;
-            case"<":
-            case"<=":
-            case">":
-            case">=":
-                n.precidence = 8, n.associativity = e.expression.operator.leftToRight;
-                break;
-            case"~":
-            case"+":
-            case"-":
-                n.precidence = 6, n.associativity = e.expression.operator.leftToRight;
-                break;
-            case"//":
-            case"**":
-            case"*":
-            case"/":
-            case"%":
-                n.precidence = 5, n.associativity = e.expression.operator.leftToRight;
-                break;
-            case"not":
-                n.precidence = 3, n.associativity = e.expression.operator.rightToLeft;
-                break;
-            default:
-                throw new e.Error(t + " is an unknown operator.")
-        }
-        return n.operator = t, n
-    }, e.expression.operator.parse = function (n, r) {
-        e.log.trace("Twig.expression.operator.parse: ", "Handling ", n);
-        var i, s, o;
-        switch (n) {
-            case":":
-                break;
-            case"?":
-                o = r.pop(), s = r.pop(), i = r.pop(), i ? r.push(s) : r.push(o);
-                break;
-            case"+":
-                s = parseFloat(r.pop()), i = parseFloat(r.pop()), r.push(i + s);
-                break;
-            case"-":
-                s = parseFloat(r.pop()), i = parseFloat(r.pop()), r.push(i - s);
-                break;
-            case"*":
-                s = parseFloat(r.pop()), i = parseFloat(r.pop()), r.push(i * s);
-                break;
-            case"/":
-                s = parseFloat(r.pop()), i = parseFloat(r.pop()), r.push(i / s);
-                break;
-            case"//":
-                s = parseFloat(r.pop()), i = parseFloat(r.pop()), r.push(parseInt(i / s));
-                break;
-            case"%":
-                s = parseFloat(r.pop()), i = parseFloat(r.pop()), r.push(i % s);
-                break;
-            case"~":
-                s = r.pop(), i = r.pop(), r.push((i !== undefined ? i.toString() : "") + (s !== undefined ? s.toString() : ""));
-                break;
-            case"not":
-            case"!":
-                r.push(!r.pop());
-                break;
-            case"<":
-                s = r.pop(), i = r.pop(), r.push(i < s);
-                break;
-            case"<=":
-                s = r.pop(), i = r.pop(), r.push(i <= s);
-                break;
-            case">":
-                s = r.pop(), i = r.pop(), r.push(i > s);
-                break;
-            case">=":
-                s = r.pop(), i = r.pop(), r.push(i >= s);
-                break;
-            case"===":
-                s = r.pop(), i = r.pop(), r.push(i === s);
-                break;
-            case"==":
-                s = r.pop(), i = r.pop(), r.push(i == s);
-                break;
-            case"!==":
-                s = r.pop(), i = r.pop(), r.push(i !== s);
-                break;
-            case"!=":
-                s = r.pop(), i = r.pop(), r.push(i != s);
-                break;
-            case"or":
-                s = r.pop(), i = r.pop(), r.push(i || s);
-                break;
-            case"and":
-                s = r.pop(), i = r.pop(), r.push(i && s);
-                break;
-            case"**":
-                s = r.pop(), i = r.pop(), r.push(Math.pow(i, s));
-                break;
-            case"not in":
-                s = r.pop(), i = r.pop(), r.push(!t(i, s));
-                break;
-            case"in":
-                s = r.pop(), i = r.pop(), r.push(t(i, s));
-                break;
-            case"..":
-                s = r.pop(), i = r.pop(), r.push(e.functions.range(i, s));
-                break;
-            default:
-                throw new e.Error(n + " is an unknown operator.")
-        }
-    }, e
-}(Twig || {}), Twig = function (e) {
-    function t(e, t) {
-        var n = Object.prototype.toString.call(t).slice(8, -1);
-        return t !== undefined && t !== null && n === e
-    }
-
-    return e.filters = {
-        upper: function (e) {
-            return typeof e != "string" ? e : e.toUpperCase()
-        }, lower: function (e) {
-            return typeof e != "string" ? e : e.toLowerCase()
-        }, capitalize: function (e) {
-            return typeof e != "string" ? e : e.substr(0, 1).toUpperCase() + e.toLowerCase().substr(1)
-        }, title: function (e) {
-            return typeof e != "string" ? e : e.toLowerCase().replace(/(^|\s)([a-z])/g, function (e, t, n) {
-                return t + n.toUpperCase()
-            })
-        }, length: function (t) {
-            return e.lib.is("Array", t) || typeof t == "string" ? t.length : e.lib.is("Object", t) ? t._keys === undefined ? Object.keys(t).length : t._keys.length : 0
-        }, reverse: function (e) {
-            if (t("Array", e)) return e.reverse();
-            if (t("String", e)) return e.split("").reverse().join("");
-            if (e instanceof Object) {
-                var n = e._keys || Object.keys(e).reverse();
-                return e._keys = n, e
-            }
-        }, sort: function (e) {
-            if (t("Array", e)) return e.sort();
-            if (e instanceof Object) {
-                delete e._keys;
-                var n = Object.keys(e), r = n.sort(function (t, n) {
-                    return e[t] > e[n]
-                });
-                return e._keys = r, e
-            }
-        }, keys: function (t) {
-            if (t === undefined || t === null) return;
-            var n = t._keys || Object.keys(t), r = [];
-            return e.forEach(n, function (e) {
-                if (e === "_keys") return;
-                t.hasOwnProperty(e) && r.push(e)
-            }), r
-        }, url_encode: function (e) {
-            if (e === undefined || e === null) return;
-            return encodeURIComponent(e)
-        }, join: function (t, n) {
-            if (t === undefined || t === null) return;
-            var r = "", i = [], s = null;
-            return n && n[0] && (r = n[0]), t instanceof Array ? i = t : (s = t._keys || Object.keys(t), e.forEach(s, function (e) {
-                if (e === "_keys") return;
-                t.hasOwnProperty(e) && i.push(t[e])
-            })), i.join(r)
-        }, "default": function (t, n) {
-            if (n === undefined || n.length !== 1) throw new e.Error("default filter expects one argument");
-            return t === undefined || t === null || t === "" ? n[0] : t
-        }, json_encode: function (e) {
-            return e && e.hasOwnProperty("_keys") && delete e._keys, e === undefined || e === null ? "null" : JSON.stringify(e)
-        }, merge: function (t, n) {
-            var r = [], i = 0, s = [];
-            t instanceof Array ? e.forEach(n, function (e) {
-                e instanceof Array || (r = {})
-            }) : r = {}, r instanceof Array || (r._keys = []), t instanceof Array ? e.forEach(t, function (e) {
-                r._keys && r._keys.push(i), r[i] = e, i++
-            }) : (s = t._keys || Object.keys(t), e.forEach(s, function (e) {
-                r[e] = t[e], r._keys.push(e);
-                var n = parseInt(e, 10);
-                !isNaN(n) && n >= i && (i = n + 1)
-            })), e.forEach(n, function (t) {
-                t instanceof Array ? e.forEach(t, function (e) {
-                    r._keys && r._keys.push(i), r[i] = e, i++
-                }) : (s = t._keys || Object.keys(t), e.forEach(s, function (e) {
-                    r[e] || r._keys.push(e), r[e] = t[e];
-                    var n = parseInt(e, 10);
-                    !isNaN(n) && n >= i && (i = n + 1)
-                }))
-            });
-            if (n.length === 0) throw new e.Error("Filter merge expects at least one parameter");
-            return r
-        }, date: function (t, n) {
-            if (t === undefined || t === null) return;
-            var r = e.functions.date(t);
-            return e.lib.formatDate(r, n[0])
-        }, date_modify: function (t, n) {
-            if (t === undefined || t === null) return;
-            if (n === undefined || n.length !== 1) throw new e.Error("date_modify filter expects 1 argument");
-            var r = n[0], i;
-            return e.lib.is("Date", t) && (i = e.lib.strtotime(r, t.getTime() / 1e3)), e.lib.is("String", t) && (i = e.lib.strtotime(r, e.lib.strtotime(t))), e.lib.is("Number", t) && (i = e.lib.strtotime(r, t)), new Date(i * 1e3)
-        }, replace: function (t, n) {
-            if (t === undefined || t === null) return;
-            var r = n[0], i;
-            for (i in r) r.hasOwnProperty(i) && i !== "_keys" && (t = e.lib.replaceAll(t, i, r[i]));
-            return t
-        }, format: function (t, n) {
-            if (t === undefined || t === null) return;
-            return e.lib.vsprintf(t, n)
-        }, striptags: function (t) {
-            if (t === undefined || t === null) return;
-            return e.lib.strip_tags(t)
-        }, escape: function (e) {
-            if (e === undefined || e === null) return;
-            return e.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;")
-        }, e: function (t) {
-            return e.filters.escape(t)
-        }, nl2br: function (t) {
-            if (t === undefined || t === null) return;
-            var n = "BACKSLASH_n_replace", r = "<br />" + n;
-            return t = e.filters.escape(t).replace(/\r\n/g, r).replace(/\r/g, r).replace(/\n/g, r), e.lib.replaceAll(t, n, "\n")
-        }, number_format: function (e, t) {
-            var n = e, r = t && t[0] ? t[0] : undefined, i = t && t[1] !== undefined ? t[1] : ".",
-                s = t && t[2] !== undefined ? t[2] : ",";
-            n = (n + "").replace(/[^0-9+\-Ee.]/g, "");
-            var o = isFinite(+n) ? +n : 0, u = isFinite(+r) ? Math.abs(r) : 0, a = "", f = function (e, t) {
-                var n = Math.pow(10, t);
-                return "" + Math.round(e * n) / n
-            };
-            return a = (u ? f(o, u) : "" + Math.round(o)).split("."), a[0].length > 3 && (a[0] = a[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, s)), (a[1] || "").length < u && (a[1] = a[1] || "", a[1] += (new Array(u - a[1].length + 1)).join("0")), a.join(i)
-        }, trim: function (t, n) {
-            if (t === undefined || t === null) return;
-            var r = e.filters.escape("" + t), i;
-            n && n[0] ? i = "" + n[0] : i = " \n\r	\f            ​\u2028\u2029　";
-            for (var s = 0; s < r.length; s++) if (i.indexOf(r.charAt(s)) === -1) {
-                r = r.substring(s);
-                break
-            }
-            for (s = r.length - 1; s >= 0; s--) if (i.indexOf(r.charAt(s)) === -1) {
-                r = r.substring(0, s + 1);
-                break
-            }
-            return i.indexOf(r.charAt(0)) === -1 ? r : ""
-        }, slice: function (t, n) {
-            if (t === undefined || t === null) return;
-            if (n === undefined || n.length < 1) throw new e.Error("slice filter expects at least 1 argument");
-            var r = n[0] || 0, i = n.length > 1 ? n[1] : t.length, s = r >= 0 ? r : Math.max(t.length + r, 0);
-            if (e.lib.is("Array", t)) {
-                var o = [];
-                for (var u = s; u < s + i && u < t.length; u++) o.push(t[u]);
-                return o
-            }
-            if (e.lib.is("String", t)) return t.substr(s, i);
-            throw new e.Error("slice filter expects value to be an array or string")
-        }, abs: function (e) {
-            if (e === undefined || e === null) return;
-            return Math.abs(e)
-        }, first: function (e) {
-            if (e instanceof Array) return e[0];
-            if (e instanceof Object) {
-                if ("_keys" in e) return e[e._keys[0]]
-            } else if (typeof e == "string") return e.substr(0, 1);
-
-        }, split: function (t, n) {
-            if (t === undefined || t === null) return;
-            if (n === undefined || n.length < 1 || n.length > 2) throw new e.Error("split filter expects 1 or 2 argument");
-            if (e.lib.is("String", t)) {
-                var r = n[0], i = n[1], s = t.split(r);
-                if (i === undefined) return s;
-                if (i < 0) return t.split(r, s.length + i);
-                var o = [];
-                if (r == "") while (s.length > 0) {
-                    var u = "";
-                    for (var a = 0; a < i && s.length > 0; a++) u += s.shift();
-                    o.push(u)
-                } else {
-                    for (var a = 0; a < i - 1 && s.length > 0; a++) o.push(s.shift());
-                    s.length > 0 && o.push(s.join(r))
-                }
-                return o
-            }
-            throw new e.Error("split filter expects value to be a string")
-        }, last: function (t) {
-            if (e.lib.is("Object", t)) {
-                var n;
-                return t._keys === undefined ? n = Object.keys(t) : n = t._keys, t[n[n.length - 1]]
-            }
-            return t[t.length - 1]
-        }, raw: function (e) {
-            return e
-        }, batch: function (t, n) {
-            var r = n.shift(), i = n.shift(), s, o, u;
-            if (!e.lib.is("Array", t)) throw new e.Error("batch filter expects items to be an array");
-            if (!e.lib.is("Number", r)) throw new e.Error("batch filter expects size to be a number");
-            r = Math.ceil(r), s = e.lib.chunkArray(t, r);
-            if (i && t.length % r != 0) {
-                o = s.pop(), u = r - o.length;
-                while (u--) o.push(i);
-                s.push(o)
-            }
-            return s
-        }, round: function (t, n) {
-            n = n || [];
-            var r = n.length > 0 ? n[0] : 0, i = n.length > 1 ? n[1] : "common";
-            t = parseFloat(t);
-            if (r && !e.lib.is("Number", r)) throw new e.Error("round filter expects precision to be a number");
-            if (i === "common") return e.lib.round(t, r);
-            if (!e.lib.is("Function", Math[i])) throw new e.Error("round filter expects method to be 'floor', 'ceil', or 'common'");
-            return Math[i](t * Math.pow(10, r)) / Math.pow(10, r)
-        }
-    }, e.filter = function (t, n, r) {
-        if (!e.filters[t]) throw "Unable to find filter " + t;
-        return e.filters[t].apply(this, [n, r])
-    }, e.filter.extend = function (t, n) {
-        e.filters[t] = n
-    }, e
-}(Twig || {}), Twig = function (e) {
-    function t(e, t) {
-        var n = Object.prototype.toString.call(t).slice(8, -1);
-        return t !== undefined && t !== null && n === e
-    }
-
-    return e.functions = {
-        range: function (e, t, n) {
-            var r = [], i, s, o, u = n || 1, a = !1;
-            !isNaN(e) && !isNaN(t) ? (i = parseInt(e, 10), s = parseInt(t, 10)) : isNaN(e) && isNaN(t) ? (a = !0, i = e.charCodeAt(0), s = t.charCodeAt(0)) : (i = isNaN(e) ? 0 : e, s = isNaN(t) ? 0 : t), o = i > s ? !1 : !0;
-            if (o) while (i <= s) r.push(a ? String.fromCharCode(i) : i), i += u; else while (i >= s) r.push(a ? String.fromCharCode(i) : i), i -= u;
-            return r
-        }, cycle: function (e, t) {
-            var n = t % e.length;
-            return e[n]
-        }, dump: function () {
-            var t = "\n", n = "  ", r = 0, i = "", s = Array.prototype.slice.call(arguments), o = function (e) {
-                var t = "";
-                while (e > 0) e--, t += n;
-                return t
-            }, u = function (e) {
-                i += o(r), typeof e == "object" ? a(e) : typeof e == "function" ? i += "function()" + t : typeof e == "string" ? i += "string(" + e.length + ') "' + e + '"' + t : typeof e == "number" ? i += "number(" + e + ")" + t : typeof e == "boolean" && (i += "bool(" + e + ")" + t)
-            }, a = function (e) {
-                var n;
-                if (e === null) i += "NULL" + t; else if (e === undefined) i += "undefined" + t; else if (typeof e == "object") {
-                    i += o(r) + typeof e, r++, i += "(" + function (e) {
-                        var t = 0, n;
-                        for (n in e) e.hasOwnProperty(n) && t++;
-                        return t
-                    }(e) + ") {" + t;
-                    for (n in e) i += o(r) + "[" + n + "]=> " + t, u(e[n]);
-                    r--, i += o(r) + "}" + t
-                } else u(e)
-            };
-            return s.length == 0 && s.push(this.context), e.forEach(s, function (e) {
-                a(e)
-            }), i
-        }, date: function (t, n) {
-            var r;
-            if (t === undefined) r = new Date; else if (e.lib.is("Date", t)) r = t; else if (e.lib.is("String", t)) r = new Date(e.lib.strtotime(t) * 1e3); else {
-                if (!e.lib.is("Number", t)) throw new e.Error("Unable to parse date " + t);
-                r = new Date(t * 1e3)
-            }
-            return r
-        }, block: function (e) {
-            return this.blocks[e]
-        }, parent: function () {
-            return e.placeholders.parent
-        }, attribute: function (e, t, n) {
-            return e instanceof Object && e.hasOwnProperty(t) ? typeof e[t] == "function" ? e[t].apply(undefined, n) : e[t] : e[t] || undefined
-        }
-    }, e._function = function (t, n, r) {
-        if (!e.functions[t]) throw "Unable to find function " + t;
-        return e.functions[t](n, r)
-    }, e._function.extend = function (t, n) {
-        e.functions[t] = n
-    }, e
-}(Twig || {}), Twig = function (e) {
-    return e.tests = {
-        empty: function (e) {
-            if (e === null || e === undefined) return !0;
-            if (typeof e == "number") return !1;
-            if (e.length && e.length > 0) return !1;
-            for (var t in e) if (e.hasOwnProperty(t)) return !1;
-            return !0
-        }, odd: function (e) {
-            return e % 2 === 1
-        }, even: function (e) {
-            return e % 2 === 0
-        }, divisibleby: function (e, t) {
-            return e % t[0] === 0
-        }, defined: function (e) {
-            return e !== undefined
-        }, none: function (e) {
-            return e === null
-        }, "null": function (e) {
-            return this.none(e)
-        }, sameas: function (e, t) {
-            return e === t[0]
-        }
-    }, e.test = function (t, n, r) {
-        if (!e.tests[t]) throw "Test " + t + " is not defined.";
-        return e.tests[t](n, r)
-    }, e.test.extend = function (t, n) {
-        e.tests[t] = n
-    }, e
-}(Twig || {}), Twig = function (e) {
-    return e.exports = {VERSION: e.VERSION}, e.exports.twig = function (n) {
-        var r = n.id, i = {
-            strict_variables: n.strict_variables || !1,
-            allowInlineIncludes: n.allowInlineIncludes || !1,
-            rethrow: n.rethrow || !1
-        };
-        r && e.validateId(r), n.debug !== undefined && (e.debug = n.debug), n.trace !== undefined && (e.trace = n.trace);
-        if (n.data !== undefined) return new e.Template({data: n.data, module: n.module, id: r, options: i});
-        if (n.ref !== undefined) {
-            if (n.id !== undefined) throw new e.Error("Both ref and id cannot be set on a twig.js template.");
-            return e.Templates.load(n.ref)
-        }
-        if (n.href !== undefined) return e.Templates.loadRemote(n.href, {
-            id: r,
-            method: "ajax",
-            base: n.base,
-            module: n.module,
-            precompiled: n.precompiled,
-            async: n.async,
-            options: i
-        }, n.load, n.error);
-        if (n.path !== undefined) return e.Templates.loadRemote(n.path, {
-            id: r,
-            method: "fs",
-            base: n.base,
-            module: n.module,
-            precompiled: n.precompiled,
-            async: n.async,
-            options: i
-        }, n.load, n.error)
-    }, e.exports.extendFilter = function (t, n) {
-        e.filter.extend(t, n)
-    }, e.exports.extendFunction = function (t, n) {
-        e._function.extend(t, n)
-    }, e.exports.extendTest = function (t, n) {
-        e.test.extend(t, n)
-    }, e.exports.extendTag = function (t) {
-        e.logic.extend(t)
-    }, e.exports.extend = function (t) {
-        t(e)
-    }, e.exports.compile = function (t, n) {
-        var r = n.filename, i = n.filename, s;
-        return s = new e.Template({data: t, path: i, id: r, options: n.settings["twig options"]}), function (e) {
-            return s.render(e)
-        }
-    }, e.exports.renderFile = function (t, n, r) {
-        "function" == typeof n && (r = n, n = {}), n = n || {};
-        var i = {
-            path: t, base: n.settings.views, load: function (e) {
-                r(null, e.render(n))
-            }
-        }, s = n.settings["twig options"];
-        if (s) for (var o in s) s.hasOwnProperty(o) && (i[o] = s[o]);
-        e.exports.twig(i)
-    }, e.exports.__express = e.exports.renderFile, e.exports.cache = function (t) {
-        e.cache = t
-    }, e
-}(Twig || {}), Twig = function (e) {
-    return e.compiler = {module: {}}, e.compiler.compile = function (t, n) {
-        console.log('HERE WE ARE before',{t, n});
-        var r = JSON.stringify(t.tokens), i = t.id, s;
-        if (n.module) {
-            if (e.compiler.module[n.module] === undefined) throw new e.Error("Unable to find module type " + n.module);
-            s = e.compiler.module[n.module](i, r, n.twig)
-        } else s = e.compiler.wrap(i, r);
-        return s
-    }, e.compiler.module = {
-        amd: function (t, n, r) {
-            return 'define(["' + r + '"], function (Twig) {\n	var twig, templates;\ntwig = Twig.twig;\ntemplates = ' + e.compiler.wrap(t, n) + "\n	return templates;\n});"
-        }, node: function (t, n) {
-            return 'var twig = require("twig").twig;\nexports.template = ' + e.compiler.wrap(t, n)
-        }, cjs2: function (t, n, r) {
-            return 'module.declare([{ twig: "' + r + '" }], function (require, exports, module) {\n' + '	var twig = require("twig").twig;\n' + "	exports.template = " + e.compiler.wrap(t, n) + "\n});"
-        }
-    }, e.compiler.wrap = function (e, t) {
-        return 'twig({id:"' + e.replace('"', '\\"') + '", data:' + t + ", precompiled: true});\n"
-    }, e
-}(Twig || {});
-typeof module != "undefined" && module.declare ? module.declare([], function (e, t, n) {
-    for (key in Twig.exports) Twig.exports.hasOwnProperty(key) && (t[key] = Twig.exports[key])
-}) : typeof define == "function" && define.amd || 1 ? timely.define("external_libs/twig", [], function () {
-    return Twig.exports
-}) : typeof module != "undefined" && module.exports ? module.exports = Twig.exports : (window.twig = Twig.exports.twig, window.Twig = Twig.exports), timely.define("libs/twig", ["external_libs/twig"], function (e) {
+/*BEGIN:twig.js runtime*/timely.define("external_libs/twig", [], function () {
+/*!
+ * twig.js 3.0.0, https://github.com/twigjs/twig.js
+ *
+ * Copyright (c) 2011-2015, John Roepke and the Twig.js Contributors
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ *
+ *     Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ *     Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+    // twig.js 3.0.0 (twig.min.js, UMD): its CommonJS branch fills this module object.
+    var module = {exports: {}}, exports = module.exports, define;
+!function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.Twig=t():e.Twig=t()}(self,()=>{return e={683(e){"use strict";e.exports=function(e){return e.ParseState.prototype.parseAsync=function(e,t){return this.parse(e,t,!0)},e.expression.parseAsync=function(t,r,n){return e.expression.parse.call(this,t,r,n,!0)},e.logic.parseAsync=function(t,r,n){return e.logic.parse.call(this,t,r,n,!0)},e.Template.prototype.renderAsync=function(e,t){return this.render(e,t,!0)},e.async={},e.isPromise=function(e){return e&&e.then&&"function"==typeof e.then},e.async.potentiallyAsync=function(t,r,n){return r?e.Promise.resolve(n.call(t)):function(t,r,n){var o=n.call(t),i=null,s=!0;if(!e.isPromise(o))return o;if(o.then(function(e){o=e,s=!1}).catch(function(e){i=e}),null!==i)throw i;if(s)throw new e.Error("You are using Twig.js in sync mode in combination with async extensions.");return o}(t,0,n)},e.Thenable=function(e,t,r){this.then=e,this._value=r?t:null,this._state=r||0},e.Thenable.prototype.catch=function(e){return 1===this._state?this:this.then(null,e)},e.Thenable.resolvedThen=function(t){try{return e.Promise.resolve(t(this._value))}catch(t){return e.Promise.reject(t)}},e.Thenable.rejectedThen=function(t,r){if(!r||"function"!=typeof r)return this;var n,o=this._value;try{n=r(o)}catch(t){n=e.Promise.reject(t)}return e.Promise.resolve(n)},e.Promise=function(t){var r=0,n=null,o=function(e,t){r=e,n=t};return function(e,t,r){try{e(t,r)}catch(e){r(e)}}(t,function(e){o(1,e)},function(e){o(2,e)}),1===r?e.Promise.resolve(n):2===r?e.Promise.reject(n):(o=new e.FullPromise).promise},e.FullPromise=function(){var t=null;function r(e){e(s._value)}function n(e,t){t(s._value)}var o=function(e,r){t=function(e,t,r){var n=[t,r,-2];return e?-2===e[2]?e=[e,n]:e.push(n):e=n,e}(t,e,r)};function i(e,i){if(!s._state&&(s._value=i,s._state=e,o=1===e?r:n,t)){if(-2===t[2])return o(t[0],t[1]),void(t=null);t.forEach(function(e){o(e[0],e[1])}),t=null}}var s=new e.Thenable(function(t,r){var n="function"==typeof t;if(1===s._state&&!n)return e.Promise.resolve(s._value);if(1===s._state)try{return e.Promise.resolve(t(s._value))}catch(t){return e.Promise.reject(t)}var i="function"==typeof r;return new e.Promise(function(e,s){o(n?function(r){try{e(t(r))}catch(e){s(e)}}:e,i?function(t){try{e(r(t))}catch(e){s(e)}}:s)})});return i.promise=s,i},e.Promise.defaultResolved=new e.Thenable(e.Thenable.resolvedThen,void 0,1),e.Promise.emptyStringResolved=new e.Thenable(e.Thenable.resolvedThen,"",1),e.Promise.resolve=function(t){return 0===arguments.length||void 0===t?e.Promise.defaultResolved:e.isPromise(t)?t:""===t?e.Promise.emptyStringResolved:new e.Thenable(e.Thenable.resolvedThen,t,1)},e.Promise.reject=function(t){return new e.Thenable(e.Thenable.rejectedThen,t,2)},e.Promise.all=function(t){var r=new Array(t.length);return e.async.forEach(t,function(t,n){if(e.isPromise(t)){if(1!==t._state)return t.then(function(e){r[n]=e});r[n]=t._value}else r[n]=t}).then(function(){return r})},e.async.forEach=function(t,r){var n=t?t.length:0,o=0;return function i(){var s=null;do{if(o===n)return e.Promise.resolve();s=r(t[o],o),o++}while(!s||!e.isPromise(s)||1===s._state);return s.then(i)}()},e}},198(e){"use strict";e.exports=function(e){return e.compiler={module:{}},e.compiler.compile=function(t,r){var n=JSON.stringify(t.tokens),o=t.id,i=null;if(r.module){if(void 0===e.compiler.module[r.module])throw new e.Error("Unable to find module type "+r.module);i=e.compiler.module[r.module](o,n,r.twig)}else i=e.compiler.wrap(o,n);return i},e.compiler.module={amd:function(t,r,n){return'define(["'+n+'"], function (Twig) {\n\tvar twig, templates;\ntwig = Twig.twig;\ntemplates = '+e.compiler.wrap(t,r)+"\n\treturn templates;\n});"},node:function(t,r){return'var twig = require("twig").twig;\nexports.template = '+e.compiler.wrap(t,r)},cjs2:function(t,r,n){return'module.declare([{ twig: "'+n+'" }], function (require, exports, module) {\n\tvar twig = require("twig").twig;\n\texports.template = '+e.compiler.wrap(t,r)+"\n});"}},e.compiler.wrap=function(e,t){return'twig({id:"'+e.replace('"','\\"')+'", data:'+t+", precompiled: true});\n"},e}},636(e,t,r){"use strict";var n=r(994)(r(693));function o(e,t){var r=Object.keys(e);if(Object.getOwnPropertySymbols){var n=Object.getOwnPropertySymbols(e);t&&(n=n.filter(function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable})),r.push.apply(r,n)}return r}function i(e){for(var t=1;t<arguments.length;t++){var r=null!=arguments[t]?arguments[t]:{};t%2?o(Object(r),!0).forEach(function(t){(0,n.default)(e,t,r[t])}):Object.getOwnPropertyDescriptors?Object.defineProperties(e,Object.getOwnPropertyDescriptors(r)):o(Object(r)).forEach(function(t){Object.defineProperty(e,t,Object.getOwnPropertyDescriptor(r,t))})}return e}e.exports=function(e){function t(t,r){if(t.template.options.rethrow)throw"string"==typeof r&&(r=new e.Error(r)),"TwigException"!==r.type||r.file||(r.file=t.template.id),r;if(e.log.error("Error parsing twig template "+t.template.id+": "),r.stack?e.log.error(r.stack):e.log.error(r.toString()),e.debug)return r.toString()}return e.trace=!1,e.debug=!1,e.cache=!0,e.noop=function(){},e.merge=function(e,t,r){return Object.keys(t).forEach(function(n){r&&!(n in e)||(e[n]=t[n])}),e},e.Error=function(e,t){this.message=e,this.name="TwigException",this.type="TwigException",this.file=t},e.Error.prototype.toString=function(){return this.name+": "+this.message},e.log={trace:function(){if(e.trace&&console){for(var t=arguments.length,r=new Array(t),n=0;n<t;n++)r[n]=arguments[n];console.log(Array.prototype.slice.call(r))}},debug:function(){if(e.debug&&console){for(var t=arguments.length,r=new Array(t),n=0;n<t;n++)r[n]=arguments[n];console.log(Array.prototype.slice.call(r))}}},"undefined"==typeof console?e.log.error=function(){}:void 0!==console.error?e.log.error=function(){var e;(e=console).error.apply(e,arguments)}:void 0!==console.log&&(e.log.error=function(){var e;(e=console).log.apply(e,arguments)}),e.token={},e.token.type={output:"output",logic:"logic",comment:"comment",raw:"raw",outputWhitespacePre:"output_whitespace_pre",outputWhitespacePost:"output_whitespace_post",outputWhitespaceBoth:"output_whitespace_both",logicWhitespacePre:"logic_whitespace_pre",logicWhitespacePost:"logic_whitespace_post",logicWhitespaceBoth:"logic_whitespace_both"},e.token.definitions=[{type:e.token.type.raw,open:"{% raw %}",close:"{% endraw %}"},{type:e.token.type.raw,open:"{% verbatim %}",close:"{% endverbatim %}"},{type:e.token.type.outputWhitespacePre,open:"{{-",close:"}}"},{type:e.token.type.outputWhitespacePost,open:"{{",close:"-}}"},{type:e.token.type.outputWhitespaceBoth,open:"{{-",close:"-}}"},{type:e.token.type.logicWhitespacePre,open:"{%-",close:"%}"},{type:e.token.type.logicWhitespacePost,open:"{%",close:"-%}"},{type:e.token.type.logicWhitespaceBoth,open:"{%-",close:"-%}"},{type:e.token.type.output,open:"{{",close:"}}"},{type:e.token.type.logic,open:"{%",close:"%}"},{type:e.token.type.comment,open:"{#",close:"#}"}],e.token.strings=['"',"'"],e.token.findStart=function(t){var r,n,o,i,s={position:null,def:null},a=null,p=e.token.definitions.length;for(r=0;r<p;r++)n=e.token.definitions[r],o=t.indexOf(n.open),i=t.indexOf(n.close),e.log.trace("Twig.token.findStart: ","Searching for ",n.open," found at ",o),o>=0&&n.open.length!==n.close.length&&i<0||(o>=0&&(null===s.position||o<s.position)?(s.position=o,s.def=n,a=i):o>=0&&null!==s.position&&o===s.position&&(n.open.length>s.def.open.length?(s.position=o,s.def=n,a=i):n.open.length===s.def.open.length&&(n.close.length,s.def.close.length,i>=0&&i<a&&(s.position=o,s.def=n,a=i))));return s},e.token.findEnd=function(t,r,n){for(var o,i,s=null,a=!1,p=0,c=null,l=null,u=null,h=null,f=null,d=null;!a;){if(c=null,l=null,!((u=t.indexOf(r.close,p))>=0))throw new e.Error("Unable to find closing bracket '"+r.close+"' opened near template position "+n);if(s=u,a=!0,r.type===e.token.type.comment)break;if(r.type===e.token.type.raw)break;for(i=e.token.strings.length,o=0;o<i;o+=1)(f=t.indexOf(e.token.strings[o],p))>0&&f<u&&(null===c||f<c)&&(c=f,l=e.token.strings[o]);if(null!==c)for(h=c+1,s=null,a=!1;;){if((d=t.indexOf(l,h))<0)throw e.Error("Unclosed string in template");if("\\"!==t.slice(d-1,d)){p=d+1;break}h=d+1}}return s},e.tokenize=function(t){for(var r=[],n=0,o=null,i=null;t.length>0;)if(o=e.token.findStart(t),e.log.trace("Twig.tokenize: ","Found token: ",o),null===o.position)r.push({type:e.token.type.raw,value:t,position:{start:n,end:n+o.position}}),t="";else{if(o.position>0&&r.push({type:e.token.type.raw,value:t.slice(0,Math.max(0,o.position)),position:{start:n,end:n+Math.max(0,o.position)}}),t=t.slice(o.position+o.def.open.length),n+=o.position+o.def.open.length,i=e.token.findEnd(t,o.def,n),e.log.trace("Twig.tokenize: ","Token ends at ",i),r.push({type:o.def.type,value:t.slice(0,Math.max(0,i)).trim(),position:{start:n-o.def.open.length,end:n+i+o.def.close.length}}),"\n"===t.slice(i+o.def.close.length,i+o.def.close.length+1))switch(o.def.type){case"logic_whitespace_pre":case"logic_whitespace_post":case"logic_whitespace_both":case"logic":i+=1}t=t.slice(i+o.def.close.length),n+=i+o.def.close.length}return r},e.compile=function(t){var r=this;try{for(var n=[],o=[],i=[],s=null,a=null,p=null,c=null,l=null,u=null,h=null,f=null,d=null,y=null,m=null,g=function(t){e.expression.compile.call(r,t),o.length>0?i.push(t):n.push(t)},x=function(t){if((a=e.logic.compile.call(r,t)).position=t.position,d=a.type,y=e.logic.handler[d].open,m=e.logic.handler[d].next,e.log.trace("Twig.compile: ","Compiled logic token to ",a," next is: ",m," open is : ",y),void 0!==y&&!y){if(c=o.pop(),!e.logic.handler[c.type].next.includes(d))throw new Error(d+" not expected after a "+c.type);c.output=c.output||[],c.output=c.output.concat(i),i=[],f={type:e.token.type.logic,token:c,position:{open:c.position,close:t.position}},o.length>0?i.push(f):n.push(f)}void 0!==m&&m.length>0?(e.log.trace("Twig.compile: ","Pushing ",a," to logic stack."),o.length>0&&((c=o.pop()).output=c.output||[],c.output=c.output.concat(i),o.push(c),i=[]),o.push(a)):void 0!==y&&y&&(f={type:e.token.type.logic,token:a,position:a.position},o.length>0?i.push(f):n.push(f))};t.length>0;){switch(s=t.shift(),l=n[n.length-1],u=i[i.length-1],h=t[0],e.log.trace("Compiling token ",s),s.type){case e.token.type.raw:o.length>0?i.push(s):n.push(s);break;case e.token.type.logic:x.call(r,s);break;case e.token.type.comment:break;case e.token.type.output:g.call(r,s);break;case e.token.type.logicWhitespacePre:case e.token.type.logicWhitespacePost:case e.token.type.logicWhitespaceBoth:case e.token.type.outputWhitespacePre:case e.token.type.outputWhitespacePost:case e.token.type.outputWhitespaceBoth:switch(s.type!==e.token.type.outputWhitespacePost&&s.type!==e.token.type.logicWhitespacePost&&(l&&l.type===e.token.type.raw&&(n.pop(),l.value=l.value.trimEnd(),n.push(l)),u&&u.type===e.token.type.raw&&(i.pop(),u.value=u.value.trimEnd(),i.push(u))),s.type){case e.token.type.outputWhitespacePre:case e.token.type.outputWhitespacePost:case e.token.type.outputWhitespaceBoth:g.call(r,s);break;case e.token.type.logicWhitespacePre:case e.token.type.logicWhitespacePost:case e.token.type.logicWhitespaceBoth:x.call(r,s)}s.type!==e.token.type.outputWhitespacePre&&s.type!==e.token.type.logicWhitespacePre&&h&&h.type===e.token.type.raw&&(t.shift(),h.value=h.value.trimStart(),t.unshift(h))}e.log.trace("Twig.compile: "," Output: ",n," Logic Stack: ",o," Pending Output: ",i)}if(o.length>0)throw p=o.pop(),new Error("Unable to find an end tag for "+p.type+", expecting one of "+p.next);return n}catch(t){if(r.options.rethrow)throw"TwigException"!==t.type||t.file||(t.file=r.id),t;e.log.error("Error compiling twig template "+r.id+": "),t.stack?e.log.error(t.stack):e.log.error(t.toString())}},e.prepare=function(t){e.log.debug("Twig.prepare: ","Tokenizing ",t);var r=e.tokenize.call(this,t);e.log.debug("Twig.prepare: ","Compiling ",r);var n=e.compile.call(this,r);return e.log.debug("Twig.prepare: ","Compiled ",n),n},e.output=function(t){var r=this.options.autoescape;if(!r)return t.join("");var n="string"==typeof r?r:"html",o=t.map(function(t){return!t||!0===t.twigMarkup||t.twigMarkup===n||"html"===n&&"html_attr"===t.twigMarkup||(t=e.filters.escape(t,[n])),t});if(0===o.length)return"";var i=o.join("");return 0===i.length?"":new e.Markup(i,!0)},e.Templates={loaders:{},parsers:{},registry:{}},e.validateId=function(t){if("prototype"===t)throw new e.Error(t+" is not a valid twig identifier");if(e.cache&&Object.hasOwnProperty.call(e.Templates.registry,t))throw new e.Error("There is already a template with the ID "+t);return!0},e.Templates.registerLoader=function(t,r,n){if("function"!=typeof r)throw new e.Error("Unable to add loader for "+t+": Invalid function reference given.");n&&(r=r.bind(n)),this.loaders[t]=r},e.Templates.unRegisterLoader=function(e){this.isRegisteredLoader(e)&&delete this.loaders[e]},e.Templates.isRegisteredLoader=function(e){return Object.hasOwnProperty.call(this.loaders,e)},e.Templates.registerParser=function(t,r,n){if("function"!=typeof r)throw new e.Error("Unable to add parser for "+t+": Invalid function regerence given.");n&&(r=r.bind(n)),this.parsers[t]=r},e.Templates.unRegisterParser=function(e){this.isRegisteredParser(e)&&delete this.parsers[e]},e.Templates.isRegisteredParser=function(e){return Object.hasOwnProperty.call(this.parsers,e)},e.Templates.save=function(t){if(void 0===t.id)throw new e.Error("Unable to save template with no id");e.Templates.registry[t.id]=t},e.Templates.load=function(t){return Object.hasOwnProperty.call(e.Templates.registry,t)?e.Templates.registry[t]:null},e.Templates.loadRemote=function(t,r,n,o){var i=void 0===r.id?t:r.id,s=e.Templates.registry[i];return e.cache&&void 0!==s?("function"==typeof n&&n(s),s):(r.parser=r.parser||"twig",r.id=i,void 0===r.async&&(r.async=!0),(this.loaders[r.method]||this.loaders.fs).call(this,t,r,n,o))},e.Block=function(e,t){this.template=e,this.token=t},e.Block.prototype.render=function(t,r){var n=t.template;return t.template=this.template,(this.token.expression?e.expression.parseAsync.call(t,this.token.output,r):t.parseAsync(this.token.output,r)).then(function(n){return e.expression.parseAsync.call(t,{type:e.expression.type.string,value:n},r)}).then(function(e){return t.template=n,e})},e.ParseState=function(e,t,r){this.renderedBlocks={},this.overrideBlocks=void 0===t?{}:t,this.context=void 0===r?{}:r,this.macros={},this.nestingStack=[],this.template=e},e.ParseState.prototype.getBlock=function(e,t){var r;return!0!==t&&(r=this.overrideBlocks[e]),void 0===r&&(r=this.template.getBlock(e,t)),void 0===r&&null!==this.template.parentTemplate&&(r=this.template.parentTemplate.getBlock(e)),r},e.ParseState.prototype.getBlocks=function(e){var t={};return!1!==e&&null!==this.template.parentTemplate&&this.template.parentTemplate!==this.template&&(t=this.template.parentTemplate.getBlocks()),t=i(i(i({},t),this.template.getBlocks()),this.overrideBlocks)},e.ParseState.prototype.getNestingStackToken=function(e){var t;return this.nestingStack.forEach(function(r){void 0===t&&r.type===e&&(t=r)}),t},e.ParseState.prototype.parse=function(r,n,o){var i,s=this,a=[],p=null,c=!0,l=!0;function u(e){a.push(e)}function h(e){void 0!==e.chain&&(l=e.chain),void 0!==e.context&&(s.context=e.context),void 0!==e.output&&a.push(e.output)}if(n&&(s.context=n),i=e.async.forEach(r,function(t){switch(e.log.debug("Twig.ParseState.parse: ","Parsing token: ",t),t.type){case e.token.type.raw:a.push(e.filters.raw(t.value));break;case e.token.type.logic:return e.logic.parseAsync.call(s,t.token,s.context,l).then(h);case e.token.type.comment:break;case e.token.type.outputWhitespacePre:case e.token.type.outputWhitespacePost:case e.token.type.outputWhitespaceBoth:case e.token.type.output:return e.log.debug("Twig.ParseState.parse: ","Output token: ",t.stack),e.expression.parseAsync.call(s,t.stack,s.context).then(u)}}).then(function(){return a=e.output.call(s.template,a),c=!1,a}).catch(function(e){o&&t(s,e),p=e}),o)return i;if(null!==p)return t(s,p);if(c)throw new e.Error("You are using Twig.js in sync mode in combination with async extensions.");return a},e.Template=function(t){var r,n,o,i=t.data,s=t.id,a=t.base,p=t.path,c=t.url,l=t.name,u=t.method,h=t.options;this.base=a,this.blocks={defined:{},imported:{}},this.id=s,this.method=u,this.name=l,this.options=h,this.parentTemplate=null,this.path=p,this.url=c,r="String",n=i,o=Object.prototype.toString.call(n).slice(8,-1),this.tokens=null!=n&&o===r?e.prepare.call(this,i):i,void 0!==s&&e.Templates.save(this)},e.Template.prototype.getBlock=function(e,t){var r,n=!(arguments.length>2&&void 0!==arguments[2])||arguments[2];return!0!==t&&(r=this.blocks.defined[e]),n&&void 0===r&&(r=this.blocks.imported[e]),void 0===r&&null!==this.parentTemplate&&(r=this.parentTemplate.getBlock(e,t,n=!1)),r},e.Template.prototype.getBlocks=function(){var e={};return e=i(i(i({},e),this.blocks.imported),this.blocks.defined)},e.Template.prototype.render=function(t,r,n){var o=this;return r=r||{},e.async.potentiallyAsync(o,n,function(){var n=new e.ParseState(o,r.blocks,t);return n.parseAsync(o.tokens).then(function(t){var i,s;return null!==o.parentTemplate?(o.options.allowInlineIncludes&&(i=e.Templates.load(o.parentTemplate))&&(i.options=o.options),i||(s=e.path.parsePath(o,o.parentTemplate),i=e.Templates.loadRemote(s,{method:o.getLoaderMethod(),base:o.base,async:!1,id:s,options:o.options})),o.parentTemplate=i,o.parentTemplate.renderAsync(n.context,{blocks:n.getBlocks(!1),isInclude:!0})):!0===r.isInclude?t:t.valueOf()})})},e.Template.prototype.importFile=function(t){var r,n=null;if(!this.url&&this.options.allowInlineIncludes){if(t=this.path?e.path.parsePath(this,t):t,!(r=e.Templates.load(t))&&!(r=e.Templates.loadRemote(n,{id:t,method:this.getLoaderMethod(),async:!1,path:t,options:this.options})))throw new e.Error("Unable to find the template "+t);return r.options=this.options,r}return n=e.path.parsePath(this,t),r=e.Templates.loadRemote(n,{method:this.getLoaderMethod(),base:this.base,async:!1,options:this.options,id:n})},e.Template.prototype.getLoaderMethod=function(){return this.path?"fs":this.url?"ajax":this.method||"fs"},e.Template.prototype.compile=function(t){return e.compiler.compile(this,t)},e.Markup=function(e,t){if("string"!=typeof e)return e;var r=new String(e);return r.twigMarkup=void 0===t||t,r},e}},68(e){"use strict";e.exports=function(e){return e.exports={VERSION:e.VERSION},e.exports.twig=function(t){var r=t.id,n={strictVariables:t.strict_variables||!1,autoescape:null!==t.autoescape&&t.autoescape||!1,allowInlineIncludes:t.allowInlineIncludes||!1,rethrow:t.rethrow||!1,namespaces:t.namespaces};if(e.cache&&r&&e.validateId(r),void 0!==t.debug&&(e.debug=t.debug),void 0!==t.trace&&(e.trace=t.trace),void 0!==t.data)return e.Templates.parsers.twig({data:t.data,path:Object.hasOwnProperty.call(t,"path")?t.path:void 0,module:t.module,id:r,options:n});if(void 0!==t.ref){if(void 0!==t.id)throw new e.Error("Both ref and id cannot be set on a twig.js template.");return e.Templates.load(t.ref)}if(void 0!==t.method){if(!e.Templates.isRegisteredLoader(t.method))throw new e.Error('Loader for "'+t.method+'" is not defined.');return e.Templates.loadRemote(t.name||t.href||t.path||r||void 0,{id:r,method:t.method,parser:t.parser||"twig",base:t.base,module:t.module,precompiled:t.precompiled,async:t.async,options:n},t.load,t.error)}return void 0!==t.href?e.Templates.loadRemote(t.href,{id:r,method:"ajax",parser:t.parser||"twig",base:t.base,module:t.module,precompiled:t.precompiled,async:t.async,options:n},t.load,t.error):void 0!==t.path?e.Templates.loadRemote(t.path,{id:r,method:"fs",parser:t.parser||"twig",base:t.base,module:t.module,precompiled:t.precompiled,async:t.async,options:n},t.load,t.error):void 0},e.exports.extendFilter=function(t,r){e.filter.extend(t,r)},e.exports.extendFunction=function(t,r){e._function.extend(t,r)},e.exports.extendTest=function(t,r){e.test.extend(t,r)},e.exports.extendTag=function(t){e.logic.extend(t)},e.exports.extend=function(t){t(e)},e.exports.compile=function(t,r){var n=r.filename,o=r.filename,i=new e.Template({data:t,path:o,id:n,options:r.settings["twig options"]});return function(e){return i.render(e)}},e.exports.renderFile=function(t,r,n){"function"==typeof r&&(n=r,r={});var o=(r=r||{}).settings||{},i=o["twig options"],s={path:t,base:o.views,load:function(e){i&&i.allowAsync?e.renderAsync(r).then(function(e){return n(null,e)},n):n(null,String(e.render(r)))},error:function(e){n(e)}};if(i)for(var a in i)Object.hasOwnProperty.call(i,a)&&(s[a]=i[a]);e.exports.twig(s)},e.exports.__express=e.exports.renderFile,e.exports.cache=function(t){e.cache=t},e.exports.path=e.path,e.exports.filters=e.filters,e.exports.tests=e.tests,e.exports.functions=e.functions,e.exports.Promise=e.Promise,e}},989(e,t,r){"use strict";var n=r(994),o=n(r(738)),i=n(r(132));e.exports=function(e){function t(t,r,n){return r?e.expression.parseAsync.call(t,r,n):e.Promise.resolve(!1)}for(e.expression={},r(611)(e),e.expression.reservedWords=["true","false","null","TRUE","FALSE","NULL","_context","and","b-and","or","b-or","b-xor","in","not in","if","matches","starts","ends","with"],e.expression.type={comma:"Twig.expression.type.comma",operator:{unary:"Twig.expression.type.operator.unary",binary:"Twig.expression.type.operator.binary"},string:"Twig.expression.type.string",bool:"Twig.expression.type.bool",slice:"Twig.expression.type.slice",array:{start:"Twig.expression.type.array.start",end:"Twig.expression.type.array.end"},object:{start:"Twig.expression.type.object.start",end:"Twig.expression.type.object.end"},parameter:{start:"Twig.expression.type.parameter.start",end:"Twig.expression.type.parameter.end"},subexpression:{start:"Twig.expression.type.subexpression.start",end:"Twig.expression.type.subexpression.end"},key:{period:"Twig.expression.type.key.period",brackets:"Twig.expression.type.key.brackets"},filter:"Twig.expression.type.filter",_function:"Twig.expression.type._function",variable:"Twig.expression.type.variable",number:"Twig.expression.type.number",_null:"Twig.expression.type.null",context:"Twig.expression.type.context",test:"Twig.expression.type.test"},e.expression.set={operations:[e.expression.type.filter,e.expression.type.operator.unary,e.expression.type.operator.binary,e.expression.type.array.end,e.expression.type.object.end,e.expression.type.parameter.end,e.expression.type.subexpression.end,e.expression.type.comma,e.expression.type.test],expressions:[e.expression.type._function,e.expression.type.bool,e.expression.type.string,e.expression.type.variable,e.expression.type.number,e.expression.type._null,e.expression.type.context,e.expression.type.parameter.start,e.expression.type.array.start,e.expression.type.object.start,e.expression.type.subexpression.start,e.expression.type.operator.unary]},e.expression.set.operationsExtended=e.expression.set.operations.concat([e.expression.type.key.period,e.expression.type.key.brackets,e.expression.type.slice]),e.expression.fn={compile:{push:function(e,t,r){r.push(e)},pushBoth:function(e,t,r){r.push(e),t.push(e)}},parse:{push:function(e,t){t.push(e)},pushValue:function(e,t){t.push(e.value)}}},e.expression.definitions=[{type:e.expression.type.test,regex:/^is\s+(not)?\s*([a-zA-Z_]\w*(\s?(?:as|by))?)/,next:e.expression.set.operations.concat([e.expression.type.parameter.start]),compile:function(e,t,r){e.filter=e.match[2],e.modifier=e.match[1],delete e.match,delete e.value,r.push(e)},parse:function(r,n,o){var i=n.pop();return t(this,r.params,o).then(function(t){var o=e.test(r.filter,i,t);"not"===r.modifier?n.push(!o):n.push(o)})}},{type:e.expression.type.comma,regex:/^,/,next:e.expression.set.expressions.concat([e.expression.type.array.end,e.expression.type.object.end]),compile:function(t,r,n){var o,i=r.length-1;for(delete t.match,delete t.value;i>=0;i--){if((o=r.pop()).type===e.expression.type.object.start||o.type===e.expression.type.parameter.start||o.type===e.expression.type.array.start){r.push(o);break}n.push(o)}n.push(t)}},{type:e.expression.type.number,regex:/^-?\d+(\.\d+)?/,next:e.expression.set.operations,compile:function(e,t,r){e.value=Number(e.value),r.push(e)},parse:e.expression.fn.parse.pushValue},{type:e.expression.type.operator.binary,regex:/(^\?\?|^\?\s*:|^(b-and)|^(b-or)|^(b-xor)|^[+\-~%?]|^(<=>)|^[:](?!\d\])|^[!=]==?|^[!<>]=?|^\*\*?|^\/\/?|^(and)[(|\s+]|^(or)[(|\s+]|^(in)[(|\s+]|^(not in)[(|\s+]|^(matches)|^(starts with)|^(ends with)|^\.\.)/,next:e.expression.set.expressions,transform:function(e,t){switch(e[0]){case"and(":case"or(":case"in(":case"not in(":return t[t.length-1].value=e[2],e[0];default:return""}},compile:function(t,r,n){delete t.match,t.value.match(/^\?\s*:/)&&(t.value="?:"),t.value=t.value.trim();var o=t.value,i=e.expression.operator.lookup(o,t);for(e.log.trace("Twig.expression.compile: ","Operator: ",i," from ",o);r.length>0&&(r[r.length-1].type===e.expression.type.operator.unary||r[r.length-1].type===e.expression.type.operator.binary)&&(i.associativity===e.expression.operator.leftToRight&&i.precidence>=r[r.length-1].precidence||i.associativity===e.expression.operator.rightToLeft&&i.precidence>r[r.length-1].precidence);){var s=r.pop();n.push(s)}if(":"===o)if(r[r.length-1]&&"?"===r[r.length-1].value);else{var a=n.pop();if(a.type===e.expression.type.string||a.type===e.expression.type.variable)t.key=a.value;else if(a.type===e.expression.type.number)t.key=a.value.toString();else{if(!a.expression||a.type!==e.expression.type.parameter.end&&a.type!==e.expression.type.subexpression.end)throw new e.Error("Unexpected value before ':' of "+a.type+" = "+a.value);t.params=a.params}n.push(t)}else r.push(i)},parse:function(t,r,n){if(t.key)r.push(t);else{if(t.params)return e.expression.parseAsync.call(this,t.params,n).then(function(e){t.key=e,r.push(t),n.loop||delete t.params});e.expression.operator.parse(t.value,r)}}},{type:e.expression.type.operator.unary,regex:/(^not\s+)/,next:e.expression.set.expressions,compile:function(t,r,n){delete t.match,t.value=t.value.trim();var o=t.value,i=e.expression.operator.lookup(o,t);for(e.log.trace("Twig.expression.compile: ","Operator: ",i," from ",o);r.length>0&&(r[r.length-1].type===e.expression.type.operator.unary||r[r.length-1].type===e.expression.type.operator.binary)&&(i.associativity===e.expression.operator.leftToRight&&i.precidence>=r[r.length-1].precidence||i.associativity===e.expression.operator.rightToLeft&&i.precidence>r[r.length-1].precidence);){var s=r.pop();n.push(s)}r.push(i)},parse:function(t,r){e.expression.operator.parse(t.value,r)}},{type:e.expression.type.string,regex:/^(["'])(?:(?=(\\?))\2[\s\S])*?\1/,next:e.expression.set.operationsExtended,compile:function(t,r,n){var o=t.value;delete t.match,o='"'===o.slice(0,1)?o.replace('\\"','"'):o.replace("\\'","'"),t.value=o.slice(1,-1).replace(/\\n/g,"\n").replace(/\\r/g,"\r"),e.log.trace("Twig.expression.compile: ","String value: ",t.value),n.push(t)},parse:e.expression.fn.parse.pushValue},{type:e.expression.type.subexpression.start,regex:/^\(/,next:e.expression.set.expressions.concat([e.expression.type.subexpression.end]),compile:function(e,t,r){e.value="(",r.push(e),t.push(e)},parse:e.expression.fn.parse.push},{type:e.expression.type.subexpression.end,regex:/^\)/,next:e.expression.set.operationsExtended,validate:function(t,r){for(var n=r.length-1,o=!1,i=!1,s=0;!o&&n>=0;){var a=r[n];(o=a.type===e.expression.type.subexpression.start)&&i&&(i=!1,o=!1),a.type===e.expression.type.parameter.start?s++:a.type===e.expression.type.parameter.end?s--:a.type===e.expression.type.subexpression.end&&(i=!0),n--}return o&&0===s},compile:function(t,r,n){var o,i=t;for(o=r.pop();r.length>0&&o.type!==e.expression.type.subexpression.start;)n.push(o),o=r.pop();for(var s=[];t.type!==e.expression.type.subexpression.start;)s.unshift(t),t=n.pop();s.unshift(t),void 0===(o=r[r.length-1])||o.type!==e.expression.type._function&&o.type!==e.expression.type.filter&&o.type!==e.expression.type.test&&o.type!==e.expression.type.key.brackets?(i.expression=!0,s.pop(),s.shift(),i.params=s,n.push(i)):(i.expression=!1,o.params=s)},parse:function(t,r,n){if(t.expression)return e.expression.parseAsync.call(this,t.params,n).then(function(e){r.push(e)});throw new e.Error("Unexpected subexpression end when token is not marked as an expression")}},{type:e.expression.type.parameter.start,regex:/^\(/,next:e.expression.set.expressions.concat([e.expression.type.parameter.end]),validate:function(t,r){var n=r[r.length-1];return n&&!e.expression.reservedWords.includes(n.value.trim())},compile:e.expression.fn.compile.pushBoth,parse:e.expression.fn.parse.push},{type:e.expression.type.parameter.end,regex:/^\)/,next:e.expression.set.operationsExtended,compile:function(t,r,n){var o,i=t;for(o=r.pop();r.length>0&&o.type!==e.expression.type.parameter.start;)n.push(o),o=r.pop();for(var s=[];t.type!==e.expression.type.parameter.start;)s.unshift(t),t=n.pop();s.unshift(t),void 0===(t=n[n.length-1])||t.type!==e.expression.type._function&&t.type!==e.expression.type.filter&&t.type!==e.expression.type.test&&t.type!==e.expression.type.key.brackets?(i.expression=!0,s.pop(),s.shift(),i.params=s,n.push(i)):(i.expression=!1,t.params=s)},parse:function(t,r,n){var o=[],i=!1,s=null;if(t.expression)return e.expression.parseAsync.call(this,t.params,n).then(function(e){r.push(e)});for(;r.length>0;){if((s=r.pop())&&s.type&&s.type===e.expression.type.parameter.start){i=!0;break}o.unshift(s)}if(!i)throw new e.Error("Expected end of parameter set.");r.push(o)}},{type:e.expression.type.slice,regex:/^\[(-?\w*:-?\w*)\]/,next:e.expression.set.operationsExtended,compile:function(e,t,r){var n=e.match[1].split(":"),o=n[0],i=n[1];e.value="slice",e.params=[o,i],i||(e.params=[o]),r.push(e)},parse:function(t,r,n){var o=r.pop(),i=t.params,s=this;if(parseInt(i[0],10).toString()===i[0])i[0]=parseInt(i[0],10);else{var a=n[i[0]];if(s.template.options.strictVariables&&void 0===a)throw new e.Error('Variable "'+i[0]+'" does not exist.');i[0]=a}if(i[1])if(parseInt(i[1],10).toString()===i[1])i[1]=parseInt(i[1],10);else{var p=n[i[1]];if(s.template.options.strictVariables&&void 0===p)throw new e.Error('Variable "'+i[1]+'" does not exist.');void 0===p?i=[i[0]]:i[1]=p}r.push(e.filter.call(s,t.value,o,i))}},{type:e.expression.type.array.start,regex:/^\[/,next:e.expression.set.expressions.concat([e.expression.type.array.end]),compile:e.expression.fn.compile.pushBoth,parse:e.expression.fn.parse.push},{type:e.expression.type.array.end,regex:/^\]/,next:e.expression.set.operationsExtended,compile:function(t,r,n){for(var o,i=r.length-1;i>=0&&(o=r.pop()).type!==e.expression.type.array.start;i--)n.push(o);n.push(t)},parse:function(t,r){for(var n=[],o=!1,i=null;r.length>0;){if((i=r.pop())&&i.type&&i.type===e.expression.type.array.start){o=!0;break}n.unshift(i)}if(!o)throw new e.Error("Expected end of array.");r.push(n)}},{type:e.expression.type.object.start,regex:/^\{/,next:e.expression.set.expressions.concat([e.expression.type.object.end]),compile:e.expression.fn.compile.pushBoth,parse:e.expression.fn.parse.push},{type:e.expression.type.object.end,regex:/^\}/,next:e.expression.set.operationsExtended,compile:function(t,r,n){for(var o,i=r.length-1;i>=0&&(!(o=r.pop())||o.type!==e.expression.type.object.start);i--)n.push(o);n.push(t)},parse:function(t,r){for(var n={},o=!1,i=null,s=!1,a=null;r.length>0;){if((i=r.pop())&&i.type&&i.type===e.expression.type.object.start){o=!0;break}if(i&&i.type&&(i.type===e.expression.type.operator.binary||i.type===e.expression.type.operator.unary)&&i.key){if(!s)throw new e.Error("Missing value for key '"+i.key+"' in object definition.");n[i.key]=a,void 0===n._keys&&(n._keys=[]),n._keys.unshift(i.key),a=null,s=!1}else s=!0,a=i}if(!o)throw new e.Error("Unexpected end of object.");r.push(n)}},{type:e.expression.type.filter,regex:/^\|\s?([a-zA-Z_][a-zA-Z0-9_-]*)/,next:e.expression.set.operationsExtended.concat([e.expression.type.parameter.start]),compile:function(e,t,r){e.value=e.match[1],r.push(e)},parse:function(r,n,o){var i=n.pop(),s=this;return t(s,r.params,o).then(function(t){return e.filter.call(s,r.value,i,t)}).then(function(e){n.push(e)})}},{type:e.expression.type._function,regex:/^([a-zA-Z_]\w*)\s*\(/,next:e.expression.type.parameter.start,validate:function(t){return t[1]&&!e.expression.reservedWords.includes(t[1])},transform:function(){return"("},compile:function(e,t,r){var n=e.match[1];e.fn=n,delete e.match,delete e.value,r.push(e)},parse:function(r,n,o){var s,a=this,p=r.fn;return t(a,r.params,o).then(function(t){if(e.functions[p])s=e.functions[p].apply(a,t);else{if("function"!=typeof o[p])throw new e.Error(p+" function does not exist and is not defined in the context");s=o[p].apply(o,(0,i.default)(t))}return s}).then(function(e){n.push(e)})}},{type:e.expression.type.variable,regex:/^[a-zA-Z_]\w*/,next:e.expression.set.operationsExtended.concat([e.expression.type.parameter.start]),compile:e.expression.fn.compile.push,validate:function(t){return!e.expression.reservedWords.includes(t[0])},parse:function(t,r,n){var o=this;return e.expression.resolveAsync.call(o,n[t.value],n).then(function(n){if(o.template.options.strictVariables&&void 0===n)throw new e.Error('Variable "'+t.value+'" does not exist.');r.push(n)})}},{type:e.expression.type.key.period,regex:/^\.(\w+)/,next:e.expression.set.operationsExtended.concat([e.expression.type.parameter.start]),compile:function(e,t,r){e.key=e.match[1],delete e.match,delete e.value,r.push(e)},parse:function(r,n,i,s){var a,p=this,c=r.key,l=n.pop();if(l&&!Object.prototype.hasOwnProperty.call(l,c)&&p.template.options.strictVariables)throw Object.keys(l).length>0?new e.Error('Key "'+c+'" for object with keys "'+Object.keys(l).join(", ")+'" does not exist.'):new e.Error('Key "'+c+'" does not exist as the object is empty.');return t(p,r.params,i).then(function(t){if(null==l)a=void 0;else{var r=function(e){return e.slice(0,1).toUpperCase()+e.slice(1)};a="object"===(0,o.default)(l)&&c in l?l[c]:l["get"+r(c)]?l["get"+r(c)]:l["is"+r(c)]?l["is"+r(c)]:void 0}return e.expression.resolveAsync.call(p,a,i,t,s,l)}).then(function(e){n.push(e)})}},{type:e.expression.type.key.brackets,regex:/^\[([^\]]*)\]/,next:e.expression.set.operationsExtended.concat([e.expression.type.parameter.start]),compile:function(t,r,n){var o=t.match[1];delete t.value,delete t.match,t.stack=e.expression.compile({value:o}).stack,n.push(t)},parse:function(r,n,i,s){var a,p,c=this,l=null;return t(c,r.params,i).then(function(t){return l=t,e.expression.parseAsync.call(c,r.stack,i)}).then(function(t){if((a=n.pop())&&!Object.prototype.hasOwnProperty.call(a,t)&&c.template.options.strictVariables){var r=Object.keys(a);throw r.length>0?new e.Error('Key "'+t+'" for array with keys "'+r.join(", ")+'" does not exist.'):new e.Error('Key "'+t+'" does not exist as the array is empty.')}return null==a?null:(p="object"===(0,o.default)(a)&&t in a?a[t]:null,e.expression.resolveAsync.call(c,p,a,l,s))}).then(function(e){n.push(e)})}},{type:e.expression.type._null,regex:/^(null|NULL|none|NONE)/,next:e.expression.set.operations,compile:function(e,t,r){delete e.match,e.value=null,r.push(e)},parse:e.expression.fn.parse.pushValue},{type:e.expression.type.context,regex:/^_context/,next:e.expression.set.operationsExtended.concat([e.expression.type.parameter.start]),compile:e.expression.fn.compile.push,parse:function(e,t,r){t.push(r)}},{type:e.expression.type.bool,regex:/^(true|TRUE|false|FALSE)/,next:e.expression.set.operations,compile:function(e,t,r){e.value="true"===e.match[0].toLowerCase(),delete e.match,r.push(e)},parse:e.expression.fn.parse.pushValue}],e.expression.resolveAsync=function(t,r,n,o,i){var s=this;if("function"!=typeof t)return e.Promise.resolve(t);var a=e.Promise.resolve(n);return o&&o.type===e.expression.type.parameter.end&&(a=a.then(function(){return o.params&&e.expression.parseAsync.call(s,o.params,r,!0)}).then(function(e){return o.cleanup=!0,e})),a.then(function(e){return t.apply(i||r,e||[])})},e.expression.resolve=function(t,r,n,o,i){return e.async.potentiallyAsync(this,!1,function(){return e.expression.resolveAsync.call(this,t,r,n,o,i)})},e.expression.handler={},e.expression.extendType=function(t){e.expression.type[t]="Twig.expression.type."+t},e.expression.extend=function(t){if(!t.type)throw new e.Error("Unable to extend logic definition. No type provided for "+t);e.expression.handler[t.type]=t};e.expression.definitions.length>0;)e.expression.extend(e.expression.definitions.shift());return e.expression.tokenize=function(t){var r,n,o,i,s,a=t.value,p=[],c=0,l=null,u=[],h=function(){for(var n=arguments.length,o=new Array(n),a=0;a<n;a++)o[a]=arguments[a];for(var h=arguments.length-2,f=new Array(h);h-- >0;)f[h]=o[h];if(e.log.trace("Twig.expression.tokenize","Matched a ",r," regular expression of ",f),l&&!l.includes(r))return u.push(r+" cannot follow a "+p[p.length-1].type+" at template:"+c+" near '"+f[0].slice(0,20)+"...'"),f[0];var d=e.expression.handler[r];if(d.validate&&!d.validate(f,p))return f[0];u=[];var y={type:r,value:f[0],match:f};return t.position&&(y.position=t.position),p.push(y),s=!0,l=i,c+=f[0].length,d.transform?d.transform(f,p):""};for(e.log.debug("Twig.expression.tokenize","Tokenizing expression ",a);a.length>0;){for(r in a=a.trim(),e.expression.handler)if(Object.hasOwnProperty.call(e.expression.handler,r)){if(i=e.expression.handler[r].next,n=e.expression.handler[r].regex,e.log.trace("Checking type ",r," on ",a),s=!1,Array.isArray(n))for(o=n.length;o-- >0;)a=a.replace(n[o],h);else a=a.replace(n,h);if(s)break}if(!s)throw u.length>0?new e.Error(u.join(" OR ")):new e.Error("Unable to parse '"+a+"' at template position"+c)}return e.log.trace("Twig.expression.tokenize","Tokenized to ",p),p},e.expression.compile=function(t){var r=e.expression.tokenize(t),n=null,o=[],i=[],s=null;for(e.log.trace("Twig.expression.compile: ","Compiling ",t.value);r.length>0;)n=r.shift(),s=e.expression.handler[n.type],e.log.trace("Twig.expression.compile: ","Compiling ",n),s.compile(n,i,o),e.log.trace("Twig.expression.compile: ","Stack is",i),e.log.trace("Twig.expression.compile: ","Output is",o);for(;i.length>0;)o.push(i.pop());return e.log.trace("Twig.expression.compile: ","Final output is",o),t.stack=o,delete t.value,t},e.expression.parse=function(t,r,n,o){var i=this;Array.isArray(t)||(t=[t]);var s=[],a=[],p=e.expression.type.operator.binary;return e.async.potentiallyAsync(i,o,function(){return e.async.forEach(t,function(n,o){var c,l=null,u=null;if(!n.cleanup)return t.length>o+1&&(u=t[o+1]),(l=e.expression.handler[n.type]).parse&&(c=l.parse.call(i,n,s,r,u)),n.type===p&&r.loop&&a.push(n),c}).then(function(){for(var e=a.length,t=null;e-- >0;)(t=a[e]).params&&t.key&&delete t.key;if(n){var r=s.splice(0);s.push(r)}return s.pop()})})},e}},611(e){"use strict";e.exports=function(e){e.expression.operator={leftToRight:"leftToRight",rightToLeft:"rightToLeft"};var t=function(e,t){if(null==t)return null;if(void 0!==t.indexOf)return(e===t||""!==e)&&t.includes(e);var r;for(r in t)if(Object.hasOwnProperty.call(t,r)&&t[r]===e)return!0;return!1};return e.expression.operator.lookup=function(t,r){switch(t){case"..":r.precidence=20,r.associativity=e.expression.operator.leftToRight;break;case",":r.precidence=18,r.associativity=e.expression.operator.leftToRight;break;case"?:":case"?":case":":r.precidence=16,r.associativity=e.expression.operator.rightToLeft;break;case"??":r.precidence=15,r.associativity=e.expression.operator.rightToLeft;break;case"or":r.precidence=14,r.associativity=e.expression.operator.leftToRight;break;case"and":r.precidence=13,r.associativity=e.expression.operator.leftToRight;break;case"b-or":r.precidence=12,r.associativity=e.expression.operator.leftToRight;break;case"b-xor":r.precidence=11,r.associativity=e.expression.operator.leftToRight;break;case"b-and":r.precidence=10,r.associativity=e.expression.operator.leftToRight;break;case"==":case"!=":case"<=>":r.precidence=9,r.associativity=e.expression.operator.leftToRight;break;case"<":case"<=":case">":case">=":case"not in":case"in":case"matches":case"starts with":case"ends with":r.precidence=8,r.associativity=e.expression.operator.leftToRight;break;case"~":case"+":case"-":r.precidence=6,r.associativity=e.expression.operator.leftToRight;break;case"//":case"**":case"*":case"/":case"%":r.precidence=5,r.associativity=e.expression.operator.leftToRight;break;case"not":r.precidence=3,r.associativity=e.expression.operator.rightToLeft;break;default:throw new e.Error("Failed to lookup operator: "+t+" is an unknown operator.")}return r.operator=t,r},e.expression.operator.parse=function(r,n){var o,i,s;if(e.log.trace("Twig.expression.operator.parse: ","Handling ",r),"?"===r&&(s=n.pop()),i=n.pop(),"not"!==r&&(o=n.pop()),"in"!==r&&"not in"!==r&&"??"!==r&&(o&&Array.isArray(o)&&(o=o.length),"?"!==r&&i&&Array.isArray(i)&&(i=i.length)),"matches"===r&&i&&"string"==typeof i){var a=i.match(/^\/(.*)\/([gims]?)$/),p=a[1],c=a[2];i=new RegExp(p,c)}switch(r){case":":break;case"??":void 0===o&&(o=i,i=s,s=void 0),null!=o?n.push(o):n.push(i);break;case"?:":e.lib.boolval(o)?n.push(o):n.push(i);break;case"?":void 0===o&&(o=i,i=s,s=void 0),e.lib.boolval(o)?n.push(i):n.push(s);break;case"+":i=parseFloat(i),o=parseFloat(o),n.push(o+i);break;case"-":i=parseFloat(i),o=parseFloat(o),n.push(o-i);break;case"*":i=parseFloat(i),o=parseFloat(o),n.push(o*i);break;case"/":i=parseFloat(i),o=parseFloat(o),n.push(o/i);break;case"//":i=parseFloat(i),o=parseFloat(o),n.push(Math.floor(o/i));break;case"%":i=parseFloat(i),o=parseFloat(o),n.push(o%i);break;case"~":n.push((null!=o?o.toString():"")+(null!=i?i.toString():""));break;case"not":case"!":n.push(!e.lib.boolval(i));break;case"<=>":n.push(o===i?0:o<i?-1:1);break;case"<":n.push(o<i);break;case"<=":n.push(o<=i);break;case">":n.push(o>i);break;case">=":n.push(o>=i);break;case"===":n.push(o===i);break;case"==":n.push(o==i);break;case"!==":n.push(o!==i);break;case"!=":n.push(o!=i);break;case"or":n.push(e.lib.boolval(o)||e.lib.boolval(i));break;case"b-or":n.push(o|i);break;case"b-xor":n.push(o^i);break;case"and":n.push(e.lib.boolval(o)&&e.lib.boolval(i));break;case"b-and":n.push(o&i);break;case"**":n.push(Math.pow(o,i));break;case"not in":n.push(!t(o,i));break;case"in":n.push(t(o,i));break;case"matches":n.push(i.test(o));break;case"starts with":n.push("string"==typeof o&&0===o.indexOf(i));break;case"ends with":n.push("string"==typeof o&&o.includes(i,o.length-i.length));break;case"..":n.push(e.functions.range(o,i));break;default:throw new e.Error("Failed to parse operator: "+r+" is an unknown operator.")}},e}},393(e,t,r){"use strict";e.exports=function e(){var t={VERSION:"3.0.0"};return r(636)(t),r(198)(t),r(989)(t),r(672)(t),r(682)(t),r(916)(t),r(354)(t),r(143)(t),r(857)(t),r(497)(t),r(241)(t),r(188)(t),r(230)(t),r(683)(t),r(68)(t),t.exports.factory=e,t.exports}},672(e,t,r){"use strict";var n=r(994)(r(738));e.exports=function(e){function t(e,t){var r=Object.prototype.toString.call(t).slice(8,-1);return null!=t&&r===e}return e.filters={upper:function(e){return"string"!=typeof e?e:e.toUpperCase()},lower:function(e){return"string"!=typeof e?e:e.toLowerCase()},capitalize:function(e){return"string"!=typeof e?e:e.slice(0,1).toUpperCase()+e.toLowerCase().slice(1)},title:function(e){return"string"!=typeof e?e:e.toLowerCase().replace(/(^|\s)([a-z])/g,function(e,t,r){return t+r.toUpperCase()})},length:function(t){return e.lib.is("Array",t)||"string"==typeof t?t.length:e.lib.is("Object",t)?void 0===t._keys?Object.keys(t).length:t._keys.length:0},reverse:function(e){if(t("Array",e))return e.reverse();if(t("String",e))return e.split("").reverse().join("");if(t("Object",e)){var r=e._keys||Object.keys(e).reverse();return e._keys=r,e}},sort:function(e){if(t("Array",e))return e.sort();if(t("Object",e)){delete e._keys;var r=Object.keys(e).sort(function(t,r){var n,o;return e[t]>e[r]==!(e[t]<=e[r])?e[t]>e[r]?1:e[t]<e[r]?-1:0:isNaN(n=parseFloat(e[t]))||isNaN(o=parseFloat(e[r]))?"string"==typeof e[t]?e[t]>e[r].toString()?1:e[t]<e[r].toString()?-1:0:"string"==typeof e[r]?e[t].toString()>e[r]?1:e[t].toString()<e[r]?-1:0:null:n>o?1:n<o?-1:0});return e._keys=r,e}},keys:function(e){if(null!=e){var t=e._keys||Object.keys(e),r=[];return t.forEach(function(t){"_keys"!==t&&Object.hasOwnProperty.call(e,t)&&r.push(t)}),r}},url_encode:function(t){if(null!=t){if(e.lib.is("Object",t)){var r=function(t,n){var o=[];return(t._keys||Object.keys(t)).forEach(function(i){if(Object.prototype.hasOwnProperty.call(t,i)){var s=n?n+"["+i+"]":i,a=t[i];o.push(e.lib.is("Object",a)||Array.isArray(a)?r(a,s):encodeURIComponent(s)+"="+encodeURIComponent(a))}}),o.join("&amp;")};return r(t)}var n=encodeURIComponent(t);return n=n.replace("'","%27")}},join:function(e,r){if(null!=e){var n="",o=[];return r&&r[0]&&(n=r[0]),t("Array",e)?o=e:(e._keys||Object.keys(e)).forEach(function(t){"_keys"!==t&&Object.hasOwnProperty.call(e,t)&&o.push(e[t])}),o.join(n)}},default:function(t,r){if(void 0!==r&&r.length>1)throw new e.Error("default filter expects one argument");return null==t||""===t?void 0===r?"":r[0]:t},json_encode:function(r){if(null==r)return"null";if("object"===(0,n.default)(r)&&t("Array",r)){var o=[];return r.forEach(function(t){o.push(e.filters.json_encode(t))}),"["+o.join(",")+"]"}if("object"===(0,n.default)(r)&&t("Date",r))return'"'+r.toISOString()+'"';if("object"===(0,n.default)(r)){var i=r._keys||Object.keys(r),s=[];return i.forEach(function(t){s.push(JSON.stringify(t)+":"+e.filters.json_encode(r[t]))}),"{"+s.join(",")+"}"}return JSON.stringify(r)},merge:function(r,n){var o=[],i=0;if(t("Array",r)?n.forEach(function(e){t("Array",e)||(o={})}):o={},t("Array",o)||(o._keys=[]),t("Array",r)?r.forEach(function(e){o._keys&&o._keys.push(i),o[i]=e,i++}):(r._keys||Object.keys(r)).forEach(function(e){o[e]=r[e],o._keys.push(e);var t=parseInt(e,10);!isNaN(t)&&t>=i&&(i=t+1)}),n.forEach(function(e){t("Array",e)?e.forEach(function(e){o._keys&&o._keys.push(i),o[i]=e,i++}):(e._keys||Object.keys(e)).forEach(function(t){o[t]||o._keys.push(t),o[t]=e[t];var r=parseInt(t,10);!isNaN(r)&&r>=i&&(i=r+1)})}),0===n.length)throw new e.Error("Filter merge expects at least one parameter");return o},date:function(t,r){var n=e.functions.date(t),o=r&&Boolean(r.length)?r[0]:"F j, Y H:i";return e.lib.date(o.replace(/\\\\/g,"\\"),n)},date_modify:function(t,r){if(null!=t){if(void 0===r||1!==r.length)throw new e.Error("date_modify filter expects 1 argument");var n,o=r[0];return e.lib.is("Date",t)&&(n=e.lib.strtotime(o,t.getTime()/1e3)),e.lib.is("String",t)&&(n=e.lib.strtotime(o,e.lib.strtotime(t))),e.lib.is("Number",t)&&(n=e.lib.strtotime(o,t)),new Date(1e3*n)}},replace:function(t,r){if(null!=t){var n,o=r[0];for(n in o)Object.hasOwnProperty.call(o,n)&&"_keys"!==n&&(t=e.lib.replaceAll(t,n,o[n]));return t}},format:function(t,r){if(null!=t&&""!==t)return e.lib.vsprintf(t,r)},striptags:function(t,r){if(null!=t)return e.lib.stripTags(t,r)},escape:function(t,r){if(null!=t&&""!==t){var n="html";if(r&&Boolean(r.length)&&!0!==r[0]&&(n=r[0]),"html"===n){var o=t.toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");return new e.Markup(o,"html")}if("js"===n){for(var i=t.toString(),s="",a=0;a<i.length;a++)if(i[a].match(/^[a-zA-Z0-9,._]$/))s+=i[a];else{var p=i.charAt(a),c=i.charCodeAt(a),l={"\\":"\\\\","/":"\\/","\b":"\\b","\f":"\\f","\n":"\\n","\r":"\\r","\t":"\\t"};s+=l[p]?l[p]:e.lib.sprintf("\\u%04s",c.toString(16).toUpperCase())}return new e.Markup(s,"js")}if("css"===n){for(var u=t.toString(),h="",f=0;f<u.length;f++)u[f].match(/^[a-zA-Z0-9]$/)?h+=u[f]:h+="\\"+u.charCodeAt(f).toString(16).toUpperCase()+" ";return new e.Markup(h,"css")}if("url"===n){var d=e.filters.url_encode(t);return new e.Markup(d,"url")}if("html_attr"===n){for(var y=t.toString(),m="",g=0;g<y.length;g++)if(y[g].match(/^[a-zA-Z0-9,.\-_]$/))m+=y[g];else if(y[g].match(/^[&<>"]$/))m+=y[g].replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");else{var x=y.charCodeAt(g);m+=x<=31&&9!==x&&10!==x&&13!==x?"&#xFFFD;":x<128?e.lib.sprintf("&#x%02s;",x.toString(16).toUpperCase()):e.lib.sprintf("&#x%04s;",x.toString(16).toUpperCase())}return new e.Markup(m,"html_attr")}throw new e.Error("escape strategy unsupported")}},e:function(t,r){return e.filters.escape(t,r)},nl2br:function(t){if(null!=t&&""!==t){var r="BACKSLASH_n_replace",n="<br />"+r;return t=e.filters.escape(t).replace(/\r\n/g,n).replace(/\r/g,n).replace(/\n/g,n),t=e.lib.replaceAll(t,r,"\n"),new e.Markup(t)}},number_format:function(e,t){var r=e,n=t&&t[0]?t[0]:void 0,o=t&&void 0!==t[1]?t[1]:".",i=t&&void 0!==t[2]?t[2]:",";r=String(r).replace(/[^0-9+\-Ee.]/g,"");var s=isFinite(Number(r))?Number(r):0,a=isFinite(Number(n))?Math.abs(n):0,p="";return p=(a?function(e,t){var r=Math.pow(10,t);return String(Math.round(e*r)/r)}(s,a):String(Math.round(s))).split("."),p[0].length>3&&(p[0]=p[0].replace(/\B(?=(?:\d{3})+(?!\d))/g,i)),(p[1]||"").length<a&&(p[1]=p[1]||"",p[1]+=new Array(a-p[1].length+1).join("0")),p.join(o)},trim:function(e,t){if(null!=e){var r,n=String(e);r=t&&t[0]?String(t[0]):" \n\r\t\f\v            ​\u2028\u2029　";for(var o=0;o<n.length;o++)if(!r.includes(n.charAt(o))){n=n.slice(Math.max(0,o));break}for(var i=n.length-1;i>=0;i--)if(!r.includes(n.charAt(i))){n=n.slice(0,Math.max(0,i+1));break}return r.includes(n.charAt(0))?"":n}},truncate:function(e,t){var r=30,n=!1,o="...";if(e=String(e),t&&(t[0]&&(r=t[0]),t[1]&&(n=t[1]),t[2]&&(o=t[2])),e.length>r){if(n&&-1===(r=e.indexOf(" ",r)))return e;e=e.slice(0,r)+o}return e},slice:function(t,r){if(null!=t){if(void 0===r||0===r.length)throw new e.Error("slice filter expects at least 1 argument");var n=r[0]||0,o=r.length>1?r[1]:t.length,i=n>=0?n:Math.max(t.length+n,0);if(o<0&&(o=t.length-i+o),e.lib.is("Array",t)){for(var s=[],a=i;a<i+o&&a<t.length;a++)s.push(t[a]);return s}if(e.lib.is("String",t))return t.slice(i,i+o);throw new e.Error("slice filter expects value to be an array or string")}},abs:function(e){if(null!=e)return Math.abs(e)},first:function(e){if(t("Array",e))return e[0];if(t("Object",e)){if("_keys"in e)return e[e._keys[0]]}else if("string"==typeof e)return e.slice(0,1)},split:function(t,r){if(null!=t){if(void 0===r||0===r.length||r.length>2)throw new e.Error("split filter expects 1 or 2 argument");if(e.lib.is("String",t)){var n=r[0],o=r[1],i=t.split(n);if(void 0===o)return i;if(o<0)return t.split(n,i.length+o);var s=[];if(""===n)for(;i.length>0;){for(var a="",p=0;p<o&&i.length>0;p++)a+=i.shift();s.push(a)}else{for(var c=0;c<o-1&&i.length>0;c++)s.push(i.shift());i.length>0&&s.push(i.join(n))}return s}throw new e.Error("split filter expects value to be a string")}},last:function(t){var r;return e.lib.is("Object",t)?t[(r=void 0===t._keys?Object.keys(t):t._keys)[r.length-1]]:e.lib.is("Number",t)?t.toString().slice(-1):t[t.length-1]},raw:function(t){return new e.Markup(t||"")},batch:function(t,r){var n,o,i=r.shift(),s=r.shift();if(!e.lib.is("Array",t))throw new e.Error("batch filter expects items to be an array");if(!e.lib.is("Number",i))throw new e.Error("batch filter expects size to be a number");i=Math.ceil(i);var a=e.lib.chunkArray(t,i);if(s&&t.length%i!==0){for(o=i-(n=a.pop()).length;o--;)n.push(s);a.push(n)}return a},round:function(t,r){var n=(r=r||[]).length>0?r[0]:0,o=r.length>1?r[1]:"common";if(t=parseFloat(t),n&&!e.lib.is("Number",n))throw new e.Error("round filter expects precision to be a number");if("common"===o)return e.lib.round(t,n);if(!e.lib.is("Function",Math[o]))throw new e.Error("round filter expects method to be 'floor', 'ceil', or 'common'");return Math[o](t*Math.pow(10,n))/Math.pow(10,n)},spaceless:function(e){return e.replace(/>\s+</g,"><").trim()}},e.filter=function(t,r,n){if(!e.filters[t])throw new e.Error("Unable to find filter "+t);return e.filters[t].call(this,r,n)},e.filter.extend=function(t,r){e.filters[t]=r},e}},682(e,t,r){"use strict";var n=r(994)(r(738));e.exports=function(t){return t.functions={range:function(e,t,r){var n,o,i=[],s=r||1,a=!1;if(isNaN(e)||isNaN(t)?isNaN(e)&&isNaN(t)?(a=!0,n=e.charCodeAt(0),o=t.charCodeAt(0)):(n=isNaN(e)?0:e,o=isNaN(t)?0:t):(n=parseInt(e,10),o=parseInt(t,10)),n>o)for(;n>=o;)i.push(a?String.fromCharCode(n):n),n-=s;else for(;n<=o;)i.push(a?String.fromCharCode(n):n),n+=s;return i},cycle:function(e,t){return e[t%e.length]},dump:function(){for(var e=arguments.length,t=new Array(e),r=0;r<e;r++)t[r]=arguments[r];var o=[].concat(t),i="\n",s=0,a="",p=function(e){for(var t="";e>0;)e--,t+="  ";return t},c=function(e){a+=p(s),"object"===(0,n.default)(e)?l(e):"function"==typeof e?a+="function()\n":"string"==typeof e?a+="string("+e.length+') "'+e+'"'+i:"number"==typeof e?a+="number("+e+")"+i:"boolean"==typeof e&&(a+="bool("+e+")"+i)},l=function(e){var t;if(null===e)a+="NULL\n";else if(void 0===e)a+="undefined\n";else if("object"===(0,n.default)(e)){for(t in a+=p(s)+(0,n.default)(e),s++,a+="("+function(e){var t,r=0;for(t in e)Object.hasOwnProperty.call(e,t)&&r++;return r}(e)+") {"+i,e)Object.hasOwnProperty.call(e,t)&&(a+=p(s)+"["+t+"]=> "+i,c(e[t]));s--,a+=p(s)+"}"+i}else c(e)};return 0===o.length&&o.push(this.context),o.forEach(function(e){l(e)}),a},date:function(e){var r;if(null==e||""===e)r=new Date;else if(t.lib.is("Date",e))r=e;else if(t.lib.is("String",e))r=e.match(/^\d+$/)?new Date(1e3*e):new Date(1e3*t.lib.strtotime(e));else{if(!t.lib.is("Number",e))throw new t.Error("Unable to parse date "+e);r=new Date(1e3*e)}return r},block:function(e){var t=this,r=t.getBlock(e);if(void 0!==r)return r.render(t,t.context)},parent:function(){var e=this;return e.getBlock(e.getNestingStackToken(t.logic.type.block).blockName,!0).render(e,e.context)},attribute:function(e,r,n){return t.lib.is("Object",e)&&Object.hasOwnProperty.call(e,r)?"function"==typeof e[r]?e[r].apply(void 0,n):e[r]:e&&e[r]||void 0},max:function(e){if(t.lib.is("Object",e))return delete e._keys,t.lib.max(e);for(var r=arguments.length,n=new Array(r>1?r-1:0),o=1;o<r;o++)n[o-1]=arguments[o];return Reflect.apply(t.lib.max,null,[e].concat(n))},min:function(e){if(t.lib.is("Object",e))return delete e._keys,t.lib.min(e);for(var r=arguments.length,n=new Array(r>1?r-1:0),o=1;o<r;o++)n[o-1]=arguments[o];return Reflect.apply(t.lib.min,null,[e].concat(n))},template_from_string:function(e){return void 0===e&&(e=""),t.Templates.parsers.twig({options:this.template.options,data:e})},random:function(e){var r=2147483648;function n(e){var t=Math.floor(Math.random()*r),n=Math.min.call(null,0,e),o=Math.max.call(null,0,e);return n+Math.floor((o-n+1)*t/r)}if(t.lib.is("Number",e))return n(e);if(t.lib.is("String",e))return e.charAt(n(e.length-1));if(t.lib.is("Array",e))return e[n(e.length-1)];if(t.lib.is("Object",e)){var o=Object.keys(e);return e[o[n(o.length-1)]]}return n(2147483647)},source:function(r,o){var i,s=this.template.options.namespaces,a=!1,p=void 0!==e.exports&&"undefined"==typeof window,c=r;s&&"object"===(0,n.default)(s)&&(c=t.path.expandNamespace(s,c));var l={id:r,path:c,method:p?"fs":"ajax",parser:"source",async:!1,fetchTemplateSource:!0};void 0===o&&(o=!1);try{null==(i=t.Templates.loadRemote(r,l))?i="":a=!0}catch(e){t.log.debug("Twig.functions.source: ","Problem loading template  ",e)}return a||o?i:'Template "{name}" is not defined.'.replace("{name}",r)}},t._function=function(e,r,n){if(!t.functions[e])throw new t.Error("Unable to find function "+e);return t.functions[e](r,n)},t._function.extend=function(e,r){t.functions[e]=r},t}},169(e,t,r){"use strict";e.exports=r(393)()},916(e,t,r){"use strict";e.exports=function(e){var t=r(789).sprintf,n=r(999).vsprintf,o=r(405).strip_tags,i=r(661).round,s=r(129).min,a=r(163).max,p=r(805).strtotime,c=r(952).date,l=r(207).boolval;return e.lib={},e.lib.sprintf=t,e.lib.vsprintf=n,e.lib.round=i,e.lib.max=a,e.lib.min=s,e.lib.stripTags=o,e.lib.strtotime=p,e.lib.date=c,e.lib.boolval=l,e.lib.is=function(e,t){if(null==t)return!1;switch(e){case"Array":return Array.isArray(t);case"Date":return t instanceof Date;case"String":return"string"==typeof t||t instanceof String;case"Number":return"number"==typeof t||t instanceof Number;case"Function":return"function"==typeof t;case"Object":return t instanceof Object;default:return!1}},e.lib.replaceAll=function(e,t,r){var n="string"==typeof e?e:e.toString(),o=t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");return n.replace(new RegExp(o,"g"),r)},e.lib.chunkArray=function(e,t){var r=[],n=0,o=e.length;if(t<1||!Array.isArray(e))return[];for(;n<o;)r.push(e.slice(n,n+=t));return r},e}},354(e){"use strict";e.exports=function(e){e.Templates.registerLoader("ajax",function(t,r,n,o){var i,s=r.precompiled,a=this.parsers[r.parser]||this.parser.twig;if("undefined"==typeof XMLHttpRequest)throw new e.Error('Unsupported platform: Unable to do ajax requests because there is no "XMLHTTPRequest" implementation');var p=new XMLHttpRequest;return p.onreadystatechange=function(){var c=null;4===p.readyState&&(200===p.status||window.cordova&&0===p.status?(e.log.debug("Got template ",p.responseText),c=!0===s?JSON.parse(p.responseText):p.responseText,r.url=t,r.data=c,i=a.call(this,r),"function"==typeof n&&n(i)):"function"==typeof o&&o(p))},p.open("GET",t,Boolean(r.async)),p.overrideMimeType("text/plain"),p.send(),!!r.async||i})}},143(e,t,r){"use strict";e.exports=function(e){var t,n;try{t=r(603),n=r(975)}catch(e){console.warn("Missing fs and path modules. "+e)}e.Templates.registerLoader("fs",function(r,o,i,s){var a,p,c=o.precompiled,l=this.parsers[o.parser]||this.parser.twig;if(!t||!n)throw new e.Error('Unsupported platform: Unable to load from file because there is no "fs" or "path" implementation');var u=function(e,t){e?"function"==typeof s&&s(e):(!0===c&&(t=JSON.parse(t)),o.data=t,o.path=o.path||r,a=l.call(this,o),"function"==typeof i&&i(a))};if(o.path=o.path||r,o.async)return t.stat(o.path,function(r,n){!r&&n.isFile()?t.readFile(o.path,"utf8",u):"function"==typeof s&&s(new e.Error("Unable to find template file "+o.path))}),!0;try{if(!t.statSync(o.path).isFile())throw new e.Error("Unable to find template file "+o.path)}catch(t){throw new e.Error("Unable to find template file "+o.path+". "+t)}return p=t.readFileSync(o.path,"utf8"),u(void 0,p),a})}},857(e,t,r){"use strict";var n=r(994)(r(693));function o(e,t){var r="undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(!r){if(Array.isArray(e)||(r=function(e,t){if(e){if("string"==typeof e)return i(e,t);var r={}.toString.call(e).slice(8,-1);return"Object"===r&&e.constructor&&(r=e.constructor.name),"Map"===r||"Set"===r?Array.from(e):"Arguments"===r||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r)?i(e,t):void 0}}(e))||t&&e&&"number"==typeof e.length){r&&(e=r);var n=0,o=function(){};return{s:o,n:function(){return n>=e.length?{done:!0}:{done:!1,value:e[n++]}},e:function(e){throw e},f:o}}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}var s,a=!0,p=!1;return{s:function(){r=r.call(e)},n:function(){var e=r.next();return a=e.done,e},e:function(e){p=!0,s=e},f:function(){try{a||null==r.return||r.return()}finally{if(p)throw s}}}}function i(e,t){(null==t||t>e.length)&&(t=e.length);for(var r=0,n=Array(t);r<t;r++)n[r]=e[r];return n}function s(e,t){var r=Object.keys(e);if(Object.getOwnPropertySymbols){var n=Object.getOwnPropertySymbols(e);t&&(n=n.filter(function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable})),r.push.apply(r,n)}return r}function a(e){for(var t=1;t<arguments.length;t++){var r=null!=arguments[t]?arguments[t]:{};t%2?s(Object(r),!0).forEach(function(t){(0,n.default)(e,t,r[t])}):Object.getOwnPropertyDescriptors?Object.defineProperties(e,Object.getOwnPropertyDescriptors(r)):s(Object(r)).forEach(function(t){Object.defineProperty(e,t,Object.getOwnPropertyDescriptor(r,t))})}return e}e.exports=function(e){for(e.logic={},e.logic.type={if_:"Twig.logic.type.if",endif:"Twig.logic.type.endif",for_:"Twig.logic.type.for",endfor:"Twig.logic.type.endfor",else_:"Twig.logic.type.else",elseif:"Twig.logic.type.elseif",set:"Twig.logic.type.set",setcapture:"Twig.logic.type.setcapture",endset:"Twig.logic.type.endset",filter:"Twig.logic.type.filter",endfilter:"Twig.logic.type.endfilter",apply:"Twig.logic.type.apply",endapply:"Twig.logic.type.endapply",do:"Twig.logic.type.do",shortblock:"Twig.logic.type.shortblock",block:"Twig.logic.type.block",endblock:"Twig.logic.type.endblock",extends_:"Twig.logic.type.extends",use:"Twig.logic.type.use",include:"Twig.logic.type.include",spaceless:"Twig.logic.type.spaceless",endspaceless:"Twig.logic.type.endspaceless",macro:"Twig.logic.type.macro",endmacro:"Twig.logic.type.endmacro",import_:"Twig.logic.type.import",from:"Twig.logic.type.from",embed:"Twig.logic.type.embed",endembed:"Twig.logic.type.endembed",with:"Twig.logic.type.with",endwith:"Twig.logic.type.endwith",deprecated:"Twig.logic.type.deprecated"},e.logic.definitions=[{type:e.logic.type.if_,regex:/^if\s?([\s\S]+)$/,next:[e.logic.type.else_,e.logic.type.elseif,e.logic.type.endif],open:!0,compile:function(t){var r=t.match[1];return t.stack=e.expression.compile.call(this,{type:e.expression.type.expression,value:r}).stack,delete t.match,t},parse:function(t,r,n){var o=this;return e.expression.parseAsync.call(o,t.stack,r).then(function(i){return n=!0,e.lib.boolval(i)?(n=!1,o.parseAsync(t.output,r)):""}).then(function(e){return{chain:n,output:e}})}},{type:e.logic.type.elseif,regex:/^elseif\s*([^\s].*)$/,next:[e.logic.type.else_,e.logic.type.elseif,e.logic.type.endif],open:!1,compile:function(t){var r=t.match[1];return t.stack=e.expression.compile.call(this,{type:e.expression.type.expression,value:r}).stack,delete t.match,t},parse:function(t,r,n){var o=this;return e.expression.parseAsync.call(o,t.stack,r).then(function(i){return n&&e.lib.boolval(i)?(n=!1,o.parseAsync(t.output,r)):""}).then(function(e){return{chain:n,output:e}})}},{type:e.logic.type.else_,regex:/^else$/,next:[e.logic.type.endif,e.logic.type.endfor],open:!1,parse:function(t,r,n){var o=e.Promise.resolve("");return n&&(o=this.parseAsync(t.output,r)),o.then(function(e){return{chain:n,output:e}})}},{type:e.logic.type.endif,regex:/^endif$/,next:[],open:!1},{type:e.logic.type.for_,regex:/^for\s+([a-zA-Z0-9_,\s]+)\s+in\s+([\S\s]+?)(?:\s+if\s+([^\s].*))?$/,next:[e.logic.type.else_,e.logic.type.endfor],open:!0,compile:function(t){var r=t.match[1],n=t.match[2],o=t.match[3],i=null;if(t.keyVar=null,t.valueVar=null,r.includes(",")){if(2!==(i=r.split(",")).length)throw new e.Error("Invalid expression in for loop: "+r);t.keyVar=i[0].trim(),t.valueVar=i[1].trim()}else t.valueVar=r.trim();return t.expression=e.expression.compile.call(this,{type:e.expression.type.expression,value:n}).stack,o&&(t.conditional=e.expression.compile.call(this,{type:e.expression.type.expression,value:o}).stack),delete t.match,t},parse:function(t,r,n){var o,i,s=[],p=0,c=this,l=t.conditional,u=function(n,i){var u=a({},r);return u[t.valueVar]=i,t.keyVar&&(u[t.keyVar]=n),u.loop=function(e,t){var n=void 0!==l;return{index:e+1,index0:e,revindex:n?void 0:t-e,revindex0:n?void 0:t-e-1,first:0===e,last:n?void 0:e===t-1,length:n?void 0:t,parent:r}}(p,o),(void 0===l?e.Promise.resolve(!0):e.expression.parseAsync.call(c,l,u)).then(function(e){if(e)return c.parseAsync(t.output,u).then(function(e){s.push(e),p+=1})}).then(function(){delete u.loop,delete u[t.valueVar],delete u[t.keyVar],e.merge(r,u,!0)})};return e.expression.parseAsync.call(c,t.expression,r).then(function(t){return Array.isArray(t)?(o=t.length,e.async.forEach(t,function(e){return u(p,e)})):e.lib.is("Object",t)?(i=void 0===t._keys?Object.keys(t):t._keys,o=i.length,e.async.forEach(i,function(e){if("_keys"!==e)return u(e,t[e])})):void 0}).then(function(){return{chain:0===s.length,context:r,output:e.output.call(c.template,s)}})}},{type:e.logic.type.endfor,regex:/^endfor$/,next:[],open:!1},{type:e.logic.type.set,regex:/^set\s+([a-zA-Z0-9_,\s]+)\s*=\s*([\s\S]+)$/,next:[],open:!0,compile:function(t){var r=t.match[1].trim(),n=t.match[2],o=e.expression.compile.call(this,{type:e.expression.type.expression,value:n}).stack;return t.key=r,t.expression=o,delete t.match,t},parse:function(t,r,n){var o=t.key;return e.expression.parseAsync.call(this,t.expression,r).then(function(e){return e===r&&(e=a({},e)),r[o]=e,{chain:n,context:r}})}},{type:e.logic.type.setcapture,regex:/^set\s+([a-zA-Z0-9_,\s]+)$/,next:[e.logic.type.endset],open:!0,compile:function(e){var t=e.match[1].trim();return e.key=t,delete e.match,e},parse:function(e,t,r){var n=this,o=e.key;return n.parseAsync(e.output,t).then(function(e){return n.context[o]=e,t[o]=e,{chain:r,context:t}})}},{type:e.logic.type.endset,regex:/^endset$/,next:[],open:!1},{type:e.logic.type.filter,regex:/^filter\s+(.+)$/,next:[e.logic.type.endfilter],open:!0,compile:function(t){var r="|"+t.match[1].trim();return t.stack=e.expression.compile.call(this,{type:e.expression.type.expression,value:r}).stack,delete t.match,t},parse:function(t,r,n){var o=this;return o.parseAsync(t.output,r).then(function(n){var i=[{type:e.expression.type.string,value:n}].concat(t.stack);return e.expression.parseAsync.call(o,i,r)}).then(function(e){return{chain:n,output:e}})}},{type:e.logic.type.endfilter,regex:/^endfilter$/,next:[],open:!1},{type:e.logic.type.apply,regex:/^apply\s+(.+)$/,next:[e.logic.type.endapply],open:!0,compile:function(t){var r="|"+t.match[1].trim();return t.stack=e.expression.compile.call(this,{type:e.expression.type.expression,value:r}).stack,delete t.match,t},parse:function(t,r,n){var o=this;return o.parseAsync(t.output,r).then(function(n){var i=[{type:e.expression.type.string,value:n}].concat(t.stack);return e.expression.parseAsync.call(o,i,r)}).then(function(e){return{chain:n,output:e}})}},{type:e.logic.type.endapply,regex:/^endapply$/,next:[],open:!1},{type:e.logic.type.do,regex:/^do\s+([\S\s]+)$/,next:[],open:!0,compile:function(t){var r=t.match[1],n=e.expression.compile.call(this,{type:e.expression.type.expression,value:r}).stack;return t.expression=n,delete t.match,t},parse:function(t,r,n){return e.expression.parseAsync.call(this,t.expression,r).then(function(){return{chain:n,context:r}})}},{type:e.logic.type.block,regex:/^block\s+(\w+)$/,next:[e.logic.type.endblock],open:!0,compile:function(e){return e.blockName=e.match[1].trim(),delete e.match,e},parse:function(t,r,n){var o=this,i=e.Promise.resolve();return o.template.blocks.defined[t.blockName]=new e.Block(o.template,t),(null===o.template.parentTemplate||o.template.parentTemplate instanceof e.Template)&&(i=o.getBlock(t.blockName).render(o,r)),i.then(function(e){return{chain:n,output:e}})}},{type:e.logic.type.shortblock,regex:/^block\s+(\w+)\s+(.+)$/,next:[],open:!0,compile:function(t){return t.expression=t.match[2].trim(),t.output=e.expression.compile({type:e.expression.type.expression,value:t.expression}).stack,e.logic.handler[e.logic.type.block].compile.apply(this,[t])},parse:function(){for(var t=arguments.length,r=new Array(t),n=0;n<t;n++)r[n]=arguments[n];return e.logic.handler[e.logic.type.block].parse.apply(this,r)}},{type:e.logic.type.endblock,regex:/^endblock(?:\s+(\w+))?$/,next:[],open:!1},{type:e.logic.type.extends_,regex:/^extends\s+(.+)$/,next:[],open:!0,compile:function(t){var r=t.match[1].trim();return delete t.match,t.stack=e.expression.compile.call(this,{type:e.expression.type.expression,value:r}).stack,t},parse:function(t,r,n){var o=this;return e.expression.parseAsync.call(o,t.stack,r).then(function(e){if(Array.isArray(e)){var t=e.reverse().reduce(function(e,t){try{return{render:o.template.importFile(t),fileName:t}}catch(t){return e}},{render:null,fileName:null});null!==t.fileName&&(o.template.parentTemplate=t.fileName)}else o.template.parentTemplate=e;return{chain:n,output:""}})}},{type:e.logic.type.use,regex:/^use\s+(.+)$/,next:[],open:!0,compile:function(t){var r=t.match[1].trim();return delete t.match,t.stack=e.expression.compile.call(this,{type:e.expression.type.expression,value:r}).stack,t},parse:function(t,r,n){var o=this;return e.expression.parseAsync.call(o,t.stack,r).then(function(t){var r=o.template.importFile(t),n=new e.ParseState(r);return n.parseAsync(r.tokens).then(function(){o.template.blocks.imported=a(a({},o.template.blocks.imported),n.getBlocks())})}).then(function(){return{chain:n,output:""}})}},{type:e.logic.type.include,regex:/^include\s+(.+?)(?:\s|$)(ignore missing(?:\s|$))?(?:with\s+([\S\s]+?))?(?:\s|$)(only)?$/,next:[],open:!0,compile:function(t){var r=t.match,n=r[1].trim(),o=void 0!==r[2],i=r[3],s=void 0!==r[4]&&r[4].length;return delete t.match,t.only=s,t.ignoreMissing=o,t.stack=e.expression.compile.call(this,{type:e.expression.type.expression,value:n}).stack,void 0!==i&&(t.withStack=e.expression.compile.call(this,{type:e.expression.type.expression,value:i.trim()}).stack),t},parse:function(t,r,n){var o=t.only?{}:a({},r),i=t.ignoreMissing,s=this,p={chain:n,output:""};return(void 0===t.withStack?e.Promise.resolve():e.expression.parseAsync.call(s,t.withStack,r).then(function(e){o=a(a({},o),e)})).then(function(){return e.expression.parseAsync.call(s,t.stack,r)}).then(function(t){var r=(Array.isArray(t)?t:[t]).reduce(function(t,r){if(null===t.render){if(r instanceof e.Template)return{render:r.renderAsync(o,{isInclude:!0}),lastError:null};try{return{render:s.template.importFile(r).renderAsync(o,{isInclude:!0}),lastError:null}}catch(e){return{render:null,lastError:e}}}return t},{render:null,lastError:null});if(null!==r.render)return r.render;if(null===r.render&&i)return"";throw r.lastError}).then(function(e){return""!==e&&(p.output=e),p})}},{type:e.logic.type.spaceless,regex:/^spaceless$/,next:[e.logic.type.endspaceless],open:!0,parse:function(t,r,n){return this.parseAsync(t.output,r).then(function(t){var r=t.replace(/>\s+</g,"><").trim();return r=new e.Markup(r),{chain:n,output:r}})}},{type:e.logic.type.endspaceless,regex:/^endspaceless$/,next:[],open:!1},{type:e.logic.type.macro,regex:/^macro\s+(\w+)\s*\(\s*((?:\w+(?:\s*=\s*([\s\S]+))?(?:,\s*)?)*)\s*\)$/,next:[e.logic.type.endmacro],open:!0,compile:function(t){var r=t.match[1],n=t.match[2].split(/\s*,\s*/),o=n.map(function(e){return e.split(/\s*=\s*/)[0]}),i=o.length;if(i>1)for(var s={},a=0;a<i;a++){var p=o[a];if(s[p])throw new e.Error("Duplicate arguments for parameter: "+p);s[p]=1}return t.macroName=r,t.parameters=o,t.defaults=n.reduce(function(t,r){var n=r.split(/\s*=\s*/),o=n[0],i=n[1];return t[o]=i?e.expression.compile.call(this,{type:e.expression.type.expression,value:i}).stack:void 0,t},{}),delete t.match,t},parse:function(t,r,n){var o=this;return o.macros[t.macroName]=function(){for(var n=arguments.length,i=new Array(n),s=0;s<n;s++)i[s]=arguments[s];var p=a(a({},o.context),{},{_self:o.macros});return e.async.forEach(t.parameters,function(n,o){return void 0!==i[o]?(p[n]=i[o],!0):void 0!==t.defaults[n]?e.expression.parseAsync.call(this,t.defaults[n],r).then(function(t){return p[n]=t,e.Promise.resolve()}):(p[n]=void 0,!0)}).then(function(){return o.parseAsync(t.output,p)})},{chain:n,output:""}}},{type:e.logic.type.endmacro,regex:/^endmacro$/,next:[],open:!1},{type:e.logic.type.import_,regex:/^import\s+(.+)\s+as\s+(\w+)$/,next:[],open:!0,compile:function(t){var r=t.match[1].trim(),n=t.match[2].trim();return delete t.match,t.expression=r,t.contextName=n,t.stack=e.expression.compile.call(this,{type:e.expression.type.expression,value:r}).stack,t},parse:function(t,r,n){var o=this,i={chain:n,output:""};return"_self"===t.expression?(r[t.contextName]=o.macros,i):e.expression.parseAsync.call(o,t.stack,r).then(function(e){return o.template.importFile(e||t.expression)}).then(function(n){var o=new e.ParseState(n);return o.parseAsync(n.tokens).then(function(){return r[t.contextName]=o.macros,i})})}},{type:e.logic.type.from,regex:/^from\s+(.+)\s+import\s+([a-zA-Z0-9_, ]+)$/,next:[],open:!0,compile:function(t){var r,n=t.match[1].trim(),i={},s=o(t.match[2].trim().split(/\s*,\s*/));try{for(s.s();!(r=s.n()).done;){var a=r.value,p=a.match(/^(\w+)\s+as\s+(\w+)$/);p?i[p[1].trim()]=p[2].trim():a.match(/^(\w+)$/)&&(i[a]=a)}}catch(e){s.e(e)}finally{s.f()}return delete t.match,t.expression=n,t.macroNames=i,t.stack=e.expression.compile.call(this,{type:e.expression.type.expression,value:n}).stack,t},parse:function(t,r,n){var o=this;return("_self"===t.expression?e.Promise.resolve(o.macros):e.expression.parseAsync.call(o,t.stack,r).then(function(e){return o.template.importFile(e||t.expression)}).then(function(t){var r=new e.ParseState(t);return r.parseAsync(t.tokens).then(function(){return r.macros})})).then(function(e){for(var o in t.macroNames)void 0!==e[o]&&(r[t.macroNames[o]]=e[o]);return{chain:n,output:""}})}},{type:e.logic.type.embed,regex:/^embed\s+(.+?)(?:\s+(ignore missing))?(?:\s+with\s+([\S\s]+?))?(?:\s+(only))?$/,next:[e.logic.type.endembed],open:!0,compile:function(t){var r=t.match,n=r[1].trim(),o=void 0!==r[2],i=r[3],s=void 0!==r[4]&&r[4].length;return delete t.match,t.only=s,t.ignoreMissing=o,t.stack=e.expression.compile.call(this,{type:e.expression.type.expression,value:n}).stack,void 0!==i&&(t.withStack=e.expression.compile.call(this,{type:e.expression.type.expression,value:i.trim()}).stack),t},parse:function(t,r,n){var o={},i=e.Promise.resolve(),s=this;return t.only||(o=a({},r)),void 0!==t.withStack&&(i=e.expression.parseAsync.call(s,t.withStack,r).then(function(e){o=a(a({},o),e)})),i.then(function(){return e.expression.parseAsync.call(s,t.stack,o)}).then(function(r){var n=new e.Template({data:t.output,base:s.template.base,path:s.template.path,url:s.template.url,name:s.template.name,method:s.template.method,options:s.template.options});try{n.importFile(r)}catch(e){if(t.ignoreMissing)return"";throw s=null,e}return n.parentTemplate=r,n.renderAsync(o,{isInclude:!0})}).then(function(e){return{chain:n,output:e}})}},{type:e.logic.type.endembed,regex:/^endembed$/,next:[],open:!1},{type:e.logic.type.with,regex:/^(?:with(?:\s+([\S\s]+?))?)(?:\s|$)(only)?$/,next:[e.logic.type.endwith],open:!0,compile:function(t){var r=t.match,n=r[1],o=void 0!==r[2]&&r[2].length;return delete t.match,t.only=o,void 0!==n&&(t.withStack=e.expression.compile.call(this,{type:e.expression.type.expression,value:n.trim()}).stack),t},parse:function(t,r,n){var o,i={},s=e.Promise.resolve();t.only||(i=a({},r)),void 0!==t.withStack&&(s=e.expression.parseAsync.call(this,t.withStack,r).then(function(e){for(o in e)Object.hasOwnProperty.call(e,o)&&(i[o]=e[o])}));var p=new e.ParseState(this.template,void 0,i);return s.then(function(){return p.parseAsync(t.output)}).then(function(e){return{chain:n,output:e}})}},{type:e.logic.type.endwith,regex:/^endwith$/,next:[],open:!1},{type:e.logic.type.deprecated,regex:/^deprecated\s+(.+)$/,next:[],open:!0,compile:function(e){return console.warn("Deprecation notice: "+e.match[1]),e},parse:function(){return{}}}],e.logic.handler={},e.logic.extendType=function(t,r){r=r||"Twig.logic.type"+t,e.logic.type[t]=r},e.logic.extend=function(t){if(!t.type)throw new e.Error("Unable to extend logic definition. No type provided for "+t);e.logic.extendType(t.type),e.logic.handler[t.type]=t};e.logic.definitions.length>0;)e.logic.extend(e.logic.definitions.shift());return e.logic.compile=function(t){var r=t.value.trim(),n=e.logic.tokenize.call(this,r),o=e.logic.handler[n.type];return o.compile&&(n=o.compile.call(this,n),e.log.trace("Twig.logic.compile: ","Compiled logic token to ",n)),n},e.logic.tokenize=function(t){var r=null,n=null,o=null,i=null,s=null,a=null,p=null;for(r in t=t.trim(),e.logic.handler)if(Object.hasOwnProperty.call(e.logic.handler,r))for(n=e.logic.handler[r].type,i=o=e.logic.handler[r].regex,Array.isArray(o)||(i=[o]),s=i.length,a=0;a<s;a++)if(null!==(p=i[a].exec(t)))return e.log.trace("Twig.logic.tokenize: ","Matched a ",n," regular expression of ",p),{type:n,match:p};throw new e.Error("Unable to parse '"+t.trim()+"'")},e.logic.parse=function(t,r,n,o){return e.async.potentiallyAsync(this,o,function(){e.log.debug("Twig.logic.parse: ","Parsing logic token ",t);var o,i=e.logic.handler[t.type],s=this;return i.parse?(s.nestingStack.unshift(t),o=i.parse.call(s,t,r||{},n),e.isPromise(o)?o=o.then(function(e){return s.nestingStack.shift(),e}):s.nestingStack.shift(),o):""})},e}},497(e){"use strict";e.exports=function(e){e.Templates.registerParser("source",function(e){return e.data||""})}},241(e){"use strict";e.exports=function(e){e.Templates.registerParser("twig",function(t){return new e.Template(t)})}},188(e,t,r){"use strict";var n=r(994)(r(738));e.exports=function(e){return e.path={},e.path.expandNamespace=function(e,t){var r=Object.keys(e),n=new RegExp("^(?:@(".concat(r.join("|"),")/|(").concat(r.join("|"),")::)"));return t.replace(n,function(t,r,n){return"".concat(e[void 0===r?n:r],"/")})},e.path.parsePath=function(t,r){var o=t.options.namespaces,i=r||"",s=o&&"object"===(0,n.default)(o)?e.path.expandNamespace(o,i):i;return s===i&&(s=e.path.relativePath(t,i)),s},e.path.relativePath=function(t,n){var o,i,s,a="/",p=[],c=n||"";if(t.url)o=void 0===t.base?t.url:t.base.replace(/([^/])$/,"$1/");else if(t.path){var l=r(975),u=l.sep||a,h=new RegExp("^\\.{1,2}"+u.replace("\\","\\\\"));c=c.replace(/\//g,u),void 0!==t.base&&null===c.match(h)?(c=c.replace(t.base,""),o=t.base+u):o=l.normalize(t.path),o=o.replace(u+u,u),a=u}else{if(!t.name&&!t.id||!t.method||"fs"===t.method||"ajax"===t.method)throw new e.Error("Cannot extend an inline template.");o=t.base||t.name||t.id}for((i=o.split(a)).pop(),i=i.concat(c.split(a));i.length>0;)"."===(s=i.shift())||(".."===s&&p.length>0&&".."!==p[p.length-1]?p.pop():p.push(s));return p.join(a)},e}},230(e){"use strict";e.exports=function(e){return e.tests={empty:function(e){if(!0===e)return!1;if(null==e)return!0;if("number"==typeof e)return!1;if(e.length>0)return!1;for(var t in e)if(Object.hasOwnProperty.call(e,t))return!1;return!0},odd:function(e){return e%2==1},even:function(e){return e%2==0},"divisible by":function(e,t){return e%t[0]===0},divisibleby:function(t,r){return console.warn("`divisibleby` is deprecated use `divisible by`"),e.tests["divisible by"](t,r)},defined:function(e){return void 0!==e},none:function(e){return null===e},null:function(e){return this.none(e)},"same as":function(e,t){return e===t[0]},sameas:function(t,r){return console.warn("`sameas` is deprecated use `same as`"),e.tests["same as"](t,r)},iterable:function(t){return t&&(e.lib.is("Array",t)||e.lib.is("Object",t))}},e.test=function(t,r,n){if(!e.tests[t])throw e.Error("Test "+t+" is not defined.");return e.tests[t](r,n)},e.test.extend=function(t,r){e.tests[t]=r},e}},975(e){"use strict";function t(e){if("string"!=typeof e)throw new TypeError("Path must be a string. Received "+JSON.stringify(e))}function r(e,t){for(var r,n="",o=0,i=-1,s=0,a=0;a<=e.length;++a){if(a<e.length)r=e.charCodeAt(a);else{if(47===r)break;r=47}if(47===r){if(i===a-1||1===s);else if(i!==a-1&&2===s){if(n.length<2||2!==o||46!==n.charCodeAt(n.length-1)||46!==n.charCodeAt(n.length-2))if(n.length>2){var p=n.lastIndexOf("/");if(p!==n.length-1){-1===p?(n="",o=0):o=(n=n.slice(0,p)).length-1-n.lastIndexOf("/"),i=a,s=0;continue}}else if(2===n.length||1===n.length){n="",o=0,i=a,s=0;continue}t&&(n.length>0?n+="/..":n="..",o=2)}else n.length>0?n+="/"+e.slice(i+1,a):n=e.slice(i+1,a),o=a-i-1;i=a,s=0}else 46===r&&-1!==s?++s:s=-1}return n}var n={resolve:function(){for(var e,n="",o=!1,i=arguments.length-1;i>=-1&&!o;i--){var s;i>=0?s=arguments[i]:(void 0===e&&(e=process.cwd()),s=e),t(s),0!==s.length&&(n=s+"/"+n,o=47===s.charCodeAt(0))}return n=r(n,!o),o?n.length>0?"/"+n:"/":n.length>0?n:"."},normalize:function(e){if(t(e),0===e.length)return".";var n=47===e.charCodeAt(0),o=47===e.charCodeAt(e.length-1);return 0!==(e=r(e,!n)).length||n||(e="."),e.length>0&&o&&(e+="/"),n?"/"+e:e},isAbsolute:function(e){return t(e),e.length>0&&47===e.charCodeAt(0)},join:function(){if(0===arguments.length)return".";for(var e,r=0;r<arguments.length;++r){var o=arguments[r];t(o),o.length>0&&(void 0===e?e=o:e+="/"+o)}return void 0===e?".":n.normalize(e)},relative:function(e,r){if(t(e),t(r),e===r)return"";if((e=n.resolve(e))===(r=n.resolve(r)))return"";for(var o=1;o<e.length&&47===e.charCodeAt(o);++o);for(var i=e.length,s=i-o,a=1;a<r.length&&47===r.charCodeAt(a);++a);for(var p=r.length-a,c=s<p?s:p,l=-1,u=0;u<=c;++u){if(u===c){if(p>c){if(47===r.charCodeAt(a+u))return r.slice(a+u+1);if(0===u)return r.slice(a+u)}else s>c&&(47===e.charCodeAt(o+u)?l=u:0===u&&(l=0));break}var h=e.charCodeAt(o+u);if(h!==r.charCodeAt(a+u))break;47===h&&(l=u)}var f="";for(u=o+l+1;u<=i;++u)u!==i&&47!==e.charCodeAt(u)||(0===f.length?f+="..":f+="/..");return f.length>0?f+r.slice(a+l):(a+=l,47===r.charCodeAt(a)&&++a,r.slice(a))},_makeLong:function(e){return e},dirname:function(e){if(t(e),0===e.length)return".";for(var r=e.charCodeAt(0),n=47===r,o=-1,i=!0,s=e.length-1;s>=1;--s)if(47===(r=e.charCodeAt(s))){if(!i){o=s;break}}else i=!1;return-1===o?n?"/":".":n&&1===o?"//":e.slice(0,o)},basename:function(e,r){if(void 0!==r&&"string"!=typeof r)throw new TypeError('"ext" argument must be a string');t(e);var n,o=0,i=-1,s=!0;if(void 0!==r&&r.length>0&&r.length<=e.length){if(r.length===e.length&&r===e)return"";var a=r.length-1,p=-1;for(n=e.length-1;n>=0;--n){var c=e.charCodeAt(n);if(47===c){if(!s){o=n+1;break}}else-1===p&&(s=!1,p=n+1),a>=0&&(c===r.charCodeAt(a)?-1===--a&&(i=n):(a=-1,i=p))}return o===i?i=p:-1===i&&(i=e.length),e.slice(o,i)}for(n=e.length-1;n>=0;--n)if(47===e.charCodeAt(n)){if(!s){o=n+1;break}}else-1===i&&(s=!1,i=n+1);return-1===i?"":e.slice(o,i)},extname:function(e){t(e);for(var r=-1,n=0,o=-1,i=!0,s=0,a=e.length-1;a>=0;--a){var p=e.charCodeAt(a);if(47!==p)-1===o&&(i=!1,o=a+1),46===p?-1===r?r=a:1!==s&&(s=1):-1!==r&&(s=-1);else if(!i){n=a+1;break}}return-1===r||-1===o||0===s||1===s&&r===o-1&&r===n+1?"":e.slice(r,o)},format:function(e){if(null===e||"object"!=typeof e)throw new TypeError('The "pathObject" argument must be of type Object. Received type '+typeof e);return function(e,t){var r=t.dir||t.root,n=t.base||(t.name||"")+(t.ext||"");return r?r===t.root?r+n:r+e+n:n}("/",e)},parse:function(e){t(e);var r={root:"",dir:"",base:"",ext:"",name:""};if(0===e.length)return r;var n,o=e.charCodeAt(0),i=47===o;i?(r.root="/",n=1):n=0;for(var s=-1,a=0,p=-1,c=!0,l=e.length-1,u=0;l>=n;--l)if(47!==(o=e.charCodeAt(l)))-1===p&&(c=!1,p=l+1),46===o?-1===s?s=l:1!==u&&(u=1):-1!==s&&(u=-1);else if(!c){a=l+1;break}return-1===s||-1===p||0===u||1===u&&s===p-1&&s===a+1?-1!==p&&(r.base=r.name=0===a&&i?e.slice(1,p):e.slice(a,p)):(0===a&&i?(r.name=e.slice(1,s),r.base=e.slice(1,p)):(r.name=e.slice(a,s),r.base=e.slice(a,p)),r.ext=e.slice(s,p)),a>0?r.dir=e.slice(0,a-1):i&&(r.dir="/"),r},sep:"/",delimiter:":",win32:null,posix:null};n.posix=n,e.exports=n},603(){},79(e){e.exports=function(e,t){(null==t||t>e.length)&&(t=e.length);for(var r=0,n=Array(t);r<t;r++)n[r]=e[r];return n},e.exports.__esModule=!0,e.exports.default=e.exports},901(e,t,r){var n=r(79);e.exports=function(e){if(Array.isArray(e))return n(e)},e.exports.__esModule=!0,e.exports.default=e.exports},693(e,t,r){var n=r(736);e.exports=function(e,t,r){return(t=n(t))in e?Object.defineProperty(e,t,{value:r,enumerable:!0,configurable:!0,writable:!0}):e[t]=r,e},e.exports.__esModule=!0,e.exports.default=e.exports},994(e){e.exports=function(e){return e&&e.__esModule?e:{default:e}},e.exports.__esModule=!0,e.exports.default=e.exports},291(e){e.exports=function(e){if("undefined"!=typeof Symbol&&null!=e[Symbol.iterator]||null!=e["@@iterator"])return Array.from(e)},e.exports.__esModule=!0,e.exports.default=e.exports},869(e){e.exports=function(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")},e.exports.__esModule=!0,e.exports.default=e.exports},132(e,t,r){var n=r(901),o=r(291),i=r(122),s=r(869);e.exports=function(e){return n(e)||o(e)||i(e)||s()},e.exports.__esModule=!0,e.exports.default=e.exports},45(e,t,r){var n=r(738).default;e.exports=function(e,t){if("object"!=n(e)||!e)return e;var r=e[Symbol.toPrimitive];if(void 0!==r){var o=r.call(e,t||"default");if("object"!=n(o))return o;throw new TypeError("@@toPrimitive must return a primitive value.")}return("string"===t?String:Number)(e)},e.exports.__esModule=!0,e.exports.default=e.exports},736(e,t,r){var n=r(738).default,o=r(45);e.exports=function(e){var t=o(e,"string");return"symbol"==n(t)?t:t+""},e.exports.__esModule=!0,e.exports.default=e.exports},738(e){function t(r){return e.exports=t="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},e.exports.__esModule=!0,e.exports.default=e.exports,t(r)}e.exports=t,e.exports.__esModule=!0,e.exports.default=e.exports},122(e,t,r){var n=r(79);e.exports=function(e,t){if(e){if("string"==typeof e)return n(e,t);var r={}.toString.call(e).slice(8,-1);return"Object"===r&&e.constructor&&(r=e.constructor.name),"Map"===r||"Set"===r?Array.from(e):"Arguments"===r||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r)?n(e,t):void 0}},e.exports.__esModule=!0,e.exports.default=e.exports},228(e,t){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t._phpCastString=function(e){if("boolean"==typeof e)return e?"1":"";if("string"==typeof e)return e;if("number"==typeof e)return isNaN(e)?"NAN":isFinite(e)?e+"":(e<0?"-":"")+"INF";if(void 0===e)return"";if("object"==typeof e)return Array.isArray(e)?"Array":null!==e?"Object":"";throw new Error("Unsupported value type")}},963(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t._php_cast_float=function(e){return"number"==typeof e?e:"string"==typeof e?parseFloat(e)||0:(0,n._php_cast_int)(e)};const n=r(212)},212(e,t){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t._php_cast_int=function(e){return"number"==typeof e?isNaN(e)||!isFinite(e)?0:e<0?Math.ceil(e):Math.floor(e):"string"==typeof e?parseInt(e,10)||0:+!!e}},952(e,t){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.date=function(e,t){let r,n=new Date;const o=["Sun","Mon","Tues","Wednes","Thurs","Fri","Satur","January","February","March","April","May","June","July","August","September","October","November","December"],i=/\\?(.?)/gi,s=function(e,t){return n=e,Object.hasOwn(r,n)?String(r[e]()):t;var n},a=function(e,t){let r=String(e);for(;r.length<t;)r="0"+r;return r};return r={d:function(){return a(r.j(),2)},D:function(){return String(r.l()).slice(0,3)},j:function(){return n.getDate()},l:function(){return(o[Number(r.w())]??"")+"day"},N:function(){return Number(r.w())||7},S:function(){const e=Number(r.j());let t=e%10;return t<=3&&1===Number.parseInt(String(e%100/10),10)&&(t=0),["st","nd","rd"][t-1]||"th"},w:function(){return n.getDay()},z:function(){const e=new Date(Number(r.Y()),Number(r.n())-1,Number(r.j())),t=new Date(Number(r.Y()),0,1);return Math.round((e.getTime()-t.getTime())/864e5)},W:function(){const e=new Date(Number(r.Y()),Number(r.n())-1,Number(r.j())-Number(r.N())+3),t=new Date(e.getFullYear(),0,4);return a(1+Math.round((e.getTime()-t.getTime())/864e5/7),2)},F:function(){return o[6+Number(r.n())]??""},m:function(){return a(r.n(),2)},M:function(){return String(r.F()).slice(0,3)},n:function(){return n.getMonth()+1},t:function(){return new Date(Number(r.Y()),Number(r.n()),0).getDate()},L:function(){const e=Number(r.Y());return e%4==0&&e%100!=0||e%400==0?1:0},o:function(){const e=Number(r.n()),t=Number(r.W());return Number(r.Y())+(12===e&&t<9?1:1===e&&t>9?-1:0)},Y:function(){return n.getFullYear()},y:function(){return String(r.Y()).slice(-2)},a:function(){return n.getHours()>11?"pm":"am"},A:function(){return String(r.a()).toUpperCase()},B:function(){const e=3600*n.getUTCHours(),t=60*n.getUTCMinutes(),r=n.getUTCSeconds();return a(Math.floor((e+t+r+3600)/86.4)%1e3,3)},g:function(){return Number(r.G())%12||12},G:function(){return n.getHours()},h:function(){return a(r.g(),2)},H:function(){return a(r.G(),2)},i:function(){return a(n.getMinutes(),2)},s:function(){return a(n.getSeconds(),2)},u:function(){return a(1e3*n.getMilliseconds(),6)},e:function(){throw new Error("Not supported (see source code of date() for timezone on how to add support)")},I:function(){const e=new Date(Number(r.Y()),0),t=Date.UTC(Number(r.Y()),0),n=new Date(Number(r.Y()),6),o=Date.UTC(Number(r.Y()),6);return e.getTime()-t!==n.getTime()-o?1:0},O:function(){const e=n.getTimezoneOffset(),t=Math.abs(e);return(e>0?"-":"+")+a(100*Math.floor(t/60)+t%60,4)},P:function(){const e=String(r.O());return e.slice(0,3)+":"+e.slice(3,5)},T:function(){return"UTC"},Z:function(){return 60*-n.getTimezoneOffset()},c:function(){return"Y-m-d\\TH:i:sP".replace(i,s)},r:function(){return"D, d M Y H:i:s O".replace(i,s)},U:function(){return n.getTime()/1e3|0}},p=e,n=void 0===(c=t)?new Date:c instanceof Date?new Date(c):new Date(1e3*Number(c)),p.replace(i,s);var p,c}},805(e,t){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.strtotime=function(e,t){const r=null==t?Math.floor(Date.now()/1e3):t,n=[F.yesterday,F.now,F.noon,F.midnightOrToday,F.tomorrow,F.timestamp,F.firstOrLastDay,F.backOrFrontOf,F.timeTiny12,F.timeShort12,F.timeLong12,F.mssqltime,F.oracledate,F.timeShort24,F.timeLong24,F.iso8601long,F.gnuNoColon,F.iso8601noColon,F.americanShort,F.american,F.iso8601date4,F.iso8601dateSlash,F.dateSlash,F.gnuDateShortOrIso8601date2,F.gnuDateShorter,F.dateFull,F.pointedDate4,F.pointedDate2,F.dateNoDay,F.dateNoDayRev,F.dateTextual,F.dateNoYear,F.dateNoYearRev,F.dateNoColon,F.xmlRpc,F.xmlRpcNoColon,F.soap,F.wddx,F.exif,F.pgydotd,F.isoWeekDay,F.pgTextShort,F.pgTextReverse,F.clf,F.year4,F.ago,F.dayText,F.relativeTextWeek,F.relativeText,F.monthFullOrMonthAbbr,F.tzCorrection,F.tzAbbr,F.dateShortWithTimeShort12,F.dateShortWithTimeLong12,F.dateShortWithTimeShort,F.dateShortWithTimeLong,F.relative,F.whitespace],o={...L};for(;e.length;){let t=null,r=null;for(const o of n){const n=e.match(o.regex);n&&(!t||n[0].length>t[0].length)&&(t=n,r=o)}if(!r||!t)return!1;if(r.callback&&!1===r.callback.apply(o,t))return!1;e=e.substr(t[0].length),r=null,t=null}return Math.floor(o.toDate(new Date(1e3*r)).getTime()/1e3)};const r="[ \\t]+",n="[ \\t]*",o="(?:([ap])\\.?m\\.?([\\t ]|$))",i="(2[0-4]|[01]?[0-9])",s="([01][0-9]|2[0-4])",a="(0?[1-9]|1[0-2])",p="([0-5]?[0-9])",c="([0-5][0-9])",l="(60|[0-5]?[0-9])",u="(60|[0-5][0-9])",h="(?:\\.([0-9]+))",f="sunday|monday|tuesday|wednesday|thursday|friday|saturday",d="sun|mon|tue|wed|thu|fri|sat",y=f+"|"+d+"|weekdays?",m="first|second|third|fourth|fifth|sixth|seventh|eighth?|ninth|tenth|eleventh|twelfth",g="next|last|previous|this",x="(?:second|sec|minute|min|hour|day|fortnight|forthnight|month|year)s?|weeks|"+y,b="([0-9]{1,4})",v="([0-9]{4})",w="(1[0-2]|0?[0-9])",k="(0[0-9]|1[0-2])",T="(?:(3[01]|[0-2]?[0-9])(?:st|nd|rd|th)?)",N="(0[0-9]|[1-2][0-9]|3[01])",A="january|february|march|april|may|june|july|august|september|october|november|december",_="jan|feb|mar|apr|may|jun|jul|aug|sept?|oct|nov|dec",E="("+A+"|"+_+"|i[vx]|vi{0,3}|xi{0,2}|i{1,3})",O="((?:GMT)?([+-])"+i+":?"+p+"?)",j=E+"[ .\\t-]*"+T+"[,.stndrh\\t ]*";function S(e,t){const r=t?.toLowerCase();switch(r){case"a":e+=12===e?-12:0;break;case"p":e+=12!==e?12:0}return e}function P(e){let t=+e;return e.length<4&&t<100&&(t+=t<70?2e3:1900),t}function M(e){return{jan:0,january:0,i:0,feb:1,february:1,ii:1,mar:2,march:2,iii:2,apr:3,april:3,iv:3,may:4,v:4,jun:5,june:5,vi:5,jul:6,july:6,vii:6,aug:7,august:7,viii:7,sep:8,sept:8,september:8,ix:8,oct:9,october:9,x:9,nov:10,november:10,xi:10,dec:11,december:11,xii:11}[e.toLowerCase()]??Number.NaN}function R(e,t=0){return{mon:1,monday:1,tue:2,tuesday:2,wed:3,wednesday:3,thu:4,thursday:4,fri:5,friday:5,sat:6,saturday:6,sun:0,sunday:0}[e.toLowerCase()]||t}function C(e,t=Number.NaN){const r=e?.match(/(?:GMT)?([+-])(\d+)(:?)(\d{0,2})/i);if(!r)return t;const n="-"===r[1]?-1:1;let o=+(r[2]??0),i=+(r[4]??0);return r[4]||r[3]||(i=Math.floor(o%100),o=Math.floor(o/100)),n*(60*o+i)*60}const D={acdt:37800,acst:34200,addt:-7200,adt:-10800,aedt:39600,aest:36e3,ahdt:-32400,ahst:-36e3,akdt:-28800,akst:-32400,amt:-13840,apt:-10800,ast:-14400,awdt:32400,awst:28800,awt:-10800,bdst:7200,bdt:-36e3,bmt:-14309,bst:3600,cast:34200,cat:7200,cddt:-14400,cdt:-18e3,cemt:10800,cest:7200,cet:3600,cmt:-15408,cpt:-18e3,cst:-21600,cwt:-18e3,chst:36e3,dmt:-1521,eat:10800,eddt:-10800,edt:-14400,eest:10800,eet:7200,emt:-26248,ept:-14400,est:-18e3,ewt:-14400,ffmt:-14660,fmt:-4056,gdt:39600,gmt:0,gst:36e3,hdt:-34200,hkst:32400,hkt:28800,hmt:-19776,hpt:-34200,hst:-36e3,hwt:-34200,iddt:14400,idt:10800,imt:25025,ist:7200,jdt:36e3,jmt:8440,jst:32400,kdt:36e3,kmt:5736,kst:30600,lst:9394,mddt:-18e3,mdst:16279,mdt:-21600,mest:7200,met:3600,mmt:9017,mpt:-21600,msd:14400,msk:10800,mst:-25200,mwt:-21600,nddt:-5400,ndt:-9052,npt:-9e3,nst:-12600,nwt:-9e3,nzdt:46800,nzmt:41400,nzst:43200,pddt:-21600,pdt:-25200,pkst:21600,pkt:18e3,plmt:25590,pmt:-13236,ppmt:-17340,ppt:-25200,pst:-28800,pwt:-25200,qmt:-18840,rmt:5794,sast:7200,sdmt:-16800,sjmt:-20173,smt:-13884,sst:-39600,tbmt:10751,tmt:12344,uct:0,utc:0,wast:7200,wat:3600,wemt:7200,west:3600,wet:0,wib:25200,wita:28800,wit:32400,wmt:5040,yddt:-25200,ydt:-28800,ypt:-28800,yst:-32400,ywt:-28800,a:3600,b:7200,c:10800,d:14400,e:18e3,f:21600,g:25200,h:28800,i:32400,k:36e3,l:39600,m:43200,n:-3600,o:-7200,p:-10800,q:-14400,r:-18e3,s:-21600,t:-25200,u:-28800,v:-32400,w:-36e3,x:-39600,y:-43200,z:0},F={yesterday:{regex:/^yesterday/i,name:"yesterday",callback(){return this.rd-=1,this.resetTime()}},now:{regex:/^now/i,name:"now"},noon:{regex:/^noon/i,name:"noon",callback(){return this.resetTime()&&this.time(12,0,0,0)}},midnightOrToday:{regex:/^(midnight|today)/i,name:"midnight | today",callback(){return this.resetTime()}},tomorrow:{regex:/^tomorrow/i,name:"tomorrow",callback(){return this.rd+=1,this.resetTime()}},timestamp:{regex:/^@(-?\d+)/i,name:"timestamp",callback(e,t){return this.rs+=+t,this.y=1970,this.m=0,this.d=1,this.dates=0,this.resetTime()&&this.zone(0)}},firstOrLastDay:{regex:/^(first|last) day of/i,name:"firstdayof | lastdayof",callback(e,t){"first"===t.toLowerCase()?this.firstOrLastDayOfMonth=1:this.firstOrLastDayOfMonth=-1}},backOrFrontOf:{regex:new RegExp("^(back|front) of "+i+n+o+"?","i"),name:"backof | frontof",callback(e,t,r,n){let o=+r,i=15;return"back"===t.toLowerCase()||(o-=1,i=45),o=S(o,n),this.resetTime()&&this.time(o,i,0,0)}},weekdayOf:{regex:new RegExp("^("+m+"|"+g+")"+r+"("+f+"|"+d+")"+r+"of","i"),name:"weekdayof"},mssqltime:{regex:new RegExp("^"+a+":"+c+":"+u+"[:.]([0-9]+)"+o,"i"),name:"mssqltime",callback(e,t,r,n,o,i){return this.time(S(+t,i),+r,+n,+o.substr(0,3))}},oracledate:{regex:/^(\d{2})-([A-Z]{3})-(\d{2})$/i,name:"d-M-y",callback(e,t,r,n){const o={JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11}[r.toUpperCase()]??Number.NaN;return this.ymd(2e3+parseInt(n,10),o,parseInt(t,10))}},timeLong12:{regex:new RegExp("^"+a+"[:.]"+p+"[:.]"+u+n+o,"i"),name:"timelong12",callback(e,t,r,n,o){return this.time(S(+t,o),+r,+n,0)}},timeShort12:{regex:new RegExp("^"+a+"[:.]"+c+n+o,"i"),name:"timeshort12",callback(e,t,r,n){return this.time(S(+t,n),+r,0,0)}},timeTiny12:{regex:new RegExp("^"+a+n+o,"i"),name:"timetiny12",callback(e,t,r){return this.time(S(+t,r),0,0,0)}},soap:{regex:new RegExp("^"+v+"-"+k+"-"+N+"T"+s+":"+c+":"+u+h+O+"?","i"),name:"soap",callback(e,t,r,n,o,i,s,a,p){return this.ymd(+t,+r-1,+n)&&this.time(+o,+i,+s,+a.substr(0,3))&&this.zone(C(p))}},wddx:{regex:new RegExp("^"+v+"-"+w+"-"+T+"T"+i+":"+p+":"+l),name:"wddx",callback(e,t,r,n,o,i,s){return this.ymd(+t,+r-1,+n)&&this.time(+o,+i,+s,0)}},exif:{regex:new RegExp("^"+v+":"+k+":"+N+" "+s+":"+c+":"+u,"i"),name:"exif",callback(e,t,r,n,o,i,s){return this.ymd(+t,+r-1,+n)&&this.time(+o,+i,+s,0)}},xmlRpc:{regex:new RegExp("^"+v+k+N+"T"+i+":"+c+":"+u),name:"xmlrpc",callback(e,t,r,n,o,i,s){return this.ymd(+t,+r-1,+n)&&this.time(+o,+i,+s,0)}},xmlRpcNoColon:{regex:new RegExp("^"+v+k+N+"[Tt]"+i+c+u),name:"xmlrpcnocolon",callback(e,t,r,n,o,i,s){return this.ymd(+t,+r-1,+n)&&this.time(+o,+i,+s,0)}},clf:{regex:new RegExp("^"+T+"/("+_+")/"+v+":"+s+":"+c+":"+u+r+O,"i"),name:"clf",callback(e,t,r,n,o,i,s,a){return this.ymd(+n,M(r),+t)&&this.time(+o,+i,+s,0)&&this.zone(C(a))}},iso8601long:{regex:new RegExp("^t?"+i+"[:.]"+p+"[:.]"+l+h,"i"),name:"iso8601long",callback(e,t,r,n,o){return this.time(+t,+r,+n,+o.substr(0,3))}},dateTextual:{regex:new RegExp("^"+E+"[ .\\t-]*"+T+"[,.stndrh\\t ]+"+b,"i"),name:"datetextual",callback(e,t,r,n){return this.ymd(P(n),M(t),+r)}},pointedDate4:{regex:new RegExp("^"+T+"[.\\t-]"+w+"[.-]"+v),name:"pointeddate4",callback(e,t,r,n){return this.ymd(+n,+r-1,+t)}},pointedDate2:{regex:new RegExp("^"+T+"[.\\t]"+w+"\\.([0-9]{2})"),name:"pointeddate2",callback(e,t,r,n){return this.ymd(P(n),+r-1,+t)}},timeLong24:{regex:new RegExp("^t?"+i+"[:.]"+p+"[:.]"+l),name:"timelong24",callback(e,t,r,n){return this.time(+t,+r,+n,0)}},dateNoColon:{regex:new RegExp("^"+v+k+N),name:"datenocolon",callback(e,t,r,n){return this.ymd(+t,+r-1,+n)}},pgydotd:{regex:new RegExp("^"+v+"\\.?(00[1-9]|0[1-9][0-9]|[12][0-9][0-9]|3[0-5][0-9]|36[0-6])"),name:"pgydotd",callback(e,t,r){return this.ymd(+t,0,+r)}},timeShort24:{regex:new RegExp("^t?"+i+"[:.]"+p,"i"),name:"timeshort24",callback(e,t,r){return this.time(+t,+r,0,0)}},iso8601noColon:{regex:new RegExp("^t?"+s+c+u,"i"),name:"iso8601nocolon",callback(e,t,r,n){return this.time(+t,+r,+n,0)}},iso8601dateSlash:{regex:new RegExp("^"+v+"/"+k+"/"+N+"/"),name:"iso8601dateslash",callback(e,t,r,n){return this.ymd(+t,+r-1,+n)}},dateSlash:{regex:new RegExp("^"+v+"/"+w+"/"+T),name:"dateslash",callback(e,t,r,n){return this.ymd(+t,+r-1,+n)}},american:{regex:new RegExp("^"+w+"/"+T+"/"+b),name:"american",callback(e,t,r,n){return this.ymd(P(n),+t-1,+r)}},americanShort:{regex:new RegExp("^"+w+"/"+T),name:"americanshort",callback(e,t,r){return this.ymd(this.y,+t-1,+r)}},gnuDateShortOrIso8601date2:{regex:new RegExp("^"+b+"-"+w+"-"+T),name:"gnudateshort | iso8601date2",callback(e,t,r,n){return this.ymd(P(t),+r-1,+n)}},iso8601date4:{regex:new RegExp("^([+-]?[0-9]{4})-"+k+"-"+N),name:"iso8601date4",callback(e,t,r,n){return this.ymd(+t,+r-1,+n)}},gnuNoColon:{regex:new RegExp("^t?"+s+c,"i"),name:"gnunocolon",callback(e,t,r){switch(this.times){case 0:return this.time(+t,+r,0,this.f);case 1:return this.y=100*+t+ +r,this.times++,!0;default:return!1}}},gnuDateShorter:{regex:new RegExp("^"+v+"-"+w),name:"gnudateshorter",callback(e,t,r){return this.ymd(+t,+r-1,1)}},pgTextReverse:{regex:new RegExp("^(\\d{3,4}|[4-9]\\d|3[2-9])-("+_+")-"+N,"i"),name:"pgtextreverse",callback(e,t,r,n){return this.ymd(P(t),M(r),+n)}},dateFull:{regex:new RegExp("^"+T+"[ \\t.-]*"+E+"[ \\t.-]*"+b,"i"),name:"datefull",callback(e,t,r,n){return this.ymd(P(n),M(r),+t)}},dateNoDay:{regex:new RegExp("^"+E+"[ .\\t-]*"+v,"i"),name:"datenoday",callback(e,t,r){return this.ymd(+r,M(t),1)}},dateNoDayRev:{regex:new RegExp("^"+v+"[ .\\t-]*"+E,"i"),name:"datenodayrev",callback(e,t,r){return this.ymd(+t,M(r),1)}},pgTextShort:{regex:new RegExp("^("+_+")-"+N+"-"+b,"i"),name:"pgtextshort",callback(e,t,r,n){return this.ymd(P(n),M(t),+r)}},dateNoYear:{regex:new RegExp("^"+j,"i"),name:"datenoyear",callback(e,t,r){return this.ymd(this.y,M(t),+r)}},dateNoYearRev:{regex:new RegExp("^"+T+"[ .\\t-]*"+E,"i"),name:"datenoyearrev",callback(e,t,r){return this.ymd(this.y,M(r),+t)}},isoWeekDay:{regex:new RegExp("^"+v+"-?W(0[1-9]|[1-4][0-9]|5[0-3])(?:-?([0-7]))?"),name:"isoweekday | isoweek",callback(e,t,r,n){const o=n?+n:1;if(!this.ymd(+t,0,1))return!1;let i=new Date(this.y,this.m,this.d).getDay();return i=0-(i>4?i-7:i),this.rd+=i+7*(+r-1)+o,!0}},relativeText:{regex:new RegExp("^("+m+"|"+g+")"+r+"("+x+")","i"),name:"relativetext",callback(e,t,r){const{amount:n,behavior:o}=function(e){const t=e.toLowerCase();return{amount:{last:-1,previous:-1,this:0,first:1,next:1,second:2,third:3,fourth:4,fifth:5,sixth:6,seventh:7,eight:8,eighth:8,ninth:9,tenth:10,eleventh:11,twelfth:12}[t]??0,behavior:{this:1}[t]||0}}(t);switch(r.toLowerCase()){case"sec":case"secs":case"second":case"seconds":this.rs+=n;break;case"min":case"mins":case"minute":case"minutes":this.ri+=n;break;case"hour":case"hours":this.rh+=n;break;case"day":case"days":this.rd+=n;break;case"fortnight":case"fortnights":case"forthnight":case"forthnights":this.rd+=14*n;break;case"week":case"weeks":this.rd+=7*n;break;case"month":case"months":this.rm+=n;break;case"year":case"years":this.ry+=n;break;case"mon":case"monday":case"tue":case"tuesday":case"wed":case"wednesday":case"thu":case"thursday":case"fri":case"friday":case"sat":case"saturday":case"sun":case"sunday":this.resetTime(),this.weekday=R(r,7),this.weekdayBehavior=1,this.rd+=7*(n>0?n-1:n)}}},relative:{regex:new RegExp("^([+-]*)[ \\t]*(\\d+)"+n+"("+x+"|week)","i"),name:"relative",callback(e,t,r,n){const o=t.replace(/[^-]/g,"").length,i=+r*Math.pow(-1,o);switch(n.toLowerCase()){case"sec":case"secs":case"second":case"seconds":this.rs+=i;break;case"min":case"mins":case"minute":case"minutes":this.ri+=i;break;case"hour":case"hours":this.rh+=i;break;case"day":case"days":this.rd+=i;break;case"fortnight":case"fortnights":case"forthnight":case"forthnights":this.rd+=14*i;break;case"week":case"weeks":this.rd+=7*i;break;case"month":case"months":this.rm+=i;break;case"year":case"years":this.ry+=i;break;case"mon":case"monday":case"tue":case"tuesday":case"wed":case"wednesday":case"thu":case"thursday":case"fri":case"friday":case"sat":case"saturday":case"sun":case"sunday":this.resetTime(),this.weekday=R(n,7),this.weekdayBehavior=1,this.rd+=7*(i>0?i-1:i)}}},dayText:{regex:new RegExp("^("+y+")","i"),name:"daytext",callback(e,t){this.resetTime(),this.weekday=R(t,0),2!==this.weekdayBehavior&&(this.weekdayBehavior=1)}},relativeTextWeek:{regex:new RegExp("^("+g+")"+r+"week","i"),name:"relativetextweek",callback(e,t){switch(this.weekdayBehavior=2,t.toLowerCase()){case"this":this.rd+=0;break;case"next":this.rd+=7;break;case"last":case"previous":this.rd-=7}isNaN(this.weekday)&&(this.weekday=1)}},monthFullOrMonthAbbr:{regex:new RegExp("^("+A+"|"+_+")","i"),name:"monthfull | monthabbr",callback(e,t){return this.ymd(this.y,M(t),this.d)}},tzCorrection:{regex:new RegExp("^"+O,"i"),name:"tzcorrection",callback(e){return this.zone(C(e))}},tzAbbr:{regex:new RegExp("^\\(?([a-zA-Z]{1,6})\\)?"),name:"tzabbr",callback(e,t){const r=D[t.toLowerCase()];return null!=r&&!Number.isNaN(r)&&this.zone(r)}},ago:{regex:/^ago/i,name:"ago",callback(){this.ry=-this.ry,this.rm=-this.rm,this.rd=-this.rd,this.rh=-this.rh,this.ri=-this.ri,this.rs=-this.rs,this.rf=-this.rf}},year4:{regex:new RegExp("^"+v),name:"year4",callback(e,t){return this.y=+t,!0}},whitespace:{regex:/^[ .,\t]+/,name:"whitespace"},dateShortWithTimeLong:{regex:new RegExp("^"+j+"t?"+i+"[:.]"+p+"[:.]"+l,"i"),name:"dateshortwithtimelong",callback(e,t,r,n,o,i){return this.ymd(this.y,M(t),+r)&&this.time(+n,+o,+i,0)}},dateShortWithTimeLong12:{regex:new RegExp("^"+j+a+"[:.]"+p+"[:.]"+u+n+o,"i"),name:"dateshortwithtimelong12",callback(e,t,r,n,o,i,s){return this.ymd(this.y,M(t),+r)&&this.time(S(+n,s),+o,+i,0)}},dateShortWithTimeShort:{regex:new RegExp("^"+j+"t?"+i+"[:.]"+p,"i"),name:"dateshortwithtimeshort",callback(e,t,r,n,o){return this.ymd(this.y,M(t),+r)&&this.time(+n,+o,0,0)}},dateShortWithTimeShort12:{regex:new RegExp("^"+j+a+"[:.]"+c+n+o,"i"),name:"dateshortwithtimeshort12",callback(e,t,r,n,o,i){return this.ymd(this.y,M(t),+r)&&this.time(S(+n,i),+o,0,0)}}},L={y:NaN,m:NaN,d:NaN,h:NaN,i:NaN,s:NaN,f:NaN,ry:0,rm:0,rd:0,rh:0,ri:0,rs:0,rf:0,weekday:NaN,weekdayBehavior:0,firstOrLastDayOfMonth:0,z:NaN,dates:0,times:0,zones:0,ymd(e,t,r){return!(this.dates>0||(this.dates++,this.y=e,this.m=t,this.d=r,0))},time(e,t,r,n){return!(this.times>0||(this.times++,this.h=e,this.i=t,this.s=r,this.f=n,0))},resetTime(){return this.h=0,this.i=0,this.s=0,this.f=0,this.times=0,!0},zone(e){return this.zones<=1&&(this.zones++,this.z=e,!0)},toDate(e){switch(this.dates&&!this.times&&(this.h=this.i=this.s=this.f=0),isNaN(this.y)&&(this.y=e.getFullYear()),isNaN(this.m)&&(this.m=e.getMonth()),isNaN(this.d)&&(this.d=e.getDate()),isNaN(this.h)&&(this.h=e.getHours()),isNaN(this.i)&&(this.i=e.getMinutes()),isNaN(this.s)&&(this.s=e.getSeconds()),isNaN(this.f)&&(this.f=e.getMilliseconds()),this.firstOrLastDayOfMonth){case 1:this.d=1;break;case-1:this.d=0,this.m+=1}if(!isNaN(this.weekday)){const t=new Date(e.getTime());t.setFullYear(this.y,this.m,this.d),t.setHours(this.h,this.i,this.s,this.f);const r=t.getDay();if(2===this.weekdayBehavior)0===r&&0!==this.weekday&&(this.weekday=-6),0===this.weekday&&0!==r&&(this.weekday=7),this.d-=r,this.d+=this.weekday;else{let e=this.weekday-r;(this.rd<0&&e<0||this.rd>=0&&e<=-this.weekdayBehavior)&&(e+=7),this.weekday>=0?this.d+=e:this.d-=7-(Math.abs(this.weekday)-r),this.weekday=NaN}}this.y+=this.ry,this.m+=this.rm,this.d+=this.rd,this.h+=this.rh,this.i+=this.ri,this.s+=this.rs,this.f+=this.rf,this.ry=this.rm=this.rd=0,this.rh=this.ri=this.rs=this.rf=0;const t=new Date(e.getTime());switch(t.setFullYear(this.y,this.m,this.d),t.setHours(this.h,this.i,this.s,this.f),this.firstOrLastDayOfMonth){case 1:t.setDate(1);break;case-1:t.setMonth(t.getMonth()+1,0)}return isNaN(this.z)||t.getTimezoneOffset()===this.z||(t.setUTCFullYear(t.getFullYear(),t.getMonth(),t.getDate()),t.setUTCHours(t.getHours(),t.getMinutes(),t.getSeconds()-this.z,t.getMilliseconds())),t}}},163(e,t){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.max=function(...e){if(0===e.length)throw new Error("At least one value should be passed to max()");let t;if(1===e.length){const o=e[0];if(void 0===o||!r(o))throw new Error("Wrong parameter count for max()");if(t=n(o),0===t.length)throw new Error("Array must contain at least one element for max()")}else t=e;const i=t[0];if(void 0===i)throw new Error("Array must contain at least one element for max()");let s=i;for(let e=1;e<t.length;e+=1){const r=t[e];void 0!==r&&1===o(s,r)&&(s=r)}return s};const r=e=>"object"==typeof e&&null!==e,n=e=>Array.isArray(e)?e:Object.values(e).filter(e=>void 0!==e),o=(e,t)=>{const i=Number(e),s=Number(t);if(e===t)return 0;if(r(e)){if(r(t)){const r=n(e),i=n(t);if(i.length>r.length)return 1;if(i.length<r.length)return-1;for(let e=0;e<r.length;e+=1){const t=r[e],n=i[e];if(void 0===t||void 0===n)continue;const s=o(t,n);if(0!==s)return s}return 0}return-1}return r(t)?1:Number.isNaN(s)&&!Number.isNaN(i)?0===e?0:i<0?1:-1:Number.isNaN(i)&&!Number.isNaN(s)?0===t?0:s>0?1:-1:"string"==typeof e&&"string"==typeof t&&Number.isNaN(i)&&Number.isNaN(s)?t>e?1:-1:s>i?1:-1}},129(e,t){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.min=function(...e){if(0===e.length)throw new Error("At least one value should be passed to min()");let t;if(1===e.length){const o=e[0];if(void 0===o||!r(o))throw new Error("Wrong parameter count for min()");if(t=n(o),0===t.length)throw new Error("Array must contain at least one element for min()")}else t=e;const i=t[0];if(void 0===i)throw new Error("Array must contain at least one element for min()");let s=i;for(let e=1;e<t.length;e+=1){const r=t[e];void 0!==r&&-1===o(s,r)&&(s=r)}return s};const r=e=>"object"==typeof e&&null!==e,n=e=>Array.isArray(e)?e:Object.values(e).filter(e=>void 0!==e),o=(e,t)=>{const i=Number(e),s=Number(t);if(e===t)return 0;if(r(e)){if(r(t)){const r=n(e),i=n(t);if(i.length>r.length)return 1;if(i.length<r.length)return-1;for(let e=0;e<r.length;e+=1){const t=r[e],n=i[e];if(void 0===t||void 0===n)continue;const s=o(t,n);if(0!==s)return s}return 0}return-1}return r(t)?1:Number.isNaN(s)&&!Number.isNaN(i)?0===e?0:i<0?1:-1:Number.isNaN(i)&&!Number.isNaN(s)?0===t?0:s>0?1:-1:"string"==typeof e&&"string"==typeof t&&Number.isNaN(i)&&Number.isNaN(s)?t>e?1:-1:s>i?1:-1}},661(e,t,r){"use strict";function n(e,t){let r=Math.floor(Math.abs(e)+.5);return("PHP_ROUND_HALF_DOWN"===t&&e===r-.5||"PHP_ROUND_HALF_EVEN"===t&&e===.5+2*Math.floor(r/2)||"PHP_ROUND_HALF_ODD"===t&&e===.5+2*Math.floor(r/2)-1)&&(r-=1),e<0?-r:r}Object.defineProperty(t,"__esModule",{value:!0}),t.round=function(e,t=0,r="PHP_ROUND_HALF_UP"){let s;if(e=(0,o._php_cast_float)(e),t=(0,i._php_cast_int)(t),s=Math.pow(10,t),isNaN(e)||!isFinite(e))return e;if(Math.trunc(e)===e&&t>=0)return e;const a=14-Math.floor(Math.log10(Math.abs(e)));return a>t&&a-15<t?(e=n(e*Math.pow(10,a),r),e/=Math.pow(10,Math.abs(t-a))):e*=s,(e=n(e,r))/s};const o=r(963),i=r(212)},789(e,t){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.sprintf=function(e,...t){const r=/%%|%(?:(\d+)\$)?((?:[-+#0 ]|'[\s\S])*)(\d+)?(?:\.(\d*))?([\s\S])/g,n=[e,...t];let o=1;const i=function(e,t,r,n){r||(r=" ");const o=e.length>=t?"":new Array(1+t-e.length>>>0).join(r);return n?e+o:o+e},s=function(e,t,r,n,o){const s=n-e.length;return s>0&&(e=r||"0"!==o?i(e,n,o,r):[e.slice(0,t.length),i("",s,"0",!0),e.slice(t.length)].join("")),e},a=function(e,t,r,n,o,a){const p=Number(e)>>>0,c=i(p.toString(t),o||0,"0",!1);return s(c,"",r,n,a)},p=function(e,t,r,n,o){return null!=n&&(e=e.slice(0,n)),s(e,"",t,r,o)},c=function(e,t,r,c,l,u){let h,f=0,d="";if("%%"===e)return"%";let y=" ",m=!1,g="",x=0,b=0;for(x=0,b=r.length;x<b;x++)switch(r.charAt(x)){case" ":case"0":y=r.charAt(x);break;case"+":g="+";break;case"-":m=!0;break;case"'":x+1<b&&(y=r.charAt(x+1),x++)}let v,w=0;if(w=c?+c:0,!isFinite(w))throw new Error("Width must be finite");if(v=l?+l:"d"===u?0:"fFeE".includes(u)?6:void 0,t&&0===+t)throw new Error("Argument number must be greater than zero");if(t&&+t>=n.length)throw new Error("Too few arguments");switch(h=t?n[+t]:n[o++],u){case"%":return"%";case"s":return p(String(h),m,w,v,y);case"c":return p(String.fromCharCode(+String(h)),m,w,v,y);case"b":return a(h,2,m,w,v,y);case"o":return a(h,8,m,w,v,y);case"x":return a(h,16,m,w,v,y);case"X":return a(h,16,m,w,v,y).toUpperCase();case"u":return a(h,10,m,w,v,y);case"i":case"d":return f=+String(h)||0,f=Math.round(f-f%1),d=f<0?"-":g,h=d+i(String(Math.abs(f)),v??0,"0",!1),m&&"0"===y&&(y=" "),s(String(h),d,m,w,y);case"e":case"E":case"f":case"F":case"g":case"G":{f=+String(h),d=f<0?"-":g;const e="efg".indexOf(u.toLowerCase()),t=Math.abs(f);let r="";r=0===e?t.toExponential(v):1===e?t.toFixed(v):t.toPrecision(v);const n=s(d+r,d,m,w,y);return"eEfFgG".indexOf(u)%2==0?n:n.toUpperCase()}default:return""}};try{return e.replace(r,c)}catch(e){return!1}}},405(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.strip_tags=function(e,t){t=(((t||"")+"").toLowerCase().match(/<[a-z][a-z0-9]*>/g)||[]).join("");const r=/<\/?([a-z0-9]*)\b[^>]*>?/gi,o=/<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi;let i=(0,n._phpCastString)(e);for(i=i.endsWith("<")?i.slice(0,-1):i;;){const e=i;if(i=e.replace(o,"").replace(r,function(e,r){return t.includes("<"+r.toLowerCase()+">")?e:""}),e===i)return i}};const n=r(228)},999(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.vsprintf=function(e,t){return(0,n.sprintf)(e,...t)};const n=r(789)},207(e,t){"use strict";Object.defineProperty(t,"__esModule",{value:!0}),t.boolval=function(e){return!1!==e&&(0!==e&&0!==e&&(""!==e&&"0"!==e&&((!Array.isArray(e)||0!==e.length)&&null!=e)))}}},t={},function r(n){var o=t[n];if(void 0!==o)return o.exports;var i=t[n]={exports:{}};return e[n](i,i.exports,r),i.exports}(169);var e,t});
+    module.exports.twig({id:"event-popup.twig", data:[{"type":"raw","value":"\n<div class=\"ai1ec-popover ai1ec-popup ai1ec-popup-in-","position":{"start":331,"end":385}},{"type":"output","position":{"start":385,"end":395},"stack":[{"type":"Twig.expression.type.variable","value":"type","match":["type"],"position":{"start":385,"end":395}}]},{"type":"raw","value":"-view\n            ai1ec-event-id-","position":{"start":395,"end":428}},{"type":"output","position":{"start":428,"end":447},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":428,"end":447}},{"type":"Twig.expression.type.key.period","position":{"start":428,"end":447},"key":"post_id"}]},{"type":"raw","value":"\n            ai1ec-event-instance-id-","position":{"start":447,"end":484}},{"type":"output","position":{"start":484,"end":507},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":484,"end":507}},{"type":"Twig.expression.type.key.period","position":{"start":484,"end":507},"key":"instance_id"}]},{"type":"raw","value":"\">\n    ","position":{"start":507,"end":514}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"category_colors"}],"position":{"start":514,"end":544},"output":[{"type":"raw","value":"        <div class=\"ai1ec-color-swatches\">","position":{"start":545,"end":587}},{"type":"output","position":{"start":587,"end":620},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":587,"end":620}},{"type":"Twig.expression.type.key.period","position":{"start":587,"end":620},"key":"category_colors"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":587,"end":620}}]},{"type":"raw","value":"</div>\n    ","position":{"start":620,"end":631}}]},"position":{"open":{"start":514,"end":544},"close":{"start":631,"end":642}}},{"type":"raw","value":"    <span class=\"ai1ec-popup-title\">\n        <a class=\"ai1ec-load-event\"\n            href=\"","position":{"start":643,"end":734}},{"type":"output","position":{"start":734,"end":774},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":734,"end":774}},{"type":"Twig.expression.type.key.period","position":{"start":734,"end":774},"key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":734,"end":774},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":734,"end":774}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":734,"end":774}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":734,"end":774},"expression":false}]}]},{"type":"raw","value":"\"\n            >","position":{"start":774,"end":789}},{"type":"output","position":{"start":789,"end":821},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":789,"end":821}},{"type":"Twig.expression.type.key.period","position":{"start":789,"end":821},"key":"filtered_title"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":789,"end":821}}]},{"type":"raw","value":"</a>\n        ","position":{"start":821,"end":834}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_location_in_title","match":["show_location_in_title"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"position":{"start":834,"end":881},"output":[{"type":"raw","value":"            <span class=\"ai1ec-event-location\"\n                >","position":{"start":882,"end":946}},{"type":"output","position":{"start":946,"end":971},"stack":[{"type":"Twig.expression.type.variable","value":"text_venue_separator","match":["text_venue_separator"],"position":{"start":946,"end":971}}]},{"type":"output","position":{"start":971,"end":988},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":971,"end":988}},{"type":"Twig.expression.type.key.period","position":{"start":971,"end":988},"key":"venue"}]},{"type":"raw","value":"</span>\n        ","position":{"start":988,"end":1004}}]},"position":{"open":{"start":834,"end":881},"close":{"start":1004,"end":1015}}},{"type":"raw","value":"        ","position":{"start":1016,"end":1024}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"is_ticket_button_enabled","match":["is_ticket_button_enabled"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"position":{"start":1024,"end":1078},"output":[{"type":"raw","value":"            <a class=\"ai1ec-pull-right ai1ec-btn ai1ec-btn-primary ai1ec-btn-xs\n                ai1ec-buy-tickets\" target=\"_blank\"\n                href=\"","position":{"start":1079,"end":1232}},{"type":"output","position":{"start":1232,"end":1273},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1232,"end":1273}},{"type":"Twig.expression.type.key.period","position":{"start":1232,"end":1273},"key":"ticket_url"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":1232,"end":1273},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":1232,"end":1273}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":1232,"end":1273}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":1232,"end":1273},"expression":false}]}]},{"type":"raw","value":"\"\n                >","position":{"start":1273,"end":1292}},{"type":"output","position":{"start":1292,"end":1320},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1292,"end":1320}},{"type":"Twig.expression.type.key.period","position":{"start":1292,"end":1320},"key":"ticket_url_label"}]},{"type":"raw","value":"</a>\n        ","position":{"start":1320,"end":1333}}]},"position":{"open":{"start":1024,"end":1078},"close":{"start":1333,"end":1344}}},{"type":"raw","value":"    </span>\n\n    ","position":{"start":1345,"end":1362}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"edit_post_link"}],"position":{"start":1362,"end":1391},"output":[{"type":"raw","value":"        <a class=\"post-edit-link\"\n            href=\"","position":{"start":1392,"end":1444}},{"type":"output","position":{"start":1444,"end":1476},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1444,"end":1476}},{"type":"Twig.expression.type.key.period","position":{"start":1444,"end":1476},"key":"edit_post_link"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":1444,"end":1476}}]},{"type":"raw","value":"\">\n            <i class=\"ai1ec-fa ai1ec-fa-pencil\"></i> ","position":{"start":1476,"end":1532}},{"type":"output","position":{"start":1532,"end":1547},"stack":[{"type":"Twig.expression.type.variable","value":"text_edit","match":["text_edit"],"position":{"start":1532,"end":1547}}]},{"type":"raw","value":"\n        </a>\n    ","position":{"start":1547,"end":1565}}]},"position":{"open":{"start":1362,"end":1391},"close":{"start":1565,"end":1576}}},{"type":"raw","value":"\n    <div class=\"ai1ec-event-time\">\n        ","position":{"start":1577,"end":1621}},{"type":"output","position":{"start":1621,"end":1653},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1621,"end":1653}},{"type":"Twig.expression.type.key.period","position":{"start":1621,"end":1653},"key":"popup_timespan"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":1621,"end":1653}}]},{"type":"raw","value":"\n    </div>\n\n    ","position":{"start":1653,"end":1670}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"image_html"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"position":{"start":1670,"end":1708},"output":[{"type":"raw","value":"        <a class=\"ai1ec-load-event\"\n            href=\"","position":{"start":1709,"end":1763}},{"type":"output","position":{"start":1763,"end":1801},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1763,"end":1801}},{"type":"Twig.expression.type.key.period","position":{"start":1763,"end":1801},"key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":1763,"end":1801},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":1763,"end":1801}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":1763,"end":1801}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":1763,"end":1801},"expression":false}]}]},{"type":"raw","value":"\">\n            ","position":{"start":1801,"end":1816}},{"type":"output","position":{"start":1816,"end":1844},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1816,"end":1844}},{"type":"Twig.expression.type.key.period","position":{"start":1816,"end":1844},"key":"image_html"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":1816,"end":1844}}]},{"type":"raw","value":"\n        </a>\n    ","position":{"start":1844,"end":1862}}]},"position":{"open":{"start":1670,"end":1708},"close":{"start":1862,"end":1873}}},{"type":"raw","value":"    ","position":{"start":1874,"end":1878}},{"type":"output","position":{"start":1878,"end":1904},"stack":[{"type":"Twig.expression.type.variable","value":"action_buttons","match":["action_buttons"],"position":{"start":1878,"end":1904}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":1878,"end":1904}}]},{"type":"raw","value":"\n\n    ","position":{"start":1904,"end":1910}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_excerpt"}],"position":{"start":1910,"end":1937},"output":[{"type":"raw","value":"        <div class=\"ai1ec-popup-excerpt\">","position":{"start":1938,"end":1979}},{"type":"output","position":{"start":1979,"end":2009},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1979,"end":2009}},{"type":"Twig.expression.type.key.period","position":{"start":1979,"end":2009},"key":"post_excerpt"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":1979,"end":2009}}]},{"type":"raw","value":"</div>\n    ","position":{"start":2009,"end":2020}}]},"position":{"open":{"start":1910,"end":1937},"close":{"start":2020,"end":2031}}},{"type":"raw","value":"</div>\n","position":{"start":2032,"end":2032}}], precompiled: true, autoescape: true});
+    return module.exports;
+})/*END:twig.js runtime*/, timely.define("libs/twig", ["external_libs/twig"], function (e) {
     return e.extendFunction("ai1ec_disable_content_output", function () {
     }), e
 }), timely.define("agenda", ["libs/twig", "agenda"], function (e) {
     var t, n;
-    return t = e.twig, n = t(/*REPLACE:agenda.twig*/{id:"../public/js/agenda.twig", data:[{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"navigation","match":["navigation"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\n<div class=\"ai1ec-agenda-view\">\n    "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"dates","match":["dates"]},{"type":"Twig.expression.type.test","filter":"empty"}],"output":[{"type":"raw","value":"    <p class=\"ai1ec-no-results\">\n        "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_upcoming_events","match":["text_upcoming_events"]}]},{"type":"raw","value":"\n    </p>\n    "}]}},{"type":"logic","token":{"type":"Twig.logic.type.else","match":["else"],"output":[{"type":"raw","value":"    "},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":"date","value_var":"date_info","expression":[{"type":"Twig.expression.type.variable","value":"dates","match":["dates"]}],"output":[{"type":"raw","value":"    <div class=\"ai1ec-date"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"]},{"type":"Twig.expression.type.key.period","key":"today"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"output":[{"type":"raw","value":" ai1ec-today"}]}},{"type":"raw","value":"\">\n        <a class=\"ai1ec-date-title ai1ec-load-view\"\n           href=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"]},{"type":"Twig.expression.type.key.period","key":"href"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n                "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"data_type","match":["data_type"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":">\n            <div class=\"ai1ec-month\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"]},{"type":"Twig.expression.type.key.period","key":"month"}]},{"type":"raw","value":"</div>\n            <div class=\"ai1ec-day\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"]},{"type":"Twig.expression.type.key.period","key":"day"}]},{"type":"raw","value":"</div>\n            <div class=\"ai1ec-weekday\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"]},{"type":"Twig.expression.type.key.period","key":"weekday"}]},{"type":"raw","value":"</div>\n            "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_year_in_agenda_dates","match":["show_year_in_agenda_dates"]}],"output":[{"type":"raw","value":"                <div class=\"ai1ec-year\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"]},{"type":"Twig.expression.type.key.period","key":"year"}]},{"type":"raw","value":"</div>\n            "}]}},{"type":"raw","value":"        </a>\n        <div class=\"ai1ec-date-events\">\n            "},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":null,"value_var":"category","expression":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"]},{"type":"Twig.expression.type.key.period","key":"events"}],"output":[{"type":"raw","value":"            "},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":null,"value_var":"event","expression":[{"type":"Twig.expression.type.variable","value":"category","match":["category"]}],"output":[{"type":"raw","value":"            <div class=\"ai1ec-event\n\t\t\t\t\t\t\t\tai1ec-event-id-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_id"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\tai1ec-event-instance-id-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"instance_id"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_allday"}],"output":[{"type":"raw","value":"ai1ec-allday"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"expanded","match":["expanded"]}],"output":[{"type":"raw","value":"ai1ec-expanded"}]}},{"type":"raw","value":"\"\n                 data-end=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"end"}]},{"type":"raw","value":"\">\n\n\n                "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"no_toggle","match":["no_toggle"]}],"output":[{"type":"raw","value":"                <div class=\"ai1ec-event-header\">\n                    "}]}},{"type":"logic","token":{"type":"Twig.logic.type.else","match":["else"],"output":[{"type":"raw","value":"                    <div class=\"ai1ec-event-header ai1ec-event-header--toggle\">\n                        "}]}},{"type":"raw","value":"\n                        "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"expanded","match":["expanded"]},{"type":"Twig.expression.type.operator.unary","value":"not","precidence":3,"associativity":"rightToLeft","operator":"not"}],"output":[{"type":"raw","value":"                            <div class=\"ai1ec-event-toggle\">\n                                <i class=\"ai1ec-fa ai1ec-fa-minus-circle ai1ec-fa-lg\"></i>\n                                <i class=\"ai1ec-fa ai1ec-fa-plus-circle ai1ec-fa-lg\"></i>\n                            </div>\n                        "}]}},{"type":"raw","value":"                        "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"no_toggle","match":["no_toggle"]}],"output":[{"type":"raw","value":"                        <a href=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\" title=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_read_more","match":["text_read_more"]}]},{"type":"raw","value":"\">\n                            "}]}},{"type":"raw","value":"                            <span class=\"ai1ec-event-title\">\n\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"filtered_title"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n                                "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_location_in_title","match":["show_location_in_title"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"                                    <span class=\"ai1ec-event-location\"\n                                    >"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_venue_separator","match":["text_venue_separator"]}]},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"}]},{"type":"raw","value":"</span>\n                                "}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t</span>\n                            "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"no_toggle","match":["no_toggle"]}],"output":[{"type":"raw","value":"                        </a>\n                        "}]}},{"type":"raw","value":"                        "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"action_buttons","match":["action_buttons"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n                        "},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"edit_post_link","expression":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"edit_post_link"}]}},{"type":"raw","value":"                        "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"edit_post_link","match":["edit_post_link"]},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"output":[{"type":"raw","value":"                            <a class=\"post-edit-link\" href=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"edit_post_link","match":["edit_post_link"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\">\n                                <i class=\"ai1ec-fa ai1ec-fa-pencil\"></i> "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_edit","match":["text_edit"]}]},{"type":"raw","value":"\n                            </a>\n                        "}]}},{"type":"raw","value":"\n                        <div class=\"ai1ec-event-time\">\n                            "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"timespan_short"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n                        </div>\n                    </div>\n\n                    "},{"type":"raw","value":"\n                    <div class=\"ai1ec-event-summary "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"expanded","match":["expanded"]}],"output":[{"type":"raw","value":"ai1ec-expanded"}]}},{"type":"raw","value":"\">\n\n                        <div class=\"ai1ec-event-description\">\n                            "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"content_img_url"},{"type":"Twig.expression.type.test","filter":"empty"},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"avatar_not_wrapped"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"                                <a class=\"ai1ec-load-event\"\n                                   href=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\">\n                                    "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"avatar_not_wrapped"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n                                </a>\n                            "}]}},{"type":"raw","value":"                            "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"filtered_content"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n                        </div>\n\n                        <div class=\"ai1ec-event-summary-footer\">\n                            <div class=\"ai1ec-btn-group ai1ec-actions\">\n                                "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"is_ticket_button_enabled","match":["is_ticket_button_enabled"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"                                    <a class=\"ai1ec-pull-right ai1ec-btn ai1ec-btn-primary\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tai1ec-btn-xs ai1ec-buy-tickets\"\n                                       target=\"_blank\"\n                                       href=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n                                    >"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url_label"}]},{"type":"raw","value":"</a>\n                                "}]}},{"type":"raw","value":"                                <a class=\"ai1ec-read-more osec-read-more ai1ec-load-event action-link\"\n                                   href=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\">\n                                    "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_read_more","match":["text_read_more"]}]},{"type":"raw","value":" <i class=\"ai1ec-fa ai1ec-fa-arrow-right\"></i>\n                                </a>\n                            </div>\n                            "},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"categories","expression":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"categories_html"}]}},{"type":"raw","value":"                            "},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"tags","expression":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"tags_html"}]}},{"type":"raw","value":"                            "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"categories","match":["categories"]},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"output":[{"type":"raw","value":"                                <span class=\"ai1ec-categories\">\n\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-field-label\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t<i class=\"ai1ec-fa ai1ec-fa-folder-open\"></i>\n\t\t\t\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_categories","match":["text_categories"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"categories","match":["categories"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t\t</span>\n                            "}]}},{"type":"raw","value":"                            "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"tags","match":["tags"]},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"output":[{"type":"raw","value":"                                <span class=\"ai1ec-tags\">\n\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-field-label\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t<i class=\"ai1ec-fa ai1ec-fa-tags\"></i>\n\t\t\t\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_tags","match":["text_tags"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"tags","match":["tags"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t\t</span>\n                            "}]}},{"type":"raw","value":"                        </div>\n                    </div>\n\n                </div>\n                "}]}},{"type":"raw","value":" "},{"type":"raw","value":"\n                "}]}},{"type":"raw","value":" "},{"type":"raw","value":"\n            </div>\n        </div>\n        "}]}},{"type":"raw","value":" "},{"type":"raw","value":"\n        "}]}},{"type":"raw","value":" "},{"type":"raw","value":"\n    </div>\n\n    <div class=\"ai1ec-pull-left\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"pagination_links","match":["pagination_links"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"</div>\n"}], precompiled: true}/*REPLACE:agenda.twig*/), n
+    return t = e.twig, n = t(/*REPLACE:agenda.twig*/{id:"../public/js/agenda.twig", data:[{"type":"output","position":{"start":0,"end":22},"stack":[{"type":"Twig.expression.type.variable","value":"navigation","match":["navigation"],"position":{"start":0,"end":22}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":0,"end":22}}]},{"type":"raw","value":"\n\n<div class=\"ai1ec-agenda-view\">\n    ","position":{"start":22,"end":60}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"dates","match":["dates"]},{"type":"Twig.expression.type.test","filter":"empty"}],"position":{"start":60,"end":83},"output":[{"type":"raw","value":"    <p class=\"ai1ec-no-results\">\n        ","position":{"start":84,"end":125}},{"type":"output","position":{"start":125,"end":151},"stack":[{"type":"Twig.expression.type.variable","value":"text_upcoming_events","match":["text_upcoming_events"],"position":{"start":125,"end":151}}]},{"type":"raw","value":"\n    </p>\n    ","position":{"start":151,"end":165}}]},"position":{"open":{"start":60,"end":83},"close":{"start":165,"end":175}}},{"type":"logic","token":{"type":"Twig.logic.type.else","match":["else"],"position":{"start":165,"end":175},"output":[{"type":"raw","value":"    ","position":{"start":176,"end":180}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":"date","valueVar":"date_info","expression":[{"type":"Twig.expression.type.variable","value":"dates","match":["dates"]}],"position":{"start":180,"end":214},"output":[{"type":"raw","value":"    <div class=\"ai1ec-date","position":{"start":215,"end":241}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"]},{"type":"Twig.expression.type.key.period","key":"today"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"position":{"start":241,"end":278},"output":[{"type":"raw","value":" ai1ec-today","position":{"start":278,"end":290}}]},"position":{"open":{"start":241,"end":278},"close":{"start":290,"end":301}}},{"type":"raw","value":"\">\n        <a class=\"ai1ec-date-title ai1ec-load-view\"\n           href=\"","position":{"start":301,"end":373}},{"type":"output","position":{"start":373,"end":410},"stack":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"],"position":{"start":373,"end":410}},{"type":"Twig.expression.type.key.period","position":{"start":373,"end":410},"key":"href"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":373,"end":410},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":373,"end":410}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":373,"end":410}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":373,"end":410},"expression":false}]}]},{"type":"raw","value":"\"\n                ","position":{"start":410,"end":428}},{"type":"output","position":{"start":428,"end":449},"stack":[{"type":"Twig.expression.type.variable","value":"data_type","match":["data_type"],"position":{"start":428,"end":449}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":428,"end":449}}]},{"type":"raw","value":">\n            <div class=\"ai1ec-month\">","position":{"start":449,"end":488}},{"type":"output","position":{"start":488,"end":509},"stack":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"],"position":{"start":488,"end":509}},{"type":"Twig.expression.type.key.period","position":{"start":488,"end":509},"key":"month"}]},{"type":"raw","value":"</div>\n            <div class=\"ai1ec-day\">","position":{"start":509,"end":551}},{"type":"output","position":{"start":551,"end":570},"stack":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"],"position":{"start":551,"end":570}},{"type":"Twig.expression.type.key.period","position":{"start":551,"end":570},"key":"day"}]},{"type":"raw","value":"</div>\n            <div class=\"ai1ec-weekday\">","position":{"start":570,"end":616}},{"type":"output","position":{"start":616,"end":639},"stack":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"],"position":{"start":616,"end":639}},{"type":"Twig.expression.type.key.period","position":{"start":616,"end":639},"key":"weekday"}]},{"type":"raw","value":"</div>\n            ","position":{"start":639,"end":658}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_year_in_agenda_dates","match":["show_year_in_agenda_dates"]}],"position":{"start":658,"end":692},"output":[{"type":"raw","value":"                <div class=\"ai1ec-year\">","position":{"start":693,"end":733}},{"type":"output","position":{"start":733,"end":753},"stack":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"],"position":{"start":733,"end":753}},{"type":"Twig.expression.type.key.period","position":{"start":733,"end":753},"key":"year"}]},{"type":"raw","value":"</div>\n            ","position":{"start":753,"end":772}}]},"position":{"open":{"start":658,"end":692},"close":{"start":772,"end":783}}},{"type":"raw","value":"        </a>\n        <div class=\"ai1ec-date-events\">\n            ","position":{"start":784,"end":849}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":null,"valueVar":"category","expression":[{"type":"Twig.expression.type.variable","value":"date_info","match":["date_info"]},{"type":"Twig.expression.type.key.period","key":"events"}],"position":{"start":849,"end":887},"output":[{"type":"raw","value":"            ","position":{"start":888,"end":900}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":null,"valueVar":"event","expression":[{"type":"Twig.expression.type.variable","value":"category","match":["category"]}],"position":{"start":900,"end":927},"output":[{"type":"raw","value":"            <div class=\"ai1ec-event\n                                ai1ec-event-id-","position":{"start":928,"end":1011}},{"type":"output","position":{"start":1011,"end":1030},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1011,"end":1030}},{"type":"Twig.expression.type.key.period","position":{"start":1011,"end":1030},"key":"post_id"}]},{"type":"raw","value":"\n                                ai1ec-event-instance-id-","position":{"start":1030,"end":1087}},{"type":"output","position":{"start":1087,"end":1110},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1087,"end":1110}},{"type":"Twig.expression.type.key.period","position":{"start":1087,"end":1110},"key":"instance_id"}]},{"type":"raw","value":"\n                                ","position":{"start":1110,"end":1143}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_allday"}],"position":{"start":1143,"end":1167},"output":[{"type":"raw","value":"ai1ec-allday","position":{"start":1167,"end":1179}}]},"position":{"open":{"start":1143,"end":1167},"close":{"start":1179,"end":1190}}},{"type":"raw","value":"                                ","position":{"start":1191,"end":1223}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"expanded","match":["expanded"]}],"position":{"start":1223,"end":1240},"output":[{"type":"raw","value":"ai1ec-expanded","position":{"start":1240,"end":1254}}]},"position":{"open":{"start":1223,"end":1240},"close":{"start":1254,"end":1265}}},{"type":"raw","value":"\"\n                 data-end=\"","position":{"start":1265,"end":1294}},{"type":"output","position":{"start":1294,"end":1309},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1294,"end":1309}},{"type":"Twig.expression.type.key.period","position":{"start":1294,"end":1309},"key":"end"}]},{"type":"raw","value":"\">\n\n\n                ","position":{"start":1309,"end":1330}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"no_toggle","match":["no_toggle"]}],"position":{"start":1330,"end":1348},"output":[{"type":"raw","value":"                <div class=\"ai1ec-event-header\">\n                    ","position":{"start":1349,"end":1418}}]},"position":{"open":{"start":1330,"end":1348},"close":{"start":1418,"end":1428}}},{"type":"logic","token":{"type":"Twig.logic.type.else","match":["else"],"position":{"start":1418,"end":1428},"output":[{"type":"raw","value":"                    <div class=\"ai1ec-event-header ai1ec-event-header--toggle\">\n                        ","position":{"start":1429,"end":1533}}]},"position":{"open":{"start":1418,"end":1428},"close":{"start":1533,"end":1544}}},{"type":"raw","value":"\n                        ","position":{"start":1545,"end":1570}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"expanded","match":["expanded"]},{"type":"Twig.expression.type.operator.unary","value":"not","precidence":3,"associativity":"rightToLeft","operator":"not"}],"position":{"start":1570,"end":1591},"output":[{"type":"raw","value":"                            <div class=\"ai1ec-event-toggle\">\n                                <i class=\"ai1ec-fa ai1ec-fa-minus-circle ai1ec-fa-lg\"></i>\n                                <i class=\"ai1ec-fa ai1ec-fa-plus-circle ai1ec-fa-lg\"></i>\n                            </div>\n                        ","position":{"start":1592,"end":1893}}]},"position":{"open":{"start":1570,"end":1591},"close":{"start":1893,"end":1904}}},{"type":"raw","value":"                        ","position":{"start":1905,"end":1929}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"no_toggle","match":["no_toggle"]}],"position":{"start":1929,"end":1947},"output":[{"type":"raw","value":"                        <a href=\"","position":{"start":1948,"end":1981}},{"type":"output","position":{"start":1981,"end":2021},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1981,"end":2021}},{"type":"Twig.expression.type.key.period","position":{"start":1981,"end":2021},"key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":1981,"end":2021},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":1981,"end":2021}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":1981,"end":2021}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":1981,"end":2021},"expression":false}]}]},{"type":"raw","value":"\" title=\"","position":{"start":2021,"end":2030}},{"type":"output","position":{"start":2030,"end":2050},"stack":[{"type":"Twig.expression.type.variable","value":"text_read_more","match":["text_read_more"],"position":{"start":2030,"end":2050}}]},{"type":"raw","value":"\">\n                            ","position":{"start":2050,"end":2081}}]},"position":{"open":{"start":1929,"end":1947},"close":{"start":2081,"end":2092}}},{"type":"raw","value":"                            <span class=\"ai1ec-event-title\">\n                                        ","position":{"start":2093,"end":2194}},{"type":"output","position":{"start":2194,"end":2226},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":2194,"end":2226}},{"type":"Twig.expression.type.key.period","position":{"start":2194,"end":2226},"key":"filtered_title"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":2194,"end":2226}}]},{"type":"raw","value":"\n                                ","position":{"start":2226,"end":2259}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_location_in_title","match":["show_location_in_title"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"position":{"start":2259,"end":2319},"output":[{"type":"raw","value":"                                    <span class=\"ai1ec-event-location\"\n                                    >","position":{"start":2320,"end":2428}},{"type":"output","position":{"start":2428,"end":2453},"stack":[{"type":"Twig.expression.type.variable","value":"text_venue_separator","match":["text_venue_separator"],"position":{"start":2428,"end":2453}}]},{"type":"output","position":{"start":2453,"end":2470},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":2453,"end":2470}},{"type":"Twig.expression.type.key.period","position":{"start":2453,"end":2470},"key":"venue"}]},{"type":"raw","value":"</span>\n                                ","position":{"start":2470,"end":2510}}]},"position":{"open":{"start":2259,"end":2319},"close":{"start":2510,"end":2521}}},{"type":"raw","value":"                                    </span>\n                            ","position":{"start":2522,"end":2594}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"no_toggle","match":["no_toggle"]}],"position":{"start":2594,"end":2612},"output":[{"type":"raw","value":"                        </a>\n                        ","position":{"start":2613,"end":2666}}]},"position":{"open":{"start":2594,"end":2612},"close":{"start":2666,"end":2677}}},{"type":"raw","value":"                        ","position":{"start":2678,"end":2702}},{"type":"output","position":{"start":2702,"end":2728},"stack":[{"type":"Twig.expression.type.variable","value":"action_buttons","match":["action_buttons"],"position":{"start":2702,"end":2728}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":2702,"end":2728}}]},{"type":"raw","value":"\n                        ","position":{"start":2728,"end":2753}},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"edit_post_link","expression":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"edit_post_link"}],"position":{"start":2753,"end":2800}},"position":{"start":2753,"end":2800}},{"type":"raw","value":"                        ","position":{"start":2801,"end":2825}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"edit_post_link","match":["edit_post_link"]},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"position":{"start":2825,"end":2861},"output":[{"type":"raw","value":"                            <a class=\"post-edit-link\" href=\"","position":{"start":2862,"end":2922}},{"type":"output","position":{"start":2922,"end":2948},"stack":[{"type":"Twig.expression.type.variable","value":"edit_post_link","match":["edit_post_link"],"position":{"start":2922,"end":2948}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":2922,"end":2948}}]},{"type":"raw","value":"\">\n                                <i class=\"ai1ec-fa ai1ec-fa-pencil\"></i> ","position":{"start":2948,"end":3024}},{"type":"output","position":{"start":3024,"end":3039},"stack":[{"type":"Twig.expression.type.variable","value":"text_edit","match":["text_edit"],"position":{"start":3024,"end":3039}}]},{"type":"raw","value":"\n                            </a>\n                        ","position":{"start":3039,"end":3097}}]},"position":{"open":{"start":2825,"end":2861},"close":{"start":3097,"end":3108}}},{"type":"raw","value":"\n                        <div class=\"ai1ec-event-time\">\n                            ","position":{"start":3109,"end":3193}},{"type":"output","position":{"start":3193,"end":3225},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":3193,"end":3225}},{"type":"Twig.expression.type.key.period","position":{"start":3193,"end":3225},"key":"timespan_short"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":3193,"end":3225}}]},{"type":"raw","value":"\n                        </div>\n                    </div>\n\n                    ","position":{"start":3225,"end":3305}},{"type":"raw","value":"\n                    <div class=\"ai1ec-event-summary ","position":{"start":3340,"end":3393}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"expanded","match":["expanded"]}],"position":{"start":3393,"end":3410},"output":[{"type":"raw","value":"ai1ec-expanded","position":{"start":3410,"end":3424}}]},"position":{"open":{"start":3393,"end":3410},"close":{"start":3424,"end":3435}}},{"type":"raw","value":"\">\n\n                        <div class=\"ai1ec-event-description\">\n                            ","position":{"start":3435,"end":3529}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"content_img_url"},{"type":"Twig.expression.type.test","filter":"empty"},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"image_html"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"position":{"start":3529,"end":3602},"output":[{"type":"raw","value":"                                <a class=\"ai1ec-load-event\"\n                                   href=\"","position":{"start":3603,"end":3704}},{"type":"output","position":{"start":3704,"end":3742},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":3704,"end":3742}},{"type":"Twig.expression.type.key.period","position":{"start":3704,"end":3742},"key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":3704,"end":3742},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":3704,"end":3742}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":3704,"end":3742}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":3704,"end":3742},"expression":false}]}]},{"type":"raw","value":"\">\n                                    ","position":{"start":3742,"end":3781}},{"type":"output","position":{"start":3781,"end":3809},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":3781,"end":3809}},{"type":"Twig.expression.type.key.period","position":{"start":3781,"end":3809},"key":"image_html"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":3781,"end":3809}}]},{"type":"raw","value":"\n                                </a>\n                            ","position":{"start":3809,"end":3875}}]},"position":{"open":{"start":3529,"end":3602},"close":{"start":3875,"end":3886}}},{"type":"raw","value":"                            ","position":{"start":3887,"end":3915}},{"type":"output","position":{"start":3915,"end":3949},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":3915,"end":3949}},{"type":"Twig.expression.type.key.period","position":{"start":3915,"end":3949},"key":"filtered_content"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":3915,"end":3949}}]},{"type":"raw","value":"\n                        </div>\n\n                        <div class=\"ai1ec-event-summary-footer\">\n                            <div class=\"ai1ec-btn-group ai1ec-actions\">\n                                ","position":{"start":3949,"end":4151}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"is_ticket_button_enabled","match":["is_ticket_button_enabled"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"position":{"start":4151,"end":4218},"output":[{"type":"raw","value":"                                    <a class=\"ai1ec-pull-right ai1ec-btn ai1ec-btn-primary\n                                                        ai1ec-btn-xs ai1ec-buy-tickets\"\n                                       target=\"_blank\"\n                                       href=\"","position":{"start":4219,"end":4498}},{"type":"output","position":{"start":4498,"end":4537},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":4498,"end":4537}},{"type":"Twig.expression.type.key.period","position":{"start":4498,"end":4537},"key":"ticket_url"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":4498,"end":4537},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":4498,"end":4537}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":4498,"end":4537}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":4498,"end":4537},"expression":false}]}]},{"type":"raw","value":"\"\n                                    >","position":{"start":4537,"end":4576}},{"type":"output","position":{"start":4576,"end":4604},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":4576,"end":4604}},{"type":"Twig.expression.type.key.period","position":{"start":4576,"end":4604},"key":"ticket_url_label"}]},{"type":"raw","value":"</a>\n                                ","position":{"start":4604,"end":4641}}]},"position":{"open":{"start":4151,"end":4218},"close":{"start":4641,"end":4652}}},{"type":"raw","value":"                                <a class=\"ai1ec-read-more osec-read-more ai1ec-load-event action-link\"\n                                   href=\"","position":{"start":4653,"end":4797}},{"type":"output","position":{"start":4797,"end":4835},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":4797,"end":4835}},{"type":"Twig.expression.type.key.period","position":{"start":4797,"end":4835},"key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":4797,"end":4835},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":4797,"end":4835}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":4797,"end":4835}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":4797,"end":4835},"expression":false}]}]},{"type":"raw","value":"\">\n                                    ","position":{"start":4835,"end":4874}},{"type":"output","position":{"start":4874,"end":4894},"stack":[{"type":"Twig.expression.type.variable","value":"text_read_more","match":["text_read_more"],"position":{"start":4874,"end":4894}}]},{"type":"raw","value":" <i class=\"ai1ec-fa ai1ec-fa-arrow-right\"></i>\n                                </a>\n                            </div>\n                            ","position":{"start":4894,"end":5041}},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"categories","expression":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"categories_html"}],"position":{"start":5041,"end":5085}},"position":{"start":5041,"end":5085}},{"type":"raw","value":"                            ","position":{"start":5086,"end":5114}},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"tags","expression":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"tags_html"}],"position":{"start":5114,"end":5152}},"position":{"start":5114,"end":5152}},{"type":"raw","value":"                            ","position":{"start":5153,"end":5181}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"categories","match":["categories"]},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"position":{"start":5181,"end":5213},"output":[{"type":"raw","value":"                                <span class=\"ai1ec-categories\">\n                                                <span class=\"ai1ec-field-label\">\n                                                    <i class=\"ai1ec-fa ai1ec-fa-folder-open\"></i>\n                                                    ","position":{"start":5214,"end":5509}},{"type":"output","position":{"start":5509,"end":5530},"stack":[{"type":"Twig.expression.type.variable","value":"text_categories","match":["text_categories"],"position":{"start":5509,"end":5530}}]},{"type":"raw","value":"\n                                                </span>\n                                                ","position":{"start":5530,"end":5635}},{"type":"output","position":{"start":5635,"end":5657},"stack":[{"type":"Twig.expression.type.variable","value":"categories","match":["categories"],"position":{"start":5635,"end":5657}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":5635,"end":5657}}]},{"type":"raw","value":"\n                                            </span>\n                            ","position":{"start":5657,"end":5738}}]},"position":{"open":{"start":5181,"end":5213},"close":{"start":5738,"end":5749}}},{"type":"raw","value":"                            ","position":{"start":5750,"end":5778}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"tags","match":["tags"]},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"position":{"start":5778,"end":5804},"output":[{"type":"raw","value":"                                <span class=\"ai1ec-tags\">\n                                                <span class=\"ai1ec-field-label\">\n                                                    <i class=\"ai1ec-fa ai1ec-fa-tags\"></i>\n                                                    ","position":{"start":5805,"end":6087}},{"type":"output","position":{"start":6087,"end":6102},"stack":[{"type":"Twig.expression.type.variable","value":"text_tags","match":["text_tags"],"position":{"start":6087,"end":6102}}]},{"type":"raw","value":"\n                                                </span>\n                                                ","position":{"start":6102,"end":6207}},{"type":"output","position":{"start":6207,"end":6223},"stack":[{"type":"Twig.expression.type.variable","value":"tags","match":["tags"],"position":{"start":6207,"end":6223}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":6207,"end":6223}}]},{"type":"raw","value":"\n                                            </span>\n                            ","position":{"start":6223,"end":6304}}]},"position":{"open":{"start":5778,"end":5804},"close":{"start":6304,"end":6315}}},{"type":"raw","value":"                        </div>\n                    </div>\n\n                </div>\n                ","position":{"start":6316,"end":6414}}]},"position":{"open":{"start":900,"end":927},"close":{"start":6414,"end":6426}}},{"type":"raw","value":" ","position":{"start":6426,"end":6427}},{"type":"raw","value":"\n                ","position":{"start":6450,"end":6467}}]},"position":{"open":{"start":849,"end":887},"close":{"start":6467,"end":6479}}},{"type":"raw","value":" ","position":{"start":6479,"end":6480}},{"type":"raw","value":"\n            </div>\n        </div>\n        ","position":{"start":6514,"end":6557}}]},"position":{"open":{"start":180,"end":214},"close":{"start":6557,"end":6569}}},{"type":"raw","value":" ","position":{"start":6569,"end":6570}},{"type":"raw","value":"\n        ","position":{"start":6600,"end":6609}}]},"position":{"open":{"start":165,"end":175},"close":{"start":6609,"end":6620}}},{"type":"raw","value":" ","position":{"start":6620,"end":6621}},{"type":"raw","value":"\n    </div>\n\n    <div class=\"ai1ec-pull-left\">","position":{"start":6645,"end":6691}},{"type":"output","position":{"start":6691,"end":6719},"stack":[{"type":"Twig.expression.type.variable","value":"pagination_links","match":["pagination_links"],"position":{"start":6691,"end":6719}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":6691,"end":6719}}]},{"type":"raw","value":"</div>\n","position":{"start":6719,"end":6719}}], precompiled: true, autoescape: true, allowInlineIncludes: true}/*REPLACE:agenda.twig*/), n
 }), timely.define("oneday", ["libs/twig", "oneday"], function (e) {
     var t, n;
-    return t = e.twig, n = t(/*REPLACE:oneday.twig*/{id:"../public/js/oneday.twig", data:[{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"navigation","match":["navigation"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\n<table class=\"ai1ec-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"type","match":["type"]}]},{"type":"raw","value":"-view-original\">\n\t<thead>\n\t\t<tr>\n\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":"date","value_var":"day","expression":[{"type":"Twig.expression.type.variable","value":"cell_array","match":["cell_array"]}],"output":[{"type":"raw","value":"\t\t\t\t<th class=\"ai1ec-weekday "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"today"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"output":[{"type":"raw","value":"ai1ec-today"}]}},{"type":"raw","value":"\">\n\t\t\t\t\t"},{"type":"raw","value":"\n\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_reveal_button","match":["show_reveal_button"]},{"type":"Twig.expression.type.variable","value":"loop","match":["loop"]},{"type":"Twig.expression.type.key.period","key":"last"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t<div class=\"ai1ec-reveal-full-day\">\n\t\t\t\t\t\t\t<button class=\"ai1ec-btn ai1ec-btn-info ai1ec-btn-xs\n\t\t\t\t\t\t\t\t\tai1ec-tooltip-trigger\"\n\t\t\t\t\t\t\t\tdata-placement=\"left\"\n\t\t\t\t\t\t\t\ttitle=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_full_day","match":["text_full_day"]},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\">\n\t\t\t\t\t\t\t\t<i class=\"ai1ec-fa ai1ec-fa-expand\"></i>\n\t\t\t\t\t\t\t</button>\n\t\t\t\t\t\t</div>\n\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t<a class=\"ai1ec-load-view\" href=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"href"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"data_type","match":["data_type"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":">\n\t\t\t\t\t\t<span class=\"ai1ec-weekday-date\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"day"}]},{"type":"raw","value":"</span>\n\t\t\t\t\t\t<span class=\"ai1ec-weekday-day\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"weekday"}]},{"type":"raw","value":"</span>\n\t\t\t\t\t</a>\n\t\t\t\t</th>\n\t\t\t"}]}},{"type":"raw","value":"\t\t</tr>\n\t\t<tr>\n\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":null,"value_var":"day","expression":[{"type":"Twig.expression.type.variable","value":"cell_array","match":["cell_array"]}],"output":[{"type":"raw","value":"\t\t\t\t<td class=\"ai1ec-allday-events\n\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"today"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"output":[{"type":"raw","value":"ai1ec-today"}]}},{"type":"raw","value":"\">\n\n\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"loop","match":["loop"]},{"type":"Twig.expression.type.key.period","key":"first"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t<div class=\"ai1ec-allday-label\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_all_day","match":["text_all_day"]}]},{"type":"raw","value":"</div>\n\t\t\t\t\t"}]}},{"type":"raw","value":"\n\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":null,"value_var":"event","expression":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"allday"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t<a href=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\tdata-instance-id=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"instance_id"}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\tclass=\"ai1ec-event-container ai1ec-load-event ai1ec-popup-trigger\n\t\t\t\t\t\t\t\tai1ec-event-id-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_id"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\tai1ec-event-instance-id-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"instance_id"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\tai1ec-allday\n\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_multiday"}],"output":[{"type":"raw","value":"ai1ec-multiday"}]}},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t>\n\t\t\t\t\t\t\t<div class=\"ai1ec-event\"\n\t\t\t\t\t\t\t\t style=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"color_style"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\">\n\t\t\t\t\t\t\t\t<span class=\"ai1ec-event-title\">\n\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"filtered_title"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_location_in_title","match":["show_location_in_title"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-event-location\"\n\t\t\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_venue_separator","match":["text_venue_separator"]}]},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"}]},{"type":"raw","value":"</span>\n\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</a>\n\n\t\t\t\t\t\t<div class=\"ai1ec-popover ai1ec-popup ai1ec-popup-in-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"type","match":["type"]}]},{"type":"raw","value":"-view\n\t\t\t\t\t\t\t\t\tai1ec-event-id-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_id"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\tai1ec-event-instance-id-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"instance_id"}]},{"type":"raw","value":"\">\n\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"category_colors"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t<div class=\"ai1ec-color-swatches\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"category_colors"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"</div>\n\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t<span class=\"ai1ec-popup-title\">\n\t\t\t\t\t\t\t\t<a class=\"ai1ec-load-event\"\n\t\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"filtered_title"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"</a>\n\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_location_in_title","match":["show_location_in_title"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-event-location\"\n\t\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_venue_separator","match":["text_venue_separator"]}]},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"}]},{"type":"raw","value":"</span>\n\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"is_ticket_button_enabled","match":["is_ticket_button_enabled"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t<a class=\"ai1ec-pull-right ai1ec-btn ai1ec-btn-primary ai1ec-btn-xs\n\t\t\t\t\t\t\t\t\t\tai1ec-buy-tickets\" target=\"_blank\"\n\t\t\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url_label"}]},{"type":"raw","value":"</a>\n\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t</span>\n\n\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"edit_post_link"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t<a class=\"post-edit-link\"\n\t\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"edit_post_link"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\">\n\t\t\t\t\t\t\t\t\t<i class=\"ai1ec-fa ai1ec-fa-pencil\"></i> "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_edit","match":["text_edit"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\n\t\t\t\t\t\t\t<div class=\"ai1ec-event-time\">\n\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"popup_timespan"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t</div>\n\n\t\t\t\t\t\t\t<a class=\"ai1ec-load-event\"\n\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\">\n\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"avatar_not_wrapped"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"action_buttons","match":["action_buttons"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_excerpt"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t<div class=\"ai1ec-popup-excerpt\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_excerpt"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"</div>\n\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t</div>\n\n\t\t\t\t\t"}]}},{"type":"raw","value":" "},{"type":"raw","value":"\n\n\t\t\t\t</td>\n\t\t\t"}]}},{"type":"raw","value":" "},{"type":"raw","value":"\n\t\t</tr>\n\n\t</thead>\n\t<tbody>\n\t\t<tr class=\"ai1ec-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"type","match":["type"]}]},{"type":"raw","value":"\">\n\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":null,"value_var":"day","expression":[{"type":"Twig.expression.type.variable","value":"cell_array","match":["cell_array"]}],"output":[{"type":"raw","value":"\t\t\t\t<td "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"today"}],"output":[{"type":"raw","value":"class=\"ai1ec-today\""}]}},{"type":"raw","value":">\n\n\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"loop","match":["loop"]},{"type":"Twig.expression.type.key.period","key":"first"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t<div class=\"ai1ec-grid-container\">\n\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":"h","value_var":"hour","expression":[{"type":"Twig.expression.type.variable","value":"hours","match":["hours"]}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t<div class=\"ai1ec-hour-marker\n\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"h","match":["h"]},{"type":"Twig.expression.type.number","value":8,"match":["8",null]},{"type":"Twig.expression.type.operator.binary","value":">=","precidence":8,"associativity":"leftToRight","operator":">="},{"type":"Twig.expression.type.variable","value":"h","match":["h"]},{"type":"Twig.expression.type.number","value":18,"match":["18",null]},{"type":"Twig.expression.type.operator.binary","value":"<","precidence":8,"associativity":"leftToRight","operator":"<"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"ai1ec-business-hour"}]}},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\tstyle=\"top: "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"h","match":["h"]},{"type":"Twig.expression.type.number","value":60,"match":["60",null]},{"type":"Twig.expression.type.operator.binary","value":"*","precidence":5,"associativity":"leftToRight","operator":"*"}]},{"type":"raw","value":"px;\">\n\t\t\t\t\t\t\t\t\t<div>\n\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"hour","match":["hour"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":null,"value_var":"quarter","expression":[{"type":"Twig.expression.type.number","value":1,"match":["1",null]},{"type":"Twig.expression.type.number","value":3,"match":["3",null]},{"type":"Twig.expression.type.operator.binary","value":"..","precidence":20,"associativity":"leftToRight","operator":".."}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t<div class=\"ai1ec-quarter-marker\"\n\t\t\t\t\t\t\t\t\t\tstyle=\"top: "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"h","match":["h"]},{"type":"Twig.expression.type.number","value":60,"match":["60",null]},{"type":"Twig.expression.type.operator.binary","value":"*","precidence":5,"associativity":"leftToRight","operator":"*"},{"type":"Twig.expression.type.variable","value":"quarter","match":["quarter"]},{"type":"Twig.expression.type.number","value":15,"match":["15",null]},{"type":"Twig.expression.type.operator.binary","value":"*","precidence":5,"associativity":"leftToRight","operator":"*"},{"type":"Twig.expression.type.operator.binary","value":"+","precidence":6,"associativity":"leftToRight","operator":"+"}]},{"type":"raw","value":"px;\"></div>\n\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"today"},{"type":"Twig.expression.type.variable","value":"show_now","match":["show_now"]},{"type":"Twig.expression.type.operator.binary","value":"or","precidence":14,"associativity":"leftToRight","operator":"or"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t<div class=\"ai1ec-now-marker\" style=\"top: "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"now_top","match":["now_top"]}]},{"type":"raw","value":"px;\">\n\t\t\t\t\t\t\t\t\t<div>\n\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_now_label","match":["text_now_label"]}]},{"type":"raw","value":" "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"now_text","match":["now_text"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t</div>\n\t\t\t\t\t"}]}},{"type":"raw","value":"\n\t\t\t\t\t<div class=\"ai1ec-day\">\n\n\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":null,"value_var":"day_array","expression":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"notallday"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"event","expression":[{"type":"Twig.expression.type.variable","value":"day_array","match":["day_array"]},{"type":"Twig.expression.type.key.period","key":"event"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t<a href=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\tdata-instance-id=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"instance_id"}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\tclass=\"ai1ec-event-container ai1ec-load-event ai1ec-popup-trigger\n\t\t\t\t\t\t\t\t\tai1ec-event-id-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_id"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\tai1ec-event-instance-id-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"instance_id"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"start_truncated"}],"output":[{"type":"raw","value":"ai1ec-start-truncated"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"end_truncated"}],"output":[{"type":"raw","value":"ai1ec-end-truncated"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_multiday"}],"output":[{"type":"raw","value":"ai1ec-multiday"}]}},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\tstyle=\"top: "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"day_array","match":["day_array"]},{"type":"Twig.expression.type.key.period","key":"top"}]},{"type":"raw","value":"px;\n\t\t\t\t\t\t\t\t\theight: "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"day_array","match":["day_array"]},{"type":"Twig.expression.type.key.period","key":"height"}]},{"type":"raw","value":"px;\n\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day_array","match":["day_array"]},{"type":"Twig.expression.type.key.period","key":"indent_depth"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t"},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\tleft: calc("},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"indent_offset","match":["indent_offset"]}]},{"type":"raw","value":"px + "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"day_array","match":["day_array"]},{"type":"Twig.expression.type.key.period","key":"indent"}]},{"type":"raw","value":" * max(0px, min("},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"indent_multiplier","match":["indent_multiplier"]}]},{"type":"raw","value":"px, (100% - "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"indent_offset","match":["indent_offset"]}]},{"type":"raw","value":"px - 3em) / "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"day_array","match":["day_array"]},{"type":"Twig.expression.type.key.period","key":"indent_depth"}]},{"type":"raw","value":")));\n\t\t\t\t\t\t\t\t\t"}]}},{"type":"logic","token":{"type":"Twig.logic.type.else","match":["else"],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\tleft: "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"indent_offset","match":["indent_offset"]}]},{"type":"raw","value":"px;\n\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"color_style"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"faded_color","expression":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"faded_color"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"rgba_color","expression":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"rgba_color"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"faded_color","match":["faded_color"]}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"rgba1","expression":[{"type":"Twig.expression.type.variable","value":"rgba_color","match":["rgba_color"]},{"type":"Twig.expression.type.filter","value":"format","match":["| format","format"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"0.05"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"rgba3","expression":[{"type":"Twig.expression.type.variable","value":"rgba_color","match":["rgba_color"]},{"type":"Twig.expression.type.filter","value":"format","match":["| format","format"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"0.3"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\tborder: 1px solid "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"faded_color","match":["faded_color"]}]},{"type":"raw","value":";\n\t\t\t\t\t\t\t\t\t\tborder-color: "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"rgba_color","match":["rgba_color"]},{"type":"Twig.expression.type.filter","value":"format","match":["| format","format"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"0.5"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":";\n\t\t\t\t\t\t\t\t\t\tbackground-image: -webkit-linear-gradient( top, "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"rgba1","match":["rgba1"]}]},{"type":"raw","value":", "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"rgba3","match":["rgba3"]}]},{"type":"raw","value":" 50px );\n\t\t\t\t\t\t\t\t\t\tbackground-image: -moz-linear-gradient( top, "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"rgba1","match":["rgba1"]}]},{"type":"raw","value":", "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"rgba3","match":["rgba3"]}]},{"type":"raw","value":" 50px );\n\t\t\t\t\t\t\t\t\t\tbackground-image: -ms-linear-gradient( top, "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"rgba1","match":["rgba1"]}]},{"type":"raw","value":", "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"rgba3","match":["rgba3"]}]},{"type":"raw","value":" 50px );\n\t\t\t\t\t\t\t\t\t\tbackground-image: -o-linear-gradient( top, "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"rgba1","match":["rgba1"]}]},{"type":"raw","value":", "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"rgba3","match":["rgba3"]}]},{"type":"raw","value":" 50px );\n\t\t\t\t\t\t\t\t\t\tbackground-image: linear-gradient( top, "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"rgba1","match":["rgba1"]}]},{"type":"raw","value":", "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"rgba3","match":["rgba3"]}]},{"type":"raw","value":" 50px );\n\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\">\n\n\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"start_truncated"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t<div class=\"ai1ec-start-truncator\">◤</div>\n\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"end_truncated"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t<div class=\"ai1ec-end-truncator\">◢</div>\n\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t<div class=\"ai1ec-event\">\n\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-event-time\">\n\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"short_start_time"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-event-title\">\n\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"filtered_title"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_location_in_title","match":["show_location_in_title"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-event-location\"\n\t\t\t\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_venue_separator","match":["text_venue_separator"]}]},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"}]},{"type":"raw","value":"</span>\n\t\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t</div>\n\n\t\t\t\t\t\t\t</a>\n\n\t\t\t\t\t\t\t<div class=\"ai1ec-popover ai1ec-popup ai1ec-popup-in-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"type","match":["type"]}]},{"type":"raw","value":"-view\">\n\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"category_colors"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t<div class=\"ai1ec-color-swatches\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"category_colors"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"</div>\n\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t<span class=\"ai1ec-popup-title\">\n\t\t\t\t\t\t\t\t\t<a class=\"ai1ec-load-event\"\n\t\t\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"filtered_title"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"</a>\n\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_location_in_title","match":["show_location_in_title"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-event-location\"\n\t\t\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_venue_separator","match":["text_venue_separator"]}]},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"}]},{"type":"raw","value":"</span>\n\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"is_ticket_button_enabled","match":["is_ticket_button_enabled"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t<a class=\"ai1ec-pull-right ai1ec-btn ai1ec-btn-primary ai1ec-btn-xs\n\t\t\t\t\t\t\t\t\t\t\tai1ec-buy-tickets\" target=\"_blank\"\n\t\t\t\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url_label"}]},{"type":"raw","value":"</a>\n\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t</span>\n\n\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"edit_post_link"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t<a class=\"post-edit-link\"\n\t\t\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"edit_post_link"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\">\n\t\t\t\t\t\t\t\t\t\t<i class=\"ai1ec-fa ai1ec-fa-pencil\"></i> "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_edit","match":["text_edit"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t<div class=\"ai1ec-event-time\">\n\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"popup_timespan"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t</div>\n\n\t\t\t\t\t\t\t\t<a class=\"ai1ec-load-event\"\n\t\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\">\n\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"avatar_not_wrapped"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"action_buttons","match":["action_buttons"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_excerpt"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t<div class=\"ai1ec-popup-excerpt\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_excerpt"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"</div>\n\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t</div>\n\n\t\t\t\t\t\t"}]}},{"type":"raw","value":" "},{"type":"raw","value":"\n\t\t\t\t\t</div>\n\n\t\t\t\t</td>\n\t\t\t"}]}},{"type":"raw","value":" "},{"type":"raw","value":"\n\t\t</tr>\n\t</tbody>\n\n</table>\n\n<div class=\"ai1ec-pull-left\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"pagination_links","match":["pagination_links"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"</div>\n"}], precompiled: true}/*REPLACE:oneday.twig*/), n
+    return t = e.twig, n = t(/*REPLACE:oneday.twig*/{id:"../public/js/oneday.twig", data:[{"type":"output","position":{"start":0,"end":22},"stack":[{"type":"Twig.expression.type.variable","value":"navigation","match":["navigation"],"position":{"start":0,"end":22}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":0,"end":22}}]},{"type":"raw","value":"\n\n<table class=\"ai1ec-","position":{"start":22,"end":44}},{"type":"output","position":{"start":44,"end":54},"stack":[{"type":"Twig.expression.type.variable","value":"type","match":["type"],"position":{"start":44,"end":54}}]},{"type":"raw","value":"-view-original\">\n    <thead>\n        <tr>\n            ","position":{"start":54,"end":108}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":"date","valueVar":"day","expression":[{"type":"Twig.expression.type.variable","value":"cell_array","match":["cell_array"]}],"position":{"start":108,"end":141},"output":[{"type":"raw","value":"                <th class=\"ai1ec-weekday ","position":{"start":142,"end":183}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"today"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"position":{"start":183,"end":214},"output":[{"type":"raw","value":"ai1ec-today","position":{"start":214,"end":225}}]},"position":{"open":{"start":183,"end":214},"close":{"start":225,"end":236}}},{"type":"raw","value":"\">\n                    ","position":{"start":236,"end":259}},{"type":"raw","value":"\n                    ","position":{"start":304,"end":325}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_reveal_button","match":["show_reveal_button"]},{"type":"Twig.expression.type.variable","value":"loop","match":["loop"]},{"type":"Twig.expression.type.key.period","key":"last"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"position":{"start":325,"end":366},"output":[{"type":"raw","value":"                        <div class=\"ai1ec-reveal-full-day\">\n                            <button\n                                class=\"ai1ec-btn ai1ec-btn-info ai1ec-btn-xs ai1ec-tooltip-trigger\"\n                                data-placement=\"left\"\n                                title=\"","position":{"start":367,"end":656}},{"type":"output","position":{"start":656,"end":692},"stack":[{"type":"Twig.expression.type.variable","value":"text_full_day","match":["text_full_day"],"position":{"start":656,"end":692}},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":656,"end":692},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":656,"end":692}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":656,"end":692}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":656,"end":692},"expression":false}]}]},{"type":"raw","value":"\"\n                                aria-label=\"","position":{"start":692,"end":738}},{"type":"output","position":{"start":738,"end":774},"stack":[{"type":"Twig.expression.type.variable","value":"text_full_day","match":["text_full_day"],"position":{"start":738,"end":774}},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":738,"end":774},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":738,"end":774}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":738,"end":774}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":738,"end":774},"expression":false}]}]},{"type":"raw","value":"\"\n                            >\n                                <i class=\"ai1ec-fa ai1ec-fa-expand\"></i>\n                            </button>\n                        </div>\n                    ","position":{"start":774,"end":968}}]},"position":{"open":{"start":325,"end":366},"close":{"start":968,"end":979}}},{"type":"raw","value":"                    <a class=\"ai1ec-load-view\" href=\"","position":{"start":980,"end":1033}},{"type":"output","position":{"start":1033,"end":1066},"stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"],"position":{"start":1033,"end":1066}},{"type":"Twig.expression.type.key.period","position":{"start":1033,"end":1066},"key":"href"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":1033,"end":1066},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":1033,"end":1066}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":1033,"end":1066}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":1033,"end":1066},"expression":false}]}]},{"type":"raw","value":"\"\n                        ","position":{"start":1066,"end":1092}},{"type":"output","position":{"start":1092,"end":1113},"stack":[{"type":"Twig.expression.type.variable","value":"data_type","match":["data_type"],"position":{"start":1092,"end":1113}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":1092,"end":1113}}]},{"type":"raw","value":">\n                        <span class=\"ai1ec-weekday-date\">","position":{"start":1113,"end":1172}},{"type":"output","position":{"start":1172,"end":1185},"stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"],"position":{"start":1172,"end":1185}},{"type":"Twig.expression.type.key.period","position":{"start":1172,"end":1185},"key":"day"}]},{"type":"raw","value":"</span>\n                        <span class=\"ai1ec-weekday-day\">","position":{"start":1185,"end":1249}},{"type":"output","position":{"start":1249,"end":1266},"stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"],"position":{"start":1249,"end":1266}},{"type":"Twig.expression.type.key.period","position":{"start":1249,"end":1266},"key":"weekday"}]},{"type":"raw","value":"</span>\n                    </a>\n                </th>\n            ","position":{"start":1266,"end":1333}}]},"position":{"open":{"start":108,"end":141},"close":{"start":1333,"end":1345}}},{"type":"raw","value":"        </tr>\n        <tr>\n            ","position":{"start":1346,"end":1385}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":null,"valueVar":"day","expression":[{"type":"Twig.expression.type.variable","value":"cell_array","match":["cell_array"]}],"position":{"start":1385,"end":1412},"output":[{"type":"raw","value":"                <td class=\"ai1ec-allday-events\n                    ","position":{"start":1413,"end":1480}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"today"},{"type":"Twig.expression.type.test","filter":"empty","modifier":"not"}],"position":{"start":1480,"end":1511},"output":[{"type":"raw","value":"ai1ec-today","position":{"start":1511,"end":1522}}]},"position":{"open":{"start":1480,"end":1511},"close":{"start":1522,"end":1533}}},{"type":"raw","value":"\">\n\n                    ","position":{"start":1533,"end":1557}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"loop","match":["loop"]},{"type":"Twig.expression.type.key.period","key":"first"}],"position":{"start":1557,"end":1576},"output":[{"type":"raw","value":"                        <div class=\"ai1ec-allday-label\">","position":{"start":1577,"end":1633}},{"type":"output","position":{"start":1633,"end":1651},"stack":[{"type":"Twig.expression.type.variable","value":"text_all_day","match":["text_all_day"],"position":{"start":1633,"end":1651}}]},{"type":"raw","value":"</div>\n                    ","position":{"start":1651,"end":1678}}]},"position":{"open":{"start":1557,"end":1576},"close":{"start":1678,"end":1689}}},{"type":"raw","value":"\n                    ","position":{"start":1690,"end":1711}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":null,"valueVar":"event","expression":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"allday"}],"position":{"start":1711,"end":1740},"output":[{"type":"raw","value":"                        <a href=\"","position":{"start":1741,"end":1774}},{"type":"output","position":{"start":1774,"end":1814},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1774,"end":1814}},{"type":"Twig.expression.type.key.period","position":{"start":1774,"end":1814},"key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":1774,"end":1814},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":1774,"end":1814}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":1774,"end":1814}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":1774,"end":1814},"expression":false}]}]},{"type":"raw","value":"\"\n                            data-instance-id=\"","position":{"start":1814,"end":1862}},{"type":"output","position":{"start":1862,"end":1885},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1862,"end":1885}},{"type":"Twig.expression.type.key.period","position":{"start":1862,"end":1885},"key":"instance_id"}]},{"type":"raw","value":"\"\n                            class=\"ai1ec-event-container ai1ec-load-event ai1ec-popup-trigger\n                                ai1ec-event-id-","position":{"start":1885,"end":2028}},{"type":"output","position":{"start":2028,"end":2047},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":2028,"end":2047}},{"type":"Twig.expression.type.key.period","position":{"start":2028,"end":2047},"key":"post_id"}]},{"type":"raw","value":"\n                                ai1ec-event-instance-id-","position":{"start":2047,"end":2104}},{"type":"output","position":{"start":2104,"end":2127},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":2104,"end":2127}},{"type":"Twig.expression.type.key.period","position":{"start":2104,"end":2127},"key":"instance_id"}]},{"type":"raw","value":"\n                                ai1ec-allday\n                                ","position":{"start":2127,"end":2205}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_multiday"}],"position":{"start":2205,"end":2231},"output":[{"type":"raw","value":"ai1ec-multiday","position":{"start":2231,"end":2245}}]},"position":{"open":{"start":2205,"end":2231},"close":{"start":2245,"end":2256}}},{"type":"raw","value":"\"\n                            >\n                            <div class=\"ai1ec-event\"\n                                 style=\"","position":{"start":2256,"end":2381}},{"type":"output","position":{"start":2381,"end":2423},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":2381,"end":2423}},{"type":"Twig.expression.type.key.period","position":{"start":2381,"end":2423},"key":"color_style"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":2381,"end":2423},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":2381,"end":2423}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":2381,"end":2423}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":2381,"end":2423},"expression":false}]}]},{"type":"raw","value":"\">\n                                <span class=\"ai1ec-event-title\">\n                                    ","position":{"start":2423,"end":2527}},{"type":"output","position":{"start":2527,"end":2559},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":2527,"end":2559}},{"type":"Twig.expression.type.key.period","position":{"start":2527,"end":2559},"key":"filtered_title"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":2527,"end":2559}}]},{"type":"raw","value":"\n                                    ","position":{"start":2559,"end":2596}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_location_in_title","match":["show_location_in_title"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"position":{"start":2596,"end":2643},"output":[{"type":"raw","value":"                                        <span class=\"ai1ec-event-location\"\n                                            >","position":{"start":2644,"end":2764}},{"type":"output","position":{"start":2764,"end":2789},"stack":[{"type":"Twig.expression.type.variable","value":"text_venue_separator","match":["text_venue_separator"],"position":{"start":2764,"end":2789}}]},{"type":"output","position":{"start":2789,"end":2806},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":2789,"end":2806}},{"type":"Twig.expression.type.key.period","position":{"start":2789,"end":2806},"key":"venue"}]},{"type":"raw","value":"</span>\n                                    ","position":{"start":2806,"end":2850}}]},"position":{"open":{"start":2596,"end":2643},"close":{"start":2850,"end":2861}}},{"type":"raw","value":"                                </span>\n                            </div>\n                        </a>\n\n                        ","position":{"start":2862,"end":2991}},{"type":"logic","token":{"type":"Twig.logic.type.include","only":false,"ignoreMissing":false,"stack":[{"type":"Twig.expression.type.string","value":"event-popup.twig"}],"position":{"start":2991,"end":3023}},"position":{"start":2991,"end":3023}},{"type":"raw","value":"\n                    ","position":{"start":3024,"end":3045}}]},"position":{"open":{"start":1711,"end":1740},"close":{"start":3045,"end":3057}}},{"type":"raw","value":" ","position":{"start":3057,"end":3058}},{"type":"raw","value":"\n\n                </td>\n            ","position":{"start":3083,"end":3119}}]},"position":{"open":{"start":1385,"end":1412},"close":{"start":3119,"end":3131}}},{"type":"raw","value":" ","position":{"start":3131,"end":3132}},{"type":"raw","value":"\n        </tr>\n\n    </thead>\n    <tbody>\n        <tr class=\"ai1ec-","position":{"start":3155,"end":3221}},{"type":"output","position":{"start":3221,"end":3231},"stack":[{"type":"Twig.expression.type.variable","value":"type","match":["type"],"position":{"start":3221,"end":3231}}]},{"type":"raw","value":"\">\n            ","position":{"start":3231,"end":3246}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":null,"valueVar":"day","expression":[{"type":"Twig.expression.type.variable","value":"cell_array","match":["cell_array"]}],"position":{"start":3246,"end":3273},"output":[{"type":"raw","value":"                <td ","position":{"start":3274,"end":3294}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"today"}],"position":{"start":3294,"end":3312},"output":[{"type":"raw","value":"class=\"ai1ec-today\"","position":{"start":3312,"end":3331}}]},"position":{"open":{"start":3294,"end":3312},"close":{"start":3331,"end":3342}}},{"type":"raw","value":">\n\n                    ","position":{"start":3342,"end":3365}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"loop","match":["loop"]},{"type":"Twig.expression.type.key.period","key":"first"}],"position":{"start":3365,"end":3384},"output":[{"type":"raw","value":"                        <div class=\"ai1ec-grid-container\">\n                            ","position":{"start":3385,"end":3472}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":"h","valueVar":"hour","expression":[{"type":"Twig.expression.type.variable","value":"hours","match":["hours"]}],"position":{"start":3472,"end":3498},"output":[{"type":"raw","value":"                                <div class=\"ai1ec-hour-marker\n                                    ","position":{"start":3499,"end":3597}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"h","match":["h"]},{"type":"Twig.expression.type.number","value":8,"match":["8",null]},{"type":"Twig.expression.type.operator.binary","value":">=","precidence":8,"associativity":"leftToRight","operator":">="},{"type":"Twig.expression.type.variable","value":"h","match":["h"]},{"type":"Twig.expression.type.number","value":18,"match":["18",null]},{"type":"Twig.expression.type.operator.binary","value":"<","precidence":8,"associativity":"leftToRight","operator":"<"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"position":{"start":3597,"end":3623},"output":[{"type":"raw","value":"ai1ec-business-hour","position":{"start":3623,"end":3642}}]},"position":{"open":{"start":3597,"end":3623},"close":{"start":3642,"end":3653}}},{"type":"raw","value":"\"\n                                    style=\"top: ","position":{"start":3653,"end":3703}},{"type":"output","position":{"start":3703,"end":3715},"stack":[{"type":"Twig.expression.type.variable","value":"h","match":["h"],"position":{"start":3703,"end":3715}},{"type":"Twig.expression.type.number","value":60,"match":["60",null],"position":{"start":3703,"end":3715}},{"type":"Twig.expression.type.operator.binary","value":"*","position":{"start":3703,"end":3715},"precidence":5,"associativity":"leftToRight","operator":"*"}]},{"type":"raw","value":"px;\">\n                                    <div>\n                                        ","position":{"start":3715,"end":3803}},{"type":"output","position":{"start":3803,"end":3819},"stack":[{"type":"Twig.expression.type.variable","value":"hour","match":["hour"],"position":{"start":3803,"end":3819}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":3803,"end":3819}}]},{"type":"raw","value":"\n                                    </div>\n                                </div>\n                                ","position":{"start":3819,"end":3934}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":null,"valueVar":"quarter","expression":[{"type":"Twig.expression.type.number","value":1,"match":["1",null]},{"type":"Twig.expression.type.number","value":3,"match":["3",null]},{"type":"Twig.expression.type.operator.binary","value":"..","precidence":20,"associativity":"leftToRight","operator":".."}],"position":{"start":3934,"end":3959},"output":[{"type":"raw","value":"                                    <div class=\"ai1ec-quarter-marker\"\n                                        style=\"top: ","position":{"start":3960,"end":4082}},{"type":"output","position":{"start":4082,"end":4109},"stack":[{"type":"Twig.expression.type.variable","value":"h","match":["h"],"position":{"start":4082,"end":4109}},{"type":"Twig.expression.type.number","value":60,"match":["60",null],"position":{"start":4082,"end":4109}},{"type":"Twig.expression.type.operator.binary","value":"*","position":{"start":4082,"end":4109},"precidence":5,"associativity":"leftToRight","operator":"*"},{"type":"Twig.expression.type.variable","value":"quarter","match":["quarter"],"position":{"start":4082,"end":4109}},{"type":"Twig.expression.type.number","value":15,"match":["15",null],"position":{"start":4082,"end":4109}},{"type":"Twig.expression.type.operator.binary","value":"*","position":{"start":4082,"end":4109},"precidence":5,"associativity":"leftToRight","operator":"*"},{"type":"Twig.expression.type.operator.binary","value":"+","position":{"start":4082,"end":4109},"precidence":6,"associativity":"leftToRight","operator":"+"}]},{"type":"raw","value":"px;\"></div>\n                                ","position":{"start":4109,"end":4153}}]},"position":{"open":{"start":3934,"end":3959},"close":{"start":4153,"end":4165}}},{"type":"raw","value":"                            ","position":{"start":4166,"end":4194}}]},"position":{"open":{"start":3472,"end":3498},"close":{"start":4194,"end":4206}}},{"type":"raw","value":"                            ","position":{"start":4207,"end":4235}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"today"},{"type":"Twig.expression.type.variable","value":"show_now","match":["show_now"]},{"type":"Twig.expression.type.operator.binary","value":"or","precidence":14,"associativity":"leftToRight","operator":"or"}],"position":{"start":4235,"end":4265},"output":[{"type":"raw","value":"                                <div class=\"ai1ec-now-marker\" style=\"top: ","position":{"start":4266,"end":4340}},{"type":"output","position":{"start":4340,"end":4353},"stack":[{"type":"Twig.expression.type.variable","value":"now_top","match":["now_top"],"position":{"start":4340,"end":4353}}]},{"type":"raw","value":"px;\">\n                                    <div>\n                                        ","position":{"start":4353,"end":4441}},{"type":"output","position":{"start":4441,"end":4461},"stack":[{"type":"Twig.expression.type.variable","value":"text_now_label","match":["text_now_label"],"position":{"start":4441,"end":4461}}]},{"type":"raw","value":" ","position":{"start":4461,"end":4462}},{"type":"output","position":{"start":4462,"end":4476},"stack":[{"type":"Twig.expression.type.variable","value":"now_text","match":["now_text"],"position":{"start":4462,"end":4476}}]},{"type":"raw","value":"\n                                    </div>\n                                </div>\n                            ","position":{"start":4476,"end":4587}}]},"position":{"open":{"start":4235,"end":4265},"close":{"start":4587,"end":4598}}},{"type":"raw","value":"                        </div>\n                    ","position":{"start":4599,"end":4650}}]},"position":{"open":{"start":3365,"end":3384},"close":{"start":4650,"end":4661}}},{"type":"raw","value":"\n                    <div class=\"ai1ec-day\">\n\n                        ","position":{"start":4662,"end":4732}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":null,"valueVar":"day_array","expression":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"notallday"}],"position":{"start":4732,"end":4768},"output":[{"type":"raw","value":"                            ","position":{"start":4769,"end":4797}},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"event","expression":[{"type":"Twig.expression.type.variable","value":"day_array","match":["day_array"]},{"type":"Twig.expression.type.key.period","key":"event"}],"position":{"start":4797,"end":4830}},"position":{"start":4797,"end":4830}},{"type":"raw","value":"                            <a href=\"","position":{"start":4831,"end":4868}},{"type":"output","position":{"start":4868,"end":4908},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":4868,"end":4908}},{"type":"Twig.expression.type.key.period","position":{"start":4868,"end":4908},"key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":4868,"end":4908},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":4868,"end":4908}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":4868,"end":4908}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":4868,"end":4908},"expression":false}]}]},{"type":"raw","value":"\"\n                                data-instance-id=\"","position":{"start":4908,"end":4960}},{"type":"output","position":{"start":4960,"end":4983},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":4960,"end":4983}},{"type":"Twig.expression.type.key.period","position":{"start":4960,"end":4983},"key":"instance_id"}]},{"type":"raw","value":"\"\n                                class=\"ai1ec-event-container ai1ec-load-event ai1ec-popup-trigger\n                                    ai1ec-event-id-","position":{"start":4983,"end":5134}},{"type":"output","position":{"start":5134,"end":5153},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":5134,"end":5153}},{"type":"Twig.expression.type.key.period","position":{"start":5134,"end":5153},"key":"post_id"}]},{"type":"raw","value":"\n                                    ai1ec-event-instance-id-","position":{"start":5153,"end":5214}},{"type":"output","position":{"start":5214,"end":5237},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":5214,"end":5237}},{"type":"Twig.expression.type.key.period","position":{"start":5214,"end":5237},"key":"instance_id"}]},{"type":"raw","value":"\n                                    ","position":{"start":5237,"end":5274}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"start_truncated"}],"position":{"start":5274,"end":5304},"output":[{"type":"raw","value":"ai1ec-start-truncated","position":{"start":5304,"end":5325}}]},"position":{"open":{"start":5274,"end":5304},"close":{"start":5325,"end":5336}}},{"type":"raw","value":"                                    ","position":{"start":5337,"end":5373}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"end_truncated"}],"position":{"start":5373,"end":5401},"output":[{"type":"raw","value":"ai1ec-end-truncated","position":{"start":5401,"end":5420}}]},"position":{"open":{"start":5373,"end":5401},"close":{"start":5420,"end":5431}}},{"type":"raw","value":"                                    ","position":{"start":5432,"end":5468}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_multiday"}],"position":{"start":5468,"end":5494},"output":[{"type":"raw","value":"ai1ec-multiday","position":{"start":5494,"end":5508}}]},"position":{"open":{"start":5468,"end":5494},"close":{"start":5508,"end":5519}}},{"type":"raw","value":"\"\n                                style=\"top: ","position":{"start":5519,"end":5565}},{"type":"output","position":{"start":5565,"end":5584},"stack":[{"type":"Twig.expression.type.variable","value":"day_array","match":["day_array"],"position":{"start":5565,"end":5584}},{"type":"Twig.expression.type.key.period","position":{"start":5565,"end":5584},"key":"top"}]},{"type":"raw","value":"px;\n                                    height: ","position":{"start":5584,"end":5632}},{"type":"output","position":{"start":5632,"end":5654},"stack":[{"type":"Twig.expression.type.variable","value":"day_array","match":["day_array"],"position":{"start":5632,"end":5654}},{"type":"Twig.expression.type.key.period","position":{"start":5632,"end":5654},"key":"height"}]},{"type":"raw","value":"px;\n                                    ","position":{"start":5654,"end":5694}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day_array","match":["day_array"]},{"type":"Twig.expression.type.key.period","key":"indent_depth"}],"position":{"start":5694,"end":5725},"output":[{"type":"raw","value":"                                        ","position":{"start":5726,"end":5766}},{"type":"raw","value":"\n                                        left: calc(","position":{"start":5877,"end":5929}},{"type":"output","position":{"start":5929,"end":5948},"stack":[{"type":"Twig.expression.type.variable","value":"indent_offset","match":["indent_offset"],"position":{"start":5929,"end":5948}}]},{"type":"raw","value":"px + ","position":{"start":5948,"end":5953}},{"type":"output","position":{"start":5953,"end":5975},"stack":[{"type":"Twig.expression.type.variable","value":"day_array","match":["day_array"],"position":{"start":5953,"end":5975}},{"type":"Twig.expression.type.key.period","position":{"start":5953,"end":5975},"key":"indent"}]},{"type":"raw","value":" * max(0px, min(","position":{"start":5975,"end":5991}},{"type":"output","position":{"start":5991,"end":6014},"stack":[{"type":"Twig.expression.type.variable","value":"indent_multiplier","match":["indent_multiplier"],"position":{"start":5991,"end":6014}}]},{"type":"raw","value":"px, (100% - ","position":{"start":6014,"end":6026}},{"type":"output","position":{"start":6026,"end":6045},"stack":[{"type":"Twig.expression.type.variable","value":"indent_offset","match":["indent_offset"],"position":{"start":6026,"end":6045}}]},{"type":"raw","value":"px - 3em) / ","position":{"start":6045,"end":6057}},{"type":"output","position":{"start":6057,"end":6085},"stack":[{"type":"Twig.expression.type.variable","value":"day_array","match":["day_array"],"position":{"start":6057,"end":6085}},{"type":"Twig.expression.type.key.period","position":{"start":6057,"end":6085},"key":"indent_depth"}]},{"type":"raw","value":")));\n                                    ","position":{"start":6085,"end":6126}}]},"position":{"open":{"start":5694,"end":5725},"close":{"start":6126,"end":6136}}},{"type":"logic","token":{"type":"Twig.logic.type.else","match":["else"],"position":{"start":6126,"end":6136},"output":[{"type":"raw","value":"                                        left: ","position":{"start":6137,"end":6183}},{"type":"output","position":{"start":6183,"end":6202},"stack":[{"type":"Twig.expression.type.variable","value":"indent_offset","match":["indent_offset"],"position":{"start":6183,"end":6202}}]},{"type":"raw","value":"px;\n                                    ","position":{"start":6202,"end":6242}}]},"position":{"open":{"start":6126,"end":6136},"close":{"start":6242,"end":6253}}},{"type":"raw","value":"                                    ","position":{"start":6254,"end":6290}},{"type":"output","position":{"start":6290,"end":6313},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":6290,"end":6313}},{"type":"Twig.expression.type.key.period","position":{"start":6290,"end":6313},"key":"color_style"}]},{"type":"raw","value":"\n                                    ","position":{"start":6313,"end":6350}},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"faded_color","expression":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"faded_color"}],"position":{"start":6350,"end":6391}},"position":{"start":6350,"end":6391}},{"type":"raw","value":"                                    ","position":{"start":6392,"end":6428}},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"rgba_color","expression":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"rgba_color"}],"position":{"start":6428,"end":6468}},"position":{"start":6428,"end":6468}},{"type":"raw","value":"                                    ","position":{"start":6469,"end":6505}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"faded_color","match":["faded_color"]}],"position":{"start":6505,"end":6525},"output":[{"type":"raw","value":"                                        ","position":{"start":6526,"end":6566}},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"rgba1","expression":[{"type":"Twig.expression.type.variable","value":"rgba_color","match":["rgba_color"]},{"type":"Twig.expression.type.filter","value":"format","match":["| format","format"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"0.05"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}],"position":{"start":6566,"end":6613}},"position":{"start":6566,"end":6613}},{"type":"raw","value":"                                        ","position":{"start":6614,"end":6654}},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"rgba3","expression":[{"type":"Twig.expression.type.variable","value":"rgba_color","match":["rgba_color"]},{"type":"Twig.expression.type.filter","value":"format","match":["| format","format"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"0.3"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}],"position":{"start":6654,"end":6700}},"position":{"start":6654,"end":6700}},{"type":"raw","value":"                                        border: 1px solid ","position":{"start":6701,"end":6759}},{"type":"output","position":{"start":6759,"end":6776},"stack":[{"type":"Twig.expression.type.variable","value":"faded_color","match":["faded_color"],"position":{"start":6759,"end":6776}}]},{"type":"raw","value":";\n                                        border-color: ","position":{"start":6776,"end":6832}},{"type":"output","position":{"start":6832,"end":6866},"stack":[{"type":"Twig.expression.type.variable","value":"rgba_color","match":["rgba_color"],"position":{"start":6832,"end":6866}},{"type":"Twig.expression.type.filter","value":"format","match":["| format","format"],"position":{"start":6832,"end":6866},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":6832,"end":6866}},{"type":"Twig.expression.type.string","value":"0.5","position":{"start":6832,"end":6866}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":6832,"end":6866},"expression":false}]}]},{"type":"raw","value":";\n                                        background-image: -webkit-linear-gradient( top, ","position":{"start":6866,"end":6956}},{"type":"output","position":{"start":6956,"end":6967},"stack":[{"type":"Twig.expression.type.variable","value":"rgba1","match":["rgba1"],"position":{"start":6956,"end":6967}}]},{"type":"raw","value":", ","position":{"start":6967,"end":6969}},{"type":"output","position":{"start":6969,"end":6980},"stack":[{"type":"Twig.expression.type.variable","value":"rgba3","match":["rgba3"],"position":{"start":6969,"end":6980}}]},{"type":"raw","value":" 50px );\n                                        background-image: -moz-linear-gradient( top, ","position":{"start":6980,"end":7074}},{"type":"output","position":{"start":7074,"end":7085},"stack":[{"type":"Twig.expression.type.variable","value":"rgba1","match":["rgba1"],"position":{"start":7074,"end":7085}}]},{"type":"raw","value":", ","position":{"start":7085,"end":7087}},{"type":"output","position":{"start":7087,"end":7098},"stack":[{"type":"Twig.expression.type.variable","value":"rgba3","match":["rgba3"],"position":{"start":7087,"end":7098}}]},{"type":"raw","value":" 50px );\n                                        background-image: -ms-linear-gradient( top, ","position":{"start":7098,"end":7191}},{"type":"output","position":{"start":7191,"end":7202},"stack":[{"type":"Twig.expression.type.variable","value":"rgba1","match":["rgba1"],"position":{"start":7191,"end":7202}}]},{"type":"raw","value":", ","position":{"start":7202,"end":7204}},{"type":"output","position":{"start":7204,"end":7215},"stack":[{"type":"Twig.expression.type.variable","value":"rgba3","match":["rgba3"],"position":{"start":7204,"end":7215}}]},{"type":"raw","value":" 50px );\n                                        background-image: -o-linear-gradient( top, ","position":{"start":7215,"end":7307}},{"type":"output","position":{"start":7307,"end":7318},"stack":[{"type":"Twig.expression.type.variable","value":"rgba1","match":["rgba1"],"position":{"start":7307,"end":7318}}]},{"type":"raw","value":", ","position":{"start":7318,"end":7320}},{"type":"output","position":{"start":7320,"end":7331},"stack":[{"type":"Twig.expression.type.variable","value":"rgba3","match":["rgba3"],"position":{"start":7320,"end":7331}}]},{"type":"raw","value":" 50px );\n                                        background-image: linear-gradient( top, ","position":{"start":7331,"end":7420}},{"type":"output","position":{"start":7420,"end":7431},"stack":[{"type":"Twig.expression.type.variable","value":"rgba1","match":["rgba1"],"position":{"start":7420,"end":7431}}]},{"type":"raw","value":", ","position":{"start":7431,"end":7433}},{"type":"output","position":{"start":7433,"end":7444},"stack":[{"type":"Twig.expression.type.variable","value":"rgba3","match":["rgba3"],"position":{"start":7433,"end":7444}}]},{"type":"raw","value":" 50px );\n                                    ","position":{"start":7444,"end":7489}}]},"position":{"open":{"start":6505,"end":6525},"close":{"start":7489,"end":7500}}},{"type":"raw","value":"                                    \">\n\n                                ","position":{"start":7501,"end":7573}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"start_truncated"}],"position":{"start":7573,"end":7603},"output":[{"type":"raw","value":"                                    <div class=\"ai1ec-start-truncator\">◤</div>\n                                ","position":{"start":7604,"end":7715}}]},"position":{"open":{"start":7573,"end":7603},"close":{"start":7715,"end":7726}}},{"type":"raw","value":"                                ","position":{"start":7727,"end":7759}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"end_truncated"}],"position":{"start":7759,"end":7787},"output":[{"type":"raw","value":"                                    <div class=\"ai1ec-end-truncator\">◢</div>\n                                ","position":{"start":7788,"end":7897}}]},"position":{"open":{"start":7759,"end":7787},"close":{"start":7897,"end":7908}}},{"type":"raw","value":"\n                                <div class=\"ai1ec-event\">\n                                    <span class=\"ai1ec-event-time\">\n                                        ","position":{"start":7909,"end":8076}},{"type":"output","position":{"start":8076,"end":8104},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":8076,"end":8104}},{"type":"Twig.expression.type.key.period","position":{"start":8076,"end":8104},"key":"short_start_time"}]},{"type":"raw","value":"\n                                    </span>\n                                    <span class=\"ai1ec-event-title\">\n                                        ","position":{"start":8104,"end":8258}},{"type":"output","position":{"start":8258,"end":8290},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":8258,"end":8290}},{"type":"Twig.expression.type.key.period","position":{"start":8258,"end":8290},"key":"filtered_title"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":8258,"end":8290}}]},{"type":"raw","value":"\n                                        ","position":{"start":8290,"end":8331}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_location_in_title","match":["show_location_in_title"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"position":{"start":8331,"end":8378},"output":[{"type":"raw","value":"                                            <span class=\"ai1ec-event-location\"\n                                                >","position":{"start":8379,"end":8507}},{"type":"output","position":{"start":8507,"end":8532},"stack":[{"type":"Twig.expression.type.variable","value":"text_venue_separator","match":["text_venue_separator"],"position":{"start":8507,"end":8532}}]},{"type":"output","position":{"start":8532,"end":8549},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":8532,"end":8549}},{"type":"Twig.expression.type.key.period","position":{"start":8532,"end":8549},"key":"venue"}]},{"type":"raw","value":"</span>\n                                        ","position":{"start":8549,"end":8597}}]},"position":{"open":{"start":8331,"end":8378},"close":{"start":8597,"end":8608}}},{"type":"raw","value":"                                    </span>\n                                </div>\n\n                            </a>\n\n                            ","position":{"start":8609,"end":8755}},{"type":"logic","token":{"type":"Twig.logic.type.include","only":false,"ignoreMissing":false,"stack":[{"type":"Twig.expression.type.string","value":"event-popup.twig"}],"position":{"start":8755,"end":8787}},"position":{"start":8755,"end":8787}},{"type":"raw","value":"\n                        ","position":{"start":8788,"end":8813}}]},"position":{"open":{"start":4732,"end":4768},"close":{"start":8813,"end":8825}}},{"type":"raw","value":" ","position":{"start":8825,"end":8826}},{"type":"raw","value":"\n                    </div>\n\n                </td>\n            ","position":{"start":8857,"end":8920}}]},"position":{"open":{"start":3246,"end":3273},"close":{"start":8920,"end":8932}}},{"type":"raw","value":" ","position":{"start":8932,"end":8933}},{"type":"raw","value":"\n        </tr>\n    </tbody>\n\n</table>\n\n<div class=\"ai1ec-pull-left\">","position":{"start":8956,"end":9024}},{"type":"output","position":{"start":9024,"end":9052},"stack":[{"type":"Twig.expression.type.variable","value":"pagination_links","match":["pagination_links"],"position":{"start":9024,"end":9052}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":9024,"end":9052}}]},{"type":"raw","value":"</div>\n","position":{"start":9052,"end":9052}}], precompiled: true, autoescape: true, allowInlineIncludes: true}/*REPLACE:oneday.twig*/), n
 }), timely.define("month", ["libs/twig", "month"], function (e) {
     var t, n;
-    return t = e.twig, n = t(/*REPLACE:month.twig*/{id:"../public/js/month.twig", data:[{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"navigation","match":["navigation"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\n<table class=\"ai1ec-month-view ai1ec-popover-boundary\n\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"month_word_wrap","match":["month_word_wrap"]}],"output":[{"type":"raw","value":"ai1ec-word-wrap"}]}},{"type":"raw","value":"\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"month_show_times","match":["month_show_times"]},{"type":"Twig.expression.type.operator.unary","value":"not","precidence":3,"associativity":"rightToLeft","operator":"not"}],"output":[{"type":"raw","value":"ai1ec-no-times"}]}},{"type":"raw","value":"\">\n\t<thead>\n\t\t<tr>\n\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":null,"value_var":"weekday","expression":[{"type":"Twig.expression.type.variable","value":"weekdays","match":["weekdays"]}],"output":[{"type":"raw","value":"\t\t\t\t<th scope=\"col\" class=\"ai1ec-weekday\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"weekday","match":["weekday"]}]},{"type":"raw","value":"</th>\n\t\t\t"}]}},{"type":"raw","value":"\t\t</tr>\n\t</thead>\n\t<tbody>\n\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":null,"value_var":"week","expression":[{"type":"Twig.expression.type.variable","value":"cell_array","match":["cell_array"]}],"output":[{"type":"raw","value":"\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"added_stretcher","expression":[{"type":"Twig.expression.type.bool","value":false}]}},{"type":"raw","value":"\t\t\t<tr class=\"ai1ec-week\">\n\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":null,"value_var":"day","expression":[{"type":"Twig.expression.type.variable","value":"week","match":["week"]}],"output":[{"type":"raw","value":"\n\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"date"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t<td "},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"today"}],"output":[{"type":"raw","value":"class=\"ai1ec-today\""}]}},{"type":"raw","value":">\n\t\t\t\t\t\t\t"},{"type":"raw","value":"\n\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"added_stretcher","match":["added_stretcher"]},{"type":"Twig.expression.type.operator.unary","value":"not","precidence":3,"associativity":"rightToLeft","operator":"not"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t<div class=\"ai1ec-day-stretcher\"></div>\n\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"added_stretcher","expression":[{"type":"Twig.expression.type.bool","value":true}]}},{"type":"raw","value":"\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\n\t\t\t\t\t\t\t<div class=\"ai1ec-day\">\n\t\t\t\t\t\t\t\t<div class=\"ai1ec-date\">\n\t\t\t\t\t\t\t\t\t<a class=\"ai1ec-load-view\"\n\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"data_type","match":["data_type"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"date_link"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"date"}]},{"type":"raw","value":"</a>\n\t\t\t\t\t\t\t\t</div>\n\n\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.for","key_var":null,"value_var":"event","expression":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"events"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t<a href=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_multiday"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\tdata-start-day=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"start_day"}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\t\tdata-end-day=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"multiday_end_day"}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\t\tdata-start-truncated=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"start_truncated"},{"type":"Twig.expression.type.string","value":"true"},{"type":"Twig.expression.type.string","value":"false"},{"type":"Twig.expression.type.operator.binary","value":"?","precidence":16,"associativity":"rightToLeft","operator":"?"}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\t\tdata-end-truncated=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"end_truncated"},{"type":"Twig.expression.type.string","value":"true"},{"type":"Twig.expression.type.string","value":"false"},{"type":"Twig.expression.type.operator.binary","value":"?","precidence":16,"associativity":"rightToLeft","operator":"?"}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\tdata-instance-id=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"instance_id"}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\tclass=\"ai1ec-event-container ai1ec-load-event\n\t\t\t\t\t\t\t\t\t\t\tai1ec-popup-trigger\n\t\t\t\t\t\t\t\t\t\t\tai1ec-event-id-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_id"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t\tai1ec-event-instance-id-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"instance_id"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_allday"}],"output":[{"type":"raw","value":"ai1ec-allday"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_multiday"}],"output":[{"type":"raw","value":"ai1ec-multiday"}]}},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\t>\n\n\t\t\t\t\t\t\t\t\t\t<div class=\"ai1ec-event\"\n\t\t\t\t\t\t\t\t\t\t\t style=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"color_style"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\">\n\t\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"month_show_times","match":["month_show_times"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_allday"},{"type":"Twig.expression.type.operator.unary","value":"not","precidence":3,"associativity":"rightToLeft","operator":"not"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-event-time\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"timespan"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\t\t\t\t"},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-event-time ai1ec-event-time-short\">\n\t\t\t\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"short_start_time"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-event-title\">\n\t\t\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"filtered_title"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_location_in_title","match":["show_location_in_title"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-event-location\"\n\t\t\t\t\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_venue_separator","match":["text_venue_separator"]}]},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"}]},{"type":"raw","value":"</span>\n\t\t\t\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\t</span>\n\t\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t\t</a>\n\n\t\t\t\t\t\t\t\t\t<div class=\"ai1ec-popover ai1ec-popup ai1ec-popup-in-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"type","match":["type"]}]},{"type":"raw","value":"-view\n\t\t\t\t\t\t\t\t\t            ai1ec-event-id-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_id"}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t            ai1ec-event-instance-id-"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"instance_id"}]},{"type":"raw","value":"\">\n\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"category_colors"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\t<div class=\"ai1ec-color-swatches\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"category_colors"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"</div>\n\t\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-popup-title\">\n\t\t\t\t\t\t\t\t\t\t\t<a class=\"ai1ec-load-event\"\n\t\t\t\t\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"filtered_title"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"</a>\n\t\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_location_in_title","match":["show_location_in_title"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\t\t<span class=\"ai1ec-event-location\"\n\t\t\t\t\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_venue_separator","match":["text_venue_separator"]}]},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"}]},{"type":"raw","value":"</span>\n\t\t\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"is_ticket_button_enabled","match":["is_ticket_button_enabled"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\t\t<a class=\"ai1ec-pull-right ai1ec-btn ai1ec-btn-primary ai1ec-btn-xs\n\t\t\t\t\t\t\t\t\t\t\t\t\tai1ec-buy-tickets\" target=\"_blank\"\n\t\t\t\t\t\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\"\n\t\t\t\t\t\t\t\t\t\t\t\t\t>"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"ticket_url_label"}]},{"type":"raw","value":"</a>\n\t\t\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t</span>\n\n\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"edit_post_link"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\t<a class=\"post-edit-link\"\n\t\t\t\t\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"edit_post_link"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\">\n\t\t\t\t\t\t\t\t\t\t\t\t<i class=\"ai1ec-fa ai1ec-fa-pencil\"></i> "},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"text_edit","match":["text_edit"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t<div class=\"ai1ec-event-time\">\n\t\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"popup_timespan"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t</div>\n\n\t\t\t\t\t\t\t\t\t\t<a class=\"ai1ec-load-event\"\n\t\t\t\t\t\t\t\t\t\t\thref=\""},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("]},{"type":"Twig.expression.type.string","value":"html_attr"},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"expression":false}]}]},{"type":"raw","value":"\">\n\t\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"avatar_not_wrapped"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\t\t\t\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t\t\t\t\t"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"action_buttons","match":["action_buttons"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"\n\n\t\t\t\t\t\t\t\t\t\t"},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_excerpt"}],"output":[{"type":"raw","value":"\t\t\t\t\t\t\t\t\t\t\t<div class=\"ai1ec-popup-excerpt\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"post_excerpt"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"</div>\n\t\t\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t\t\t"}]}},{"type":"raw","value":"\t\t\t\t\t\t\t</div>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t"}]}},{"type":"logic","token":{"type":"Twig.logic.type.else","match":["else"],"output":[{"type":"raw","value":" "},{"type":"raw","value":"\n\t\t\t\t\t\t<td class=\"ai1ec-empty\"></td>\n\t\t\t\t\t"}]}},{"type":"raw","value":" "},{"type":"raw","value":"\n\n\t\t\t\t"}]}},{"type":"raw","value":" "},{"type":"raw","value":"\n\t\t\t</tr>\n\t\t"}]}},{"type":"raw","value":" "},{"type":"raw","value":"\n\t</tbody>\n</table>\n\n<div class=\"ai1ec-pull-left\">"},{"type":"output","stack":[{"type":"Twig.expression.type.variable","value":"pagination_links","match":["pagination_links"]},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"]}]},{"type":"raw","value":"</div>\n"}], precompiled: true}/*REPLACE:month.twig*/), n
+    return t = e.twig, n = t(/*REPLACE:month.twig*/{id:"../public/js/month.twig", data:[{"type":"output","position":{"start":0,"end":22},"stack":[{"type":"Twig.expression.type.variable","value":"navigation","match":["navigation"],"position":{"start":0,"end":22}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":0,"end":22}}]},{"type":"raw","value":"\n\n<table class=\"ai1ec-month-view ai1ec-popover-boundary\n    ","position":{"start":22,"end":82}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"month_word_wrap","match":["month_word_wrap"]}],"position":{"start":82,"end":106},"output":[{"type":"raw","value":"ai1ec-word-wrap","position":{"start":106,"end":121}}]},"position":{"open":{"start":82,"end":106},"close":{"start":121,"end":132}}},{"type":"raw","value":"    ","position":{"start":133,"end":137}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"month_show_times","match":["month_show_times"]},{"type":"Twig.expression.type.operator.unary","value":"not","precidence":3,"associativity":"rightToLeft","operator":"not"}],"position":{"start":137,"end":166},"output":[{"type":"raw","value":"ai1ec-no-times","position":{"start":166,"end":180}}]},"position":{"open":{"start":137,"end":166},"close":{"start":180,"end":191}}},{"type":"raw","value":"\">\n    <thead>\n        <tr>\n            ","position":{"start":191,"end":231}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":null,"valueVar":"weekday","expression":[{"type":"Twig.expression.type.variable","value":"weekdays","match":["weekdays"]}],"position":{"start":231,"end":260},"output":[{"type":"raw","value":"                <th scope=\"col\" class=\"ai1ec-weekday\">","position":{"start":261,"end":315}},{"type":"output","position":{"start":315,"end":328},"stack":[{"type":"Twig.expression.type.variable","value":"weekday","match":["weekday"],"position":{"start":315,"end":328}}]},{"type":"raw","value":"</th>\n            ","position":{"start":328,"end":346}}]},"position":{"open":{"start":231,"end":260},"close":{"start":346,"end":358}}},{"type":"raw","value":"        </tr>\n    </thead>\n    <tbody>\n        ","position":{"start":359,"end":406}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":null,"valueVar":"week","expression":[{"type":"Twig.expression.type.variable","value":"cell_array","match":["cell_array"]}],"position":{"start":406,"end":434},"output":[{"type":"raw","value":"            ","position":{"start":435,"end":447}},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"added_stretcher","expression":[{"type":"Twig.expression.type.bool","value":false}],"position":{"start":447,"end":480}},"position":{"start":447,"end":480}},{"type":"raw","value":"            <tr class=\"ai1ec-week\">\n                ","position":{"start":481,"end":533}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":null,"valueVar":"day","expression":[{"type":"Twig.expression.type.variable","value":"week","match":["week"]}],"position":{"start":533,"end":554},"output":[{"type":"raw","value":"\n                    ","position":{"start":555,"end":576}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"date"}],"position":{"start":576,"end":593},"output":[{"type":"raw","value":"                        <td ","position":{"start":594,"end":622}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"today"}],"position":{"start":622,"end":640},"output":[{"type":"raw","value":"class=\"ai1ec-today\"","position":{"start":640,"end":659}}]},"position":{"open":{"start":622,"end":640},"close":{"start":659,"end":670}}},{"type":"raw","value":">\n                            ","position":{"start":670,"end":700}},{"type":"raw","value":"\n                            ","position":{"start":761,"end":790}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"added_stretcher","match":["added_stretcher"]},{"type":"Twig.expression.type.operator.unary","value":"not","precidence":3,"associativity":"rightToLeft","operator":"not"}],"position":{"start":790,"end":818},"output":[{"type":"raw","value":"                                <div class=\"ai1ec-day-stretcher\"></div>\n                                ","position":{"start":819,"end":923}},{"type":"logic","token":{"type":"Twig.logic.type.set","key":"added_stretcher","expression":[{"type":"Twig.expression.type.bool","value":true}],"position":{"start":923,"end":955}},"position":{"start":923,"end":955}},{"type":"raw","value":"                            ","position":{"start":956,"end":984}}]},"position":{"open":{"start":790,"end":818},"close":{"start":984,"end":995}}},{"type":"raw","value":"\n                            <div class=\"ai1ec-day\">\n                                <div class=\"ai1ec-date\">\n                                    <a class=\"ai1ec-load-view\"\n                                        ","position":{"start":996,"end":1209}},{"type":"output","position":{"start":1209,"end":1230},"stack":[{"type":"Twig.expression.type.variable","value":"data_type","match":["data_type"],"position":{"start":1209,"end":1230}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":1209,"end":1230}}]},{"type":"raw","value":"\n                                        href=\"","position":{"start":1230,"end":1277}},{"type":"output","position":{"start":1277,"end":1315},"stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"],"position":{"start":1277,"end":1315}},{"type":"Twig.expression.type.key.period","position":{"start":1277,"end":1315},"key":"date_link"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":1277,"end":1315},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":1277,"end":1315}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":1277,"end":1315}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":1277,"end":1315},"expression":false}]}]},{"type":"raw","value":"\"\n                                        >","position":{"start":1315,"end":1358}},{"type":"output","position":{"start":1358,"end":1372},"stack":[{"type":"Twig.expression.type.variable","value":"day","match":["day"],"position":{"start":1358,"end":1372}},{"type":"Twig.expression.type.key.period","position":{"start":1358,"end":1372},"key":"date"}]},{"type":"raw","value":"</a>\n                                </div>\n\n                                ","position":{"start":1372,"end":1449}},{"type":"logic","token":{"type":"Twig.logic.type.for","keyVar":null,"valueVar":"event","expression":[{"type":"Twig.expression.type.variable","value":"day","match":["day"]},{"type":"Twig.expression.type.key.period","key":"events"}],"position":{"start":1449,"end":1478},"output":[{"type":"raw","value":"                                    <a href=\"","position":{"start":1479,"end":1524}},{"type":"output","position":{"start":1524,"end":1564},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1524,"end":1564}},{"type":"Twig.expression.type.key.period","position":{"start":1524,"end":1564},"key":"permalink"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":1524,"end":1564},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":1524,"end":1564}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":1524,"end":1564}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":1524,"end":1564},"expression":false}]}]},{"type":"raw","value":"\"\n                                        ","position":{"start":1564,"end":1606}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_multiday"}],"position":{"start":1606,"end":1632},"output":[{"type":"raw","value":"                                            data-start-day=\"","position":{"start":1633,"end":1693}},{"type":"output","position":{"start":1693,"end":1714},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1693,"end":1714}},{"type":"Twig.expression.type.key.period","position":{"start":1693,"end":1714},"key":"start_day"}]},{"type":"raw","value":"\"\n                                            data-end-day=\"","position":{"start":1714,"end":1774}},{"type":"output","position":{"start":1774,"end":1802},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1774,"end":1802}},{"type":"Twig.expression.type.key.period","position":{"start":1774,"end":1802},"key":"multiday_end_day"}]},{"type":"raw","value":"\"\n                                            data-start-truncated=\"","position":{"start":1802,"end":1870}},{"type":"output","position":{"start":1870,"end":1916},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1870,"end":1916}},{"type":"Twig.expression.type.key.period","position":{"start":1870,"end":1916},"key":"start_truncated"},{"type":"Twig.expression.type.string","value":"true","position":{"start":1870,"end":1916}},{"type":"Twig.expression.type.string","value":"false","position":{"start":1870,"end":1916}},{"type":"Twig.expression.type.operator.binary","value":"?","position":{"start":1870,"end":1916},"precidence":16,"associativity":"rightToLeft","operator":"?"}]},{"type":"raw","value":"\"\n                                            data-end-truncated=\"","position":{"start":1916,"end":1982}},{"type":"output","position":{"start":1982,"end":2026},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":1982,"end":2026}},{"type":"Twig.expression.type.key.period","position":{"start":1982,"end":2026},"key":"end_truncated"},{"type":"Twig.expression.type.string","value":"true","position":{"start":1982,"end":2026}},{"type":"Twig.expression.type.string","value":"false","position":{"start":1982,"end":2026}},{"type":"Twig.expression.type.operator.binary","value":"?","position":{"start":1982,"end":2026},"precidence":16,"associativity":"rightToLeft","operator":"?"}]},{"type":"raw","value":"\"\n                                        ","position":{"start":2026,"end":2068}}]},"position":{"open":{"start":1606,"end":1632},"close":{"start":2068,"end":2079}}},{"type":"raw","value":"                                        data-instance-id=\"","position":{"start":2080,"end":2138}},{"type":"output","position":{"start":2138,"end":2161},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":2138,"end":2161}},{"type":"Twig.expression.type.key.period","position":{"start":2138,"end":2161},"key":"instance_id"}]},{"type":"raw","value":"\"\n                                        class=\"ai1ec-event-container ai1ec-load-event\n                                            ai1ec-popup-trigger\n                                            ai1ec-event-id-","position":{"start":2161,"end":2372}},{"type":"output","position":{"start":2372,"end":2391},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":2372,"end":2391}},{"type":"Twig.expression.type.key.period","position":{"start":2372,"end":2391},"key":"post_id"}]},{"type":"raw","value":"\n                                            ai1ec-event-instance-id-","position":{"start":2391,"end":2460}},{"type":"output","position":{"start":2460,"end":2483},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":2460,"end":2483}},{"type":"Twig.expression.type.key.period","position":{"start":2460,"end":2483},"key":"instance_id"}]},{"type":"raw","value":"\n                                            ","position":{"start":2483,"end":2528}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_allday"}],"position":{"start":2528,"end":2552},"output":[{"type":"raw","value":"ai1ec-allday","position":{"start":2552,"end":2564}}]},"position":{"open":{"start":2528,"end":2552},"close":{"start":2564,"end":2575}}},{"type":"raw","value":"                                            ","position":{"start":2576,"end":2620}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_multiday"}],"position":{"start":2620,"end":2646},"output":[{"type":"raw","value":"ai1ec-multiday","position":{"start":2646,"end":2660}}]},"position":{"open":{"start":2620,"end":2646},"close":{"start":2660,"end":2671}}},{"type":"raw","value":"\"\n                                        >\n\n                                        <div class=\"ai1ec-event\"\n                                             style=\"","position":{"start":2671,"end":2833}},{"type":"output","position":{"start":2833,"end":2875},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":2833,"end":2875}},{"type":"Twig.expression.type.key.period","position":{"start":2833,"end":2875},"key":"color_style"},{"type":"Twig.expression.type.filter","value":"e","match":["| e","e"],"position":{"start":2833,"end":2875},"params":[{"type":"Twig.expression.type.parameter.start","value":"(","match":["("],"position":{"start":2833,"end":2875}},{"type":"Twig.expression.type.string","value":"html_attr","position":{"start":2833,"end":2875}},{"type":"Twig.expression.type.parameter.end","value":")","match":[")"],"position":{"start":2833,"end":2875},"expression":false}]}]},{"type":"raw","value":"\">\n                                            ","position":{"start":2875,"end":2922}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"month_show_times","match":["month_show_times"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"is_allday"},{"type":"Twig.expression.type.operator.unary","value":"not","precidence":3,"associativity":"rightToLeft","operator":"not"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"position":{"start":2922,"end":2971},"output":[{"type":"raw","value":"                                                <span class=\"ai1ec-event-time\">\n                                                    ","position":{"start":2972,"end":3104}},{"type":"output","position":{"start":3104,"end":3130},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":3104,"end":3130}},{"type":"Twig.expression.type.key.period","position":{"start":3104,"end":3130},"key":"timespan"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":3104,"end":3130}}]},{"type":"raw","value":"\n                                                </span>\n                                                ","position":{"start":3130,"end":3235}},{"type":"raw","value":"\n                                                <span class=\"ai1ec-event-time ai1ec-event-time-short\">\n                                                    ","position":{"start":3293,"end":3449}},{"type":"output","position":{"start":3449,"end":3477},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":3449,"end":3477}},{"type":"Twig.expression.type.key.period","position":{"start":3449,"end":3477},"key":"short_start_time"}]},{"type":"raw","value":"\n                                                </span>\n                                            ","position":{"start":3477,"end":3578}}]},"position":{"open":{"start":2922,"end":2971},"close":{"start":3578,"end":3589}}},{"type":"raw","value":"                                            <span class=\"ai1ec-event-title\">\n                                                ","position":{"start":3590,"end":3715}},{"type":"output","position":{"start":3715,"end":3747},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":3715,"end":3747}},{"type":"Twig.expression.type.key.period","position":{"start":3715,"end":3747},"key":"filtered_title"},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":3715,"end":3747}}]},{"type":"raw","value":"\n                                                ","position":{"start":3747,"end":3796}},{"type":"logic","token":{"type":"Twig.logic.type.if","stack":[{"type":"Twig.expression.type.variable","value":"show_location_in_title","match":["show_location_in_title"]},{"type":"Twig.expression.type.variable","value":"event","match":["event"]},{"type":"Twig.expression.type.key.period","key":"venue"},{"type":"Twig.expression.type.operator.binary","value":"and","precidence":13,"associativity":"leftToRight","operator":"and"}],"position":{"start":3796,"end":3843},"output":[{"type":"raw","value":"                                                    <span class=\"ai1ec-event-location\"\n                                                    >","position":{"start":3844,"end":3984}},{"type":"output","position":{"start":3984,"end":4009},"stack":[{"type":"Twig.expression.type.variable","value":"text_venue_separator","match":["text_venue_separator"],"position":{"start":3984,"end":4009}}]},{"type":"output","position":{"start":4009,"end":4026},"stack":[{"type":"Twig.expression.type.variable","value":"event","match":["event"],"position":{"start":4009,"end":4026}},{"type":"Twig.expression.type.key.period","position":{"start":4009,"end":4026},"key":"venue"}]},{"type":"raw","value":"</span>\n                                                ","position":{"start":4026,"end":4082}}]},"position":{"open":{"start":3796,"end":3843},"close":{"start":4082,"end":4093}}},{"type":"raw","value":"                                            </span>\n                                        </div>\n                                    </a>\n\n                                    ","position":{"start":4094,"end":4271}},{"type":"logic","token":{"type":"Twig.logic.type.include","only":false,"ignoreMissing":false,"stack":[{"type":"Twig.expression.type.string","value":"event-popup.twig"}],"position":{"start":4271,"end":4303}},"position":{"start":4271,"end":4303}},{"type":"raw","value":"                                ","position":{"start":4304,"end":4336}}]},"position":{"open":{"start":1449,"end":1478},"close":{"start":4336,"end":4348}}},{"type":"raw","value":"                            </div>\n                        </td>\n                    ","position":{"start":4349,"end":4434}}]},"position":{"open":{"start":576,"end":593},"close":{"start":4434,"end":4444}}},{"type":"logic","token":{"type":"Twig.logic.type.else","match":["else"],"position":{"start":4434,"end":4444},"output":[{"type":"raw","value":" ","position":{"start":4444,"end":4445}},{"type":"raw","value":"\n                        <td class=\"ai1ec-empty\"></td>\n                    ","position":{"start":4472,"end":4547}}]},"position":{"open":{"start":4434,"end":4444},"close":{"start":4547,"end":4558}}},{"type":"raw","value":" ","position":{"start":4558,"end":4559}},{"type":"raw","value":"\n\n                ","position":{"start":4586,"end":4604}}]},"position":{"open":{"start":533,"end":554},"close":{"start":4604,"end":4616}}},{"type":"raw","value":" ","position":{"start":4616,"end":4617}},{"type":"raw","value":"\n            </tr>\n        ","position":{"start":4634,"end":4661}}]},"position":{"open":{"start":406,"end":434},"close":{"start":4661,"end":4673}}},{"type":"raw","value":" ","position":{"start":4673,"end":4674}},{"type":"raw","value":"\n    </tbody>\n</table>\n\n<div class=\"ai1ec-pull-left\">","position":{"start":4698,"end":4751}},{"type":"output","position":{"start":4751,"end":4779},"stack":[{"type":"Twig.expression.type.variable","value":"pagination_links","match":["pagination_links"],"position":{"start":4751,"end":4779}},{"type":"Twig.expression.type.filter","value":"raw","match":["| raw","raw"],"position":{"start":4751,"end":4779}}]},{"type":"raw","value":"</div>\n","position":{"start":4779,"end":4779}}], precompiled: true, autoescape: true, allowInlineIncludes: true}/*REPLACE:month.twig*/), n
 }), timely.define("external_libs/jquery_history", ["jquery_timely"], function (e) {
     try {
         (function (t, n) {
@@ -4543,7 +2775,7 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
                     }
                     h.normalizeStore()
                 } else h.store = {}, h.normalizeStore();
-                h.Adapter.bind(e, "beforeunload", h.clearAllIntervals), h.Adapter.bind(e, "unload", h.clearAllIntervals), h.saveState(h.storeState(h.extractState(r.location.href, !0))), s && (h.onUnload = function () {
+                h.saveState(h.storeState(h.extractState(r.location.href, !0))), s && (h.onUnload = function () {
                     var e, t;
                     try {
                         e = l.parse(s.getItem("History.store")) || {}
@@ -4564,7 +2796,7 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
                         e.stateToId[t] = h.stateToId[t]
                     }
                     h.store = e, h.normalizeStore(), s.setItem("History.store", l.stringify(e))
-                }, h.intervalList.push(a(h.onUnload, h.options.storeInterval)), h.Adapter.bind(e, "beforeunload", h.onUnload), h.Adapter.bind(e, "unload", h.onUnload));
+                }, h.intervalList.push(a(h.onUnload, h.options.storeInterval)), h.Adapter.bind(e, "pagehide", h.onUnload));
                 if (!h.emulated.pushState) {
                     h.bugs.safariPoll && h.intervalList.push(a(h.safariStatePoll, h.options.safariPollInterval));
                     if (i.vendor === "Apple Computer, Inc." || (i.appCodeName || "") === "Mozilla") h.Adapter.bind(e, "hashchange", function () {
@@ -5760,18 +3992,21 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
     u.defaults = {}, e.removeCookie = function (t, n) {
         return e.cookie(t) === undefined ? !1 : (e.cookie(t, "", e.extend({}, n, {expires: -1})), !e.cookie(t))
     }
-}), timely.define("scripts/calendar/load_views", ["jquery_timely", "scripts/calendar/print", "scripts/calendar/agenda_view", "scripts/calendar/month_view", "libs/frontend_utils", "libs/utils", "ai1ec_calendar", "ai1ec_config", "scripts/common_scripts/frontend/common_frontend", "libs/select2_multiselect_helper", "external_libs/twig", "agenda", "oneday", "month", "external_libs/jquery_history", "external_libs/jquery.tablescroller", "external_libs/jquery.scrollTo", "external_libs/bootstrap_datepicker", "external_libs/bootstrap/alert", "external_libs/jquery_cookie"], function (e, t, n, r, i, s, o, config, a, f, l, c, h, p) {
-    e.cookie.json = !0;
-    var d = "ai1ec_saved_filter", v = !e("#save_filtered_views").hasClass("ai1ec-hide");
-    timely.renderer_map || (timely.renderer_map = {}), e.extend(timely.renderer_map, {
-        agenda: c,
-        oneday: h,
-        week: h,
-        month: p
+}), timely.define("scripts/calendar/load_views", ["jquery_timely", "scripts/calendar/print", "scripts/calendar/agenda_view", "scripts/calendar/month_view", "libs/frontend_utils", "libs/utils", "ai1ec_calendar", "ai1ec_config", "scripts/common_scripts/frontend/common_frontend", "libs/select2_multiselect_helper", "external_libs/twig", "agenda", "oneday", "month", "external_libs/jquery_history", "external_libs/jquery.tablescroller", "external_libs/jquery.scrollTo", "external_libs/bootstrap_datepicker", "external_libs/bootstrap/alert", "external_libs/jquery_cookie"], function ($, print, agendaView, monthView, frontendUtils, utils, calendarPage, config, commonFrontend, select2MultiselectHelper, twig, agendaTemplate, onedayTemplate, monthTemplate) {
+    $.cookie.json = !0;
+    var d = "ai1ec_saved_filter", v = !$("#save_filtered_views").hasClass("ai1ec-hide");
+    timely.renderer_map || (timely.renderer_map = {}), $.extend(timely.renderer_map, {
+        agenda: agendaTemplate,
+        oneday: onedayTemplate,
+        week: onedayTemplate,
+        month: monthTemplate
     });
     var m = function (e) {
-        var t = e.find("#ai1ec-view-dropdown .ai1ec-dropdown-menu .ai1ec-active a"),
-            n = config.week_view_ends_at - config.week_view_starts_at, i = n * 60;
+        // After "Show all 24 hours" (class osec-full-day on the calendar) every week and day view shows the whole day.
+        var full = e.hasClass("osec-full-day"),
+            first = full ? 0 : config.week_view_starts_at,
+            t = e.find("#ai1ec-view-dropdown .ai1ec-dropdown-menu .ai1ec-active a"),
+            n = full ? 24 : config.week_view_ends_at - config.week_view_starts_at, i = full ? 1442 : n * 60;
         e.find("table.ai1ec-week-view-original").tableScroll({
             height: i,
             containerClass: "ai1ec-week-view ai1ec-popover-boundary",
@@ -5781,53 +4016,55 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
             containerClass: "ai1ec-oneday-view ai1ec-popover-boundary",
             scroll: !1
         }), e.find(".tablescroll_wrapper, .tablescroll_head, .tablescroll_body").css("width", ""), e.find(".tablescroll_head th, .tablescroll_body > tbody > tr > td").css("width", "");
-        if (e.find(".ai1ec-week-view").length || e.find(".ai1ec-oneday-view").length) e.find(".ai1ec-oneday-view .tablescroll_wrapper, .ai1ec-week-view .tablescroll_wrapper").scrollTo(e.find(".ai1ec-hour-marker:eq(" + config.week_view_starts_at + ")")), e.find(".ai1ec-hour-marker:eq(" + config.week_view_starts_at + ")").addClass("ai1ec-first-visible");
-        e.find(".ai1ec-month-view .ai1ec-multiday").length && r.extend_multiday_events(e), e.find(".osec-calendar-view-container").data("ai1ec-inited", !0).trigger("initialize_view.ai1ec"), e.find(".ai1ec-calendar-toolbar").trigger("ai1ec-affix.reinit")
+        if (e.find(".ai1ec-week-view").length || e.find(".ai1ec-oneday-view").length) e.find(".ai1ec-oneday-view .tablescroll_wrapper, .ai1ec-week-view .tablescroll_wrapper").scrollTo(e.find(".ai1ec-hour-marker:eq(" + first + ")")), e.find(".ai1ec-hour-marker:eq(" + first + ")").addClass("ai1ec-first-visible");
+        e.find(".ai1ec-month-view .ai1ec-multiday").length && monthView.extend_multiday_events(e), e.find(".osec-calendar-view-container").data("ai1ec-inited", !0).trigger("initialize_view.ai1ec"), e.find(".ai1ec-calendar-toolbar").trigger("ai1ec-affix.reinit")
     }, g = function (t) {
         t.find(".osec-calendar-view-container").trigger("destroy_view.ai1ec");
         var n = t.find(".ai1ec-minical-trigger").data("datepicker");
-        typeof n != "undefined" && (n.picker.remove(), e(document).off("changeDate", ".ai1ec-minical-trigger")), t.find(".ai1ec-tooltip.ai1ec-in, .ai1ec-popup").remove(), t.find(".ai1ec-calendar-toolbar .ai1ec-btn-toolbar").remove()
+        // Drop the instance with its picker and handler, so a trigger that survives the reload
+        // gets a fresh picker for the new view on its next click.
+        typeof n != "undefined" && (n.picker.remove(), t.find(".ai1ec-minical-trigger").off("changeDate", k).removeData("datepicker")), t.find(".ai1ec-tooltip.ai1ec-in, .ai1ec-popup").remove(), t.find(".ai1ec-calendar-toolbar .ai1ec-btn-toolbar").remove()
     }, y = function () {
         var t = [], n = [], r = [], i;
-        e(".ai1ec-category-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
-            t.push(e(this).data("term"))
-        }), e(".ai1ec-tag-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
-            n.push(e(this).data("term"))
-        }), e(".ai1ec-author-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
-            r.push(e(this).data("term"))
+        $(".ai1ec-category-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
+            t.push($(this).data("term"))
+        }), $(".ai1ec-tag-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
+            n.push($(this).data("term"))
+        }), $(".ai1ec-author-filter .ai1ec-dropdown-menu .ai1ec-active").each(function () {
+            r.push($(this).data("term"))
         });
         var s = {};
-        return s.cat_ids = t, s.tag_ids = n, s.auth_ids = r, i = e(".ai1ec-views-dropdown .ai1ec-dropdown-menu .ai1ec-active").data("action"), s.action = i, s
+        return s.cat_ids = t, s.tag_ids = n, s.auth_ids = r, i = $(".ai1ec-views-dropdown .ai1ec-dropdown-menu .ai1ec-active").data("action"), s.action = i, s;
     }, b = function () {
-        var t = History.getState(), n = e.cookie(d);
+        var t = History.getState(), n = $.cookie(d);
         if (null === n || undefined === n) n = {};
         var r = y();
-        config.is_calendar_page ? n.calendar_page = r : n[t.url] = r, e.cookie(d, n, {
+        config.is_calendar_page ? n.calendar_page = r : n[t.url] = r, $.cookie(d, n, {
             path: "/",
             expires: 365
-        }), e("#save_filtered_views").addClass("ai1ec-active").attr("data-original-title", config.clear_saved_filter_text);
-        var i = s.make_alert(config.save_filter_text_ok, "success");
-        e("#ai1ec-calendar").prepend(i)
+        }), $("#save_filtered_views").addClass("ai1ec-active").attr("data-original-title", config.clear_saved_filter_text);
+        var i = utils.make_alert(config.save_filter_text_ok, "success");
+        $("#ai1ec-calendar").prepend(i)
     }, w = function (t) {
         t.stopImmediatePropagation();
-        var n = e.cookie(d);
+        var n = $.cookie(d);
         if (config.is_calendar_page) delete n.calendar_page; else {
             var r = History.getState();
             delete n[r.url]
         }
-        e.cookie(d, n, {
+        $.cookie(d, n, {
             path: "/",
             expires: 365
-        }), e("#save_filtered_views").removeClass("ai1ec-active").attr("data-original-title", config.reset_saved_filter_text), v || e("#save_filtered_views").addClass("ai1ec-hide");
-        var i = s.make_alert(config.remove_filter_text_ok, "success");
-        e("#ai1ec-calendar").prepend(i)
+        }), $("#save_filtered_views").removeClass("ai1ec-active").attr("data-original-title", config.reset_saved_filter_text), v || $("#save_filtered_views").addClass("ai1ec-hide");
+        var i = utils.make_alert(config.remove_filter_text_ok, "success");
+        $("#ai1ec-calendar").prepend(i)
     }, E = function (t, n, r) {
         t.find(".osec-calendar-view-loading").fadeIn("fast").end().find(".osec-calendar-view").fadeTo("fast", .3, function () {
             var i = {request_type: r, osec_doing_ajax: !0};
-            e("#osec-container > .ai1ec-alert").remove();
-            var o = e.ajax({url: n, dataType: r, data: i, method: "get"});
+            $("#osec-container > .ai1ec-alert").remove();
+            var o = $.ajax({url: n, dataType: r, data: i, method: "get"});
             o.done(function (i) {
-                e(document).trigger("calendar_view_loaded.ai1ec", t), g(t), typeof i.views_dropdown == "string" && t.find(".ai1ec-views-dropdown").replaceWith(i.views_dropdown), typeof i.categories == "string" && t.find(".ai1ec-category-filter").replaceWith(i.categories), typeof i.authors == "string" && t.find(".ai1ec-author-filter").replaceWith(i.authors), typeof i.tags == "string" && t.find(".ai1ec-tag-filter").replaceWith(i.tags);
+                $(document).trigger("calendar_view_loaded.ai1ec", t), g(t), typeof i.views_dropdown == "string" && t.find(".ai1ec-views-dropdown").replaceWith(i.views_dropdown), typeof i.categories == "string" && t.find(".ai1ec-category-filter").replaceWith(i.categories), typeof i.authors == "string" && t.find(".ai1ec-author-filter").replaceWith(i.authors), typeof i.tags == "string" && t.find(".ai1ec-tag-filter").replaceWith(i.tags);
                 if (typeof i.custom_filters == "string") {
                     var s = t.find("li.ai1ec-custom-filter").parent();
                     t.find("li.ai1ec-custom-filter").remove(), s.append(i.custom_filters)
@@ -5845,29 +4082,32 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
                     }
                     o = timely.renderer_map[u]
                 }
-                t.find(".osec-calendar-view").html(o ? o.render(i.html) : e(i.html).find(".osec-calendar-view").length ? e(i.html).find(".osec-calendar-view").html() : i.html), m(t)
+                t.find(".osec-calendar-view").html(o ? o.render(i.html) : $(i.html).find(".osec-calendar-view").length ? $(i.html).find(".osec-calendar-view").html() : i.html), m(t)
             }), o.fail(function (n, r, i) {
                 var o = config.load_views_error;
                 o = o.replace("#STATUS#", n.status), o = o.replace("#ERROR#", i);
-                var a = s.make_alert(o, "error", !0);
-                e("#osec-container").prepend(a), g(t), m(t)
+                var a = utils.make_alert(o, "error", !0);
+                $("#osec-container").prepend(a), g(t), m(t)
             }), o.always(function () {
                 t.find(".osec-calendar-view-loading").fadeOut("fast"), t.find(".osec-calendar-view").fadeTo("fast", 1)
             })
         })
     }, S = !1, x = function (t) {
-        var n = History.getState(), r = e(".ai1ec-calendar:first");
-        if (n.data.ai1ec !== undefined && !0 === n.data.ai1ec || !0 === S) S = !0, E(r, n.url, "json")
+        var n = History.getState(), r = $(".ai1ec-calendar:first");
+        if (n.data.ai1ec !== undefined && !0 === n.data.ai1ec) S = !0, E(r, n.url, "json");
+        // Back to the entry the page was opened with: its address is the page's own (a page with a calendar
+        // block or shortcode answers it with the whole page, not with a view), so load the page again.
+        else if (!0 === S) window.location.reload()
     }, T = function (e, t, n) {
         if (t === "json") {
             var r = {ai1ec: !0};
             History.pushState(r, document.title, decodeURI(n))
         } else E(e, n, "jsonp")
     }, N = function (t) {
-        var n = e(this), r = n.closest(".ai1ec-calendar");
+        var n = $(this), r = n.closest(".ai1ec-calendar");
         t.preventDefault(), T(r, n.data("type"), n.attr("href"))
     }, handle_minical_trigger = function (t) {
-        var n = e(this);
+        var n = $(this);
         t.preventDefault();
         if (typeof n.data("datepicker") == "undefined") {
             n.datepicker({
@@ -5883,21 +4123,31 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
                 r.place = function () {
                     i.call(this);
                     var t = this.component ? this.component : this.element, n = t.offset();
-                    this.picker.css({left: "auto", right: e(document).width() - n.left - t.outerWidth()})
+                    this.picker.css({left: "auto", right: $(document).width() - n.left - t.outerWidth()})
                 }
             }
-            e(document).one("changeDate", ".ai1ec-minical-trigger", k)
+            // On the trigger, for as long as its picker lives: a one-time handler was used up by
+            // the first pick, and a pick of the date already shown reloads nothing, so the next
+            // pick found no handler, did nothing and left the picker open.
+            n.on("changeDate", k)
         }
         n.datepicker("show")
     }, k = function (t) {
-        var n, r = e(this), i = r.closest(".ai1ec-calendar"), s;
-        r.datepicker("hide"), n = r.data("href"), s = t.format(), s = s.replace(/\//g, "-"), n = n.replace("__DATE__", s), T(i, r.data("type"), n)
+        var n, r = $(this), i = r.closest(".ai1ec-calendar"), s;
+        // Clicking the selected date deselects it (bootstrap-datepicker toggles dates): that
+        // date is already shown, so select it again and close instead of loading "no date".
+        if (!t.date) {
+            r.datepicker("update", r.attr("data-date")).datepicker("hide");
+            return;
+        }
+        // ISO like every other calendar link, whatever the input date format (the picker's display format).
+        r.datepicker("hide"), n = r.data("href"), s = t.format("yyyy-m-d"), n = n.replace("__DATE__", s), T(i, r.data("type"), n)
     }, L = function (t) {
         var n;
-        typeof t.added != "undefined" ? n = e(t.added.element).data("href") : n = e("option[value=" + t.removed.id + "]", t.target).data("href"), data = {ai1ec: !0}, History.pushState(data, null, n)
+        typeof t.added != "undefined" ? n = $(t.added.element).data("href") : n = $("option[value=" + t.removed.id + "]", t.target).data("href"), data = {ai1ec: !0}, History.pushState(data, null, n)
     }, A = function () {
-        var t = e(this).closest(".ai1ec-calendar");
-        T(t, e(this).data("type"), e(this).data("href"))
+        var t = $(this).closest(".ai1ec-calendar");
+        T(t, $(this).data("type"), $(this).data("href"))
     };
     return {
         initialize_view: m,
@@ -5912,23 +4162,23 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
         load_view_from_select2_filter: L,
         load_view_according_to_datatype: T
     }
-}), timely.define("scripts/calendar/calendar-affix", ["jquery_timely", "ai1ec_config"], function (e, t) {
+}), timely.define("scripts/calendar/calendar-affix", ["jquery_timely", "ai1ec_config"], function ($, config) {
     var n = function (n) {
         var r = n.find(".ai1ec-calendar-toolbar");
-        r.length || (r = e("<div />", {"class": "timely ai1ec-calendar-toolbar ai1ec-empty-toolbar ai1ec-clearfix"}), n.prepend(r));
+        r.length || (r = $("<div />", {"class": "timely ai1ec-calendar-toolbar ai1ec-empty-toolbar ai1ec-clearfix"}), n.prepend(r));
         var i = n.find(".ai1ec-views-dropdown").closest("div.ai1ec-clearfix").css("clear", "both"),
-            s = r.find(".ai1ec-dropdown-toggle"), o = n.find("#osec-calendar-view"), u = e("#wpadminbar"),
+            s = r.find(".ai1ec-dropdown-toggle"), o = n.find("#osec-calendar-view"), u = $("#wpadminbar"),
             a = r.offset().top, f = 0, l = null, c = function () {
-                return e("#ai1ec-bs-modes div:visible:first").text()
+                return $("#ai1ec-bs-modes div:visible:first").text();
             }, h = function () {
-                var t = ["xs", "sm", "md", "lg"], n = e('<div id="ai1ec-bs-modes"></div>');
-                for (var r in t) e('<div class="ai1ec-device-' + t[r] + " ai1ec-visible-" + t[r] + '">' + t[r] + "</div>").appendTo(n);
+                var t = ["xs", "sm", "md", "lg"], n = $('<div id="ai1ec-bs-modes"></div>');
+                for (var r in t) $('<div class="ai1ec-device-' + t[r] + " ai1ec-visible-" + t[r] + '">' + t[r] + "</div>").appendTo(n);
                 n.appendTo("body")
             }, p = function () {
-                return parseInt(t["affix_vertical_offset_" + c()] || 0)
+                return parseInt(config["affix_vertical_offset_" + c()] || 0);
             }, d = function () {
                 s.each(function () {
-                    e(this).contents().eq(-3).wrap('<div class="ai1ec-hidden" />')
+                    $(this).contents().eq(-3).wrap('<div class="ai1ec-hidden" />')
                 })
             }, v = function () {
                 s.find(".ai1ec-hidden").contents().unwrap()
@@ -5953,12 +4203,12 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
             }
         }).on("ai1ec-affix.bs.affix", function () {
             var t = o.offset().top;
-            i.hide().appendTo(r).show().css("opacity", 0).animate({opacity: 1}, 400), b(), m(), o.css("margin-top", r.outerHeight(!0) + parseInt(r.css("margin-bottom")) + "px"), e("body").addClass("ai1ec-has-affixed-toolbar")
+            i.hide().appendTo(r).show().css("opacity", 0).animate({opacity: 1}, 400), b(), m(), o.css("margin-top", r.outerHeight(!0) + parseInt(r.css("margin-bottom")) + "px"), $("body").addClass("ai1ec-has-affixed-toolbar")
         }).on("ai1ec-affix-top.bs.affix", function () {
-            i.hide(), o.prepend(i), i.show().css("opacity", 0).animate({opacity: 1}, 400), v(), m(), o.css("margin-top", 0), r.data("original_height", r.height()), e("body").removeClass("ai1ec-has-affixed-toolbar")
-        }).on("ai1ec-affix.reinit", w).filter(".ai1ec-affix").trigger("ai1ec-affix.bs.affix"), e(window).on("resize.affix", function () {
+            i.hide(), o.prepend(i), i.show().css("opacity", 0).animate({opacity: 1}, 400), v(), m(), o.css("margin-top", 0), r.data("original_height", r.height()), $("body").removeClass("ai1ec-has-affixed-toolbar")
+        }).on("ai1ec-affix.reinit", w).filter(".ai1ec-affix").trigger("ai1ec-affix.bs.affix"), $(window).on("resize.affix", function () {
             clearTimeout(l), l = setTimeout(E, 100)
-        }), n
+        }), n;
     };
     return {initialize_affixed_toolbar: n}
 }), timely.define("external_libs/bootstrap/transition", ["jquery_timely"], function (e) {
@@ -6052,29 +4302,29 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
     }).on("hidden.bs.modal", ".ai1ec-modal", function () {
         e(document.body).removeClass("ai1ec-modal-open")
     })
-}), timely.define("scripts/calendar", ["jquery_timely", "domReady", "scripts/calendar/load_views", "scripts/calendar/print", "scripts/calendar/agenda_view", "scripts/calendar/month_view", "scripts/calendar/calendar-affix", "ai1ec_calendar", "ai1ec_config", "scripts/common_scripts/frontend/common_frontend", "libs/utils", "libs/select2_multiselect_helper", "external_libs/bootstrap/transition", "external_libs/bootstrap/modal", "external_libs/jquery.scrollTo", "external_libs/jquery_cookie"], function (e, t, n, r, i, s, o, u, a, f, l, c) {
+}), timely.define("scripts/calendar", ["jquery_timely", "domReady", "scripts/calendar/load_views", "scripts/calendar/print", "scripts/calendar/agenda_view", "scripts/calendar/month_view", "scripts/calendar/calendar-affix", "ai1ec_calendar", "ai1ec_config", "scripts/common_scripts/frontend/common_frontend", "libs/utils", "libs/select2_multiselect_helper", "external_libs/bootstrap/transition", "external_libs/bootstrap/modal", "external_libs/jquery.scrollTo", "external_libs/jquery_cookie"], function ($, domReady, loadViews, print, agendaView, monthView, calendarAffix, calendarPage, config, commonFrontend, utils, select2MultiselectHelper) {
     var h = function () {
-        if (u.selector !== undefined && u.selector !== "" && e(u.selector).length === 1) {
-            var t = e(":header:contains(" + u.title + "):first");
-            t.length || (t = e('<h1 class="page-title"></h1>'), t.text(u.title));
-            var n = e(".ai1ec-main-container:first").detach().before(t);
-            e(u.selector).empty().append(n).hide().css("visibility", "visible").fadeIn("fast")
+        if (calendarPage.selector !== undefined && calendarPage.selector !== "" && $(calendarPage.selector).length === 1) {
+            var t = $(":header:contains(" + calendarPage.title + "):first");
+            t.length || (t = $('<h1 class="page-title"></h1>'), t.text(calendarPage.title));
+            var n = $(".ai1ec-main-container:first").detach().before(t);
+            $(calendarPage.selector).empty().append(n).hide().css("visibility", "visible").fadeIn("fast")
         }
     }, p = function () {
-        var t = e(this).data("instanceId"), n = e(this).closest(".ai1ec-calendar");
+        var t = $(this).data("instanceId"), n = $(this).closest(".ai1ec-calendar");
         n.find(".ai1ec-event-instance-id-" + t).addClass("ai1ec-hover")
     }, d = function () {
-        var t = e(this).data("instanceId"), n = e(this).closest(".ai1ec-calendar");
+        var t = $(this).data("instanceId"), n = $(this).closest(".ai1ec-calendar");
         n.find(".ai1ec-event-instance-id-" + t).removeClass("ai1ec-hover")
     }, v = function () {
-        var t = e(this), n = t.closest(".ai1ec-calendar"), r = t.data("instanceId");
+        var t = $(this), n = t.closest(".ai1ec-calendar"), r = t.data("instanceId");
         t.delay(500).queue(function () {
             n.find(".ai1ec-event-instance-id-" + r).addClass("ai1ec-raised")
         })
     }, m = function (t) {
-        var n = e(this), r = n.closest(".ai1ec-calendar"),
+        var n = $(this), r = n.closest(".ai1ec-calendar"),
             i = n.data("instanceId"),
-            s = e(t.toElement || t.relatedTarget), o = r.find(".ai1ec-event-instance-id-" + i);
+            s = $(t.toElement || t.relatedTarget), o = r.find(".ai1ec-event-instance-id-" + i);
         if (s.is(o) || s.parent().is(o)) return;
         r.find(".ai1ec-event-instance-id-" + i).clearQueue().removeClass("ai1ec-raised")
     }, g = function () {
@@ -6082,58 +4332,80 @@ typeof module != "undefined" && module.declare ? module.declare([], function (e,
     }, pointer = {x: 0, y: 0}, track_pointer = function (t) {
         pointer = {x: t.pageX, y: t.pageY}
     }, anchor_popover = function () {
-        // Stacked week/day events stretch to the column's right edge and can be hours tall, so the
-        // popover the shared handler places beside the whole box lands far from the pointer, often
-        // off-screen. Re-place it at the pointer: above it (below if there is no room), so the row
-        // the pointer sweeps along to reach the other stacked events stays free. The shared handler
-        // lives in the minified common_frontend.js, so this hooks its "shown" event instead.
-        var data = e(this).data("ai1ec.constrained_popover");
+        // Stacked week/day events stretch to the column's right edge and can be hours tall, and month
+        // multi-day bars span up to a whole week, so the popover the shared handler places beside the
+        // whole box lands far from the pointer, often off-screen. Re-place it on the event's time side, at the pointer's x: above the event, the
+        // arrow on its top edge (start), or below it, the arrow on its bottom edge (end), whichever
+        // fits. The way from the pointer to the popover then runs inside the event straight into the
+        // arrow, which belongs to the popover, so it stays open (R4: a gap closed it on the way). Only
+        // an event taller than the window falls back to the pointer. The shared handler lives in the
+        // minified common_frontend.js, so this hooks its "shown" event instead.
+        var data = $(this).data("ai1ec.constrained_popover");
         if (!data) return;
-        var tip = data.tip(), $win = e(window),
+        var $event = $(this), tip = data.tip(), $win = $(window),
             width = tip.outerWidth(), height = tip.outerHeight(),
-            // Room for the arrow (11px) plus a small gap.
-            reach = 14,
             left = Math.max($win.scrollLeft() + 4, Math.min(pointer.x - width / 2, $win.scrollLeft() + $win.width() - width - 4)),
-            above = pointer.y - reach - height >= $win.scrollTop();
+            eventTop = $event.offset().top, eventBottom = eventTop + $event.outerHeight(),
+            viewTop = $win.scrollTop(), viewBottom = viewTop + $win.height(),
+            // Room for the box plus a generous arrow, before the arrow is measured.
+            need = height + 16,
+            edgeAbove = eventTop - need >= viewTop, edgeBelow = eventBottom + need <= viewBottom,
+            above = edgeAbove || (!edgeBelow && pointer.y - need >= viewTop),
+            // The arrow's tip overlaps the event by 1px, so there is no gap to cross.
+            target = edgeAbove ? eventTop + 1 : (edgeBelow ? eventBottom - 1 : pointer.y),
+            arrow, box, overhang;
         tip.removeClass("ai1ec-left ai1ec-right ai1ec-top ai1ec-bottom")
             .addClass(above ? "ai1ec-top" : "ai1ec-bottom")
-            .offset({top: above ? pointer.y - reach - height : pointer.y + reach, left: left});
-        tip.find(".ai1ec-arrow").css({top: "", left: (pointer.x - left) + "px"})
+            .offset({top: above ? target - height : target, left: left});
+        tip.find(".ai1ec-arrow").css({top: "", left: (pointer.x - left) + "px"});
+        // The arrow's overhang depends on the calendar theme, so it is measured.
+        arrow = tip.find(".ai1ec-arrow")[0].getBoundingClientRect();
+        box = tip[0].getBoundingClientRect();
+        overhang = above ? arrow.bottom - box.bottom : box.top - arrow.top;
+        // A transparent strip of the popover fills the overhang over its whole width (style.less), not only the arrow.
+        tip[0].style.setProperty("--osec-popover-bridge", overhang + "px");
+        tip.offset({top: above ? target - overhang - height : target + overhang, left: left})
     }, y = function () {
         // Capture phase: runs before the jQuery handlers, including the shared one that opens the
         // popover, so anchor_popover already sees the position of the pointer that opened it.
         document.addEventListener("mousemove", track_pointer, true);
         document.addEventListener("mouseover", track_pointer, true);
-        e(document).on({
+        $(document).on({
             mouseenter: p,
             mouseleave: d
-        }, ".ai1ec-event-container.ai1ec-multiday"), e(document).on({
+        }, ".ai1ec-event-container.ai1ec-multiday"), $(document).on({
             mouseenter: v,
             mouseleave: m
-        }, ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container"), e(document).on("shown.bs.constrained_popover", ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container", anchor_popover), e(document).on("click", ".ai1ec-agenda-view .ai1ec-event-header--toggle", i.toggle_event), e(document).on("click", "#ai1ec-agenda-expand-all", i.expand_all), e(document).on("click", "#ai1ec-agenda-collapse-all", i.collapse_all), e(document).on("click", "a.ai1ec-load-view", n.handle_click_on_link_to_load_view), e(document).on("click", ".ai1ec-minical-trigger", n.handle_minical_trigger), e(document).on("click", ".ai1ec-clear-filter", n.clear_filters), e(document).on("click", "#ai1ec-print-button", r.handle_click_on_print_button), window.addEventListener("beforeprint", r.before_print), window.addEventListener("afterprint", r.after_print), e(document).on("click", ".ai1ec-reveal-full-day button", function () {
-            var t = e(this).closest(".ai1ec-calendar");
-            e(this).fadeOut();
+        }, ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container"), $(document).on("shown.bs.constrained_popover", ".ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container, .ai1ec-week-view .ai1ec-week .ai1ec-event-container, .ai1ec-month-view .ai1ec-multiday", anchor_popover), $(document).on("click", ".ai1ec-agenda-view .ai1ec-event-header--toggle", agendaView.toggle_event), $(document).on("click", "#ai1ec-agenda-expand-all", agendaView.expand_all), $(document).on("click", "#ai1ec-agenda-collapse-all", agendaView.collapse_all), $(document).on("click", "a.ai1ec-load-view", loadViews.handle_click_on_link_to_load_view), $(document).on("click", ".ai1ec-minical-trigger", loadViews.handle_minical_trigger), $(document).on("click", ".ai1ec-clear-filter", loadViews.clear_filters), $(document).on("click", "#ai1ec-print-button", print.handle_click_on_print_button), window.addEventListener("beforeprint", print.before_print), window.addEventListener("afterprint", print.after_print), $(document).on("click", ".ai1ec-reveal-full-day button", function () {
+            var t = $(this).closest(".ai1ec-calendar");
+            // The tooltip closes on mouseleave, which a button fading out under a resting
+            // pointer never gets.
+            $(this).data("bs.tooltip") && $(this).tooltip("hide");
+            $(this).fadeOut();
+            // Remembered on the calendar, which stays when navigation loads the next view: initialize_view()
+            // builds that one with all 24 hours too.
+            t.addClass("osec-full-day");
             var n = t.find(".ai1ec-oneday-view-original, .ai1ec-week-view-original"),
                 r = t.find(".tablescroll_wrapper").offset().top - n.offset().top;
-            e(window).scrollTo("+=" + r + "px", 400);
+            $(window).scrollTo("+=" + r + "px", 400);
             var i = 1442;
             t.find(".tablescroll_wrapper").scrollTo("-=" + r + "px", 400).animate({height: i + "px"})
-        }), History.Adapter.bind(window, "statechange", n.handle_state_change), e(document).on("click", "#osec-calendar-view .ai1ec-load-event", function (t) {
-            e.cookie.raw = !1, e.cookie("osec_calendar_url", document.URL, {path: a.cookie_path})
+        }), History.Adapter.bind(window, "statechange", loadViews.handle_state_change), $(document).on("click", "#osec-calendar-view .ai1ec-load-event", function (t) {
+            $.cookie.raw = !1, $.cookie("osec_calendar_url", document.URL, {path: config.cookie_path})
         })
     }, b = function () {
-        c.init(e(".ai1ec-select2-filters")), e(document).on("change", ".ai1ec-select2-multiselect-selector", n.load_view_from_select2_filter)
+        select2MultiselectHelper.init($(".ai1ec-select2-filters")), $(document).on("change", ".ai1ec-select2-multiselect-selector", loadViews.load_view_from_select2_filter)
     };
-    t(function () {
-        var t = e(".ai1ec-calendar"), r = e(".ai1ec-calendar:visible").first();
-        g(), a.use_select2 && b(), y(), t.each(function () {
-            n.initialize_view(e(this))
-        }), a.affix_filter_menu && 1 === r.length && o.initialize_affixed_toolbar(r)
+    domReady(function () {
+        var t = $(".ai1ec-calendar"), r = $(".ai1ec-calendar:visible").first();
+        g(), config.use_select2 && b(), y(), t.each(function () {
+            loadViews.initialize_view($(this))
+        }), config.affix_filter_menu && 1 === r.length && calendarAffix.initialize_affixed_toolbar(r)
     });
     var w = function () {
     };
-    return {start: w, initialize_view: n.initialize_view}
-}), timely.require(["scripts/calendar"], function (e) {
-    e.start()
+    return {start: w, initialize_view: loadViews.initialize_view};
+}), timely.require(["scripts/calendar"], function (calendar) {
+    calendar.start()
 }), timely.define("pages/calendar", function () {
 });

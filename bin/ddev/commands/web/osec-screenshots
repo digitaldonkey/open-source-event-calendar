@@ -1,0 +1,17 @@
+#!/bin/bash
+
+## Description: Open Source Event Calendar plugin directory screenshots: generate the showcase content, write assets/screenshot-*.png.
+## Usage: osec-screenshots [dev|claude|try_<name>] [screenshot-N.png ...] [--out=<dir>]
+## Example: ddev osec-screenshots try_pw\nddev osec-screenshots try_pw screenshot-2.png --out=/tmp/shots
+
+# Copy to .ddev/commands/web/ of the DDEV project (see bin/screenshots/README.md).
+# Review the result with `git diff --stat assets/` before committing.
+
+. /var/www/html/wp-content/plugins/open-source-event-calendar/bin/ddev/osec-lib.sh || exit 1
+osec_site "$@"
+set -- "${OSEC_ARGS[@]}"
+
+osec_npm_ready "$OSEC_PLUGIN_DIR/bin/screenshots"
+osec_playwright_ready
+cd "$OSEC_PLUGIN_DIR" || exit 1
+exec node bin/screenshots/shoot.js "$@"

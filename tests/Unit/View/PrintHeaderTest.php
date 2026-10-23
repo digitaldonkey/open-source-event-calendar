@@ -114,7 +114,9 @@ class PrintHeaderTest extends TestBase
         $color = fn() => '#c0392b';
         add_filter('osec_event_color', $color);
 
-        $style = EventTaxonomyView::factory($osec_app)->get_color_style($event);
+        // A new view, not factory(): the shared one caches colours per post ID, and SQLite gives a post ID out again
+        // after an earlier test's rollback.
+        $style = (new EventTaxonomyView($osec_app))->get_color_style($event);
 
         remove_filter('osec_event_color', $color);
         $this->assertSame('color: #c0392b !important; --osec-event-color: #c0392b;', $style);

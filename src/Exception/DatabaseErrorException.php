@@ -20,7 +20,7 @@ class DatabaseErrorException extends Exception
     public function get_html_message()
     {
         $message = '<p>' . __(
-            'Database update has failed. Please make sure, that database user, defined in <em>wp-config.php</em> 
+            'Database update has failed. Please make sure, that database user, defined in <em>wp-config.php</em>
                 has permissions, to make changes (<strong>ALTER TABLE</strong>) to the database.',
             'open-source-event-calendar'
         ) . '</p>'

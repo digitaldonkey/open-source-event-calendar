@@ -3,12 +3,14 @@
 namespace Osec\Cache;
 
 use Exception;
-use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 
 /**
- * Concrete class for file caching strategy.
+ * File cache: one folder, a key is the file name.
+ *
+ * Files are written with WP_Filesystem_Direct (as core writes uploads: no credentials, no file owner test) to a
+ * temporary file next to the target and then renamed over it, so a request never reads a half-written file.
  *
  * @since        2.0
  * @replaces Ai1ec_Cache_Strategy_File
@@ -17,46 +19,56 @@ use Osec\Bootstrap\OsecBaseClass;
 class CacheFile extends OsecBaseClass implements CacheInterface
 {
     /**
-     * @car OSEC_FILE_CACHE_UNAVAILABLE
-     *
-     * A value identifying that file cache is not available.
-     * Used in place of actual path for cache to use.
+     * Stored in the setting `twig_cache` when no folder is writable.
      */
     public const OSEC_FILE_CACHE_UNAVAILABLE = 'OSEC_FILE_CACHE_UNAVAILABLE';
 
-    public const OPTION_PREFIX = 'osec_file_cache__';
-
     /**
-     * @var string
+     * Prefix of the 1.1.x options which indexed the cache files. Only removed on upgrade.
      */
-    private ?string $_cache_path;
+    public const LEGACY_OPTION_PREFIX = 'osec_file_cache__';
 
-    private ?string $_cache_url;
-
-    /**
-     * Directory/context in cache dir.
-     *
-     * @var string
-     */
-    private ?string $_cache_id;
-
-    private $_cacheData;
-
-    private function __construct(App $app, string $path, ?string $url, ?string $cache_id)
+    private function __construct(App $app, private string $_cache_path, private string $_root)
     {
         parent::__construct($app);
-        $this->_cache_path = $path;
-        $this->_cache_url  = $url;
-        $this->_cache_id   = $cache_id ?? 'default';
     }
 
     public static function is_available(): bool
     {
-        return (bool)(new CachePath())->getCachePath();
+        global $osec_app;
+
+        return (bool) CachePath::factory($osec_app)->get_dir();
     }
 
     /**
-     * Absolut path to directory of this file cache instance
+     * Creates a file cache in the first writable folder.
+     *
+     * @param  App  $app
+     * @param  string|null  $cache_id  A valid (ascii) directory name, e.g. 'css'.
+     *
+     * @return CacheFile|null Null if no folder is writable.
+     * @throws Exception
+     */
+    public static function createFileCacheInstance(App $app, ?string $cache_id = null): ?CacheFile
+    {
+        if ($cache_id && str_starts_with($cache_id, '/')) {
+            throw new Exception('a cache identifier must be provided. It will define a directory in cachePath');
+        }
+        $dir = CachePath::factory($app)->get_dir((string) $cache_id);
+
+        return $dir ? new self($app, $dir['dir'], $dir['root']) : null;
+    }
+
+    /**
+     * A file cache in a known folder, e.g. the one a page reads the compiled CSS from.
+     */
+    public static function for_dir(App $app, string $dir, string $root): CacheFile
+    {
+        return new self($app, trailingslashit($dir), $root);
+    }
+
+    /**
+     * Absolute path to directory of this file cache instance
      *
      * @return string
      */
@@ -66,373 +78,100 @@ class CacheFile extends OsecBaseClass implements CacheInterface
     }
 
     /**
-     * Creates a file cache instance
-     *
-     * @param  App  $app
-     * @param  string|null  $cache_id  A valid (asci) directory name string.
-     *
-     * @return CacheFile|null
-     * @throws Exception
+     * @return string CachePath::ROOT_OVERRIDE or CachePath::ROOT_UPLOADS.
      */
-    public static function createFileCacheInstance(App $app, ?string $cache_id = null): ?CacheFile
+    public function get_root(): string
     {
-        if ($cache_id && str_starts_with($cache_id, '/')) {
-            throw new Exception('a cache identifier must be provided. It will define a directory in cachePath');
-        }
-        $cacheData = (new CachePath())->getCacheData($cache_id);
-
-        // $cacheData['url'] is optional.
-        // the creator needs to deal with not
-        // having a public url for the cache.
-        if ( ! is_array($cacheData)
-            || ! isset($cacheData['path'])
-        ) {
-            self::setUnavailable($app, $cache_id);
-
-            return null;
-        }
-        self::setAvailable($app, $cache_id);
-        return new self($app, $cacheData['path'], $cacheData['url'], $cache_id);
+        return $this->_root;
     }
 
     /**
-     * Setting entire directory unavailable in wp-options.
+     * Insert or replace.
      *
-     * @param  App  $app
-     * @param  string|null  $cache_id
-     *
-     * @return void
+     * @throws CacheWriteException
      */
-    private static function setUnavailable(App $app, ?string $cache_id): void
-    {
-        $cache_id = ! empty($cache_id) ? $cache_id : 'default_cache';
-        $app->options->set(
-            self::optionKey($cache_id),
-            self::OSEC_FILE_CACHE_UNAVAILABLE,
-            true
-        );
-        // TODO : Maybe add Admin message?
-    }
-
-    /**
-     * Setting entire directory unavailable in wp-options.
-     *
-     * @param  App  $app
-     * @param  string|null  $cache_id
-     *
-     * @return void
-     */
-    private static function setAvailable(App $app, ?string $cache_id): void
-    {
-        $cache_id = ! empty($cache_id) ? $cache_id : 'default_cache';
-        $app->options->delete(
-            self::optionKey($cache_id)
-        );
-    }
-
     public function set(string $key, mixed $value): bool
     {
-        return is_array($this->setWithFileInfo($key, $value));
-    }
-
-    /**
-     * Insert Replace
-     *
-     * @inheritDoc
-     */
-    public function setWithFileInfo(string $key, mixed $value): array
-    {
-        $fileName = $this->_safe_file_name($key);
-        $value  = maybe_serialize($value);
-        $result = $this->put_contents(
-            $this->_cache_path . $fileName,
-            $value
-        );
-        // Update
-        $this->setOption($key, $fileName);
-
-        // Delete old file.
-        $oldFile = $this->get_file_name($key);
-        if ($result !== false) {
-            // Delete old file if on update.
-            if ($oldFile && $oldFile  !== $this->_cache_path . $fileName
-                    && file_exists($oldFile)
-            ) {
-                wp_delete_file($oldFile);
-            }
-        } else {
-            throw new CacheWriteException(
-                esc_html(sprintf(
-                    /* translators: File name */
-                    __( 'An error occured while saving data to: %s', 'open-source-event-calendar'),
-                    $this->_cache_path . $fileName
-                ))
-            );
+        $file = $this->path($key);
+        $temp = $file . '.' . wp_generate_password(8, false) . '.tmp';
+        $fs   = CachePath::filesystem();
+        if ( ! $fs->put_contents($temp, maybe_serialize($value), self::file_mode())) {
+            throw new CacheWriteException(esc_html($file));
         }
-        return [
-            'key'  => $key,
-            'path' => $this->_cache_path . $fileName,
-            'url'  => $this->_cache_url.$fileName,
-            'file' => $fileName,
-        ];
-    }
-
-    /**
-     * _safe_file_name method
-     *
-     * Generate safe file name for any storage case.
-     *
-     * @param  string  $file  File name currently supplied. Prefixed or not.
-     *
-     * @return string Sanitized file name
-     */
-    private function _safe_file_name(string $file)
-    {
-        if (empty($file) || strpbrk($file, "\\/?%*:|\"<>") !== false) {
-            throw new Exception('Filename empty or conatins Illegal chars');
-        }
-        static $prefix = null;
-        if (null === $prefix && ! OSEC_DEBUG) {
-            $prefix = substr(md5(site_url()), 0, 8);
-        }
-        // Make sure Prefix is onöly added if not yet set.
-        if (0 !== strncmp($file, (string)$prefix, 8)) {
-            $key = $prefix . $file;
-        }
-        return is_string($prefix) ? $prefix . '_' . $file : $file;
-    }
-
-    /**
-     * Creates a file using $wp_filesystem.
-     *
-     * @param  string  $file
-     * @param  string  $content
-     */
-    private function put_contents(string $file, string $content)
-    {
-        global $wp_filesystem;
-        // @see https://wordpress.stackexchange.com/a/372407/15081
-        require_once ABSPATH . 'wp-admin/includes/file.php';
-        if (WP_Filesystem([], dirname($file))) {
-            try {
-                return $wp_filesystem->put_contents(
-                    $file,
-                    $content
-                );
-            } catch (Exception $e) {
-                // fall through.
-            }
-        }
-        // Throw a mean message.
-
-        $uploads = wp_upload_dir();
-        $upload_path = trailingslashit($uploads['basedir']);
-
-        //  if ($notification->are_notices_available(2)) {}
-        $msg = sprintf(
-        /* translators: 1: Filename 2: wp_upload_dir() 3: OSEC_FILE_CACHE_WP_UPLOAD_DIR 4: OSEC_FILE_CACHE_DEFAULT_PATH */
-            __(
-                'Can not use WP_Filesystem() method to write to file: %1$s
-                        <br /><br />
-                        You may set OSEC_ENABLE_CACHE_FILE false to use other cache methods like APCU or DB and ignore this message.
-                        <br /><br /><strong>BUT: If we can not write files Twig cache is disabled.</strong>
-                        <br /><br /><strong>Ensure that</strong><br /><code>%2$s%3$s
-                        </code><br />or<br /><code>%4$s (OSEC_FILE_CACHE_DEFAULT_PATH)</code><br /> are writable by php.',
-                'open-source-event-calendar'
-            ),
-            $file,
-            $upload_path,
-            OSEC_FILE_CACHE_WP_UPLOAD_DIR,
-            OSEC_FILE_CACHE_DEFAULT_PATH
-        );
-        NotificationAdmin::factory($this->app)->store(
-            "<p>" . wp_kses($msg,$this->app->kses->allowed_html_inline()) . "</p>",
-            'error',
-            1,
-            [NotificationAdmin::RCPT_ADMIN],
-            true
-        );
-        throw new CacheWriteException(esc_html($file));
-    }
-
-    /**
-     * Tries to get the stored filename
-     *
-     * @param  string  $key
-     *
-     * @return string|null
-     */
-    public function get_file_name(string $key): ?string
-    {
-        $fileName = $this->getOption($key);
-        if ($fileName) {
-            return $fileName;
+        // Atomic on one filesystem. WP_Filesystem_Direct::move() deletes the target first, leaving a moment
+        // without a file for a request to read.
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename
+        if ( ! rename($temp, $file)) {
+            $fs->delete($temp);
+            throw new CacheWriteException(esc_html($file));
         }
 
-        return false;
+        return true;
     }
 
-    private function getOption($key): mixed
+    public function add(string $key, mixed $value): bool
     {
-        return $this->app->options->get(
-            $this->optionKey($key)
-        );
+        return ! file_exists($this->path($key)) && $this->set($key, $value);
     }
 
-    /**
-     *
-     * @param  string  $key
-     * @param  mixed|null  $default  *
-     */
-    public function get($key, mixed $default = null): mixed
+    public function get(string $key, mixed $default = null): mixed
     {
-        $filename = $this->get_file_name($key);
-        if ( ! $key || ! file_exists($filename)) {
+        $file = $this->path($key);
+        if ( ! file_exists($file)) {
             if ($default) {
                 return $default;
             }
-            throw new CacheNotSetException(
-                esc_html(
-                    sprintf(
-                        /* translators: File name */
-                        esc_html__('File %s does not exist', 'open-source-event-calendar'),
-                        $key
-                    )
-                )
-            );
+            throw new CacheNotSetException(esc_html($file) . ' does not exist');
         }
 
-        return maybe_unserialize(
-            file_get_contents($filename)
-        );
+        return maybe_unserialize(CachePath::filesystem()->get_contents($file));
     }
 
-    public static function optionKey($key, $revert = false): string
+    public function delete(string $key): bool
     {
-        if ($revert) {
-            return substr($key, strlen(self::OPTION_PREFIX));
+        $file = $this->path($key);
+        if (file_exists($file)) {
+            wp_delete_file($file);
         }
 
-        return self::OPTION_PREFIX . $key;
+        return ! file_exists($file);
     }
 
-    /**
-     * Handling CacheFile WP-Options.
-     *
-     * @param $key
-     * @param $filename
-     *
-     * @return bool True on success.
-     * @see https://developer.wordpress.org/reference/functions/update_option/
-     */
-    private function setOption($key, $filename): bool
-    {
-        return $this->app->options->set(
-            $this->optionKey($key),
-            $this->_cache_path . $filename,
-            true
-        );
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function delete_matching(string $pattern): int
     {
-        $dirhandle = opendir($this->_cache_path);
-        if (false === $dirhandle) {
-            return 0;
-        }
         $count = 0;
-        while (false !== ($entry = readdir($dirhandle))) {
-            if ('.' !== $entry[0] && str_contains($entry, $pattern)) {
-                if (wp_delete_file($this->_cache_path . $entry)) {
-                    ++$count;
-                }
+        foreach (glob($this->_cache_path . '*') ?: [] as $file) {
+            if (is_file($file) && str_contains(basename($file), $pattern)) {
+                wp_delete_file($file);
+                $count += (int) ! file_exists($file);
             }
         }
-        closedir($dirhandle);
 
         return $count;
     }
 
     public function clear_cache(): bool
     {
-        $cache = (new CachePath())->getCacheData($this->_cache_id);
-
-        if ($cache && CachePath::clean_and_check_dir($cache['path'])) {
-            $this->_cache_path = $cache['path'];
-            $this->_cache_url  = $cache['url'];
-            self::setAvailable($this->app, $this->_cache_id);
-            return true;
-        }
-        self::setUnavailable($this->app, $this->_cache_id);
-
-        return false;
-    }
-
-    public function empty_all_caches(): bool
-    {
-        foreach ($this->get_all_cache_files() as $f) {
-            if ( ! $this->delete($this->optionKey($f->name, true))) {
-                return false;
-            }
-        }
-        $cacheBasepath = (new CachePath())->getCachePath();
-
-        return CachePath::clean_and_check_dir($cacheBasepath);
-    }
-
-    public function get_all_cache_files(): array
-    {
-        $db        = $this->app->db;
-
-        $files     = [];
-        foreach ($db->get_results(
-            $db->prepare(
-                'SELECT option_name as name, option_value as filename FROM ' . $db->get_table_name('options') .
-                ' WHERE option_name LIKE %s',
-                '%%' . (string)self::OPTION_PREFIX . '%%'
-            )
-        ) as $result) {
-            $files[] = $result;
-        }
-
-        return $files;
+        return CachePath::clean_and_check_dir($this->_cache_path);
     }
 
     /**
-     * @inheritDoc
+     * @throws Exception On a key that is not a plain file name.
      */
-    public function delete(string $key): bool
+    private function path(string $key): string
     {
-        $filename = $this->get_file_name($key);
-        if ($filename) {
-            $this->app->options->delete($this->optionKey($key));
-            if (file_exists($filename)) {
-                wp_delete_file($filename);
-                return !file_exists($filename);
-            }
+        if ('' === $key || $key !== sanitize_file_name($key)) {
+            throw new Exception('Cache key must be a plain file name.');
         }
 
-        return true;
+        return $this->_cache_path . $key;
     }
 
-    public function add($key, mixed $value): bool
+    /**
+     * FS_CHMOD_FILE, which core only defines in WP_Filesystem(); the same default otherwise.
+     */
+    private static function file_mode(): int
     {
-        if ($this->key_exists($key)) {
-            return false;
-        } else {
-            return $this->set($key, $value);
-        }
-    }
-
-    private function key_exists($key): bool
-    {
-        try {
-            return (bool)$this->get_file_name($key);
-        } catch (CacheNotSetException) {
-            return false;
-        }
+        return defined('FS_CHMOD_FILE') ? FS_CHMOD_FILE : (fileperms(ABSPATH . 'index.php') & 0777 | 0644);
     }
 }

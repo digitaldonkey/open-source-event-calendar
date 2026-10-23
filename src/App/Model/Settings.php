@@ -56,10 +56,18 @@ class Settings extends OsecBaseInitialized
     {
         global $wpdb;
         if ($purge) {
+            // "osec_" literally: a bare _ in LIKE matches any character (osecurity_*, osec-*).
+            // delete_option() so that the object cache forgets them too.
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-            $wpdb->query(
-                $wpdb->prepare("DELETE FROM {$wpdb->options} WHERE `option_name` LIKE %s", 'osec_%')
+            $names = $wpdb->get_col(
+                $wpdb->prepare(
+                    "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+                    $wpdb->esc_like('osec_') . '%'
+                )
             );
+            foreach ($names as $name) {
+                delete_option($name);
+            }
         }
     }
 
@@ -701,10 +709,11 @@ class Settings extends OsecBaseInitialized
                         'open-source-event-calendar'
                     ),
                     'help'  => __(
-                        'Select if your want to use category images as featured image fallback on event page.
-                         Fallbacks can be influenced by hook <code>osec_avatar_valid_callbacks</code> and
-                          <code>osec_avatar_fallback_order</code>.
-                        ',
+                        'Select if you want an event without featured image to use its category image (or content
+                         image) as its WordPress featured image, e.g. where your theme shows featured images. The
+                         calendar views show the category image either way. Fallbacks can be influenced by the hooks
+                         <code>osec_avatar_fallback_order</code>, <code>osec_avatar_valid_media_callbacks</code>
+                         and <code>osec_avatar_valid_url_callbacks</code>.',
                         'open-source-event-calendar'
                     ),
                 ],
@@ -832,6 +841,23 @@ class Settings extends OsecBaseInitialized
                 ],
                 'default'  => true,
             ],
+            'feeds_trust_server_ca' => [
+                'type'     => 'bool',
+                'renderer' => [
+                    'class' => 'Osec\Settings\Elements\SettingsCheckbox',
+                    'tab'   => 'advanced',
+                    'label' => __("Trust this server's CA certificates for feeds", 'open-source-event-calendar'),
+                    'help'  => __(
+                        'Feeds are fetched with certificate verification against the list of certificate
+                            authorities that comes with WordPress. Enable to also accept certificates issued by
+                            authorities installed on this server, such as a company or local certificate authority
+                            ("cURL error 60: unable to get local issuer certificate").
+                            Certificates are still verified.',
+                        'open-source-event-calendar'
+                    ),
+                ],
+                'default'  => false,
+            ],
             'calendar_css_selector' => [
                 'type'     => 'string',
                 'renderer' => [
@@ -862,12 +888,12 @@ class Settings extends OsecBaseInitialized
                     'readonly' => 'readonly',
                     'help'     => __(
                         'The Robot Exclusion Standard, also known as the Robots Exclusion Protocol or
-						<code><a href="https://en.wikipedia.org/wiki/Robots.txt" target="_blank">robots.txt</a></code>
-						protocol, is a convention for cooperating web crawlers and other web robots
-						about accessing all or part of a website that is otherwise publicly viewable.<br />
-						The file is dynamically created using <a href="/?robots=1" target="_blank">/?robots=1</a>
-						and should map to <a href="/robots.txt" target="_blank">/robots.txt</a>
-						If you maintain a static robots.txt you should copy over above directives.',
+                        <code><a href="https://en.wikipedia.org/wiki/Robots.txt" target="_blank">robots.txt</a></code>
+                        protocol, is a convention for cooperating web crawlers and other web robots
+                        about accessing all or part of a website that is otherwise publicly viewable.<br />
+                        The file is dynamically created using <a href="/?robots=1" target="_blank">/?robots=1</a>
+                        and should map to <a href="/robots.txt" target="_blank">/robots.txt</a>
+                        If you maintain a static robots.txt you should copy over above directives.',
                         'open-source-event-calendar'
                     ),
                 ],
@@ -1250,7 +1276,9 @@ class Settings extends OsecBaseInitialized
         }
         $options = $this->app->options;
         $options->set('osec_force_flush_rewrite_rules', true, true);
-        $options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true, true);
+        FrontendCssController::factory($this->app)->request_compile();
         $options->set(ThemeLoader::OPTION_FORCE_CLEAN, true, true);
+        // Rows now (pages without CSS state link the compiling route), the 1.1.x CSS files in a week (cached pages).
+        FrontendCssController::factory($this->app)->migrate_legacy();
     }
 }

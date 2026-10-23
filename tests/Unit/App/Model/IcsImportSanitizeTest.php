@@ -3,7 +3,11 @@
 namespace Osec\Tests\Unit\App\Model;
 
 use Osec\App\Model\IcsImportExportParser;
+use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventSearch;
+use Osec\App\View\Calendar\AbstractView;
+use Osec\App\View\Event\EventSingleView;
+use Osec\Tests\Utilities\HostileInput;
 use Osec\Tests\Utilities\TestBase;
 
 /**
@@ -15,6 +19,8 @@ use Osec\Tests\Utilities\TestBase;
  */
 class IcsImportSanitizeTest extends TestBase
 {
+    use HostileInput;
+
     private const FEED_URL = 'https://example.org/sanitize.ics';
 
     public static function users(): array
@@ -46,6 +52,43 @@ class IcsImportSanitizeTest extends TestBase
         $this->assertStringContainsString('<p class="lead">', $post->post_content);
     }
 
+    public static function encodedTitles(): array
+    {
+        $cases = [];
+        foreach ([
+            'named entities'   => '&lt;img src=x onerror=alert(1)&gt;',
+            'numeric entities' => '&#60;img src=x onerror=alert(1)&#62;',
+            'double encoded'   => '&amp;lt;img src=x onerror=alert(1)&amp;gt;',
+        ] as $name => $summary) {
+            foreach (self::users() as $user => [$role]) {
+                $cases["$name, $user"] = [$summary, $role];
+            }
+        }
+
+        return $cases;
+    }
+
+    /**
+     * T8: titles are printed as HTML (|raw, in PHP and twig.js), so a feed must not get markup into them by encoding
+     * it either; whatever is stored stays text in the view's filtered_title.
+     *
+     * @dataProvider encodedTitles
+     */
+    public function test_encoded_markup_in_a_feed_title_stays_text(string $summary, ?string $role)
+    {
+        global $osec_app;
+        wp_set_current_user($role ? self::factory()->user->create(['role' => $role]) : 0);
+
+        $post  = $this->import('SUMMARY:' . $summary, 'DESCRIPTION:x');
+        $event = new Event($osec_app, $post->ID);
+        AbstractView::addRuntimePropertiesStatic($osec_app, $event);
+        $title = $event->get_runtime('filtered_title');
+
+        $this->assertStringNotContainsString('<', $post->post_title);
+        $this->assertStringNotContainsString('<img', $title);
+        $this->assertStringNotContainsString('<', $title);
+    }
+
     public function test_plain_text_description_keeps_its_line_breaks()
     {
         $post = $this->import('SUMMARY:Plain', 'DESCRIPTION:first line\\nsecond line');
@@ -53,9 +96,93 @@ class IcsImportSanitizeTest extends TestBase
         $this->assertSame("first line\nsecond line", $post->post_content);
     }
 
-    private function import(string $summary, string $description): \WP_Post
+    public static function hostile(): array
+    {
+        $values = [];
+        foreach (self::hostile_values() as $label => $value) {
+            // Feed text escapes "," and ";" (RFC 5545 3.3.11).
+            $values[$label] = [addcslashes($value, ',;')];
+        }
+
+        return $values;
+    }
+
+    /**
+     * Location, contact, organizer, cost and ticket URL are printed unescaped by the frontend
+     * rendering (twig.js), so a feed must not be able to store markup or a script URL in them.
+     *
+     * @dataProvider hostile
+     */
+    public function test_event_fields_from_a_feed_are_plain_text(string $value)
+    {
+        $event = $this->import_event([
+            'LOCATION:' . $value,
+            'CONTACT:' . $value . '\\;' . $value . ' 1\\;' . $value . '@example.org\\;javascript://x%0Aalert(1)',
+            'ORGANIZER;CN="' . str_replace('"', '', $value) . '":mailto:o@example.org',
+            'X-COST:' . $value,
+            'X-TICKETS-URL:' . $value,
+        ]);
+
+        foreach (['venue', 'address', 'contact_name', 'contact_phone', 'contact_email', 'cost'] as $field) {
+            self::assertNoTag($event->get($field), $field);
+        }
+        foreach (['contact_url', 'ticket_url'] as $field) {
+            self::assertSafeUrl($event->get($field), $field);
+        }
+    }
+
+    public function test_venue_keeps_ampersands_and_quotes()
+    {
+        $event = $this->import_event(['LOCATION:D&D "Hall"']);
+
+        $this->assertSame('D&D "Hall"', $event->get('venue'));
+    }
+
+    public function test_address_keeps_line_breaks()
+    {
+        $event = $this->import_event(['LOCATION:Main St 1\\nBerlin\\, Germany']);
+
+        $this->assertSame("Main St 1\nBerlin, Germany", $event->get('address'));
+    }
+
+    public function test_safe_ticket_and_contact_urls_are_kept()
+    {
+        $event = $this->import_event([
+            'CONTACT:Jane\\;https://example.org/contact?a=1&b=2',
+            'X-TICKETS-URL:https://example.org/tickets?a=1&b=2',
+        ]);
+
+        $this->assertSame('https://example.org/contact?a=1&b=2', $event->get('contact_url'));
+        $this->assertSame('https://example.org/tickets?a=1&b=2', $event->get('ticket_url'));
+    }
+
+    public function test_source_url_is_imported_and_linked()
     {
         global $osec_app;
+
+        $event = $this->import_event(['URL:https://example.org/event?a=1&b=2']);
+
+        $this->assertSame('https://example.org/event?a=1&b=2', $event->get('ical_source_url'));
+        $this->assertStringContainsString(
+            'href="https://example.org/event?a=1&#038;b=2"',
+            EventSingleView::factory($osec_app)->get_footer($event)
+        );
+    }
+
+    private function import_event(array $lines): Event
+    {
+        global $osec_app;
+
+        $post = $this->import('SUMMARY:Fields', 'DESCRIPTION:x', $lines);
+
+        return new Event($osec_app, $post->ID);
+    }
+
+    private function import(string $summary, string $description, array $lines = []): \WP_Post
+    {
+        global $osec_app;
+
+        $extra = implode('', array_map(fn($line) => $line . "\r\n", $lines));
 
         IcsImportExportParser::factory($osec_app)->import([
             'events_in_db'   => [],
@@ -63,7 +190,7 @@ class IcsImportSanitizeTest extends TestBase
             'do_show_map'    => 0,
             'source'         => "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//osec tests//EN\r\n" .
                 "BEGIN:VEVENT\r\nUID:sanitize@example.org\r\nDTSTAMP:20260901T100000Z\r\n" .
-                "DTSTART:20261015T100000Z\r\nDTEND:20261015T110000Z\r\n{$summary}\r\n{$description}\r\n" .
+                "DTSTART:20261015T100000Z\r\nDTEND:20261015T110000Z\r\n{$summary}\r\n{$description}\r\n{$extra}" .
                 "END:VEVENT\r\nEND:VCALENDAR\r\n",
             'feed'           => (object)[
                 'feed_id'              => '1',

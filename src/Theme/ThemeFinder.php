@@ -96,6 +96,32 @@ class ThemeFinder extends OsecBaseClass
     }
 
     /**
+     * Finds a calendar theme by name and returns the value stored in the option osec_current_theme.
+     *
+     * When two theme folders hold a theme of the same name, the later folder in get_theme_dirs() wins, as in the
+     * admin Themes list: the plugin's own theme over an unrenamed copy in wp-content/themes.
+     *
+     * @param  string  $name  Theme folder name (stylesheet), e.g. "plana".
+     *
+     * @return array|null Keys theme_root, theme_dir, theme_url, stylesheet; null when no theme without errors has
+     *                    that name.
+     */
+    public function find_theme(string $name): ?array
+    {
+        $found = $this->get_themes()[$name] ?? null;
+        if ( ! $found instanceof WP_Theme || false !== $found->errors()) {
+            return null;
+        }
+
+        return [
+            'theme_root' => $found->get_theme_root(),
+            'theme_dir'  => $found->get_stylesheet_directory(),
+            'theme_url'  => $found->get_stylesheet_directory_uri(),
+            'stylesheet' => $found->get_stylesheet(),
+        ];
+    }
+
+    /**
      * Set some globals to allow theme searching.
      */
     protected function preSearch(array $directories): void

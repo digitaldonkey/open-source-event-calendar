@@ -4,6 +4,7 @@ namespace Osec\App\View\Event;
 
 use Osec\App\Model\Date\DateFormatsFrontend;
 use Osec\App\Model\Date\DT;
+use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
@@ -31,7 +32,9 @@ class EventTimeView extends OsecBaseClass
      *
      * @param  Event  $event  Rendered event.
      * @param  string  $start_date_display  Can be one of 'hidden', 'short',
-     *                                       or 'long'.
+     *                                       'long' or 'backend' (wp-admin: date
+     *                                       and time in the input formats of
+     *                                       Settings > Editing events).
      *
      * @return string Formatted timespan HTML element.
      */
@@ -70,6 +73,7 @@ class EventTimeView extends OsecBaseClass
                 break;
             case 'short':
             case 'long':
+            case 'backend':
                 $function = 'format_' . $start_date_display . '_date';
                 $date_string .= $this->{$function}($start, $break_years);
                 if ($displayEndDate) {
@@ -81,12 +85,14 @@ class EventTimeView extends OsecBaseClass
                 break;
         }
 
+        $format_time = 'backend' === $start_date_display ? 'format_backend_time' : 'format_time';
+
         // Output start time for non-all-day events.
         if (! $event->is_allday()) {
             if ('hidden' !== $start_date_display) {
                 $date_string .= self::timeSeparator();
             }
-            $date_string .= $this->format_time($start);
+            $date_string .= $this->{$format_time}($start);
         }
 
         // Find out if we need to output the end time/date. Do not output it for
@@ -98,7 +104,7 @@ class EventTimeView extends OsecBaseClass
         }
         if ($displayEndTime) {
             $date_string  .= $displayEndDate ? self::timeSeparator() : self::timespanSeparator();
-            $date_string .= $this->format_time($end);
+            $date_string .= $this->{$format_time}($end);
         }
 
         if (! $event->is_allday()) {
@@ -153,6 +159,32 @@ class EventTimeView extends OsecBaseClass
         );
 
         return $time->format_i18n($time_format);
+    }
+
+    /**
+     * Time in wp-admin: 24h or 12h as set in "Use 24h time in time pickers" (Settings > Editing events).
+     *
+     * @param  DT  $time
+     *
+     * @return string
+     */
+    public function format_backend_time(DT $time): string
+    {
+        return $time->format_i18n($this->app->settings->get('input_24h_time') ? 'H:i' : 'g:i a');
+    }
+
+    /**
+     * Date in wp-admin, as set in "Input date format" (Settings > Editing events), the format of the date pickers.
+     *
+     * @param  DT  $time
+     *
+     * @return string
+     */
+    public function format_backend_date(DT $time): string
+    {
+        return $time->format_i18n(
+            UIDateFormats::factory($this->app)->get_date_format_patter($this->app->settings->get('input_date_format'))
+        );
     }
 
     /**

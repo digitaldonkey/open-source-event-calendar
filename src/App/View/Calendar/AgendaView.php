@@ -207,7 +207,6 @@ class AgendaView extends AbstractView
                 'There are no upcoming events to display at this time.',
                 'open-source-event-calendar'
             ),
-            'text_edit'                 => __('Edit', 'open-source-event-calendar'),
             'text_read_more'            => __('Read more', 'open-source-event-calendar'),
             'text_categories'           => __('Categories:', 'open-source-event-calendar'),
             'text_tags'                 => __('Tags:', 'open-source-event-calendar'),
@@ -310,7 +309,9 @@ class AgendaView extends AbstractView
             $event_props['timespan_short']            = EventTimeView::factory($this->app)
                                                                      ->get_timespan_html($event, 'short');
             $event_props['avatar']                    = $event->getavatar();
-            $event_props['avatar_not_wrapped']        = $event->getavatar(false);
+            $event_props['image_html']                = $event->getavatar(false);
+            // avatar_not_wrapped: the name before 1.2.0, kept for theme templates written for it.
+            $event_props['avatar_not_wrapped']        = $event_props['image_html'];
             $event_props['avatar_url']                = EventAvatarView::factory($this->app)
                                                                        ->get_event_avatar_url($event);
             $event_props['category_divider_color']    = $event->get_runtime(
@@ -394,6 +395,12 @@ class AgendaView extends AbstractView
         // repeated the same page on days with more events than one page holds.
         $page_offset = (int)($args['page_offset'] ?? 0);
 
+        // The first page lists events from the requested date on (the picked day or today),
+        // so the picker names that date; any other page starts at its first event.
+        $picker_date = 0 === $page_offset && DT::is_timestamp($args['exact_date'] ?? null)
+            ? $args['exact_date']
+            : $date_first->format_to_gmt();
+
         if ($make_absolute) {
             $args['page_offset'] = 0;
             $args['exact_date']  = (new DT($date_first))->set_time(
@@ -409,6 +416,7 @@ class AgendaView extends AbstractView
                            ->create_href_helper_instance($args);
         $links[] = [
             'class'   => 'ai1ec-prev-page',
+            'label'   => __('Previous page', 'open-source-event-calendar'),
             'text'    => '<i class="ai1ec-fa ai1ec-fa-chevron-left"></i>',
             'href'    => $href->generate_href(),
             'enabled' => $prev,
@@ -417,7 +425,7 @@ class AgendaView extends AbstractView
         // Minical datepicker.
         $links[] = HtmlFactory::factory($this->app)->create_datepicker_link(
             $args,
-            $date_first->format_to_gmt(),
+            $picker_date,
             $title,
             $title_short
         );
@@ -437,6 +445,7 @@ class AgendaView extends AbstractView
 
         $links[] = [
             'class'   => 'ai1ec-next-page',
+            'label'   => __('Next page', 'open-source-event-calendar'),
             'text'    => '<i class="ai1ec-fa ai1ec-fa-chevron-right"></i>',
             'href'    => $href->generate_href(),
             'enabled' => $next,

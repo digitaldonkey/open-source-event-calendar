@@ -13,7 +13,9 @@ use Osec\Exception\BootstrapException;
 use Osec\Exception\EngineNotSetException;
 use Osec\Exception\ImportExportParseException;
 use Osec\Exception\InvalidArgumentException;
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
+use Osec\Http\Request\TrustedCaBundle;
 use Osec\Http\Response\RenderJson;
 use Osec\Theme\ThemeLoader;
 use WP_Term;
@@ -180,7 +182,7 @@ class FeedsController extends OsecBaseClass
                 'data_loading_button_text' => __('Please wait&#8230;', 'open-source-event-calendar'),
                 'add_subscription_button_text' => esc_html__('Add new subscription', 'open-source-event-calendar'),
                 'update_subscription_button_text' => esc_html__('Update subscription', 'open-source-event-calendar'),
-                'reloading_button_loading_text' => esc_html__('Refreshing&#8230', 'open-source-event-calendar'),
+                'reloading_button_loading_text' => esc_html__('Refreshing&#8230;', 'open-source-event-calendar'),
                 'reloading_button_text' => esc_html__('Refresh', 'open-source-event-calendar'),
                 'edit_button_text' => esc_html__('Edit', 'open-source-event-calendar'),
                 'remove_button_loading_text' => esc_html__('Removing&#8230;', 'open-source-event-calendar'),
@@ -463,12 +465,7 @@ class FeedsController extends OsecBaseClass
             // Certificates are verified (the WordPress default): without it anyone on
             // the network path could inject events. A feed server with a broken
             // certificate can be exempted with the http_request_args filter.
-            $response = wp_remote_get(
-                $feed->feed_url,
-                [
-                    'timeout' => (float) 120,
-                ]
-            );
+            $response = wp_remote_get($feed->feed_url, $this->fetch_args());
 
             if (
                 ! is_wp_error($response) &&
@@ -570,6 +567,16 @@ class FeedsController extends OsecBaseClass
                     ),
                     $response->get_error_message()
                 );
+                if (
+                    str_contains($response->get_error_message(), 'cURL error 60')
+                    && ! $this->app->settings->get('feeds_trust_server_ca')
+                ) {
+                    $message .= ' ' . __(
+                        "If a certificate authority installed on this server issued the feed's certificate, enable
+                            Settings → Advanced → \"Trust this server's CA certificates for feeds\".",
+                        'open-source-event-calendar'
+                    );
+                }
             } else {
                 $message = __(
                     'Calendar data could not be fetched. If your URL is valid and contains an iCalendar resource,
@@ -730,8 +737,7 @@ class FeedsController extends OsecBaseClass
     {
         $feed_id = 0;
         // Nonce checked before.
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-        if (isset($_REQUEST['feed_id'])) {
+        if (RequestParser::has_param('feed_id')) {
             $feed_id = $this->get_request_params('feed_id');
         }
         if (false === $feed_url) {
@@ -811,6 +817,23 @@ class FeedsController extends OsecBaseClass
             'twicedaily' => esc_html__('Twice Daily', 'open-source-event-calendar'),
             'daily' => esc_html__('Daily', 'open-source-event-calendar'),
         ];
+    }
+
+    /**
+     * Arguments for fetching a feed. Certificates are always verified; with "Trust this server's CA certificates for
+     * feeds" against WordPress' list plus the server's (TrustedCaBundle).
+     */
+    private function fetch_args(): array
+    {
+        $args = ['timeout' => (float) 120];
+        if ($this->app->settings->get('feeds_trust_server_ca')) {
+            $bundle = TrustedCaBundle::factory($this->app)->path();
+            if ($bundle) {
+                $args['sslcertificates'] = $bundle;
+            }
+        }
+
+        return $args;
     }
 
     /**
@@ -904,14 +927,14 @@ class FeedsController extends OsecBaseClass
             }
             unset($feed_categories);
             $args = self::merge_commom_vars([
-                'feed_name' => esc_attr(! empty($row->feed_name) ? $row->feed_name : $row->feed_url),
-                'feed_url' => esc_attr($row->feed_url),
+                'feed_name' => ! empty($row->feed_name) ? $row->feed_name : $row->feed_url,
+                'feed_url' => $row->feed_url,
                 'event_category' => implode(', ', $categories),
-                'events_categories_ids' => esc_attr($row->feed_category),
+                'events_categories_ids' => $row->feed_category,
                 'tags' => stripslashes(
-                    str_replace(',', ', ', esc_attr($row->feed_tags))
+                    str_replace(',', ', ', (string)$row->feed_tags)
                 ),
-                'tags_ids'             => esc_attr($row->feed_tags),
+                'tags_ids'             => $row->feed_tags,
                 'feed_id'              => $row->feed_id,
                 'comments_enabled'     => (int) $row->comments_enabled,
                 'map_display_enabled'  => (int) $row->map_display_enabled,
@@ -949,37 +972,28 @@ class FeedsController extends OsecBaseClass
                 wp_die(esc_html__('User not allowed to manage feeds.', 'open-source-event-calendar'));
             }
 
-            if (isset($_REQUEST['feed_url']) && ! empty($_REQUEST['feed_url'])) {
-                $url = esc_url_raw(wp_unslash($_REQUEST['feed_url']));
-            }
-
-            $feedId = RequestParser::get_param('feed_id', null);
-            if ($feedId) {
-                $feedId = (int) $feedId;
-            }
-            $feed_categories = '';
+            $url    = RequestParser::get_param('feed_url', '', ParamType::Url);
+            $feedId = RequestParser::get_param('feed_id', null, ParamType::Id) ?: null;
             // Different from tags they are submitted as [](int).
-            if (isset($_REQUEST['feed_category']) && is_array($_REQUEST['feed_category'])) {
-                $f_cats = array_map('intval', $_REQUEST['feed_category']);
-                $feed_categories = implode(',', $f_cats);
-            }
+            $feed_categories = implode(',', RequestParser::get_param('feed_category', [], ParamType::IdList));
 
             $requestArgs = [
-                'feed_url'             => $url ?? '',
-                'feed_name'            => $url ?? '',
+                'feed_url'             => $url,
+                'feed_name'            => $url,
                 // Update integer or New null.
                 'feed_id'              => $feedId,
                 'feed_category'        => $feed_categories,
                 'feed_tags'            => RequestParser::get_param('feed_tags', ''),
                 // Booleans are integers in DB.
-                'hide_cost'            => (int) RequestParser::get_param('hide_cost', 1),
-                'comments_enabled'     => (int) RequestParser::get_param('comments_enabled', 0),
-                'map_display_enabled'  => (int) RequestParser::get_param('map_display_enabled', 0),
-                'keep_tags_categories' => (int) RequestParser::get_param('keep_tags_categories', 0),
-                'keep_old_events'      => (int) RequestParser::get_param('keep_old_events', 0),
-                'import_timezone'      => (int) RequestParser::get_param('feed_import_timezone', 0),
-                'remove_events'        => (RequestParser::get_param('remove_events') === 'true'),
-                'import_post_status'   => (string) RequestParser::get_param('import_post_status', 'publish'),
+                'hide_cost'            => RequestParser::get_param('hide_cost', 1, ParamType::Int),
+                'comments_enabled'     => RequestParser::get_param('comments_enabled', 0, ParamType::Int),
+                'map_display_enabled'  => RequestParser::get_param('map_display_enabled', 0, ParamType::Int),
+                'keep_tags_categories' => RequestParser::get_param('keep_tags_categories', 0, ParamType::Int),
+                'keep_old_events'      => RequestParser::get_param('keep_old_events', 0, ParamType::Int),
+                'import_timezone'      => RequestParser::get_param('feed_import_timezone', 0, ParamType::Int),
+                // jQuery sends the JS boolean as 'true' / 'false'.
+                'remove_events'        => RequestParser::get_param('remove_events', false, ParamType::Bool),
+                'import_post_status'   => RequestParser::get_param('import_post_status', 'publish'),
             ];
         }
 

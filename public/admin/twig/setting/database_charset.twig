@@ -1,0 +1,31 @@
+<div id="osec-database-charset" class="timely">
+    <p>{{ text.info }}</p>
+    <table class="ai1ec-table">
+        <thead>
+        <tr>
+            <th scope="col">{{ text.table }}</th>
+            <th scope="col">{{ text.collation }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for name, table in tables %}
+            <tr>
+                <th scope="row"><code>{{ name }}</code></th>
+                <td><code>{{ table.collation }}</code>{% if not table.convertible %} ({{ text.other }}){% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <p>
+        <button type="button" class="ai1ec-btn ai1ec-btn-primary" id="osec-button-convert-tables"
+                data-url="{{ convert.url }}"
+                data-nonce="{{ convert.nonce }}"
+                data-result="#osec-convert-tables-result"
+                data-busy="{{ text.busy }}"
+                data-failed="{{ text.failed }}"
+                data-disable-on-success="1">
+            {{ text.button }}
+        </button>
+    </p>
+    <div id="osec-convert-tables-result" class="osec-action-result" role="status" aria-live="polite"></div>
+</div>

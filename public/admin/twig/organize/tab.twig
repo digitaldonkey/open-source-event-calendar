@@ -1,20 +1,20 @@
 {% if taxonomy.divider %}
-	<li role="presentation" class="ai1ec-divider"></li>
+    <li role="presentation" class="ai1ec-divider"></li>
 {% else %}
-	<li class="{% if taxonomy.active %}ai1ec-active{% endif %}
-		ai1ec-taxonomy-{{ taxonomy.taxonomy_name }}">
-		<a href="{{ taxonomy.url | e('html_attr') }}">
-		{% if taxonomy.icon is not empty %}
-			<i class="{{ taxonomy.icon | e('html_attr') }} ai1ec-fa-fw"></i>
-		{% endif %}
-		{{ taxonomy.name | raw }}
-		</a>
+    <li class="{% if taxonomy.active %}ai1ec-active{% endif %}
+        ai1ec-taxonomy-{{ taxonomy.taxonomy_name }}">
+        <a href="{{ taxonomy.url | e('html_attr') }}">
+        {% if taxonomy.icon is not empty %}
+            <i class="{{ taxonomy.icon | e('html_attr') }} ai1ec-fa-fw"></i>
+        {% endif %}
+        {{ taxonomy.name | raw }}
+        </a>
 
-		{% if taxonomy.active and taxonomy.edit_url is not empty %}
-			<a class="ai1ec-taxonomy-edit-link ai1ec-hide button button-primary timely"
-				href="{{ taxonomy.edit_url | e('html_attr') }}">
-				<i class="ai1ec-fa ai1ec-fa-pencil"></i> {{ taxonomy.edit_label }}
-			</a>
-		{% endif %}
-	</li>
+        {% if taxonomy.active and taxonomy.edit_url is not empty %}
+            <a class="ai1ec-taxonomy-edit-link ai1ec-hide button button-primary timely"
+                href="{{ taxonomy.edit_url | e('html_attr') }}">
+                <i class="ai1ec-fa ai1ec-fa-pencil"></i> {{ taxonomy.edit_label }}
+            </a>
+        {% endif %}
+    </li>
 {% endif %}

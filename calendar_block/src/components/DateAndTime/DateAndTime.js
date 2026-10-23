@@ -6,7 +6,7 @@ export default function DateAndTime ({
 	onChange,
 	labelText,
 	placeholder,
- 	isRequired,
+	isRequired,
 	dateFormat,
 	id
 }) {
@@ -41,6 +41,7 @@ export default function DateAndTime ({
 			<DatePicker
 				ref={pickerRef}
 				id={id}
+				autoComplete="off"
 				placeholderText={placeholder}
 				selected={date}
 				closeOnScroll={(e) => e.target === document}

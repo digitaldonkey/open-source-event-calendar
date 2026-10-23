@@ -2,6 +2,7 @@
 
 namespace Osec\App\View\Admin;
 
+use Osec\Http\Request\RequestParser;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -24,8 +25,7 @@ class AdminPageManageThemes extends AdminPageAbstract
     public function display_page(): void
     {
         global $osec_current_theme;
-        // phpcs:ignore WordPress.Security.NonceVerification
-        $activated = isset($_GET['activated']) ? true : false;
+        $activated = RequestParser::has_param('activated');
         $deleted   = false;
 
         $_list_table = new AdminThemeList($this->app);

@@ -7,6 +7,7 @@ use Osec\App\Model\Date\DT;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\WpmlHelper;
 use Osec\Helper\IntegerHelper;
+use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
 use Osec\Http\Response\RenderIcal;
 
@@ -61,10 +62,7 @@ class ExportEvents extends CommandAbstract
                 'lang',
                 false
             );
-            $params['no_html']  = (bool)RequestParser::get_param(
-                'no_html',
-                false
-            );
+            $params['no_html']  = RequestParser::get_param('no_html', false, ParamType::Bool);
             $this->params      = $params;
 
             return true;

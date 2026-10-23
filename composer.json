@@ -53,7 +53,8 @@
         "phpcsstandards/phpcsextra": "*",
         "phpcsstandards/phpcsutils": "*",
         "wpackagist-plugin/plugin-check": "2.1.0",
-        "wp-coding-standards/wpcs": "^3.3"
+        "wp-coding-standards/wpcs": "^3.3",
+        "armin/editorconfig-cli": "^2.2"
     },
     "config": {
         "allow-plugins": {

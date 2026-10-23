@@ -35,6 +35,7 @@ class BlockController extends OsecBaseClass
             $asset['version'],
             true
         );
+        wp_set_script_translations('osec-calendar-block-classic', 'open-source-event-calendar');
         // Dependencies of an editor style are loaded into the editor iframe as well.
         wp_register_style(
             'osec-editor-style',
@@ -64,7 +65,14 @@ class BlockController extends OsecBaseClass
                             // No calendars inside event content, see EventContentView::is_filtering_content().
                             return '';
                         }
-                        $content .= '<div ' . get_block_wrapper_attributes() . '>';
+                        if (CalendarPageView::factory($this->app)->is_calendar_page_request()) {
+                            // The calendar page shows its own calendar only.
+                            return '';
+                        }
+                        $wrapper = 'full' === ($attributes['align'] ?? '')
+                            ? ['class' => CalendarPageView::edge_padding_class()]
+                            : [];
+                        $content .= '<div ' . get_block_wrapper_attributes($wrapper) . '>';
                         $content .= $this->getContent($this->transformAttributes($attributes));
                         $content .= '</div>';
 
@@ -96,7 +104,6 @@ class BlockController extends OsecBaseClass
             'display_filters' => 'true',
             'display_subscribe' => 'true',
             'display_print' => 'true',
-            'agenda_toggle' => 'true',
             'display_view_switch' => 'true',
             'display_date_navigation' => 'true',
             'events_limit' => $this->app->settings->get('agenda_events_per_page'),
@@ -118,12 +125,32 @@ class BlockController extends OsecBaseClass
             'displayPrint' => 'display_print',
             'displayViewSwitch' => 'display_view_switch',
             'displayDateNavigation' => 'display_date_navigation',
-            'agendaToggle' => 'agenda_toggle',
 
         ] as $jsProp => $query_prop) {
             if (isset($atts[$jsProp])) {
                 $query[$query_prop] = CalendarPageView::booleanStringArg($atts[$jsProp]);
             }
+        }
+
+        // Agenda events: the global setting (RequestParser's default for agenda_toggle), or expanded/collapsed for
+        // this block. Blocks saved before agendaEvents existed carry agendaToggle true for "expanded".
+        $agenda_events = $atts['agendaEvents'] ?? 'global';
+        if ('global' === $agenda_events && ! empty($atts['agendaToggle'])) {
+            $agenda_events = 'expanded';
+        }
+        if ('expanded' === $agenda_events) {
+            $query['agenda_toggle'] = 'true';
+        } elseif ('collapsed' === $agenda_events) {
+            $query['agenda_toggle'] = 'false';
+        }
+
+        // Print icon: the global setting, or shown/hidden for this block. Blocks saved
+        // before printIcon existed only carry displayPrint, which the loop above maps.
+        $print_icon = $atts['printIcon'] ?? 'global';
+        if ('show' === $print_icon) {
+            $query['display_print'] = 'always';
+        } elseif ('hide' === $print_icon) {
+            $query['display_print'] = 'false';
         }
 
         if (isset($atts['fixedDate']) && DT::isValidTimeStamp($atts['fixedDate'])) {
@@ -170,7 +197,7 @@ class BlockController extends OsecBaseClass
     {
         $request = new RequestParser($this->app, $query, $query['action']);
         $request->parse();
-        $page_content = CalendarPageView::factory($this->app)->get_content($request);
+        $page_content = CalendarPageView::factory($this->app)->get_content($request, 'render-command', 'none');
         FrontendCssController::factory($this->app)
                              ->add_link_to_html_for_frontend();
         ScriptsFrontendController::factory($this->app)->load_frontend_js(true);

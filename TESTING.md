@@ -12,6 +12,7 @@ Run before pushing:
 [ ] composer install                                                        # sync dev deps
 [ ] vendor/bin/phpcs --standard=phpcs.xml --runtime-set testVersion 8.2-    # coding standards
 [ ] vendor/bin/phpunit                                                      # unit + integration tests
+[ ] bin/phpunit-sqlite.sh                                                   # the same on SQLite (~15 s)
 [ ] cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test  # Mocha/Selenium (~5 min)
 [ ] bin/plugin-check.sh                                                     # WordPress plugin-check gate (~13 s)
 [ ] vendor/bin/grumphp run --testsuite=all_tests                           # everything above, in one command
@@ -93,13 +94,13 @@ composer run phpcbf            # auto-fix
 
 ```
 vendor/bin/grumphp run                              # every configured task - INCLUDES integration_tests, see warning below
-vendor/bin/grumphp run --testsuite=git_pre_commit   # what the pre-commit hook runs: composer + phpcs + phpunit
+vendor/bin/grumphp run --testsuite=git_pre_commit   # what the pre-commit hook runs: composer + phpcs + editorconfig + phpunit
 vendor/bin/grumphp run --testsuite=all_tests        # the full TESTING.md checklist in one command
 vendor/bin/grumphp run --testsuite=prepare_release  # release-readiness checks, run after all_tests
 ```
 
-> **Warning:** `integration_tests` runs the Mocha/Selenium suite against whatever `settings.local.js` points
-> at. It installs/uninstalls the plugin, exercises the `OSEC_UNINSTALL_PLUGIN_DATA` purge and **trashes every
+> **Warning:** `integration_tests` runs the Mocha/Selenium suite against whatever `mocha/settings.local.js` points
+> at (or `BASE_URL`, see [Running against a sandbox](#integration-tests-mochaselenium)). It installs/uninstalls the plugin, exercises the `OSEC_UNINSTALL_PLUGIN_DATA` purge and **trashes every
 > calendar page on teardown**, leaving `calendar_page_id` pointing at a trashed post. Bare `grumphp run`,
 > `--testsuite=all_tests` and `ddev grumphp all` all include it. Use `--testsuite=git_pre_commit` when you only
 > want the code-quality gate.
@@ -127,12 +128,12 @@ Unlike the git hook, which only checks staged files, these commands check the wh
 
 Task inventory as currently configured:
 
-- **Active**: `composer` (validates `composer.json`/`composer.lock`), `phpcs` (standard `./phpcs.xml`), `phpunit` (config file `./phpunit.xml`, `always_execute: true` so it runs regardless of which files changed), `integration_tests` (a named `shell` task instance — `metadata.task: shell` — running `cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test`; needs the `ddev-selenium-standalone-chrome` add-on and `constants-local.php`, see [Integration tests](#integration-tests-mochaselenium) above), `plugin_check` (a named `shell` task running `bin/plugin-check.sh`, the WordPress plugin-check gate — see [WordPress plugin-check](#wordpress-plugin-check) below)
+- **Active**: `composer` (validates `composer.json`/`composer.lock`), `phpcs` (standard `./phpcs.xml`), `editorconfig` (a `shell` task running `vendor/bin/ec` from `armin/editorconfig-cli` over every tracked file except `calendar_block/`, against `.editorconfig`; also in CI `static_job`. Fix reports by hand or with `vendor/bin/ec --fix` (rewrites every reported file - check `git diff` first; it knows nothing about strings); whitespace-only fixes go in their own `style:` commit, listed in `.git-blame-ignore-revs`), `phpunit` (config file `./phpunit.xml`, `always_execute: true` so it runs regardless of which files changed), `integration_tests` (a named `shell` task instance — `metadata.task: shell` — running `cd integration_tests && SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test`; needs the `ddev-selenium-standalone-chrome` add-on and `constants-local.php`, see [Integration tests](#integration-tests-mochaselenium) above), `plugin_check` (a named `shell` task running `bin/plugin-check.sh`, the WordPress plugin-check gate — see [WordPress plugin-check](#wordpress-plugin-check) below)
 - **Present but commented out** (not run): `gherkin`, `git_commit_message`, `phpcpd` (would exclude `lib`/`tests`/`vendor`), `phplint`, `phpmd` (ruleset `codesize, design, naming, unusedcode`, would exclude `tests`/`vendor`)
 
 Testsuites:
-- `git_pre_commit` — matched by name to GrumPHP's git hook (`PreCommitCommand` looks up a testsuite literally named `git_pre_commit`), so this is what actually runs on every commit: `composer`, `phpcs`, `phpunit`. Without this testsuite the hook would run every configured task, including `integration_tests` and the release checks. CI's "Run code quality tests" step deliberately does not use this testsuite (it runs `--tasks=composer,phpcs`, as that job has no database for `phpunit`).
-- `all_tests` — not hook-bound, for running everything on demand: `composer`, `phpcs`, `phpunit`, `plugin_check`, `integration_tests`.
+- `git_pre_commit` — matched by name to GrumPHP's git hook (`PreCommitCommand` looks up a testsuite literally named `git_pre_commit`), so this is what actually runs on every commit: `composer`, `phpcs`, `editorconfig`, `phpunit`. Without this testsuite the hook would run every configured task, including `integration_tests` and the release checks. CI's "Run code quality tests" step deliberately does not use this testsuite (it runs `--tasks=composer,phpcs`, as that job has no database for `phpunit`).
+- `all_tests` — not hook-bound, for running everything on demand: `composer`, `phpcs`, `editorconfig`, `phpunit`, `phpunit_sqlite`, `plugin_check`, `integration_tests`.
 - `prepare_release` — `release_check` (`wp osec prepare_release`), `make_readme` (`wp osec make_readme --check`), `hooks_and_filters` (`hookster_markdown` check), `plugin_check` (`bin/plugin-check.sh`). Run after `all_tests`.
 
 The git pre-commit hook already runs inside DDEV — `git_hook_variables.EXEC_GRUMPHP_COMMAND` wraps it in `ddev exec -d "/var/www/html/wp-content/plugins/open-source-event-calendar"`. No extra setup needed; only reinit (`ddev exec grumphp git:init`) if the hook itself isn't installed.
@@ -177,16 +178,20 @@ afterwards so it cannot affect the integration tests that follow.
 
 ## Integration tests (Mocha/Selenium)
 
+The suite lives in `integration_tests/mocha/`, its own npm workspace. `integration_tests/` is the workspaces root
+(`mocha/`, `visual_regression/`): `npm install` there installs both, and its `npm run test` / `npm run test:js`
+forward to `mocha/`.
+
 ```
 cd integration_tests
 npm install
-cp settings.local.js.example settings.local.js   # if not already present
+cp mocha/settings.local.js.example mocha/settings.local.js   # if not already present
 SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test   # see Prerequisites below — plain `npm run test` tries to spawn a local chromedriver and fails
 ```
 
-Edit `settings.local.js` to point `domain` at your local DDEV URL (e.g. `https://ddev-wordpress.ddev.site`) — it's gitignored, for your personal local values.
+Edit `mocha/settings.local.js` to point `domain` at your local DDEV URL (e.g. `https://ddev-wordpress.ddev.site`) — it's gitignored, for your personal local values.
 
-**Not a per-key overlay** — `page_objects/BasePage.js`'s `build()` picks one file or the other, not both:
+**Not a per-key overlay** — `mocha/page_objects/BasePage.js`'s `build()` picks one file or the other, not both:
 ```js
 if (fs.existsSync(__dirname + '/../settings.local.js')) {
     settings = require('../settings.local.js');
@@ -198,7 +203,7 @@ If `settings.local.js` exists, it **wholesale replaces** `settings.js` — every
 
 Prerequisites:
 - A Chrome browser + matching chromedriver. Two ways to get one:
-  - **Inside DDEV (recommended)**: install the [`ddev/ddev-selenium-standalone-chrome`](https://github.com/ddev/ddev-selenium-standalone-chrome) add-on (`ddev get ddev/ddev-selenium-standalone-chrome && ddev restart`). This adds a `selenium-chrome` service reachable at `http://selenium-chrome:4444/wd/hub` from other DDEV containers, including the web container. `page_objects/BasePage.js` builds its WebDriver with plain `new Builder().forBrowser(Browser.CHROME)...build()` (no `.usingServer()`), so `selenium-webdriver` picks up the `SELENIUM_REMOTE_URL` env var automatically — no code changes needed:
+  - **Inside DDEV (recommended)**: install the [`ddev/ddev-selenium-standalone-chrome`](https://github.com/ddev/ddev-selenium-standalone-chrome) add-on (`ddev get ddev/ddev-selenium-standalone-chrome && ddev restart`). This adds a `selenium-chrome` service reachable at `http://selenium-chrome:4444/wd/hub` from other DDEV containers, including the web container. `mocha/page_objects/BasePage.js` builds its WebDriver with plain `new Builder().forBrowser(Browser.CHROME)...build()` (no `.usingServer()`), so `selenium-webdriver` picks up the `SELENIUM_REMOTE_URL` env var automatically — no code changes needed:
     ```
     cd integration_tests
     SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test
@@ -212,7 +217,28 @@ This suite runs directly against your working repo checkout — no need to build
 
 A full run takes ~5 minutes (21+ specs across 4 themes: `gamma`, `plana`, `umbra`, `vortex`). Run it in the background rather than blocking on it — e.g. `npm run test &`, or when driving it from an agent/non-interactive shell, backgrounded with output captured to a file and polled/tailed rather than awaited synchronously.
 
-**Running against one theme only**: `settings.local.js`'s `currentThemeOnly: true` (default is `false`, i.e. all 4 themes) makes `test/03_OsecPluginFrontend.spec.js`'s `before` hook read whichever theme is *currently active* in wp-admin's OSEC theme settings page (`page_objects/ActivatePluginAndSettings.js`'s `getActiveTheme()`) and skip the other three theme blocks (`this.skip()`). Only the theme-looped Frontend suite is affected — "Plugin install & Setup" and "Backend tests" aren't per-theme and always run once. Set your active theme in wp-admin first, then flip the setting; this cuts the Frontend portion to ~1/4 its normal length.
+**Running against a sandbox** (recommended - the suite then leaves the dev site alone): `BASE_URL` replaces
+`settings.local.js`'s `domain`, and `OSEC_TEST_HOST_RULES` lets the Selenium grid resolve the sandbox's wildcard
+hostname. Scope the purge constant to the sandbox in `constants-local.php`, so the dev site keeps `false`:
+```
+// in osec_initiate_constants_local():
+if (! defined('OSEC_UNINSTALL_PLUGIN_DATA') && defined('DB_NAME') && DB_NAME === 'try_grumphp') {
+    define('OSEC_UNINSTALL_PLUGIN_DATA', true);
+}
+```
+```
+# fresh copy of the dev database (see CLAUDE.md "Database Safety")
+mysql -uroot -proot -h db -e "DROP DATABASE IF EXISTS try_grumphp; CREATE DATABASE try_grumphp CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+mysqldump -uroot -proot -h db --single-transaction db | mysql -uroot -proot -h db try_grumphp
+mkdir -p ../../uploads/osec-sandbox/try_grumphp
+cd integration_tests
+BASE_URL=https://try-grumphp.ddev-wordpress.ddev.site \
+OSEC_TEST_HOST_RULES='MAP *.ddev-wordpress.ddev.site ddev-router' \
+SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub npm run test
+```
+GrumPHP's `integration_tests` task passes neither variable, so it still targets `settings.local.js`.
+
+**Running against one theme only**: `settings.local.js`'s `currentThemeOnly: true` (default is `false`, i.e. all 4 themes) makes `mocha/test/03_OsecPluginFrontend.spec.js`'s `before` hook read whichever theme is *currently active* in wp-admin's OSEC theme settings page (`mocha/page_objects/ActivatePluginAndSettings.js`'s `getActiveTheme()`) and skip the other three theme blocks (`this.skip()`). Only the theme-looped Frontend suite is affected — "Plugin install & Setup" and "Backend tests" aren't per-theme and always run once. Set your active theme in wp-admin first, then flip the setting; this cuts the Frontend portion to ~1/4 its normal length.
 
 **Running a single test**: append `--grep "<test or describe title>"` to a direct `npx mocha` invocation, e.g.:
 ```
@@ -222,7 +248,76 @@ Confirmed working (2026-09-11): 1 passing in 3s vs. the full suite's ~5 minutes.
 
 **Don't drive this suite through PhpStorm's `execute_run_configuration` MCP tool** — tested repeatedly on 2026-09-11; root cause now confirmed: the call returns early/asynchronously (sometimes immediately with a timeout, sometimes with truncated in-progress output) while the actual npm/mocha process keeps running **detached** on the host afterward. There's no way to block on or be notified of completion through that tool — the only way to see the real outcome is to separately poll the `fullOutputPath` log file it returns, which itself requires host filesystem access outside the project (`read_file` refuses it as outside project/library/SDK roots). A plain shell invocation (as above), run in the foreground or backgrounded and awaited/polled directly, is the only reliable way to get pass/fail results back.
 
-**Known flakiness**: the `afterEach` hook in `test/01_OsecPluginInstall.spec.js` (`doLogout()` in `page_objects/WpLogin.js`, which hovers the admin bar then clicks Log Out) can intermittently hit a `TimeoutError: Waiting until element is visible` right after the very first plugin activation in a run — most likely first-page-load timing rather than a real regression. It hasn't reproduced on a re-run in practice; if it fails, re-run just that spec (`npx mocha test/01_OsecPluginInstall.spec.js --timeout 60000`) before assuming a real break.
+**Known flakiness**: the `afterEach` hook in `mocha/test/01_OsecPluginInstall.spec.js` (`doLogout()` in `mocha/page_objects/WpLogin.js`, which hovers the admin bar then clicks Log Out) can intermittently hit a `TimeoutError: Waiting until element is visible` right after the very first plugin activation in a run — most likely first-page-load timing rather than a real regression. It hasn't reproduced on a re-run in practice; if it fails, re-run just that spec (`cd mocha && npx mocha test/01_OsecPluginInstall.spec.js --timeout 60000`) before assuming a real break.
+
+## PHPUnit on SQLite
+
+WordPress Playground, and with it the WordPress.org Live Preview, runs WordPress on SQLite through the SQLite
+Database Integration drop-in. `bin/phpunit-sqlite.sh` copies the MySQL test WordPress to `/tmp/osec-sqlite-tests`,
+adds the drop-in there (the MySQL setup stays untouched) and runs PHPUnit; arguments go to phpunit (default `tests`).
+CI runs the script in `db_job_sqlite`, which `release_decision_job` waits for; GrumPHP in `all_tests`.
+
+```bash
+bin/phpunit-sqlite.sh
+bin/phpunit-sqlite.sh --filter ExceptionDateTest
+```
+
+- Run it inside the DDEV container (`ddev ssh`, or `ddev exec bin/phpunit-sqlite.sh` from the plugin folder) after
+  `bin/install-wp-tests.sh`; it stops with a hint when the test WordPress is missing (e.g. after a container restart).
+- The driver is pinned in `bin/sqlite-dropin.sh` (version and the sha256 GitHub publishes for the release asset). To
+  update it, change both. The copy is set up again when the driver or the test WordPress changes.
+- **The release test runs on SQLite too**: `release_test_job_sqlite` (CI, `master|release-*`, blocks the release) is
+  `release_test_job` with `db: sqlite` - the release zip on WordPress with the drop-in, the Mocha and JS smoke suites.
+  php-fpm runs as `circleci` there, because WP-CLI and the web server write the same database file (created `0600`).
+  plugin-check runs only in the MariaDB jobs.
+- The run fails if no SQLite database was written, so a run that silently fell back to MySQL never passes.
+- **Driver 3.1.0 evaluates `IF()` correctly**, so the #44 tests (`ExceptionDateTest`) no longer catch an `IF()` in our
+  SQL; up to 3.0.2 they did (checked 2026-10-15). Keep `CASE WHEN` for sites on older drivers.
+- SQLite hands out a post ID again after a test's rollback (MySQL does not). A test that relies on a shared object
+  caching per post ID can fail only here; use a new instance in the test (see `PrintHeaderTest`).
+
+## JS smoke tests (non-destructive)
+
+`integration_tests/mocha/js_smoke/` visits every page that loads an OSEC JS bundle, waits for its requirejs modules to
+run, fails on any browser console error or failed script request, and does one or two interactions per page
+(view switching, paging, date pickers, filters, popover, maps, repeat dialog, color pickers). Unlike `test/` it
+installs, uninstalls and trashes nothing, so it is safe to run on the dev site after every JS change. Not part
+of `npm run test`. CI runs it in `release_test_job` after the main suite, on its own calendar page
+(`osec-smoke-calendar`) with the seed data, in the local Chrome of the browsers image (`SELENIUM_LOCAL=1`).
+Other env: `BASE_URL`, `CALENDAR_PATH`, `WP_ADMIN_USER`/`WP_ADMIN_PASS`, `SELENIUM_REMOTE_URL`, and
+`OSEC_TEST_HOST_RULES` for a sandbox (the grid cannot resolve its wildcard host):
+`BASE_URL=https://claude.ddev-wordpress.ddev.site OSEC_TEST_HOST_RULES='MAP *.ddev-wordpress.ddev.site ddev-router'`.
+Two tests check that event values print as text in views rendered by twig.js; they need the seed's
+"Hostile venue" event.
+A failure says what failed in the log itself: CI uses the `spec` reporter next to JUnit (`MOCHA_FILE`, as the
+main suite; never `--reporter mocha-junit-reporter` alone, which prints nothing), a failed login names WordPress'
+login error, and every failed test or `before` hook saves a screenshot to `MOCHA_SCREENSHOT_DIR` (CI artifacts),
+else `screenshotsDir` from the settings, and prints its path and the page URL.
+
+```bash
+/usr/local/bin/wp eval-file bin/dev-seed-block-test-data.php   # test data, once ([OSEC-TEST] events and terms)
+cd integration_tests
+npm run test:js                                   # all groups, ~10 s
+npm run test:js -- --grep @js-calendar            # one group
+```
+
+Groups, one per bundle: `@js-calendar`, `@js-event`, `@js-backend` (common backend), `@js-add-new-event`,
+`@js-settings`, `@js-feeds`, `@js-categories`, `@js-less-variables`. The grid defaults to
+`http://selenium-chrome:4444/wd/hub` (`SELENIUM_REMOTE_URL` overrides it).
+
+### Checking a hand edit of a bundle: `rename-check.js`
+
+`public/js/pages/*.js` are minified bundles without build tooling, edited by hand. To prove an edit only renamed
+local names (or reformatted, or changed comments), compare the terser-minified output (mangle on, compress off)
+at a git revision with the working tree; it must be byte-identical:
+
+```bash
+node bin/js-rename-check/rename-check.js public/js/pages/calendar.js             # vs HEAD
+node bin/js-rename-check/rename-check.js --rev=master public/js/pages/*.js       # exit 1 if any file differs
+```
+
+Needs `npm install` in `bin/js-rename-check/` once (`bin/js-rename-check/README.md`). Run the JS smoke tests as well:
+the check says nothing about edits that are meant to change behaviour.
 
 ## Firefox (second browser)
 
@@ -247,23 +342,23 @@ Firefox has no CDP, so anything driving Chrome through `sendAndGetDevToolsComman
 PDFs come from the WebDriver *Print Page* command (`driver.printPage()`), screenshots from
 `driver.takeScreenshot()` instead of `Emulation.setDeviceMetricsOverride`.
 
-## Print output review
+## Visual regression, print output and test content
 
-`integration_tests/print_review/print-all.sh` regenerates every print PDF and prints a summary table
-(file, orientation, page count). It prints each view with the print button **and** with Ctrl+P, plus a busy
-day/week/month and a quiet month - the two cases that decide the page count.
+`integration_tests/visual_regression/` (Playwright, DDEV service `playwright`) generates its own test content
+(`wp osec content generate`, dataset in `tests/data/content/`), shoots the wp-admin screens, every calendar view per
+theme at several widths and every print view in Chromium and Firefox (with the PDFs), and compares them with a
+baseline set on a review page with approval. Run it in a sandbox:
 
 ```
-integration_tests/print_review/print-all.sh
-THEMES=plana BROWSERS=chrome,firefox integration_tests/print_review/print-all.sh
+ddev osec-review try_v1116                         # from the host: run, print the review page URL
+ddev osec-approve --set=local <reference>          # accept a reviewed difference
 ```
 
-Options: `THEMES`, `BROWSERS`, `OUT`, `BASE_URL`, `DATE`, `BUSY_DATE`, `QUIET_DATE`, `KEEP=1`. The script switches
-the OSEC theme in the **dev database** and restores the original on exit. `LONG_TEXT=1` (on `print-pdfs.js`
-directly) inflates agenda descriptions to test page breaks inside events.
+Details, including comparing with an older release: `integration_tests/visual_regression/README.md`.
 
-Neither browser fires `beforeprint` for a programmatic print, so the script dispatches it by hand for the Ctrl+P
-path and stubs `window.print` for the button path.
+The WordPress.org screenshots (`assets/screenshot-*.png`) come from the same content: `ddev osec-screenshots
+try_<name>` (`bin/screenshots/README.md`). Review them with `git diff --stat assets/` before committing (`assets/` is
+deployed from master).
 
 ## Manual/UI feed testing
 

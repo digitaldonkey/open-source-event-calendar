@@ -184,6 +184,11 @@ class CalendarShortcodeView extends OsecBaseClass
                 $query[$query_prop] = CalendarPageView::booleanStringArg($atts[$query_prop]);
             }
         }
+        // agenda_expanded="true|false": events expanded (no toggle) or collapsed with Expand/Collapse all. Same values
+        // as agenda_toggle, whose name says the opposite and which stays as an older spelling.
+        if (isset($atts['agenda_expanded'])) {
+            $query['agenda_toggle'] = CalendarPageView::booleanStringArg($atts['agenda_expanded']);
+        }
 
 
         foreach ($custom_taxonomies as $taxonomy) {
@@ -194,7 +199,12 @@ class CalendarShortcodeView extends OsecBaseClass
         }
         $request = new RequestParser($this->app, $query, $view);
         $request->parse();
-        $page_content = CalendarPageView::factory($this->app)->get_content($request, 'shortcode');
+        // WordPress alignment like a block, "wide" unless the shortcode asks for another.
+        $align = isset($atts['align']) ? strtolower(trim((string) $atts['align'])) : 'wide';
+        if ( ! in_array($align, CalendarPageView::ALIGNMENTS, true)) {
+            $align = 'wide';
+        }
+        $page_content = CalendarPageView::factory($this->app)->get_content($request, 'shortcode', $align);
         FrontendCssController::factory($this->app)
                              ->add_link_to_html_for_frontend();
         ScriptsFrontendController::factory($this->app)->load_frontend_js(true);

@@ -164,7 +164,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
                         'html' => '',
                     ];
                 }
-                if ($var['tab'] === $id) {
+                if ($var['tab'] === $id && empty($var['hidden'])) {
                     $var['id'] = $variable_id;
                     $args['sections'][$id]['html'] .= $renderer->createRenderer($var)->render();
                 }
@@ -191,7 +191,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
         foreach ($this->get_sections() as $id => $section) {
             $args['sections'][$id]['section'] = $section;
             foreach ($variables as $varId => $variable) {
-                if ($variable['tab'] === $id) {
+                if ($variable['tab'] === $id && empty($variable['hidden'])) {
                     $args['sections'][$id]['variables'][$varId] = $variable;
                 }
             }

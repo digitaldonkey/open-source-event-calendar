@@ -13,6 +13,8 @@ use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
 use Osec\Http\Response\RenderJson;
 use Osec\Theme\ThemeLoader;
+use Osec\Http\Request\ParamType;
+use Osec\Http\Request\RequestParser;
 
 /**
  * The get repeat box snippet.
@@ -34,12 +36,8 @@ class AdminDateRepeatBox extends OsecBaseClass
             || !wp_verify_nonce(sanitize_text_field(wp_unslash($_REQUEST['nonce'])), 'wp_rest')) {
             return;
         }
-        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-        $repeat  = (int) $_REQUEST['repeat'];
-        $repeat  = (int) $repeat === 1 ? 1 : 0;
-        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
-        $post_id = (int)$_REQUEST['post_id'];
-        // phpcs:enable
+        $repeat  = RequestParser::get_param('repeat', 0, ParamType::Int) === 1 ? 1 : 0;
+        $post_id = RequestParser::get_param('post_id', 0, ParamType::Int);
         $count   = 100;
         $end     = 0;
         $until   = UIDateFormats::factory($this->app)->current_time();
@@ -649,15 +647,16 @@ class AdminDateRepeatBox extends OsecBaseClass
         $error   = false;
         $message = '';
         // check to see if RRULE is set
-        if (isset($_REQUEST['rrule'])) {
+        $rrule = RequestParser::get_param('rrule', null);
+        if (null !== $rrule) {
             // check to see if rrule is empty
-            if (empty($_REQUEST['rrule'])) {
+            if (empty($rrule)) {
                 $error   = true;
                 $message = __('Recurrence rule cannot be empty.', 'open-source-event-calendar');
             } else {
                 $message = ucfirst(
                     RepeatRuleToText::factory($this->app)
-                                ->rrule_to_text(sanitize_text_field(wp_unslash($_REQUEST['rrule'])))
+                                ->rrule_to_text($rrule)
                 );
             }
         } else {

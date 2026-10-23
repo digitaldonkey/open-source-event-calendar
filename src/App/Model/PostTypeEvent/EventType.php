@@ -329,28 +329,25 @@ class EventType extends OsecBaseClass
                 }
             }
 
-            // Constants only. DB prepare is not required.
-            $post_type = OSEC_POST_TYPE;
-            $this->app->db->query(
-                "DELETE a,b,c FROM wp_posts a
-                    LEFT JOIN wp_term_relationships b
-                        ON (a.ID = b.object_id)
-                    LEFT JOIN wp_postmeta c
-                        ON (a.ID = c.post_id)
-                    WHERE a.post_type = '$post_type';"
-            );
+            $this->delete_event_posts();
 
             // Remove role
             remove_role('osec_event_assistant');
 
             // Remove Capavilities
             global $wp_roles;
+            // Every capability register_post_type() adds.
             $delete_caps = [
                 'edit_osec_events',
+                'edit_others_osec_events',
+                'edit_private_osec_events',
                 'read_osec_event',
+                'read_private_osec_events',
                 'publish_osec_events',
                 'edit_published_osec_events',
                 'delete_osec_events',
+                'delete_others_osec_events',
+                'delete_private_osec_events',
                 'delete_published_osec_events',
                 'switch_osec_themes',
                 'manage_osec_options',
@@ -368,5 +365,43 @@ class EventType extends OsecBaseClass
             unregister_taxonomy_for_object_type($taxonomy, OSEC_POST_TYPE);
         }
         unregister_post_type(OSEC_POST_TYPE);
+    }
+
+    /**
+     * Deletes all event posts with what wp_delete_post() would remove with them: meta, term relations, comments
+     * with their meta, revisions. Attached media stays in the library, detached as wp_delete_post() leaves it.
+     *
+     * Plain single-table statements on lists of IDs, so it runs on MySQL, MariaDB and SQLite (no multi-table
+     * DELETE, and MySQL refuses a subquery on the table it changes), with the site's table names.
+     */
+    public function delete_event_posts()
+    {
+        $db       = $this->app->db;
+        $posts    = $db->get_table_name('posts');
+        $comments = $db->get_table_name('comments');
+        $event_ids = array_map('intval', $db->get_col(
+            $db->prepare("SELECT ID FROM $posts WHERE post_type = %s", OSEC_POST_TYPE)
+        ));
+
+        foreach (array_chunk($event_ids, 500) as $chunk) {
+            $events = implode(',', $chunk);
+            $ids    = array_merge(
+                $chunk,
+                array_map('intval', $db->get_col(
+                    "SELECT ID FROM $posts WHERE post_type = 'revision' AND post_parent IN ($events)"
+                ))
+            );
+            $ids    = implode(',', $ids);
+
+            $db->query(
+                'DELETE FROM ' . $db->get_table_name('commentmeta') .
+                " WHERE comment_id IN (SELECT comment_ID FROM $comments WHERE comment_post_ID IN ($events))"
+            );
+            $db->query("DELETE FROM $comments WHERE comment_post_ID IN ($events)");
+            $db->query("UPDATE $posts SET post_parent = 0 WHERE post_type = 'attachment' AND post_parent IN ($events)");
+            $db->query('DELETE FROM ' . $db->get_table_name('term_relationships') . " WHERE object_id IN ($ids)");
+            $db->query('DELETE FROM ' . $db->get_table_name('postmeta') . " WHERE post_id IN ($ids)");
+            $db->query("DELETE FROM $posts WHERE ID IN ($ids)");
+        }
     }
 }

@@ -36,6 +36,11 @@ class NotificationAdmin extends NotificationAbstract
     public const RCPT_ADMIN = 'admin_notices';
 
     /**
+     * Nonce action of the dismiss button (wp_ajax_osec_dismiss_notice).
+     */
+    public const DISMISS_ACTION = 'osec_dismiss_notice';
+
+    /**
      * @var array Map of messages to be rendered.
      */
     protected ?array $messages = [];
@@ -215,6 +220,9 @@ class NotificationAdmin extends NotificationAbstract
                 __('Open Source Event Calendar', 'open-source-event-calendar')
             );
             $entity['text_dismiss_button'] = __('Got it – dismiss this', 'open-source-event-calendar');
+            $entity['dismiss_nonce']       = current_user_can('manage_osec_options')
+                ? wp_create_nonce(self::DISMISS_ACTION)
+                : '';
             $file                          = $theme->get_file(
                 'notification/admin.twig',
                 $entity,
@@ -267,21 +275,35 @@ class NotificationAdmin extends NotificationAbstract
     }
 
     /**
+     * Removes a stored message.
+     *
+     * @param  string  $msg_key  Key of the message (its `msg_key`).
+     *
+     * @return bool Success.
+     */
+    public function remove(string $msg_key): bool
+    {
+        $this->retrieve();
+        unset($this->messages['_messages'][$msg_key]);
+        foreach (array_keys($this->messages) as $dest) {
+            unset($this->messages[$dest][$msg_key]);
+        }
+
+        return $this->write();
+    }
+
+    /**
      * Delete a notice from ajax call.
      */
     public function dismiss_notice(): void
     {
-        // phpcs:ignore WordPress.Security.NonceVerification
-        if (!isset($_POST['key'])) {
-            return;
+        check_ajax_referer(self::DISMISS_ACTION, 'nonce');
+        // Dismissing removes the notice for everyone.
+        if (! current_user_can('manage_osec_options')) {
+            wp_die(-1, 403);
         }
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing
-        $key = sanitize_text_field(wp_unslash($_POST['key']));
-        foreach ($this->messages as $dest) {
-            if (isset($this->messages[$dest][$key])) {
-                unset($this->messages[$dest][$key]);
-            }
+        if (isset($_POST['key'])) {
+            $this->remove(sanitize_key(wp_unslash($_POST['key'])));
         }
-        $this->write();
     }
 }

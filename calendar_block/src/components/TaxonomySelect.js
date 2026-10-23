@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import makeAnimated from "react-select/animated";
 import Select from 'react-select';
+import {__, sprintf} from '@wordpress/i18n';
 
 const animatedComponents = makeAnimated();
 
@@ -66,7 +67,11 @@ export default function TaxonomySelect ({taxonomy, defaultValue = [], onChange})
 	return (
 		<p>
 			<label>
-				<small><strong>Filter by {taxonomy.name}</strong> ({taxonomy.slug})</small>
+				<small><strong>{sprintf(
+					/* translators: %s: taxonomy name */
+					__('Filter by %s', 'open-source-event-calendar'),
+					taxonomy.name
+				)}</strong> ({taxonomy.slug})</small>
 			</label>
 			<Select
 				isMulti

@@ -22,7 +22,8 @@ class ThemeVariableSize extends SettingsAbstract
             'value' => $this->args['value'],
             'args'  => [
                 'class'       => '',
-                'placeholder' => __('CSS font size', 'open-source-event-calendar'),
+                // A size variable may name its own hint, e.g. a width (user_variables.php 'placeholder').
+                'placeholder' => $this->args['placeholder'] ?? __('CSS font size', 'open-source-event-calendar'),
             ],
         ];
 

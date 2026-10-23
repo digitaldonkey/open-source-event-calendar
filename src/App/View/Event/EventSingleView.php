@@ -56,6 +56,9 @@ class EventSingleView extends OsecBaseClass
             return $block_content;
         }, 10, 2);
 
+        // Classic themes have no core/group to wrap: the event details, description and footer get the scope.
+        add_filter('osec_event_content', fn($html) => self::wrap_event_scope($html));
+
         //  Wrap the content with itemprop "description".
         add_filter('the_content', function ($content) {
             if (is_singular(OSEC_POST_TYPE) && in_the_loop() && is_main_query()) {
@@ -63,6 +66,20 @@ class EventSingleView extends OsecBaseClass
             }
             return $content;
         });
+    }
+
+    /**
+     * The schema.org/Event scope around the single event content on classic themes.
+     *
+     * Block themes get it around the template's core/group (render_block above), which also holds the title.
+     */
+    public static function wrap_event_scope(string $html): string
+    {
+        if (wp_is_block_theme()) {
+            return $html;
+        }
+
+        return '<div itemscope itemtype="https://schema.org/Event">' . $html . '</div>';
     }
 
     /**

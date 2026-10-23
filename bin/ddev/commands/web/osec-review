@@ -1,0 +1,34 @@
+#!/bin/bash
+
+## Description: Open Source Event Calendar visual regression suite: generate the test content, shoot and compare every screen, print the report URL.
+## Usage: osec-review [dev|claude|try_<name>] [--set=<baseline set>] [--anchor=<date>] [--update] [playwright test arguments]
+## Example: ddev osec-review try_v1116\nddev osec-review try_v1116 --set=1.1.16 --anchor=2027-05-10\nddev osec-review try_v1116 --set=master --update\nddev osec-review try_v1116 --project=chromium -g "Month view"
+
+# Copy to .ddev/commands/web/ of the DDEV project (see integration_tests/visual_regression/README.md).
+# Runs integration_tests/visual_regression in review mode (a screenshot of every test in the report) against the
+# chosen site; --set picks the baseline set (default "local"), --anchor pins the content dates (needed to compare with
+# a set shot earlier, e.g. 1.1.16 at 2027-05-10), --update shoots the set instead of comparing.
+
+. /var/www/html/wp-content/plugins/open-source-event-calendar/bin/ddev/osec-lib.sh || exit 1
+osec_site "$@"
+set -- "${OSEC_ARGS[@]}"
+
+script=review
+pass=()
+for arg in "$@"; do
+    case "$arg" in
+        --set=*) export OSEC_BASELINE_SET=${arg#*=} ;;
+        --anchor=*) export OSEC_ANCHOR=${arg#*=} ;;
+        --update) script=update ;;
+        *) pass+=("$arg") ;;
+    esac
+done
+
+suite=$OSEC_PLUGIN_DIR/integration_tests/visual_regression
+osec_npm_ready "$OSEC_PLUGIN_DIR/integration_tests"
+osec_playwright_ready
+cd "$suite" || exit 1
+npm run "$script" -- "${pass[@]}"
+status=$?
+echo "Report: $(osec_home)/wp-content/uploads/osec-visual-regression/report/${OSEC_BASELINE_SET:-local}/index.html"
+exit $status

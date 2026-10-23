@@ -60,16 +60,21 @@ add_filter('osec_block_query_alter', $query $atts);
 ### osec_pre_save_current_theme <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter default theme if no theme is set.
+Alter the calendar theme before the plugin stores it by itself: the default theme when none is set or the setting is invalid, or the active theme found again by name when its folder moved (e.g. a site moved to another path). Not called when an admin activates a theme.
 
 ```php
 add_filter('osec_pre_save_current_theme', $theme);
 ```
 
+#### Description
+
+
+A value without stylesheet, theme_dir and theme_url, or whose theme_dir is not a folder, is ignored.
+
 #### Parameters
 
 
- - **$theme** <span style="color:crimson"> </span> Array of Less variables
+ - **$theme** <span style="color:crimson"> </span> Keys theme_root, theme_dir, theme_url, stylesheet.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -77,11 +82,15 @@ add_filter('osec_pre_save_current_theme', $theme);
 
 ```php
 /**
- * Alter default theme if no theme is set.
+ * Alter the calendar theme before the plugin stores it by itself: the default theme when none is set or the
+ * setting is invalid, or the active theme found again by name when its folder moved (e.g. a site moved to
+ * another path). Not called when an admin activates a theme.
+ *
+ * A value without stylesheet, theme_dir and theme_url, or whose theme_dir is not a folder, is ignored.
  *
  * @since 1.0
  *
- * @param  array  $theme  Array of Less variables
+ * @param  array  $theme  Keys theme_root, theme_dir, theme_url, stylesheet.
  *
  * @file src/App/Controller/BootstrapController.php
  */
@@ -456,45 +465,6 @@ do_action('osec_ics_feed_deleted', $feed_id);
 ---
 
 
-@file **../src/App/Controller/FrontendCssController.php**
-
-### osec_frontend_standard_css_url <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter css file.
-
-```php
-add_filter('osec_frontend_standard_css_url', $parsed_css);
-```
-
-#### Parameters
-
-
- - **$parsed_css** <span style="color:crimson"> </span> Css file path
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter css file.
- *
- * @since 1.0
- *
- * @param  string  $parsed_css  Css file path
- *
- * @file src/App/Controller/FrontendCssController.php
- */
-add_filter('osec_frontend_standard_css_url', $parsed_css);
-```
-
-</details>
-
-
----
-
-
 @file **../src/App/Controller/ImportExportController.php**
 
 ### osec_import_export_engines_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -615,83 +585,6 @@ Inject variables after loading theme user_variables.php
  * @file src/App/Controller/LessController.php
  */
 add_filter('osec_less_variables', $variables);
-```
-
-</details>
-
-
-### osec_should_recompile_less <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Hook to trigger less processing
-
-```php
-add_filter('osec_should_recompile_less', $variables);
-```
-
-#### Description
-
-
-Allows to request theme recompile action. You may also set OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST which forces recompile too.
-
-#### Parameters
-
-
- - **$variables** <span style="color:crimson"> </span> Array of less variables.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Hook to trigger less processing
- *
- * Allows to request theme recompile action.
- * You may also set OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST
- * which forces recompile too.
- *
- * @since 1.0
- *
- * @param  array  $variables  Array of less variables.
- *
- * @file src/App/Controller/LessController.php
- */
-add_filter('osec_should_recompile_less', $variables);
-```
-
-</details>
-
-
-### osec_less_constants_pre_hashmap <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter Less variables before hashmap generation.
-
-```php
-add_filter('osec_less_constants_pre_hashmap', $variables);
-```
-
-#### Parameters
-
-
- - **$variables** <span style="color:crimson"> </span> Array of less variables
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter Less variables before hashmap generation.
- *
- * @since 1.0
- *
- * @param  array  $variables  Array of less variables
- *
- * @file src/App/Controller/LessController.php
- */
-add_filter('osec_less_constants_pre_hashmap', $variables);
 ```
 
 </details>
@@ -1233,6 +1126,11 @@ Do something after IMPORTED event is saved
 do_action('osec_ics_import_event_saved', $event $feed);
 ```
 
+#### Description
+
+
+The categories and tags of the feed are assigned by then. Terms assigned here count as assigned by hand: later imports keep them.
+
 #### Parameters
 
 
@@ -1246,6 +1144,9 @@ do_action('osec_ics_import_event_saved', $event $feed);
 ```php
 /**
  * Do something after IMPORTED event is saved
+ *
+ * The categories and tags of the feed are assigned by then. Terms
+ * assigned here count as assigned by hand: later imports keep them.
  *
  * @since 1.0
  *
@@ -1586,6 +1487,52 @@ The event is saved without the rule, as a single occurrence, instead of the save
  * @file src/App/Model/PostTypeEvent/Event.php
  */
 do_action('osec_recurrence_rule_invalid', $rrule $message);
+```
+
+</details>
+
+
+### osec_event_value_too_long <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Act on an event value that did not fit its database column.
+
+```php
+do_action('osec_event_value_too_long', $column $length $shortened);
+```
+
+#### Description
+
+
+Free text (venue, address, contact name, phone, cost, ...) is shortened to the column width, other values (e-mail, URLs) are not stored. Use this to tell an editor, or to log feeds.
+
+#### Parameters
+
+
+ - **$column** <span style="color:crimson"> </span> Column of the events table.
+ - **$length** <span style="color:crimson"> </span> Maximum length of the column, in characters.
+ - **$shortened** <span style="color:crimson"> </span> True if the value was shortened, false if it was left out.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Act on an event value that did not fit its database column.
+ *
+ * Free text (venue, address, contact name, phone, cost, ...) is shortened to the column width,
+ * other values (e-mail, URLs) are not stored. Use this to tell an editor, or to log feeds.
+ *
+ * @since 1.2.0
+ *
+ * @param  string  $column  Column of the events table.
+ * @param  int  $length  Maximum length of the column, in characters.
+ * @param  bool  $shortened  True if the value was shortened, false if it was left out.
+ *
+ * @file src/App/Model/PostTypeEvent/Event.php
+ */
+do_action('osec_event_value_too_long', $column $length $shortened);
 ```
 
 </details>
@@ -5423,16 +5370,21 @@ add_filter('osec_block_query_alter', $query $atts);
 ### osec_pre_save_current_theme <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
 
 
-Alter default theme if no theme is set.
+Alter the calendar theme before the plugin stores it by itself: the default theme when none is set or the setting is invalid, or the active theme found again by name when its folder moved (e.g. a site moved to another path). Not called when an admin activates a theme.
 
 ```php
 add_filter('osec_pre_save_current_theme', $theme);
 ```
 
+#### Description
+
+
+A value without stylesheet, theme_dir and theme_url, or whose theme_dir is not a folder, is ignored.
+
 #### Parameters
 
 
- - **$theme** <span style="color:crimson"> </span> Array of Less variables
+ - **$theme** <span style="color:crimson"> </span> Keys theme_root, theme_dir, theme_url, stylesheet.
 
 <details markdown="1">
 <summary>Source</summary>
@@ -5440,11 +5392,15 @@ add_filter('osec_pre_save_current_theme', $theme);
 
 ```php
 /**
- * Alter default theme if no theme is set.
+ * Alter the calendar theme before the plugin stores it by itself: the default theme when none is set or the
+ * setting is invalid, or the active theme found again by name when its folder moved (e.g. a site moved to
+ * another path). Not called when an admin activates a theme.
+ *
+ * A value without stylesheet, theme_dir and theme_url, or whose theme_dir is not a folder, is ignored.
  *
  * @since 1.0
  *
- * @param  array  $theme  Array of Less variables
+ * @param  array  $theme  Keys theme_root, theme_dir, theme_url, stylesheet.
  *
  * @file src/App/Controller/BootstrapController.php
  */
@@ -5819,45 +5775,6 @@ do_action('osec_ics_feed_deleted', $feed_id);
 ---
 
 
-@file **../src/App/Controller/FrontendCssController.php**
-
-### osec_frontend_standard_css_url <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter css file.
-
-```php
-add_filter('osec_frontend_standard_css_url', $parsed_css);
-```
-
-#### Parameters
-
-
- - **$parsed_css** <span style="color:crimson"> </span> Css file path
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter css file.
- *
- * @since 1.0
- *
- * @param  string  $parsed_css  Css file path
- *
- * @file src/App/Controller/FrontendCssController.php
- */
-add_filter('osec_frontend_standard_css_url', $parsed_css);
-```
-
-</details>
-
-
----
-
-
 @file **../src/App/Controller/ImportExportController.php**
 
 ### osec_import_export_engines_alter <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
@@ -5978,83 +5895,6 @@ Inject variables after loading theme user_variables.php
  * @file src/App/Controller/LessController.php
  */
 add_filter('osec_less_variables', $variables);
-```
-
-</details>
-
-
-### osec_should_recompile_less <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Hook to trigger less processing
-
-```php
-add_filter('osec_should_recompile_less', $variables);
-```
-
-#### Description
-
-
-Allows to request theme recompile action. You may also set OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST which forces recompile too.
-
-#### Parameters
-
-
- - **$variables** <span style="color:crimson"> </span> Array of less variables.
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Hook to trigger less processing
- *
- * Allows to request theme recompile action.
- * You may also set OSEC_PARSE_LESS_FILES_AT_EVERY_REQUEST
- * which forces recompile too.
- *
- * @since 1.0
- *
- * @param  array  $variables  Array of less variables.
- *
- * @file src/App/Controller/LessController.php
- */
-add_filter('osec_should_recompile_less', $variables);
-```
-
-</details>
-
-
-### osec_less_constants_pre_hashmap <span style="text-transform: uppercase; font-size: small; color: darkgray"> filter</span>
-
-
-Alter Less variables before hashmap generation.
-
-```php
-add_filter('osec_less_constants_pre_hashmap', $variables);
-```
-
-#### Parameters
-
-
- - **$variables** <span style="color:crimson"> </span> Array of less variables
-
-<details markdown="1">
-<summary>Source</summary>
-
-
-```php
-/**
- * Alter Less variables before hashmap generation.
- *
- * @since 1.0
- *
- * @param  array  $variables  Array of less variables
- *
- * @file src/App/Controller/LessController.php
- */
-add_filter('osec_less_constants_pre_hashmap', $variables);
 ```
 
 </details>
@@ -6596,6 +6436,11 @@ Do something after IMPORTED event is saved
 do_action('osec_ics_import_event_saved', $event $feed);
 ```
 
+#### Description
+
+
+The categories and tags of the feed are assigned by then. Terms assigned here count as assigned by hand: later imports keep them.
+
 #### Parameters
 
 
@@ -6609,6 +6454,9 @@ do_action('osec_ics_import_event_saved', $event $feed);
 ```php
 /**
  * Do something after IMPORTED event is saved
+ *
+ * The categories and tags of the feed are assigned by then. Terms
+ * assigned here count as assigned by hand: later imports keep them.
  *
  * @since 1.0
  *
@@ -6949,6 +6797,52 @@ The event is saved without the rule, as a single occurrence, instead of the save
  * @file src/App/Model/PostTypeEvent/Event.php
  */
 do_action('osec_recurrence_rule_invalid', $rrule $message);
+```
+
+</details>
+
+
+### osec_event_value_too_long <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Act on an event value that did not fit its database column.
+
+```php
+do_action('osec_event_value_too_long', $column $length $shortened);
+```
+
+#### Description
+
+
+Free text (venue, address, contact name, phone, cost, ...) is shortened to the column width, other values (e-mail, URLs) are not stored. Use this to tell an editor, or to log feeds.
+
+#### Parameters
+
+
+ - **$column** <span style="color:crimson"> </span> Column of the events table.
+ - **$length** <span style="color:crimson"> </span> Maximum length of the column, in characters.
+ - **$shortened** <span style="color:crimson"> </span> True if the value was shortened, false if it was left out.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Act on an event value that did not fit its database column.
+ *
+ * Free text (venue, address, contact name, phone, cost, ...) is shortened to the column width,
+ * other values (e-mail, URLs) are not stored. Use this to tell an editor, or to log feeds.
+ *
+ * @since 1.2.0
+ *
+ * @param  string  $column  Column of the events table.
+ * @param  int  $length  Maximum length of the column, in characters.
+ * @param  bool  $shortened  True if the value was shortened, false if it was left out.
+ *
+ * @file src/App/Model/PostTypeEvent/Event.php
+ */
+do_action('osec_event_value_too_long', $column $length $shortened);
 ```
 
 </details>

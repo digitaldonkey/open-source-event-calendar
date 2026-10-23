@@ -3,6 +3,31 @@
     "./CLAUDE.md"
   ],
   "plansDirectory": ".claude/plans",
+  "extraKnownMarketplaces": {
+    "donkeymedia": {
+      "source": {
+        "source": "directory",
+        "path": "/var/www/html/wp-content/plugins/open-source-event-calendar/.claude/shared"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "wordpress@donkeymedia": true
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-commit.sh",
+            "timeout": 600
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(circleci run list:*)",

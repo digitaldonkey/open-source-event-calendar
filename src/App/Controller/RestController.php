@@ -2,8 +2,10 @@
 
 namespace Osec\App\Controller;
 
+use Osec\App\Model\DatabaseCharset;
 use Osec\App\Model\Date\DateValidator;
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Theme\ThemeLoader;
 use WP_REST_Request;
 
 class RestController extends OsecBaseClass
@@ -28,8 +30,91 @@ class RestController extends OsecBaseClass
                         },
                     ],
                 );
+                register_rest_route(
+                    'osec/v1',
+                    '/database/convert',
+                    [
+                        'methods' => 'POST',
+                        'callback' => function () use ($app) {
+                            return RestController::factory($app)->convertTables();
+                        },
+                        'permission_callback' => function () {
+                            return current_user_can('manage_osec_options');
+                        },
+                    ],
+                );
+                register_rest_route(
+                    'osec/v1',
+                    '/cache/clear',
+                    [
+                        'methods' => 'POST',
+                        'callback' => function () use ($app) {
+                            return RestController::factory($app)->clearCaches();
+                        },
+                        'permission_callback' => function () {
+                            return current_user_can('manage_osec_options');
+                        },
+                    ],
+                );
             }
         );
+    }
+
+    /**
+     * "Clear all caches" in the cache report: the compiled CSS of every engine (rebuilt at once), the Twig templates
+     * of this site (rebuilt on the next page view) and what older versions left behind.
+     */
+    public function clearCaches(): \WP_REST_Response
+    {
+        $loader = ThemeLoader::factory($this->app);
+        $twig   = $loader->clear_cache();
+        $loader->get_cache_dir(true);
+        $css = FrontendCssController::factory($this->app)->rebuild();
+
+        if ($css['ok']) {
+            $message = __('All caches were cleared and the calendar CSS was rebuilt.', 'open-source-event-calendar');
+        } else {
+            $message = sprintf(
+                /* translators: %s: error message */
+                __(
+                    'Twig cache cleared. The calendar CSS was not rebuilt, the previous CSS stays in place. Error: %s',
+                    'open-source-event-calendar'
+                ),
+                $css['error']
+            );
+        }
+
+        return new \WP_REST_Response(
+            [
+                'ok'      => $css['ok'],
+                'css'     => $css,
+                'twig'    => ['ok' => $twig],
+                'message' => $message,
+            ]
+        );
+    }
+
+    /**
+     * "Convert database tables" on the Settings page: the plugin's tables to the site's utf8mb4 charset.
+     */
+    public function convertTables(): \WP_REST_Response
+    {
+        $result = DatabaseCharset::factory($this->app)->convert();
+        if ($result['ok']) {
+            $message = __('The tables were converted. They now store all characters.', 'open-source-event-calendar');
+        } else {
+            $errors = [];
+            foreach ($result['tables'] as $table => $state) {
+                if ( ! $state['ok']) {
+                    $errors[] = $table . ': ' . $state['error'];
+                }
+            }
+            $message = __('Not every table was converted; those keep their charset.', 'open-source-event-calendar')
+                . ' ' . implode(' ', $errors);
+        }
+        $result['message'] = $message;
+
+        return new \WP_REST_Response($result);
     }
 
     public function getSettings(WP_REST_Request $request)

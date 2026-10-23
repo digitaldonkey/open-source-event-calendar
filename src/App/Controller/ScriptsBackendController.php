@@ -81,15 +81,22 @@ class ScriptsBackendController extends OsecBaseClass
             return $this->process_enqueue($enqueuables[$hook_suffix]);
         }
 
-        // Edit post type event.
-        $post_pages = [
-            'post.php'     => true,
-            'post-new.php' => true,
-        ];
-        if (
-            isset($post_pages[$hook_suffix]) ||
-            AccessControl::are_we_editing_our_post()
-        ) {
+        $screen = get_current_screen();
+        // Event list: the all-day label and the date under the title; the editor's assets stay off it (#65).
+        if ($screen && 'edit' === $screen->base && OSEC_POST_TYPE === $screen->post_type) {
+            wp_enqueue_script(
+                'osec-admin-all-events-date',
+                OSEC_ADMIN_THEME_JS_URL . 'admin/all_events_date.js',
+                [],
+                OSEC_VERSION,
+                ['in_footer' => true]
+            );
+
+            return $this->process_enqueue([['style', 'osec-admin-page-all-events.css']]);
+        }
+
+        // Edit post type event. Not the event list (#65): global $post is its first event there.
+        if ($screen && 'post' === $screen->base && OSEC_POST_TYPE === $screen->post_type) {
             return $this->process_enqueue(
                 [
                     ['style', 'box-event-location.css'],

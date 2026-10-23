@@ -1,16 +1,16 @@
 <div class="ai1ec-clearfix">
-	{{ views_dropdown | raw }}
-	<div class="ai1ec-title-buttons ai1ec-btn-toolbar">
-		{% if display_date_navigation %}
-			{{ before_pagination | raw }}
-			{{ pagination_links | raw }}
-		{% endif %}
-		{{ after_pagination | raw }}
-		{% if contribution_buttons is defined %}
-			{{ contribution_buttons | raw }}
-		{% endif %}
-	</div>
-	{% if below_toolbar is defined %}
-		{{ below_toolbar | raw }}
-	{% endif %}
+    {{ views_dropdown | raw }}
+    <div class="ai1ec-title-buttons ai1ec-btn-toolbar">
+        {% if display_date_navigation %}
+            {{ before_pagination | raw }}
+            {{ pagination_links | raw }}
+        {% endif %}
+        {{ after_pagination | raw }}
+        {% if contribution_buttons is defined %}
+            {{ contribution_buttons | raw }}
+        {% endif %}
+    </div>
+    {% if below_toolbar is defined %}
+        {{ below_toolbar | raw }}
+    {% endif %}
 </div>

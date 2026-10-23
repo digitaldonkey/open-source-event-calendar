@@ -1,13 +1,19 @@
+// The site's font size presets (rem in WordPress). The fallbacks are rem as well: the pagination sits inside the
+// toolbar, so em would shrink it twice.
+.plana-pagination,
+.plana-toolbar {
+  font-size: var(--wp--preset--font-size--small, .875rem);
+  @media (min-width: 36.25rem) {
+    font-size: var(--wp--preset--font-size--normal, 1rem);
+  }
+}
+
 .plana-toolbar {
   margin-bottom: .25em;
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: end;
   align-items: flex-start;
-  font-size: var(--wp--preset--font-size--small);
-  @media (min-width: 36.25rem) {
-    font-size: var(--wp--preset--font-size--normal);
-  }
 
   .osec-date-select {
     width: auto;
@@ -19,18 +25,8 @@
   flex-wrap: wrap;
   flex-grow: 1;
 
-  font-size: var(--wp--preset--font-size--small);
-  @media (min-width: 36.25rem) {
-    font-size: var(--wp--preset--font-size--normal);
-  }
-
   .osec-date-select {
     z-index: 3;
-
-    .ai1ec-calendar-title-short,
-    .ai1ec-calendar-title {
-      font-size: inherit;
-    }
 
     .ai1ec-calendar-title {
       padding-left: 1em;
@@ -134,26 +130,5 @@
     @media (min-width: 36.25rem) {
       display: inline;
     }
-  }
-}
-
-// The calendar page and the shortcode narrow the agenda to the content size
-// (#osec-container in vortex style.less); its filters and toolbar take the same box.
-.wp-block-post-content > #osec-container:has(.ai1ec-agenda-view) {
-  .osec-taxonomy-filters,
-  .plana-toolbar {
-    max-width: var(--wp--style--global--content-size);
-    margin-left: auto;
-    margin-right: auto;
-    @media (min-width: @screen-sm) {
-      padding-left: var(--wp--style--root--padding-left);
-      padding-right: var(--wp--style--root--padding-right);
-    }
-  }
-
-  // Items wrapping to a second row (the view switcher next to "Collapse All")
-  // stay on the right, next to the print button.
-  .plana-toolbar {
-    justify-content: flex-end;
   }
 }

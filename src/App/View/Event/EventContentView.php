@@ -153,6 +153,7 @@ class EventContentView extends OsecBaseClass
             // restoring globals.
             foreach (self::POSTDATA_GLOBALS as $name) {
                 if (array_key_exists($name, $snapshot)) {
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Core globals.
                     $GLOBALS[$name] = $snapshot[$name];
                 } else {
                     unset($GLOBALS[$name]);
@@ -238,10 +239,6 @@ class EventContentView extends OsecBaseClass
             // 'main' contains text before more OR all content.
             $content = get_extended($post->post_content);
             $raw_excerpt = $content['main'];
-        }
-
-        if ( ! isset($raw_excerpt[0])) {
-            $raw_excerpt = '&nbsp;';
         }
 
         $text = wp_strip_all_tags(

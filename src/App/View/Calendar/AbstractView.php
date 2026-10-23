@@ -97,6 +97,8 @@ abstract class AbstractView extends OsecBaseClass
      */
     public function get_extra_template_arguments(array $args)
     {
+        // Edit links of the agenda and of the event popovers (month, week, day).
+        $args['text_edit'] = __('Edit', 'open-source-event-calendar');
         /**
          * Change the Twig arguments
          *
@@ -333,10 +335,12 @@ abstract class AbstractView extends OsecBaseClass
      */
     protected function getPrintButtonHtml(): string
     {
-        // The setting is the master switch, a block can only hide the button.
+        // The setting is the default; a calendar can hide the button ('false') or
+        // show it regardless of the setting ('always').
+        $display_print = $this->request->get('display_print');
         if (
-            ! $this->app->settings->get('display_print_button')
-            || $this->request->get('display_print') === 'false'
+            'false' === $display_print
+            || ('always' !== $display_print && ! $this->app->settings->get('display_print_button'))
         ) {
             return '';
         }

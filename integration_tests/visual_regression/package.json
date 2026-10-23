@@ -1,0 +1,21 @@
+{
+    "name": "osec-visual-regression",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Visual regression and review suite for the calendar (Playwright, local DDEV only).",
+    "scripts": {
+        "test": "playwright test",
+        "review": "OSEC_REVIEW=1 playwright test",
+        "update": "playwright test --update-snapshots",
+        "approve": "node lib/approve.js",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix"
+    },
+    "author": "digitaldonkey",
+    "license": "Apache-2.0",
+    "devDependencies": {
+        "@playwright/test": "1.63.0",
+        "@stylistic/eslint-plugin": "5.10.0",
+        "eslint": "10.13.0"
+    }
+}

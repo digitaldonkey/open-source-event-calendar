@@ -2,6 +2,9 @@
 
 namespace Osec\Http\Response;
 
+use Osec\Http\Request\ParamType;
+use Osec\Http\Request\RequestParser;
+
 /**
  * Render the request as jsonp.
  *
@@ -24,13 +27,11 @@ class RenderJsonP extends RenderStrategyAbstract
         header('Content-Type: application/json; charset=UTF-8');
         $data   = ResponseHelper::utf8($params['data']);
         $output = wp_json_encode($data);
-        if ( ! empty($params['callback'])) {
-            $output = $params['callback'] . '(' . $output . ')';
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended
-        } elseif (isset($_GET['callback'])) {
-            $output = sanitize_key($_GET['callback']) . '(' . $output . ')';
+        // Printed as code: callers read it as ParamType::Callback too.
+        $callback = $params['callback'] ?? RequestParser::get_param('callback', null, ParamType::Callback);
+        if ($callback) {
+            $output = $callback . '(' . $output . ')';
         }
-        // phpcs:enable
         // No way to escape this html/JS mix here.
         // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         echo $output;

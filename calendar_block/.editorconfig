@@ -16,3 +16,13 @@ indent_style = tab
 [*.{yml,yaml}]
 indent_style = space
 indent_size = 2
+
+# wp-scripts output, and an adapted copy of react-datepicker's stylesheets
+# (mixins.scss is identical to react-datepicker 8.10.0): kept as generated/upstream.
+[{build/**,src/components/DateAndTime/scss/**}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset

@@ -5,6 +5,8 @@ namespace Osec\Http\Request;
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\ScriptsFrontendController;
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Http\Request\ParamType;
+use Osec\Http\Request\RequestParser;
 
 /**
  * Utility handling HTTP(s) automation issues
@@ -53,15 +55,12 @@ class Request extends OsecBaseClass
         ) {
             return true;
         }
-        if (
-            isset($_GET['osec_doing_ajax']) &&
-            'true' === sanitize_key($_GET['osec_doing_ajax'])
-        ) {
+        if ('true' === RequestParser::get_param('osec_doing_ajax', '', ParamType::Key)) {
             return true;
         }
         if (
-            isset($_GET[ScriptsFrontendController::LOAD_JS_PARAMETER]) ||
-            isset($_GET[FrontendCssController::REQUEST_CSS_PARAM])
+            RequestParser::has_param(ScriptsFrontendController::LOAD_JS_PARAMETER) ||
+            RequestParser::has_param(FrontendCssController::REQUEST_CSS_PARAM)
         ) {
             return true;
         }
@@ -126,14 +125,12 @@ class Request extends OsecBaseClass
      */
     public function get_current_action()
     {
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended
-        if (isset($_REQUEST['action']) && (int) $_REQUEST['action'] !== -1) {
-            return sanitize_key($_REQUEST['action']);
+        // Bulk actions send -1 for "no action".
+        foreach (['action', 'action2'] as $name) {
+            if (RequestParser::get_param($name, -1, ParamType::Int) !== -1) {
+                return RequestParser::get_param($name, null, ParamType::Key);
+            }
         }
-        if (isset($_REQUEST['action2']) && (int)$_REQUEST['action2'] !== -1) {
-            return sanitize_key($_REQUEST['action2']);
-        }
-        // phpcs: enable
         return null;
     }
 

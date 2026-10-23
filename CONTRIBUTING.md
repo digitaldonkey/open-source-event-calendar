@@ -1,12 +1,12 @@
 # OSEC Developer Readme
 
-Open Source Event calendar is based on All-in-One Event Calendar 2.3.4. 
+Open Source Event calendar is based on All-in-One Event Calendar 2.3.4.
 
-All 236 classes where rewritten using PHP Namespaces and composer for dependency management. 
+All 236 classes where rewritten using PHP Namespaces and composer for dependency management.
 
 Repository with all available sources are at [github.com/digitaldonkey/open-source-event-calendar](https://github.com/digitaldonkey/open-source-event-calendar).
 
-A CircleCI pipeline is on [CircleCI](https://app.circleci.com/pipelines/github/digitaldonkey/open-source-event-calendar). 
+A CircleCI pipeline is on [CircleCI](https://app.circleci.com/pipelines/github/digitaldonkey/open-source-event-calendar).
 
 ## Developing
 
@@ -16,7 +16,7 @@ A developer should **clone the repository** and run do ´composer install´ to g
 
 You most likely will need a debugger like xdebug and an IDE for efficient development.
 
-I love and recommend [ddev](https://ddev.com/) so some docs might just assume you use it too. 
+I love and recommend [ddev](https://ddev.com/) so some docs might just assume you use it too.
 
 Take a look into [hooks-and-filters.md](hooks-and-filters.md) and [constants.php](constants.php) first.
 
@@ -25,7 +25,7 @@ Take a look into [hooks-and-filters.md](hooks-and-filters.md) and [constants.php
 
 When you reached limits using the UI settings and template variables you can proceed with investigating constants and hooks of the plugin.
 
-**Constants** 
+**Constants**
 
 Take a look at [constants.php](https://github.com/digitaldonkey/open-source-event-calendar/blob/master/constants.php)
 you can easily add a `constants-local.php` to override.
@@ -42,17 +42,35 @@ Check out [hooks-and-filters.md](https://github.com/digitaldonkey/open-source-ev
 
 You might also propose new hooks if they make sense to solve your problem.
 
-**osec_recompile_templates** 
+**osec_recompile_templates**
 
-Enable debug mode `define('OSEC_DEBUG', true);` and add get param  
-yoursite.com?osec_recompile_templates=TRUE
+Enable debug mode `define('OSEC_DEBUG', true);` and add the GET parameter `osec_recompile_templates=TRUE`, e.g.
+`yoursite.com?osec_recompile_templates=TRUE`.
 
 
 
-## Coding standards 
+## Coding standards
 
 We have a PHP (require_dev) based toolset.
 Project has been set up using ddev. All scripts should be running stable in ddev using provided config.
+
+**Reading request values**
+
+Read `$_GET`, `$_POST` and `$_REQUEST` only through `RequestParser`:
+
+```php
+$url  = RequestParser::get_param('osec_ticket_url', '', ParamType::HttpUrl);
+$ids  = RequestParser::get_param('feed_category', [], ParamType::IdList);
+$sent = RequestParser::has_param('osec_hide_cost');
+```
+
+- Pick the `ParamType` for what the value is (see `src/Http/Request/ParamType.php`), don't cast
+  afterwards. The default `Text` runs `sanitize_text_field()`, which strips `%xx` from URLs and
+  line breaks from textareas.
+- A missing parameter returns the default unchanged; a sent one is converted even when empty. Use a
+  `null` default to tell a cleared field from a missing one.
+- `get_param()` does not check a nonce: the caller verifies it first. Nonce checks and writes to
+  `$_REQUEST` are the only direct superglobal accesses left.
 
 **Test & Release pipeline**
 
@@ -62,12 +80,53 @@ Check out the [CircleCi pipeline script](https://github.com/digitaldonkey/open-s
 
 See [TESTING.md](TESTING.md) for the full checklist: first-time setup, one-time WP test-DB init, PHPUnit, phpcs, GrumPHP, integration (Mocha/Selenium) tests, and manual ICS feed testing.
 
-## Tools 
+### Escaping in views and Twig templates
+
+Twig autoescapes every `{{ }}` (strategy `html`), so that is where escaping happens: late, at output.
+Escaping in PHP as well escapes twice. The browser then shows `D&amp;D`, and a form stores it back
+(up to 1.1.14 the event editor did this; `wp osec repair-escaping` repairs stored values).
+
+1. **PHP passes raw values to Twig.** No `esc_html()`, `esc_attr()` or `esc_url()` on values printed
+   with `{{ }}`. New labels use `__()`, not `esc_html__()`, and `…` instead of `&#8230;`.
+2. **Autoescape stays on.** `{{ venue }}` is right for text and for double-quoted attributes
+   (`value="{{ venue }}"`, `data-venue="{{ venue }}"`). Always quote attributes. Other contexts need
+   their strategy: `{{ value|e('js') }}` in scripts, `{{ value|e('url') }}` for one query parameter.
+3. **Links use `|esc_url`**: `href="{{ contact_url|esc_url }}"`. Twig does not check the protocol, so
+   `javascript:` would pass. The filter runs WordPress' `esc_url()` and is not escaped again.
+   An input the user edits keeps plain `value="{{ ticket_url }}"`.
+4. **`|raw` only for HTML that is already safe**, and the variable name ends in `_html`:
+   `{{ nonce_field_html|raw }}`. Safe means rendered by another Twig template, returned escaped by
+   WordPress (`wp_nonce_field()`, `paginate_links()`), or passed through `wp_kses*()`.
+   Existing `|raw` variables without `_html` get renamed when the code is touched.
+5. **No new `{% autoescape false %}` blocks.** They switch escaping off for everything added to the
+   block later. Replace existing ones with a per-variable `|raw` when the code is touched.
+6. **Sanitize on input, independently** (`sanitize_text_field()`, `sanitize_url()`,
+   `sanitize_email()`). Never store escaped values.
+   - **The sanitizer always runs last.** Decoding user input (`html_entity_decode()`,
+     `htmlspecialchars_decode()`, `EventEscapingRepair::decode_*()`) is followed by the field's
+     sanitizer again:
+     `sanitize_text_field()` leaves `&lt;img&gt;` alone as text, and decoding it afterwards
+     stores a real tag.
+   - Tests for code that stores or repairs user input use `Osec\Tests\Utilities\HostileInput`.
+7. **Every PHP `echo` of HTML** goes through `wp_kses*()`, like `FileAbstract::render()` does for
+   Twig output. Where that is impossible, add
+   `// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- <reason>`.
+
+Plugin Check's `EscapeOutput` sniff only checks PHP output points (`echo`, `print`, `printf`, …).
+It never flags values handed to Twig, and `.twig` files are not scanned.
+
+The TwigJs templates (`agenda`, `month`, `oneday`, see below) run in the browser, with frontend
+rendering on by default. They are created with `autoescape: true` (twig.js 3), so they escape like PHP
+Twig: plain values are escaped, `|raw` marks HTML built by PHP, `|e('html_attr')` attributes. PHP
+filters like `|esc_url` are not available there, so URLs must already be safe as stored, which is one
+more reason the sanitizer runs last (rule 6).
+
+## Tools
 
 There are some local helpers used to avoid doing things on the fly in ci pipeline.
 
 Anything going into release package **must be commited** to git before.
-Using local helpers and test in pipeline if these where used before creating a release. 
+Using local helpers and test in pipeline if these where used before creating a release.
 
 In pipeline the `static_release_job` test verifies that the generated files are up to date.
 
@@ -76,7 +135,7 @@ In pipeline the `static_release_job` test verifies that the generated files are 
 A wpl cli action generates the WordPress **Readme.txt** from Readme.md and constants.
 
 ```bash
-# Readme.md -> Readme.txt 
+# Readme.md -> Readme.txt
 ddev wp osec make_readme
 ```
 
@@ -95,12 +154,13 @@ npm run build
 
 ### Twig frontend templates
 
-There are a few TwigJs templates in [public/js](https://github.com/digitaldonkey/open-source-event-calendar/tree/master/public/js): `agenda.js`, `month.js` and `oneday.js`, which are in use when [osec_use_frontend_rendering](https://github.com/digitaldonkey/open-source-event-calendar/blob/c3ecd0b20205f7830710506286a828b7049b27c4/src/App/Model/Settings.php#L830-L843) is set.
+Three Twig templates, `public/osec_themes/vortex/twig/{agenda,month,oneday}.twig`, also exist as TwigJs templates inside `public/js/pages/calendar.js`, which are in use when [osec_use_frontend_rendering](https://github.com/digitaldonkey/open-source-event-calendar/blob/c3ecd0b20205f7830710506286a828b7049b27c4/src/App/Model/Settings.php#L830-L843) is set.
 
-They are generated and [integrated](https://github.com/digitaldonkey/open-source-event-calendar/blob/c3ecd0b20205f7830710506286a828b7049b27c4/public/js/pages/calendar.js#L3973-L3981) with the following script.
+After editing one of them, regenerate the copies in `calendar.js` (between the `/*REPLACE:<template>.twig*/` comments) with the following script. It also writes the twig.js runtime they were compiled with (between `/*BEGIN:twig.js runtime*/` and `/*END:twig.js runtime*/`), so runtime and templates always match.
 
 ```bash
 cd open-source-event-calendar/twig_to_js_transform/
+nvm use
 npm install
 npm run build-twig-frontend
 ```
@@ -128,7 +188,7 @@ npm run build-twig-frontend
 * should include all bugfixes from master
 * Might have surprising changes, not fully documented yet.
 
-## Background 
+## Background
 
 ### Events, EventEntity and EventInstances
 
@@ -150,15 +210,15 @@ CREATE VIEW wp_osec_event_instances_readable_date AS
 SELECT id, post_id, `start`, DATE_FORMAT(FROM_UNIXTIME(`start`), '%Y-%m-%d %H:%i') AS 'start_formatted',
        `end`, DATE_FORMAT(FROM_UNIXTIME(`end`), '%Y-%m-%d %H:%i') AS 'end_formatted' FROM wp_osec_event_instances;
 ```
- 
+
 @see https://github.com/digitaldonkey/open-source-event-calendar/wiki/Understanding-data-modell
 
 # Feeds
 
 Feeds got a huge update comparet to all-in-one: To improve RFC5445 support `kigkonsult/icalcreator` was updated and
-rlanvin/php-rrule added. 
+rlanvin/php-rrule added.
 
-There are test feeds in tests/Unit/App/Model/ical_feeds/*.ics 
+There are test feeds in tests/Unit/App/Model/ical_feeds/*.ics
 
 You can "Subscribe" to them for testing using localhost. e.g:
 
@@ -170,4 +230,4 @@ There are a few basic phpunit-tests allowing to test the "challenging heritage"
 
 ## This document
 
-is constant work in Progress. Please PR if you can help to improve. 
+is constant work in Progress. Please PR if you can help to improve.

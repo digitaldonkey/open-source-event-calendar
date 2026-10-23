@@ -60,7 +60,7 @@ class EnvironmentCheck extends OsecBaseInitialized
                 $msg = sprintf(
                 /* translators: Admin url */
                     __(
-                        'The plugin is installed, but has not been configured.  
+                        'The plugin is installed, but has not been configured.
                          <a href="%s">Click here to set it up now &raquo;</a>',
                         'open-source-event-calendar'
                     ),
@@ -74,7 +74,7 @@ class EnvironmentCheck extends OsecBaseInitialized
                 );
             } else {
                 $msg = __(
-                    'The plugin is installed, but has not been configured. 
+                    'The plugin is installed, but has not been configured.
                         Please log in as an Administrator to set it up.',
                     'open-source-event-calendar'
                 );

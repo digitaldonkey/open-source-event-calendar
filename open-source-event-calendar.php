@@ -68,7 +68,7 @@ function osec_plugin_activate()
     }
     DatabaseSchema::factory($osec_app)->verifySqlSchema(true);
     $osec_app->options->set('osec_force_flush_rewrite_rules', true);
-    $osec_app->options->set(FrontendCssController::COMPILED_CSS_CACHE_KEY, true);
+    FrontendCssController::factory($osec_app)->request_compile();
 }
 
 register_activation_hook(__FILE__, 'osec_plugin_activate');
@@ -98,4 +98,7 @@ if (defined('WP_CLI') && WP_CLI) {
 
     WP_CLI::add_command('osec event', \Osec\WpCli\EventCommand::class);
     WP_CLI::add_command('osec feed', \Osec\WpCli\FeedCommand::class);
+    WP_CLI::add_command('osec repair-escaping', \Osec\WpCli\RepairEscapingCommand::class);
+    WP_CLI::add_command('osec content', \Osec\WpCli\ContentCommand::class);
+    WP_CLI::add_command('osec theme', \Osec\WpCli\ThemeCommand::class);
 }

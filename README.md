@@ -23,6 +23,7 @@ This plugin is open source software in the traditional sense. I pledge this plug
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [WP-CLI](#wp-cli)
+- [Custom calendar themes](#custom-calendar-themes)
 - [Fork Notice](#this-is-a-fork)
 - [Migration Notes](#migration-notes)
 - [Development & Support](#development--support)
@@ -62,7 +63,7 @@ Importing and exporting iCalendar (.ics) feeds is one of the strongest features 
 
 You can embed the calendar by adding a **OSEC Calendar Block** to any page or post. Alternatively there is a shortcode available.
 
-> [!WARNING] 
+> [!WARNING]
 > At this time, only **one calendar per page or post** is supported.
 
 On the long run it's planned to have a Rest API to allow the calendar being rendered with more modern frontend tools than the current, outdated, but nice old Bootstrap 3 stuff.
@@ -124,6 +125,22 @@ Copy [constants-local.php.example](https://raw.githubusercontent.com/digitaldonk
 
 To remove all plugin data on uninstall, set: `define('OSEC_UNINSTALL_PLUGIN_DATA', true);`
 
+## Caching
+
+The calendar compiles its theme stylesheet on your site and stores it as a static file in
+`wp-content/uploads/osec_cache/css/`, which the web server sends without PHP. Without a writable uploads folder it
+is kept in your object cache (Redis, Memcached), APCu or the database and served by PHP. Compiled Twig templates go
+next to it, to `wp-content/uploads/osec_cache/twig/`.
+
+- **Events → Settings → Cache Report** shows where the CSS and the templates are. **Clear all caches** rebuilds
+  the CSS right away; if it does not compile, the current CSS is kept and the error is shown.
+- The stylesheet is added to the page header for the calendar page, single events, and posts or pages with the
+  calendar shortcode or block. A calendar placed elsewhere (widgets, template parts, patterns, page builders) gets it
+  with the footer styles, which can show the calendar unstyled for a moment while the page loads.
+- In `constants-local.php`: `OSEC_FILE_CACHE_DEFAULT_PATH` moves the file cache to another folder;
+  `OSEC_ENABLE_CACHE_FILE` set to `false` keeps the CSS out of static files (served by PHP), e.g. if your host does
+  not serve them; templates are still cached as files. Changes take effect at the next compile (Theme Options → Save, or Clear all caches).
+
 ---
 
 ## WP-CLI
@@ -167,6 +184,39 @@ Exit code is 1 if any event or feed failed.
 
 ---
 
+## Custom calendar themes
+
+The calendar has its own themes (Events › Calendar Themes), independent of your WordPress theme. A custom calendar theme is based on Vortex: it only contains the files that add to or replace Vortex's.
+
+1. Create a folder in `wp-content/themes/osec_themes/`, e.g. `wp-content/themes/osec_themes/my-calendar/`. The plugin's Gamma theme (`public/osec_themes/gamma/`) is an empty skeleton you can copy.
+2. Add an empty `index.php` (WordPress lists a theme folder only with one) and a `style.css` with a theme header, and optionally a `screenshot.png`:
+
+        /**
+         * Theme Name: My Calendar
+         * Description: My own calendar theme.
+         * Version: 1.0.0
+         */
+
+3. Add your styles, compiled after all Vortex styles:
+    - `less/override.less` - [LESS](https://lesscss.org/). You can use the Vortex variables (`less/variables.less`, `less/user_variables.php`) and the Bootstrap 3 mixins, which carry an `ai1ec-` prefix:
+
+            @import "bootstrap/mixins.less";
+            .my-calendar-box { .ai1ec-clearfix(); color: @link-color; }
+
+    - or `css/override.css` - plain CSS. If both files exist, only `less/override.less` is used.
+4. Activate the theme under Events › Calendar Themes.
+
+Optional:
+
+- `twig/<template>.twig` replaces the Vortex template of the same name (copy it from `public/osec_themes/vortex/twig/`). With "Use frontend rendering" enabled in the settings, the agenda, month and day views are rendered in the browser from the Vortex templates, so overrides of `agenda.twig`, `month.twig` and `oneday.twig` only apply to views rendered on the server.
+- `less/user_variables.php`, copied from Vortex, sets your own defaults for Events › Theme Options.
+
+The CSS is compiled when the theme is activated, when Theme Options are saved and after a plugin update. **After editing your theme's files, save Events › Theme Options once.** Activating a theme resets the saved Theme Options.
+
+Use `em` or `%` for font sizes, not `px` or `rem`, so they follow the "Base font size" theme option.
+
+---
+
 ## Languages
 
 OSEC supports multiple languages
@@ -207,9 +257,9 @@ The principle behind this plugin is to be Open Source. Get in touch on [GitHub](
 
 Writing this fork was [a huge effort](https://github.com/wp-plugins/all-in-one-event-calendar/compare/master...digitaldonkey:open-source-event-calendar:master).
 
-Digitaldonkey believes everybody should be able to set up and manage public calendars. 
+Digitaldonkey believes everybody should be able to set up and manage public calendars.
 
-If you are implementing this plugin for others you should support ongoing development with a [donation](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6) or [contribution](https://github.com/digitaldonkey/open-source-event-calendar/issues). 
+If you are implementing this plugin for others you should support ongoing development with a [donation](https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6) or [contribution](https://github.com/digitaldonkey/open-source-event-calendar/issues).
 
 [Be a maker](https://dri.es/solving-the-maker-taker-problem)😀
 
@@ -244,7 +294,11 @@ If a plugin still adds unwanted content, enable *OSEC Settings → Advanced → 
 
 ### A feed fails with "cURL error 60: SSL certificate problem"
 
-Feeds are fetched with certificate verification, so a server with a self-signed, expired or incomplete certificate is refused (before 1.1.15 certificates were not checked). Ask the feed's provider to fix the certificate, or use `http://` if the provider offers it. If you trust that server anyway, you can exempt just its host with WordPress' `http_request_args` filter:
+Feeds are fetched with certificate verification, so a server with a self-signed, expired or incomplete certificate is refused (before 1.1.15 certificates were not checked). WordPress checks against its own list of certificate authorities, not the one of your server.
+
+If the certificate is issued by an authority installed on your server, such as a company or local certificate authority ("unable to get local issuer certificate"), enable *Settings → Advanced → Trust this server's CA certificates for feeds*. Certificates are still verified, against WordPress' list plus your server's.
+
+Otherwise ask the feed's provider to fix the certificate, or use `http://` if the provider offers it. If you trust that server anyway, you can exempt just its host with WordPress' `http_request_args` filter:
 
 ```php
 add_filter('http_request_args', function ($args, $url) {

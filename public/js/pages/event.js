@@ -58,10 +58,10 @@ timely.define("scripts/event/maps_helper", ["jquery_timely"], function ($) {
         };
     return {handle_show_map_when_clicking_on_placeholder}
 }),
-timely.define("scripts/event", ["jquery_timely", "domReady", "ai1ec_config", "scripts/event/maps_helper"], function ($, domReady, config, maps_helper) {
+timely.define("scripts/event", ["jquery_timely", "domReady", "ai1ec_config", "scripts/event/maps_helper"], function ($, domReady, config, mapsHelper) {
     var initMapPlaceholder = function () {
         // What is this?
-        $(".osec-map-placeholder:first").click(maps_helper.handle_show_map_when_clicking_on_placeholder)
+        $(".osec-map-placeholder:first").click(mapsHelper.handle_show_map_when_clicking_on_placeholder)
     },
     o = function () {
         $("#timely-description img[data-ai1ec-hidden]").each(function () {
@@ -79,6 +79,6 @@ timely.define("scripts/event", ["jquery_timely", "domReady", "ai1ec_config", "sc
     };
     return {start}
 }),
-timely.require(["scripts/event"], function (e) {
-    e.start()
+timely.require(["scripts/event"], function (event) {
+    event.start()
 });

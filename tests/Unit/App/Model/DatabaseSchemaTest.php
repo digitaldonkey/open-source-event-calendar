@@ -249,6 +249,28 @@ class DatabaseSchemaTest extends TestBase
         }
     }
 
+    public function test_apply_delta_widens_columns_of_an_existing_table()
+    {
+        global $osec_app;
+        $schema = DatabaseSchema::factory($osec_app);
+        $events = $osec_app->db->get_table_name(OSEC_DB__EVENTS);
+        $feeds  = $osec_app->db->get_table_name(OSEC_DB__FEEDS);
+
+        // The 1.1.x widths. Implicit commit, see above.
+        $osec_app->db->query("ALTER TABLE {$events} MODIFY ical_uid varchar(255), MODIFY contact_email varchar(128)");
+        $osec_app->db->query("ALTER TABLE {$feeds} MODIFY feed_tags varchar(255) NOT NULL");
+
+        try {
+            $this->assertTrue($schema->apply_delta($schema->get_current_db_schema()));
+            $type = fn($table, $column) => $osec_app->db->get_row("SHOW COLUMNS FROM {$table} LIKE '{$column}'")->Type;
+            $this->assertSame('varchar(768)', $type($events, 'ical_uid'));
+            $this->assertSame('varchar(254)', $type($events, 'contact_email'));
+            $this->assertSame('varchar(1024)', $type($feeds, 'feed_tags'));
+        } finally {
+            $schema->apply_delta($schema->get_current_db_schema());
+        }
+    }
+
     public function test_apply_delta_throws_on_malformed_column_definition()
     {
         global $osec_app;

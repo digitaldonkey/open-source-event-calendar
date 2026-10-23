@@ -64,7 +64,7 @@ class EventLocationView extends OsecBaseClass
         $args = array_merge(
             $address_components,
             [
-                'venue'       => esc_html($event->get('venue')),
+                'venue'       => $event->get('venue'),
                 'show_map'    => (bool) $event->get('show_map'),
                 'latitude'    => (float) $event->get('latitude'),
                 'longitude'   => (float) $event->get('longitude'),
@@ -109,15 +109,14 @@ class EventLocationView extends OsecBaseClass
             'text_view_map'           => __('Click to view map', 'open-source-event-calendar'),
             'height'                  => $this->app->settings->get('location_maps_map_height'),
             'data'                    => [
-                'venue'                   => esc_attr($event->get('venue')),
-                'address'                 => esc_attr($event->get('address')),
+                'venue'                   => $event->get('venue'),
+                'address'                 => $event->get('address'),
                 'lat'                     => floatval($event->get('latitude')),
                 'long'                    => floatval($event->get('longitude')),
                 'maxzoom'                 => intval($this->app->settings->get('location_maps_max_zoom')),
                 'zoom'                    => intval($this->app->settings->get('location_maps_zoom')),
-                'attribution'             => esc_attr(
-                    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                ),
+                'attribution'             =>
+                    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
             ],
         ];
         /**
