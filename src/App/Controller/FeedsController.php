@@ -182,7 +182,7 @@ class FeedsController extends OsecBaseClass
                 'data_loading_button_text' => __('Please wait&#8230;', 'open-source-event-calendar'),
                 'add_subscription_button_text' => esc_html__('Add new subscription', 'open-source-event-calendar'),
                 'update_subscription_button_text' => esc_html__('Update subscription', 'open-source-event-calendar'),
-                'reloading_button_loading_text' => esc_html__('Refreshing&#8230', 'open-source-event-calendar'),
+                'reloading_button_loading_text' => esc_html__('Refreshing&#8230;', 'open-source-event-calendar'),
                 'reloading_button_text' => esc_html__('Refresh', 'open-source-event-calendar'),
                 'edit_button_text' => esc_html__('Edit', 'open-source-event-calendar'),
                 'remove_button_loading_text' => esc_html__('Removing&#8230;', 'open-source-event-calendar'),
