@@ -114,9 +114,10 @@
     }
   }
 }
-// The print button has the small size of the toolbar's other buttons (pagination, date, view switch), so all have
-// one height. Vortex's button only; plana's print link has no .ai1ec-btn.
-.ai1ec-print-buttons .ai1ec-btn {
+// The print and the agenda's collapse/expand all buttons have the small size of the toolbar's other buttons
+// (pagination, date, view switch), so all have one height. Vortex's buttons only; plana's links have no .ai1ec-btn.
+.ai1ec-print-buttons .ai1ec-btn,
+.ai1ec-agenda-buttons .ai1ec-btn {
   .ai1ec-button-size(@padding-small-vertical; @padding-small-horizontal; @font-size-small; @line-height-small; @border-radius-small);
   // As style.less resets .ai1ec-btn-sm in a button group.
   font-size: .92 * @font-size-small;
