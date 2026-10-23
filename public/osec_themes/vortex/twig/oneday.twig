@@ -1,6 +1,6 @@
 {{ navigation | raw }}
 
-<table id="{{ full_day_id }}" class="ai1ec-{{ type }}-view-original">
+<table class="ai1ec-{{ type }}-view-original">
     <thead>
         <tr>
             {% for date, day in cell_array %}
@@ -12,8 +12,6 @@
                                 class="ai1ec-btn ai1ec-btn-info ai1ec-btn-xs ai1ec-tooltip-trigger"
                                 data-placement="left"
                                 title="{{ text_full_day | e('html_attr') }}"
-                                aria-expanded="false"
-                                aria-controls="{{ full_day_id }}"
                                 aria-label="{{ text_full_day | e('html_attr') }}"
                             >
                                 <i class="ai1ec-fa ai1ec-fa-expand"></i>

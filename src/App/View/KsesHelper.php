@@ -132,7 +132,6 @@ class KsesHelper extends OsecBaseClass
                     'class' => true,
                 ],
                 'table'  => [
-                    'id'          => true,
                     'class'       => true,
                     'style'       => true,
                 ],
@@ -153,9 +152,6 @@ class KsesHelper extends OsecBaseClass
                     // The agenda's disabled pagination button (pagination.twig).
                     'aria-label'          => true,
                     'disabled'            => true,
-                    // The reveal full day button of week and day (oneday.twig).
-                    'aria-expanded'       => true,
-                    'aria-controls'       => true,
                 ],
                 'td'     => [
                     'class' => true,

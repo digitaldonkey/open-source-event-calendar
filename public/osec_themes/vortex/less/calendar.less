@@ -259,6 +259,10 @@ table.ai1ec-oneday-view-original {
     display: flex;
     align-content: center;
     align-items: center;
+    // All 24 hours shown already (calendar.js keeps them for the next views).
+    .osec-full-day & {
+      display: none;
+    }
   }
   .ai1ec-day {
     height: 1440px;
