@@ -570,6 +570,9 @@ timely.define("domReady", [], function () {
         // Detach instead of re-rendering the page HTML, so event handlers and state survive.
         // Styles and scripts stay where they are: WordPress prints the calendar CSS in the body
         // (wp_add_inline_style in the footer), and re-appending a script element runs it again.
+        // A theme with font-family: inherit (plana) would take the font from <html> once body is .timely,
+        // not the site's body font it shows on screen. Read before detaching: detached, it has no style.
+        $print.css('font-family', window.getComputedStyle($calendar[0]).fontFamily);
         $page = $body.children().not('style, link, script, noscript, template').detach();
         $body.addClass('timely').append($print);
         $html.addClass('ai1ec-print');
