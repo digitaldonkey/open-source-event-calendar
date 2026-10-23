@@ -186,9 +186,18 @@ table.ai1ec-month-view {
 .ai1ec-oneday-view {
   .ai1ec-reveal-full-day {
     top: 50%;
-    transform: translateY( -50% );
+    transform: translate(0,  -50% );
   }
 }
+
+.ai1ec-week-view .ai1ec-reveal-full-day {
+  // Move the expand button,
+  // to not overlay the day.
+  @media (max-width: 48em) {
+    transform: translate(100%, -50%);
+  }
+}
+
 .ai1ec-reveal-full-day {
 
   .ai1ec-btn-xs {
