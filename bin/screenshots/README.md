@@ -43,8 +43,12 @@ the DDEV `playwright` service image.
 | `width`, `height`, `mobile` | Viewport in CSS pixels; `mobile` emulates a phone (viewport meta tag, touch). |
 | `admin` | Logged in as the site's first administrator. |
 | `edit_event` | Edit screen of the event with this dataset key. |
+| `calendar_theme` | Calendar theme for the shot (`wp osec theme activate`). Also top-level in `shots.json` as the default (plana); without it the dataset's `site.calendar_theme` stays. |
+| `osec_settings` | OSEC settings for this shot only, e.g. `{"agenda_events_expanded": false}`: set with WP-CLI before the shot, restored after it. |
+| `editor_title` | With `editor_block`: the page title shown in the editor for the shot (not saved); the image then reaches from the title down to the block. |
 | `editor_block` | Page key from the manifest (`block`): opened in the block editor, the calendar block selected, only the block is shot. |
 | `scroll_to` | Scroll this element to the top. |
+| `scroll_offset` | Pixels left above the `scroll_to` element (default 50: room for a page title). In wp-admin, WordPress already keeps the 32 px admin bar free when scrolling (`scroll-padding-top`), so a few pixels are enough there. |
 | `click`, `wait_for` | Click an element; wait for another to be visible. |
 | `hover`, `hover_event` | Hover the first element matching the selector (containing that event's title). Without `hover` the pointer is parked in the bottom right corner. |
 | `manual` | Not automated: printed as a reminder. |
