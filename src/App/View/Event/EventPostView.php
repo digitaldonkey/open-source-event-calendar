@@ -63,7 +63,7 @@ class EventPostView extends OsecBaseClass
             9  => sprintf(
                 /* translators: 1: Date 2: Url */
                 __(
-                    'Event scheduled for: <strong>%1$s</strong>. <a target="_blank" href=">%2$s">Preview event</a>',
+                    'Event scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview event</a>',
                     'open-source-event-calendar'
                 ),
                 (new DT($post->post_date))->format_i18n(__('M j, Y @ G:i', 'open-source-event-calendar'),),
