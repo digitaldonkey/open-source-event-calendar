@@ -31,6 +31,8 @@
         .approve input { width: 18px; height: 18px; cursor: pointer; }
         .row.approved .status { color: var(--accent); }
         .row.pending .status { color: #996800; }
+        .row.stale { border-left-color: #dba617; border-left-style: dashed; }
+        .row.stale .status { color: #996800; font-style: italic; }
         .after { margin-top: 8px; }
         #approvals { display: none; gap: 8px; align-items: center; margin-top: 10px; padding: 6px 10px; background: #fffbea; border: 1px solid #dba617; border-radius: 4px; }
         #approvals.on { display: flex; flex-wrap: wrap; }
@@ -149,36 +151,77 @@
         $('meta').textContent = `Baseline set ${data.set} · ${data.site} · ${new Date(data.date).toLocaleString()} · `
             + `${count('failed')} differ, ${count('passed')} unchanged, ${count('approved')} approved`;
 
-        // Rows checked for approval: kept for this browser window (sessionStorage), per set and run.
-        const storeKey = `osec-review:${data.set}:${data.date}`;
-        const checked = new Set((() => {
+        // Rows checked for approval, per baseline set in this browser (localStorage), across runs:
+        // {checks: {ref: currentHash}, dropped: {ref: run date}}. A check holds the fingerprint of the image it was made
+        // on (lib/review-reporter.js currentHash); after a run it stays only while that image is unchanged. Changed: the
+        // check is dropped and the row says "image changed since you checked it" for the rest of that run (also after a
+        // reload). Rows this run did not shoot keep their check. Checks of earlier page versions (sessionStorage, per run, no
+        // fingerprint) are read once and treated as changed: they cannot be matched to an image.
+        const storeKey = `osec-review:${data.set}`;
+        const read = (storage, key) => {
             try {
-                return JSON.parse(sessionStorage.getItem(storeKey) || '[]');
+                return JSON.parse(storage.getItem(key) || 'null');
             } catch (e) {
-                return [];
+                return null;
             }
-        })());
+        };
+        const saved = read(localStorage, storeKey) || {};
+        const stored = saved.checks || {};
+        const dropped = saved.dropped || {};
+        try {
+            Object.keys(sessionStorage).filter((k) => k.startsWith(`${storeKey}:`)).forEach((k) => {
+                (read(sessionStorage, k) || []).forEach((ref) => { if (!(ref in stored)) stored[ref] = null; });
+                sessionStorage.removeItem(k);
+            });
+        } catch (e) {
+            // Storage unavailable: nothing to carry over.
+        }
+        const checked = new Set();
+        const stale = new Set();
+        Object.keys(dropped).forEach((ref) => (dropped[ref] === data.date ? stale.add(ref) : delete dropped[ref]));
+        data.rows.forEach((r) => {
+            if (!(r.ref in stored)) {
+                return;
+            }
+            const same = r.currentHash ? stored[r.ref] === r.currentHash : true;
+            if (failed(r) && r.current && same) {
+                checked.add(r.ref);
+            } else {
+                if (failed(r) && r.current) {
+                    stale.add(r.ref);
+                    dropped[r.ref] = data.date;
+                }
+                delete stored[r.ref];
+            }
+        });
         const saveChecked = () => {
+            data.rows.forEach((r) => (checked.has(r.ref) ? (stored[r.ref] = r.currentHash || null) : delete stored[r.ref]));
+            Object.keys(dropped).forEach((ref) => stale.has(ref) || delete dropped[ref]);
             try {
-                sessionStorage.setItem(storeKey, JSON.stringify([...checked]));
+                localStorage.setItem(storeKey, JSON.stringify({checks: stored, dropped}));
             } catch (e) {
                 // Storage unavailable (private window): the selection lasts until the page is left.
             }
         };
+        saveChecked();
         const approvable = (r) => failed(r) && r.current && r.ref;
         const statusText = (r) => (approved(r)
             ? `approved ${new Date(r.approvedAt).toLocaleString()}`
             : approvable(r) && checked.has(r.ref) ? 'approval pending (run the command)'
+                : approvable(r) && stale.has(r.ref) ? 'image changed since you checked it: check again'
                 : failed(r) ? (r.ratio ? `differs: ${(r.ratio * 100).toFixed(2)} % (${r.pixels} px)` : r.status) : 'unchanged');
         function renderApprovals() {
             const refs = data.rows.filter((r) => approvable(r) && checked.has(r.ref)).map((r) => r.ref);
-            $('approvals').classList.toggle('on', refs.length > 0);
+            const changed = data.rows.filter((r) => approvable(r) && stale.has(r.ref) && !checked.has(r.ref)).length;
+            $('approvals').classList.toggle('on', refs.length > 0 || changed > 0);
             $('approvals').replaceChildren(
                 `${refs.length} checked for approval:`,
                 copyButton('copy ddev command', `ddev osec-approve --set=${data.set} ${refs.join(' ')}`),
                 copyButton('copy npm command', `npm run approve -- --set=${data.set} ${refs.join(' ')}`),
-                Object.assign(el('button', {type: 'button'}, 'clear'), {onclick: () => { checked.clear(); saveChecked(); render(); }}),
-                el('span', {class: 'meta'}, 'Run the command, then reload: approved rows show their new baseline.'));
+                Object.assign(el('button', {type: 'button'}, 'clear'), {onclick: () => { checked.clear(); stale.clear(); saveChecked(); render(); }}),
+                el('span', {class: 'meta'}, 'Run the command, then reload: approved rows show their new baseline.'),
+                changed ? Object.assign(el('button', {type: 'button'}, `${changed} check${1 === changed ? '' : 's'} dropped: image changed since checked (show)`),
+                    {onclick: () => { state.status = 'stale'; render(); }}) : '');
         }
 
         // Filter options from the data.
@@ -206,7 +249,8 @@
         function render() {
             document.querySelectorAll('[data-status]').forEach((b) => b.classList.toggle('on', b.dataset.status === state.status));
             const rows = data.rows.filter((r) => ('all' === state.status || kind(r) === state.status
-                    || ('approved' === state.status && approvable(r) && checked.has(r.ref)))
+                    || ('approved' === state.status && approvable(r) && checked.has(r.ref))
+                    || ('stale' === state.status && approvable(r) && stale.has(r.ref) && !checked.has(r.ref)))
                 && (!state.project || r.project === state.project)
                 && (!state.theme || r.theme === state.theme)
                 && (!state.width || `${r.width} px` === state.width)
@@ -225,6 +269,7 @@
                             e.target.checked ? checked.add(r.ref) : checked.delete(r.ref);
                             saveChecked();
                             section.classList.toggle('pending', e.target.checked);
+                            section.classList.toggle('stale', !e.target.checked && stale.has(r.ref));
                             section.querySelector('.status').textContent = statusText(r);
                             renderApprovals();
                             window.scrollBy(0, section.getBoundingClientRect().top - top);
@@ -239,7 +284,8 @@
                         figure(`Baseline (${data.set})`, r.old, r, 'old'),
                         failed(r) ? figure('Diff', r.diff, r, 'diff') : '',
                         figure('Current', r.current, r, 'current'));
-                return el('section', {id: r.id, class: `row ${kind(r)}${pending ? ' pending' : ''}`},
+                const changed = !pending && approvable(r) && stale.has(r.ref);
+                return el('section', {id: r.id, class: `row ${kind(r)}${pending ? ' pending' : ''}${changed ? ' stale' : ''}`},
                     el('div', {class: 'head'},
                         el('span', {class: 'title'}, r.titles.join(' › ')),
                         el('span', {class: 'chip'}, r.project),

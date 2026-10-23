@@ -13,10 +13,20 @@
  * Reads what lib/pages.js compareShot() attaches: `osec-review` (the snapshot name) and, for a passing comparison,
  * `osec-current` (the current shot); for a failed one Playwright's own `*-expected.png`, `*-actual.png`, `*-diff.png`.
  * PDFs attached by specs/print.spec.js are linked. All images are copied, so a page keeps showing its run when the
- * baselines change later.
+ * baselines change later. Each row carries `currentHash`, a fingerprint of its current image: the page keeps a row
+ * checked for approval across runs only while that image stays the same.
  */
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+
+/**
+ * A short fingerprint of a file's content.
+ *
+ * @param {string} file
+ * @returns {string} The first 16 hex digits of its SHA-256.
+ */
+const fingerprint = (file) => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex').slice(0, 16);
 
 class ReviewReporter {
     /**
@@ -114,6 +124,7 @@ class ReviewReporter {
                 old: copy(sources.old, 'old'),
                 diff: copy(sources.diff, 'diff'),
                 current,
+                currentHash: current ? fingerprint(path.join(out, current)) : null,
                 pdfs,
             };
         });

@@ -50,6 +50,11 @@ npm run approve -- --set=local chromium/plana/month-1280.png     # inside the co
 Approving copies the reviewed image over the baseline without a new run. The old baseline goes to
 `backups/approved/<date_time>/`.
 
+Ticked rows are kept per baseline set in this browser (`localStorage`), across runs and tabs, together with a
+fingerprint of the image they were ticked on. After a new run a tick stays while that row's current image is unchanged;
+if the image changed, the tick is dropped and the row says "image changed since you checked it" until the next run (the
+bar has a button listing those rows). A row approved with the command, or one that passes now, loses its tick.
+
 ### Accept the current look
 
 ```
