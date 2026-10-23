@@ -5,7 +5,7 @@
  * a download). The printed views are listed in screens.js (PRINT, paths from VIEWS).
  */
 const { test, expect } = require('@playwright/test');
-const { manifest, printView, firefoxPdf, about, compareShot } = require('../lib/pages');
+const { manifest, printView, firefoxPdf, about, compareShot, replaceForShot } = require('../lib/pages');
 const { themes, activateTheme } = require('../lib/theme');
 const { VIEWS, PRINT } = require('./screens');
 
@@ -20,15 +20,17 @@ for (const theme of themes()) {
     test.describe(`Calendar theme ${theme}`, () => {
         test.beforeAll(({ browser }) => activateTheme(theme, browser));
 
-        for (const { view: name, title } of PRINT) {
+        for (const { view: name, title, replace = [] } of PRINT) {
             const { path } = VIEWS.find((v) => v.name === name);
+            const replaced = replace.map((r) => r.label).join(', ');
             test(title, about(
-                `The calendar's print button, shot full page with print media, exactly as printed (the header
-                carries the site URL, so sets from different sites differ there). The PDF is attached for a look at
-                the page breaks (Chromium: page.pdf(); Firefox: its own silent print to a file).`,
+                `The calendar's print button, shot full page with print media, exactly as printed. Replaced by a red
+                marker: ${replaced}. The PDF is attached for a look at the page breaks (Chromium: page.pdf();
+                Firefox: its own silent print to a file).`,
             ), async ({ page, browserName }, testInfo) => {
                 await page.goto(path(manifest()));
                 await printView(page);
+                await replaceForShot(page, replace);
                 // Guard: the print page must show the calendar, or an empty shot would match an empty baseline.
                 await expect(page.locator('.ai1ec-calendar').first()).toBeVisible();
                 try {

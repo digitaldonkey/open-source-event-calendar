@@ -33,19 +33,6 @@ function calendarPath(m, view, date) {
 }
 
 /**
- * Y-m-d of the last Sunday of a month: the European DST changes (March, October).
- *
- * @param {number} year
- * @param {number} month 1-12.
- * @returns {string}
- */
-function lastSunday(year, month) {
-    const d = new Date(Date.UTC(year, month, 0));
-    d.setUTCDate(d.getUTCDate() - d.getUTCDay());
-    return d.toISOString().slice(0, 10);
-}
-
-/**
  * Waits until the page is laid out: no network activity, web fonts loaded, map tiles loaded (OpenStreetMap, over the
  * internet; decision N6: compared as they are), then a short settle for the calendar's scripts.
  *
@@ -224,7 +211,6 @@ async function replaceForShot(page, replacements = []) {
 module.exports = {
     manifest,
     calendarPath,
-    lastSunday,
     settle,
     printView,
     firefoxPdf,
