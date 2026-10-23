@@ -167,9 +167,6 @@ jobs:
           command: echo "127.0.0.1 ${WP_HOST}" | sudo tee -a /etc/hosts
       - *attach_workspace
       - *copy_vendor
-      - run:
-          name: Update outdated apt key
-          command: (cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
 #      - run:
 #          name: Install MySQL client and PHP extension
 #          command: sudo apt-get update
@@ -450,9 +447,6 @@ jobs:
       - checkout
       - *attach_workspace
       # @see https://circleci.com/developer/orbs/orb/circleci/browser-tools
-      - run:
-          name: Update outdated apt key
-          command: (cd /etc/apt/ && sudo cp trusted.gpg trusted.gpg.d/)
       - run:
           name: Install Apache, MySQL client and PHP extension
           command: |
