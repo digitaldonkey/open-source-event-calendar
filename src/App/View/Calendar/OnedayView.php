@@ -103,6 +103,9 @@ class OnedayView extends AbstractView
             'data_type'                => $args['data_type'],
             'is_ticket_button_enabled' => $is_ticket_button_enabled,
             'show_reveal_button'       => $show_reveal_button,
+            // The grid's id for the reveal button's aria-controls: unique per render, as one page can show several
+            // calendars and a view loaded by navigation replaces only its own calendar.
+            'full_day_id'              => uniqid('osec-full-day-'),
             'text_full_day'            => __('Reveal full day', 'open-source-event-calendar'),
             'text_all_day'             => __('All-day', 'open-source-event-calendar'),
             'text_now_label'           => __('Now:', 'open-source-event-calendar'),
