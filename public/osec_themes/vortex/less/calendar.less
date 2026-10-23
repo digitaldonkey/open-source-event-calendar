@@ -82,10 +82,21 @@
   .ai1ec-btn-group {
     margin-block-end: .5em;
   }
+  // The large calendar icon would raise the date button's line box above the other buttons.
+  .ai1ec-minical-trigger .ai1ec-fa-lg {
+    vertical-align: middle;
+  }
   .ai1ec-contribution-buttons {
     float: right;
     margin-top: 5px;
   }
+}
+// The print button has the small size of the toolbar's other buttons (pagination, date, view switch), so all have
+// one height. Vortex's button only; plana's print link has no .ai1ec-btn.
+.ai1ec-print-buttons .ai1ec-btn {
+  .ai1ec-button-size(@padding-small-vertical; @padding-small-horizontal; @font-size-small; @line-height-small; @border-radius-small);
+  // As style.less resets .ai1ec-btn-sm in a button group.
+  font-size: .92 * @font-size-small;
 }
 // Hidden elements to detect current window mode.
 #ai1ec-bs-modes {
