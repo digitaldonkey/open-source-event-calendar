@@ -61,18 +61,32 @@ const VIEWS = [
  * Printed views (print.spec.js), by their name in VIEWS, which gives the path: `<theme>/print-<view>.png`, in Chromium
  * and Firefox.
  */
+/**
+ * The print header carries the view's URL, which names the site: shots of different sites (a sandbox, the 1.1.16
+ * site) would differ there only.
+ */
+const PRINT_REPLACE = [
+    {
+        label: 'site URL',
+        selector: '.osec-print-url',
+    },
+];
+
 const PRINT = [
     {
         view: 'month',
         title: 'Print: month view',
+        replace: PRINT_REPLACE,
     },
     {
         view: 'week',
         title: 'Print: week view',
+        replace: PRINT_REPLACE,
     },
     {
         view: 'day',
         title: 'Print: busy day',
+        replace: PRINT_REPLACE,
     },
 ];
 
@@ -145,8 +159,15 @@ const ADMIN = [
         title: 'Settings',
         description: 'The plugin settings page, including the cache report and the charset box.',
         path: () => '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-settings',
-        // The compiled CSS's version hash changes with every compile.
+        // The compiled CSS's version hash changes with every compile. The URL row names the site and is empty while no
+        // CSS file is stored (cache state at that moment), so the page height changed between runs.
         replace: [
+            {
+                label: 'CSS URL',
+                selector: '.timely li',
+                text: 'URL:',
+                target: 'span',
+            },
             {
                 label: 'version tag',
                 selector: '.timely li',

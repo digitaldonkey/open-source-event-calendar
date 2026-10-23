@@ -142,14 +142,15 @@ Nothing is hidden unless listed here:
 - wp-admin: notices and the admin footer removed, the run's dates removed or blanked;
 - values that change from run to run replaced by a red `<what (replaced by test)>` marker, never silently: per screen
   in `replace` (`specs/screens.js`), done by `replaceForShot()` (`lib/pages.js`), which fails when the value is not
-  found. Today: the compiled CSS's version hash on the settings page (`<version tag (replaced by test)>`);
+  found. Today: the compiled CSS's version hash and URL on the settings page (`<version tag (replaced by test)>`,
+  `<CSS URL (replaced by test)>`), the site URL in the print header (`<site URL (replaced by test)>`);
 - the events list sorted by title, with the Screen Options above;
 - views logged out, phone emulation below 800 px;
 - week, day and month: the window grown to the page's height and one event hovered, so its popover is in the shot
   (`popover` in `specs/screens.js`, an event with image and excerpt inside the configured day hours);
 - animations frozen, text cursor hidden;
 - the print button's `window.print()` stubbed;
-- the DST day's "show full day" button and the block's settings toggle clicked.
+- the block's settings toggle clicked.
 
 Map tiles are compared as they load. When OpenStreetMap changes its tiles, the shot fails: review and approve it, rather than raising `OSEC_MAX_DIFF_PIXELS` or hiding the map.
 
@@ -179,7 +180,7 @@ rm -rf local && tar xzf ../backups/baselines-local-<date>.tar.gz              # 
 
 Add an entry to `specs/screens.js`: a calendar view (shot at every width of `WIDTHS`, per theme), a printed view, a
 single event or page (by its manifest key), or a wp-admin screen. The specs loop over these lists. A screen that needs
-clicks or its own setup (like the DST day or the block form) gets its own test in its spec. A new screen has no
+clicks or its own setup (like the block form) gets its own test in its spec. A new screen has no
 baseline yet: shoot it with `npm run update` (or approve it from the review page).
 
 ## Files
