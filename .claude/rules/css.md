@@ -139,8 +139,8 @@ The "Base font size" option (Calendar Theme Options) compiles to `@font-size-bas
 plugin's own wrapper element (`.timely`, via `bootstrap/scaffolding.less` imported inside
 `.timely { }` in `style.less`) - not on `<html>`.
 
-**Each theme ships its own default for it** (`user_variables.php`: vortex `13px`, plana `1rem`,
-umbra `0.8rem`), so *switching theme changes the base font size* unless a value is saved in
+**Each theme ships its own default for it** (`user_variables.php`: vortex `13px`, umbra `0.8rem`;
+plana `1em`, hidden from Theme Options since 1.2.0 - plana follows the site's font size presets), so *switching theme changes the base font size* unless a value is saved in
 `osec_less_variables`. Rendered box heights then shift - don't read that as a LESS edit having
 broken something. **Check the base font size after every theme switch**, and when comparing two
 themes, pin them to the same value so only one variable moves.
@@ -159,6 +159,17 @@ compiles down to a `px` value in the output CSS, but that value is derived from 
 at compile time, so it moves when the setting changes. Use it in LESS source for a
 size that should track the base but not equal it; the rule above is about hand-written
 `px`/`rem` literals in the CSS.
+
+**Special Bootstrap setup: `em`/`rem` bases.** The setting accepts `px`, `em` and `rem` (`rem` since `12bb14b8`,
+2025-03; umbra defaults to `.8rem` since `5e4391ad`, plana to `1em` since `fe488d9a`). OSEC's own rules were made
+unit-safe by multiplying instead of adding `px` (`12bb14b8` buttons in `style.less`, `08e319ef` event sizes,
+`a58d837b` component sizes). `bootstrap/variables.less` is unchanged since the 2014 import: its `ceil()`/`floor()`
+and `px` additions (`@line-height-computed`, `@input-height-*`, `@font-size-h1..h6`, `@font-size-large/small`) only
+work with a `px` base. Measured 2026-10-23 by compiling twice with base `x` and `2x` (what does not double is broken):
+plana `1em` 17 broken declarations (inputs `15em` high, `-lg` buttons and `.timely h1/h4` `2em`, dividers `-.5em`),
+umbra `.8rem` 14 (`.timely h2` smaller than `h3`). No frontend template uses those rules; plana child themes or
+third-party markup inside `.timely` would hit them. Fix options and status: `.claude/plans/plana-font-sizes.md` (B).
+The short version for developers sits as a comment at `@font-size-base` in `vortex/less/user-variable-map.less`.
 
 **Exception: print styles** (`@media print`, `.osec-print-calendar()`, `.ai1ec-print` in
 `calendar.less`) may use fixed `px`/`pt` sizes - physical paper output isn't meant to track

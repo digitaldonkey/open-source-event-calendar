@@ -8,6 +8,8 @@
 @link-color:                    @linkColor;
 @link-hover-color:              @linkColorHover;
 @font-family-base:              @baseFontFamily;
+// The base font size can be px, em or rem. Scale sizes from it by multiplying (.9 * @font-size-base), never by
+// adding px: Bootstrap's own size formulas only work with a px base.
 @font-size-base:                @baseFontSize;
 // Default for custom calendar themes whose user_variables.php predates this option (Theme Options override it).
 @agendaMaxWidth:                45em;
