@@ -49,6 +49,25 @@ a.ai1ec-fa.ai1ec-hide {
   display: none;
 }
 
+// Arrows next to text (pagination): a box as wide as the arrow, like the font glyphs were, so prev/next links keep
+// their 1.1.x width and still fit one line on phones. The mask keeps its 1em size; only the empty sides are cut.
+.ai1ec-fa-angle-left,
+.ai1ec-fa-angle-right {
+  &:before {
+    width: .4em;
+    -webkit-mask-size: 1em;
+    mask-size: 1em;
+  }
+}
+.ai1ec-fa-angle-double-left,
+.ai1ec-fa-angle-double-right {
+  &:before {
+    width: .62em;
+    -webkit-mask-size: 1em;
+    mask-size: 1em;
+  }
+}
+
 // Font Awesome 4 helpers still used in templates.
 .ai1ec-fa-lg {
   font-size: 1.33333333em;
