@@ -91,6 +91,29 @@
     margin-top: 5px;
   }
 }
+// Pagination arrows on very small screens: a box as wide as the arrow, like the font glyphs were, so the month
+// pagination still fits one line at 320 px. The mask keeps its 1em size; only the empty sides are cut. Vortex's
+// pagination only; plana's (.plana-pagination) hides its arrows on small screens itself.
+@media (max-width: 478px) {
+  .ai1ec-pagination {
+    .ai1ec-fa-angle-left,
+    .ai1ec-fa-angle-right {
+      &:before {
+        width: .4em;
+        -webkit-mask-size: 1em;
+        mask-size: 1em;
+      }
+    }
+    .ai1ec-fa-angle-double-left,
+    .ai1ec-fa-angle-double-right {
+      &:before {
+        width: .62em;
+        -webkit-mask-size: 1em;
+        mask-size: 1em;
+      }
+    }
+  }
+}
 // The print button has the small size of the toolbar's other buttons (pagination, date, view switch), so all have
 // one height. Vortex's button only; plana's print link has no .ai1ec-btn.
 .ai1ec-print-buttons .ai1ec-btn {
