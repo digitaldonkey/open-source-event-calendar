@@ -197,7 +197,7 @@ class DatabaseCharset extends OsecBaseClass
             $suppress = $wpdb->suppress_errors(true);
             // Table names from constants, charset and collation from the site's configuration.
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $ok = false !== $wpdb->query("ALTER TABLE `$table` CONVERT TO $target");
+            $ok = false !== $wpdb->query($wpdb->prepare("ALTER TABLE %i CONVERT TO $target", $table));
             $wpdb->suppress_errors($suppress);
             $result['ok']             = $result['ok'] && $ok;
             $result['tables'][$table] = [

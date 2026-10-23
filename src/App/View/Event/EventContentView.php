@@ -153,6 +153,7 @@ class EventContentView extends OsecBaseClass
             // restoring globals.
             foreach (self::POSTDATA_GLOBALS as $name) {
                 if (array_key_exists($name, $snapshot)) {
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Core globals.
                     $GLOBALS[$name] = $snapshot[$name];
                 } else {
                     unset($GLOBALS[$name]);
