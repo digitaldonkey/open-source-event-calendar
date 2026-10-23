@@ -45,6 +45,14 @@
   background: rgba(244, 244, 191, 0.5);
   border-top: 1px dotted mix( @today-color, @text-color, 80% ) !important;
 }
+// The space above the first date goes below its dotted line, so the line stays under the toolbar
+// (vortex uses a margin there, against a grey band from its date background).
+#osec-container .ai1ec-agenda-view > .ai1ec-date:first-of-type {
+  @media (min-width: @screen-sm) {
+    margin-top: 0;
+    padding-top: var(--wp--preset--spacing--50, 2em);
+  }
+}
 .ai1ec-agenda-view .ai1ec-date-title,
 .ai1ec-agenda-widget-view .ai1ec-date-title,
 .ai1ec-week-view .ai1ec-week .ai1ec-event-container,
