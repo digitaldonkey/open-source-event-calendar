@@ -307,7 +307,9 @@ See `TESTING.md` and `.claude/rules/testing.md`. Quick reference:
   its own earlier content and keeps other calendar data next to it; `--only-generated` (used by the screenshot and
   regression tools) refuses a site with other calendar data, so use a `try_*` sandbox on a used site
 - `integration_tests/visual_regression/` (`ddev osec-review`, `ddev osec-approve`) - Playwright screenshots compared
-  with a baseline set, review page with approval. See its `README.md`
+  with a baseline set, review page with approval. See its `README.md`. **Any value a test replaces in a shot (or in
+  test output) is marked explicitly**: red text `<what (replaced by test)>` via `replaceForShot()` (`lib/pages.js`),
+  listed per screen (`replace` in `specs/screens.js`) - never blanked, hidden or swapped for a plausible fake
 - `bin/screenshots/` (`ddev osec-screenshots`) - the WordPress.org `assets/screenshot-*.png`
 - `bin/js-rename-check/` - proves a hand edit of a minified bundle changed only names/formatting
 - `twig_to_js_transform/` - converts Twig templates for frontend use

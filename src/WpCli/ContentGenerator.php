@@ -208,7 +208,7 @@ class ContentGenerator
 
         $pages = ['calendar' => wp_make_link_relative(get_permalink($calendar_page))];
         foreach ($this->dataset['pages'] ?? [] as $page_row) {
-            $page_id                 = $this->insert_page($page_row['title'], $page_row['content']);
+            $page_id                 = $this->insert_page($page_row['title'], $this->page_dates($page_row['content']));
             $pages[$page_row['key']] = [
                 'id'   => $page_id,
                 'path' => wp_make_link_relative(get_permalink($page_id)),
@@ -886,6 +886,24 @@ class ContentGenerator
      * @return int Page ID.
      * @throws Exception
      */
+    /**
+     * Page content with each `{date:<modifier>}` replaced by that date (Y-m-d) from the anchor, e.g.
+     * `[osec view="oneday" exact_date="{date:+8 days}"]`. The modifier is a dataset date (see relative()).
+     *
+     * @param  string  $content
+     *
+     * @return string
+     * @throws InvalidArgumentException On an invalid modifier.
+     */
+    private function page_dates(string $content): string
+    {
+        return preg_replace_callback(
+            '/\{date:([^}]+)\}/',
+            fn($found) => $this->relative($this->anchor, trim($found[1]))->format('Y-m-d'),
+            $content
+        );
+    }
+
     private function insert_page(string $title, string $content): int
     {
         $page_id = $this->checked(wp_insert_post([
