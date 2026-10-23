@@ -245,3 +245,15 @@ table.ai1ec-month-view {
     }
   }
 }
+
+// The date picker and the tooltips hang in <body>, outside the calendar, so 1em (theirs, or that of .timely, which
+// they carry when opened inside a .timely element) is the site's body text size. They take the toolbar's size
+// instead (plana-toolbar.less).
+.timely.ai1ec-datepicker,
+.ai1ec-tooltip,
+.timely.ai1ec-tooltip {
+  font-size: var(--wp--preset--font-size--small, .875rem);
+  @media (min-width: 36.25rem) {
+    font-size: var(--wp--preset--font-size--normal, 1rem);
+  }
+}
