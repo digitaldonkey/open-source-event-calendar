@@ -502,8 +502,10 @@ input.ai1ec-timepicker[readonly] {
   margin-left: auto;
   margin-right: auto;
   @media (min-width: @screen-sm) {
-    padding-top: 2em;
-    padding-bottom: 2em;
+    padding-bottom: var(--wp--preset--spacing--50, 2em);
+    & > .ai1ec-date:first-of-type {
+      padding-top: var(--wp--preset--spacing--50, 2em);
+    }
   }
   @media print {
     max-width: none;
