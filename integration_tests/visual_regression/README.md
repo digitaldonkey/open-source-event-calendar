@@ -83,6 +83,8 @@ Environment variables:
 - `OSEC_MAX_DIFF_PIXELS`: pixels per shot that may differ, default `20`. `0` for exact. Measured 2026-10-20: three
   runs at `0` against an unchanged state differed by 0 px; the smallest real change seen was 186 px (icons). Measure
   again the same way (three runs with `0`) before changing it.
+- `OSEC_DIFF_THRESHOLD`: per-pixel color tolerance, `0` to `1`, default `0.2` (Playwright's). It lets light color
+  changes pass unnoticed (lines, tints); `0` shows every changed color, for reviewing a color change.
 - `OSEC_REMOTE_URL`, `OSEC_REMOTE_DIR`: remote mode, see the next section.
 - `PLAYWRIGHT_WS`: the browser server, default `ws://playwright:3000/`.
 
