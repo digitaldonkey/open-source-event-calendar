@@ -168,7 +168,7 @@ and `px` additions (`@line-height-computed`, `@input-height-*`, `@font-size-h1..
 work with a `px` base. Measured 2026-10-23 by compiling twice with base `x` and `2x` (what does not double is broken):
 plana `1em` 17 broken declarations (inputs `15em` high, `-lg` buttons and `.timely h1/h4` `2em`, dividers `-.5em`),
 umbra `.8rem` 14 (`.timely h2` smaller than `h3`). No frontend template uses those rules; plana child themes or
-third-party markup inside `.timely` would hit them. Fix options and status: `.claude/plans/plana-font-sizes.md` (B).
+third-party markup inside `.timely` would hit them. Fix options and status: `.claude/plans/plana-appearance-settings.md` ("Related").
 The short version for developers sits as a comment at `@font-size-base` in `vortex/less/user-variable-map.less`.
 
 **Exception: print styles** (`@media print`, `.osec-print-calendar()`, `.ai1ec-print` in

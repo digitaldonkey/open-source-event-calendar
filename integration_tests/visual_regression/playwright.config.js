@@ -58,10 +58,12 @@ module.exports = defineConfig({
     ],
     // Pixels per shot that may differ, the same for every shot (decision A2): three runs at 0 differed by 0 px
     // (2026-10-20); the smallest real change seen was 186 px. A share of the image (0.1 % before) let changes of up
-    // to 6,886 px pass on tall pages. The per-pixel color tolerance stays Playwright's `threshold` default (0.2).
+    // to 6,886 px pass on tall pages. The per-pixel color tolerance is Playwright's `threshold` default (0.2), which
+    // lets light color changes pass (a grid line #ddd -> 15 % text); OSEC_DIFF_THRESHOLD=0 catches them.
     expect: {
         toHaveScreenshot: {
             maxDiffPixels: Number(process.env.OSEC_MAX_DIFF_PIXELS ?? 20),
+            threshold: Number(process.env.OSEC_DIFF_THRESHOLD ?? 0.2),
             // Playwright's defaults, set on purpose (maintainer 2026-10-19): CSS animations and transitions frozen,
             // text cursor hidden.
             animations: 'disabled',
