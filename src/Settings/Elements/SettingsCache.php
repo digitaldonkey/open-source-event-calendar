@@ -182,10 +182,12 @@ class SettingsCache extends OsecBaseClass
                 'code'  => true,
             ];
         }
+        // No URL: the pages print the CSS inline (debug mode, or no stored file and "Link CSS" off).
+        $url    = $ctrl->get_css_url();
         $rows[] = [
             'label' => __('URL', 'open-source-event-calendar'),
-            'value' => $ctrl->get_css_url(),
-            'code'  => true,
+            'value' => $url ?: __('None: the CSS is printed inline in each page.', 'open-source-event-calendar'),
+            'code'  => '' !== $url,
         ];
         $rows[] = [
             'label' => __('Version', 'open-source-event-calendar'),
