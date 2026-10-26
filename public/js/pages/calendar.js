@@ -621,8 +621,17 @@ timely.define("domReady", [], function () {
         var t = $(this).closest(".ai1ec-calendar");
         t.find(".ai1ec-event:not(.ai1ec-expanded) .ai1ec-event-toggle").click();
         $('#osec-calendar-view').toggleClass('osec-all-events-collapsed', false).toggleClass('osec-all-events-expanded', true)
+    }, restore_state = function (e) {
+        // "Expand all" / "Collapse all" is remembered on #osec-calendar-view, which stays when navigation loads the
+        // next view (like osec-full-day): the newly loaded agenda events follow it, without animation.
+        var view = e.find("#osec-calendar-view");
+        if (view.hasClass("osec-all-events-expanded")) {
+            view.find(".ai1ec-agenda-view .ai1ec-event:not(.ai1ec-expanded)").addClass("ai1ec-expanded").find(".ai1ec-event-summary").show();
+        } else if (view.hasClass("osec-all-events-collapsed")) {
+            view.find(".ai1ec-agenda-view .ai1ec-event.ai1ec-expanded").removeClass("ai1ec-expanded").find(".ai1ec-event-summary").hide();
+        }
     };
-    return {toggle_event: t, collapse_all: collapse_all, expand_all: expand_all}
+    return {toggle_event: t, collapse_all: collapse_all, expand_all: expand_all, restore_state: restore_state}
 }), timely.define("external_libs/modernizr", [], function () {
     var e = function (e, t, n) {
         function S(e) {
@@ -4017,6 +4026,7 @@ timely.define("domReady", [], function () {
             scroll: !1
         }), e.find(".tablescroll_wrapper, .tablescroll_head, .tablescroll_body").css("width", ""), e.find(".tablescroll_head th, .tablescroll_body > tbody > tr > td").css("width", "");
         if (e.find(".ai1ec-week-view").length || e.find(".ai1ec-oneday-view").length) e.find(".ai1ec-oneday-view .tablescroll_wrapper, .ai1ec-week-view .tablescroll_wrapper").scrollTo(e.find(".ai1ec-hour-marker:eq(" + first + ")")), e.find(".ai1ec-hour-marker:eq(" + first + ")").addClass("ai1ec-first-visible");
+        agendaView.restore_state(e);
         e.find(".ai1ec-month-view .ai1ec-multiday").length && monthView.extend_multiday_events(e), e.find(".osec-calendar-view-container").data("ai1ec-inited", !0).trigger("initialize_view.ai1ec"), e.find(".ai1ec-calendar-toolbar").trigger("ai1ec-affix.reinit")
     }, g = function (t) {
         t.find(".osec-calendar-view-container").trigger("destroy_view.ai1ec");
