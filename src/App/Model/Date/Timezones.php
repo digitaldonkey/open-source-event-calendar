@@ -598,7 +598,7 @@ class Timezones extends OsecBaseClass
             return $auto_zone;
         }
         $auto_zone = timezone_name_from_abbr(
-            null,
+            '',
             ((int)$zone) * 3600,
             true
         );
