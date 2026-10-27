@@ -249,6 +249,17 @@ A standardized upgrade path may be developed if there is demand and contribution
 
 See this [wiki](https://github.com/digitaldonkey/open-source-event-calendar/wiki/migration-from-all%E2%80%90in%E2%80%90one%E2%80%90event%E2%80%90calendar) for currently known information on migrating.
 
+### Upgrading from versions before 1.0.7
+
+Categories and tags were renamed (prefix requirements). Rename the taxonomies:
+
+```
+# events_categories => osec_events_categories
+UPDATE  `wp_term_taxonomy` SET  `taxonomy` =  'osec_events_categories' WHERE  `taxonomy` = 'events_categories';
+# events_tags       => osec_events_tags
+UPDATE  `wp_term_taxonomy` SET  `taxonomy` =  'osec_events_tags' WHERE  `taxonomy` = 'events_tags';
+```
+
 ---
 
 ## Development & Support
@@ -267,17 +278,9 @@ Those wishing to contribute to the development of this project, please see the [
 
 ## Upgrade Notice
 
-= 1.0.7 =
+= 1.2.0 =
 
-Categories and Tags renamed
-Upgrading from pre 1.0.7 requires you to rename taxonomies due to prefix requirements.
-
-```
-# events_categories => osec_events_categories
-UPDATE  `wp_term_taxonomy` SET  `taxonomy` =  'osec_events_categories' WHERE  `taxonomy` = 'events_categories';
-# events_tags       => osec_events_tags
-UPDATE  `wp_term_taxonomy` SET  `taxonomy` =  'osec_events_tags' WHERE  `taxonomy` = 'events_tags';
-```
+Plana's colours now follow your WordPress theme: check the look, adjust in Theme Options. Custom calendar themes: icon fonts are replaced by SVG icons and templates render with autoescape, so test first. Optional: convert tables to utf8mb4 in Settings (back up first).
 
 ## Frequently Asked Questions
 

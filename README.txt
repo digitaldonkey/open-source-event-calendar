@@ -226,15 +226,7 @@ All changes and older versions: [CHANGELOG.md](https://github.com/digitaldonkey/
 
 == Upgrade Notice ==
 
-= 1.0.7 =
+= 1.2.0 =
 
-Categories and Tags renamed
-Upgrading from pre 1.0.7 requires you to rename taxonomies due to prefix requirements.
-
-```
-# events_categories => osec_events_categories
-UPDATE  `wp_term_taxonomy` SET  `taxonomy` =  'osec_events_categories' WHERE  `taxonomy` = 'events_categories';
-# events_tags       => osec_events_tags
-UPDATE  `wp_term_taxonomy` SET  `taxonomy` =  'osec_events_tags' WHERE  `taxonomy` = 'events_tags';
-```
+Plana's colours now follow your WordPress theme: check the look, adjust in Theme Options. Custom calendar themes: icon fonts are replaced by SVG icons and templates render with autoescape, so test first. Optional: convert tables to utf8mb4 in Settings (back up first).
 
