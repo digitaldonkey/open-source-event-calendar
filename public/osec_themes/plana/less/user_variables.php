@@ -116,7 +116,7 @@ $osec_variables = [
         'description' => __('Strong lines (agenda events and date titles)', 'open-source-event-calendar'),
         'tab'         => 'backgrounds',
         'type'        => 'color',
-        'css_var'     => 'osec-line-hover',
+        'css_var'     => 'osec-line-thick',
     ],
     'osecTextOnColor' => [
         'value'       => '#ffffff',
@@ -229,7 +229,7 @@ $osec_variables = [
     ],
     'osecSpacing' => [
         'value'       => 'var(--wp--preset--spacing--50, 2em)',
-        'description' => __('Spacing around Agenda (large screens)', 'open-source-event-calendar'),
+        'description' => __('Spacing above and below Agenda (large screens)', 'open-source-event-calendar'),
         'tab'         => 'agenda',
         'type'        => 'size',
         'css_var'     => 'osec-spacing',
