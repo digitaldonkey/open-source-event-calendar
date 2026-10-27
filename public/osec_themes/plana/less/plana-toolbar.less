@@ -132,3 +132,11 @@
     }
   }
 }
+
+// The view switcher is a <button>: themes that style buttons (Twenty Seventeen, Twenty Twenty,
+// Twenty Twenty-One) add vertical padding, which makes it taller than Print next to it. The
+// height comes from min-height, as for Print; the theme's button text (bold) stays.
+.plana-toolbar .plana-flyout-menu--button {
+  padding-top: 0;
+  padding-bottom: 0;
+}
