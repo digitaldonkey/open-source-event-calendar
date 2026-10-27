@@ -29,6 +29,29 @@ class MakeReadme
         'Contributors',
     ];
 
+    /**
+     * README.md sections WordPress.org shows as sections of their own; every other section becomes a
+     * subsection of "== Description ==".
+     * @var array|string[]
+     */
+    private array $own_sections = [
+        'Installation',
+        'Frequently Asked Questions',
+    ];
+
+    /**
+     * Developer documentation left out of README.txt (WordPress.org advises a readme under 10 KB); README.txt
+     * links each one in README.md on GitHub instead. Value: the GitHub anchor of the section.
+     * @var array<string, string>
+     */
+    private array $github_sections = [
+        'Caching'                => 'caching',
+        'WP-CLI'                 => 'wp-cli',
+        'Custom calendar themes' => 'custom-calendar-themes',
+        'Migration Notes'        => 'migration-notes',
+        'Development & Support'  => 'development--support',
+    ];
+
 
     /**
      * Makes a Readme.
@@ -84,6 +107,7 @@ class MakeReadme
                 'Long Description' => array($this, 'get_value_long_description'),
                 'Screenshots' => array($this, 'format_screenshots_for_wp'),
                 'ChangeLog' => array($this, 'get_value_changelog'),
+                'Upgrade Notice' => array($this, 'get_value_upgrade_notice'),
             );
 
             foreach ($readmefile as $key => $display) {
@@ -159,23 +183,97 @@ class MakeReadme
         return $sections;
     }
 
+    /**
+     * "== Description ==" with README.md's sections as "= … =" subsections, a link list to the developer
+     * documentation on GitHub, then the sections WordPress.org shows on their own (Installation, FAQ).
+     *
+     * @return string
+     */
     protected function get_value_long_description(): string
     {
-        $active_sections = array_diff_key($this->sections, array_flip($this->except_sections));
-        foreach ($active_sections as $sectionId => $content) {
-            $lines = explode("\n", $content);
-            // Remove title.
-            unset($lines['0']);
-            $content = "\n== " . $sectionId . " ==\n\n" . implode("\n", $lines);
-            $active_sections [$sectionId] = $content;
+        $skip        = array_merge($this->except_sections, array_keys($this->github_sections), ['Upgrade Notice']);
+        $description = [];
+        $own         = [];
+        foreach (array_diff_key($this->sections, array_flip($skip)) as $sectionId => $content) {
+            if (in_array($sectionId, $this->own_sections, true)) {
+                $own[] = "\n== " . $sectionId . " ==\n\n" . $this->section_body($content);
+            } else {
+                $description[] = "\n= " . $sectionId . " =\n\n" . $this->section_body($content);
+            }
         }
-        return implode("\n", $active_sections);
+        $links = [];
+        foreach ($this->github_sections as $title => $anchor) {
+            $links[] = '[' . $title . '](' . $this->github_readme_url() . '#' . $anchor . ')';
+        }
+        $description[] = "\n= Developer documentation =\n\n" . implode(', ', $links) . " (README.md on GitHub)\n";
+
+        return "\n== Description ==\n" . implode("\n", $description) . "\n" . implode("\n", $own);
     }
 
+    /**
+     * The newest version entry of CHANGELOG.md and a link to the whole file on GitHub (WordPress.org advises
+     * keeping only the current release in the readme). An entry may end its readme part early with a line
+     * "<!-- readme-end -->": the details below it stay in CHANGELOG.md only.
+     *
+     * @return string
+     */
     protected function get_value_changelog(): string
     {
-        return "\n== Changelog ==\n\n"
-            . file_get_contents(OSEC_PATH . '/CHANGELOG.md');
+        $changelog = file_get_contents(OSEC_PATH . '/CHANGELOG.md');
+        // Version headings: "= 1.2.0 =". Everything before the second one is the newest entry.
+        $entries = preg_split('/^(?==\s.+\s=\s*$)/m', $changelog, -1, PREG_SPLIT_NO_EMPTY);
+        $newest  = $entries[0] ?? $changelog;
+        $newest  = rtrim(preg_split('/^<!--\s*readme-end\s*-->\s*$/m', $newest)[0]);
+
+        return "\n== Changelog ==\n\n" . $newest . "\n\n"
+            . 'All changes and older versions: [CHANGELOG.md](' . $this->github_url() . "/blob/master/CHANGELOG.md)\n";
+    }
+
+    /**
+     * README.md's "Upgrade Notice" section as WordPress.org's own section, after the changelog.
+     *
+     * @return string
+     */
+    protected function get_value_upgrade_notice(): string
+    {
+        if (empty($this->sections['Upgrade Notice'])) {
+            return '';
+        }
+        return "\n== Upgrade Notice ==\n\n" . $this->section_body($this->sections['Upgrade Notice']) . "\n";
+    }
+
+    /**
+     * A README.md section without its "## Title" line.
+     *
+     * @param  string  $content  Section as parsed, title line first.
+     *
+     * @return string
+     */
+    private function section_body(string $content): string
+    {
+        $lines = explode("\n", $content);
+        unset($lines[0]);
+        return trim(implode("\n", $lines)) . "\n";
+    }
+
+    /**
+     * The repository URL (plugin header "Plugin URI"), without a trailing slash.
+     *
+     * @return string
+     */
+    private function github_url(): string
+    {
+        return untrailingslashit($this->get_plugin_header_value('Plugin URI'));
+    }
+
+    /**
+     * README.md on GitHub (master), the target of the developer documentation links.
+     *
+     * @return string
+     */
+    private function github_readme_url(): string
+    {
+        return $this->github_url() . '/blob/master/README.md';
     }
 
     //** Takes the markdown formatted screenshots section and reformats it for use on WordPress */

@@ -1,3 +1,150 @@
+= 1.2.0 =
+
+**Highlights**
+
+* Plana fits the WordPress theme: colours, lines and text sizes as Theme Options, defaults from the theme
+* Faster: SVG icons, stylesheet 406 to 227 KB, served as a static file; new "Clear all caches"
+* Calendar block: width follows the page, agenda expanded or collapsed per block, print icon setting
+* Print: month, week and day fill the page on any paper size
+* Emoji in events and feeds (utf8mb4), longer event fields, option to trust the server's CA certificates for feeds
+* Complete schema.org/Event microdata in all themes; names for icon-only buttons
+* Updated translations; full SQLite support (for the Live Preview)
+
+**Fixes**
+
+* 5 security fixes: imported feed fields, event titles in the views, JSONP callback, cache report permission, admin output
+* Fields escaped twice since 1.0.7 ("D&amp;D"); repair from the admin notice or with `wp osec repair-escaping`
+* Feed import: categories and tags #62, duplicates, timeouts, long fields, UTC offsets
+* Excluded dates of recurring events on SQLite and in other time zones #44
+* Month view, agenda, date picker, print and theme fixes: 50 fixes in all
+
+**Developers**
+
+* Internet Explorer is no longer supported; custom themes: only the icons in `osec-icons-map.less` remain
+* Templates: new `event-popup.twig`, `event.image_html`; frontend rendering with twig.js 3 and autoescape
+* WP-CLI: `wp osec theme`, `wp osec content generate`, `wp osec repair-escaping`
+* Calendar URLs carry `exact_date` as ISO date; URLs in the input date format keep working
+
+<!-- readme-end -->
+
+**Faster and lighter**
+
+- Icons are inline SVG instead of icon fonts
+- Calendar stylesheet down from 406 to 227 KB (gzipped 137 to 30 KB)
+- Default cache is now FILE: Stylesheet served as a static file from wp-content/uploads/osec_cache/
+- Other caches use persistent object cache (Redis, Memcached) or APCu
+- Improved CSS compilation
+- Moved caches to be multisite safe: wp-content/uploads/osec_cache/twig/, kept on plugin updates
+- Cache Report: where CSS and templates are, new "Clear all caches" button, which cleans TWIG and recompiles CSS
+
+**Plana Update**
+
+- Try to integrate better with common themes. Colours, backgrounds and lines as settings on the Theme Options page and built with CSS variables
+- Fixed Text size inconsistencies
+- Defaults follow the colours and font sizes of the WordPress theme
+- Font size and font come from the site
+
+**Calendar and print visual improvements**
+
+- Calendar width follows the page or block around it
+- Full-width calendar block: edge padding, agenda with a readable maximum width
+- Calendar block: agenda expanded or collapsed per block
+- Calendar block: print icon shown, hidden or as in the settings
+- Calendar block: settings open and close from the header
+- "Show all 24 hours" stays on when changing the date
+- Selected categories and tags show a remove x
+- "Edit" links in every view
+- Print improvements: month, week and day fill the page on any paper size
+- Accessibility: names for icon-only buttons
+- Complete schema.org/Event microdata on the event page for ALL THEMES now
+
+**Events, feeds and database**
+
+- utf8mb4: Fixed: Emoji and other 4-byte characters in events and feeds
+- Table conversion action in the UI
+- Longer event fields (venue, address, URLs, iCal UID and others)
+- A value that still does not fit is shortened or left out, with a notice
+- New setting "Trust this server's CA certificates for feeds"
+- Event list in wp-admin: date is now visible under the title on narrow screens, event times dates and times use the backend date and time format
+- Updated translations
+- FULL SQLite support (don't use it, it's just for the **Live Preview** Show ;) )
+
+**Deveelopers**
+
+- WP-CLI: `wp osec theme list|activate`
+- WP-CLI: `wp osec content generate` (test content)
+- WP-CLI: `wp osec repair-escaping`
+
+**Fixes**
+
+- Security: imported venue, address, contact, cost and URLs stored as plain text and safe URLs
+- Security: event titles filtered with kses before the calendar views print them
+- Security: JSONP callback accepts only a JavaScript function name
+- Security: "Check again" in the cache report needs capability and nonce
+- Security: admin output lets no script or event handler attributes through
+- Event and feed fields were saved and shown escaped twice ("D&amp;D")
+- Double escaped fields can be repaired via UI (notice) or with `wp osec repair-escaping`
+- Fix: Event image alt text escaped twice
+- Feed import: categories and tags of the feed assigned again #62
+- Feed import: categories and tags set by hand are kept #62
+- Feed import: duplicates of events with a quote or backslash in the iCal UID
+- Feed import: a timeout could block the feed until the lock was removed by hand
+- Feed import: a too long field failed the save and stopped the import
+- Feed import: fatal error on a UTC offset without a named time zone
+- Imported events link their original again ("View original")
+- Imported events without a contact name show the organizer again
+- Excluded dates on SQLite and outside the site time zone #44
+- A plain numeric cost ("10", "0") broke the event
+- Settings lost backslashes and line breaks
+- Saving a custom frontend date format could end in a fatal error
+- Ticket and contact URLs lost percent-encoded characters
+- "Got it – dismiss this" on admin notices did nothing
+- Custom calendar themes did not compile after switching to them
+- A calendar theme was not found after its folder moved
+- An invalid calendar theme setting caused a fatal error
+- Category image missing from calendar views (since 1.1.9)
+- "Something went wrong while fetching events" after Back following a view change
+- Calendar views led to a deleted page after the calendar page changed
+- Plana: changing the view loaded a new page
+- Month view: multi-day bars crossing the same day covered each other
+- Month view: titles overlapped with "Word-wrap event stubs in Month view"
+- Month view: event text clipped at the bottom
+- Plana month view: events without category colour use the link colour again
+- Agenda: "Expand all/Collapse all" state is kept when navigating date
+- Agenda: an empty agenda showed the current month instead of the requested one. Now it will not jump BACK but show empty. Past dates requested will still "forward" to next existing event and "correct" selected date silently.
+- Date picker: picking the shown date again crashed js
+- Date picker: month and week views start on the first day selected timeframe
+- Date picker links changed meaning with the input date format setting
+- Print: agenda images floated out of their event
+- Print: plana's event page moved the whole details list to the next page
+- Map script errors on events without a map
+- Calendar block editor strings were not translatable
+- Event editor styles loaded on every admin page #65
+- "Remove all data": events left behind on SQLite and with a table prefix other than wp_
+- "Remove all data": other plugins' options starting with "osec" were removed
+- Deactivation emptied the server's whole APCu cache
+- Stylesheet linked with a broken URL after WP-CLI or cron compiled it
+- Shortcode or block on a classic theme got its stylesheet late or not at all
+- Broken "Preview" link in the time zone notice
+- PHP 8.1 deprecation for unknown UTC offsets
+
+**For developers and custom themes**
+- Internet Explorer is no longer supported
+- Custom themes: Fontcustom icon font classes outside the shipped set are removed. Left is only what you find in `public/osec_themes/vortex/less/osec-icons-map.less`
+- Custom themes: add own icons in `override.less` (see `osec-icons.less`)
+- The precompiled theme CSS fallback is gone; every theme compiles on first use
+- New template `event-popup.twig` for the month, week and day popups
+- Event image is `event.image_html`; `event.avatar_not_wrapped` is deprecated
+- Frontend templates render with twig.js 3 and autoescape
+- Fields printed with `|raw` must be safe server-side
+- `osec_pre_save_settings` receives the values unslashed once
+- `OSEC_FILE_CACHE_DEFAULT_PATH` is empty by default
+- `OSEC_ENABLE_CACHE_FILE` no longer turns off the template cache
+- New constant `OSEC_ENABLE_CACHE_TRANSIENT`
+- `public/js/scripts/` is gone; the four used files moved (check `get_module()` users)
+- Calendar URLs: `exact_date` is always ISO (yyyy-m-d); URLs in the input date format keep working
+- Request parameters are read and cleaned by type (`RequestParser::get_param()` with `ParamType`); an array where one value is expected counts as missing
+
 = 1.1.16 =
 - Security: title and description of events imported from feeds are sanitized, whoever runs the import. Every earlier version stored them unfiltered when a feed was added or refreshed by an administrator (since All-in-One Event Calendar 1.0, 2011, which this plugin is based on) or updated with `wp osec feed update` (1.1.15)
 
