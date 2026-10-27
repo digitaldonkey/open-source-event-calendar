@@ -13,8 +13,8 @@ Author URI: https://github.com/digitaldonkey
 Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 Text Domain: open-source-event-calendar
-Stable Tag: 1.1.16
-Version: 1.1.16
+Stable Tag: 1.2.0
+Version: 1.2.0
 
 An event calendar with native iCal / ICS import and export
 
@@ -229,4 +229,3 @@ All changes and older versions: [CHANGELOG.md](https://github.com/digitaldonkey/
 = 1.2.0 =
 
 Plana's colours now follow your WordPress theme: check the look, adjust in Theme Options. Custom calendar themes: icon fonts are replaced by SVG icons and templates render with autoescape, so test first. Optional: convert tables to utf8mb4 in Settings (back up first).
-

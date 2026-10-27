@@ -130,7 +130,8 @@ class MakeReadme
 
             // Make the file.
             $output_file = trailingslashit(realpath(OSEC_PATH)) . 'README.txt';
-            $lines = implode('', $this->lines);
+            // Exactly one final newline (.editorconfig: insert_final_newline, trim_trailing_whitespace).
+            $lines = rtrim(implode('', $this->lines)) . "\n";
 
             if (! empty($assoc_args['check'])) {
                 $current = file_exists($output_file) ? file_get_contents($output_file) : '';
