@@ -141,6 +141,7 @@
 - `OSEC_FILE_CACHE_DEFAULT_PATH` is empty by default
 - `OSEC_ENABLE_CACHE_FILE` no longer turns off the template cache
 - New constant `OSEC_ENABLE_CACHE_TRANSIENT`
+- The category colour PHP writes on each event is `--osec-event-category-color` (was `--osec-event-color`, used by the print styles)
 - `public/js/scripts/` is gone; the four used files moved (check `get_module()` users)
 - Calendar URLs: `exact_date` is always ISO (yyyy-m-d); URLs in the input date format keep working
 - Request parameters are read and cleaned by type (`RequestParser::get_param()` with `ParamType`); an array where one value is expected counts as missing

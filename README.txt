@@ -39,7 +39,7 @@ All features are provided in their entirety. **No features are locked behind any
 - SEO-optimized event pages
 - Mobile-friendly and responsive layouts
 - Embedded **OpenStreetMap**
-- Theme options to customize your calendar appearence
+- Plana follows your WordPress theme's colours and font sizes; adjust them in Theme Options
 - Your calendar can be embedded into a WordPress page without needing to create template files or modify the theme.
 
 **Import events from other calendars** and offer users the **ability to subscribe to your calendar**.

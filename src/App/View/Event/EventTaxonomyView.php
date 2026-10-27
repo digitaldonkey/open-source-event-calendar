@@ -62,7 +62,7 @@ class EventTaxonomyView extends OsecBaseClass
             $color = ($event->is_allday() || $event->is_multiday()
                 ? 'background-color: ' . $color . ';'
                 : 'color: ' . $color . ' !important;')
-                . ' --osec-event-color: ' . $color . ';';
+                . ' --osec-event-category-color: ' . $color . ';';
         } else {
             $color = '';
         }
