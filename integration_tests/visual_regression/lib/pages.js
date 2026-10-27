@@ -180,30 +180,69 @@ function about(description) {
  * silently. Fails when an entry finds nothing, so a renamed element cannot turn a replacement into a no-op.
  *
  * @param {import('@playwright/test').Page} page
- * @param {Array<{label: string, selector: string, text?: string, target?: string}>} replacements `selector` finds the
- *     element, `text` (optional) the start of its text that picks it among several, `target` (optional) a child of it
- *     whose text is replaced instead of the whole element; `label` names the value in the marker.
+ * @param {Array<{label: string, selector: string, text?: string, target?: string, pattern?: string}>} replacements
+ *     `selector` finds the element, `text` (optional) the start of its text that picks it among several, `target`
+ *     (optional) a child of it whose text is replaced instead of the whole element, `pattern` (optional, a regular
+ *     expression source) only the matching parts of its text, every match, e.g. the site address in a permalink; the
+ *     rest stays. `label` names the value in the marker.
  */
 async function replaceForShot(page, replacements = []) {
-    for (const { label, selector, text, target } of replacements) {
-        const count = await page.evaluate(({ label: name, selector: css, text: start, target: child }) => {
+    for (const { label, selector, text, target, pattern } of replacements) {
+        const count = await page.evaluate(({
+            label: name, selector: css, text: start, target: child, pattern: source,
+        }) => {
+            const marker = `<${name} (replaced by test)>`;
             const found = [...document.querySelectorAll(css)]
                 .filter((element) => !start || element.textContent.trim().startsWith(start))
                 .map((element) => (child ? element.querySelector(child) : element))
                 .filter(Boolean);
+            if (!source) {
+                found.forEach((element) => {
+                    element.textContent = marker;
+                    element.style.color = 'red';
+                });
+                return found.length;
+            }
+            // Every matching part of the text becomes the marker, in a red span of its own; the rest stays.
+            let replaced = 0;
+            const expression = new RegExp(source, 'g');
             found.forEach((element) => {
-                element.textContent = `<${name} (replaced by test)>`;
-                element.style.color = 'red';
+                const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+                const nodes = [];
+                for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+                    nodes.push(node);
+                }
+                nodes.forEach((node) => {
+                    const matches = [...node.nodeValue.matchAll(expression)].filter((match) => match[0]);
+                    if (!matches.length) {
+                        return;
+                    }
+                    const parts = document.createDocumentFragment();
+                    let last = 0;
+                    matches.forEach((match) => {
+                        parts.append(node.nodeValue.slice(last, match.index));
+                        const span = document.createElement('span');
+                        span.textContent = marker;
+                        span.style.color = 'red';
+                        parts.append(span);
+                        last = match.index + match[0].length;
+                    });
+                    parts.append(node.nodeValue.slice(last));
+                    node.replaceWith(parts);
+                    replaced += matches.length;
+                });
             });
-            return found.length;
+            return replaced;
         }, {
             label,
             selector,
             text,
             target,
+            pattern,
         });
         if (!count) {
-            throw new Error(`replaceForShot: "${label}" not found (${selector}${text ? `, text "${text}"` : ''})`);
+            throw new Error(`replaceForShot: "${label}" not found (${selector}${text ? `, text "${text}"` : ''}${
+                pattern ? `, pattern ${pattern}` : ''})`);
         }
     }
 }
