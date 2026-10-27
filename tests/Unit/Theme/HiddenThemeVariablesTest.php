@@ -129,9 +129,11 @@ class HiddenThemeVariablesTest extends TestBase
         $css = new class ($osec_app) extends FrontendCssController {
             public ?array $saved = null;
 
-            public function update_variables_and_compile_css(array $variables, $resetting)
+            public function update_variables_and_compile_css(array $variables, $resetting, bool $notify = true): bool
             {
                 $this->saved = $variables;
+
+                return true;
             }
         };
         $osec_app->inject_object(FrontendCssController::class, $css);
