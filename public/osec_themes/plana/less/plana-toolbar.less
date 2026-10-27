@@ -1,10 +1,10 @@
-// The site's font size presets (rem in WordPress). The fallbacks are rem as well: the pagination sits inside the
-// toolbar, so em would shrink it twice.
+// The site's font size presets (--osec-font-size-*, rem in WordPress). Their fallbacks are rem as
+// well: the pagination sits inside the toolbar, so em would shrink it twice.
 .plana-pagination,
 .plana-toolbar {
-  font-size: var(--wp--preset--font-size--small, .875rem);
+  font-size: var(--osec-font-size-small);
   @media (min-width: 36.25rem) {
-    font-size: var(--wp--preset--font-size--normal, 1rem);
+    font-size: var(--osec-font-size-normal);
   }
 }
 
@@ -91,7 +91,7 @@
 #ai1ec-agenda-expand-all {
   min-width: 7em;
   margin-right: .1em;
-  font-size: var(--wp--preset--font-size--normal);
+  font-size: var(--osec-font-size-normal);
 }
 .osec-all-events-collapsed #ai1ec-agenda-collapse-all,
 .osec-all-events-expanded #ai1ec-agenda-expand-all {
@@ -114,7 +114,7 @@
     padding-top: 0;
     padding-bottom: 0;
     white-space: nowrap;
-    font-size: var(--wp--preset--font-size--normal);
+    font-size: var(--osec-font-size-normal);
     margin: 0 1px 0 0;
 
     > i {

@@ -1,0 +1,263 @@
+// Plana's colour roles in the rules plana renders.
+//
+// The variables are defined in plana-variables.less; the rules below are the ones plana actually
+// renders, each with a role instead of a fixed or LESS-computed colour.
+// Shades are color-mix() in the browser. Borders use --osec-border* where the original rule had
+// the same full border; elsewhere only colour properties, so no width or style changes. Screen
+// rules only (print keeps its fixed colours). Imported last by override.less.
+
+
+// Screen only: print keeps its own fixed colours.
+@media screen {
+  // Links.
+  .ai1ec-tag,
+  .ai1ec-agenda-view .ai1ec-date-title,
+  .ai1ec-agenda-widget-view .ai1ec-date-title {
+    color: var(--osec-link);
+  }
+  .ai1ec-agenda-view .ai1ec-date-title:hover,
+  .ai1ec-agenda-widget-view .ai1ec-date-title:hover {
+    color: var(--osec-link-hover);
+  }
+
+  // Event titles (default: the link colour).
+  .ai1ec-agenda-view .ai1ec-event .ai1ec-event-title,
+  .ai1ec-week-view .ai1ec-week .ai1ec-event-container,
+  .ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container,
+  .ai1ec-month-view .ai1ec-event-container {
+    color: var(--osec-event-title);
+  }
+  .ai1ec-agenda-view .ai1ec-event:hover .ai1ec-event-title,
+  .ai1ec-week-view .ai1ec-week .ai1ec-event-container:hover,
+  .ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container:hover,
+  .ai1ec-month-view .ai1ec-event-container:hover {
+    color: var(--osec-event-title-hover);
+  }
+
+  // Muted text.
+  .ai1ec-month-view th,
+  .ai1ec-week-view th,
+  .ai1ec-week-view .ai1ec-hour-marker div,
+  .ai1ec-week-view .ai1ec-allday-label,
+  .ai1ec-oneday-view th,
+  .ai1ec-oneday-view .ai1ec-hour-marker div,
+  .ai1ec-oneday-view .ai1ec-allday-label {
+    color: var(--osec-text-muted) !important;
+  }
+  .ai1ec-field-label,
+  .ai1ec-month-view .ai1ec-date {
+    color: var(--osec-text-muted);
+  }
+  // Week and day headers hold a link to the day: same muted colour as the month headers,
+  // not the WordPress theme's link colour.
+  .ai1ec-week-view th a,
+  .ai1ec-oneday-view th a {
+    color: inherit;
+  }
+
+  // Backgrounds.
+  table.ai1ec-month-view,
+  .ai1ec-week-view table,
+  .ai1ec-oneday-view table,
+  .ai1ec-agenda-view .ai1ec-event {
+    background-color: var(--osec-background);
+  }
+  // The event image box only frames the image: no background of its own (vortex: the page
+  // background colour, a white box on off-white pages).
+  .ai1ec-event-avatar {
+    background-color: transparent;
+  }
+  .ai1ec-month-view .ai1ec-multiday-arrow1 {
+    background-image:
+      linear-gradient(to top right, transparent 50%, var(--osec-background) 50%),
+      linear-gradient(to bottom right, transparent 50%, var(--osec-background) 50%);
+  }
+  .ai1ec-month-view .ai1ec-multiday-arrow2 {
+    background-image:
+      linear-gradient(to top right, var(--osec-background) 50%, transparent 50%),
+      linear-gradient(to bottom right, var(--osec-background) 50%, transparent 50%);
+  }
+  .ai1ec-month-view th,
+  .ai1ec-week-view th,
+  .ai1ec-oneday-view th,
+  .ai1ec-month-view td.ai1ec-empty {
+    background-color: var(--osec-background-subtle) !important;
+  }
+  .ai1ec-week-view .ai1ec-hour-marker div,
+  .ai1ec-oneday-view .ai1ec-hour-marker div,
+  .ai1ec-week-view .ai1ec-allday-label,
+  .ai1ec-oneday-view .ai1ec-allday-label {
+    background-color: var(--osec-background-subtle);
+  }
+  .ai1ec-week-view .ai1ec-week .ai1ec-event-container,
+  .ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
+    background-color: var(--osec-background-subtle);
+  }
+  // The agenda date badge box: the main background.
+  .ai1ec-agenda-view .ai1ec-date-title,
+  .ai1ec-agenda-widget-view .ai1ec-date-title {
+    background-color: var(--osec-background);
+  }
+  .ai1ec-category:hover,
+  .ai1ec-active > .ai1ec-category,
+  .ai1ec-tag:hover,
+  .ai1ec-active > .ai1ec-tag {
+    background-color: var(--osec-background-subtle);
+    border-color: var(--osec-background-subtle);
+  }
+  .ai1ec-month-view .ai1ec-date {
+    background-color: var(--osec-day-background);
+  }
+
+  // Lines.
+  table.ai1ec-month-view,
+  .ai1ec-week-view table,
+  .ai1ec-oneday-view table,
+  .ai1ec-month-view td,
+  .ai1ec-week-view td,
+  .ai1ec-oneday-view td {
+    border: var(--osec-border) !important;
+  }
+  .ai1ec-week-view .tablescroll_wrapper,
+  .ai1ec-oneday-view .tablescroll_wrapper {
+    border-bottom: var(--osec-border);
+  }
+  .ai1ec-week-view .ai1ec-hour-marker,
+  .ai1ec-oneday-view .ai1ec-hour-marker {
+    border-top-color: color-mix(in srgb, var(--osec-line) 70%, transparent);
+    background-color: color-mix(in srgb, var(--osec-line) 40%, transparent) !important;
+  }
+  .ai1ec-week-view .ai1ec-quarter-marker,
+  .ai1ec-oneday-view .ai1ec-quarter-marker {
+    border-top-color: color-mix(in srgb, var(--osec-line) 40%, transparent);
+  }
+  // Agenda events and their date title share the strong border; the
+  // date title has none on top on wider screens (the month badge sits there).
+  .ai1ec-agenda-view .ai1ec-event {
+    border: var(--osec-border-strong);
+  }
+  @media (min-width: 30rem) {
+    .ai1ec-agenda-widget-view .ai1ec-date-title,
+    .ai1ec-agenda-view .ai1ec-date-title {
+      border: var(--osec-border-strong);
+      border-top: none;
+    }
+  }
+  .ai1ec-agenda-view .ai1ec-date,
+  .ai1ec-agenda-widget-view .ai1ec-date {
+    border-top-color: var(--osec-line) !important;
+  }
+  .ai1ec-agenda-view .ai1ec-event:hover,
+  .ai1ec-agenda-view .ai1ec-event.ai1ec-expanded {
+    border: var(--osec-border-strong);
+  }
+
+  // Events without category (a category colour, inline style, still wins).
+  .ai1ec-month-view .ai1ec-allday .ai1ec-event,
+  .ai1ec-week-view .ai1ec-allday-events .ai1ec-allday .ai1ec-event,
+  .ai1ec-oneday-view .ai1ec-allday-events .ai1ec-allday .ai1ec-event,
+  .ai1ec-month-view .ai1ec-multiday .ai1ec-event,
+  .ai1ec-week-view .ai1ec-allday-events .ai1ec-multiday .ai1ec-event,
+  .ai1ec-oneday-view .ai1ec-allday-events .ai1ec-multiday .ai1ec-event {
+    background-color: var(--osec-event-default);
+    color: var(--osec-text-on-color);
+  }
+  .ai1ec-month-view .ai1ec-multiday-bar {
+    background-color: var(--osec-event-default);
+  }
+  // The "all-day" badge (agenda, popover, event page) like the all-day bars.
+  .ai1ec-allday-badge {
+    background-color: var(--osec-event-default);
+    color: var(--osec-text-on-color);
+  }
+  .ai1ec-week-view .ai1ec-week a.ai1ec-event-container,
+  .ai1ec-oneday-view .ai1ec-oneday a.ai1ec-event-container {
+    background-color: var(--osec-background);
+    background-image: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--osec-event-default) 5%, var(--osec-background)),
+      color-mix(in srgb, var(--osec-event-default) 30%, var(--osec-background)) 120px
+    );
+    border-color: color-mix(in srgb, var(--osec-event-default) 50%, var(--osec-background));
+    &:hover {
+      border-color: color-mix(in srgb, var(--osec-link-hover) 50%, var(--osec-background));
+    }
+  }
+
+  // Day date badge (agenda).
+  .ai1ec-agenda-widget-view .ai1ec-month,
+  .ai1ec-agenda-view .ai1ec-month {
+    background-color: var(--osec-date-badge);
+    color: var(--osec-text-on-color);
+  }
+
+  // Today highlight: month and week cells; the agenda's today date as a gradient. The agenda's today line mixes it with
+  // the text colour (before: the vortex text colour, now the WordPress theme's, currentColor).
+  .ai1ec-month-view .ai1ec-today,
+  .ai1ec-week-view .ai1ec-today {
+    background-color: var(--osec-today) !important;
+  }
+  .ai1ec-agenda-view .ai1ec-date.ai1ec-today,
+  .ai1ec-agenda-widget-view .ai1ec-date.ai1ec-today {
+    // As in vortex: the today colour for the first 1em, then fading out (here to transparent).
+    background-color: transparent;
+    background-image: linear-gradient(var(--osec-today), var(--osec-today) 1em, transparent);
+    border-top-color: color-mix(in srgb, var(--osec-today) 80%, currentColor) !important;
+  }
+
+  // Toolbar (navigation, date selection, print, expand/collapse): own colours, apart from
+  // the menu and other buttons (Controls text/background). Hover swaps them, like .action-link.
+  // "Back to Calendar" and the event page buttons (tickets, contact, map) too; the edit link
+  // (logged in) keeps its own hover colour.
+  .plana-toolbar .action-link,
+  .plana-pagination .action-link,
+  .action-link.osec-calendar-back-link,
+  .ai1ec-single-event .action-link:not(.edit-link) {
+    color: var(--osec-toolbar-text);
+    background-color: var(--osec-toolbar-background);
+  }
+  .plana-toolbar .action-link:not([disabled]):hover,
+  .plana-pagination .action-link:not([disabled]):hover,
+  .action-link.osec-calendar-back-link:not([disabled]):hover,
+  .ai1ec-single-event .action-link:not(.edit-link):not([disabled]):hover {
+    color: var(--osec-toolbar-contrast);
+    background-color: var(--osec-toolbar-text);
+  }
+  // Disabled buttons (pagination at the first/last page): the toolbar text faded into the
+  // toolbar background, as .action-link does with the controls colours.
+  .plana-toolbar .action-link[disabled],
+  .plana-pagination .action-link[disabled] {
+    color: color-mix(in srgb, var(--osec-toolbar-text) 40%, var(--osec-toolbar-background));
+  }
+
+  // "Filter by:", the category and tag icons and the subscribe icon: the surrounding text colour.
+  .osec-taxonomy-filters--label,
+  .osec-taxonomy-filters--item > .ai1ec-fa,
+  .subscribe-buttons > .ai1ec-fa {
+    color: currentColor;
+  }
+
+  // The date picker (opened from the toolbar): the selected day like a hovered toolbar button.
+  .ai1ec-datepicker table tr td.ai1ec-active.ai1ec-active,
+  .ai1ec-datepicker table tr td.ai1ec-active.ai1ec-active:hover,
+  .ai1ec-datepicker table tr td.ai1ec-active.ai1ec-active.ai1ec-disabled,
+  .ai1ec-datepicker table tr td.ai1ec-active.ai1ec-active.ai1ec-disabled:hover {
+    background-color: var(--osec-toolbar-text);
+    border-color: var(--osec-toolbar-text);
+    color: var(--osec-toolbar-contrast);
+  }
+
+  // Popovers: the strong border, the arrow in the same colour, its inner
+  // part in the popover background.
+  .ai1ec-popover.ai1ec-popup {
+    border-color: var(--osec-line-hover);
+  }
+  .ai1ec-popover.ai1ec-top .ai1ec-arrow { border-top-color: var(--osec-line-hover); }
+  .ai1ec-popover.ai1ec-right .ai1ec-arrow { border-right-color: var(--osec-line-hover); }
+  .ai1ec-popover.ai1ec-bottom .ai1ec-arrow { border-bottom-color: var(--osec-line-hover); }
+  .ai1ec-popover.ai1ec-left .ai1ec-arrow { border-left-color: var(--osec-line-hover); }
+  .ai1ec-popover.ai1ec-top .ai1ec-arrow:after { border-top-color: var(--osec-background); }
+  .ai1ec-popover.ai1ec-right .ai1ec-arrow:after { border-right-color: var(--osec-background); }
+  .ai1ec-popover.ai1ec-bottom .ai1ec-arrow:after { border-bottom-color: var(--osec-background); }
+  .ai1ec-popover.ai1ec-left .ai1ec-arrow:after { border-left-color: var(--osec-background); }
+}

@@ -65,7 +65,7 @@ class HiddenThemeVariablesTest extends TestBase
         $variables                           = LessController::factory($osec_app)->get_saved_variables(false);
         $variables['baseFontSize']['value']  = '20px';
         $variables['baseFontFamily']['value'] = 'Georgia';
-        $variables['textColor']['value']     = '#123456';
+        $variables['osecLink']['value']       = '#123456';
         $osec_app->options->set(LessController::DB_KEY_FOR_LESS_VARIABLES, $variables);
     }
 
@@ -81,8 +81,8 @@ class HiddenThemeVariablesTest extends TestBase
         $this->assertTrue($variables['baseFontSize']['hidden']);
         $this->assertSame('inherit', $variables['baseFontFamily']['value']);
         $this->assertTrue($variables['baseFontFamily']['hidden']);
-        $this->assertSame('#123456', $variables['textColor']['value']);
-        $this->assertArrayNotHasKey('hidden', $variables['textColor']);
+        $this->assertSame('#123456', $variables['osecLink']['value']);
+        $this->assertArrayNotHasKey('hidden', $variables['osecLink']);
     }
 
     public function test_vortex_hides_nothing_and_keeps_stored_values()
@@ -109,10 +109,10 @@ class HiddenThemeVariablesTest extends TestBase
         AdminPageThemeOptions::factory($osec_app)->display_page();
         $page = ob_get_clean();
 
-        $this->assertStringContainsString('id="textColor"', $page);
+        $this->assertStringContainsString('id="osecLink"', $page);
         $this->assertStringNotContainsString('id="baseFontSize"', $page);
         $this->assertStringNotContainsString('id="baseFontFamily"', $page);
-        $this->assertStringContainsString("getElementById('textColor')", $page);
+        $this->assertStringContainsString("getElementById('osecLink')", $page);
         $this->assertStringNotContainsString("getElementById('baseFontSize')", $page);
         $this->assertStringNotContainsString("getElementById('baseFontFamily')", $page);
     }
@@ -144,13 +144,13 @@ class HiddenThemeVariablesTest extends TestBase
             AdminPageThemeOptions::SUBMIT_ID => '1',
             'baseFontSize'                     => '30px',
             'baseFontFamily'                   => 'Arial',
-            'textColor'                        => '#654321',
+            'osecLink'                         => '#654321',
         ]);
         $_REQUEST = $_POST;
 
         SaveThemeOptions::factory($osec_app, RequestParser::factory($osec_app), $nonce)->do_execute();
 
-        $this->assertSame('#654321', $css->saved['textColor']['value']);
+        $this->assertSame('#654321', $css->saved['osecLink']['value']);
         $this->assertSame('1em', $css->saved['baseFontSize']['value']);
         $this->assertSame('inherit', $css->saved['baseFontFamily']['value']);
     }

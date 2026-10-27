@@ -8,6 +8,7 @@
 @import "plana-flyout-menu";
 @import "plana-toolbar";
 @import "event-single";
+@import "plana-variables";
 @import "plana-popover";
 
 @lineheight: 2.5;
@@ -15,8 +16,8 @@
 // height instead of leaving it to line height and padding, because a link and a button
 // do not end up the same size otherwise - Safari differs from Chrome and Firefox.
 @toolbarControlHeight: 2.625em; // 42px, the height of the pagination links
-@foregroundColor: var(--wp--preset--color--contrast, buttontext);
-@backgroundColor: var(--wp--preset--color--accent, buttonFace);
+@foregroundColor: var(--osec-controls-text);
+@backgroundColor: var(--osec-controls-background);
 
 .ai1ec-filter-selector,
 .ai1ec-agenda-view .ai1ec-event.ai1ec-expanded,
@@ -50,7 +51,7 @@
 #osec-container .ai1ec-agenda-view > .ai1ec-date:first-of-type {
   @media (min-width: @screen-sm) {
     margin-top: 0;
-    padding-top: var(--wp--preset--spacing--50, 2em);
+    padding-top: var(--osec-spacing);
   }
 }
 .ai1ec-agenda-view .ai1ec-date-title,
@@ -60,15 +61,9 @@
   background-image: none; // Removes gradient.
   background-color: @agenda-date-bg;
   .ai1ec-box-shadow( none );
-  color: @link-color;
-  &:hover {
-    color: @link-hover-color;
-  }
 }
-// Month events are links inside the day cell. Plana's calendar.twig has no .timely wrapper,
-// so Bootstrap's ".timely a" link color does not reach them and they took the site's text
-// color. Same colors as week/day events above; a category color (inline style) still wins.
-.ai1ec-month-view .ai1ec-event-container {
+.ai1ec-agenda-view .ai1ec-date-title,
+.ai1ec-agenda-widget-view .ai1ec-date-title {
   color: @link-color;
   &:hover {
     color: @link-hover-color;
@@ -102,13 +97,11 @@
 }
 
 .action-link {
-  // TODO Is there any consistent logic in these vars?
-  //@foregroundColor: var(--wp--preset--color--base, buttontext);
-  //@backgroundColor: var(--wp--preset--color--contrast, buttonFace);
-  @foregroundColor: var(--wp--preset--color--contrast, buttontext);
-  @backgroundColor: var(--wp--preset--color--accent, buttonFace);
-  @mutedColor: var(--wp--preset--color--cyan-bluish-gray, lightgray);
-  @editColor: var(--wp-admin-theme-color, buttonFace);
+  @foregroundColor: var(--osec-controls-text);
+  @backgroundColor: var(--osec-controls-background);
+  // Disabled: the text faded into the background, no setting of its own.
+  @mutedColor: color-mix(in srgb, var(--osec-controls-text) 40%, var(--osec-controls-background));
+  @editColor: var(--osec-edit-link);
 
   display: inline-block;
   padding: 0 .6em;
@@ -139,16 +132,17 @@
     padding-left: 1em;
   }
 
-  // Requires more specificity.
+  // Requires more specificity. "Read more" has its own colours (default: link colour on the
+  // controls background), inverted on hover like the other controls.
   &.osec-read-more {
-    color: @foregroundColor;
-    background: @backgroundColor;
+    color: var(--osec-read-more-text);
+    background: var(--osec-read-more-background);
 
     &:hover,
     &:focus,
     &:active {
-      color: @backgroundColor;
-      background: @foregroundColor;
+      color: var(--osec-read-more-contrast);
+      background: var(--osec-read-more-text);
     }
   }
 }
@@ -172,7 +166,7 @@ table.ai1ec-month-view {
 .ai1ec-week-view,
 .ai1ec-oneday-view {
   th.ai1ec-weekday {
-    font-size: var(--wp--preset--font-size--small);
+    font-size: var(--osec-font-size-small);
     font-weight: bold;
   }
 }
@@ -209,7 +203,7 @@ table.ai1ec-month-view {
 .ai1ec-allday-badge {
   line-height: normal;
   font-weight: bold;
-  font-size: 70%;
+  font-size: 80%;
   margin-left: .5em;
 }
 
@@ -254,8 +248,11 @@ table.ai1ec-month-view {
 .timely.ai1ec-datepicker,
 .ai1ec-tooltip,
 .timely.ai1ec-tooltip {
-  font-size: var(--wp--preset--font-size--small, .875rem);
+  font-size: var(--osec-font-size-small);
   @media (min-width: 36.25rem) {
-    font-size: var(--wp--preset--font-size--normal, 1rem);
+    font-size: var(--osec-font-size-normal);
   }
 }
+
+// Colour roles last, so they win over the rules above with the same selectors.
+@import "plana-colours";

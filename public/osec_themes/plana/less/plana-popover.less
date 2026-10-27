@@ -8,7 +8,9 @@
   width: 10.625em;
 
   .ai1ec-popover-content {
-    font-size: var(--wp--preset--font-size--medium);
+    // Relative to the popover, so it follows the calendar's text size; .82em is what WordPress's
+    // "medium" size gave on Twenty Twenty-Five (17.9px in a 21.8px popover).
+    font-size: .82em;
     font-weight: unset;
   }
   .ai1ec-event-time {

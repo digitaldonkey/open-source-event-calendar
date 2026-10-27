@@ -1,0 +1,45 @@
+// All variables plana's look depends on, in one place.
+//
+// Every --osec-* custom property plana uses is defined here, from its Theme Options setting
+// (user_variables.php, 'css_var'). A setting holds a plain value or a reference to a WordPress
+// variable with a fallback, e.g. var(--wp--preset--color--contrast, buttontext). The rest of
+// plana's LESS uses only var(--osec-…), never var(--wp…) (tests/Unit/Theme/PlanaVariablesTest.php).
+// Values pass through LESS unchanged, so these LESS variables must never reach a LESS function.
+:root {
+  --osec-text: @osecText;
+  --osec-link: @osecLink;
+  --osec-link-hover: @osecLinkHover;
+  --osec-event-title: @osecEventTitle;
+  --osec-event-title-hover: @osecEventTitleHover;
+  --osec-text-muted: @osecTextMuted;
+  --osec-background: @osecBackground;
+  --osec-background-subtle: @osecBackgroundSubtle;
+  --osec-day-background: @osecDayBackground;
+  --osec-line: @osecLine;
+  --osec-line-hover: @osecLineHover;
+  --osec-event-default: @osecEventDefault;
+  --osec-text-on-color: @osecTextOnColor;
+  --osec-date-badge: @osecAccent;
+  --osec-read-more-text: @osecReadMoreText;
+  --osec-read-more-background: @osecReadMoreBackground;
+  --osec-today: @osecToday;
+  --osec-controls-text: @osecControlsText;
+  --osec-label-text: @osecLabelText;
+  --osec-controls-background: @osecControlsBackground;
+  --osec-toolbar-text: @osecToolbarText;
+  --osec-toolbar-background: @osecToolbarBackground;
+  --osec-edit-link: @osecEditLink;
+  --osec-font-size-small: @osecFontSizeSmall;
+  --osec-font-size-normal: @osecFontSizeNormal;
+  --osec-spacing: @osecSpacing;
+
+  // Text on a surface in the toolbar text colour (hover, open menu, selected entry, selected
+  // day): black or white, whichever reads, computed by the browser.
+  --osec-toolbar-contrast: ~"oklch(from var(--osec-toolbar-text) clamp(0, (0.62 - l) * 1000, 1) 0 0)";
+  // The same for the hovered "Read more" button (its text colour as background).
+  --osec-read-more-contrast: ~"oklch(from var(--osec-read-more-text) clamp(0, (0.62 - l) * 1000, 1) 0 0)";
+
+  // Borders built from the colour settings: change width or style here.
+  --osec-border: 1px solid var(--osec-line);
+  --osec-border-strong: 1px solid var(--osec-line-hover);
+}
