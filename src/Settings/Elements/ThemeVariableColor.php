@@ -30,10 +30,21 @@ class ThemeVariableColor extends SettingsAbstract
             'id'       => $this->args['id'],
             'value'    => $this->args['value'],
             'format'   => $this->getFormat(),
+            'css_var'  => $this->args['css_var'] ?? '',
+            'default'  => $this->args['default'] ?? '',
+            'source'   => $this->args['source'] ?? '',
+            'default_label'     => __('Default', 'open-source-event-calendar'),
+            'use_default_label' => __('Use default', 'open-source-event-calendar'),
         ];
 
+        // A css_var setting holds a colour or a var() reference; the bootstrap colour picker
+        // would overwrite a reference with its own parse result, so it gets its own field.
+        $template = empty($this->args['css_var'])
+            ? 'theme-options/color-picker.twig'
+            : 'theme-options/color-css-var.twig';
+
         return ThemeLoader::factory($this->app)
-                          ->get_file('theme-options/color-picker.twig', $args, true)
+                          ->get_file($template, $args, true)
                           ->get_content();
     }
 

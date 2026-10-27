@@ -1,0 +1,34 @@
+{#
+ # Colour setting that may hold a CSS variable reference.
+ #
+ # The text field is the stored value: a colour or var(--…, fallback). The native colour input
+ # shows the colour the browser resolves it to and opens the picker; theme_options_css_vars.js
+ # keeps both in step and writes the resolved colour into .osec-css-var-resolved. Below: where the
+ # value comes from ('source'), when it differs the theme default with a "Use default" link, and,
+ # above the field, the CSS variable name the setting writes.
+ #}
+{% extends "theme-options/base_option.twig" %}
+
+{% block variable %}
+<code class="osec-css-var-name">--{{ css_var }}</code>
+<div class="ai1ec-input-group osec-css-var-color">
+    <input
+        type="text"
+        id="{{ id }}"
+        name="{{ id }}"
+        class="ai1ec-form-control osec-css-var-value"
+        data-osec-css-var="{{ css_var }}"
+        {{ readonly }}
+        value="{{ value }}"
+        required="required"
+    />
+    <span class="ai1ec-input-group-addon">
+        <input type="color" class="osec-css-var-picker" />
+    </span>
+</div>
+<p class="description osec-css-var-details">
+    <span class="osec-css-var-resolved"></span>{% if source %} · {{ source }}{% endif %}
+    {% if default and default != value %}<br />{{ default_label }}: <code>{{ default }}</code>
+        <a href="#" class="osec-css-var-use-default" data-osec-default="{{ default }}">{{ use_default_label }}</a>{% endif %}
+</p>
+{% endblock %}
