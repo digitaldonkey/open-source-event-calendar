@@ -1406,7 +1406,9 @@ table.ai1ec-oneday-view-original {
       break-inside: avoid;
       break-after: avoid;
     }
+    // Contains the floated image without clipping (the print button hides the footer below it).
     .ai1ec-event {
+      display: flow-root;
       orphans: 5;
       widows: 5;
       -webkit-box-decoration-break: clone;
