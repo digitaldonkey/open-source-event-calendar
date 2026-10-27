@@ -56,7 +56,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
                     'name' => __('Backgrounds and lines', 'open-source-event-calendar'),
                 ],
                 'sizes'    => [
-                    'name' => __('Text sizes and spacing', 'open-source-event-calendar'),
+                    'name' => __('Text sizes', 'open-source-event-calendar'),
                 ],
                 'general'  => [
                     'name' => __('General', 'open-source-event-calendar'),

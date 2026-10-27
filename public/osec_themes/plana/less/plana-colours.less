@@ -9,6 +9,17 @@
 
 // Screen only: print keeps its own fixed colours.
 @media screen {
+  // Text: the calendar, the event page and the popovers (appended to body).
+  #osec-container,
+  .osec-plana-single-event,
+  .ai1ec-popover.ai1ec-popup {
+    color: var(--osec-text);
+  }
+  // The popover's event title is a link: the text colour too, not the theme's link colour.
+  .ai1ec-popover.ai1ec-popup .ai1ec-load-event {
+    color: var(--osec-text);
+  }
+
   // Links.
   .ai1ec-tag,
   .ai1ec-agenda-view .ai1ec-date-title,
