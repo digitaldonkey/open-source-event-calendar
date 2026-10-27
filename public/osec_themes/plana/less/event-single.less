@@ -189,4 +189,31 @@
     }
   }
 
+  // Printed, Chrome and Firefox moved the whole list (a wrapping flex container) to the next page.
+  // The same two columns with floats break between the rows.
+  @media print {
+    display: block;
+    // Own formatting context as a flex item had: margins inside do not collapse through.
+    > dd {
+      display: flow-root;
+      width: auto;
+    }
+    // A label stays with its value (one column on small paper).
+    > dt {
+      break-after: avoid;
+    }
+    // As a flex item it already was a block-level flex box.
+    .event-date-time {
+      display: flex;
+    }
+    @media (min-width: @breakpoint) {
+      > dt {
+        float: left;
+        clear: left;
+      }
+      > dd {
+        margin-inline-start: calc(14% + 2em);
+      }
+    }
+  }
 }
