@@ -4,6 +4,9 @@ namespace Osec\Tests\Unit\Theme;
 
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\LessController;
+use Osec\App\View\Admin\AdminPageThemeOptions;
+use Osec\Command\SaveThemeOptions;
+use Osec\Http\Request\RequestParser;
 use Osec\Tests\Utilities\TestBase;
 use Osec\Theme\CssVarValue;
 use Osec\Theme\ThemeLoader;
@@ -11,7 +14,8 @@ use Osec\Theme\ThemeLoader;
 /**
  * Plana's variables: every WordPress variable plana uses is referenced only in
  * plana-variables.less, css_var values are checked strictly, and changed values of the hidden
- * vortex colour options move to the plana settings that replace them.
+ * vortex colour options move to the plana settings that replace them. Saving sets back settings
+ * whose values do not work together.
  *
  * @group theme
  */
@@ -33,6 +37,8 @@ class PlanaVariablesTest extends TestBase
     {
         global $osec_app;
 
+        $_POST    = [];
+        $_REQUEST = [];
         foreach ($this->saved as $key => $value) {
             $osec_app->options->set($key, $value, true);
         }
@@ -132,6 +138,31 @@ class PlanaVariablesTest extends TestBase
             $this->assertMatchesRegularExpression('/^osec-[a-z0-9-]+$/', $variable['css_var'], $name);
         }
         $this->assertSame([], CssVarValue::cycles($plana));
+        foreach ($plana as $name => $variable) {
+            if ('color' === $variable['type'] && empty($variable['current_color'])) {
+                $this->assertFalse(
+                    CssVarValue::resolves_to_current_color($variable['value'], $plana),
+                    $name . ' is also a background: its default must not end up as currentColor.'
+                );
+            }
+        }
+    }
+
+    public function test_stored_cycle_is_ignored()
+    {
+        global $osec_app;
+
+        ThemeLoader::factory($osec_app)->switch_to('plana');
+        $osec_app->inject_object(ThemeLoader::class, new ThemeLoader($osec_app));
+        $less      = LessController::factory($osec_app);
+        $variables = $less->get_saved_variables(false);
+        $variables['osecToday']['value']  = 'var(--osec-date-badge)';
+        $variables['osecAccent']['value'] = 'var(--osec-today)';
+        $osec_app->options->set(LessController::DB_KEY_FOR_LESS_VARIABLES, $variables);
+
+        $after = $less->get_saved_variables(false);
+        $this->assertSame('#ffffdd', $after['osecToday']['value']);
+        $this->assertSame('#6689ac', $after['osecAccent']['value']);
     }
 
     public function test_stored_value_that_fails_the_check_is_ignored()
@@ -149,5 +180,87 @@ class PlanaVariablesTest extends TestBase
         $after = $less->get_saved_variables(false);
         $this->assertSame('#ffffff', $after['osecBackground']['value'], 'Written by other means: the default.');
         $this->assertSame('3em', $after['osecSpacing']['value']);
+    }
+
+    /**
+     * Saves Theme Options through SaveThemeOptions with plana active. The CSS controller only records
+     * the variables: a real compile commits the test transaction (see .claude/rules/testing.md).
+     *
+     * @param  array  $stored  Setting name => value stored before the save.
+     * @param  array  $submitted  Setting name => submitted value (the other settings submit their stored value).
+     *
+     * @return array The variables handed to the compile.
+     */
+    private function save(array $stored, array $submitted): array
+    {
+        global $osec_app;
+
+        ThemeLoader::factory($osec_app)->switch_to('plana');
+        $osec_app->inject_object(ThemeLoader::class, new ThemeLoader($osec_app));
+        $variables = LessController::factory($osec_app)->get_saved_variables(false);
+        foreach ($stored as $name => $value) {
+            $variables[$name]['value'] = $value;
+        }
+        $osec_app->options->set(LessController::DB_KEY_FOR_LESS_VARIABLES, $variables);
+
+        $css = new class ($osec_app) extends FrontendCssController {
+            public ?array $saved = null;
+
+            public function update_variables_and_compile_css(array $variables, $resetting, bool $notify = true): bool
+            {
+                $this->saved = $variables;
+
+                return true;
+            }
+        };
+        $osec_app->inject_object(FrontendCssController::class, $css);
+        wp_set_current_user(self::factory()->user->create(['role' => 'administrator']));
+        $nonce = AdminPageThemeOptions::$NONCE;
+        $post  = [
+            $nonce['nonce_name']             => wp_create_nonce($nonce['action']),
+            AdminPageThemeOptions::SUBMIT_ID => '1',
+        ];
+        foreach (LessController::factory($osec_app)->get_saved_variables(false) as $name => $variable) {
+            if (empty($variable['hidden'])) {
+                $post[$name] = $submitted[$name] ?? $variable['value'];
+            }
+        }
+        $_POST    = wp_slash($post);
+        $_REQUEST = $_POST;
+
+        // A new command per save: factory() keeps one instance and refuses new arguments.
+        (new SaveThemeOptions($osec_app, RequestParser::factory($osec_app), $nonce))->do_execute();
+
+        return $css->saved;
+    }
+
+    public function test_save_sets_back_until_no_cycle_is_left()
+    {
+        // Today and the date badge refer to each other: both get their stored values back, and Today's
+        // stored value now forms a cycle with the new Lines value: Today gets the default, Lines its
+        // stored value.
+        $saved = $this->save(
+            ['osecToday' => 'var(--osec-line)'],
+            [
+                'osecToday'  => 'var(--osec-date-badge)',
+                'osecAccent' => 'var(--osec-today)',
+                'osecLine'   => 'var(--osec-today)',
+            ]
+        );
+        $this->assertSame('#ffffdd', $saved['osecToday']['value']);
+        $this->assertSame('#6689ac', $saved['osecAccent']['value']);
+        $this->assertSame('#dddddd', $saved['osecLine']['value']);
+        $this->assertSame([], CssVarValue::cycles($saved));
+    }
+
+    public function test_save_uses_the_default_when_the_stored_value_ends_up_as_current_color()
+    {
+        // "Text" goes back to currentColor: the event colour stored as var(--osec-text) cannot follow it.
+        $saved = $this->save(
+            ['osecText' => '#333333', 'osecEventDefault' => 'var(--osec-text)'],
+            ['osecText' => 'currentColor']
+        );
+        $this->assertSame('currentColor', $saved['osecText']['value']);
+        $this->assertSame('#3d6b99', $saved['osecEventDefault']['value']);
     }
 }

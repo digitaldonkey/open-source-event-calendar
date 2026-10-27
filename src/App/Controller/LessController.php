@@ -315,6 +315,10 @@ class LessController extends OsecBaseClass
                 $variables[$name]['value'] = $variables_from_config[$name]['value'];
             }
         }
+        // Settings that refer to each other in a circle have no value at all in the browser: defaults.
+        foreach (CssVarValue::cycles($variables) as $name) {
+            $variables[$name]['value'] = $variables_from_config[$name]['value'];
+        }
         // A colour that is also used as a background and ends up as currentColor, e.g. stored before
         // "Text" changed back to currentColor, is ignored too. Checked once all values are known.
         $current = $variables;

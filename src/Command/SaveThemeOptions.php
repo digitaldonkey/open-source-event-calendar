@@ -59,38 +59,7 @@ class SaveThemeOptions extends SaveAbstract
                     $variables[$variable_name]['value'] = $var;
                 }
             }
-            // A setting that refers to itself, directly or through others, has no value: keep the stored one.
-            foreach (CssVarValue::cycles($variables) as $variable_name) {
-                $variables[$variable_name]['value'] = $stored[$variable_name]['value'];
-                $rejected[$variable_name]           = [__('refers to itself', 'open-source-event-calendar'), true];
-            }
-            // A colour that is also used as a background must not end up as currentColor: there it
-            // would take the element's own text colour (text on text). Checked with all new values;
-            // when the stored value has the same problem (e.g. "Text" changed back to currentColor),
-            // the theme default replaces it.
-            $submitted = $variables;
-            foreach ($submitted as $variable_name => $variable_params) {
-                if (
-                    ! empty($variable_params['css_var']) && 'color' === ($variable_params['type'] ?? '')
-                    && empty($variable_params['current_color'])
-                    && CssVarValue::resolves_to_current_color((string)$variable_params['value'], $submitted)
-                ) {
-                    $kept = ! CssVarValue::resolves_to_current_color(
-                        (string)$stored[$variable_name]['value'],
-                        $submitted
-                    );
-                    $variables[$variable_name]['value'] = $kept
-                        ? $stored[$variable_name]['value']
-                        : $defaults[$variable_name]['value'];
-                    $rejected[$variable_name] = [
-                        __(
-                            'is also a background, so it cannot follow the text colour (currentColor)',
-                            'open-source-event-calendar'
-                        ),
-                        $kept,
-                    ];
-                }
-            }
+            $variables = $this->settle($variables, $stored, $defaults, $rejected);
         } elseif ($isReset) {
             // Handle reset of theme options.
             $this->app->options->delete(LessController::DB_KEY_FOR_LESS_VARIABLES);
@@ -133,6 +102,54 @@ class SaveThemeOptions extends SaveAbstract
             ),
             'query_args' => [],
         ];
+    }
+
+    /**
+     * Sets back css_var settings whose values do not work together: a setting that refers to itself,
+     * directly or through others (no value), and a colour that is also used as a background but ends
+     * up as currentColor (it would take the element's own text colour there).
+     *
+     * A refused setting first gets its stored value back, then, if that is still a problem with the
+     * other new values, the theme default (defaults pass both checks, PlanaVariablesTest). Setting a
+     * value back can make another one a problem, so the checks repeat until nothing is refused.
+     *
+     * @param  array  $variables  Variables with the submitted values.
+     * @param  array  $stored  The same variables with their stored values.
+     * @param  array  $defaults  Variables from the theme's user_variables.php.
+     * @param  array  $rejected  Setting name => [reason, previous value kept]; refused settings are added.
+     *
+     * @return array The variables, refused ones set back.
+     */
+    private function settle(array $variables, array $stored, array $defaults, array &$rejected): array
+    {
+        $cycle    = __('refers to itself', 'open-source-event-calendar');
+        $current  = __(
+            'is also a background, so it cannot follow the text colour (currentColor)',
+            'open-source-event-calendar'
+        );
+        $attempts = count($variables) + 1;
+        while ($attempts--) {
+            $problems = array_fill_keys(CssVarValue::cycles($variables), $cycle);
+            foreach ($variables as $name => $params) {
+                if (
+                    ! isset($problems[$name]) && ! empty($params['css_var'])
+                    && 'color' === ($params['type'] ?? '') && empty($params['current_color'])
+                    && CssVarValue::resolves_to_current_color((string)$params['value'], $variables)
+                ) {
+                    $problems[$name] = $current;
+                }
+            }
+            if ( ! $problems) {
+                break;
+            }
+            foreach ($problems as $name => $reason) {
+                $kept                      = $variables[$name]['value'] !== $stored[$name]['value'];
+                $variables[$name]['value'] = $kept ? $stored[$name]['value'] : $defaults[$name]['value'];
+                $rejected[$name]           = [$reason, $kept];
+            }
+        }
+
+        return $variables;
     }
 
     /**
