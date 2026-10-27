@@ -1022,7 +1022,7 @@ table.ai1ec-oneday-view-original {
   .ai1ec-event-location {
     color: #000 !important;
   }
-  // Month/week/day: the category color (--osec-event-color) is a left border on timed events
+  // Month/week/day: the category color (--osec-event-category-color) is a left border on timed events
   // and a thin border on all four sides of all-day events. Borders print without "background graphics".
   .ai1ec-month-view .ai1ec-event-container,
   .ai1ec-allday-events .ai1ec-event-container {
@@ -1031,7 +1031,7 @@ table.ai1ec-oneday-view-original {
   .ai1ec-month-view .ai1ec-event,
   .ai1ec-week-view .ai1ec-week .ai1ec-event-container,
   .ai1ec-oneday-view .ai1ec-oneday .ai1ec-event-container {
-    border: 1px solid var(--osec-event-color, #999) !important;
+    border: 1px solid var(--osec-event-category-color, #999) !important;
     border-left-width: 4px !important;
     padding-left: 3px !important;
     // White, so the event covers the table and hour lines behind it. Marked exact,
@@ -1043,7 +1043,7 @@ table.ai1ec-oneday-view-original {
   .ai1ec-month-view .ai1ec-allday .ai1ec-event,
   .ai1ec-month-view .ai1ec-multiday .ai1ec-event,
   .ai1ec-allday-events .ai1ec-event {
-    border: @print-event-border solid var(--osec-event-color, #999) !important;
+    border: @print-event-border solid var(--osec-event-category-color, #999) !important;
     border-left-width: @print-event-border !important;
     background: #fff !important;
     -webkit-print-color-adjust: exact;
@@ -1055,7 +1055,7 @@ table.ai1ec-oneday-view-original {
   // of the bar, and it sits outside the outline as the bar's pointed end.
   //
   // They hang off .ai1ec-event rather than the .ai1ec-multiday-arrow* divs (hidden above)
-  // because only .ai1ec-event carries --osec-event-color - the arrow divs are its siblings,
+  // because only .ai1ec-event carries --osec-event-category-color - the arrow divs are its siblings,
   // and a custom property only inherits downward. :has() is what reads across to them, so
   // each end is drawn only where calendar.js actually put an arrow.
   //
@@ -1099,16 +1099,16 @@ table.ai1ec-oneday-view-original {
   // Points right, out of the last printed day - the event carries on past it.
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow1 ) .ai1ec-event:after {
     background-image:
-      linear-gradient( to top right, var(--osec-event-color, #999) 50%, transparent 50% ),
-      linear-gradient( to bottom right, var(--osec-event-color, #999) 50%, transparent 50% );
+      linear-gradient( to top right, var(--osec-event-category-color, #999) 50%, transparent 50% ),
+      linear-gradient( to bottom right, var(--osec-event-category-color, #999) 50%, transparent 50% );
     background-position: top left, bottom left;
     left: 100%;
   }
   // Points left, into the first printed day - the event started before it.
   .ai1ec-month-view .ai1ec-multiday:has( .ai1ec-multiday-arrow2 ) .ai1ec-event:before {
     background-image:
-      linear-gradient( to top left, var(--osec-event-color, #999) 50%, transparent 50% ),
-      linear-gradient( to bottom left, var(--osec-event-color, #999) 50%, transparent 50% );
+      linear-gradient( to top left, var(--osec-event-category-color, #999) 50%, transparent 50% ),
+      linear-gradient( to bottom left, var(--osec-event-category-color, #999) 50%, transparent 50% );
     background-position: top right, bottom right;
     right: 100%;
   }

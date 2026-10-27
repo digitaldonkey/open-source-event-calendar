@@ -119,6 +119,6 @@ class PrintHeaderTest extends TestBase
         $style = (new EventTaxonomyView($osec_app))->get_color_style($event);
 
         remove_filter('osec_event_color', $color);
-        $this->assertSame('color: #c0392b !important; --osec-event-color: #c0392b;', $style);
+        $this->assertSame('color: #c0392b !important; --osec-event-category-color: #c0392b;', $style);
     }
 }
