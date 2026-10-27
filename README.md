@@ -50,7 +50,7 @@ All features are provided in their entirety. **No features are locked behind any
 - SEO-optimized event pages
 - Mobile-friendly and responsive layouts
 - Embedded **OpenStreetMap**
-- Theme options to customize your calendar appearence
+- Plana follows your WordPress theme's colours and font sizes; adjust them in Theme Options
 - Your calendar can be embedded into a WordPress page without needing to create template files or modify the theme.
 
 **Import events from other calendars** and offer users the **ability to subscribe to your calendar**.
@@ -214,6 +214,15 @@ Optional:
 The CSS is compiled when the theme is activated, when Theme Options are saved and after a plugin update. **After editing your theme's files, save Events › Theme Options once.** Activating a theme resets the saved Theme Options.
 
 Use `em` or `%` for font sizes, not `px` or `rem`, so they follow the "Base font size" theme option.
+
+### Plana's appearance settings
+
+Plana's Theme Options (colours, backgrounds and lines, text sizes, agenda spacing) set CSS custom properties, all
+defined in `public/osec_themes/plana/less/plana-variables.less`, e.g. `--osec-link`, `--osec-toolbar-background`,
+`--osec-font-size-normal`. A value is a colour or size, a variable of your WordPress theme with a fallback
+(`var(--wp--preset--color--contrast, #3d6b99)`, the defaults) or another setting (`var(--osec-link)`); the page shows
+what each one resolves to. Use the variables in your own CSS to match the calendar. `--osec-event-category-color` is
+not a setting: it holds each event's category colour.
 
 ---
 

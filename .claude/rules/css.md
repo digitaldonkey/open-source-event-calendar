@@ -185,3 +185,33 @@ rule above pushes everything towards `em` while borders and hairlines stay `px`.
 `calc( ~"@{a} + @{b}" )` (the `~""` escape keeps LESS from evaluating it) and check the compiled
 output in the CSS file (`osec_css` names it) - a plausible-looking wrong number is the normal
 failure mode, not a compile error.
+
+## Plana appearance settings (CSS variables, since 1.2.0)
+
+Plana's colours, text sizes and agenda spacing are Theme Options that write `--osec-*` custom properties.
+Other themes (vortex, umbra, gamma, custom ones) keep their LESS Theme Options unchanged.
+
+**Where they live:**
+
+| File | Role |
+|---|---|
+| `public/osec_themes/plana/less/user_variables.php` | The settings: `css_var` (property name), `type` (`color`/`size`), `tab` (section), `current_color` (text-only, may be `currentColor`), `migrate_from` (vortex options taken over once), `hidden`. Vortex's colour options are hidden in plana. |
+| `plana/less/plana-variables.less` | The one `:root` block: every `--osec-*` from its LESS variable. |
+| `plana/less/plana-colours.less` | The colour roles in the rules plana renders, **screen only** (print keeps its fixed colours). |
+| `src/Theme/CssVarValue.php` | What a value may be: plain colour/size, `var(--x, fallback)` up to three levels, one `color-mix()`, the contrast form `oklch(from …)`; `cycles()`, `resolves_to_current_color()`, `describe()` (origin text for the admin page). |
+| `src/Command/SaveThemeOptions.php` | Save: refuses invalid values, cycles and `currentColor` reaching a background; `settle()` repeats until stable (refused value → stored value → default); one notice lists them. |
+| `src/App/Controller/LessController.php` | Load: a stored value failing the same checks (written by other means) falls back to the default; `migrate_css_var_settings()`. |
+| `AdminPageThemeOptions.php`, `Settings/Elements/ThemeVariableColor/Size.php`, `admin/twig/theme-options/*-css-var.twig`, `js/admin/theme_options_css_vars.js` | The fields: CSS variable name, resolved value (the site's variables are loaded on the page, `CssVarValue::root_block()`), origin. |
+
+**Rules:**
+
+- Plana's LESS outside `plana-variables.less` uses only `var(--osec-…)`, never `var(--wp…)` directly
+  (`tests/Unit/Theme/PlanaVariablesTest.php`). A new colour or size in plana is a setting or derived from one
+  (`color-mix()` in the browser), not a LESS value.
+- The values pass through LESS unchanged: those LESS variables must never reach a LESS function.
+- Defaults are theme variables with a fallback (`var(--wp--preset--color--contrast, #3d6b99)`), so the calendar
+  follows the WordPress theme until a value is set.
+- **Data is not a setting:** per-event values PHP writes inline are named as data,
+  `--osec-event-category-color` (`EventTaxonomyView::get_color_style()`, read by the print styles).
+- Prove a changed default with screenshots before and after on the Twenty* themes (visual suite,
+  `integration_tests/visual_regression/README.md`; `OSEC_THEMES=plana` limits a run to plana).
