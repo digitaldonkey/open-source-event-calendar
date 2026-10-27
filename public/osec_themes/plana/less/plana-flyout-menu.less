@@ -1,13 +1,17 @@
 .plana-flyout-menu {
   @lineheight: 2.5;
-  @foregroundColor: var(--wp--preset--color--contrast, buttontext);
-  @backgroundColor: var(--wp--preset--color--accent, buttonFace);
+  // Flyout menus (categories, tags, view switcher, subscribe) sit in the toolbar: its colours.
+  @foregroundColor: var(--osec-toolbar-text);
+  @backgroundColor: var(--osec-toolbar-background);
 
 
   //margin-bottom: .25em;
   position: relative;
   display: inline-block;
-  font-size: var(--wp--preset--font-size--normal);
+  font-size: var(--osec-font-size-normal);
+  // As the button: an inherited taller line (event page footer: line-height 3) would make the
+  // box taller than the button, and the menu would open below a gap.
+  line-height: 1;
 
   min-width: 7rem;
   &.plana-flyout-menu--wide {
@@ -34,7 +38,7 @@
     // Height comes from min-height, not from the line box, or a link and a button differ.
     line-height: 1;
     text-align: left;
-    font-size: var(--wp--preset--font-size--normal);
+    font-size: var(--osec-font-size-normal);
     border: 0;
     cursor: pointer;
     background: @backgroundColor;
@@ -45,7 +49,7 @@
     &:hover {
       border-bottom: 0;
       background: @foregroundColor;
-      color: @backgroundColor;
+      color: var(--osec-toolbar-contrast);
       cursor: revert;
     }
 
@@ -68,8 +72,15 @@
     z-index: 10;
     font-size: .95em;
     background: @backgroundColor;
+    // Every flyout menu (view switcher, subscribe, filters) has the outline.
+    border: 1px solid @foregroundColor;
     width: 100%;
     box-sizing: border-box;
+
+    // Themes indent list items (Twenty Twenty: li { margin: .5rem 0 0 2rem }).
+    > li {
+      margin: 0;
+    }
   }
 
   .link {
@@ -90,7 +101,7 @@
     }
 
     &:hover {
-      color: @backgroundColor;
+      color: var(--osec-toolbar-contrast);
       background: @foregroundColor;
     }
 
@@ -106,6 +117,10 @@
 }
 
 .plana-flyout-menu--taxonomy {
+  // Category and tag filters are toolbar menus too (outside .plana-flyout-menu above, so the
+  // colours are set again here; the global aliases in override.less are the controls colours).
+  @foregroundColor: var(--osec-toolbar-text);
+  @backgroundColor: var(--osec-toolbar-background);
   min-width: 12em;
   margin-left: .6em;
   margin-right: 1.2em;
@@ -140,7 +155,7 @@
   }
 
   .term-is-selected .link {
-    color: @backgroundColor;
+    color: var(--osec-toolbar-contrast);
     background: @foregroundColor;
     // Starts with the remove icon: as much space to the left as above and below it.
     padding-left: .3em;
@@ -150,7 +165,7 @@
   &:focus-within ,
   &:hover {
     .plana-flyout-menu--button {
-      color: @backgroundColor;
+      color: var(--osec-toolbar-contrast);
       background: @foregroundColor;
     }
   }

@@ -4,6 +4,7 @@ namespace Osec\App\View\Admin;
 
 use Osec\App\Controller\LessController;
 use Osec\Settings\ThemeVariablesFactory;
+use Osec\Theme\CssVarValue;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -48,6 +49,15 @@ class AdminPageThemeOptions extends AdminPageAbstract
         static $sections = null;
         if (is_null($sections)) {
             $sections = [
+                'colors'   => [
+                    'name' => __('Colours', 'open-source-event-calendar'),
+                ],
+                'backgrounds' => [
+                    'name' => __('Backgrounds and lines', 'open-source-event-calendar'),
+                ],
+                'sizes'    => [
+                    'name' => __('Text sizes', 'open-source-event-calendar'),
+                ],
                 'general'  => [
                     'name' => __('General', 'open-source-event-calendar'),
                 ],
@@ -154,6 +164,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
             'export' => $this->get_export(),
         ];
         $less_variables = LessController::factory($this->app)->get_saved_variables();
+        $less_variables = $this->add_css_var_details($less_variables);
         $renderer = ThemeVariablesFactory::factory($this->app);
         $args['sections'] = [];
         foreach ($this->get_sections() as $id => $section) {
@@ -170,9 +181,74 @@ class AdminPageThemeOptions extends AdminPageAbstract
                 }
             }
         }
+        // A section no variable of the active theme uses, e.g. "Colours" outside plana.
+        $args['sections'] = array_filter($args['sections'], fn($section) => '' !== $section['html']);
+        $this->enqueue_css_var_preview($less_variables);
         ThemeLoader::factory($this->app)
                    ->get_file('admin_page_theme_options.twig', $args, true)
                    ->render();
+    }
+
+    /**
+     * Adds what the field of a css_var setting shows besides its value: the theme default
+     * ('default') and where the value comes from ('source', see CssVarValue::describe()).
+     *
+     * @param  array  $less_variables  Variables from LessController::get_saved_variables().
+     *
+     * @return array The variables, css_var ones with 'default' and 'source'.
+     */
+    private function add_css_var_details(array $less_variables): array
+    {
+        $config = LessController::factory($this->app)->get_less_variable_data_from_config_file();
+        $labels = [];
+        foreach ($less_variables as $var) {
+            if ( ! empty($var['css_var'])) {
+                $labels['--' . $var['css_var']] = $var['description'] ?? $var['css_var'];
+            }
+        }
+        foreach ($less_variables as $id => $var) {
+            if (empty($var['css_var'])) {
+                continue;
+            }
+            $less_variables[$id]['default'] = $config[$id]['value'] ?? '';
+            $less_variables[$id]['source']  = CssVarValue::describe((string)$var['value'], $var['type'], $labels);
+        }
+
+        return $less_variables;
+    }
+
+    /**
+     * Lets the browser resolve css_var settings on this page.
+     *
+     * Prints the site's WordPress variables (presets, custom) and the calendar's own :root block,
+     * so a field's colour input can show the colour the calendar uses (e.g. for
+     * `var(--osec-link)`), and enqueues the fields' stylesheet and the script that resolves them.
+     *
+     * @param  array  $less_variables  Variables from LessController::get_saved_variables().
+     */
+    private function enqueue_css_var_preview(array $less_variables): void
+    {
+        $root = CssVarValue::root_block($less_variables);
+        if ('' === $root) {
+            return;
+        }
+        $handle = 'osec-theme-options-css-vars';
+        wp_register_style($handle, false, [], OSEC_VERSION);
+        wp_add_inline_style($handle, wp_strip_all_tags(wp_get_global_stylesheet(['variables']) . $root));
+        wp_enqueue_style($handle);
+        wp_enqueue_style(
+            $handle . '-fields',
+            OSEC_ADMIN_THEME_CSS_URL . 'theme_options_css_vars.css',
+            [],
+            OSEC_VERSION
+        );
+        wp_enqueue_script(
+            $handle,
+            OSEC_ADMIN_THEME_JS_URL . 'admin/theme_options_css_vars.js',
+            [],
+            OSEC_VERSION,
+            true
+        );
     }
 
     /**

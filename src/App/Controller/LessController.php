@@ -8,6 +8,7 @@ use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\Exception;
 use Osec\Exception\FileNotFoundException;
 use Osec\Http\Response\ResponseHelper;
+use Osec\Theme\CssVarValue;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -262,6 +263,8 @@ class LessController extends OsecBaseClass
             []
         );
 
+        $variables = $this->migrate_css_var_settings($variables, $variables_from_config);
+
         // Generate default variable array from the config file, and union these
         // with any saved variables to make sure all required variables are set.
         $variables += $variables_from_config;
@@ -280,6 +283,20 @@ class LessController extends OsecBaseClass
                 $variables[$name]['value']  = $variables_from_config[$name]['value'];
                 $variables[$name]['hidden'] = true;
             }
+            // Where a setting is shown, what it holds and whether it takes var() values is the active
+            // theme's decision (user_variables.php), never stored data, e.g. from another theme.
+            foreach (['tab', 'type'] as $key) {
+                if (isset($variables_from_config[$name][$key])) {
+                    $variables[$name][$key] = $variables_from_config[$name][$key];
+                }
+            }
+            unset($variables[$name]['css_var'], $variables[$name]['current_color']);
+            if ( ! empty($variables_from_config[$name]['css_var'])) {
+                $variables[$name]['css_var'] = $variables_from_config[$name]['css_var'];
+            }
+            if ( ! empty($variables_from_config[$name]['current_color'])) {
+                $variables[$name]['current_color'] = true;
+            }
             if ($with_description && isset($variables_from_config[$name]['description'])) {
                 // If description is requested and is available in config file, use it.
                 $variables[$name]['description'] =
@@ -288,8 +305,69 @@ class LessController extends OsecBaseClass
                 unset($variables[$name]['description']);
             }
         }
+        // A css_var value goes to the stylesheet as it is, so a stored one that would not pass the save
+        // check (written by other means) is ignored: the theme default.
+        foreach ($variables as $name => $attrs) {
+            if (
+                ! empty($attrs['css_var'])
+                && ! CssVarValue::is_allowed((string)($attrs['value'] ?? ''), $attrs['type'] ?? 'color')
+            ) {
+                $variables[$name]['value'] = $variables_from_config[$name]['value'];
+            }
+        }
+        // Settings that refer to each other in a circle have no value at all in the browser: defaults.
+        foreach (CssVarValue::cycles($variables) as $name) {
+            $variables[$name]['value'] = $variables_from_config[$name]['value'];
+        }
+        // A colour that is also used as a background and ends up as currentColor, e.g. stored before
+        // "Text" changed back to currentColor, is ignored too. Checked once all values are known.
+        $current = $variables;
+        foreach ($variables as $name => $attrs) {
+            if (
+                ! empty($attrs['css_var']) && 'color' === ($attrs['type'] ?? '') && empty($attrs['current_color'])
+                && CssVarValue::resolves_to_current_color((string)($attrs['value'] ?? ''), $current)
+            ) {
+                $variables[$name]['value'] = $variables_from_config[$name]['value'];
+            }
+        }
 
         return $variables;
+    }
+
+    /**
+     * Takes changed values of hidden vortex options over into the settings that replace them
+     * ('migrate_from' in user_variables.php, plana).
+     *
+     * Runs while a setting is not stored yet, i.e. until the first save under the new theme
+     * version: the first listed old option whose stored value differs from its default wins.
+     *
+     * @param  array  $stored  Variables from the options table.
+     * @param  array  $config  Variables from the theme's user_variables.php (old options there hold their defaults).
+     *
+     * @return array The stored variables, with migrated settings added.
+     */
+    private function migrate_css_var_settings(array $stored, array $config): array
+    {
+        foreach ($config as $name => $definition) {
+            if (empty($definition['migrate_from']) || isset($stored[$name])) {
+                continue;
+            }
+            foreach ($definition['migrate_from'] as $old) {
+                $value = $stored[$old]['value'] ?? null;
+                if (
+                    null === $value
+                    || ! isset($config[$old]['value'])
+                    || 0 === strcasecmp(trim((string)$value), trim((string)$config[$old]['value']))
+                    || ! CssVarValue::is_allowed((string)$value, $definition['type'])
+                ) {
+                    continue;
+                }
+                $stored[$name] = ['value' => $value] + $definition;
+                break;
+            }
+        }
+
+        return $stored;
     }
 
     /**
@@ -332,6 +410,11 @@ class LessController extends OsecBaseClass
         $converted_variables = [];
         foreach ($variables as $variable_name => $variable_params) {
             $converted_variables[$variable_name] = $variable_params['value'];
+            // A css_var value (plana) goes to the browser as it is: escaped, LESS never evaluates it
+            // (e.g. the arithmetic in a computed contrast colour). Allowed values hold no quotes.
+            if ( ! empty($variable_params['css_var']) && ! str_contains((string)$variable_params['value'], '"')) {
+                $converted_variables[$variable_name] = '~"' . $variable_params['value'] . '"';
+            }
         }
 
         return $converted_variables;

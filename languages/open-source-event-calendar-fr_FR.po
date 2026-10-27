@@ -596,19 +596,19 @@ msgid "Invalid parameter"
 msgstr "Paramètre invalide"
 
 #. translators: Url
-#: src/App/Controller/FrontendCssController.php:553
+#: src/App/Controller/FrontendCssController.php:556
 #, php-format
 msgid "Theme options were successfully reset to their default values. <a href='%s'>Visit site</a>"
 msgstr "Les options du thème ont été réinitialisées avec succès à leurs valeurs par défaut. <a href='%s'>Visiter le site</a>"
 
 #. translators: Site url
-#: src/App/Controller/FrontendCssController.php:562
+#: src/App/Controller/FrontendCssController.php:565
 #, php-format
 msgid "Theme options were updated successfully. <a href='%s'>Visit site</a>"
 msgstr "Les options du thème ont été mises à jour avec succès. <a href='%s'>Visitez le site</a>"
 
 #. translators: Minimum PHP memory required
-#: src/App/Controller/FrontendCssController.php:590
+#: src/App/Controller/FrontendCssController.php:597
 #, php-format
 msgid ""
 "CSS compilation failed because you do not have enough free memory\n"
@@ -621,7 +621,7 @@ msgstr ""
 "\n"
 "Sans CSS, veuillez augmenter la limite de mémoire PHP."
 
-#: src/App/Controller/FrontendCssController.php:617
+#: src/App/Controller/FrontendCssController.php:624
 msgid ""
 "The LESS file compiled correctly but there was an error\n"
 "                    while saving the generated CSS to persistence."
@@ -631,7 +631,7 @@ msgstr ""
 "lors de l'enregistrement du CSS généré."
 
 #. translators: filename
-#: src/App/Controller/LessController.php:183
+#: src/App/Controller/LessController.php:184
 #, php-format
 msgid "Could not map SASS import \"%1$s\" at theme \"%2$s\""
 msgstr "Impossible de mapper l'importation SASS « %1$s » au thème « %2$s »."
@@ -1310,46 +1310,46 @@ msgstr "Rapport de cache"
 msgid "Save Settings"
 msgstr "Enregistrer les paramètres"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:93
-#: src/App/View/Admin/AdminPageThemeOptions.php:94
+#: src/App/View/Admin/AdminPageThemeOptions.php:103
+#: src/App/View/Admin/AdminPageThemeOptions.php:104
 msgid "Theme Options"
 msgstr "Options du thème"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:119
+#: src/App/View/Admin/AdminPageThemeOptions.php:129
 msgid "Calendar Theme Options"
 msgstr "Options du thème du calendrier"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:52
+#: src/App/View/Admin/AdminPageThemeOptions.php:62
 msgid "General"
 msgstr "Général"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:55
+#: src/App/View/Admin/AdminPageThemeOptions.php:65
 msgid "Tables"
 msgstr "Tables"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:58
+#: src/App/View/Admin/AdminPageThemeOptions.php:68
 msgid "Buttons"
 msgstr "Boutons"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:61
+#: src/App/View/Admin/AdminPageThemeOptions.php:71
 msgid "Forms"
 msgstr "Formulaires"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:64
+#: src/App/View/Admin/AdminPageThemeOptions.php:74
 msgid "Calendar general"
 msgstr "Calendrier général"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:67
+#: src/App/View/Admin/AdminPageThemeOptions.php:77
 msgid "Month/week/day view"
 msgstr "Vue mois/semaine/jour"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:70
+#: src/App/View/Admin/AdminPageThemeOptions.php:80
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:160
 msgid "Agenda view"
 msgstr "Vue Agenda"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:146
+#: src/App/View/Admin/AdminPageThemeOptions.php:156
 msgid "Save Options"
 msgstr "Options d'enregistrement"
 
@@ -1842,6 +1842,8 @@ msgid "Enabled"
 msgstr "Activé"
 
 #: src/Settings/Elements/SettingsEnabledViews.php:24
+#: src/Settings/Elements/ThemeVariableColor.php:36
+#: src/Settings/Elements/ThemeVariableSize.php:38
 msgid "Default"
 msgstr "Défaut"
 
@@ -2038,57 +2040,57 @@ msgstr "Bloc Bootstrap classique Osec."
 #. Description of the plugin
 #: open-source-event-calendar.php
 msgid "An event calendar with native iCal / ICS import and export"
-msgstr ""
+msgstr "Un calendrier d'événements avec import et export iCal / ICS natifs"
 
 #: public/osec_themes/umbra/less/user_variables.php:52
 #: public/osec_themes/vortex/less/user_variables.php:52
 msgid "Agenda maximum width"
-msgstr ""
+msgstr "Largeur maximale de l'agenda"
 
 #: public/osec_themes/umbra/less/user_variables.php:55
 #: public/osec_themes/vortex/less/user_variables.php:55
 msgid "CSS width, e.g. 45em"
-msgstr ""
+msgstr "Largeur CSS, p. ex. 45em"
 
 #. translators: 1: calendar theme name that was not found, 2: calendar theme name now used, e.g. plana
 #: src/App/Controller/BootstrapController.php:204
 #, php-format
 msgid "The calendar theme \"%1$s\" was not found and has been replaced by the theme \"%2$s\"."
-msgstr ""
+msgstr "Le thème de calendrier « %1$s » est introuvable et a été remplacé par le thème « %2$s »."
 
 #. translators: %s: calendar theme name, e.g. plana
 #: src/App/Controller/BootstrapController.php:214
 #, php-format
 msgid "The calendar theme setting was invalid and has been reset to the theme \"%s\"."
-msgstr ""
+msgstr "Le réglage du thème de calendrier n'était pas valide et a été réinitialisé au thème « %s »."
 
 #: src/App/Controller/BootstrapController.php:226
 msgid "Choose your calendar theme again under Events > Calendar Themes."
-msgstr ""
+msgstr "Choisissez à nouveau votre thème de calendrier sous Événements > Thèmes de calendrier."
 
 #. translators: 1: number of fields, 2: example entity
 #: src/App/Controller/EscapingRepairController.php:86
 #, php-format
 msgid "%1$d event or feed fields contain HTML entities like %2$s, stored by earlier versions."
-msgstr ""
+msgstr "%1$d champs d'événements ou de flux contiennent des entités HTML comme %2$s, enregistrées par des versions antérieures."
 
 #: src/App/Controller/EscapingRepairController.php:94
 msgid "Review and repair"
-msgstr ""
+msgstr "Vérifier et réparer"
 
 #: src/App/Controller/EscapingRepairController.php:96
 msgid "Dismiss"
-msgstr ""
+msgstr "Ignorer"
 
 #. translators: 1: number of fields, 2: number of events and feeds
 #: src/App/Controller/EscapingRepairController.php:135
 #, php-format
 msgid "Repaired %1$d fields of %2$d events and feeds."
-msgstr ""
+msgstr "%1$d champs de %2$d événements et flux réparés."
 
 #: src/App/Controller/EscapingRepairController.php:184
 msgid "You are not allowed to do this."
-msgstr ""
+msgstr "Vous n'êtes pas autorisé à faire cela."
 
 #: src/App/Controller/FeedsController.php:138
 msgid ""
@@ -2096,51 +2098,51 @@ msgid ""
 "                        You can add any calendar that provides an iCalendar (.ics) feed.\n"
 "                        Enter the feed URL(s) below and the events from those feeds will be\n"
 "                        imported periodically."
-msgstr ""
+msgstr "Configurez les autres calendriers auxquels votre calendrier est abonné. Vous pouvez ajouter tout calendrier qui fournit un flux iCalendar (.ics). Saisissez ci-dessous la ou les URL de flux : les événements de ces flux seront importés régulièrement."
 
 #: src/App/Controller/FeedsController.php:147
 msgid "Hide cost/free on imported events"
-msgstr ""
+msgstr "Masquer le prix/gratuit des événements importés"
 
 #: src/App/Controller/FeedsController.php:162
 msgid "Feed url (required)"
-msgstr ""
+msgstr "URL du flux (obligatoire)"
 
 #: src/App/Controller/FeedsController.php:163
 msgid "Event categories"
-msgstr ""
+msgstr "Catégories d'événements"
 
 #: src/App/Controller/FeedsController.php:177
 msgid "Post status for imported events"
-msgstr ""
+msgstr "Statut de publication des événements importés"
 
 #. translators: %s: reason the feed could not be read.
 #: src/App/Controller/FeedsController.php:550
 #, php-format
 msgid "The provided feed didn't return valid ics data: %s"
-msgstr ""
+msgstr "Le flux n'a pas renvoyé de données ics valides : %s"
 
 #: src/App/Controller/FeedsController.php:574
 msgid ""
 "If a certificate authority installed on this server issued the feed's certificate, enable\n"
 "                            Settings → Advanced → \"Trust this server's CA certificates for feeds\"."
-msgstr ""
+msgstr "Si une autorité de certification installée sur ce serveur a émis le certificat du flux, activez Paramètres → Avancé → « Faire confiance aux certificats CA de ce serveur pour les flux »."
 
 #. translators: 1: feed url, 2: error message.
 #: src/App/Controller/FeedsController.php:593
 #, php-format
 msgid "Importing the feed \"%1$s\" failed: %2$s"
-msgstr ""
+msgstr "L'import du flux « %1$s » a échoué : %2$s"
 
 #. translators: 1: feed name, 2: what happened during the import.
 #: src/App/Controller/FeedsController.php:618
 #, php-format
 msgid "Importing the feed \"%1$s\": %2$s"
-msgstr ""
+msgstr "Import du flux « %1$s » : %2$s"
 
 #: src/App/Controller/FeedsController.php:849
 msgid "Invalid nonce or permission"
-msgstr ""
+msgstr "Nonce invalide ou autorisation manquante"
 
 #. translators: Compile error
 #: src/App/Controller/FrontendCssController.php:250
@@ -2148,19 +2150,19 @@ msgstr ""
 msgid ""
 "Your CSS is being compiled on every request,\n"
 "                            which causes your calendar to perform slowly. The following error occurred: %s"
-msgstr ""
+msgstr "Votre CSS est compilé à chaque requête, ce qui ralentit votre calendrier. L'erreur suivante s'est produite : %s"
 
 #: src/App/Controller/FrontendCssController.php:529
 msgid "Unexpected CSS content"
-msgstr ""
+msgstr "Contenu CSS inattendu"
 
 #. translators: Error message
-#: src/App/Controller/FrontendCssController.php:795
+#: src/App/Controller/FrontendCssController.php:802
 #, php-format
 msgid ""
 "<strong>There was an error while compiling CSS.</strong>\n"
 "                    The message returned was: <em>%s</em>"
-msgstr ""
+msgstr "<strong>Une erreur s'est produite lors de la compilation du CSS.</strong> Le message renvoyé était : <em>%s</em>"
 
 #. translators: 1: event title, 2: reason.
 #: src/App/Controller/ImportExportController.php:204
@@ -2168,193 +2170,193 @@ msgstr ""
 msgid ""
 "The repeat rule of \"%1$s\" cannot be written to the iCalendar feed and was left out of\n"
 "                        it. Reason: %2$s"
-msgstr ""
+msgstr "La règle de répétition de « %1$s » ne peut pas être écrite dans le flux iCalendar et a été omise. Raison : %2$s"
 
 #: src/App/Controller/MapsController.php:73
 msgid "Search for location"
-msgstr ""
+msgstr "Rechercher un lieu"
 
 #: src/App/Controller/MapsController.php:75
 msgid "Nothing found."
-msgstr ""
+msgstr "Aucun résultat."
 
 #: src/App/Controller/RestController.php:75
 msgid "All caches were cleared and the calendar CSS was rebuilt."
-msgstr ""
+msgstr "Tous les caches ont été vidés et le CSS du calendrier a été reconstruit."
 
 #. translators: %s: error message
 #: src/App/Controller/RestController.php:79
 #, php-format
 msgid "Twig cache cleared. The calendar CSS was not rebuilt, the previous CSS stays in place. Error: %s"
-msgstr ""
+msgstr "Cache Twig vidé. Le CSS du calendrier n'a pas été reconstruit, le CSS précédent est conservé. Erreur : %s"
 
 #: src/App/Controller/RestController.php:104
 msgid "The tables were converted. They now store all characters."
-msgstr ""
+msgstr "Les tables ont été converties. Elles enregistrent désormais tous les caractères."
 
 #: src/App/Controller/RestController.php:112
 msgid "Not every table was converted; those keep their charset."
-msgstr ""
+msgstr "Toutes les tables n'ont pas été converties ; celles-ci gardent leur jeu de caractères."
 
 #. translators: Number of events not printed
 #: src/App/Controller/ScriptsFrontendController.php:393
 #, php-format
 msgid "+%d more"
-msgstr ""
+msgstr "+%d de plus"
 
 #: src/App/Model/DatabaseCharset.php:37
 msgid "Event Calendar database charset"
-msgstr ""
+msgstr "Jeu de caractères de la base de données d'Event Calendar"
 
 #: src/App/Model/DatabaseCharset.php:55
 msgid "Some Event Calendar database tables cannot store emoji and other 4-byte characters yet."
-msgstr ""
+msgstr "Certaines tables de la base de données d'Event Calendar ne peuvent pas encore enregistrer les émojis et autres caractères sur 4 octets."
 
 #: src/App/Model/DatabaseCharset.php:59
 msgid "Convert them in the Settings."
-msgstr ""
+msgstr "Convertissez-les dans les Paramètres."
 
 #: src/App/Model/DatabaseCharset.php:77
 msgid "Event Calendar tables store all characters"
-msgstr ""
+msgstr "Les tables d'Event Calendar enregistrent tous les caractères"
 
 #: src/App/Model/DatabaseCharset.php:80
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:136
 msgid "Event Calendar"
-msgstr ""
+msgstr "Event Calendar"
 
 #: src/App/Model/DatabaseCharset.php:83
 msgid "The Event Calendar tables use the site's utf8mb4 charset."
-msgstr ""
+msgstr "Les tables d'Event Calendar utilisent le jeu de caractères utf8mb4 du site."
 
 #: src/App/Model/DatabaseCharset.php:94
 msgid "Event Calendar tables cannot store emoji and other 4-byte characters"
-msgstr ""
+msgstr "Les tables d'Event Calendar ne peuvent pas enregistrer les émojis et autres caractères sur 4 octets"
 
 #. translators: %s: table names
 #: src/App/Model/DatabaseCharset.php:103
 #, php-format
 msgid "These tables are not utf8mb4: %s. Events and feeds with such characters fail to save."
-msgstr ""
+msgstr "Ces tables ne sont pas en utf8mb4 : %s. Les événements et flux contenant de tels caractères ne peuvent pas être enregistrés."
 
 #: src/App/Model/DatabaseCharset.php:111
 msgid "Convert the tables"
-msgstr ""
+msgstr "Convertir les tables"
 
 #. translators: %s: collation, e.g. latin1_swedish_ci
 #: src/App/Model/DatabaseCharset.php:188
 #, php-format
 msgid "Not converted: the table uses %s, not utf8. Converting it could change its text."
-msgstr ""
+msgstr "Non convertie : la table utilise %s, pas utf8. La convertir pourrait modifier son texte."
 
 #: src/App/Model/DatabaseCharset.php:218
 msgid "Two entries are equal under the new collation (e.g. URLs differing only in ß and ss)."
-msgstr ""
+msgstr "Deux entrées sont identiques avec la nouvelle collation (p. ex. des URL qui ne diffèrent que par ß et ss)."
 
 #: src/App/Model/DatabaseCharset.php:221
 msgid "Delete or change one of them and try again."
-msgstr ""
+msgstr "Supprimez ou modifiez l'une d'elles et réessayez."
 
 #: src/App/Model/DatabaseCharset.php:225
 msgid "An index is too long for this database server: it needs InnoDB with the DYNAMIC row format."
-msgstr ""
+msgstr "Un index est trop long pour ce serveur de base de données : il nécessite InnoDB avec le format de ligne DYNAMIC."
 
 #: src/App/Model/DatabaseCharset.php:228
 msgid "Ask your host, then try again."
-msgstr ""
+msgstr "Contactez votre hébergeur, puis réessayez."
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:34
 msgid "Event Calendar database"
-msgstr ""
+msgstr "Base de données d'Event Calendar"
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:94
 msgid "Event Calendar is disabled."
-msgstr ""
+msgstr "Event Calendar est désactivé."
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:95
 msgid "Its database tables could not be updated. Visitors see \"calendar unavailable\"."
-msgstr ""
+msgstr "Ses tables de base de données n'ont pas pu être mises à jour. Les visiteurs voient « calendrier indisponible »."
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:101
 msgid "Open Site Health"
-msgstr ""
+msgstr "Ouvrir Santé du site"
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:108
 msgid "The calendar is temporarily unavailable."
-msgstr ""
+msgstr "Le calendrier est temporairement indisponible."
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:111
 msgid "Admins: the Event Calendar database needs an update. See Site Health."
-msgstr ""
+msgstr "Administrateurs : la base de données d'Event Calendar doit être mise à jour. Voir Santé du site."
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:133
 msgid "Event Calendar database is up to date"
-msgstr ""
+msgstr "La base de données d'Event Calendar est à jour"
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:139
 msgid "The Event Calendar database tables match the installed plugin version."
-msgstr ""
+msgstr "Les tables de base de données d'Event Calendar correspondent à la version installée de l'extension."
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:151
 msgid "Event Calendar is disabled: database update failed"
-msgstr ""
+msgstr "Event Calendar est désactivé : la mise à jour de la base de données a échoué"
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:157
 msgid "The Event Calendar database tables are outdated and could not be updated, so the calendar is disabled."
-msgstr ""
+msgstr "Les tables de base de données d'Event Calendar sont obsolètes et n'ont pas pu être mises à jour, le calendrier est donc désactivé."
 
 #. translators: %s: Site URL.
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:200
 #, php-format
 msgid "The Event Calendar on %s could not update its database tables."
-msgstr ""
+msgstr "Event Calendar sur %s n'a pas pu mettre à jour ses tables de base de données."
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:203
 msgid "The calendar is disabled until the update succeeds."
-msgstr ""
+msgstr "Le calendrier reste désactivé jusqu'à ce que la mise à jour réussisse."
 
 #. translators: %s: Error message.
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:205
 #, php-format
 msgid "Error: %s"
-msgstr ""
+msgstr "Erreur : %s"
 
 #. translators: %s: Site Health URL.
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:208
 #, php-format
 msgid "Details: %s"
-msgstr ""
+msgstr "Détails : %s"
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:209
 msgid "This email is sent at most once per day."
-msgstr ""
+msgstr "Cet e-mail est envoyé au maximum une fois par jour."
 
 #. translators: %s: Site name.
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:215
 #, php-format
 msgid "[%s] Event Calendar is disabled: database update failed"
-msgstr ""
+msgstr "[%s] Event Calendar est désactivé : la mise à jour de la base de données a échoué"
 
 #: src/App/Model/DatabaseSchemaFailureNotifier.php:222
 msgid "The update is retried automatically. Check that the database user may ALTER and CREATE tables."
-msgstr ""
+msgstr "La mise à jour est relancée automatiquement. Vérifiez que l'utilisateur de la base de données peut faire ALTER et CREATE sur les tables."
 
 #: src/App/Model/Date/DateFormatsFrontend.php:69
 msgid ""
 "Osec calendar uses WordPress default \"date_format\" and \"time_format\" above and\n"
 "                        provides additional <strong>frontend date formats</strong>."
-msgstr ""
+msgstr "Le calendrier Osec utilise les réglages WordPress par défaut « date_format » et « time_format » ci-dessus et propose des <strong>formats de date supplémentaires pour le site public</strong>."
 
 #: src/App/Model/Date/DateFormatsFrontend.php:224
 msgid "The custom date format was empty, the previous format is kept."
-msgstr ""
+msgstr "Le format de date personnalisé était vide, le format précédent est conservé."
 
 #: src/App/Model/Date/DT.php:145
 msgid ""
 "WordPress requires PHP default timezone to be UTC.\n"
 "                     This plugin assumes this too.\n"
 "                     Ensure date_default_timezone_get() will return `UTC`"
-msgstr ""
+msgstr "WordPress exige que le fuseau horaire PHP par défaut soit UTC. Cette extension le suppose aussi. Assurez-vous que date_default_timezone_get() renvoie `UTC`."
 
 #. translators: Link options-general timezone settings
 #: src/App/Model/Date/Timezones.php:446
@@ -2362,31 +2364,31 @@ msgstr ""
 msgid ""
 "OSEC fixed your site’s timezone for you.\n"
 "                                 Please verify in %s <em>Timezone</em> dropdown menu."
-msgstr ""
+msgstr "OSEC a corrigé le fuseau horaire de votre site. Veuillez le vérifier dans le menu déroulant <em>Fuseau horaire</em> de %s."
 
 #. translators: 1: number of events, 2: maximum length.
 #: src/App/Model/IcsImportExportParser.php:583
 #, php-format
 msgid "%1$s event was not imported: its UID is longer than %2$s characters."
 msgid_plural "%1$s events were not imported: their UIDs are longer than %2$s characters."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%1$s événement n'a pas été importé : son UID dépasse %2$s caractères."
+msgstr[1] "%1$s événements n'ont pas été importés : leurs UID dépassent %2$s caractères."
 
 #. translators: %s: number of values.
 #: src/App/Model/IcsImportExportParser.php:596
 #, php-format
 msgid "%s value was too long for the calendar and was shortened or left out."
 msgid_plural "%s values were too long for the calendar and were shortened or left out."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%s valeur était trop longue pour le calendrier et a été raccourcie ou omise."
+msgstr[1] "%s valeurs étaient trop longues pour le calendrier et ont été raccourcies ou omises."
 
 #. translators: %s: number of events.
 #: src/App/Model/IcsImportExportParser.php:608
 #, php-format
 msgid "The repeat rule of %s event is not valid and was ignored."
 msgid_plural "The repeat rules of %s events are not valid and were ignored."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "La règle de répétition de %s événement n'est pas valide et a été ignorée."
+msgstr[1] "Les règles de répétition de %s événements ne sont pas valides et ont été ignorées."
 
 #. translators: 1: number of events, 2: number of instances.
 #: src/App/Model/IcsImportExportParser.php:620
@@ -2395,8 +2397,8 @@ msgid "%1$s event repeats more often than the calendar stores, only %2$s occurre
 msgid_plural ""
 "%1$s events repeat more often than the calendar stores, only %2$s occurrences each were\n"
 "                    created."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%1$s événement se répète plus souvent que le calendrier n'en enregistre, seules %2$s occurrences ont été créées."
+msgstr[1] "%1$s événements se répètent plus souvent que le calendrier n'en enregistre, seules %2$s occurrences chacun ont été créées."
 
 #. translators: 1: event title, 2: number of instances.
 #: src/App/Model/PostTypeEvent/EventEditing.php:295
@@ -2404,7 +2406,7 @@ msgstr[1] ""
 msgid ""
 "\"%1$s\" repeats more often than the calendar stores. Only the first %2$s occurrences\n"
 "                            were created, so the series ends earlier than its repeat rule asks for."
-msgstr ""
+msgstr "« %1$s » se répète plus souvent que le calendrier n'en enregistre. Seules les %2$s premières occurrences ont été créées, la série se termine donc plus tôt que ne le prévoit sa règle de répétition."
 
 #. translators: 1: event title, 2: recurrence rule, 3: reason.
 #: src/App/Model/PostTypeEvent/EventEditing.php:313
@@ -2412,79 +2414,79 @@ msgstr ""
 msgid ""
 "The repeat rule of \"%1$s\" is not valid and was ignored, the event was saved as a\n"
 "                            single event. Rule: %2$s Reason: %3$s"
-msgstr ""
+msgstr "La règle de répétition de « %1$s » n'est pas valide et a été ignorée, l'événement a été enregistré comme événement unique. Règle : %2$s Raison : %3$s"
 
 #. translators: 1: event title, 2: field name, 3: maximum length.
 #: src/App/Model/PostTypeEvent/EventEditing.php:343
 #, php-format
 msgid "\"%1$s\": the field \"%2$s\" is longer than %3$s characters and was shortened."
-msgstr ""
+msgstr "« %1$s » : le champ « %2$s » dépasse %3$s caractères et a été raccourci."
 
 #. translators: 1: event title, 2: field name, 3: maximum length.
 #: src/App/Model/PostTypeEvent/EventEditing.php:348
 #, php-format
 msgid "\"%1$s\": the field \"%2$s\" is longer than %3$s characters and was not saved."
-msgstr ""
+msgstr "« %1$s » : le champ « %2$s » dépasse %3$s caractères et n'a pas été enregistré."
 
 #: src/App/Model/PostTypeEvent/EventInstance.php:393
 msgid "The rule has no end."
-msgstr ""
+msgstr "La règle n'a pas de fin."
 
 #: src/App/Model/Settings.php:460
 msgid ""
 "This is an alias to wp-settings timezone and could also be\n"
 "                            changed on <a href=\"/wp-admin/options-general.php\">Settings&nbsp;>&nbsp;general</a>."
-msgstr ""
+msgstr "Ceci est un alias du fuseau horaire de WordPress, qui peut aussi être modifié dans <a href=\"/wp-admin/options-general.php\">Réglages&nbsp;>&nbsp;Général</a>."
 
 #: src/App/Model/Settings.php:535
 msgid "Show year in calendar date labels"
-msgstr ""
+msgstr "Afficher l'année dans les libellés de date du calendrier"
 
 #: src/App/Model/Settings.php:539
 msgid ""
 "For output date formats please check <a href=\"/wp-admin/options-general.php\">\n"
 "                             Settings&nbsp;>&nbsp;general</a>."
-msgstr ""
+msgstr "Pour les formats de date affichés, voir <a href=\"/wp-admin/options-general.php\">Réglages&nbsp;>&nbsp;Général</a>."
 
 #: src/App/Model/Settings.php:552
 msgid "Show times in Month view"
-msgstr ""
+msgstr "Afficher les heures dans la vue mois"
 
 #: src/App/Model/Settings.php:561
 msgid "Word-wrap event stubs in Month view"
-msgstr ""
+msgstr "Renvoyer à la ligne les titres d'événements dans la vue mois"
 
 #: src/App/Model/Settings.php:571
 msgid ""
 "In Agenda-like views, include all events\n"
 "                            from last day shown"
-msgstr ""
+msgstr "Dans les vues de type agenda, inclure tous les événements du dernier jour affiché"
 
 #: src/App/Model/Settings.php:584
 msgid "Keep all events expanded in Agenda view (disables toggler)."
-msgstr ""
+msgstr "Garder tous les événements développés dans la vue agenda (désactive le bouton bascule)."
 
 #: src/App/Model/Settings.php:596
 msgid "Exclude events from search results"
-msgstr ""
+msgstr "Exclure les événements des résultats de recherche"
 
 #: src/App/Model/Settings.php:608
 msgid ""
 "Hide Subscribe/Add to Calendar\n"
 "                            buttons in calendar and single event views "
-msgstr ""
+msgstr "Masquer les boutons S'abonner/Ajouter au calendrier dans le calendrier et la vue d'un événement "
 
 #: src/App/Model/Settings.php:621
 msgid " Affix filter menu to top of window when it scrolls out of view"
-msgstr ""
+msgstr " Fixer le menu de filtres en haut de la fenêtre lorsqu'il sort de la vue"
 
 #: src/App/Model/Settings.php:691
 msgid " Hide featured image from event details page"
-msgstr ""
+msgstr " Masquer l'image mise en avant sur la page de l'événement"
 
 #: src/App/Model/Settings.php:707
 msgid "Use featured image fallbacks if no featured image is set in event"
-msgstr ""
+msgstr "Utiliser des images de remplacement si l'événement n'a pas d'image mise en avant"
 
 #: src/App/Model/Settings.php:711
 msgid ""
@@ -2493,11 +2495,11 @@ msgid ""
 "                         calendar views show the category image either way. Fallbacks can be influenced by the hooks\n"
 "                         <code>osec_avatar_fallback_order</code>, <code>osec_avatar_valid_media_callbacks</code>\n"
 "                         and <code>osec_avatar_valid_url_callbacks</code>."
-msgstr ""
+msgstr "Cochez cette case si un événement sans image mise en avant doit utiliser l'image de sa catégorie (ou une image du contenu) comme image mise en avant WordPress, p. ex. là où votre thème affiche les images mises en avant. Les vues du calendrier affichent l'image de catégorie dans tous les cas. Les remplacements peuvent être modifiés avec les hooks <code>osec_avatar_fallback_order</code>, <code>osec_avatar_valid_media_callbacks</code> et <code>osec_avatar_valid_url_callbacks</code>."
 
 #: src/App/Model/Settings.php:727
 msgid "Fall back to default image"
-msgstr ""
+msgstr "Utiliser l'image par défaut en dernier recours"
 
 #: src/App/Model/Settings.php:731
 msgid ""
@@ -2505,46 +2507,46 @@ msgid ""
 "                         or osec-fallback-image.[png|jpg] from upload directory. Delete Item in\n"
 "                         media gallery to pick up new image from upload dir. Only applied if \"Use\n"
 "                          featured image fallbacks\" is active."
-msgstr ""
+msgstr "Utilise osec-fallback-image.png, fournie par la constante OSEC_DEFAULT_IMAGE, ou osec-fallback-image.[png|jpg] du dossier de téléversement. Supprimez l'élément de la médiathèque pour qu'une nouvelle image du dossier soit prise en compte. Appliqué uniquement si « Utiliser des images de remplacement » est actif."
 
 #: src/App/Model/Settings.php:773
 msgid " Use 24h time in time pickers"
-msgstr ""
+msgstr " Utiliser le format 24 h dans les sélecteurs d'heure"
 
 #: src/App/Model/Settings.php:798
 msgid ""
 "Skip in_the_loop() check\n"
 "                            that protects against multiple calendar output"
-msgstr ""
+msgstr "Ignorer la vérification in_the_loop() qui empêche l'affichage multiple du calendrier"
 
 #: src/App/Model/Settings.php:803
 msgid ""
 "Try enabling this option if your calendar does not appear on the calendar page.\n"
 "                            It is needed for compatibility with a small number of themes that call\n"
 "                            <code>the_content()</code> from outside of The Loop. Leave disabled otherwise."
-msgstr ""
+msgstr "Essayez d'activer cette option si votre calendrier n'apparaît pas sur la page du calendrier. Elle est nécessaire pour quelques thèmes qui appellent <code>the_content()</code> en dehors de The Loop. Sinon, laissez-la désactivée."
 
 #: src/App/Model/Settings.php:818
 msgid ""
 "Renders calendar views on the client rather than the server;\n"
 "                            significantly improves performance."
-msgstr ""
+msgstr "Génère les vues du calendrier dans le navigateur plutôt que sur le serveur ; nettement plus rapide."
 
 #: src/App/Model/Settings.php:831
 msgid ""
 "Link CSS in <code>&lt;head&gt;</code>\n"
 "                            section when file cache is unavailable."
-msgstr ""
+msgstr "Lier le CSS dans la section <code>&lt;head&gt;</code> lorsque le cache de fichiers n'est pas disponible."
 
 #: src/App/Model/Settings.php:836
 msgid ""
 "Serve CSS as a link if file cache is not enabled rather than have\n"
 "                            it output inline (recommended)."
-msgstr ""
+msgstr "Servir le CSS sous forme de lien plutôt qu'en ligne si le cache de fichiers n'est pas activé (recommandé)."
 
 #: src/App/Model/Settings.php:849
 msgid "Trust this server's CA certificates for feeds"
-msgstr ""
+msgstr "Faire confiance aux certificats CA de ce serveur pour les flux"
 
 #: src/App/Model/Settings.php:850
 msgid ""
@@ -2553,7 +2555,7 @@ msgid ""
 "                            authorities installed on this server, such as a company or local certificate authority\n"
 "                            (\"cURL error 60: unable to get local issuer certificate\").\n"
 "                            Certificates are still verified."
-msgstr ""
+msgstr "Les flux sont récupérés avec une vérification du certificat par rapport à la liste des autorités de certification fournie avec WordPress. Activez cette option pour accepter aussi les certificats émis par des autorités installées sur ce serveur, comme une autorité d'entreprise ou locale (« cURL error 60: unable to get local issuer certificate »). Les certificats restent vérifiés."
 
 #: src/App/Model/Settings.php:868
 msgid ""
@@ -2563,11 +2565,11 @@ msgid ""
 "                            for the calendar page. To use, enter a CSS selcctor that evaluates to a single DOM element.\n"
 "                            Any existing markup found within the target will be replaced by the\n"
 "                            calendar. Will only work if selector is outside the page content loop."
-msgstr ""
+msgstr "Facultatif. Utilisez ce raccourci JavaScript pour placer le calendrier dans un autre élément DOM que le conteneur habituel du contenu de la page, si vous ne pouvez pas créer de modèle de page adapté pour la page du calendrier. Saisissez pour cela un sélecteur CSS qui désigne un seul élément DOM. Tout le balisage existant dans la cible sera remplacé par le calendrier. Ne fonctionne que si le sélecteur se trouve en dehors de la boucle de contenu."
 
 #: src/App/Model/Settings.php:885
 msgid "What Osec adds to your robots.txt file"
-msgstr ""
+msgstr "Ce qu'Osec ajoute à votre fichier robots.txt"
 
 #: src/App/Model/Settings.php:889
 msgid ""
@@ -2578,645 +2580,826 @@ msgid ""
 "                        The file is dynamically created using <a href=\"/?robots=1\" target=\"_blank\">/?robots=1</a>\n"
 "                        and should map to <a href=\"/robots.txt\" target=\"_blank\">/robots.txt</a>\n"
 "                        If you maintain a static robots.txt you should copy over above directives."
-msgstr ""
+msgstr "Le protocole d'exclusion des robots, aussi appelé protocole <code><a href=\"https://en.wikipedia.org/wiki/Robots.txt\" target=\"_blank\">robots.txt</a></code>, est une convention qui indique aux robots d'indexation et autres robots coopératifs s'ils peuvent accéder à tout ou partie d'un site web par ailleurs public.<br />Le fichier est créé dynamiquement via <a href=\"/?robots=1\" target=\"_blank\">/?robots=1</a> et devrait correspondre à <a href=\"/robots.txt\" target=\"_blank\">/robots.txt</a>. Si vous gérez un robots.txt statique, recopiez-y les directives ci-dessus."
 
 #: src/App/Model/Settings.php:900
 msgid "Save settings and reload page to generate."
-msgstr ""
+msgstr "Enregistrez les paramètres et rechargez la page pour le générer."
 
 #: src/App/Model/Settings.php:915
 msgid "Display print icon to print calendar without site header or footer."
-msgstr ""
+msgstr "Afficher une icône d'impression pour imprimer le calendrier sans l'en-tête ni le pied de page du site."
 
 #: src/App/Model/Settings.php:927
 msgid "Display events in calendar time zone"
-msgstr ""
+msgstr "Afficher les événements dans le fuseau horaire du calendrier"
 
 #: src/App/Model/Settings.php:931
 msgid ""
 "If this box is checked events will appear in the calendar time zone with time zone\n"
 "                            information displayed on the event details page."
-msgstr ""
+msgstr "Si cette case est cochée, les événements apparaissent dans le fuseau horaire du calendrier et le fuseau horaire est indiqué sur la page de l'événement."
 
 #: src/App/Model/Settings.php:944
 msgid "Enable event location"
-msgstr ""
+msgstr "Activer le lieu de l'événement"
 
 #: src/App/Model/Settings.php:948
 msgid "Add and display event location information."
-msgstr ""
+msgstr "Ajouter et afficher les informations sur le lieu de l'événement."
 
 #: src/App/Model/Settings.php:960
 msgid "Enable excerpt"
-msgstr ""
+msgstr "Activer l'extrait"
 
 #: src/App/Model/Settings.php:964
 msgid "Allow custom excerpts and use them where appropriate. Falling back to autogenerated excerpts."
-msgstr ""
+msgstr "Autoriser les extraits personnalisés et les utiliser là où c'est pertinent. À défaut, les extraits générés automatiquement sont utilisés."
 
 #: src/App/Model/Settings.php:976
 msgid "Show location in event titles in calendar views"
-msgstr ""
+msgstr "Afficher le lieu dans les titres d'événements des vues du calendrier"
 
 #: src/App/Model/Settings.php:988
 msgid "Enable maps for event location"
-msgstr ""
+msgstr "Activer les cartes pour le lieu de l'événement"
 
 #: src/App/Model/Settings.php:992
 msgid "Add and display event location maps. Requires event locations."
-msgstr ""
+msgstr "Ajouter et afficher des cartes du lieu de l'événement. Nécessite les lieux d'événements."
 
 #: src/App/Model/Settings.php:1004
 msgid " Hide Maps until clicked"
-msgstr ""
+msgstr " Masquer les cartes jusqu'au clic"
 
 #: src/App/Model/Settings.php:1016
 msgid "Disable address autocomplete function"
-msgstr ""
+msgstr "Désactiver la saisie semi-automatique des adresses"
 
 #: src/App/Model/Settings.php:1028
 msgid "Display link to google maps"
-msgstr ""
+msgstr "Afficher un lien vers Google Maps"
 
 #: src/App/Model/Settings.php:1040
 msgid "Display link to OpenStreetMaps"
-msgstr ""
+msgstr "Afficher un lien vers OpenStreetMap"
 
 #: src/App/Model/Settings.php:1052
 msgid "Map zoom level"
-msgstr ""
+msgstr "Niveau de zoom de la carte"
 
 #: src/App/Model/Settings.php:1063
 msgid "Map max zoom level"
-msgstr ""
+msgstr "Niveau de zoom maximal de la carte"
 
 #: src/App/Model/Settings.php:1074
 msgid "Map height (frontend)"
-msgstr ""
+msgstr "Hauteur de la carte (site public)"
 
 #: src/App/Model/Settings.php:1077
 msgid ""
 "It is recommended to use absolute values like rem or px.\n"
 "                        Leaflet sets its own font-size, placeholder- and map-height may vary using em."
-msgstr ""
+msgstr "Il est recommandé d'utiliser des valeurs absolues comme rem ou px. Leaflet définit sa propre taille de police, avec em la hauteur de l'espace réservé et de la carte peut varier."
 
 #: src/App/Model/Settings.php:1090
 msgid ""
 "Use the configured region (WordPress locale)\n"
 "                            to bias the address autocomplete function "
-msgstr ""
+msgstr "Utiliser la région configurée (langue de WordPress) pour orienter la saisie semi-automatique des adresses "
 
 #: src/App/Model/Settings.php:1103
 msgid "Enable organizer contact"
-msgstr ""
+msgstr "Activer le contact de l'organisateur"
 
 #: src/App/Model/Settings.php:1107
 msgid "Add and display organizer contact information for events."
-msgstr ""
+msgstr "Ajouter et afficher les coordonnées de l'organisateur des événements."
 
 #: src/App/Model/Settings.php:1119
 msgid "Enable Event cost and Tickets "
-msgstr ""
+msgstr "Activer le prix et les billets "
 
 #: src/App/Model/Settings.php:1123
 msgid "Add and display event coast and buy tickets url."
-msgstr ""
+msgstr "Ajouter et afficher le prix de l'événement et l'URL d'achat des billets."
 
 #: src/App/Model/Settings.php:1135
 msgid "Enable comments on events"
-msgstr ""
+msgstr "Activer les commentaires sur les événements"
 
 #: src/App/Model/Settings.php:1139
 msgid "Enables comments on events post type."
-msgstr ""
+msgstr "Active les commentaires pour le type de contenu événement."
 
 #: src/App/Model/Settings.php:1151
 msgid "Enable Shortcodes"
-msgstr ""
+msgstr "Activer les codes courts"
 
 #: src/App/Model/Settings.php:1155
 msgid "Enables Osec shortcodes. Disabling will not remove any shortcodes from content, but hide them"
-msgstr ""
+msgstr "Active les codes courts d'Osec. Les désactiver ne les retire pas du contenu, mais les masque."
 
 #: src/App/View/Admin/AdminPageAddEvent.php:67
 msgid "Event location"
-msgstr ""
+msgstr "Lieu de l'événement"
 
 #: src/App/View/Admin/AdminPageAddEvent.php:90
 msgid "Organizer contact"
-msgstr ""
+msgstr "Contact de l'organisateur"
 
 #: src/App/View/Admin/AdminPageAddEvent.php:383
 msgid "Coordinates"
-msgstr ""
+msgstr "Coordonnées GPS"
 
 #: src/App/View/Admin/AdminPageAddEvent.php:384
 msgid "Use your own coordinates"
-msgstr ""
+msgstr "Utiliser vos propres coordonnées GPS"
 
 #: src/App/View/Admin/AdminPageAddEvent.php:390
 msgid "Show Map on event"
-msgstr ""
+msgstr "Afficher la carte sur l'événement"
 
 #: src/App/View/Admin/AdminPageAddEvent.php:411
 msgid "Hide event cost"
-msgstr ""
+msgstr "Masquer le prix de l'événement"
 
 #: src/App/View/Admin/AdminPageDebugCapabilities.php:29
 #: src/App/View/Admin/AdminPageDebugCapabilities.php:30
 msgid "Capabilities reference"
-msgstr ""
+msgstr "Référence des capacités"
 
 #. translators: 1: theme title, 2: theme version
 #: src/App/View/Admin/AdminPageManageThemes.php:57
 #, php-format
 msgid "%1$s %2$s"
-msgstr ""
+msgstr "%1$s %2$s"
 
 #: src/App/View/Admin/AdminPageManageThemes.php:66
 #: src/App/View/Admin/AdminThemeList.php:323
 msgid "The template files are located in"
-msgstr ""
+msgstr "Les fichiers de modèle se trouvent dans"
 
 #: src/App/View/Admin/AdminPageRepairEscaping.php:29
 #: src/App/View/Admin/AdminPageRepairEscaping.php:67
 msgid "Repair stored entities"
-msgstr ""
+msgstr "Réparer les entités enregistrées"
 
 #: src/App/View/Admin/AdminPageRepairEscaping.php:69
 msgid "Earlier versions of the calendar stored some event and feed fields with HTML entities, so \"D&D\" was saved as \"D&amp;D\". Repairing decodes one level. Check the list: a value you typed as \"&amp;\" on purpose would change too."
-msgstr ""
+msgstr "Les versions antérieures du calendrier enregistraient certains champs d'événements et de flux avec des entités HTML : « D&D » était enregistré sous la forme « D&amp;D ». La réparation décode un niveau. Vérifiez la liste : une valeur dans laquelle vous avez saisi « &amp; » volontairement serait aussi modifiée."
 
 #: src/App/View/Admin/AdminPageRepairEscaping.php:74
 msgid "Nothing to repair."
-msgstr ""
+msgstr "Rien à réparer."
 
 #: src/App/View/Admin/AdminPageRepairEscaping.php:76
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 #: src/App/View/Admin/AdminPageRepairEscaping.php:77
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: src/App/View/Admin/AdminPageRepairEscaping.php:78
 msgid "Field"
-msgstr ""
+msgstr "Champ"
 
 #: src/App/View/Admin/AdminPageRepairEscaping.php:79
 msgid "Stored"
-msgstr ""
+msgstr "Enregistré"
 
 #: src/App/View/Admin/AdminPageRepairEscaping.php:80
 msgid "After repair"
-msgstr ""
+msgstr "Après réparation"
 
 #. translators: number of fields
 #: src/App/View/Admin/AdminPageRepairEscaping.php:88
 #, php-format
 msgid "Repair %d field"
 msgid_plural "Repair %d fields"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Réparer %d champ"
+msgstr[1] "Réparer %d champs"
 
 #: src/App/View/Admin/AdminPageRepairEscaping.php:91
 msgid "Same from the command line:"
-msgstr ""
+msgstr "La même chose en ligne de commande :"
 
 #: src/App/View/Admin/AdminPageSettings.php:121
 msgctxt "meta box"
 msgid "Features"
-msgstr ""
+msgstr "Fonctionnalités"
 
 #: src/App/View/Admin/AdminPageSettings.php:148
 msgctxt "meta box"
 msgid "Publish"
-msgstr ""
+msgstr "Publier"
 
 #: src/App/View/Admin/AdminPageSettings.php:161
 msgid "Upgrade database charset (utf8mb4)"
-msgstr ""
+msgstr "Mettre à jour le jeu de caractères de la base de données (utf8mb4)"
 
 #: src/App/View/Admin/AdminPageSettings.php:185
 msgctxt "meta box"
 msgid "Location and maps"
-msgstr ""
+msgstr "Lieu et cartes"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:123
+#: src/App/View/Admin/AdminPageThemeOptions.php:133
 msgid "Theme Options are are set per Calendar Theme and will reset to defaults on theme change."
-msgstr ""
+msgstr "Les options du thème sont propres à chaque thème de calendrier et sont réinitialisées aux valeurs par défaut lors d'un changement de thème."
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:150
+#: src/App/View/Admin/AdminPageThemeOptions.php:160
 msgid "Reset to theme Defaults"
-msgstr ""
+msgstr "Réinitialiser aux valeurs par défaut du thème"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:152
+#: src/App/View/Admin/AdminPageThemeOptions.php:162
 msgid "Export"
-msgstr ""
+msgstr "Exporter"
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:153
+#: src/App/View/Admin/AdminPageThemeOptions.php:163
 msgid "Exports saved variables only."
-msgstr ""
+msgstr "Exporte uniquement les variables enregistrées."
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:185
+#: src/App/View/Admin/AdminPageThemeOptions.php:261
 msgid "Import via browser console. Color pickers will update after saving form."
-msgstr ""
+msgstr "Import via la console du navigateur. Les sélecteurs de couleur sont mis à jour après l'enregistrement du formulaire."
 
 #: src/App/View/Calendar/AbstractView.php:348
 msgid "Print"
-msgstr ""
+msgstr "Imprimer"
 
 #: src/App/View/Calendar/AgendaView.php:419
 msgid "Previous page"
-msgstr ""
+msgstr "Page précédente"
 
 #: src/App/View/Calendar/AgendaView.php:448
 msgid "Next page"
-msgstr ""
+msgstr "Page suivante"
 
 #: src/App/View/Calendar/CalendarPageView.php:139
 msgid ""
 "There was an error loading calendar.\n"
 "                        Please contact site administrator and inform him to configure calendar views."
-msgstr ""
+msgstr "Une erreur s'est produite lors du chargement du calendrier. Veuillez contacter l'administration du site pour qu'elle configure les vues du calendrier."
 
 #: src/App/View/Calendar/CalendarPageView.php:224
 msgid "Filter by"
-msgstr ""
+msgstr "Filtrer par"
 
 #: src/App/View/Calendar/CalendarSubscribeView.php:87
 msgid "Add event to..."
-msgstr ""
+msgstr "Ajouter l'événement à…"
 
 #: src/App/View/Calendar/CalendarSubscribeView.php:95
 msgid "Download ics"
-msgstr ""
+msgstr "Télécharger l'ics"
 
 #: src/App/View/Calendar/CalendarSubscribeView.php:101
 msgid "Subscribe to this calendar in another calendar"
-msgstr ""
+msgstr "S'abonner à ce calendrier dans un autre calendrier"
 
 #: src/App/View/Calendar/CalendarSubscribeView.php:105
 msgid "Download ICS file"
-msgstr ""
+msgstr "Télécharger le fichier ICS"
 
 #: src/App/View/Calendar/OnedayView.php:106
 #: src/App/View/Calendar/WeekView.php:134
 msgid "Show all 24 hours"
-msgstr ""
+msgstr "Afficher les 24 heures"
 
 #: src/App/View/Calendar/OnedayView.php:369
 msgid "Previous day"
-msgstr ""
+msgstr "Jour précédent"
 
 #: src/App/View/Calendar/OnedayView.php:395
 msgid "Next day"
-msgstr ""
+msgstr "Jour suivant"
 
 #: src/App/View/Calendar/WeekView.php:436
 msgid "Previous week"
-msgstr ""
+msgstr "Semaine précédente"
 
 #: src/App/View/Calendar/WeekView.php:464
 msgid "Next week"
-msgstr ""
+msgstr "Semaine suivante"
 
 #: src/App/View/Event/EventAvatarView.php:675
 msgid "Could not read fallback image"
-msgstr ""
+msgstr "Impossible de lire l'image de remplacement"
 
 #: src/App/View/Event/EventContentView.php:312
 msgid "Back to events"
-msgstr ""
+msgstr "Retour aux événements"
 
 #: src/App/View/Event/EventLocationView.php:104
 msgid "View on Google maps"
-msgstr ""
+msgstr "Voir sur Google Maps"
 
 #: src/App/View/Event/EventLocationView.php:106
 msgid "View on OpenStreetMap"
-msgstr ""
+msgstr "Voir sur OpenStreetMap"
 
 #: src/App/View/Event/EventSingleView.php:229
 msgid "Excluding"
-msgstr ""
+msgstr "Sauf"
 
 #: src/App/View/Event/EventSingleView.php:312
 msgid "Edit event"
-msgstr ""
+msgstr "Modifier l'événement"
 
 #: src/Command/ChangeTheme.php:39
 msgid "Unknown calendar theme."
-msgstr ""
+msgstr "Thème de calendrier inconnu."
 
 #. translators: Url to cloned event
 #: src/Command/CommandClone.php:112
 #, php-format
 msgid "The event %1$s was cloned succesfully. <a href=\"%2$s\">Edit cloned event</a>"
-msgstr ""
+msgstr "L'événement %1$s a été dupliqué avec succès. <a href=\"%2$s\">Modifier l'événement dupliqué</a>"
 
 #: src/Settings/Elements/SettingsCache.php:64
 msgid "Only with a persistent object cache (Redis, Memcached)."
-msgstr ""
+msgstr "Uniquement avec un cache d'objets persistant (Redis, Memcached)."
 
 #: src/Settings/Elements/SettingsCache.php:96
 msgid "Caches used in given order."
-msgstr ""
+msgstr "Les caches sont utilisés dans l'ordre indiqué."
 
 #: src/Settings/Elements/SettingsCache.php:105
 msgid "Twig cache is writable"
-msgstr ""
+msgstr "Le cache Twig est accessible en écriture"
 
 #: src/Settings/Elements/SettingsCache.php:108
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #: src/Settings/Elements/SettingsCache.php:109
 msgid "Available"
-msgstr ""
+msgstr "Disponible"
 
 #: src/Settings/Elements/SettingsCache.php:110
 msgid "CSS"
-msgstr ""
+msgstr "CSS"
 
 #: src/Settings/Elements/SettingsCache.php:111
 msgid "Constant"
-msgstr ""
+msgstr "Constante"
 
 #: src/Settings/Elements/SettingsCache.php:112
 msgid "Notes"
-msgstr ""
+msgstr "Remarques"
 
 #: src/Settings/Elements/SettingsCache.php:113
 msgid "Compiled CSS"
-msgstr ""
+msgstr "CSS compilé"
 
 #: src/Settings/Elements/SettingsCache.php:114
 msgid "Twig Cache"
-msgstr ""
+msgstr "Cache Twig"
 
 #: src/Settings/Elements/SettingsCache.php:115
 msgid "Compiled templates are stored as PHP files."
-msgstr ""
+msgstr "Les modèles compilés sont enregistrés sous forme de fichiers PHP."
 
 #: src/Settings/Elements/SettingsCache.php:116
 msgid "Without a writable folder, they compile on every request."
-msgstr ""
+msgstr "Sans dossier accessible en écriture, ils sont compilés à chaque requête."
 
 #: src/Settings/Elements/SettingsCache.php:117
 #: src/Settings/Elements/SettingsCache.php:118
 msgid "Clear all caches"
-msgstr ""
+msgstr "Vider tous les caches"
 
 #: src/Settings/Elements/SettingsCache.php:119
 msgid "Clearing..."
-msgstr ""
+msgstr "Vidage…"
 
 #: src/Settings/Elements/SettingsCache.php:120
 msgid "The caches could not be cleared."
-msgstr ""
+msgstr "Les caches n'ont pas pu être vidés."
 
 #: src/Settings/Elements/SettingsCache.php:124
 msgid "Deletes the compiled calendar CSS from every cache (file, APCu, database),"
-msgstr ""
+msgstr "Supprime le CSS compilé du calendrier de tous les caches (fichier, APCu, base de données),"
 
 #: src/Settings/Elements/SettingsCache.php:128
 msgid "the compiled Twig templates of this site and what older versions left behind."
-msgstr ""
+msgstr "les modèles Twig compilés de ce site et ce que les anciennes versions ont laissé."
 
 #: src/Settings/Elements/SettingsCache.php:132
 msgid "The CSS is compiled first and rebuilt right away."
-msgstr ""
+msgstr "Le CSS est d'abord compilé puis reconstruit immédiatement."
 
 #: src/Settings/Elements/SettingsCache.php:133
 msgid "If it does not compile, the current CSS is kept."
-msgstr ""
+msgstr "S'il ne se compile pas, le CSS actuel est conservé."
 
 #: src/Settings/Elements/SettingsCache.php:134
 msgid "Templates are rebuilt on the next page view."
-msgstr ""
+msgstr "Les modèles sont reconstruits lors du prochain affichage de page."
 
 #: src/Settings/Elements/SettingsCache.php:135
 msgid "Settings and theme options are not changed."
-msgstr ""
+msgstr "Les paramètres et les options du thème ne sont pas modifiés."
 
 #: src/Settings/Elements/SettingsCache.php:156
 msgid "Status"
-msgstr ""
+msgstr "État"
 
 #: src/Settings/Elements/SettingsCache.php:157
 msgid "Not compiled yet: it is compiled on the next page view with a calendar."
-msgstr ""
+msgstr "Pas encore compilé : il sera compilé lors du prochain affichage d'une page avec un calendrier."
 
 #: src/Settings/Elements/SettingsCache.php:166
 msgid "Static file, sent by the web server"
-msgstr ""
+msgstr "Fichier statique, servi par le serveur web"
 
 #: src/Settings/Elements/SettingsCache.php:167
 msgid "Object cache (site transient), sent by PHP"
-msgstr ""
+msgstr "Cache d'objets (transient du site), servi par PHP"
 
 #: src/Settings/Elements/SettingsCache.php:168
 msgid "APCu, sent by PHP"
-msgstr ""
+msgstr "APCu, servi par PHP"
 
 #: src/Settings/Elements/SettingsCache.php:169
 msgid "Database, sent by PHP"
-msgstr ""
+msgstr "Base de données, servi par PHP"
 
 #: src/Settings/Elements/SettingsCache.php:173
 msgid "Stored as"
-msgstr ""
+msgstr "Enregistré comme"
 
 #: src/Settings/Elements/SettingsCache.php:180
 msgid "File"
-msgstr ""
+msgstr "Fichier"
 
-#: src/Settings/Elements/SettingsCache.php:186
+#: src/Settings/Elements/SettingsCache.php:188
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
-#: src/Settings/Elements/SettingsCache.php:191
+#: src/Settings/Elements/SettingsCache.php:193
 msgid "Version"
-msgstr ""
+msgstr "Version"
 
 #: src/Settings/Elements/SettingsDatabase.php:32
 msgid "These tables cannot store emoji and other 4-byte characters yet:"
-msgstr ""
+msgstr "Ces tables ne peuvent pas encore enregistrer les émojis et autres caractères sur 4 octets :"
 
 #: src/Settings/Elements/SettingsDatabase.php:36
 msgid "an event or feed containing one fails to save."
-msgstr ""
+msgstr "un événement ou un flux qui en contient ne peut pas être enregistré."
 
 #: src/Settings/Elements/SettingsDatabase.php:40
 msgid "Converting them changes no stored text."
-msgstr ""
+msgstr "Leur conversion ne modifie aucun texte enregistré."
 
 #: src/Settings/Elements/SettingsDatabase.php:41
 msgid "It takes about a second per 100,000 events."
-msgstr ""
+msgstr "Elle prend environ une seconde pour 100 000 événements."
 
 #: src/Settings/Elements/SettingsDatabase.php:42
 msgid "Back up the database first."
-msgstr ""
+msgstr "Sauvegardez d'abord la base de données."
 
 #: src/Settings/Elements/SettingsDatabase.php:45
 msgid "Table"
-msgstr ""
+msgstr "Table"
 
 #: src/Settings/Elements/SettingsDatabase.php:46
 msgid "Collation"
-msgstr ""
+msgstr "Collation"
 
 #: src/Settings/Elements/SettingsDatabase.php:47
 msgid "not utf8, will not be converted"
-msgstr ""
+msgstr "pas en utf8, ne sera pas convertie"
 
 #: src/Settings/Elements/SettingsDatabase.php:48
 msgid "Convert database tables"
-msgstr ""
+msgstr "Convertir les tables de la base de données"
 
 #: src/Settings/Elements/SettingsDatabase.php:49
 msgid "Converting..."
-msgstr ""
+msgstr "Conversion…"
 
 #: src/Settings/Elements/SettingsDatabase.php:50
 msgid "The tables could not be converted."
-msgstr ""
+msgstr "Les tables n'ont pas pu être converties."
 
 #: src/Settings/Elements/ThemeVariableSize.php:26
 msgid "CSS font size"
-msgstr ""
+msgstr "Taille de police CSS"
 
 #. translators: %s: taxonomy name
 #: calendar_block/build/index.js:2
 #: calendar_block/src/components/TaxonomySelect.js:72
 #, js-format
 msgid "Filter by %s"
-msgstr ""
+msgstr "Filtrer par %s"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/components/ViewSelect.js:25
 msgid "One Day"
-msgstr ""
+msgstr "Un jour"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/components/OsecEventsFilter.js:57
 msgid "Filter by Events"
-msgstr ""
+msgstr "Filtrer par événements"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/components/OsecEventsFilter.js:65
 msgid "Type to search events"
-msgstr ""
+msgstr "Tapez pour rechercher des événements"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/components/LimitBy.js:22
 msgid "Limit by number of days (Disables date navigation)"
-msgstr ""
+msgstr "Limiter par nombre de jours (désactive la navigation par date)"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/components/LimitBy.js:27
 msgid "Limit by event count (pager)"
-msgstr ""
+msgstr "Limiter par nombre d'événements (pagination)"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/components/LimitBy.js:34
 msgid "days"
-msgstr ""
+msgstr "jours"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/components/LimitBy.js:39
 msgid "events"
-msgstr ""
+msgstr "événements"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:104
 msgid "Osec Calendar"
-msgstr ""
+msgstr "Calendrier Osec"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:116
 msgid "Settings close"
-msgstr ""
+msgstr "Fermer les paramètres"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:117
 msgid "Settings open"
-msgstr ""
+msgstr "Ouvrir les paramètres"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:144
 msgid "Display view select"
-msgstr ""
+msgstr "Afficher le sélecteur de vue"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:177
 msgid "Agenda events"
-msgstr ""
+msgstr "Événements de l'agenda"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:189
 #: calendar_block/src/edit.js:337
 msgid "Use the global setting"
-msgstr ""
+msgstr "Utiliser le paramètre global"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:193
 msgid "Expanded (no Expand/Collapse all)"
-msgstr ""
+msgstr "Développés (sans Tout développer/réduire)"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:197
 msgid "Collapsed, with Expand/Collapse all"
-msgstr ""
+msgstr "Réduits, avec Tout développer/réduire"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:210
 msgid "Fixed calendar date"
-msgstr ""
+msgstr "Date fixe du calendrier"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:218
 msgid "Selected date for fixed calendar start time"
-msgstr ""
+msgstr "Date choisie comme début fixe du calendrier"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:225
 msgid "Defaults to current day"
-msgstr ""
+msgstr "Par défaut, le jour actuel"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:275
 msgid "View settings"
-msgstr ""
+msgstr "Paramètres d'affichage"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:283
 msgid "Display filters"
-msgstr ""
+msgstr "Afficher les filtres"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:297
 msgid "Display date navigation"
-msgstr ""
+msgstr "Afficher la navigation par date"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:312
 msgid "Display iCal Feeds"
-msgstr ""
+msgstr "Afficher les flux iCal"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:325
 msgid "Print icon"
-msgstr ""
+msgstr "Icône d'impression"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:340
 msgid "Show"
-msgstr ""
+msgstr "Afficher"
 
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:341
 msgid "Hide"
-msgstr ""
+msgstr "Masquer"
+
+#: public/osec_themes/plana/less/user_variables.php:36
+msgid "Text (default: the theme's text colour)"
+msgstr "Texte (par défaut : la couleur de texte du thème)"
+
+#: public/osec_themes/plana/less/user_variables.php:44
+msgid "Links"
+msgstr "Liens"
+
+#: public/osec_themes/plana/less/user_variables.php:52
+msgid "Links (hover)"
+msgstr "Liens (survol)"
+
+#: public/osec_themes/plana/less/user_variables.php:60
+msgid "Event colour (events without category colour)"
+msgstr "Couleur des événements (événements sans couleur de catégorie)"
+
+#: public/osec_themes/plana/less/user_variables.php:68
+msgid "Event titles"
+msgstr "Titres des événements"
+
+#: public/osec_themes/plana/less/user_variables.php:76
+msgid "Event titles (hover)"
+msgstr "Titres des événements (survol)"
+
+#: public/osec_themes/plana/less/user_variables.php:84
+msgid "Background (tables, agenda events)"
+msgstr "Arrière-plan (tableaux, événements de l'agenda)"
+
+#: public/osec_themes/plana/less/user_variables.php:92
+msgid "Subtle background (table headers, empty days, hour labels)"
+msgstr "Arrière-plan discret (en-têtes de tableau, jours vides, libellés d'heure)"
+
+#: public/osec_themes/plana/less/user_variables.php:100
+msgid "Day number background (month)"
+msgstr "Arrière-plan du numéro de jour (mois)"
+
+#: public/osec_themes/plana/less/user_variables.php:108
+msgid "Lines (grid, borders)"
+msgstr "Lignes (grille, bordures)"
+
+#: public/osec_themes/plana/less/user_variables.php:116
+msgid "Strong lines (agenda events and date titles)"
+msgstr "Lignes marquées (événements de l'agenda et titres de date)"
+
+#: public/osec_themes/plana/less/user_variables.php:123
+msgid "Text on coloured backgrounds (event bars, date badge, all-day badge)"
+msgstr "Texte sur fond coloré (barres d'événements, pastille de date, pastille toute la journée)"
+
+#: public/osec_themes/plana/less/user_variables.php:134
+msgid "Today highlight"
+msgstr "Mise en évidence d'aujourd'hui"
+
+#: public/osec_themes/plana/less/user_variables.php:142
+msgid "Day date badge"
+msgstr "Pastille de date du jour"
+
+#: public/osec_themes/plana/less/user_variables.php:150
+msgid "\"Read more\" button text"
+msgstr "Texte du bouton « En savoir plus »"
+
+#: public/osec_themes/plana/less/user_variables.php:157
+msgid "\"Read more\" button background"
+msgstr "Arrière-plan du bouton « En savoir plus »"
+
+#: public/osec_themes/plana/less/user_variables.php:164
+msgid "Controls text (buttons on the event page)"
+msgstr "Texte des commandes (boutons de la page de l'événement)"
+
+#: public/osec_themes/plana/less/user_variables.php:171
+msgid "Controls background"
+msgstr "Arrière-plan des commandes"
+
+#: public/osec_themes/plana/less/user_variables.php:178
+msgid "Toolbar text (toolbar, filter and view menus, subscribe, back to calendar)"
+msgstr "Texte de la barre d'outils (barre d'outils, menus de filtres et de vues, abonnement, retour au calendrier)"
+
+#: public/osec_themes/plana/less/user_variables.php:188
+msgid "Toolbar background"
+msgstr "Arrière-plan de la barre d'outils"
+
+#: public/osec_themes/plana/less/user_variables.php:195
+msgid "Edit link (logged in)"
+msgstr "Lien de modification (connecté)"
+
+#: public/osec_themes/plana/less/user_variables.php:202
+msgid "Label text (event page)"
+msgstr "Texte des libellés (page de l'événement)"
+
+#: public/osec_themes/plana/less/user_variables.php:210
+msgid "Muted text (weekdays, hours, labels, day numbers)"
+msgstr "Texte atténué (jours de la semaine, heures, libellés, numéros de jour)"
+
+#: public/osec_themes/plana/less/user_variables.php:218
+msgid "Small text"
+msgstr "Petit texte"
+
+#: public/osec_themes/plana/less/user_variables.php:225
+msgid "Normal text"
+msgstr "Texte normal"
+
+#: public/osec_themes/plana/less/user_variables.php:232
+msgid "Spacing above and below Agenda (large screens)"
+msgstr "Espacement au-dessus et au-dessous de l'agenda (grands écrans)"
+
+#: src/App/View/Admin/AdminPageThemeOptions.php:53
+msgid "Colours"
+msgstr "Couleurs"
+
+#: src/App/View/Admin/AdminPageThemeOptions.php:56
+msgid "Backgrounds and lines"
+msgstr "Arrière-plans et lignes"
+
+#: src/App/View/Admin/AdminPageThemeOptions.php:59
+msgid "Text sizes"
+msgstr "Tailles de texte"
+
+#: src/Command/SaveThemeOptions.php:55
+msgid "not a valid value"
+msgstr "valeur non valide"
+
+#. translators: 1: setting name, 2: why the value was refused, 3: what the setting holds now
+#: src/Command/SaveThemeOptions.php:82
+#, php-format
+msgid "%1$s: %2$s (%3$s)"
+msgstr "%1$s : %2$s (%3$s)"
+
+#: src/Command/SaveThemeOptions.php:86
+msgid "previous value kept"
+msgstr "valeur précédente conservée"
+
+#: src/Command/SaveThemeOptions.php:87
+msgid "default used"
+msgstr "valeur par défaut utilisée"
+
+#: src/Command/SaveThemeOptions.php:91
+msgid "Theme options were updated, except these settings:"
+msgstr "Les options du thème ont été mises à jour, sauf ces réglages :"
+
+#: src/Command/SaveThemeOptions.php:125
+msgid "refers to itself"
+msgstr "fait référence à lui-même"
+
+#: src/Command/SaveThemeOptions.php:126
+msgid "is also a background, so it cannot follow the text colour (currentColor)"
+msgstr "est aussi un arrière-plan, il ne peut donc pas suivre la couleur du texte (currentColor)"
+
+#: src/Settings/Elements/SettingsCache.php:189
+msgid "None: the CSS is printed inline in each page."
+msgstr "Aucun : le CSS est intégré dans chaque page."
+
+#: src/Settings/Elements/ThemeVariableColor.php:37
+#: src/Settings/Elements/ThemeVariableSize.php:39
+msgid "Use default"
+msgstr "Utiliser la valeur par défaut"
+
+#. translators: %s: name of another Theme Options setting
+#: src/Theme/CssVarValue.php:388
+#, php-format
+msgid "same as \"%s\""
+msgstr "comme « %s »"
+
+#: src/Theme/CssVarValue.php:391
+msgid "set by WordPress in the calendar; the value shown here may differ"
+msgstr "défini par WordPress dans le calendrier ; la valeur affichée ici peut différer"
+
+#. translators: 1: name of a colour or size of the WordPress theme, 2: its value
+#: src/Theme/CssVarValue.php:399
+#, php-format
+msgid "from your theme: %1$s (%2$s)"
+msgstr "de votre thème : %1$s (%2$s)"
+
+#. translators: %s: fallback value
+#: src/Theme/CssVarValue.php:405
+#, php-format
+msgid "your theme does not set it: %s"
+msgstr "votre thème ne le définit pas : %s"
+
+#: src/Theme/CssVarValue.php:407
+msgid "your theme does not set it"
+msgstr "votre thème ne le définit pas"

@@ -645,6 +645,10 @@ table.ai1ec-oneday-view-original {
 
     .ai1ec-event {
       border-bottom: 1px dotted @table-border-color;
+      // Lift the two-line cut of .ai1ec-event above: with overflow visible it still drew the
+      // ellipsis after line two and the rest of the title over the next event.
+      display: block;
+      -webkit-line-clamp: unset;
       height: auto;
       overflow: visible;
       padding-top: 1px;
@@ -1402,7 +1406,9 @@ table.ai1ec-oneday-view-original {
       break-inside: avoid;
       break-after: avoid;
     }
+    // Contains the floated image without clipping (the print button hides the footer below it).
     .ai1ec-event {
+      display: flow-root;
       orphans: 5;
       widows: 5;
       -webkit-box-decoration-break: clone;

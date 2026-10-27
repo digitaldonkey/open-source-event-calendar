@@ -11,7 +11,7 @@
 .osec-plana-single-event {
 
   // All sizes and breakpoints are based on:
-  font-size: var(--wp--preset--font-size--normal);
+  font-size: var(--osec-font-size-normal);
   --main-max-width: 100%; // 35*16=560px
   @media (min-width: 71.5em) {
     --main-max-width: 35em; // 35*16=560px
@@ -86,11 +86,16 @@
     //outline: 1px solid yellowgreen;
     font-weight: bold;
     min-width: 4em;
-    color: var(--wp--preset--color--contrast);
+    color: var(--osec-label-text);
 
     @media (min-width: @breakpoint) {
       width: 14%;
     }
+  }
+  // "Repeats" and "Excludes" are part of the date: text colour.
+  .osec-recurrence .label,
+  .osec-recurrence--excludes .label {
+    color: var(--osec-text);
   }
 
   // Right content column.
@@ -189,4 +194,31 @@
     }
   }
 
+  // Printed, Chrome and Firefox moved the whole list (a wrapping flex container) to the next page.
+  // The same two columns with floats break between the rows.
+  @media print {
+    display: block;
+    // Own formatting context as a flex item had: margins inside do not collapse through.
+    > dd {
+      display: flow-root;
+      width: auto;
+    }
+    // A label stays with its value (one column on small paper).
+    > dt {
+      break-after: avoid;
+    }
+    // As a flex item it already was a block-level flex box.
+    .event-date-time {
+      display: flex;
+    }
+    @media (min-width: @breakpoint) {
+      > dt {
+        float: left;
+        clear: left;
+      }
+      > dd {
+        margin-inline-start: calc(14% + 2em);
+      }
+    }
+  }
 }

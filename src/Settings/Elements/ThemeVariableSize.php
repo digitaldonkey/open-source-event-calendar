@@ -27,8 +27,20 @@ class ThemeVariableSize extends SettingsAbstract
             ],
         ];
 
+        // A css_var setting (plana) may hold var(--…, fallback): its own field, without the size
+        // pattern check of the plain field.
+        $template = 'theme-options/size.twig';
+        if ( ! empty($this->args['css_var'])) {
+            $template        = 'theme-options/size-css-var.twig';
+            $args['css_var'] = $this->args['css_var'];
+            $args['default'] = $this->args['default'] ?? '';
+            $args['source']  = $this->args['source'] ?? '';
+            $args['default_label']     = __('Default', 'open-source-event-calendar');
+            $args['use_default_label'] = __('Use default', 'open-source-event-calendar');
+        }
+
         return ThemeLoader::factory($this->app)
-                          ->get_file('theme-options/size.twig', $args, true)
+                          ->get_file($template, $args, true)
                           ->get_content();
     }
 }

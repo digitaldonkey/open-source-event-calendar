@@ -1,0 +1,56 @@
+/*
+ * Theme Options: fields of settings that may hold a CSS variable.
+ *
+ * The text field takes the whole width next to its label, so long references
+ * (var(--wp--preset--…, fallback)) stay readable and every row lines up; the browser's colour
+ * input sits next to it without the default padding around its swatch.
+ * Loaded by AdminPageThemeOptions::enqueue_css_var_preview().
+ */
+.ai1ec-form-group:has(> div > .osec-css-var-color),
+.ai1ec-form-group:has(> div > .osec-css-var-size) {
+    align-items: flex-start;
+}
+/* The row is a flex box (label | field wrapper); the wrapper takes the rest of the width. */
+.ai1ec-form-group > div:has(> .osec-css-var-color),
+.ai1ec-form-group > div:has(> .osec-css-var-size) {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.osec-css-var-color,
+.osec-css-var-size {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+}
+.osec-css-var-color .osec-css-var-value,
+.osec-css-var-size .osec-css-var-value {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: none;
+}
+.osec-css-var-color .ai1ec-input-group-addon {
+    display: flex;
+    align-items: center;
+    width: auto;
+    padding: 4px;
+}
+input.osec-css-var-picker {
+    width: 3em;
+    height: 100%;
+    min-height: 2em;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+input.osec-css-var-picker::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+input.osec-css-var-picker::-moz-color-swatch {
+    border: 1px solid #8c8f94;
+}
+/* The CSS variable name above the field. */
+.osec-css-var-name {
+    display: inline-block;
+    margin-bottom: .25em;
+}

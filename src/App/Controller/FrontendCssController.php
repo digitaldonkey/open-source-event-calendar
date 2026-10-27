@@ -536,8 +536,11 @@ class FrontendCssController extends OsecBaseClass
      * Update the less variables on the DB and recompile the CSS
      *
      * @param  bool  $resetting  are we resetting or updating variables?
+     * @param  bool  $notify  Store the success notice (false: the caller stores its own).
+     *
+     * @return bool Whether the CSS compiled and the variables were stored.
      */
-    public function update_variables_and_compile_css(array $variables, $resetting)
+    public function update_variables_and_compile_css(array $variables, $resetting, bool $notify = true): bool
     {
         $no_parse_errors = $this->invalidate_cache($variables, true);
 
@@ -566,8 +569,12 @@ class FrontendCssController extends OsecBaseClass
                     get_site_url()
                 );
             }
-            NotificationAdmin::factory($this->app)->store($message);
+            if ($notify) {
+                NotificationAdmin::factory($this->app)->store($message);
+            }
         }
+
+        return (bool)$no_parse_errors;
     }
 
     /**

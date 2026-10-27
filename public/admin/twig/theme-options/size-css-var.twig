@@ -1,0 +1,29 @@
+{#
+ # Size setting that may hold a CSS variable reference.
+ #
+ # The text field is the stored value: a size (any CSS length unit or %) or var(--…, fallback).
+ # Below: where the value comes from ('source', e.g. the theme's own value as written - fluid
+ # sizes are not computed) and, when it differs, the default with a "Use default" link
+ # (theme_options_css_vars.js), and, above the
+ # field, the CSS variable name the setting writes.
+ #}
+{% extends "theme-options/base_option.twig" %}
+
+{% block variable %}
+<code class="osec-css-var-name">--{{ css_var }}</code>
+<div class="osec-css-var-size">
+    <input
+        type="text"
+        id="{{ id }}"
+        name="{{ id }}"
+        class="ai1ec-form-control osec-css-var-value"
+        value="{{ value }}"
+        required="required"
+    />
+</div>
+<p class="description osec-css-var-details">
+    {{ source }}
+    {% if default and default != value %}<br />{{ default_label }}: <code>{{ default }}</code>
+        <a href="#" class="osec-css-var-use-default" data-osec-default="{{ default }}">{{ use_default_label }}</a>{% endif %}
+</p>
+{% endblock %}

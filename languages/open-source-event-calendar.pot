@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-23T23:57:55+02:00\n"
+"POT-Creation-Date: 2026-10-27T17:00:47+01:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: open-source-event-calendar\n"
@@ -39,6 +39,110 @@ msgstr ""
 #. Author URI of the plugin
 #: open-source-event-calendar.php
 msgid "https://github.com/digitaldonkey"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:36
+msgid "Text (default: the theme's text colour)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:44
+msgid "Links"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:52
+msgid "Links (hover)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:60
+msgid "Event colour (events without category colour)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:68
+msgid "Event titles"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:76
+msgid "Event titles (hover)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:84
+msgid "Background (tables, agenda events)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:92
+msgid "Subtle background (table headers, empty days, hour labels)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:100
+msgid "Day number background (month)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:108
+msgid "Lines (grid, borders)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:116
+msgid "Strong lines (agenda events and date titles)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:123
+msgid "Text on coloured backgrounds (event bars, date badge, all-day badge)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:134
+msgid "Today highlight"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:142
+msgid "Day date badge"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:150
+msgid "\"Read more\" button text"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:157
+msgid "\"Read more\" button background"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:164
+msgid "Controls text (buttons on the event page)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:171
+msgid "Controls background"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:178
+msgid "Toolbar text (toolbar, filter and view menus, subscribe, back to calendar)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:188
+msgid "Toolbar background"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:195
+msgid "Edit link (logged in)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:202
+msgid "Label text (event page)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:210
+msgid "Muted text (weekdays, hours, labels, day numbers)"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:218
+msgid "Small text"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:225
+msgid "Normal text"
+msgstr ""
+
+#: public/osec_themes/plana/less/user_variables.php:232
+msgid "Spacing above and below Agenda (large screens)"
 msgstr ""
 
 #: public/osec_themes/umbra/less/user_variables.php:10
@@ -529,19 +633,19 @@ msgid "Unexpected CSS content"
 msgstr ""
 
 #. translators: Url
-#: src/App/Controller/FrontendCssController.php:553
+#: src/App/Controller/FrontendCssController.php:556
 #, php-format
 msgid "Theme options were successfully reset to their default values. <a href='%s'>Visit site</a>"
 msgstr ""
 
 #. translators: Site url
-#: src/App/Controller/FrontendCssController.php:562
+#: src/App/Controller/FrontendCssController.php:565
 #, php-format
 msgid "Theme options were updated successfully. <a href='%s'>Visit site</a>"
 msgstr ""
 
 #. translators: Minimum PHP memory required
-#: src/App/Controller/FrontendCssController.php:590
+#: src/App/Controller/FrontendCssController.php:597
 #, php-format
 msgid ""
 "CSS compilation failed because you do not have enough free memory\n"
@@ -549,14 +653,14 @@ msgid ""
 "                      properly without CSS. Increase your PHP memory limit."
 msgstr ""
 
-#: src/App/Controller/FrontendCssController.php:617
+#: src/App/Controller/FrontendCssController.php:624
 msgid ""
 "The LESS file compiled correctly but there was an error\n"
 "                    while saving the generated CSS to persistence."
 msgstr ""
 
 #. translators: Error message
-#: src/App/Controller/FrontendCssController.php:795
+#: src/App/Controller/FrontendCssController.php:802
 #, php-format
 msgid ""
 "<strong>There was an error while compiling CSS.</strong>\n"
@@ -572,7 +676,7 @@ msgid ""
 msgstr ""
 
 #. translators: filename
-#: src/App/Controller/LessController.php:183
+#: src/App/Controller/LessController.php:184
 #, php-format
 msgid "Could not map SASS import \"%1$s\" at theme \"%2$s\""
 msgstr ""
@@ -2067,66 +2171,78 @@ msgstr ""
 msgid "Save Settings"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:52
+#: src/App/View/Admin/AdminPageThemeOptions.php:53
+msgid "Colours"
+msgstr ""
+
+#: src/App/View/Admin/AdminPageThemeOptions.php:56
+msgid "Backgrounds and lines"
+msgstr ""
+
+#: src/App/View/Admin/AdminPageThemeOptions.php:59
+msgid "Text sizes"
+msgstr ""
+
+#: src/App/View/Admin/AdminPageThemeOptions.php:62
 msgid "General"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:55
+#: src/App/View/Admin/AdminPageThemeOptions.php:65
 msgid "Tables"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:58
+#: src/App/View/Admin/AdminPageThemeOptions.php:68
 msgid "Buttons"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:61
+#: src/App/View/Admin/AdminPageThemeOptions.php:71
 msgid "Forms"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:64
+#: src/App/View/Admin/AdminPageThemeOptions.php:74
 msgid "Calendar general"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:67
+#: src/App/View/Admin/AdminPageThemeOptions.php:77
 msgid "Month/week/day view"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:70
+#: src/App/View/Admin/AdminPageThemeOptions.php:80
 #: calendar_block/build/index.js:2
 #: calendar_block/src/edit.js:160
 msgid "Agenda view"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:93
-#: src/App/View/Admin/AdminPageThemeOptions.php:94
+#: src/App/View/Admin/AdminPageThemeOptions.php:103
+#: src/App/View/Admin/AdminPageThemeOptions.php:104
 msgid "Theme Options"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:119
+#: src/App/View/Admin/AdminPageThemeOptions.php:129
 msgid "Calendar Theme Options"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:123
+#: src/App/View/Admin/AdminPageThemeOptions.php:133
 msgid "Theme Options are are set per Calendar Theme and will reset to defaults on theme change."
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:146
+#: src/App/View/Admin/AdminPageThemeOptions.php:156
 msgid "Save Options"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:150
+#: src/App/View/Admin/AdminPageThemeOptions.php:160
 msgid "Reset to theme Defaults"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:152
+#: src/App/View/Admin/AdminPageThemeOptions.php:162
 msgid "Export"
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:153
+#: src/App/View/Admin/AdminPageThemeOptions.php:163
 msgid "Exports saved variables only."
 msgstr ""
 
-#: src/App/View/Admin/AdminPageThemeOptions.php:185
+#: src/App/View/Admin/AdminPageThemeOptions.php:261
 msgid "Import via browser console. Color pickers will update after saving form."
 msgstr ""
 
@@ -2651,6 +2767,36 @@ msgstr ""
 msgid "The event %1$s was cloned succesfully. <a href=\"%2$s\">Edit cloned event</a>"
 msgstr ""
 
+#: src/Command/SaveThemeOptions.php:55
+msgid "not a valid value"
+msgstr ""
+
+#. translators: 1: setting name, 2: why the value was refused, 3: what the setting holds now
+#: src/Command/SaveThemeOptions.php:82
+#, php-format
+msgid "%1$s: %2$s (%3$s)"
+msgstr ""
+
+#: src/Command/SaveThemeOptions.php:86
+msgid "previous value kept"
+msgstr ""
+
+#: src/Command/SaveThemeOptions.php:87
+msgid "default used"
+msgstr ""
+
+#: src/Command/SaveThemeOptions.php:91
+msgid "Theme options were updated, except these settings:"
+msgstr ""
+
+#: src/Command/SaveThemeOptions.php:125
+msgid "refers to itself"
+msgstr ""
+
+#: src/Command/SaveThemeOptions.php:126
+msgid "is also a background, so it cannot follow the text colour (currentColor)"
+msgstr ""
+
 #: src/Exception/DatabaseErrorException.php:22
 msgid ""
 "Database update has failed. Please make sure, that database user, defined in <em>wp-config.php</em>\n"
@@ -2800,11 +2946,15 @@ msgstr ""
 msgid "File"
 msgstr ""
 
-#: src/Settings/Elements/SettingsCache.php:186
+#: src/Settings/Elements/SettingsCache.php:188
 msgid "URL"
 msgstr ""
 
-#: src/Settings/Elements/SettingsCache.php:191
+#: src/Settings/Elements/SettingsCache.php:189
+msgid "None: the CSS is printed inline in each page."
+msgstr ""
+
+#: src/Settings/Elements/SettingsCache.php:193
 msgid "Version"
 msgstr ""
 
@@ -2867,6 +3017,8 @@ msgid "Enabled"
 msgstr ""
 
 #: src/Settings/Elements/SettingsEnabledViews.php:24
+#: src/Settings/Elements/ThemeVariableColor.php:36
+#: src/Settings/Elements/ThemeVariableSize.php:38
 msgid "Default"
 msgstr ""
 
@@ -3010,6 +3162,11 @@ msgstr ""
 msgid "Display options"
 msgstr ""
 
+#: src/Settings/Elements/ThemeVariableColor.php:37
+#: src/Settings/Elements/ThemeVariableSize.php:39
+msgid "Use default"
+msgstr ""
+
 #: src/Settings/Elements/ThemeVariableFont.php:88
 msgid "Custom..."
 msgstr ""
@@ -3028,6 +3185,32 @@ msgstr ""
 
 #: src/Settings/HtmlFactory.php:312
 msgid "Tags (optional)"
+msgstr ""
+
+#. translators: %s: name of another Theme Options setting
+#: src/Theme/CssVarValue.php:388
+#, php-format
+msgid "same as \"%s\""
+msgstr ""
+
+#: src/Theme/CssVarValue.php:391
+msgid "set by WordPress in the calendar; the value shown here may differ"
+msgstr ""
+
+#. translators: 1: name of a colour or size of the WordPress theme, 2: its value
+#: src/Theme/CssVarValue.php:399
+#, php-format
+msgid "from your theme: %1$s (%2$s)"
+msgstr ""
+
+#. translators: %s: fallback value
+#: src/Theme/CssVarValue.php:405
+#, php-format
+msgid "your theme does not set it: %s"
+msgstr ""
+
+#: src/Theme/CssVarValue.php:407
+msgid "your theme does not set it"
 msgstr ""
 
 #. translators: Missing file extensions

@@ -147,6 +147,14 @@ const ADMIN = [
         description: `The event editor with every box filled: date and time, weekly recurrence, venue with map and
             coordinates, cost and ticket URL, organizer contact, featured image.`,
         path: (m) => `/wp-admin/post.php?post=${m.events.jazz.id}&action=edit`,
+        // The permalink starts with the address of the site the run uses (sandbox host).
+        replace: [
+            {
+                label: 'site address',
+                selector: '#sample-permalink a',
+                pattern: '^https?://[^/]+',
+            },
+        ],
     },
     {
         name: 'feeds',
@@ -173,6 +181,34 @@ const ADMIN = [
                 selector: '.timely li',
                 text: 'Version:',
                 target: 'span',
+            },
+            // The cache folder names the sandbox (uploads/osec-sandbox/<db>, on the dev site uploads/osec_cache), the
+            // cache row also the site address.
+            {
+                label: 'cache folder',
+                selector: '.timely li',
+                text: 'File:',
+                target: 'span',
+                pattern: 'uploads/[^\\s]*?(?=/css)',
+            },
+            {
+                label: 'site address',
+                selector: '.timely tr',
+                text: 'CacheFile',
+                target: 'td div',
+                pattern: '(?:https?:)?//[^/\\s]+',
+            },
+            {
+                label: 'cache folder',
+                selector: '.timely tr',
+                text: 'CacheFile',
+                target: 'td div',
+                pattern: 'uploads/[^\\s]*?(?=/css)',
+            },
+            {
+                label: 'cache folder',
+                selector: '.timely .ai1ec-pre-scrollable code',
+                pattern: 'uploads/[^\\s]*?(?=/twig)',
             },
         ],
     },
