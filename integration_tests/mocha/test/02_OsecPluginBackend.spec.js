@@ -41,7 +41,7 @@ describe('Backend tests', function(){
         const url = pageObject.settings.domain + '/wp-admin/edit.php?post_type=osec_event&page=osec-admin-edit-css';
         await pageObject.go_and_do_login(url);
 
-        await pageObject.getElement(By.id( 'agendaTodayBackground'))
+        await pageObject.getElement(By.id( 'agendaMaxWidth'))
 
         // Submit/Save
         const saveOptionsButton = await pageObject.getElement(By.id( 'osec_save_themes_options'))
@@ -50,7 +50,7 @@ describe('Backend tests', function(){
         await pageObject.waitToSeeWhatHappens(700, true);
 
         // Required to wait again.
-        await pageObject.getElement(By.id( 'agendaTodayBackground'))
+        await pageObject.getElement(By.id( 'agendaMaxWidth'))
 
         // "Theme options were updated successfully. Visit site" should be visible.
         const expectedText = 'Visit site';
