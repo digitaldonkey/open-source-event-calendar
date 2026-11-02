@@ -2,7 +2,9 @@
 
 namespace Osec\Tests\Unit\Command;
 
+use Osec\App\Model\Date\DT;
 use Osec\App\Model\PostTypeEvent\EditPostActions;
+use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventParent;
 use Osec\Command\CommandClone;
 use Osec\Http\Request\RequestParser;
@@ -111,6 +113,62 @@ class CommandClonePermissionTest extends TestBase
         self::assertSame(0, get_post($clone_id)->post_parent);
         self::assertSame('', get_post_meta($clone_id, '_osec_parent', true));
         self::assertEmpty(EventParent::factory($osec_app)->get_parent_event($clone_id));
+    }
+
+    /**
+     * Values the event page hides stay with users who may edit the original.
+     *
+     * @dataProvider hidden_value_cases
+     *
+     * @param  string  $role  Role of the acting user.
+     * @param  bool  $hide  Whether the original hides its cost and map.
+     * @param  string  $cost  Expected cost of the clone.
+     * @param  string  $latitude  Expected latitude of the clone.
+     */
+    public function test_clone_keeps_hidden_values_from_readers(string $role, bool $hide, string $cost, float $latitude)
+    {
+        global $osec_app;
+
+        $post_id = self::factory()->post->create(['post_type' => OSEC_POST_TYPE, 'post_status' => 'publish']);
+        $event   = new Event(
+            $osec_app,
+            [
+                'post_id'          => $post_id,
+                'post'             => get_post($post_id),
+                'start'            => new DT('2027-03-01 09:00:00', 'Europe/Berlin'),
+                'end'              => new DT('2027-03-01 10:00:00', 'Europe/Berlin'),
+                'allday'           => 0,
+                'timezone_name'    => 'Europe/Berlin',
+                'latitude'         => 1.5,
+                'longitude'        => 2.5,
+                'show_map'         => $hide ? 0 : 1,
+                // The event page only shows coordinates with the map on.
+                'show_coordinates' => 1,
+            ]
+        );
+        $event->set('cost', '99 EUR');
+        $event->set('is_free', false);
+        $event->set('hide_cost', $hide);
+        $event->save(false);
+        wp_set_current_user(self::factory()->user->create(['role' => $role]));
+
+        $command = new CommandClone($osec_app, new RequestParser($osec_app, [], 'agenda'));
+        $clone   = new Event($osec_app, $command->duplicate_post_create_duplicate(get_post($post_id)));
+
+        self::assertSame($cost, (string)$clone->get('cost'));
+        self::assertSame($hide, (bool)$clone->get('hide_cost'), 'Or an emptied cost shows as free.');
+        self::assertEquals($latitude, (float)$clone->get('latitude'));
+    }
+
+    public static function hidden_value_cases(): array
+    {
+        $contributor = 'osec_event_assistant';
+
+        return [
+            'contributor, hidden' => [$contributor, true, '', 0.0],
+            'contributor, shown'  => [$contributor, false, '99 EUR', 1.5],
+            'editor, hidden'      => ['editor', true, '99 EUR', 1.5],
+        ];
     }
 
     public static function meta_cases(): array

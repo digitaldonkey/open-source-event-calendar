@@ -163,6 +163,18 @@ class CommandClone extends CommandAbstract
                 $old_event->set('ical_organizer', null);
                 $old_event->set('ical_contact', null);
                 $old_event->set('ical_uid', null);
+                // A user who may only read the original gets nothing its event page hides.
+                if (! current_user_can('edit_post', $post->ID)) {
+                    if ($old_event->get('hide_cost')) {
+                        // Setting the cost resets hide_cost, and an empty cost would then show as free.
+                        $old_event->set('cost', '');
+                        $old_event->set('hide_cost', true);
+                    }
+                    if (! $old_event->get('show_map')) {
+                        $old_event->set('latitude', null);
+                        $old_event->set('longitude', null);
+                    }
+                }
                 $old_event->save();
             } catch (EventNotFoundException) {
                 /* ignore */
