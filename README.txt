@@ -13,8 +13,8 @@ Author URI: https://github.com/digitaldonkey
 Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 Text Domain: open-source-event-calendar
-Stable Tag: 1.2.0
-Version: 1.2.0
+Stable Tag: 1.2.1
+Version: 1.2.1
 
 An event calendar with native iCal / ICS import and export
 
@@ -195,6 +195,19 @@ add_filter('http_request_args', function ($args, $url) {
 
 == Changelog ==
 
+= 1.2.1 =
+
+**Fixes**
+
+* Excluding a date on a repeating event no longer removes the whole series; a review page repairs affected events, also `wp osec repair-exclusions` (#71)
+* "Edit this instance" and Clone now check the permission for that event; a clone only includes what the user may read (#73)
+* Editing an occurrence of a private event no longer makes that occurrence public (#73)
+* "Edit this instance": a moved occurrence no longer comes back on its old date; the first occurrence no longer adds a date at the end or shows twice, and no longer loses the rest of a private or draft series
+* Clone no longer leaves empty items in the media library, and a clone of an occurrence is now its own event (#73)
+* ICS export respects "Hide event cost" and the map setting
+* Plana: the subscribe button follows filters chosen without a page reload (#72)
+* With WPML, a single event's "Add event to..." exports that event, not the whole calendar
+
 = 1.2.0 =
 
 **Highlights**
@@ -225,6 +238,10 @@ add_filter('http_request_args', function ($args, $url) {
 All changes and older versions: [CHANGELOG.md](https://github.com/digitaldonkey/open-source-event-calendar/blob/master/CHANGELOG.md)
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+
+Fixes repeating events that lost their dates after excluding a date (1.1.15 to 1.2.0): check the notice in wp-admin and repair them there. Also fixes permission checks. Recommended for all sites.
 
 = 1.2.0 =
 
