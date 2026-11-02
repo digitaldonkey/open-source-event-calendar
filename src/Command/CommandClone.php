@@ -146,7 +146,8 @@ class CommandClone extends CommandAbstract
                 . '</p>'
         );
         $this->copyPostTaxonomies($new_post_id, $post);
-        $this->copyAttachments($new_post_id, $post);
+        // No attachment copies: they lacked their file data and showed up as empty media items. The clone
+        // shows the same images through the copied featured image meta and content.
         $this->copyMeta($new_post_id, $post);
 
         if (AccessControl::is_our_post_type($post)) {
@@ -254,65 +255,6 @@ class CommandClone extends CommandAbstract
                 }
                 wp_set_object_terms($new_id, $terms, $taxonomy);
             }
-        }
-    }
-
-    /**
-     * Copy the attachments
-     * It simply copies the table entries, actual file won't be duplicated
-     */
-    protected function copyAttachments($new_id, $post)
-    {
-        // get old attachments
-        $attachments = get_posts(
-            [
-                'post_type'   => 'attachment',
-                'numberposts' => -1,
-                'post_status' => null,
-                'post_parent' => $post->ID,
-            ]
-        );
-        // clone old attachments
-        foreach ($attachments as $att) {
-            $new_att_author = $this->duplicatePostGetCurrentUser();
-
-            $new_att = [
-                'menu_order'     => $att->menu_order,
-                'comment_status' => $att->comment_status,
-                'guid'           => $att->guid,
-                'ping_status'    => $att->ping_status,
-                'pinged'         => $att->pinged,
-                'post_author'    => $new_att_author->ID,
-                'post_content'   => $att->post_content,
-                'post_date'      => $att->post_date,
-                'post_date_gmt'  => get_gmt_from_date($att->post_date),
-                'post_excerpt'   => $att->post_excerpt,
-                'post_mime_type' => $att->post_mime_type,
-                'post_parent'    => $new_id,
-                'post_password'  => $att->post_password,
-                'post_status'    => $this->getNewPostStatus(
-                    $att->post_status
-                ),
-                'post_title'     => $att->post_title,
-                'post_type'      => $att->post_type,
-                'to_ping'        => $att->to_ping,
-            ];
-
-            $new_att_id = wp_insert_post($new_att);
-
-            // get and apply a unique slug
-            $att_name             = wp_unique_post_slug(
-                $att->post_name,
-                $new_att_id,
-                $att->post_status,
-                $att->post_type,
-                $new_id
-            );
-            $new_att              = [];
-            $new_att['ID']        = $new_att_id;
-            $new_att['post_name'] = $att_name;
-
-            wp_update_post($new_att);
         }
     }
 
