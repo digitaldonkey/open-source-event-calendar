@@ -136,6 +136,44 @@ class EditThisInstancePermissionTest extends TestBase
         self::assertSame([], $this->children($post_id));
     }
 
+    /**
+     * The child keeps the visibility the form sends, which is the parent's unless the user changed it. Without
+     * the publish permission a private child falls back to pending, and is never public.
+     *
+     * @dataProvider visibilities
+     *
+     * @param  string  $role  Role of the acting user.
+     * @param  array  $form  Form fields.
+     * @param  string  $status  Expected status of the child.
+     * @param  string  $password  Expected password of the child.
+     */
+    public function test_child_keeps_the_visibility_of_the_form(string $role, array $form, string $status, string $password)
+    {
+        $user      = self::factory()->user->create(['role' => $role]);
+        $parent_id = $this->create_event($user);
+
+        $this->submit_as($user, $parent_id, array_merge(['post_status' => 'publish', 'publish' => 'Update'], $form));
+
+        $children = $this->children($parent_id);
+        self::assertCount(1, $children);
+        self::assertSame($status, get_post_status($children[0]));
+        self::assertSame($password, get_post($children[0])->post_password);
+    }
+
+    public static function visibilities(): array
+    {
+        $password = ['post_password' => 'secret'];
+
+        return [
+            'editor, private'         => ['editor', ['visibility' => 'private'], 'private', ''],
+            'editor, private, stale'  => ['editor', ['visibility' => 'private'] + $password, 'private', ''],
+            'editor, public'          => ['editor', ['visibility' => 'public'], 'publish', ''],
+            'editor, public, stale'   => ['editor', ['visibility' => 'public'] + $password, 'publish', ''],
+            'editor, password'        => ['editor', ['visibility' => 'password'] + $password, 'publish', 'secret'],
+            'contributor, private'    => ['osec_event_assistant', ['visibility' => 'private'], 'pending', ''],
+        ];
+    }
+
     public static function allowed_users(): array
     {
         return [

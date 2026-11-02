@@ -440,7 +440,15 @@ class EventEditing extends OsecBaseClass
             }
         }
         $_POST['post_type'] = OSEC_POST_TYPE;
-        $data               = _wp_translate_postdata(false);
+        // The form sends "private" as a visibility next to status "publish"; core maps it only in edit_post().
+        $visibility = RequestParser::get_param('visibility', '', ParamType::Key);
+        if ('private' === $visibility) {
+            $_POST['post_status'] = 'private';
+        }
+        if ('private' === $visibility || 'public' === $visibility) {
+            $_POST['post_password'] = '';
+        }
+        $data = _wp_translate_postdata(false);
         if (is_wp_error($data)) {
             return null;
         }
