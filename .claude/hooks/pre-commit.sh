@@ -30,6 +30,19 @@ if printf '%s' "$command" | grep -Eq '(^|[;&|[:space:]])git[[:space:]]+add([[:sp
     exit 2
 fi
 
+# Only commits in this repo: a commit in another repo has its own checks. Skipped only for a command that is
+# nothing but that commit (`git -C <dir> commit`, `cd <dir> && git commit`), or a session working directory
+# elsewhere, e.g. a sibling plugin. Anything chained uses the session's directory, so the checks run when in doubt.
+# Parsed from $command, without quoted strings: text in a commit message must not decide.
+target=$(printf '%s' "$command" | sed -nE 's/^[[:space:]]*git[[:space:]]+-C[[:space:]]+([^[:space:];&|]+)[[:space:]]+commit[^;&|]*$/\1/p')
+[ -n "$target" ] || target=$(printf '%s' "$command" | sed -nE 's/^[[:space:]]*cd[[:space:]]+([^[:space:];&|]+)[[:space:]]*(&&|;)[[:space:]]*git[[:space:]]+commit[^;&|]*$/\1/p')
+[ -n "$target" ] || target=$(printf '%s' "$input" | jq -r '.cwd // empty')
+target_repo=$(git -C "$target" rev-parse --show-toplevel 2>/dev/null)
+project_repo=$(git -C "$CLAUDE_PROJECT_DIR" rev-parse --show-toplevel 2>/dev/null)
+if [ -n "$target_repo" ] && [ -n "$project_repo" ] && [ "$target_repo" != "$project_repo" ]; then
+    exit 0
+fi
+
 cd "$CLAUDE_PROJECT_DIR" || exit 0
 
 output=$(git -c diff.mnemonicprefix=false -c diff.noprefix=false --no-pager diff --raw -r -p -m -M --full-index --no-color --staged \
