@@ -101,11 +101,20 @@ What the CircleCI pipeline (`.circleci/config.yml`) does differently depending o
 
 ### Releasing to WordPress.org
 
+The last step of a release, after everything else in skill `prepare-release` ("Order of a release"):
+the bump reaches `master` only here.
+
 ```bash
-# on master, once the release commit (version bumped everywhere) is pushed and green
+# release-* holds the release commit (version bumped everywhere) and its pipeline is green
+git switch master
+git merge --ff-only release-1.2.x
 git tag -a 1.2.0 -m "Release 1.2.0"
-git push origin 1.2.0
+git push --atomic origin master 1.2.0
 ```
+
+**Known gap:** the push starts a `master` pipeline as well as the tag pipeline, and the `master` one replaces
+trunk with the new `Stable Tag` if it finishes first. Until `release-context.sh` holds trunk back for a release
+commit, there can be a short time when WordPress.org serves trunk as that version. Do not push anything else.
 
 - **`.circleci/release-context.sh` decides, once, in `release_decision_job`** (master and release tags only,
   after all tests; `build` stays release-free) and writes `/tmp/release.env` (`RELEASE_MODE`
@@ -119,8 +128,9 @@ git push origin 1.2.0
   Checked in `release_decision_job` and again right before each deploy (`.circleci/still-master-head.sh`), because
   master can move on while the pipeline runs. A master pipeline that was overtaken deploys nothing; a tag on
   an older master commit creates just `tags/X.Y.Z`. If the check itself fails (fetch error), the job fails.
-- **The release commit reaches trunk through its master pipeline before the tag exists** - WordPress.org
-  serves trunk as that version until the tag pipeline finishes. Tag it before pushing anything else to master.
+- **The release commit reaches trunk through its master pipeline, possibly before the tag exists** - WordPress.org
+  then serves trunk as that version until the tag pipeline finishes (see "Known gap" above). 1.2.1 was offered this
+  way on 2026-11-02 before its tag existed, and later fixes under that number do not reach sites that had updated.
 - **An existing `tags/X.Y.Z` is never touched**, so rerunning a tag pipeline is harmless.
 - **The tag is committed as a working-copy copy of the updated trunk**, so a release uploads only what differs
   from trunk. A whole-tag upload (~1,500 files) timed out on "Committing transaction..." in 2026-09.

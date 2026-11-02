@@ -11,6 +11,27 @@ Walks through this plugin's release-readiness checklist end to end, asking
 before every file edit or environment change. Never commits - that's left
 to the user.
 
+## Order of a release
+
+**The version bump reaches `master` last, directly before the tag.** WordPress.org reads
+`Stable Tag` from trunk, and the `master` pipeline replaces trunk. With a new `Stable Tag` and no
+`tags/X.Y.Z` yet, WordPress.org serves trunk as that release, so sites can update to a version that
+was never tagged and that a later fix under the same number will not reach (happened with 1.2.1).
+
+1. **Fixes:** merged into `release-*`, then `master`, with the version unchanged. Trunk gets the code,
+   sites stay on the tagged release. Everything worth changing is changed here, and rechecked by
+   the maintainer **before** step 2. Merge commits say `Fixes #N` per ticket: GitHub links it, and closes
+   the ticket when the commit reaches `master`.
+2. **Checklist below:** on a branch from `release-*` (`chore/version-X.Y.Z`): tests, metadata, bump,
+   changelog, Upgrade Notice, generated files. Merge it into `release-*` only, and let that pipeline
+   go green. `release-*` deploys nothing.
+3. **End, by the maintainer, only once nothing else is coming:** `master` takes the bump and the tag
+   goes up with it (see skill `release-pipeline`, "Releasing to WordPress.org"). A later fix means a
+   new version number.
+
+Never push the bump to `master` to "try" it, and don't start the checklist's bump while fixes are
+still expected.
+
 ## Steps
 
 1. **Run the test suite.** Always re-run it yourself, even if the user says
@@ -44,7 +65,8 @@ to the user.
 
 5. **If the failure says "version mismatch - OSEC_VERSION: ..."** (or the
    user is bumping to a new release version even without this failure):
-   Ask the user for the target version number. Then ask before applying it
+   Do this on the `chore/version-X.Y.Z` branch, never on `master`. Ask the user for the target
+   version number. Then ask before applying it
    - if they agree, update all three of these together in one pass:
    - `constants.php`: the `OSEC_VERSION` constant
    - `open-source-event-calendar.php`'s header: the `Version:` line
@@ -69,6 +91,8 @@ to the user.
 8. **Do not commit.** Tell the user the working tree is ready for review
    and that committing is their call, per this repo's convention (never
    commit unless explicitly asked).
+
+9. **Do not merge the bump into `master`.** Say what's left for the end: "Order of a release" step 3.
 
 ## Notes
 
