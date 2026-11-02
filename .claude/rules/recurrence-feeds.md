@@ -38,7 +38,7 @@ paths:
   a summer-created event at `[00:00, 01:00)` doubles the autumn transition day; a winter-created one at
   `[23:00, 24:00)` loses the spring transition day. Integration tests that create events at "now" therefore
   pass or fail depending on what time the pipeline ran - see
-  `.claude/plans/13-one-hour-before-midnight-test-fails.md`.
+  `.claude/plans/done/13-one-hour-before-midnight-test-fails.md`.
 - **Two limits bound how many instances one event may generate**, and they do different jobs:
   `OSEC_REOCCURRENCE_TIMEFRAME` (`+ 3years`) is applied **only to a rule that names no end of its own** - it is
   what keeps an open-ended `FREQ=DAILY` finite. An explicit `UNTIL` is honoured in full, however far out, and
