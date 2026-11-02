@@ -160,6 +160,78 @@ class EditThisInstancePermissionTest extends TestBase
         self::assertSame($password, get_post($children[0])->post_password);
     }
 
+    /**
+     * The "Base Event" row link leads to the parent's editor and names it: only for users who may edit the parent.
+     *
+     * @dataProvider base_event_viewers
+     *
+     * @param  string  $role  Role of the acting user.
+     * @param  bool  $offered  Whether the link is offered.
+     */
+    public function test_base_event_link_needs_the_edit_permission(string $role, bool $offered)
+    {
+        $author   = self::factory()->user->create(['role' => 'administrator']);
+        $child_id = $this->create_child(self::factory()->post->create(
+            ['post_type' => OSEC_POST_TYPE, 'post_status' => 'private', 'post_author' => $author]
+        ));
+        wp_set_current_user(self::factory()->user->create(['role' => $role]));
+
+        self::assertSame($offered, isset($this->row_actions($child_id)['osec_parent']));
+    }
+
+    public static function base_event_viewers(): array
+    {
+        return [
+            'contributor' => ['osec_event_assistant', false],
+            'editor'      => ['editor', true],
+        ];
+    }
+
+    /**
+     * The parent's title is escaped for the link's title attribute.
+     */
+    public function test_base_event_link_escapes_the_title()
+    {
+        $child_id = $this->create_child(self::factory()->post->create(['post_type' => OSEC_POST_TYPE]));
+        wp_set_current_user(self::factory()->user->create(['role' => 'editor']));
+        $title = static fn() => 'A"B';
+        add_filter('the_title', $title);
+
+        $actions = $this->row_actions($child_id);
+        remove_filter('the_title', $title);
+
+        self::assertStringContainsString('A&quot;B', $actions['osec_parent']);
+    }
+
+    /**
+     * Creates a published child event of a parent.
+     *
+     * @param  int  $parent_id  Parent event post.
+     *
+     * @return int Child post ID.
+     */
+    private function create_child(int $parent_id): int
+    {
+        global $osec_app;
+
+        $child_id = self::factory()->post->create(
+            ['post_type' => OSEC_POST_TYPE, 'post_status' => 'publish', 'post_parent' => $parent_id]
+        );
+        EventParent::factory($osec_app)->event_parent($child_id, $parent_id, 1);
+
+        return $child_id;
+    }
+
+    /**
+     * @return array Row actions of an event for the current user.
+     */
+    private function row_actions(int $post_id): array
+    {
+        global $osec_app;
+
+        return EventParent::factory($osec_app)->post_row_actions([], get_post($post_id));
+    }
+
     public static function visibilities(): array
     {
         $password = ['post_password' => 'secret'];

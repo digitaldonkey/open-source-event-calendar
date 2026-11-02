@@ -312,6 +312,7 @@ class EventParent extends OsecBaseClass
             if ($parent_post
                 && isset($parent_post->post_status)
                 && 'trash' !== $parent_post->post_status
+                && current_user_can('edit_post', $parent_post_id)
             ) {
                 $parent_link             = get_edit_post_link(
                     $parent_post_id,
@@ -320,14 +321,16 @@ class EventParent extends OsecBaseClass
                 $actions['osec_parent'] = sprintf(
                     '<a href="%s" title="%s">%s</a>',
                     wp_nonce_url($parent_link),
-                    sprintf(
-                        /* translators: Parent event title */
-                        __('Edit &#8220;%s&#8221;', 'open-source-event-calendar'),
-                        apply_filters(
-                            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                            'the_title',
-                            $parent_post->post_title,
-                            $parent_post->ID
+                    esc_attr(
+                        sprintf(
+                            /* translators: Parent event title */
+                            __('Edit &#8220;%s&#8221;', 'open-source-event-calendar'),
+                            apply_filters(
+                                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                                'the_title',
+                                $parent_post->post_title,
+                                $parent_post->ID
+                            )
                         )
                     ),
                     __('Base Event', 'open-source-event-calendar')
