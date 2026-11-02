@@ -4,8 +4,12 @@
     {% if events is empty %}
         <p><strong>{{ nothing_text }}</strong></p>
     {% else %}
-        <p>{{ intro }}</p>
-        <p><strong>{{ warning }}</strong></p>
+        {% if repairable > 0 %}
+            <p>{{ intro }}</p>
+            <p><strong>{{ warning }}</strong></p>
+        {% else %}
+            <p><strong>{{ none_repairable_text }}</strong></p>
+        {% endif %}
         <table class="widefat striped">
             <thead>
             <tr>

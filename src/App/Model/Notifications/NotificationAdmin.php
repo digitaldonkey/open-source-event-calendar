@@ -290,6 +290,20 @@ class NotificationAdmin extends NotificationAbstract
     }
 
     /**
+     * Whether a message is still stored: dismissing removes it.
+     *
+     * @param  string  $msg_key  Key of the message.
+     *
+     * @return bool True if it is stored.
+     */
+    public function has_message(string $msg_key): bool
+    {
+        $this->retrieve();
+
+        return isset($this->messages['_messages'][$msg_key]);
+    }
+
+    /**
      * Removes a stored message.
      *
      * @param  string  $msg_key  Key of the message (its `msg_key`).

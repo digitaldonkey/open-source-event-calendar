@@ -83,12 +83,104 @@ class ExclusionRepairControllerTest extends TestBase
         $controller = ExclusionRepairController::factory($osec_app);
         $controller->maybe_check();
 
-        $controller->clear_notice_if_done();
+        $controller->refresh_notice();
         self::assertCount(1, $this->notices(), 'Still affected.');
 
         $wpdb->update($wpdb->prefix . 'osec_events', ['exception_rules' => ''], ['post_id' => $post_id]);
-        $controller->clear_notice_if_done();
+        $controller->refresh_notice();
         self::assertSame([], $this->notices());
+    }
+
+    /**
+     * The count follows the events left to repair, as one healed on an editor save.
+     */
+    public function test_notice_count_follows_the_events_left()
+    {
+        global $osec_app, $wpdb;
+
+        $healed     = $this->create_broken_event();
+        $this->create_broken_event();
+        $controller = ExclusionRepairController::factory($osec_app);
+        $controller->maybe_check();
+        self::assertStringContainsString('2 repeating events', array_values($this->notices())[0]['message']);
+
+        $wpdb->update($wpdb->prefix . 'osec_events', ['exception_rules' => ''], ['post_id' => $healed]);
+        $controller->refresh_notice();
+
+        $messages = array_column($this->notices(), 'message');
+        self::assertCount(1, $messages, 'Replaced, not added.');
+        self::assertStringContainsString('1 repeating event ', $messages[0]);
+    }
+
+    /**
+     * If the new notice cannot be stored, the old one stays.
+     */
+    public function test_notice_stays_when_its_replacement_is_not_stored()
+    {
+        global $osec_app, $wpdb;
+
+        $healed     = $this->create_broken_event();
+        $this->create_broken_event();
+        $controller = ExclusionRepairController::factory($osec_app);
+        $controller->maybe_check();
+        $wpdb->update($wpdb->prefix . 'osec_events', ['exception_rules' => ''], ['post_id' => $healed]);
+
+        $refuse = static fn() => false;
+        add_filter('osec_admin_notification_pre_store', $refuse);
+        $controller->refresh_notice();
+        remove_filter('osec_admin_notification_pre_store', $refuse);
+
+        self::assertStringContainsString('2 repeating events', array_values($this->notices())[0]['message']);
+    }
+
+    /**
+     * A notice someone dismissed does not come back when the count changes.
+     */
+    public function test_dismissed_notice_stays_away()
+    {
+        global $osec_app, $wpdb;
+
+        $healed     = $this->create_broken_event();
+        $this->create_broken_event();
+        $controller = ExclusionRepairController::factory($osec_app);
+        $controller->maybe_check();
+        NotificationAdmin::factory($osec_app)->remove(array_key_first($this->notices()));
+
+        $wpdb->update($wpdb->prefix . 'osec_events', ['exception_rules' => ''], ['post_id' => $healed]);
+        $controller->refresh_notice();
+
+        self::assertSame([], $this->notices());
+    }
+
+    /**
+     * After a repair that leaves an event, the notice counts only that one.
+     */
+    public function test_repair_leaving_an_event_updates_the_notice()
+    {
+        global $osec_app, $wpdb;
+
+        $this->create_broken_event();
+        $unusable = $this->create_broken_event();
+        $wpdb->update($wpdb->prefix . 'osec_events', ['recurrence_rules' => 'FREQ=NOPE;COUNT=x'], ['post_id' => $unusable]);
+        $controller = ExclusionRepairController::factory($osec_app);
+        $controller->maybe_check();
+        $_REQUEST['_wpnonce'] = wp_create_nonce(ExclusionRepairController::ACTION);
+        $stop = static function () {
+            throw new RuntimeException('redirect');
+        };
+        add_filter('wp_redirect', $stop);
+        try {
+            $controller->handle_repair();
+        } catch (RuntimeException) {
+            // The redirect.
+        } finally {
+            remove_filter('wp_redirect', $stop);
+        }
+
+        $messages = implode(' ', array_column($this->notices(), 'message'));
+        self::assertStringContainsString('1 repeating event ', $messages);
+        self::assertStringContainsString('Repaired 1 event.', $messages);
+        self::assertStringNotContainsString('2 repeating events', $messages);
     }
 
     public function test_action_needs_the_capability()
