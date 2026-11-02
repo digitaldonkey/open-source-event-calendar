@@ -79,7 +79,7 @@ class ExclusionRepairController extends OsecBaseClass
 
         $repair = EventExclusionRepair::factory($this->app);
         $result = $repair->repair($repair->find_affected());
-        $this->clear_notice_if_done();
+        $this->refresh_notice();
 
         $notifications = NotificationAdmin::factory($this->app);
         $notifications->store(
@@ -109,18 +109,27 @@ class ExclusionRepairController extends OsecBaseClass
     }
 
     /**
-     * Removes the notice when no event is left to repair, for example after they healed on an editor save.
+     * Makes the notice match the events left to repair: a new count, or gone when none is left.
+     *
+     * Events also leave the list when they heal on an editor save. A notice someone dismissed stays away.
      */
-    public function clear_notice_if_done(): void
+    public function refresh_notice(): void
     {
-        if (EventExclusionRepair::factory($this->app)->find_affected()) {
+        $state         = $this->get_state();
+        $notifications = NotificationAdmin::factory($this->app);
+        if (! $state['key'] || ! $notifications->has_message($state['key'])) {
             return;
         }
-        $state = $this->get_state();
-        if ($state['key']) {
-            NotificationAdmin::factory($this->app)->remove($state['key']);
+        $count = count(EventExclusionRepair::factory($this->app)->find_affected());
+        $key   = $count ? $this->store_notice($count) : null;
+        // Not stored: keep the notice there is.
+        if ($count && (! $key || ! $notifications->has_message($key))) {
+            return;
         }
-        $this->set_state($state['version'], null);
+        if ($key !== $state['key']) {
+            $notifications->remove($state['key']);
+        }
+        $this->set_state($state['version'], $key);
     }
 
     /**

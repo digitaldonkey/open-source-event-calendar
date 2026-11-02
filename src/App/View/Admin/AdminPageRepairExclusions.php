@@ -40,6 +40,8 @@ class AdminPageRepairExclusions extends AdminPageAbstract
             add_action('load-' . $hook, function () use ($title) {
                 // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- admin-header.php reads it.
                 $GLOBALS['title'] = $title;
+                // Before the notices print.
+                ExclusionRepairController::factory($this->app)->refresh_notice();
             });
         }
     }
@@ -57,8 +59,6 @@ class AdminPageRepairExclusions extends AdminPageAbstract
      */
     public function display_page(): void
     {
-        ExclusionRepairController::factory($this->app)->clear_notice_if_done();
-
         $events = EventExclusionRepair::factory($this->app)->find_affected();
         foreach ($events as &$event) {
             $event['edit_url'] = get_edit_post_link($event['post_id'], 'raw');
@@ -80,6 +80,10 @@ class AdminPageRepairExclusions extends AdminPageAbstract
             ),
             // phpcs:enable
             'nothing_text' => __('Nothing to repair.', 'open-source-event-calendar'),
+            'none_repairable_text' => __(
+                'These events cannot be repaired automatically. Open each one to fix it by hand.',
+                'open-source-event-calendar'
+            ),
             'labels'       => [
                 'event'  => __('Event', 'open-source-event-calendar'),
                 'status' => __('Status', 'open-source-event-calendar'),

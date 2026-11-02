@@ -89,7 +89,7 @@ class RepairExclusionsCommand extends \WP_CLI_Command
         }
         $this->confirm_all('Repair ' . count($events) . ' events?', $assoc_args);
         $result = $repair->repair($events);
-        ExclusionRepairController::factory($this->app)->clear_notice_if_done();
+        ExclusionRepairController::factory($this->app)->refresh_notice();
 
         if ($result['skipped']) {
             WP_CLI::warning('Skipped, repeat rule or dates not usable: ' . implode(', ', $result['skipped']));
