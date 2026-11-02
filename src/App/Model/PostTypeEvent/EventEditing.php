@@ -246,22 +246,16 @@ class EventEditing extends OsecBaseClass
         if (RequestParser::get_param('osec_exclude', false, ParamType::Bool)) {
             $exRuleString = RequestParser::get_param('osec_exrule', '');
             if ($exRuleString) {
-                /*
-                 *  Exclude "custom" (array of dates)
-                 */
-                if (str_starts_with($exRuleString, 'EXDATE')) {
-                    // Remove 'EXDATE=' prefix */
-                    $exdate = substr($exRuleString, 7);
-                }
-                if (str_starts_with($repRuleString, 'FREQ')) {
-                    $exrule = $exRuleString;
-                }
-                // No need to exclude, if repetition is not set.
-                if ((null !== $rrule || null !== $rdate)) {
-                    $exrule = RepeatRuleToText::factory($this->app)->merge_exrule(
-                        $exRuleString,
-                        $rrule
-                    );
+                $exdate = $this->exclusion_dates($exRuleString, $event);
+                if (null === $exdate) {
+                    $exdate = $this->dates_next_to_rule($event);
+                    // No need to exclude, if repetition is not set.
+                    if (null !== $rrule || null !== $rdate) {
+                        $exrule = RepeatRuleToText::factory($this->app)->merge_exrule(
+                            $exRuleString,
+                            (string)$rrule
+                        );
+                    }
                 }
             }
         }
@@ -289,6 +283,60 @@ class EventEditing extends OsecBaseClass
         $this->stop_listening_for_recurrence_notices();
 
         return $event;
+    }
+
+    /**
+     * Returns the date list of a posted exclusion, or null if it is a rule.
+     *
+     * The editor posts custom dates as "EXDATE=<dates>". Releases 1.1.15 to 1.2.0 stored them merged into the
+     * repeat rule ("FREQ=...;EXDATE=<dates>", #71), and the editor posts that shape back. It is read as a date
+     * list too, joined with the stored dates: "Edit this instance" adds dates to the column only.
+     *
+     * @param  string  $exclusion  Value of the editor's exclusion field.
+     * @param  Event  $event  Event being saved, still holding its stored exception dates.
+     *
+     * @return string|null Comma separated dates, or null for an exclusion rule.
+     */
+    private function exclusion_dates(string $exclusion, Event $event): ?string
+    {
+        if (str_starts_with($exclusion, 'EXDATE=')) {
+            return substr($exclusion, 7);
+        }
+        foreach (explode(';', $exclusion) as $part) {
+            if (str_starts_with($part, 'EXDATE=')) {
+                $dates = array_merge(
+                    explode(',', substr($part, 7)),
+                    explode(',', (string)$event->get('exception_dates'))
+                );
+                $dates = array_unique(array_filter($dates));
+                sort($dates);
+
+                return implode(',', $dates);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the stored exception dates to keep when the editor posts an exclusion rule.
+     *
+     * The editor shows only the rule. Dates stored next to a real rule come from "Edit this instance" or a
+     * feed's EXDATE and are kept. Dates of an event whose exclusion was a date list are the user's former
+     * custom dates, replaced by the rule.
+     *
+     * @param  Event  $event  Event being saved, still holding its stored exclusion.
+     *
+     * @return string|null Comma separated dates, or null.
+     */
+    private function dates_next_to_rule(Event $event): ?string
+    {
+        $stored_rule = (string)$event->get('exception_rules');
+        if ('' === $stored_rule || str_starts_with($stored_rule, 'EXDATE=')) {
+            return null;
+        }
+
+        return $event->get('exception_dates') ?: null;
     }
 
     /**

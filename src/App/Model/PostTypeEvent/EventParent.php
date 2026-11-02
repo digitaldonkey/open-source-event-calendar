@@ -126,8 +126,8 @@ class EventParent extends OsecBaseClass
     }
 
     /**
-     * Handles instances saving and switching if needed. If original event
-     * and created event have different start dates proceed in old style
+     * Handles instances saving and switching if needed. If the edited instance
+     * is not the original event's first occurrence, exclude its date;
      * otherwise find next instance, switch original start date to next
      * instance start date. If there are no next instances mark event as
      * non recurring. Filter also exception dates if are past.
@@ -142,14 +142,16 @@ class EventParent extends OsecBaseClass
         Event $original_event,
         $instance_id
     ) {
-        $ce_start = $created_event->get('start');
-        $oe_start = $original_event->get('start');
+        // Decided by the edited occurrence, not the child: the child may have a new day or time.
+        $instance_start = EventSearch::factory($this->app)
+            ->get_event($original_event->get('post_id'), $instance_id)
+            ->get('start');
         if (
-            $ce_start->format() !== $oe_start->format()
+            $instance_start->format() !== $original_event->get('start')->format()
         ) {
             $this->add_exception_date(
                 $original_event->get('post_id'),
-                $ce_start
+                $instance_start
             );
 
             return;
@@ -260,7 +262,7 @@ class EventParent extends OsecBaseClass
         $start           = (int)$event->get('start')->format();
         $exception_dates = explode(',', (string)$event->get('exception_dates'));
         $dates           = [];
-        foreach ($exception_dates as $date) {
+        foreach (array_filter($exception_dates) as $date) {
             $ex_date = new DT($date);
             $ex_date = (int)$ex_date->format();
             if ($ex_date > $start) {
