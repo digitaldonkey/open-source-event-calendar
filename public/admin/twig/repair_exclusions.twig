@@ -1,0 +1,48 @@
+<div class="wrap">
+    <h1>{{ title }}</h1>
+    <hr class="wp-header-end">
+    {% if events is empty %}
+        <p><strong>{{ nothing_text }}</strong></p>
+    {% else %}
+        <p>{{ intro }}</p>
+        <p><strong>{{ warning }}</strong></p>
+        <table class="widefat striped">
+            <thead>
+            <tr>
+                <th>{{ labels.event }}</th>
+                <th>{{ labels.status }}</th>
+                <th>{{ labels.dates }}</th>
+                <th>{{ labels.note }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for event in events %}
+                <tr>
+                    <td>
+                        {% if event.edit_url %}
+                            <a href="{{ event.edit_url|esc_url }}">{{ event.title }}</a>
+                        {% else %}
+                            {{ event.title }}
+                        {% endif %}
+                    </td>
+                    <td>{{ event.status }}</td>
+                    <td>{{ event.dates_text }}</td>
+                    <td>
+                        {% if not event.repairable %}{{ note_unrepairable }}{% endif %}
+                        {% if event.has_children %}{{ note_children }}{% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% if repairable > 0 %}
+            <form method="post" action="{{ action|esc_url }}">
+                <input type="hidden" name="action" value="{{ action_name }}">
+                {# wp_nonce_field() output. #}
+                {{ nonce_field_html|raw }}
+                <p><button type="submit" class="button button-primary">{{ submit_text }}</button></p>
+            </form>
+        {% endif %}
+    {% endif %}
+    <p>{{ cli_text }} <code>wp osec repair-exclusions --dry-run</code></p>
+</div>

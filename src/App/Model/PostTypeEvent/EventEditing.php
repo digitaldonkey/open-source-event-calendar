@@ -302,20 +302,8 @@ class EventEditing extends OsecBaseClass
         if (str_starts_with($exclusion, 'EXDATE=')) {
             return substr($exclusion, 7);
         }
-        foreach (explode(';', $exclusion) as $part) {
-            if (str_starts_with($part, 'EXDATE=')) {
-                $dates = array_merge(
-                    explode(',', substr($part, 7)),
-                    explode(',', (string)$event->get('exception_dates'))
-                );
-                $dates = array_unique(array_filter($dates));
-                sort($dates);
 
-                return implode(',', $dates);
-            }
-        }
-
-        return null;
+        return EventExclusionRepair::dates_from_rule($exclusion, (string)$event->get('exception_dates'));
     }
 
     /**

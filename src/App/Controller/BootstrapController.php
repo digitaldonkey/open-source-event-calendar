@@ -347,6 +347,7 @@ class BootstrapController
         TrashController::add_actions($app, is_admin());
         FrontendCssController::add_actions($app, is_admin());
         EscapingRepairController::add_actions($app, is_admin());
+        ExclusionRepairController::add_actions($app, is_admin());
 
         add_action('pre_http_request', function ($status, $output, $url) use ($app) {
                 Request::factory($app)->pre_http_request($status, $output, $url);
