@@ -88,8 +88,16 @@ class EventParent extends OsecBaseClass
         ) {
             $old_post_id = RequestParser::get_param('post_ID', null, ParamType::Id);
             $instance_id = RequestParser::get_param('osec_instance_id', 0, ParamType::Id);
+            // Runs before core's checks in wp-admin/post.php, which this request never reaches.
+            if (!AccessControl::is_our_post_type($old_post_id) || !current_user_can('edit_post', $old_post_id)) {
+                wp_die(esc_html__('Sorry, you are not allowed to edit this event.', 'open-source-event-calendar'), 403);
+            }
             $post_id = EventEditing::factory($this->app)->create_duplicate_post();
-            if (!is_null($old_post_id) && false !== $post_id) {
+            // Falling through to core would save the parent with the repeat fields already emptied.
+            if (!$post_id) {
+                wp_die(esc_html__('This occurrence could not be saved.', 'open-source-event-calendar'), 400);
+            }
+            if (!is_null($old_post_id)) {
                 $this->handleInstances(
                     new Event($this->app, $post_id),
                     new Event($this->app, $old_post_id),
@@ -118,8 +126,8 @@ class EventParent extends OsecBaseClass
     }
 
     /**
-     * Handles instances saving and switching if needed. If original event
-     * and created event have different start dates proceed in old style
+     * Handles instances saving and switching if needed. If the edited instance
+     * is not the original event's first occurrence, exclude its date;
      * otherwise find next instance, switch original start date to next
      * instance start date. If there are no next instances mark event as
      * non recurring. Filter also exception dates if are past.
@@ -134,14 +142,16 @@ class EventParent extends OsecBaseClass
         Event $original_event,
         $instance_id
     ) {
-        $ce_start = $created_event->get('start');
-        $oe_start = $original_event->get('start');
+        // Decided by the edited occurrence, not the child: the child may have a new day or time.
+        $instance_start = EventSearch::factory($this->app)
+            ->get_event($original_event->get('post_id'), $instance_id)
+            ->get('start');
         if (
-            $ce_start->format() !== $oe_start->format()
+            $instance_start->format() !== $original_event->get('start')->format()
         ) {
             $this->add_exception_date(
                 $original_event->get('post_id'),
-                $ce_start
+                $instance_start
             );
 
             return;
@@ -222,13 +232,10 @@ class EventParent extends OsecBaseClass
     {
         $dbi              = $this->app->db;
         $table_instances  = $dbi->get_table_name(OSEC_DB__INSTANCES);
-        $table_posts      = $dbi->get_table_name('posts');
         $next_instance_id = $dbi->get_var(
             $dbi->prepare(
-                'SELECT i.id FROM ' . $table_instances . ' i JOIN ' .
-                $table_posts . ' p ON (p.ID = i.post_id) ' .
+                'SELECT i.id FROM ' . $table_instances . ' i ' .
                 'WHERE i.post_id = %d AND i.id > %d ' .
-                'AND p.post_status = \'publish\' ' .
                 'ORDER BY id ASC LIMIT 1',
                 $post_id,
                 $instance_id
@@ -252,7 +259,7 @@ class EventParent extends OsecBaseClass
         $start           = (int)$event->get('start')->format();
         $exception_dates = explode(',', (string)$event->get('exception_dates'));
         $dates           = [];
-        foreach ($exception_dates as $date) {
+        foreach (array_filter($exception_dates) as $date) {
             $ex_date = new DT($date);
             $ex_date = (int)$ex_date->format();
             if ($ex_date > $start) {
@@ -275,12 +282,10 @@ class EventParent extends OsecBaseClass
     {
         $dbi             = $this->app->db;
         $table_instances = $dbi->get_table_name(OSEC_DB__INSTANCES);
-        $table_posts     = $dbi->get_table_name('posts');
         return (int) $dbi->get_var(
             $dbi->prepare(
                 "SELECT COUNT(i.id) FROM {$table_instances} i
-                         JOIN {$table_posts} p ON (p.ID = i.post_id)
-                         WHERE i.post_id = %d AND i.id > %d AND p.post_status = 'publish'",
+                         WHERE i.post_id = %d AND i.id > %d",
                 $post_id,
                 $instance_id
             )
@@ -307,6 +312,7 @@ class EventParent extends OsecBaseClass
             if ($parent_post
                 && isset($parent_post->post_status)
                 && 'trash' !== $parent_post->post_status
+                && current_user_can('edit_post', $parent_post_id)
             ) {
                 $parent_link             = get_edit_post_link(
                     $parent_post_id,
@@ -315,14 +321,16 @@ class EventParent extends OsecBaseClass
                 $actions['osec_parent'] = sprintf(
                     '<a href="%s" title="%s">%s</a>',
                     wp_nonce_url($parent_link),
-                    sprintf(
-                        /* translators: Parent event title */
-                        __('Edit &#8220;%s&#8221;', 'open-source-event-calendar'),
-                        apply_filters(
-                            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                            'the_title',
-                            $parent_post->post_title,
-                            $parent_post->ID
+                    esc_attr(
+                        sprintf(
+                            /* translators: Parent event title */
+                            __('Edit &#8220;%s&#8221;', 'open-source-event-calendar'),
+                            apply_filters(
+                                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                                'the_title',
+                                $parent_post->post_title,
+                                $parent_post->ID
+                            )
                         )
                     ),
                     __('Base Event', 'open-source-event-calendar')

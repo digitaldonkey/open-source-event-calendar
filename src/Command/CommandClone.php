@@ -26,6 +26,11 @@ use WP_Post;
 class CommandClone extends CommandAbstract
 {
     /**
+     * Meta a user who may only read the original gets on the clone: other fields are not part of what they can read.
+     */
+    private const META_KEYS_FOR_READERS = ['_thumbnail_id'];
+
+    /**
      * @var array The posts that must be cloned
      */
     protected array $posts = [];
@@ -74,6 +79,26 @@ class CommandClone extends CommandAbstract
     }
 
     /**
+     * Whether the current user may clone a post: a clone gives them its full content.
+     *
+     * Only events the user may read. A password protects content from readers, so those need the edit permission.
+     *
+     * @param  WP_Post|null  $post  Post to clone.
+     *
+     * @return bool True if the post may be cloned.
+     */
+    public static function may_clone(?WP_Post $post): bool
+    {
+        if (! $post || ! AccessControl::is_our_post_type($post)) {
+            return false;
+        }
+
+        return '' === $post->post_password
+            ? current_user_can('read_post', $post->ID)
+            : current_user_can('edit_post', $post->ID);
+    }
+
+    /**
      * Create a duplicate from a posts' instance
      */
     public function duplicate_post_create_duplicate(WP_Post $post, $status = '')
@@ -96,7 +121,8 @@ class CommandClone extends CommandAbstract
             'post_date'      => $post->post_date,
             'post_date_gmt'  => get_gmt_from_date($post->post_date),
             'post_excerpt'   => $post->post_excerpt,
-            'post_parent'    => $post->post_parent,
+            // A clone is an event of its own, not an occurrence of the original's series.
+            'post_parent'    => 0,
             'post_password'  => $post->post_password,
             'post_status'    => $new_post_status,
             'post_title'     => $post->post_title,
@@ -121,7 +147,8 @@ class CommandClone extends CommandAbstract
                 . '</p>'
         );
         $this->copyPostTaxonomies($new_post_id, $post);
-        $this->copyAttachments($new_post_id, $post);
+        // No attachment copies: they lacked their file data and showed up as empty media items. The clone
+        // shows the same images through the copied featured image meta and content.
         $this->copyMeta($new_post_id, $post);
 
         if (AccessControl::is_our_post_type($post)) {
@@ -136,6 +163,18 @@ class CommandClone extends CommandAbstract
                 $old_event->set('ical_organizer', null);
                 $old_event->set('ical_contact', null);
                 $old_event->set('ical_uid', null);
+                // A user who may only read the original gets nothing its event page hides.
+                if (! current_user_can('edit_post', $post->ID)) {
+                    if ($old_event->get('hide_cost')) {
+                        // Setting the cost resets hide_cost, and an empty cost would then show as free.
+                        $old_event->set('cost', '');
+                        $old_event->set('hide_cost', true);
+                    }
+                    if (! $old_event->get('show_map')) {
+                        $old_event->set('latitude', null);
+                        $old_event->set('longitude', null);
+                    }
+                }
                 $old_event->save();
             } catch (EventNotFoundException) {
                 /* ignore */
@@ -157,7 +196,7 @@ class CommandClone extends CommandAbstract
                 $new_post_id,
                 $new_post_status,
                 $post->post_type,
-                $post->post_parent
+                0
             );
 
             $new_post              = [];
@@ -233,65 +272,6 @@ class CommandClone extends CommandAbstract
     }
 
     /**
-     * Copy the attachments
-     * It simply copies the table entries, actual file won't be duplicated
-     */
-    protected function copyAttachments($new_id, $post)
-    {
-        // get old attachments
-        $attachments = get_posts(
-            [
-                'post_type'   => 'attachment',
-                'numberposts' => -1,
-                'post_status' => null,
-                'post_parent' => $post->ID,
-            ]
-        );
-        // clone old attachments
-        foreach ($attachments as $att) {
-            $new_att_author = $this->duplicatePostGetCurrentUser();
-
-            $new_att = [
-                'menu_order'     => $att->menu_order,
-                'comment_status' => $att->comment_status,
-                'guid'           => $att->guid,
-                'ping_status'    => $att->ping_status,
-                'pinged'         => $att->pinged,
-                'post_author'    => $new_att_author->ID,
-                'post_content'   => $att->post_content,
-                'post_date'      => $att->post_date,
-                'post_date_gmt'  => get_gmt_from_date($att->post_date),
-                'post_excerpt'   => $att->post_excerpt,
-                'post_mime_type' => $att->post_mime_type,
-                'post_parent'    => $new_id,
-                'post_password'  => $att->post_password,
-                'post_status'    => $this->getNewPostStatus(
-                    $att->post_status
-                ),
-                'post_title'     => $att->post_title,
-                'post_type'      => $att->post_type,
-                'to_ping'        => $att->to_ping,
-            ];
-
-            $new_att_id = wp_insert_post($new_att);
-
-            // get and apply a unique slug
-            $att_name             = wp_unique_post_slug(
-                $att->post_name,
-                $new_att_id,
-                $att->post_status,
-                $att->post_type,
-                $new_id
-            );
-            $new_att              = [];
-            $new_att['ID']        = $new_att_id;
-            $new_att['post_name'] = $att_name;
-
-            wp_update_post($new_att);
-        }
-    }
-
-    /**
      * Copy the meta information of a post to another post
      */
     protected function copyMeta(int $new_id, WP_Post $post)
@@ -301,9 +281,13 @@ class CommandClone extends CommandAbstract
             return;
         }
 
+        $may_edit_original = current_user_can('edit_post', $post->ID);
         foreach ($post_meta_keys as $meta_key) {
-            // The clone is detached from the feed.
-            if (EventFeedTerms::POST_META_KEY === $meta_key) {
+            // The clone is detached from the feed and from the original's series.
+            if (EventFeedTerms::POST_META_KEY === $meta_key || '_osec_parent' === $meta_key) {
+                continue;
+            }
+            if (! $may_edit_original && ! in_array($meta_key, self::META_KEYS_FOR_READERS, true)) {
                 continue;
             }
             $meta_values = get_post_custom_values($meta_key, $post->ID);
@@ -350,7 +334,7 @@ class CommandClone extends CommandAbstract
         ) {
             foreach (RequestParser::get_param('post', [], ParamType::IdList) as $post_id) {
                 $post = get_post($post_id);
-                if ($post) {
+                if (self::may_clone($post)) {
                     $this->posts[] = [
                         'status' => '',
                         'post'   => $post,
@@ -367,6 +351,10 @@ class CommandClone extends CommandAbstract
             !$post_id
             || !isset($_REQUEST['_wpnonce'])
             || !wp_verify_nonce(sanitize_key(wp_unslash($_REQUEST['_wpnonce'])), 'ai1ec_clone_' . $post_id)) {
+            return false;
+        }
+
+        if (!self::may_clone(get_post($post_id))) {
             return false;
         }
 

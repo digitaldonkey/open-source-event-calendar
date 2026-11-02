@@ -101,7 +101,7 @@ class NotificationAdmin extends NotificationAbstract
         $this->retrieve();
 
         $entity            = compact('message', 'class', 'importance', 'persistent');
-        $msg_key           = sha1(wp_json_encode($entity));
+        $msg_key           = $this->message_key($message, $class, $importance, $persistent);
         $entity['msg_key'] = $msg_key;
         if (isset($this->messages['_messages'][$msg_key])) {
             return true;
@@ -272,6 +272,21 @@ class NotificationAdmin extends NotificationAbstract
         return is_object($screen)
                && isset($screen->id)
                && in_array($screen->id, $allow_on, true);
+    }
+
+    /**
+     * Returns the key of a message, to remove it later. The same message stored twice has the same key.
+     *
+     * @param  string  $message  Message.
+     * @param  string  $class  Message box class.
+     * @param  int  $importance  Importance, see store().
+     * @param  bool  $persistent  Whether it must be dismissed by the user.
+     *
+     * @return string Key of the message.
+     */
+    public function message_key($message, $class, $importance, $persistent): string
+    {
+        return sha1(wp_json_encode(compact('message', 'class', 'importance', 'persistent')));
     }
 
     /**

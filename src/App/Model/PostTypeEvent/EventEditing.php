@@ -28,6 +28,25 @@ class EventEditing extends OsecBaseClass
     public const NONCE_ACTION = 'osec_edit_event_nonce';
 
     /**
+     * Post fields an "Edit this instance" child takes from the event form.
+     */
+    private const DUPLICATE_POST_FIELDS = [
+        'post_author',
+        'post_title',
+        'post_content',
+        'post_excerpt',
+        'post_status',
+        'post_password',
+        'post_date',
+        'post_date_gmt',
+        'comment_status',
+        'ping_status',
+        'post_category',
+        'tax_input',
+        '_thumbnail_id',
+    ];
+
+    /**
      * Listeners collecting recurrence problems of the running save.
      *
      * @var callable[]
@@ -227,22 +246,16 @@ class EventEditing extends OsecBaseClass
         if (RequestParser::get_param('osec_exclude', false, ParamType::Bool)) {
             $exRuleString = RequestParser::get_param('osec_exrule', '');
             if ($exRuleString) {
-                /*
-                 *  Exclude "custom" (array of dates)
-                 */
-                if (str_starts_with($exRuleString, 'EXDATE')) {
-                    // Remove 'EXDATE=' prefix */
-                    $exdate = substr($exRuleString, 7);
-                }
-                if (str_starts_with($repRuleString, 'FREQ')) {
-                    $exrule = $exRuleString;
-                }
-                // No need to exclude, if repetition is not set.
-                if ((null !== $rrule || null !== $rdate)) {
-                    $exrule = RepeatRuleToText::factory($this->app)->merge_exrule(
-                        $exRuleString,
-                        $rrule
-                    );
+                $exdate = $this->exclusion_dates($exRuleString, $event);
+                if (null === $exdate) {
+                    $exdate = $this->dates_next_to_rule($event);
+                    // No need to exclude, if repetition is not set.
+                    if (null !== $rrule || null !== $rdate) {
+                        $exrule = RepeatRuleToText::factory($this->app)->merge_exrule(
+                            $exRuleString,
+                            (string)$rrule
+                        );
+                    }
                 }
             }
         }
@@ -270,6 +283,48 @@ class EventEditing extends OsecBaseClass
         $this->stop_listening_for_recurrence_notices();
 
         return $event;
+    }
+
+    /**
+     * Returns the date list of a posted exclusion, or null if it is a rule.
+     *
+     * The editor posts custom dates as "EXDATE=<dates>". Releases 1.1.15 to 1.2.0 stored them merged into the
+     * repeat rule ("FREQ=...;EXDATE=<dates>", #71), and the editor posts that shape back. It is read as a date
+     * list too, joined with the stored dates: "Edit this instance" adds dates to the column only.
+     *
+     * @param  string  $exclusion  Value of the editor's exclusion field.
+     * @param  Event  $event  Event being saved, still holding its stored exception dates.
+     *
+     * @return string|null Comma separated dates, or null for an exclusion rule.
+     */
+    private function exclusion_dates(string $exclusion, Event $event): ?string
+    {
+        if (str_starts_with($exclusion, 'EXDATE=')) {
+            return substr($exclusion, 7);
+        }
+
+        return EventExclusionRepair::dates_from_rule($exclusion, (string)$event->get('exception_dates'));
+    }
+
+    /**
+     * Returns the stored exception dates to keep when the editor posts an exclusion rule.
+     *
+     * The editor shows only the rule. Dates stored next to a real rule come from "Edit this instance" or a
+     * feed's EXDATE and are kept. Dates of an event whose exclusion was a date list are the user's former
+     * custom dates, replaced by the rule.
+     *
+     * @param  Event  $event  Event being saved, still holding its stored exclusion.
+     *
+     * @return string|null Comma separated dates, or null.
+     */
+    private function dates_next_to_rule(Event $event): ?string
+    {
+        $stored_rule = (string)$event->get('exception_rules');
+        if ('' === $stored_rule || str_starts_with($stored_rule, 'EXDATE=')) {
+            return null;
+        }
+
+        return $event->get('exception_dates') ?: null;
     }
 
     /**
@@ -394,13 +449,13 @@ class EventEditing extends OsecBaseClass
             ! isset($_REQUEST[self::NONCE_NAME])
             || ! wp_verify_nonce(sanitize_key($_REQUEST[self::NONCE_NAME]), self::NONCE_ACTION)
         ) {
-            return false;
+            return null;
         }
 
         // For details @see EventParent->admin_init_post().
         $old_post_id = RequestParser::get_param('post_ID', null, ParamType::Id);
         if (is_null($old_post_id)) {
-            return false;
+            return null;
         }
         $clean_fields = [
             'osec_repeat'      => null,
@@ -420,9 +475,27 @@ class EventEditing extends OsecBaseClass
                 $_REQUEST[$field] = $to_value;
             }
         }
-        $data                = _wp_translate_postdata(false);
+        $_POST['post_type'] = OSEC_POST_TYPE;
+        // The form sends "private" as a visibility next to status "publish"; core maps it only in edit_post().
+        $visibility = RequestParser::get_param('visibility', '', ParamType::Key);
+        if ('private' === $visibility) {
+            $_POST['post_status'] = 'private';
+        }
+        if ('private' === $visibility || 'public' === $visibility) {
+            $_POST['post_password'] = '';
+        }
+        $data = _wp_translate_postdata(false);
+        if (is_wp_error($data)) {
+            return null;
+        }
+        // Only what the event form edits: wp_insert_post() also takes IDs, meta and more from an array.
+        $data                = array_intersect_key($data, array_flip(self::DUPLICATE_POST_FIELDS));
+        $data['post_type']   = OSEC_POST_TYPE;
         $data['post_parent'] = $old_post_id;
-        $new_post_id             = wp_insert_post($data);
+        $new_post_id         = wp_insert_post($data);
+        if (! $new_post_id) {
+            return null;
+        }
         EventParent::factory($this->app)
                    ->event_parent($new_post_id, $old_post_id, $instance_id);
         return $new_post_id;

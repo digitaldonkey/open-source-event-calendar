@@ -1427,9 +1427,12 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // ========================
         // = Latitude & longitude =
         // ========================
+        // As on the event page, which shows them only with the map.
         if (
-            floatval($event->get('latitude')) ||
-            floatval($event->get('longitude'))
+            $event->get('show_map') && (
+                floatval($event->get('latitude')) ||
+                floatval($event->get('longitude'))
+            )
         ) {
             $e->setGeo($event->get('latitude'), $event->get('longitude'));
         }
@@ -1472,7 +1475,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // ==================
         // = Cost & tickets =
         // ==================
-        if ($event->get('cost')) {
+        if ($event->get('cost') && ! $event->get('hide_cost')) {
             $e->setXprop(
                 'X-COST',
                 $this->sanitizeValue($event->get('cost'))
