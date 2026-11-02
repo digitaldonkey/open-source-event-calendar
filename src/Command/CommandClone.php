@@ -26,6 +26,11 @@ use WP_Post;
 class CommandClone extends CommandAbstract
 {
     /**
+     * Meta a user who may only read the original gets on the clone: other fields are not part of what they can read.
+     */
+    private const META_KEYS_FOR_READERS = ['_thumbnail_id', '_osec_parent'];
+
+    /**
      * @var array The posts that must be cloned
      */
     protected array $posts = [];
@@ -71,6 +76,26 @@ class CommandClone extends CommandAbstract
 
         // no redirect, just go on with the page
         return [];
+    }
+
+    /**
+     * Whether the current user may clone a post: a clone gives them its full content.
+     *
+     * Only events the user may read. A password protects content from readers, so those need the edit permission.
+     *
+     * @param  WP_Post|null  $post  Post to clone.
+     *
+     * @return bool True if the post may be cloned.
+     */
+    public static function may_clone(?WP_Post $post): bool
+    {
+        if (! $post || ! AccessControl::is_our_post_type($post)) {
+            return false;
+        }
+
+        return '' === $post->post_password
+            ? current_user_can('read_post', $post->ID)
+            : current_user_can('edit_post', $post->ID);
     }
 
     /**
@@ -301,9 +326,13 @@ class CommandClone extends CommandAbstract
             return;
         }
 
+        $may_edit_original = current_user_can('edit_post', $post->ID);
         foreach ($post_meta_keys as $meta_key) {
             // The clone is detached from the feed.
             if (EventFeedTerms::POST_META_KEY === $meta_key) {
+                continue;
+            }
+            if (! $may_edit_original && ! in_array($meta_key, self::META_KEYS_FOR_READERS, true)) {
                 continue;
             }
             $meta_values = get_post_custom_values($meta_key, $post->ID);
@@ -350,7 +379,7 @@ class CommandClone extends CommandAbstract
         ) {
             foreach (RequestParser::get_param('post', [], ParamType::IdList) as $post_id) {
                 $post = get_post($post_id);
-                if ($post) {
+                if (self::may_clone($post)) {
                     $this->posts[] = [
                         'status' => '',
                         'post'   => $post,
@@ -367,6 +396,10 @@ class CommandClone extends CommandAbstract
             !$post_id
             || !isset($_REQUEST['_wpnonce'])
             || !wp_verify_nonce(sanitize_key(wp_unslash($_REQUEST['_wpnonce'])), 'ai1ec_clone_' . $post_id)) {
+            return false;
+        }
+
+        if (!self::may_clone(get_post($post_id))) {
             return false;
         }
 

@@ -3,6 +3,7 @@
 namespace Osec\App\Model\PostTypeEvent;
 
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Command\CommandClone;
 
 /**
  * Helps Rendering clone html.
@@ -36,7 +37,7 @@ class EditPostActions extends OsecBaseClass
      */
     public function duplicate_post_make_duplicate_link_row($actions, $post)
     {
-        if ($post->post_type === OSEC_POST_TYPE) {
+        if (CommandClone::may_clone($post)) {
             $actions['clone'] = '<a href="' . $this->duplicate_post_get_clone_post_link(
                 $post->ID,
                 'display',
