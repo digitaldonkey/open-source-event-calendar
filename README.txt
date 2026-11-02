@@ -208,6 +208,33 @@ add_filter('http_request_args', function ($args, $url) {
 * Plana: the subscribe button follows filters chosen without a page reload (#72)
 * With WPML, a single event's "Add event to..." exports that event, not the whole calendar
 
+= 1.2.0 =
+
+**Highlights**
+
+* Plana fits the WordPress theme: colours, lines and text sizes as Theme Options, defaults from the theme
+* Faster: SVG icons, stylesheet 406 to 227 KB, served as a static file; new "Clear all caches"
+* Calendar block: width follows the page, agenda expanded or collapsed per block, print icon setting
+* Print: month, week and day fill the page on any paper size
+* Emoji in events and feeds (utf8mb4), longer event fields, option to trust the server's CA certificates for feeds
+* Complete schema.org/Event microdata in all themes; names for icon-only buttons
+* Updated translations; full SQLite support (for the Live Preview)
+
+**Fixes**
+
+* 5 security fixes: imported feed fields, event titles in the views, JSONP callback, cache report permission, admin output
+* Fields escaped twice since 1.0.7 ("D&amp;D"); repair from the admin notice or with `wp osec repair-escaping`
+* Feed import: categories and tags #62, duplicates, timeouts, long fields, UTC offsets
+* Excluded dates of recurring events on SQLite and in other time zones #44
+* Month view, agenda, date picker, print and theme fixes: 50 fixes in all
+
+**Developers**
+
+* Internet Explorer is no longer supported; custom themes: only the icons in `osec-icons-map.less` remain
+* Templates: new `event-popup.twig`, `event.image_html`; frontend rendering with twig.js 3 and autoescape
+* WP-CLI: `wp osec theme`, `wp osec content generate`, `wp osec repair-escaping`
+* Calendar URLs carry `exact_date` as ISO date; URLs in the input date format keep working
+
 All changes and older versions: [CHANGELOG.md](https://github.com/digitaldonkey/open-source-event-calendar/blob/master/CHANGELOG.md)
 
 == Upgrade Notice ==

@@ -212,22 +212,48 @@ class MakeReadme
     }
 
     /**
-     * The newest version entry of CHANGELOG.md and a link to the whole file on GitHub (WordPress.org advises
-     * keeping only the current release in the readme). An entry may end its readme part early with a line
-     * "<!-- readme-end -->": the details below it stay in CHANGELOG.md only.
+     * The entries of the current release line in CHANGELOG.md (all 1.2.x while 1.2.1 is the newest) and a link to
+     * the whole file on GitHub, as a bug fix release must not hide what its release line brought.
      *
      * @return string
      */
     protected function get_value_changelog(): string
     {
         $changelog = file_get_contents(OSEC_PATH . '/CHANGELOG.md');
-        // Version headings: "= 1.2.0 =". Everything before the second one is the newest entry.
-        $entries = preg_split('/^(?==\s.+\s=\s*$)/m', $changelog, -1, PREG_SPLIT_NO_EMPTY);
-        $newest  = $entries[0] ?? $changelog;
-        $newest  = rtrim(preg_split('/^<!--\s*readme-end\s*-->\s*$/m', $newest)[0]);
 
-        return "\n== Changelog ==\n\n" . $newest . "\n\n"
+        return "\n== Changelog ==\n\n" . self::current_release_line($changelog) . "\n\n"
             . 'All changes and older versions: [CHANGELOG.md](' . $this->github_url() . "/blob/master/CHANGELOG.md)\n";
+    }
+
+    /**
+     * Returns the entries sharing the newest entry's major and minor version.
+     *
+     * An entry may end its readme part early with a line "<!-- readme-end -->": the details below it stay in
+     * CHANGELOG.md only.
+     *
+     * @param  string  $changelog  Text of CHANGELOG.md, newest first, with version headings like "= 1.2.0 =".
+     *
+     * @return string The entries, newest first.
+     */
+    public static function current_release_line(string $changelog): string
+    {
+        $entries = preg_split('/^(?==\s.+\s=\s*$)/m', $changelog, -1, PREG_SPLIT_NO_EMPTY) ?: [$changelog];
+        $line    = null;
+        $keep    = [];
+        foreach ($entries as $entry) {
+            $found   = preg_match('/^=\s*(\d+\.\d+)[.\s]/', $entry, $version);
+            $current = $found ? $version[1] : null;
+            $line ??= $current;
+            if (null !== $line && $current !== $line) {
+                break;
+            }
+            $keep[] = rtrim(preg_split('/^<!--\s*readme-end\s*-->\s*$/m', $entry)[0]);
+            if (null === $line) {
+                break;
+            }
+        }
+
+        return implode("\n\n", $keep);
     }
 
     /**
