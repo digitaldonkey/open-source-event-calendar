@@ -42,7 +42,7 @@ class CalendarSubscribeView extends OsecBaseClass
         if (! str_contains($url_args, '&lang=')) {
             $use_lang = WpmlHelper::factory($this->app)->get_language();
             if (!is_null($use_lang)) {
-                $url_args = '&lang=' . $use_lang;
+                $url_args .= '&lang=' . $use_lang;
             }
         }
 
