@@ -28,6 +28,25 @@ class EventEditing extends OsecBaseClass
     public const NONCE_ACTION = 'osec_edit_event_nonce';
 
     /**
+     * Post fields an "Edit this instance" child takes from the event form.
+     */
+    private const DUPLICATE_POST_FIELDS = [
+        'post_author',
+        'post_title',
+        'post_content',
+        'post_excerpt',
+        'post_status',
+        'post_password',
+        'post_date',
+        'post_date_gmt',
+        'comment_status',
+        'ping_status',
+        'post_category',
+        'tax_input',
+        '_thumbnail_id',
+    ];
+
+    /**
      * Listeners collecting recurrence problems of the running save.
      *
      * @var callable[]
@@ -394,13 +413,13 @@ class EventEditing extends OsecBaseClass
             ! isset($_REQUEST[self::NONCE_NAME])
             || ! wp_verify_nonce(sanitize_key($_REQUEST[self::NONCE_NAME]), self::NONCE_ACTION)
         ) {
-            return false;
+            return null;
         }
 
         // For details @see EventParent->admin_init_post().
         $old_post_id = RequestParser::get_param('post_ID', null, ParamType::Id);
         if (is_null($old_post_id)) {
-            return false;
+            return null;
         }
         $clean_fields = [
             'osec_repeat'      => null,
@@ -420,9 +439,19 @@ class EventEditing extends OsecBaseClass
                 $_REQUEST[$field] = $to_value;
             }
         }
-        $data                = _wp_translate_postdata(false);
+        $_POST['post_type'] = OSEC_POST_TYPE;
+        $data               = _wp_translate_postdata(false);
+        if (is_wp_error($data)) {
+            return null;
+        }
+        // Only what the event form edits: wp_insert_post() also takes IDs, meta and more from an array.
+        $data                = array_intersect_key($data, array_flip(self::DUPLICATE_POST_FIELDS));
+        $data['post_type']   = OSEC_POST_TYPE;
         $data['post_parent'] = $old_post_id;
-        $new_post_id             = wp_insert_post($data);
+        $new_post_id         = wp_insert_post($data);
+        if (! $new_post_id) {
+            return null;
+        }
         EventParent::factory($this->app)
                    ->event_parent($new_post_id, $old_post_id, $instance_id);
         return $new_post_id;

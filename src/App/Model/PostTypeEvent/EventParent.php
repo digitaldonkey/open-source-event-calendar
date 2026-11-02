@@ -88,8 +88,16 @@ class EventParent extends OsecBaseClass
         ) {
             $old_post_id = RequestParser::get_param('post_ID', null, ParamType::Id);
             $instance_id = RequestParser::get_param('osec_instance_id', 0, ParamType::Id);
+            // Runs before core's checks in wp-admin/post.php, which this request never reaches.
+            if (!AccessControl::is_our_post_type($old_post_id) || !current_user_can('edit_post', $old_post_id)) {
+                wp_die(esc_html__('Sorry, you are not allowed to edit this event.', 'open-source-event-calendar'), 403);
+            }
             $post_id = EventEditing::factory($this->app)->create_duplicate_post();
-            if (!is_null($old_post_id) && false !== $post_id) {
+            // Falling through to core would save the parent with the repeat fields already emptied.
+            if (!$post_id) {
+                wp_die(esc_html__('This occurrence could not be saved.', 'open-source-event-calendar'), 400);
+            }
+            if (!is_null($old_post_id)) {
                 $this->handleInstances(
                     new Event($this->app, $post_id),
                     new Event($this->app, $old_post_id),
