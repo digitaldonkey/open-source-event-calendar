@@ -17,7 +17,7 @@ paths:
 
 No theme ships precompiled CSS (dropped in 1.0.8), so every site compiles its own LESS into one stylesheet
 (~400 KB). `FrontendCssController` (`src/App/Controller/FrontendCssController.php`) owns all of it: compile, store,
-link, route. Since 1.2.0 (`feature/css-cache-rework`, plan `.claude/plans/css-cache-rework.md`):
+link, route. Since 1.2.0 (`feature/css-cache-rework`, plan `.claude/plans/done/css-cache-rework.md`):
 
 **Where the CSS is stored** - decided only when it is compiled (`CacheFactory::createCache('css')`), first that works:
 
