@@ -3,6 +3,7 @@
 namespace Osec\Tests\Unit\Command;
 
 use Osec\App\Model\PostTypeEvent\EditPostActions;
+use Osec\App\Model\PostTypeEvent\EventParent;
 use Osec\Command\CommandClone;
 use Osec\Http\Request\RequestParser;
 use Osec\Tests\Utilities\TestBase;
@@ -84,6 +85,32 @@ class CommandClonePermissionTest extends TestBase
 
         self::assertSame($gets_field ? 'value' : '', get_post_meta($clone_id, 'osec_test_field', true));
         self::assertSame('123', get_post_meta($clone_id, '_thumbnail_id', true));
+    }
+
+    /**
+     * A clone of an edited occurrence is an event of its own: it does not join the series.
+     *
+     * @dataProvider meta_cases
+     *
+     * @param  string  $role  Role of the acting user.
+     */
+    public function test_clone_is_detached_from_the_series(string $role)
+    {
+        global $osec_app;
+
+        $parent_id = self::factory()->post->create(['post_type' => OSEC_POST_TYPE, 'post_status' => 'private']);
+        $child_id  = self::factory()->post->create(
+            ['post_type' => OSEC_POST_TYPE, 'post_status' => 'publish', 'post_parent' => $parent_id]
+        );
+        EventParent::factory($osec_app)->event_parent($child_id, $parent_id, 1);
+        wp_set_current_user(self::factory()->user->create(['role' => $role]));
+
+        $command  = new CommandClone($osec_app, new RequestParser($osec_app, [], 'agenda'));
+        $clone_id = $command->duplicate_post_create_duplicate(get_post($child_id));
+
+        self::assertSame(0, get_post($clone_id)->post_parent);
+        self::assertSame('', get_post_meta($clone_id, '_osec_parent', true));
+        self::assertEmpty(EventParent::factory($osec_app)->get_parent_event($clone_id));
     }
 
     public static function meta_cases(): array

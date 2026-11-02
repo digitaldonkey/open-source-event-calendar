@@ -28,7 +28,7 @@ class CommandClone extends CommandAbstract
     /**
      * Meta a user who may only read the original gets on the clone: other fields are not part of what they can read.
      */
-    private const META_KEYS_FOR_READERS = ['_thumbnail_id', '_osec_parent'];
+    private const META_KEYS_FOR_READERS = ['_thumbnail_id'];
 
     /**
      * @var array The posts that must be cloned
@@ -121,7 +121,8 @@ class CommandClone extends CommandAbstract
             'post_date'      => $post->post_date,
             'post_date_gmt'  => get_gmt_from_date($post->post_date),
             'post_excerpt'   => $post->post_excerpt,
-            'post_parent'    => $post->post_parent,
+            // A clone is an event of its own, not an occurrence of the original's series.
+            'post_parent'    => 0,
             'post_password'  => $post->post_password,
             'post_status'    => $new_post_status,
             'post_title'     => $post->post_title,
@@ -183,7 +184,7 @@ class CommandClone extends CommandAbstract
                 $new_post_id,
                 $new_post_status,
                 $post->post_type,
-                $post->post_parent
+                0
             );
 
             $new_post              = [];
@@ -270,8 +271,8 @@ class CommandClone extends CommandAbstract
 
         $may_edit_original = current_user_can('edit_post', $post->ID);
         foreach ($post_meta_keys as $meta_key) {
-            // The clone is detached from the feed.
-            if (EventFeedTerms::POST_META_KEY === $meta_key) {
+            // The clone is detached from the feed and from the original's series.
+            if (EventFeedTerms::POST_META_KEY === $meta_key || '_osec_parent' === $meta_key) {
                 continue;
             }
             if (! $may_edit_original && ! in_array($meta_key, self::META_KEYS_FOR_READERS, true)) {
