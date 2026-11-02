@@ -232,13 +232,10 @@ class EventParent extends OsecBaseClass
     {
         $dbi              = $this->app->db;
         $table_instances  = $dbi->get_table_name(OSEC_DB__INSTANCES);
-        $table_posts      = $dbi->get_table_name('posts');
         $next_instance_id = $dbi->get_var(
             $dbi->prepare(
-                'SELECT i.id FROM ' . $table_instances . ' i JOIN ' .
-                $table_posts . ' p ON (p.ID = i.post_id) ' .
+                'SELECT i.id FROM ' . $table_instances . ' i ' .
                 'WHERE i.post_id = %d AND i.id > %d ' .
-                'AND p.post_status = \'publish\' ' .
                 'ORDER BY id ASC LIMIT 1',
                 $post_id,
                 $instance_id
@@ -285,12 +282,10 @@ class EventParent extends OsecBaseClass
     {
         $dbi             = $this->app->db;
         $table_instances = $dbi->get_table_name(OSEC_DB__INSTANCES);
-        $table_posts     = $dbi->get_table_name('posts');
         return (int) $dbi->get_var(
             $dbi->prepare(
                 "SELECT COUNT(i.id) FROM {$table_instances} i
-                         JOIN {$table_posts} p ON (p.ID = i.post_id)
-                         WHERE i.post_id = %d AND i.id > %d AND p.post_status = 'publish'",
+                         WHERE i.post_id = %d AND i.id > %d",
                 $post_id,
                 $instance_id
             )

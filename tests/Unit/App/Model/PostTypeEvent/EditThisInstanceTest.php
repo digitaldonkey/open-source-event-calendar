@@ -92,6 +92,34 @@ class EditThisInstanceTest extends TestBase
         self::assertSame(['2026-01-12', '2026-01-19', '2026-01-26'], $this->instance_dates($parent_id));
     }
 
+    /**
+     * Editing the first occurrence of a series that is not published moves the parent to the second, as for a
+     * published one. It used to find no next occurrence, clear the rule and leave only the edited occurrence.
+     *
+     * @dataProvider unpublished_statuses
+     */
+    public function test_first_instance_edit_keeps_an_unpublished_series(string $status)
+    {
+        global $osec_app;
+
+        $parent_id = $this->create_event('2026-01-05 09:00:00', 'FREQ=WEEKLY;COUNT=4');
+        wp_update_post(['ID' => $parent_id, 'post_status' => $status]);
+        $this->edit_instance($parent_id, '2026-01-05', '2026-01-05 09:00:00');
+
+        $parent = new Event($osec_app, $parent_id);
+        self::assertSame('FREQ=WEEKLY;COUNT=3;', $parent->get('recurrence_rules'));
+        self::assertSame(['2026-01-12', '2026-01-19', '2026-01-26'], $this->instance_dates($parent_id));
+    }
+
+    public static function unpublished_statuses(): array
+    {
+        return [
+            'private' => ['private'],
+            'draft'   => ['draft'],
+            'pending' => ['pending'],
+        ];
+    }
+
     public static function first_occurrences(): array
     {
         return [
