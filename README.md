@@ -287,6 +287,10 @@ Those wishing to contribute to the development of this project, please see the [
 
 ## Upgrade Notice
 
+= 1.2.1 =
+
+Fixes repeating events that lost their dates after excluding a date (1.1.15 to 1.2.0): check the notice in wp-admin and repair them there. Also fixes permission checks. Recommended for all sites.
+
 = 1.2.0 =
 
 Plana's colours now follow your WordPress theme: check the look, adjust in Theme Options. Custom calendar themes: icon fonts are replaced by SVG icons and templates render with autoescape, so test first. Optional: convert tables to utf8mb4 in Settings (back up first).

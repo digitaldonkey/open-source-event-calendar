@@ -13,8 +13,8 @@ Author URI: https://github.com/digitaldonkey
 Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
 Donate link: https://www.paypal.com/donate/?hosted_button_id=ZNWEQRQNJBTE6
 Text Domain: open-source-event-calendar
-Stable Tag: 1.2.0
-Version: 1.2.0
+Stable Tag: 1.2.1
+Version: 1.2.1
 
 An event calendar with native iCal / ICS import and export
 
@@ -195,36 +195,26 @@ add_filter('http_request_args', function ($args, $url) {
 
 == Changelog ==
 
-= 1.2.0 =
-
-**Highlights**
-
-* Plana fits the WordPress theme: colours, lines and text sizes as Theme Options, defaults from the theme
-* Faster: SVG icons, stylesheet 406 to 227 KB, served as a static file; new "Clear all caches"
-* Calendar block: width follows the page, agenda expanded or collapsed per block, print icon setting
-* Print: month, week and day fill the page on any paper size
-* Emoji in events and feeds (utf8mb4), longer event fields, option to trust the server's CA certificates for feeds
-* Complete schema.org/Event microdata in all themes; names for icon-only buttons
-* Updated translations; full SQLite support (for the Live Preview)
+= 1.2.1 =
 
 **Fixes**
 
-* 5 security fixes: imported feed fields, event titles in the views, JSONP callback, cache report permission, admin output
-* Fields escaped twice since 1.0.7 ("D&amp;D"); repair from the admin notice or with `wp osec repair-escaping`
-* Feed import: categories and tags #62, duplicates, timeouts, long fields, UTC offsets
-* Excluded dates of recurring events on SQLite and in other time zones #44
-* Month view, agenda, date picker, print and theme fixes: 50 fixes in all
-
-**Developers**
-
-* Internet Explorer is no longer supported; custom themes: only the icons in `osec-icons-map.less` remain
-* Templates: new `event-popup.twig`, `event.image_html`; frontend rendering with twig.js 3 and autoescape
-* WP-CLI: `wp osec theme`, `wp osec content generate`, `wp osec repair-escaping`
-* Calendar URLs carry `exact_date` as ISO date; URLs in the input date format keep working
+* Excluding a date on a repeating event no longer removes the whole series; a review page repairs affected events, also `wp osec repair-exclusions` (#71)
+* "Edit this instance" and Clone now check the permission for that event; a clone only includes what the user may read (#73)
+* Editing an occurrence of a private event no longer makes that occurrence public (#73)
+* "Edit this instance": a moved occurrence no longer comes back on its old date; the first occurrence no longer adds a date at the end or shows twice, and no longer loses the rest of a private or draft series
+* Clone no longer leaves empty items in the media library, and a clone of an occurrence is now its own event (#73)
+* ICS export respects "Hide event cost" and the map setting
+* Plana: the subscribe button follows filters chosen without a page reload (#72)
+* With WPML, a single event's "Add event to..." exports that event, not the whole calendar
 
 All changes and older versions: [CHANGELOG.md](https://github.com/digitaldonkey/open-source-event-calendar/blob/master/CHANGELOG.md)
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+
+Fixes repeating events that lost their dates after excluding a date (1.1.15 to 1.2.0): check the notice in wp-admin and repair them there. Also fixes permission checks. Recommended for all sites.
 
 = 1.2.0 =
 
