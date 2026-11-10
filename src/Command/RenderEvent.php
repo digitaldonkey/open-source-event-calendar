@@ -46,7 +46,7 @@ class RenderEvent extends RenderCalendar
         }
 
         // Else proceed with rendering valid event. Fetch all relevant details.
-        $instance    = RequestParser::get_param('instance_id', -1);
+        $instance    = RequestParser::get_param('instance_id', -1, ParamType::Int);
         $event       = new Event($this->app, get_the_ID(), $instance);
         $view        = EventSingleView::factory($this->app);
         $footer_html = $view->get_footer($event);
