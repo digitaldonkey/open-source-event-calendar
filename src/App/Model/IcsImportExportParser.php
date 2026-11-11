@@ -1330,19 +1330,31 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // ============================
         if ($use_html) {
             if (! empty($content) || !empty($post_excerpt)) {
-                // The akward newline and spacing is necessary to keep
-                // iclal 75 chars per line limit rendered correcctly.
                 $post_excerpt = $post_excerpt ? '<p><strong>' . $post_excerpt . '</strong></p>' : '';
                 $link = '<p><a href="' . esc_url($event_url) . '">' . esc_url($event_url) . '</a></p>';
-                // Doctype is added after escaping
-                //   @see RenderIcal->render_escped_with_doctype()
-                $html = "###DOCTYPE_PLACEHOLDER###\n"
-                        . '<html ' . get_language_attributes() . '>'
+                $html = '<html ' . get_language_attributes() . '>'
                         . '<body>'
                         . $post_excerpt
                         . $content . $html_image
                         . $link
                         . '</body></html>';
+                $html = "<!DOCTYPE html>\n" . wp_kses(
+                    $html,
+                    [
+                        'html' => ['lang' => true],
+                        'head' => true,
+                        'title' => true,
+                        'body' => true,
+                        'p' => true,
+                        'strong' => true,
+                        'em' => true,
+                        'a' => [
+                            'href' => true,
+                            'title' => true,
+                        ],
+                        'br' => true,
+                    ]
+                );
                 $e->setXprop(
                     'X-ALT-DESC',
                     $this->sanitizeValue($html),
