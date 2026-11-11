@@ -1689,17 +1689,16 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 'TZID'  => $tz,
             ];
             $dt_suffix = $event->get('start')->format('\THis');
+            $exdates = [];
             foreach (
                 explode(',', $exception_dates) as $exdate
             ) {
                 // date-time string in EXDATES is formatted as 'Ymd\THis\Z', that
                 // means - in UTC timezone, thus we use `format_to_gmt` here.
                 $exdate = new DT($exdate);
-                $e->setExdate(
-                    [$exdate->format_to_gmt('Ymd') . $dt_suffix],
-                    $params
-                );
+                $exdates[] = $exdate->format_to_gmt('Ymd') . $dt_suffix;
             }
+            $e->setExdate($exdates, $params);
         }
         return $calendar;
     }
