@@ -9,16 +9,21 @@ use Osec\App\Model\PostTypeEvent\Event;
 use Osec\Tests\Utilities\TestBase;
 
 /**
- * Multiple excluded dates share one EXDATE property without empty values.
+ * Excluded dates export as one EXDATE property: every date at the series' start time, in the series' timezone.
+ *
+ * The event uses the site's timezone, which the export writes as TZID for every event (an event in another
+ * timezone currently gets the site's TZID too, a separate bug). The test site's timezone comes from
+ * PHP's date.timezone (Europe/Berlin locally and in CI), so the expected line is built from it.
  */
 class IcsExportExdateTest extends TestBase
 {
     /**
      * @dataProvider exclusions
      *
-     * @param string[] $dates Stored excluded dates.
+     * @param string[] $dates    Stored excluded dates.
+     * @param string[] $expected Exported values, in this order.
      */
-    public function test_export_preserves_excluded_dates(array $dates)
+    public function test_export_writes_excluded_dates_at_the_series_start_time(array $dates, array $expected)
     {
         global $osec_app;
 
@@ -33,7 +38,7 @@ class IcsExportExdateTest extends TestBase
             'end' => clone $start,
             'allday' => false,
             'timezone_name' => $timezone,
-            'recurrence_rules' => 'FREQ=WEEKLY;COUNT=4',
+            'recurrence_rules' => 'FREQ=WEEKLY;COUNT=30',
             'exception_dates' => implode(',', $dates),
         ]);
         $ics = IcsImportExportParser::factory($osec_app)->export([
@@ -43,21 +48,27 @@ class IcsExportExdateTest extends TestBase
         $unfolded = str_replace("\r\n ", '', $ics);
         preg_match_all('/^EXDATE[^\r\n]*/m', $unfolded, $matches);
 
-        self::assertCount(1, $matches[0]);
-        self::assertStringNotContainsString(':,', $matches[0][0]);
-        $values = explode(':', $matches[0][0], 2)[1];
-        self::assertCount(count($dates), explode(',', $values));
+        // iCalcreator writes UTC as a "Z" suffix instead of a TZID.
+        $line = 'UTC' === $timezone
+            ? 'EXDATE:' . implode('Z,', $expected) . 'Z'
+            : 'EXDATE;TZID=' . $timezone . ':' . implode(',', $expected);
+        self::assertSame([$line], $matches[0]);
     }
 
     /**
-     * @return array[] Multiple exclusions and the single-date control.
+     * @return array[] Stored dates and the values the export writes for them.
      */
     public static function exclusions(): array
     {
         return [
-            'two dates' => [['20261127T000000Z', '20261204T000000Z']],
-            'three dates' => [['20261127T000000Z', '20261204T000000Z', '20261211T000000Z']],
-            'one date' => [['20261127T000000Z']],
+            'one date' => [['20261127T000000Z'], ['20261127T180000']],
+            'two dates' => [['20261127T000000Z', '20261204T000000Z'], ['20261127T180000', '20261204T180000']],
+            'three dates' => [
+                ['20261127T000000Z', '20261204T000000Z', '20261211T000000Z'],
+                ['20261127T180000', '20261204T180000', '20261211T180000'],
+            ],
+            'stored out of order' => [['20261204T000000Z', '20261127T000000Z'], ['20261127T180000', '20261204T180000']],
+            'after a DST change, same wall time' => [['20270402T000000Z'], ['20270402T180000']],
         ];
     }
 }
