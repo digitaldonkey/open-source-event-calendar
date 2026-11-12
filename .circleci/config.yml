@@ -756,7 +756,7 @@ jobs:
             echo "CIRCLE_SHA1:   $CIRCLE_SHA1"
       - run:
           name: Decide what this pipeline releases
-          # /tmp/release.env (RELEASE_MODE, RELEASE_VERSION, RELEASE_UPDATE_TRUNK) is read by
+          # /tmp/release.env (RELEASE_MODE, RELEASE_VERSION) is read by
           # the GitHub and SVN deploy jobs; the format is documented in release-context.sh.
           command: |
             .circleci/release-context.sh | tee /tmp/release.env
@@ -804,9 +804,11 @@ jobs:
                 # No -delete: it would delete the release tag too (protected by the
                 # "Release tags" ruleset). -replace makes a rerun re-upload the zip.
                 ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -replace "$RELEASE_VERSION" /tmp/open-source-event-calendar.zip
+                # The master pipeline of this commit deploys nothing, so "dev" moves here, as trunk does.
+                ghr -prerelease -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete dev /tmp/open-source-event-calendar.zip
                 ;;
               dryrun)
-                echo "Dry run: would publish GitHub release $RELEASE_VERSION"
+                echo "Dry run: would publish GitHub release $RELEASE_VERSION and move dev to this commit"
                 ;;
               *)
                 echo "Nothing to publish"
