@@ -93,8 +93,8 @@ time. The whole red run took 3m07s.
 
 What the CircleCI pipeline (`.circleci/config.yml`) does differently depending on which branch or tag triggers it:
 
-- `master` — runs the full test matrix; replaces the WordPress.org SVN **trunk** and the GitHub `dev` prerelease, on every push (skipped when master has moved on, so a rerun never rolls back); contains the latest bugfixes
-- tag `X.Y.Z` — runs the full test matrix, then creates SVN `tags/X.Y.Z` and the GitHub release `X.Y.Z` (see below)
+- `master` — runs the full test matrix; replaces the WordPress.org SVN **trunk** and the GitHub `dev` prerelease, on every push (skipped when master has moved on, so a rerun never rolls back; a new `Stable Tag` never reaches trunk, see below); contains the latest bugfixes
+- tag `X.Y.Z` — runs the full test matrix, then creates the GitHub release `X.Y.Z` and moves GitHub `dev`, then SVN `tags/X.Y.Z` and trunk in one commit (see below)
 - tag `X.Y.Z-dryrun` — the same, but prints what it would commit and publishes nothing
 - `release-*` — runs the full test matrix; does not create a release
 - Next-release branch (e.g. `1.2.x-dev` if the current release is `1.1.x`) — a dev branch for the next semantic major version; should include all bugfixes from master; no release
@@ -104,6 +104,9 @@ What the CircleCI pipeline (`.circleci/config.yml`) does differently depending o
 The last step of a release, after everything else in skill `prepare-release` ("Order of a release"):
 the bump reaches `master` only here.
 
+Before the bump, `master` is merged into `release-*` (skill `prepare-release`, step 2), so `master` holds nothing the
+release line lacks and the fast-forward below works. External PRs often land on `master` directly.
+
 ```bash
 # release-* holds the release commit (version bumped everywhere) and its pipeline is green
 git switch master
@@ -112,26 +115,44 @@ git tag -a 1.2.0 -m "Release 1.2.0"
 git push --atomic origin master 1.2.0
 ```
 
-**Known gap:** the push starts a `master` pipeline as well as the tag pipeline, and the `master` one replaces
-trunk with the new `Stable Tag` if it finishes first. Until `release-context.sh` holds trunk back for a release
-commit, there can be a short time when WordPress.org serves trunk as that version. Do not push anything else.
+The push starts two pipelines on the same commit. The `master` one deploys nothing and waits for the tag pipeline's
+result (below), so a missing, slow or red tag pipeline also turns it red. Two pipelines from one atomic push first run in a
+real release at the next tag (not yet verified).
 
 - **`.circleci/release-context.sh` decides, once, in `release_decision_job`** (master and release tags only,
   after all tests; `build` stays release-free) and writes `/tmp/release.env` (`RELEASE_MODE`
-  none/dev/tagged/dryrun, `RELEASE_VERSION`, `RELEASE_UPDATE_TRUNK`) for the GitHub and SVN jobs. A tag that
-  fails a check fails that job, so nothing is deployed:
+  none/dev/tagged/dryrun, `RELEASE_VERSION`) for the GitHub and SVN jobs. A failed check
+  fails that job, so nothing is deployed. "Latest" is the highest `X.Y.Z` in
+  https://plugins.svn.wordpress.org/open-source-event-calendar/tags/; an unreadable listing fails the job.
+- **A tag** must pass:
   - `X.Y.Z` or `X.Y.Z-dryrun` only;
-  - the tagged commit is on master;
+  - the tagged commit is on master (not for `-dryrun`, so a bump on `release-*` can be rehearsed);
   - the tag equals plugin header `Version` and `Stable Tag`, `README.txt` `Stable Tag` and `OSEC_VERSION`;
-  - the tag is higher than every other `X.Y.Z` tag.
-- **Trunk (and the GitHub `dev` release) is only replaced while the pipeline's commit is master's HEAD.**
+  - the tag is higher than every other `X.Y.Z` tag, and than the latest on WordPress.org.
+- **A `master` push** compares `Stable Tag` (`README.txt` and plugin header, equal and `X.Y.Z`, or the job fails):
+  - equals latest: trunk and GitHub `dev`. So the Development Version on
+    https://wordpress.org/plugins/open-source-event-calendar/advanced/ is `master`;
+  - newer, git tag `X.Y.Z` on this exact commit: deploys nothing; the tag pipeline releases it (trunk and GitHub `dev`
+    too). The job waits until `tags/X.Y.Z` is in the listing (a read per minute with a log line, an unreadable listing
+    counts as "not yet") and fails after 60 minutes;
+  - newer, no git tag: the job fails. The bump was pushed without its tag, or the tag was forgotten;
+  - newer, tag on another commit: the job fails. Usually a push to `master` during a release: rerun it once the release
+    is out;
+  - older: the job fails. So **a bad release cannot be rolled back by a `master` push**: release a new, higher version.
+  - A stray higher `tags/X.Y.Z` on WordPress.org would turn every `master` run red. Fixing it is an SVN edit, a deliberate
+    exception to "git is the source" that gets written down.
+- **A dev build only replaces trunk (and the GitHub `dev` release) while the pipeline's commit is master's HEAD.**
   Checked in `release_decision_job` and again right before each deploy (`.circleci/still-master-head.sh`), because
-  master can move on while the pipeline runs. A master pipeline that was overtaken deploys nothing; a tag on
-  an older master commit creates just `tags/X.Y.Z`. If the check itself fails (fetch error), the job fails.
-- **The release commit reaches trunk through its master pipeline, possibly before the tag exists** - WordPress.org
-  then serves trunk as that version until the tag pipeline finishes (see "Known gap" above). 1.2.1 was offered this
-  way on 2026-11-02 before its tag existed, and later fixes under that number do not reach sites that had updated.
-- **An existing `tags/X.Y.Z` is never touched**, so rerunning a tag pipeline is harmless.
+  master can move on while the pipeline runs. A master pipeline that was overtaken deploys nothing. If the check itself
+  fails (fetch error), the job fails.
+- **A release always replaces trunk**, in one SVN commit with `tags/X.Y.Z`, also when master has moved on. Trunk cannot be
+  newer, as master only deploys that `Stable Tag` once the tag exists. It also moves GitHub `dev` to the release commit.
+- **Second deploy of a tag:** once `tags/X.Y.Z` exists, its pipeline deploys nothing anywhere and stays green. GitHub publishes
+  before SVN (a GitHub release can be replaced, an SVN tag is final), so a failed SVN step can be rerun. An SVN commit
+  that reports no revision fails the job; its rerun finds the tag and stops.
+- **Rerunning an old red `master` pipeline after a newer push** turns it green without deploying: the newer pipeline deploys.
+- **Assets are not part of the release decision:** `wp_deploy_assets_job` runs on every `master` push after the build job,
+  before the tests finish and also when the decision fails (maintainer decision 2026-11-12).
 - **The tag is committed as a working-copy copy of the updated trunk**, so a release uploads only what differs
   from trunk. A whole-tag upload (~1,500 files) timed out on "Committing transaction..." in 2026-09.
 - **Only the maintainer can push `X.Y.Z` tags**: GitHub tag ruleset "Release tags" (`refs/tags/*.*.*`,

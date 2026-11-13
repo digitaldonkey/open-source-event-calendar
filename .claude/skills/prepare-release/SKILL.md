@@ -13,23 +13,26 @@ to the user.
 
 ## Order of a release
 
-**The version bump reaches `master` last, directly before the tag.** WordPress.org reads
-`Stable Tag` from trunk, and the `master` pipeline replaces trunk. With a new `Stable Tag` and no
-`tags/X.Y.Z` yet, WordPress.org serves trunk as that release, so sites can update to a version that
-was never tagged and that a later fix under the same number will not reach (happened with 1.2.1).
+**The version bump reaches `master` last, together with the tag.** WordPress.org reads
+`Stable Tag` from trunk. With a new `Stable Tag` and no `tags/X.Y.Z` yet, it serves trunk as that release,
+so sites can update to a version that was never tagged and that a later fix under the same number
+will not reach (happened with 1.2.1). `release-context.sh` keeps a new `Stable Tag` out of trunk, and a
+bump on `master` without its tag fails the pipeline.
 
 1. **Fixes:** merged into `release-*`, then `master`, with the version unchanged. Trunk gets the code,
    sites stay on the tagged release. Everything worth changing is changed here, and rechecked by
    the maintainer **before** step 2. Merge commits say `Fixes #N` per ticket: GitHub links it, and closes
    the ticket when the commit reaches `master`.
-2. **Checklist below:** on a branch from `release-*` (`chore/version-X.Y.Z`): tests, metadata, bump,
+2. **Checklist below:** first merge `master` into `release-*`, so the fast-forward at the end works and the
+   combined code is tested before any tag exists (external PRs often land on `master`). Then, on a branch from
+   `release-*` (`chore/version-X.Y.Z`): tests, metadata, bump,
    changelog, Upgrade Notice, generated files. Merge it into `release-*` only, and let that pipeline
    go green. `release-*` deploys nothing.
 3. **End, by the maintainer, only once nothing else is coming:** `master` takes the bump and the tag
    goes up with it (see skill `release-pipeline`, "Releasing to WordPress.org"). A later fix means a
    new version number.
 
-Never push the bump to `master` to "try" it, and don't start the checklist's bump while fixes are
+Never push the bump to `master` to "try" it (a `X.Y.Z-dryrun` tag on `release-*` rehearses the deploy), and don't start the checklist's bump while fixes are
 still expected.
 
 ## Steps
