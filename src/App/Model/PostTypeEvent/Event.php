@@ -194,7 +194,10 @@ class Event extends OsecBaseClass
      * {@see self::initialize_from_array} to initiate actual values.
      *
      * @param  int  $post_id  ID of post (event) to initiate.
-     * @param  int|bool  $instance  ID of event instance, false for base event.
+     * @param  int|bool  $instance  false: the event's own dates, no instance ID.
+     *   -1: the event's own dates plus the ID of the occurrence on them (normally the first).
+     *   An ID: that occurrence's dates; if it is no occurrence of this event, the event's own dates and no
+     *   instance ID.
      *
      * @return Event Instance of self for chaining.
      *
@@ -257,7 +260,8 @@ class Event extends OsecBaseClass
             $this->set('instance_id', $instance);
 
             // CASE, not IF(): the SQLite driver (WordPress Playground) evaluates IF() to its else branch.
-            $select_sql .= ', CASE WHEN aei.start IS NOT NULL THEN aei.start ELSE e.start END AS start,' .
+            $select_sql .= ', aei.id AS instance_id,' .
+                           ' CASE WHEN aei.start IS NOT NULL THEN aei.start ELSE e.start END AS start,' .
                            ' CASE WHEN aei.start IS NOT NULL THEN aei.end ELSE e.end END AS `end` ';
             $left_join = 'LEFT JOIN ' . $dbi->get_table_name(OSEC_DB__INSTANCES) .
                          ' aei ON aei.id = ' . absint($instance) . ' AND e.post_id = aei.post_id ';
@@ -304,6 +308,10 @@ class Event extends OsecBaseClass
             );
         }
 
+        // The join found no occurrence: no instance ID, so no link points at one.
+        if (array_key_exists('instance_id', $event) && null === $event['instance_id']) {
+            $this->set('instance_id', null);
+        }
         $event['post'] = $post;
 
         return $this->initialize_from_array($event);
@@ -321,8 +329,10 @@ class Event extends OsecBaseClass
 
     public function get_instance_edit_link()
     {
-        // Defaults to 1.
-        $instance_id = $this->get('instance_id') ? $this->get('instance_id') : 1;
+        $instance_id = $this->get('instance_id');
+        if (! $instance_id) {
+            return $this->get_edit_link();
+        }
         return admin_url(
             'post.php?post=' . $this->entity->get('post_id')
             . '&action=edit'

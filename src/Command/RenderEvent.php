@@ -9,6 +9,7 @@ use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\View\Event\EventSingleView;
 use Osec\Http\Request\ParamType;
 use Osec\Http\Request\RequestParser;
+use Osec\Http\Response\RenderRedirect;
 
 /**
  * The concrete command that renders the event.
@@ -46,8 +47,24 @@ class RenderEvent extends RenderCalendar
         }
 
         // Else proceed with rendering valid event. Fetch all relevant details.
-        $instance    = RequestParser::get_param('instance_id', -1, ParamType::Int);
-        $event       = new Event($this->app, get_the_ID(), $instance);
+        $instance = RequestParser::get_param('instance_id', -1, ParamType::Int);
+        // Present and not empty, but below 1. An array reads as the defaults: null text, -1.
+        if (
+            RequestParser::has_param('instance_id')
+            && '' !== RequestParser::get_param('instance_id', null, ParamType::Text)
+            && $instance < 1
+        ) {
+            wp_die(
+                esc_html__('Bad request: instance_id must be a positive number.', 'open-source-event-calendar'),
+                esc_html__('Bad Request', 'open-source-event-calendar'),
+                ['response' => 400]
+            );
+        }
+        $event = new Event($this->app, get_the_ID(), $instance);
+        // Not a date of this event (any more): show the event itself, with a notice.
+        if ($instance > 0 && null === $event->get('instance_id')) {
+            RenderRedirect::local_redirect(remove_query_arg('instance_id'), ['osec_date_not_found' => 1], 301);
+        }
         $view        = EventSingleView::factory($this->app);
         $footer_html = $view->get_footer($event);
         FrontendCssController::factory($this->app)->add_link_to_html_for_frontend();
@@ -63,9 +80,17 @@ class RenderEvent extends RenderCalendar
             ];
         }
 
+        $notice = '';
+        if (RequestParser::has_param('osec_date_not_found')) {
+            $notice = '<div class="ai1ec-alert ai1ec-alert-info">' . esc_html__(
+                "We couldn't find the specific date for this event your URL requested. Showing the main event instead.",
+                'open-source-event-calendar'
+            ) . '</div>';
+        }
+
         // Else return event details as components.
         return [
-            'data' => wp_kses(
+            'data' => $notice . wp_kses(
                 $view->get_content($event),
                 $this->app->kses->allowed_html_frontend()
             ),
