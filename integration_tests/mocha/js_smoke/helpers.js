@@ -91,6 +91,12 @@ function url(path) {
 async function login(driver) {
     await driver.get(url('/wp-login.php'));
     const user = await driver.wait(until.elementLocated(By.id('user_login')), TIMEOUT);
+    // wp-login.php focuses and selects the username field 200 ms after load (wp_attempt_focus()). Typing before
+    // that lets the password replace the selected username. Wait for it; go on if a site turned it off.
+    await driver.wait(
+        () => driver.executeScript("return document.activeElement && document.activeElement.id === 'user_login';"),
+        2000
+    ).catch(() => {});
     await user.clear();
     await user.sendKeys(settings.wpLogin.admin.user);
     await driver.findElement(By.id('user_pass')).sendKeys(settings.wpLogin.admin.pass);
