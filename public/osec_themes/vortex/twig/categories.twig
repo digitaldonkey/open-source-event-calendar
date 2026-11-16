@@ -1,15 +1,23 @@
 <li class="ai1ec-dropdown ai1ec-category-filter
     {% if selected_cat_ids is not empty %}ai1ec-active{% endif %}">
-    <a class="ai1ec-dropdown-toggle" data-toggle="ai1ec-dropdown">
-        <i class="ai1ec-fa ai1ec-fa-folder-open" aria-hidden="true"></i>
-        <span class="ai1ec-clear-filter ai1ec-tooltip-trigger"
+    {# The clear button sits on the toggle's icon (vortex calendar.less); not inside the toggle, a button in a
+     # button is not allowed. Before it, as it is shown first. #}
+    {% if selected_cat_ids is not empty %}
+        <button type="button"
+            class="ai1ec-clear-filter ai1ec-tooltip-trigger"
             data-href="{{ clear_filter }}"
             {{ data_type | raw }}
-            title="{{ text_clear_category_filter }}">
-            <i class="ai1ec-fa ai1ec-fa-remove"></i>
-        </span>
+            title="{{ text_clear_category_filter }}"
+            aria-label="{{ text_clear_category_filter }}">
+            <i class="ai1ec-fa ai1ec-fa-remove" aria-hidden="true"></i>
+        </button>
+    {% endif %}
+    {# Opens the filter (osec-taxonomy-filter.js: Enter, Space, arrow down; Escape closes). #}
+    <a class="ai1ec-dropdown-toggle" data-toggle="ai1ec-dropdown"
+        role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">
+        <i class="ai1ec-fa ai1ec-fa-folder-open" aria-hidden="true"></i>
         {{ text_categories }}
-        <span class="ai1ec-caret"></span>
+        <span class="ai1ec-caret" aria-hidden="true"></span>
     </a>
     <div class="ai1ec-dropdown-menu osec-taxonomy-filter">
         {% include 'taxonomy-filter-select.twig' with {

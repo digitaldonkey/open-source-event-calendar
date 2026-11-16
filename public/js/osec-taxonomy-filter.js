@@ -33,12 +33,15 @@
  *   data-search-taxonomy   this taxonomy), and the list says data-type-to-search-label until something is typed.
  *   data-updated-label     "Calendar updated." and
  *   data-filtered-label    "Filtered by: %s." (%s = the selected terms): announced to screen readers after a filter
- *                          reloaded the view.
+ *                          (or vortex's clear button) reloaded the view.
  *   <option value>         The term ID; data-color (category colour, hex) and data-description are optional.
  *
  * Accessibility: the select's <label> (visually hidden, "Filter by category") names Tom Select's combobox and
  * list; the list is marked multi-selectable; clear-all reacts to Enter and Space; after a filter change reloads
  * the view, the same filter gets the focus back (without opening its list).
+ * Vortex (and the themes using its templates): the filter toggle is a focusable role="button" that the bundled
+ * Bootstrap dropdown opens on click only. Enter, Space and arrow down open it and move the focus to the search;
+ * Escape closes it and gives the toggle the focus back; leaving it with Tab closes it. aria-expanded follows.
  *
  * The view is loaded by the calendar bundle (calendar.js, with its own private jQuery): this script dispatches the
  * native event "osec:load-view" (detail: href, type) from the select, and initialises again on "osec:view-initialized",
@@ -469,6 +472,84 @@
             }
         });
     }
+
+    /** Vortex's filter toggles (categories.twig / tags.twig), each in its .ai1ec-dropdown item. */
+    const TOGGLE = '.ai1ec-filters > .ai1ec-dropdown > .ai1ec-dropdown-toggle';
+
+    /**
+     * Whether a vortex filter's dropdown is open (the bundled Bootstrap dropdown sets ai1ec-open on the item).
+     *
+     * @param {Element} item The .ai1ec-dropdown item.
+     * @return {boolean} Open.
+     */
+    function isOpen(item) {
+        return item.classList.contains('ai1ec-open');
+    }
+
+    /**
+     * Sets aria-expanded on every vortex filter toggle from its item's state.
+     *
+     * @return {void}
+     */
+    function syncExpanded() {
+        document.querySelectorAll(TOGGLE).forEach((toggle) => {
+            toggle.setAttribute('aria-expanded', String(isOpen(toggle.parentElement)));
+        });
+    }
+
+    /**
+     * Opens or closes a vortex filter: a click on its toggle, which the Bootstrap dropdown (calendar.js, its own
+     * jQuery) handles, so that its other dropdowns close as on a mouse click.
+     *
+     * @param {Element} toggle The filter's toggle.
+     * @return {void}
+     */
+    function clickToggle(toggle) {
+        toggle.click();
+        syncExpanded();
+    }
+
+    // Capture phase: before the Bootstrap dropdown's keydown handler (arrow keys, Escape) and Tom Select's Escape.
+    document.addEventListener('keydown', (event) => {
+        const toggle = event.target.closest(TOGGLE);
+        if (toggle && (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown')) {
+            event.preventDefault();
+            event.stopPropagation();
+            const item = toggle.parentElement;
+            if (!isOpen(item)) {
+                clickToggle(toggle);
+            }
+            const select = item.querySelector(SELECTOR);
+            if (isOpen(item) && select && select.tomselect) {
+                select.tomselect.focus();
+            }
+            return;
+        }
+        const item = event.key === 'Escape' && event.target.closest('.ai1ec-filters > .ai1ec-dropdown');
+        if (item && isOpen(item)) {
+            event.preventDefault();
+            event.stopPropagation();
+            const own = item.querySelector(':scope > .ai1ec-dropdown-toggle');
+            clickToggle(own);
+            own.focus();
+        }
+    }, true);
+    // Tab out of an open vortex filter closes it (a mouse user closes it by clicking elsewhere).
+    document.addEventListener('focusout', (event) => {
+        const item = event.target.closest('.ai1ec-filters > .ai1ec-dropdown');
+        if (item && isOpen(item) && !(event.relatedTarget && item.contains(event.relatedTarget))) {
+            clickToggle(item.querySelector(':scope > .ai1ec-dropdown-toggle'));
+        }
+    });
+    // Mouse clicks open and close the dropdowns too (Bootstrap's document handlers run first). Vortex's clear
+    // button reloads the view through calendar.js: its filter gets the focus back as after a change in the widget.
+    document.addEventListener('click', (event) => {
+        const clear = event.target.closest('.ai1ec-filters .ai1ec-clear-filter');
+        if (clear) {
+            refocusFilter = clear.closest('.ai1ec-tag-filter') ? 'ai1ec-tag-filter' : 'ai1ec-category-filter';
+        }
+        setTimeout(syncExpanded);
+    });
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => init(document));

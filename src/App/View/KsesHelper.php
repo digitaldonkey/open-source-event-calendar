@@ -94,6 +94,11 @@ class KsesHelper extends OsecBaseClass
                     'id'                  => true,
                     // nofollow on the event term links (event-categories.twig, event-tags.twig).
                     'rel'                 => true,
+                    // Filter toggles (vortex categories.twig, tags.twig).
+                    'role'                => true,
+                    'tabindex'            => true,
+                    'aria-haspopup'       => true,
+                    'aria-expanded'       => true,
                     'style'               => true,
                     'target'              => true,
                     'title'               => true,
@@ -113,6 +118,8 @@ class KsesHelper extends OsecBaseClass
                 'span'   => [
                     'class'       => true,
                     'data-*' => true,
+                    // The filter toggles' caret (vortex categories.twig, tags.twig).
+                    'aria-hidden' => true,
                     'role'        => true,
                     'itemprop'    => true,
                     'itemscope'   => true,
@@ -156,6 +163,8 @@ class KsesHelper extends OsecBaseClass
                     // The agenda's disabled pagination button (pagination.twig).
                     'aria-label'          => true,
                     'disabled'            => true,
+                    // Clear filter buttons (vortex categories.twig, tags.twig).
+                    'type'                => true,
                 ],
                 'td'     => [
                     'class' => true,
