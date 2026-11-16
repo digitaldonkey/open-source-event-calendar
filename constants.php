@@ -505,6 +505,20 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         );
     }
 
+    /**
+     * Tom Select version
+     *
+     * Bundled in public/js/external_libs/tom-select (the calendar's category
+     * and tag filters). Bump this, then run bin/update-tom-select.sh to
+     * refresh the files.
+     */
+    if (! defined('OSEC_TOM_SELECT_VERSION')) {
+        define(
+            'OSEC_TOM_SELECT_VERSION',
+            '2.7.0'
+        );
+    }
+
 
     /**
      * Experimental.

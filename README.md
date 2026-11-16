@@ -249,6 +249,8 @@ them from a third party.
 You can load them from elsewhere, for example a CDN, using the hooks `osec_leaflet_library_alter` and
 `osec_leaflet_geocoder_library_alter`.
 
+Tom Select (Apache-2.0) is bundled for the calendar's category and tag filters.
+
 ## Migration Notes
 Database structure is not fully compatible with All-in-One Event Calendar v2.3.4
 
