@@ -4027,7 +4027,12 @@ timely.define("domReady", [], function () {
         }), e.find(".tablescroll_wrapper, .tablescroll_head, .tablescroll_body").css("width", ""), e.find(".tablescroll_head th, .tablescroll_body > tbody > tr > td").css("width", "");
         if (e.find(".ai1ec-week-view").length || e.find(".ai1ec-oneday-view").length) e.find(".ai1ec-oneday-view .tablescroll_wrapper, .ai1ec-week-view .tablescroll_wrapper").scrollTo(e.find(".ai1ec-hour-marker:eq(" + first + ")")), e.find(".ai1ec-hour-marker:eq(" + first + ")").addClass("ai1ec-first-visible");
         agendaView.restore_state(e);
-        e.find(".ai1ec-month-view .ai1ec-multiday").length && monthView.extend_multiday_events(e), e.find(".osec-calendar-view-container").data("ai1ec-inited", !0).trigger("initialize_view.ai1ec"), e.find(".ai1ec-calendar-toolbar").trigger("ai1ec-affix.reinit")
+        e.find(".ai1ec-month-view .ai1ec-multiday").length && monthView.extend_multiday_events(e), e.find(".osec-calendar-view-container").data("ai1ec-inited", !0).trigger("initialize_view.ai1ec"), e.find(".ai1ec-calendar-toolbar").trigger("ai1ec-affix.reinit");
+        // Native event for scripts outside this bundle (its jQuery is private), e.g. osec-taxonomy-filter.js:
+        // the view and its toolbar (filters included) are in place.
+        e.each(function () {
+            this.dispatchEvent(new CustomEvent("osec:view-initialized", {bubbles: !0}))
+        })
     }, g = function (t) {
         t.find(".osec-calendar-view-container").trigger("destroy_view.ai1ec");
         var n = t.find(".ai1ec-minical-trigger").data("datepicker");
@@ -4407,6 +4412,14 @@ timely.define("domReady", [], function () {
         select2MultiselectHelper.init($(".ai1ec-select2-filters")), $(document).on("change", ".ai1ec-select2-multiselect-selector", loadViews.load_view_from_select2_filter)
     };
     domReady(function () {
+        // Scripts outside this bundle load a view by dispatching osec:load-view (detail: href, type) from an
+        // element inside the calendar, e.g. osec-taxonomy-filter.js. Same-origin URLs only: the "jsonp" type
+        // runs the response as a script.
+        document.addEventListener("osec:load-view", function (t) {
+            var n = t.detail || {}, r = $(t.target).closest(".ai1ec-calendar");
+            if (!r.length || typeof n.href != "string" || new URL(n.href, location.href).origin !== location.origin) return;
+            loadViews.load_view_according_to_datatype(r, n.type, n.href)
+        });
         var t = $(".ai1ec-calendar"), r = $(".ai1ec-calendar:visible").first();
         g(), config.use_select2 && b(), y(), t.each(function () {
             loadViews.initialize_view($(this))

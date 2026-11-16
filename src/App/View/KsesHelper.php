@@ -105,6 +105,8 @@ class KsesHelper extends OsecBaseClass
                     'style' => true,
                     'title' => true,
                     'class' => true,
+                    // Decorative icons next to a labelled control (filter-menu.twig, categories.twig, tags.twig).
+                    'aria-hidden' => true,
                 ],
                 'span'   => [
                     'class'       => true,
@@ -241,6 +243,23 @@ class KsesHelper extends OsecBaseClass
                 'meta'  => [
                     'itemprop'    => true,
                     'content'    => true,
+                ],
+                // Category and tag filters (taxonomy-filter-select.twig).
+                'label'  => [
+                    'class' => true,
+                    'for'   => true,
+                ],
+                'select' => [
+                    'class'      => true,
+                    'id'         => true,
+                    'multiple'   => true,
+                    'aria-label' => true,
+                    'data-*'     => true,
+                ],
+                'option' => [
+                    'value'    => true,
+                    'selected' => true,
+                    'data-*'   => true,
                 ],
             ];
         }

@@ -716,6 +716,57 @@ class ScriptsFrontendController extends OsecBaseClass
     }
 
     /**
+     * Enqueues the category and tag filter widget (Tom Select), by CalendarPageView when it renders the filters.
+     *
+     * The script talks to calendar.js through native events (see public/js/osec-taxonomy-filter.js). Its styles
+     * are part of the compiled theme CSS: tom-select.less (LessController); vortex inlines the library's
+     * tom-select.css, plana has its own.
+     *
+     * @return void
+     */
+    public function enqueue_taxonomy_filter(): void
+    {
+        wp_enqueue_script(
+            'osec-tom-select',
+            OSEC_ADMIN_THEME_JS_URL . 'external_libs/tom-select/tom-select.complete.min.js',
+            [],
+            OSEC_TOM_SELECT_VERSION,
+            ['in_footer' => true]
+        );
+        wp_enqueue_script(
+            'osec-taxonomy-filter',
+            OSEC_ADMIN_THEME_JS_URL . 'osec-taxonomy-filter.js',
+            ['osec-tom-select', self::JS_HANDLE],
+            OSEC_VERSION,
+            ['in_footer' => true]
+        );
+        if (! has_action('wp_footer', [$this, 'print_taxonomy_filter_noscript'])) {
+            add_action('wp_footer', [$this, 'print_taxonomy_filter_noscript']);
+        }
+    }
+
+    /**
+     * Hides the category and tag filters when JavaScript is off.
+     *
+     * Without the script they are plain selects with nothing to apply them (no link per term, on purpose). Plana's
+     * filter row goes too when it holds nothing else than its label and these filters. A <noscript> style, not a
+     * class the script removes: with JavaScript, the filters are there from the first paint (no layout shift).
+     *
+     * @wp-hook wp_footer
+     *
+     * @return void
+     */
+    public function print_taxonomy_filter_noscript(): void
+    {
+        echo '<noscript><style id="osec-taxonomy-filter-noscript">'
+            . '.osec-taxonomy-filters--item,.ai1ec-filters>.ai1ec-category-filter,.ai1ec-filters>.ai1ec-tag-filter'
+            . '{display:none!important}'
+            . '.osec-taxonomy-filters:not(:has(>:not(.osec-taxonomy-filters--label,.osec-taxonomy-filters--filters)))'
+            . '{display:none!important}'
+            . '</style></noscript>' . "\n";
+    }
+
+    /**
      * Check if we are accessing a single event page
      *
      * @return bool TRUE if we are accessing a single event page FALSE otherwise

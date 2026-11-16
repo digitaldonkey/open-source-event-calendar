@@ -88,9 +88,10 @@ describe('JS smoke: frontend', function () {
 
         it('opens the category filter', async function () {
             await h.open(driver, h.CAL_PATH, CAL);
-            await h.click(driver, '.ai1ec-category-filter .ai1ec-dropdown-toggle');
-            // vortex: bootstrap dropdown, plana: flyout menu.
-            await h.visible(driver, '.ai1ec-category-filter .ai1ec-dropdown-menu, .ai1ec-category-filter .plana-flyout-menu--menu');
+            // vortex: the pill opens a bootstrap dropdown holding the Tom Select list; plana: the Tom Select field
+            // opens its list. First match in document order, so vortex finds its pill before the hidden field.
+            await h.click(driver, '.ai1ec-category-filter .ai1ec-dropdown-toggle, .ai1ec-category-filter .ts-control');
+            await h.visible(driver, '.ai1ec-category-filter .ai1ec-dropdown-menu, .ai1ec-category-filter .ts-dropdown');
             await h.assertNoConsoleErrors(driver, 'category filter');
         });
 

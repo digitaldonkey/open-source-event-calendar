@@ -13,14 +13,14 @@
 
         {% if categories is not empty %}
             <span class="osec-taxonomy-filters--item">
-                <i class="ai1ec-fa ai1ec-fa-folder-open"></i>
+                <i class="ai1ec-fa ai1ec-fa-folder-open" aria-hidden="true"></i>
                 {{ categories | raw }}
             </span>
         {% endif %}
 
         {% if tags is not empty %}
             <span class="osec-taxonomy-filters--item">
-            <i class="ai1ec-fa ai1ec-fa-tags"></i>
+            <i class="ai1ec-fa ai1ec-fa-tags" aria-hidden="true"></i>
             {{ tags | raw }}
         </span>
         {% endif %}
