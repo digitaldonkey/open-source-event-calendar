@@ -3,6 +3,7 @@
 namespace Osec\App\Model\PostTypeEvent;
 
 use Osec\Bootstrap\OsecBaseClass;
+use Osec\Http\Request\RequestParser;
 
 /**
  * File robots.txt helper.
@@ -62,6 +63,35 @@ class RobotsTxt extends OsecBaseClass
             PHP_EOL,
             array_filter(array_unique($robots))
         );
+
+        return $robots;
+    }
+
+    /**
+     * Robots meta directives for calendar views filtered by category, tag or author.
+     *
+     * Each filter combination is its own URL; search engines should not index them. Unfiltered views
+     * stay indexable. Only the URL counts: a block or shortcode preset to a category is not a filtered request.
+     *
+     * @wp-hook wp_robots
+     *
+     * @param  array  $robots  Directives collected so far.
+     *
+     * @return array
+     */
+    public function meta_robots(array $robots): array
+    {
+        $request = RequestParser::factory($this->app);
+        if ($request->get('action') === false) {
+            $request->parse();
+        }
+        foreach (['cat_ids', 'tag_ids', 'auth_ids'] as $filter) {
+            if (! empty($request->get($filter))) {
+                // Following stays the default (or what the site set): not adding "follow" next to a "nofollow".
+                $robots['noindex'] = true;
+                break;
+            }
+        }
 
         return $robots;
     }

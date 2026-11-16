@@ -92,6 +92,8 @@ class KsesHelper extends OsecBaseClass
                     'data-*'           => true,
                     'href'                => true,
                     'id'                  => true,
+                    // nofollow on the event term links (event-categories.twig, event-tags.twig).
+                    'rel'                 => true,
                     'style'               => true,
                     'target'              => true,
                     'title'               => true,

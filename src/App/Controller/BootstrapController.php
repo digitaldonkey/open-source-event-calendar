@@ -370,6 +370,10 @@ class BootstrapController
              return RobotsTxt::factory($app)->rules($output, $is_public);
         }, 10, 2);
 
+        add_filter('wp_robots', function (array $robots) use ($app) {
+            return RobotsTxt::factory($app)->meta_robots($robots);
+        });
+
         add_filter('osec_dbi_debug', function ($do_debug) use ($app) {
             return Request::factory($app)->debug_filter($do_debug);
         });

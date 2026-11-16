@@ -5,7 +5,11 @@ namespace Osec\Tests\Unit\App\View\Calendar;
 use Osec\App\Controller\FrontendCssController;
 use Osec\App\Controller\LessController;
 use Osec\App\Controller\ScriptsFrontendController;
+use Osec\App\Model\PostTypeEvent\Event;
+use Osec\App\Model\PostTypeEvent\RobotsTxt;
 use Osec\App\View\Calendar\CalendarTaxonomyView;
+use Osec\App\View\Event\EventTaxonomyView;
+use Osec\App\View\KsesHelper;
 use Osec\Cache\CacheMemory;
 use Osec\Http\Request\RequestParser;
 use Osec\Settings\HtmlFactory;
@@ -302,6 +306,35 @@ class CalendarTaxonomyViewTest extends TestBase
     }
 
     /**
+     * An event's category and tag links lead to filtered views (noindex): crawlers are asked not to follow them,
+     * also after the frontend kses filter.
+     */
+    public function test_event_term_links_are_nofollow()
+    {
+        global $osec_app;
+
+        $post_id  = static::factory()->post->create(['post_type' => OSEC_POST_TYPE]);
+        $category = wp_insert_term('Concerts', 'osec_events_categories');
+        $tag      = wp_insert_term('outdoor', 'osec_events_tags');
+        wp_set_object_terms($post_id, [$category['term_id']], 'osec_events_categories');
+        wp_set_object_terms($post_id, [$tag['term_id']], 'osec_events_tags');
+        $event = new Event($osec_app, ['post_id' => $post_id]);
+        $view  = EventTaxonomyView::factory($osec_app);
+
+        foreach (['blocks', 'inline'] as $format) {
+            $html = wp_kses(
+                $view->get_categories_html($event, $format) . $view->get_tags_html($event),
+                KsesHelper::factory($osec_app)->allowed_html_frontend()
+            );
+            preg_match_all('/<a\s[^>]*>/', $html, $links);
+            $this->assertCount(2, $links[0], "$format: category and tag link");
+            foreach ($links[0] as $link) {
+                $this->assertStringContainsString('rel="nofollow"', $link, $format);
+            }
+        }
+    }
+
+    /**
      * Above the search threshold, the page holds only the selected terms, and the filter gets the search endpoint.
      */
     public function test_many_terms_switch_to_server_search()
@@ -380,5 +413,36 @@ class CalendarTaxonomyViewTest extends TestBase
             $search(['taxonomy' => 'osec_events_tags', 'search' => 'a', 'per_page' => 500])->get_status(),
             'per_page limit'
         );
+    }
+
+    /**
+     * @dataProvider robots_cases
+     */
+    public function test_filtered_views_are_not_indexed(array $argv, bool $noindex)
+    {
+        global $osec_app;
+
+        $request = new RequestParser($osec_app, $argv);
+        $request->parse();
+        $osec_app->inject_object(RequestParser::class, $request);
+
+        $robots = RobotsTxt::factory($osec_app)->meta_robots(['max-image-preview' => 'large']);
+
+        $this->assertSame($noindex, ! empty($robots['noindex']));
+        $this->assertArrayNotHasKey('follow', $robots);
+    }
+
+    /**
+     * @return array<string, array{array, bool}>
+     */
+    public static function robots_cases(): array
+    {
+        return [
+            'unfiltered'    => [[], false],
+            'other view'    => [['action' => 'month'], false],
+            'category'      => [['cat_ids' => '3'], true],
+            'tags'          => [['action' => 'week', 'tag_ids' => '4,5'], true],
+            'author'        => [['auth_ids' => '1'], true],
+        ];
     }
 }
