@@ -280,18 +280,11 @@ class FeedsController extends OsecBaseClass
 
         // Prepare output
 
-        $categories = [];
-        if (!empty($entry['feed_category'])) {
-            foreach (explode(',', $entry['feed_category']) as $cat_id) {
-                $fcat = get_term($cat_id, 'osec_events_categories');
-                $categories[]  = PlainText::decode($fcat->name);
-            }
-        }
 
         $args = self::merge_commom_vars([
             'feed_name'            => $feed_name,
             'feed_url'             => $entry['feed_url'],
-            'event_category'       => implode(', ', $categories),
+            'event_category'       => $this->feed_category_names((string)$entry['feed_category']),
             'events_categories_ids'       => $entry['feed_category'],
             'tags'                 => str_replace(',', ', ', $entry['feed_tags']),
             'tags_ids'             => $entry['feed_tags'],
@@ -914,23 +907,10 @@ class FeedsController extends OsecBaseClass
 
         $html = '';
         foreach ($rows as $row) {
-            $feed_categories = explode(',', $row->feed_category);
-            $categories      = [];
-
-            foreach ($feed_categories as $cat_id) {
-                $feed_category = get_term(
-                    $cat_id,
-                    'osec_events_categories'
-                );
-                if ($feed_category && ! is_wp_error($feed_category)) {
-                    $categories[] = PlainText::decode($feed_category->name);
-                }
-            }
-            unset($feed_categories);
             $args = self::merge_commom_vars([
                 'feed_name' => ! empty($row->feed_name) ? $row->feed_name : $row->feed_url,
                 'feed_url' => $row->feed_url,
-                'event_category' => implode(', ', $categories),
+                'event_category' => $this->feed_category_names((string)$row->feed_category),
                 'events_categories_ids' => $row->feed_category,
                 'tags' => stripslashes(
                     str_replace(',', ', ', (string)$row->feed_tags)
@@ -950,6 +930,28 @@ class FeedsController extends OsecBaseClass
         }
 
         return $html;
+    }
+
+    /**
+     * Names of a feed's categories, for the feed list (plain text; the template escapes them).
+     *
+     * Categories deleted since the feed was saved are left out.
+     *
+     * @param  string  $ids  Comma-separated category IDs as stored with the feed.
+     *
+     * @return string Names, comma-separated.
+     */
+    public function feed_category_names(string $ids): string
+    {
+        $names = [];
+        foreach (array_filter(explode(',', $ids)) as $cat_id) {
+            $term = get_term((int)$cat_id, 'osec_events_categories');
+            if ($term instanceof \WP_Term) {
+                $names[] = PlainText::decode($term->name);
+            }
+        }
+
+        return implode(', ', $names);
     }
 
     public function get_feed_uri_by_id(int $feed_id): ?string

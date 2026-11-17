@@ -125,7 +125,7 @@ class EventTaxonomy extends OsecBaseClass
     }
 
     /**
-     * Get ID of term. Optionally create it if it doesn't exist.
+     * Get ID of term. Creates a term given by name if it doesn't exist; a term given by ID must exist.
      *
      * @param  string  $term  Name of term to create.
      * @param  string  $taxonomy  Name of taxonomy to contain term within.
@@ -133,7 +133,7 @@ class EventTaxonomy extends OsecBaseClass
      * @param  array  $attrs  Attributes to creatable entity.
      *
      * @return array|bool      Associative array with term_id
-     *                         and taxonomy keys or false on error
+     *                         and taxonomy keys, or false on error or for an ID that does not exist
      */
     public function initiate_term(
         $term,
@@ -162,6 +162,9 @@ class EventTaxonomy extends OsecBaseClass
                 // check that the term matches the taxonomy
                 $tax                   = $this->get_taxonomy_for_term_id(term_exists((int)$alias_to_use));
                 $to_return['taxonomy'] = $tax->taxonomy;
+            } elseif ($is_id) {
+                // A missing ID (e.g. a feed's category deleted since) is not a name: creating it made a term "123".
+                return false;
             } else {
                 $term_to_check = wp_insert_term($term, $taxonomy, $attrs);
                 if (is_wp_error($term_to_check)) {
