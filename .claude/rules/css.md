@@ -148,8 +148,10 @@ themes, pin them to the same value so only one variable moves.
 Note that switching theme *deletes* `osec_less_variables`, discarding any tuned theme options -
 capture and restore them around anything that switches themes.
 
-**All font sizes in the plugin's LESS/CSS must be relative to that wrapper, using `em` or
-`%` - never `rem`, and never a hardcoded `px` value.** `rem` is always relative to the root
+**All font sizes in plana's LESS/CSS (including vortex values plana inherits) must be relative to that wrapper,
+using `em` or `%` - never `rem`, and never a hardcoded `px` value.** Vortex, umbra, gamma and vendored library CSS
+are exempt (maintainer 2026-11-17), although the reason below applies to their "Base font size" option too.
+`rem` is always relative to the root
 `<html>` element's font-size, which belongs to the surrounding theme/site, not to
 `.timely`. A hardcoded `px` value doesn't move with the setting at all. Either one silently
 breaks "Base font size" for that element.

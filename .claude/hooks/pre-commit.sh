@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
-# Claude Code PreToolUse hook: runs GrumPHP's pre-commit checks before Claude
-# commits from inside the DDEV container.
+# Claude Code PreToolUse hook: before Claude commits from inside the DDEV container,
+# requires a review record for the staged content (see "Review gate" below), then runs
+# GrumPHP's pre-commit checks.
 #
 # The git hooks in .git/hooks call `ddev exec`, which is a stub inside the
 # container, so they do nothing there. They belong to the maintainer and stay
@@ -44,6 +45,18 @@ if [ -n "$target_repo" ] && [ -n "$project_repo" ] && [ "$target_repo" != "$proj
 fi
 
 cd "$CLAUDE_PROJECT_DIR" || exit 0
+
+# Review gate: a commit needs a review record for exactly the staged content, named after its tree hash
+# (`git write-tree`), in .git/osec-review/: harsh review + /security-review of the staged changes, every
+# finding with its outcome (fixed / accepted by the maintainer). Any change after the review gives another
+# hash, so the record no longer matches. The maintainer's own commits do not run this hook.
+tree=$(git write-tree 2>/dev/null)
+record="$(git rev-parse --git-path osec-review 2>/dev/null)/${tree}.md"
+if [ -z "$tree" ] || [ ! -s "$record" ]; then
+    printf 'No review record for the staged content (tree %s), commit blocked.\n' "${tree:-unknown}" >&2
+    printf 'Run the harsh review and /security-review on the staged changes, write the findings and their outcome to\n  %s\nthen commit again.\n' "$record" >&2
+    exit 2
+fi
 
 output=$(git -c diff.mnemonicprefix=false -c diff.noprefix=false --no-pager diff --raw -r -p -m -M --full-index --no-color --staged \
     | GRUMPHP_GIT_WORKING_DIR="$(git rev-parse --show-toplevel)" vendor/bin/grumphp git:pre-commit --no-ansi --no-interaction 2>&1)

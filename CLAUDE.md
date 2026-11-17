@@ -233,7 +233,8 @@ the ICS export) must report through it. Degrade and report, do not throw. Detail
 ## Frontend CSS and Theme LESS
 
 - Every site compiles its own LESS into one stylesheet; `FrontendCssController` owns compile, store, link and route
-- **Font sizes in LESS/CSS use `em` or `%`, never `rem` or a hardcoded `px`** (print styles excepted)
+- **Font sizes in plana's LESS/CSS use `em` or `%`, never `rem` or a hardcoded `px`**, including vortex values
+  plana inherits (print styles excepted). Vortex, umbra, gamma and vendored library CSS are exempt
 - **Never add two LESS values of different units** - `less.php` silently keeps the first unit; use `calc( ~"..." )`
 - **Loading WordPress (WP-CLI too) can compile the CSS** when the invalidate flag is set - read cache state with `mysql`
 - Engines, compile triggers, lock/backoff, debugging a LESS edit that "doesn't take", escape-hatch constants:
@@ -274,6 +275,10 @@ Details (twig.js 3 autoescape, markers, escaping test): `.claude/rules/twig-js.m
   composer, phpcs on the staged files, editorconfig on all tracked files, phpunit), and blocks the commit on failure. Stage with `git add` in
   a **separate** command and don't use `commit -a`: the hook runs before the command, so it would check
   the old index (it blocks both).
+- **Review gate (same hook, first check)**: a Claude commit needs `.git/osec-review/<git write-tree>.md`, the
+  record of a harsh review + `/security-review` of exactly the staged content, each finding with its outcome
+  (fixed / accepted by the maintainer). Stage, review, write the record, commit; any change after the review
+  needs a new one. Merges (`git merge`) are not covered by the hook.
 - **Before handing work back** (and for anything the hook doesn't cover):
   - `vendor/bin/phpunit tests` and check the exit code (see the no-skipped-tests rule below)
   - `vendor/bin/phpcs --standard=phpcs.xml <changed paths>`
