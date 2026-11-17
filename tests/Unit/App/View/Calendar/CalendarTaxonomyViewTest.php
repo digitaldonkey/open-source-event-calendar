@@ -7,6 +7,7 @@ use Osec\App\Controller\LessController;
 use Osec\App\Controller\ScriptsFrontendController;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\RobotsTxt;
+use Osec\App\Model\TaxonomyAdapter;
 use Osec\App\View\Calendar\CalendarTaxonomyView;
 use Osec\App\View\Event\EventTaxonomyView;
 use Osec\App\View\KsesHelper;
@@ -319,7 +320,10 @@ class CalendarTaxonomyViewTest extends TestBase
         wp_set_object_terms($post_id, [$category['term_id']], 'osec_events_categories');
         wp_set_object_terms($post_id, [$tag['term_id']], 'osec_events_tags');
         $event = new Event($osec_app, ['post_id' => $post_id]);
-        $view  = EventTaxonomyView::factory($osec_app);
+        // TaxonomyAdapter caches terms per post ID for the app's lifetime. SQLite hands out a rolled-back post ID
+        // again, so the shared adapter could still hold an earlier test's post with no terms.
+        $osec_app->inject_object(TaxonomyAdapter::class, new TaxonomyAdapter($osec_app));
+        $view = new EventTaxonomyView($osec_app);
 
         foreach (['blocks', 'inline'] as $format) {
             $html = wp_kses(
