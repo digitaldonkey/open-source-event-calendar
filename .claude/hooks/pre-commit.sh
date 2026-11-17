@@ -12,9 +12,20 @@
 # to Claude.
 
 input=$(cat)
-# First line only (a heredoc body is the message), without quoted strings.
-command=$(printf '%s' "$input" | jq -r '.tool_input.command // empty' | head -n 1 \
-    | sed -E "s/'[^']*'//g; s/\"[^\"]*\"//g")
+# Every line of the command except heredoc bodies (a commit message may mention `git commit`), joined with ";",
+# without quoted strings. Only the first line was read until 2026-11-17: a `git commit` on a later line of a
+# multi-line command skipped every check below.
+command=$(printf '%s' "$input" | jq -r '.tool_input.command // empty' | awk '
+    heredoc != "" { if ($0 == heredoc) heredoc = ""; next }
+    {
+        print
+        if (match($0, /<<-?[ \t]*["\x27]?[A-Za-z_][A-Za-z0-9_]*["\x27]?/)) {
+            delim = substr($0, RSTART, RLENGTH)
+            sub(/^<<-?[ \t]*/, "", delim)
+            gsub(/["\x27]/, "", delim)
+            heredoc = delim
+        }
+    }' | sed -E "s/'[^']*'//g; s/\"[^\"]*\"//g" | paste -sd ';' -)
 
 # Only `git commit`, also after `cd ... &&` or with `git -C <dir>`.
 if ! printf '%s' "$command" | grep -Eq '(^|[;&|[:space:]])git([[:space:]]+-C[[:space:]]+[^[:space:]]+)?[[:space:]]+commit([[:space:]]|$)'; then
