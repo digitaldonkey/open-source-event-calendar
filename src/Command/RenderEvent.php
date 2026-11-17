@@ -63,7 +63,8 @@ class RenderEvent extends RenderCalendar
         $event = new Event($this->app, get_the_ID(), $instance);
         // Not a date of this event (any more): show the event itself, with a notice.
         if ($instance > 0 && null === $event->get('instance_id')) {
-            RenderRedirect::local_redirect(remove_query_arg('instance_id'), ['osec_date_not_found' => 1], 301);
+            // 302: the date may come back after an edit; browsers and CDNs would keep a 301.
+            RenderRedirect::local_redirect(remove_query_arg('instance_id'), ['osec_date_not_found' => 1], 302);
         }
         $view        = EventSingleView::factory($this->app);
         $footer_html = $view->get_footer($event);

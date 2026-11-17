@@ -137,7 +137,8 @@ class RenderEventInstanceIdTest extends TestBase
         }
 
         [$location, $status] = $redirect;
-        self::assertSame(301, $status);
+        // Temporary: the date may come back after an edit, a cached 301 would keep redirecting.
+        self::assertSame(302, $status);
         self::assertStringNotContainsString('instance_id', $location);
         self::assertStringContainsString('osec_date_not_found=1', $location);
         self::assertStringContainsString('utm_source=x', $location, 'Other parameters are kept.');
