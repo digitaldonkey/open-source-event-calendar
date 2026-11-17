@@ -167,7 +167,8 @@
             .filter(Boolean));
         let message = selects[0].dataset.updatedLabel;
         if (names.length && selects[0].dataset.filteredLabel) {
-            message += ' ' + selects[0].dataset.filteredLabel.replace('%s', names.join(', '));
+            // A replacer function: a string would read "$&" etc. in term names as replacement patterns.
+            message += ' ' + selects[0].dataset.filteredLabel.replace('%s', () => names.join(', '));
         }
         if (!liveRegion) {
             liveRegion = document.createElement('div');
@@ -194,7 +195,7 @@
             const option = widget.options[item.dataset.value];
             const button = item.querySelector('.remove');
             if (option && button) {
-                const name = pattern.replace('%s', option.text);
+                const name = pattern.replace('%s', () => option.text);
                 button.setAttribute('aria-label', name);
                 button.title = name;
             }
