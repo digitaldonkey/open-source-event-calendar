@@ -382,6 +382,34 @@ class CalendarTaxonomyViewTest extends TestBase
     }
 
     /**
+     * Only terms in use count: unused terms neither show an empty filter nor switch to the server search.
+     * (wp_count_terms() counts unused terms unless told otherwise, unlike get_terms().)
+     */
+    public function test_unused_terms_do_not_count()
+    {
+        global $osec_app;
+
+        $view = new class ($osec_app) extends CalendarTaxonomyView {
+            protected function search_threshold(): int
+            {
+                return 2;
+            }
+        };
+
+        wp_insert_term('unused one', 'osec_events_tags');
+        wp_insert_term('unused two', 'osec_events_tags');
+        wp_insert_term('unused three', 'osec_events_tags');
+        $this->assertSame('', $view->get_html_for_tags(self::VIEW_ARGS), 'only unused terms: no filter');
+
+        $event = static::factory()->post->create(['post_type' => OSEC_POST_TYPE]);
+        $used  = wp_insert_term('used', 'osec_events_tags')['term_id'];
+        wp_set_object_terms($event, [$used], 'osec_events_tags');
+        $html = $view->get_html_for_tags(self::VIEW_ARGS);
+        $this->assertStringNotContainsString('data-search-url', $html, 'one term in use: below the threshold');
+        $this->assertStringContainsString('<option value="' . $used . '"', $html);
+    }
+
+    /**
      * The search endpoint: terms in use only, as plain text with hex colours; invalid input refused.
      */
     public function test_term_search_endpoint()
@@ -417,6 +445,61 @@ class CalendarTaxonomyViewTest extends TestBase
             $search(['taxonomy' => 'osec_events_tags', 'search' => 'a', 'per_page' => 500])->get_status(),
             'per_page limit'
         );
+    }
+
+    /**
+     * The search finds names with &, <, quotes: stored encoded when an admin saved them ("O&#039;Neil &amp; Sons"),
+     * with plain quotes from users without unfiltered_html ('Bob\'s "live"'). Each term is listed once.
+     */
+    public function test_term_search_finds_encoded_names()
+    {
+        global $wpdb;
+
+        $event = static::factory()->post->create(['post_type' => OSEC_POST_TYPE]);
+        $admin = wp_insert_term('admin term', 'osec_events_tags')['term_id'];
+        $user  = wp_insert_term('user term', 'osec_events_tags')['term_id'];
+        wp_set_object_terms($event, [$admin, $user], 'osec_events_tags');
+        $wpdb->update($wpdb->terms, ['name' => 'O&#039;Neil &amp; Sons &lt;3 &quot;live&quot;'], ['term_id' => $admin]);
+        $wpdb->update($wpdb->terms, ['name' => 'Bob\'s "live" &amp; more'], ['term_id' => $user]);
+        clean_term_cache([$admin, $user], 'osec_events_tags');
+
+        $found = function (string $query): array {
+            $request = new \WP_REST_Request('GET', '/osec/v1/terms');
+            $request->set_query_params(['taxonomy' => 'osec_events_tags', 'search' => $query]);
+            return array_map('intval', array_column(rest_do_request($request)->get_data(), 'value'));
+        };
+
+        $this->assertSame([$admin], $found('O\'Neil & S'), 'apostrophe and ampersand, admin-stored');
+        $this->assertSame([$admin], $found('<3'), 'less-than');
+        $this->assertSame([$user], $found('Bob\'s'), 'plain apostrophe, user-stored');
+        $this->assertSame([$user, $admin], $found('"live"'), 'quotes in both storage forms');
+        $this->assertSame([$user, $admin], $found('live'), 'each term once, sorted by name');
+    }
+
+    /**
+     * Names and descriptions in the filter are plain text: every entity decoded, not only the five special chars.
+     */
+    public function test_filter_terms_decode_all_entities()
+    {
+        global $wpdb;
+
+        $event = static::factory()->post->create(['post_type' => OSEC_POST_TYPE]);
+        $term  = wp_insert_term('placeholder', 'osec_events_tags')['term_id'];
+        wp_set_object_terms($event, [$term], 'osec_events_tags');
+        $wpdb->update(
+            $wpdb->term_taxonomy,
+            ['description' => '<p>Open&nbsp;air &#8211; <b>free</b></p>'],
+            ['term_id' => $term]
+        );
+        $wpdb->update($wpdb->terms, ['name' => 'Jazz &#8211; Blues'], ['term_id' => $term]);
+        clean_term_cache($term, 'osec_events_tags');
+
+        $request = new \WP_REST_Request('GET', '/osec/v1/terms');
+        $request->set_query_params(['taxonomy' => 'osec_events_tags', 'search' => 'Jazz']);
+        $data = rest_do_request($request)->get_data();
+
+        $this->assertSame("Jazz \u{2013} Blues", $data[0]['text']);
+        $this->assertSame("Open\u{a0}air \u{2013} free", $data[0]['description']);
     }
 
     /**

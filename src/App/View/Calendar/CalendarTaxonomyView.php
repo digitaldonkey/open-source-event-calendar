@@ -4,6 +4,7 @@ namespace Osec\App\View\Calendar;
 
 use Osec\App\Model\TaxonomyAdapter;
 use Osec\App\View\Event\EventTaxonomyView;
+use Osec\App\View\PlainText;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Settings\HtmlFactory;
 use Osec\Theme\ThemeLoader;
@@ -54,8 +55,11 @@ class CalendarTaxonomyView extends OsecBaseClass
             $type_for_filter    = 'tag_ids';
             $type_for_view_args = 'tags';
         }
-        // Terms in use (hide_empty, get_terms()' default), as the filter lists them.
-        $total = (int)wp_count_terms(['taxonomy' => $taxonomy_name]);
+        // Terms in use, as the filter lists them (get_terms() hides empty terms by default, wp_count_terms() not).
+        $total = (int)wp_count_terms([
+            'taxonomy'   => $taxonomy_name,
+            'hide_empty' => true,
+        ]);
         if ($total < 1) {
             return '';
         }
@@ -140,8 +144,8 @@ class CalendarTaxonomyView extends OsecBaseClass
         $legacy = $legacy && $this->builds_legacy_term_args();
         foreach ($terms as $term) {
             // WordPress stores term names HTML-encoded; Twig escapes once more on output.
-            $term->name_text        = wp_specialchars_decode($term->name, ENT_QUOTES);
-            $term->description_text = wp_specialchars_decode(wp_strip_all_tags($term->description), ENT_QUOTES);
+            $term->name_text        = PlainText::decode($term->name);
+            $term->description_text = PlainText::from_html($term->description);
             if (false === $tag) {
                 $term->color_value = (string)sanitize_hex_color(
                     (string)TaxonomyAdapter::factory($this->app)->get_category_color($term->term_id)
@@ -176,17 +180,24 @@ class CalendarTaxonomyView extends OsecBaseClass
      */
     public function search_terms(string $taxonomy, string $search, int $limit): array
     {
-        $terms = get_terms([
-            'taxonomy' => $taxonomy,
-            'orderby'  => 'name',
-            'search'   => $search,
-            'number'   => $limit,
-        ]);
-        if (! is_array($terms)) {
-            return [];
+        // Names are stored HTML-encoded, fully when an admin saved them ("O&#039;Neil &amp; Sons"), only "&" from
+        // users without unfiltered_html: search the typed text and its encoded form.
+        $terms = [];
+        foreach (array_unique([$search, esc_html($search)]) as $query) {
+            $found = get_terms([
+                'taxonomy' => $taxonomy,
+                'orderby'  => 'name',
+                'search'   => $query,
+                'number'   => $limit,
+            ]);
+            foreach (is_array($found) ? $found : [] as $term) {
+                $terms[$term->term_id] = $term;
+            }
         }
+        $terms = $this->prepare_terms(array_values($terms), [], 'osec_events_tags' === $taxonomy, false);
+        usort($terms, fn($a, $b) => strcasecmp($a->name_text, $b->name_text));
         $result = [];
-        foreach ($this->prepare_terms($terms, [], 'osec_events_tags' === $taxonomy, false) as $term) {
+        foreach (array_slice($terms, 0, $limit) as $term) {
             $result[] = [
                 'value'       => (string)$term->term_id,
                 'text'        => $term->name_text,
