@@ -162,7 +162,10 @@ class RenderEventInstanceIdTest extends TestBase
         $result = $this->render_event_page($this->create_weekly_event(), null);
 
         self::assertStringContainsString('ai1ec-alert', $result['data']);
-        self::assertStringContainsString('Showing the main event instead.', $result['data']);
+        self::assertStringContainsString(
+            esc_html("That date isn't on this event any more, so here's the event."),
+            $result['data']
+        );
         self::assertStringContainsString('Weekly event', $result['data']);
     }
 

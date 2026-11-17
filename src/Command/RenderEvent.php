@@ -48,7 +48,7 @@ class RenderEvent extends RenderCalendar
 
         // Else proceed with rendering valid event. Fetch all relevant details.
         $instance = RequestParser::get_param('instance_id', -1, ParamType::Int);
-        // Present and not empty, but below 1. An array reads as the defaults: null text, -1.
+        // Present and not empty, but below 1, is a 400. An array is one too: it reads as text null and number -1.
         if (
             RequestParser::has_param('instance_id')
             && '' !== RequestParser::get_param('instance_id', null, ParamType::Text)
@@ -83,7 +83,7 @@ class RenderEvent extends RenderCalendar
         $notice = '';
         if (RequestParser::has_param('osec_date_not_found')) {
             $notice = '<div class="ai1ec-alert ai1ec-alert-info">' . esc_html__(
-                "We couldn't find the specific date for this event your URL requested. Showing the main event instead.",
+                "That date isn't on this event any more, so here's the event.",
                 'open-source-event-calendar'
             ) . '</div>';
         }
