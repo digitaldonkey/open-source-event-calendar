@@ -9,7 +9,8 @@ use Osec\Tests\Utilities\TestBase;
 /**
  * Admin selects show term names as typed: WordPress stores them HTML-encoded ("Arts &amp; Culture"), and the Twig
  * templates escaped them again. The feed form's tag list was a JSON attribute escaped twice, so jQuery could not
- * parse it.
+ * parse it. Exception: the feed form's category select2, whose helper inserts the option text as HTML, keeps the
+ * stored text (security review 2026-11-17).
  *
  * @group osec
  */
@@ -39,6 +40,8 @@ class AdminTermLabelsTest extends TestBase
         global $osec_app;
 
         wp_insert_term('Arts & Culture', 'osec_events_categories');
+        // As an imported feed's CATEGORIES can deliver it; WordPress stores the entities as typed.
+        wp_insert_term('&lt;img src=x onerror=alert(1)&gt;', 'osec_events_categories');
         wp_insert_term('Jazz & Blues', 'osec_events_tags');
         $factory = HtmlFactory::factory($osec_app);
 
@@ -46,7 +49,12 @@ class AdminTermLabelsTest extends TestBase
             ['name' => 'c[]', 'id' => 'c', 'use_id' => true, 'type' => 'category', 'placeholder' => ''],
             get_terms(['taxonomy' => 'osec_events_categories', 'hide_empty' => false])
         )->get_content();
-        $this->assertContains('Arts & Culture', $this->option_texts($select));
+        // The select2 helper inserts the option text as HTML, which decodes it once: the text must stay encoded,
+        // or a name like the second one runs as markup in wp-admin.
+        $this->assertEqualsCanonicalizing(
+            ['Arts &amp; Culture', '&lt;img src=x onerror=alert(1)&gt;'],
+            $this->option_texts($select)
+        );
 
         $input = $factory->create_select2_input(['id' => 'osec_feed_tags'])->get_content();
         $doc   = $this->doc($input);

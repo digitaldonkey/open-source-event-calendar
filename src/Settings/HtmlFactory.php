@@ -207,6 +207,10 @@ class HtmlFactory extends OsecBaseClass
 
         $use_id         = isset($args['use_id']);
         $options_to_add = [];
+        // The option text stays the name as stored ("Arts &amp; Culture"), not decoded: the select2 helper
+        // (libs/select2_multiselect_helper) inserts the option's text as HTML unescaped, which decodes it once for
+        // display. A decoded name would run as markup there (stored "&lt;img onerror=...&gt;", e.g. from an
+        // imported feed's CATEGORIES).
         foreach ($options as $term) {
             $option_arguments = [];
             $color            = false;
@@ -244,13 +248,13 @@ class HtmlFactory extends OsecBaseClass
             }
             if (true === $use_id) {
                 $options_to_add[] = [
-                    'text'  => PlainText::decode($term->name),
+                    'text'  => $term->name,
                     'value' => $term->term_id,
                     'args'  => $option_arguments,
                 ];
             } else {
                 $options_to_add[] = [
-                    'text'  => PlainText::decode($term->name),
+                    'text'  => $term->name,
                     'value' => $term->name,
                     'args'  => $option_arguments,
                 ];
