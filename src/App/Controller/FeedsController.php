@@ -7,6 +7,7 @@ use Osec\App\Model\PostTypeEvent\EventCreateException;
 use Osec\App\Model\Notifications\NotificationAdmin;
 use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\Model\PostTypeEvent\EventType;
+use Osec\App\View\PlainText;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
@@ -135,58 +136,58 @@ class FeedsController extends OsecBaseClass
         static $common_data = null;
         if (is_null($common_data)) {
             $common_data = [
-                'description'      => esc_html__(
+                'description'      => __(
                     'Configure which other calendars your own calendar subscribes to.
                         You can add any calendar that provides an iCalendar (.ics) feed.
                         Enter the feed URL(s) below and the events from those feeds will be
                         imported periodically.',
                     'open-source-event-calendar'
                 ),
-                'cron_freq_label'  => esc_html__('Check for new events', 'open-source-event-calendar'),
-                'allow_comments_label' => esc_html__('Allow comments on imported events', 'open-source-event-calendar'),
-                'hide_cost_label' => esc_html__('Hide cost/free on imported events', 'open-source-event-calendar'),
-                'enable_maps_label' => esc_html__('Show map on imported events', 'open-source-event-calendar'),
-                'feed_import_timezone_label' => esc_html__(
+                'cron_freq_label'  => __('Check for new events', 'open-source-event-calendar'),
+                'allow_comments_label' => __('Allow comments on imported events', 'open-source-event-calendar'),
+                'hide_cost_label' => __('Hide cost/free on imported events', 'open-source-event-calendar'),
+                'enable_maps_label' => __('Show map on imported events', 'open-source-event-calendar'),
+                'feed_import_timezone_label' => __(
                     'Assign default time zone to events in UTC',
                     'open-source-event-calendar'
                 ),
-                'feed_import_timezone_info' => esc_html__(
+                'feed_import_timezone_info' => __(
                     'Guesses the time zone of events that have none specified; recommended for Google Calendar feeds',
                     'open-source-event-calendar'
                 ),
-                'add_tag_categories_label' => esc_html__(
+                'add_tag_categories_label' => __(
                     'Import any tags/categories provided by feed, in addition those selected above',
                     'open-source-event-calendar'
                 ),
-                'feed_url_label'    => esc_html__('iCalendar/.ics Feed URL:', 'open-source-event-calendar'),
+                'feed_url_label'    => __('iCalendar/.ics Feed URL:', 'open-source-event-calendar'),
                 'feed_url_placeholder' => __('Feed url (required)', 'open-source-event-calendar'),
-                'categories_label'  => esc_html__('Event categories', 'open-source-event-calendar'),
-                'tags_label'        => esc_html__('Tag with', 'open-source-event-calendar'),
-                'comments_label'    => esc_html__('Allow comments', 'open-source-event-calendar'),
-                'yes'               => esc_html__('Yes', 'open-source-event-calendar'),
-                'no'                => esc_html__('No', 'open-source-event-calendar'),
-                'show_map_label'    => esc_html__('Show map', 'open-source-event-calendar'),
-                'keep_taxonomy_label' => esc_html__(
+                'categories_label'  => __('Event categories', 'open-source-event-calendar'),
+                'tags_label'        => __('Tag with', 'open-source-event-calendar'),
+                'comments_label'    => __('Allow comments', 'open-source-event-calendar'),
+                'yes'               => __('Yes', 'open-source-event-calendar'),
+                'no'                => __('No', 'open-source-event-calendar'),
+                'show_map_label'    => __('Show map', 'open-source-event-calendar'),
+                'keep_taxonomy_label' => __(
                     'Keep original events categories and tags',
                     'open-source-event-calendar'
                 ),
-                'keep_old_events_label' => esc_html__(
+                'keep_old_events_label' => __(
                     'On refresh, preserve previously imported events that are missing from the feed',
                     'open-source-event-calendar'
                 ),
-                'import_post_status_label' => esc_html__(
+                'import_post_status_label' => __(
                     'Post status for imported events',
                     'open-source-event-calendar'
                 ),
-                'cancel_button_text' => esc_html__('Cancel', 'open-source-event-calendar'),
+                'cancel_button_text' => __('Cancel', 'open-source-event-calendar'),
                 'data_loading_button_text' => __('Please wait&#8230;', 'open-source-event-calendar'),
-                'add_subscription_button_text' => esc_html__('Add new subscription', 'open-source-event-calendar'),
-                'update_subscription_button_text' => esc_html__('Update subscription', 'open-source-event-calendar'),
-                'reloading_button_loading_text' => esc_html__('Refreshing&#8230;', 'open-source-event-calendar'),
-                'reloading_button_text' => esc_html__('Refresh', 'open-source-event-calendar'),
-                'edit_button_text' => esc_html__('Edit', 'open-source-event-calendar'),
-                'remove_button_loading_text' => esc_html__('Removing&#8230;', 'open-source-event-calendar'),
-                'remove_button_text' => esc_html__('Remove', 'open-source-event-calendar'),
+                'add_subscription_button_text' => __('Add new subscription', 'open-source-event-calendar'),
+                'update_subscription_button_text' => __('Update subscription', 'open-source-event-calendar'),
+                'reloading_button_loading_text' => __('Refreshing&#8230;', 'open-source-event-calendar'),
+                'reloading_button_text' => __('Refresh', 'open-source-event-calendar'),
+                'edit_button_text' => __('Edit', 'open-source-event-calendar'),
+                'remove_button_loading_text' => __('Removing&#8230;', 'open-source-event-calendar'),
+                'remove_button_text' => __('Remove', 'open-source-event-calendar'),
             ];
         }
         return array_merge($common_data, $data);
@@ -283,7 +284,7 @@ class FeedsController extends OsecBaseClass
         if (!empty($entry['feed_category'])) {
             foreach (explode(',', $entry['feed_category']) as $cat_id) {
                 $fcat = get_term($cat_id, 'osec_events_categories');
-                $categories[]  = $fcat->name;
+                $categories[]  = PlainText::decode($fcat->name);
             }
         }
 
@@ -813,9 +814,9 @@ class FeedsController extends OsecBaseClass
     public static function cron_options(): array
     {
         return [
-            'hourly' => esc_html__('Hourly', 'open-source-event-calendar'),
-            'twicedaily' => esc_html__('Twice Daily', 'open-source-event-calendar'),
-            'daily' => esc_html__('Daily', 'open-source-event-calendar'),
+            'hourly' => __('Hourly', 'open-source-event-calendar'),
+            'twicedaily' => __('Twice Daily', 'open-source-event-calendar'),
+            'daily' => __('Daily', 'open-source-event-calendar'),
         ];
     }
 
@@ -922,7 +923,7 @@ class FeedsController extends OsecBaseClass
                     'osec_events_categories'
                 );
                 if ($feed_category && ! is_wp_error($feed_category)) {
-                    $categories[] = $feed_category->name;
+                    $categories[] = PlainText::decode($feed_category->name);
                 }
             }
             unset($feed_categories);

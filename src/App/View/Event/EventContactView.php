@@ -34,8 +34,8 @@ class EventContactView extends OsecBaseClass
         $has_data = !empty(array_filter($data));
         $args = array_merge($data, [
             'has_data' => $has_data,
-            'contact_email_text' => esc_html__('Email', 'open-source-event-calendar'),
-            'contact_url_text' => esc_html__('Event website', 'open-source-event-calendar'),
+            'contact_email_text' => __('Email', 'open-source-event-calendar'),
+            'contact_url_text' => __('Event website', 'open-source-event-calendar'),
         ]);
 
         /**

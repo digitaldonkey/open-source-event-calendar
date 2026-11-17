@@ -6,6 +6,7 @@ use Osec\App\Model\Date\DateValidator;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Date\UIDateFormats;
 use Osec\App\Model\TaxonomyAdapter;
+use Osec\App\View\PlainText;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Cache\CacheMemory;
@@ -243,13 +244,13 @@ class HtmlFactory extends OsecBaseClass
             }
             if (true === $use_id) {
                 $options_to_add[] = [
-                    'text'  => $term->name,
+                    'text'  => PlainText::decode($term->name),
                     'value' => $term->term_id,
                     'args'  => $option_arguments,
                 ];
             } else {
                 $options_to_add[] = [
-                    'text'  => $term->name,
+                    'text'  => PlainText::decode($term->name),
                     'value' => $term->name,
                     'args'  => $option_arguments,
                 ];
@@ -304,10 +305,10 @@ class HtmlFactory extends OsecBaseClass
         // Build tags array to pass as JSON.
         $tags_json = [];
         foreach ($tags as $term) {
-            $tags_json[] = $term->name;
+            $tags_json[] = PlainText::decode($term->name);
         }
+        // The template escapes the attribute; escaping here as well showed "&amp;" in the names.
         $tags_json    = wp_json_encode($tags_json);
-        $tags_json    = _wp_specialchars($tags_json, 'single', 'UTF-8');
         $select2_args = [
             'placeholder' => __('Tags (optional)', 'open-source-event-calendar'),
             'class'            => 'ai1ec-tags-selector span12',

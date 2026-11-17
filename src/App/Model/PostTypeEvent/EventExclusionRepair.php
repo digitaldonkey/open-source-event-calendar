@@ -2,6 +2,7 @@
 
 namespace Osec\App\Model\PostTypeEvent;
 
+use Osec\App\View\PlainText;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
 use Throwable;
@@ -72,7 +73,7 @@ class EventExclusionRepair extends OsecBaseClass
             $dates = self::dates_from_rule((string)$row['exception_rules'], (string)$row['exception_dates']);
             $entry = [
                 'post_id'      => (int)$row['post_id'],
-                'title'        => $post->post_title,
+                'title'        => PlainText::from_html(get_the_title($post)),
                 'status'       => $post->post_status,
                 'rule'         => $row['exception_rules'],
                 'dates'        => $dates,

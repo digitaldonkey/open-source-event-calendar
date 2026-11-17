@@ -308,8 +308,8 @@ class EventContentView extends OsecBaseClass
         // Render Button
         $args = [
             'href' => $href,
-            'text' => esc_attr(__('Back to Calendar', 'open-source-event-calendar')),
-            'tooltip' => esc_attr(__('Back to events', 'open-source-event-calendar')),
+            'text' => __('Back to Calendar', 'open-source-event-calendar'),
+            'tooltip' => __('Back to events', 'open-source-event-calendar'),
             'template' => 'back-to-calendar-button.twig',
         ];
         /**

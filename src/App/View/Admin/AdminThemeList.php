@@ -312,19 +312,20 @@ class AdminThemeList extends WP_List_Table
 
         foreach ($theme_names as $theme_id => $theme_name) {
             $theme = $themes[$theme_name];
-            $theme_dir = esc_attr($theme->get_stylesheet_directory());
+            $theme_dir = $theme->get_stylesheet_directory();
 
-            $theme_root_uri = esc_url($theme['Theme Root URI']);
+            $theme_root_uri = esc_url_raw($theme['Theme Root URI']);
 
             $args = [
-                'title' => $theme->display('Name'),
-                'description' => $theme->display('Description'),
-                'version' => esc_html($theme->display('Version')),
-                'template_dir_text' => esc_html__('The template files are located in', 'open-source-event-calendar'),
+                // Plain values: theme_row.twig escapes them (display() with markup returns escaped HTML).
+                'title' => $theme->display('Name', false),
+                'description' => $theme->display('Description', false),
+                'version' => $theme->display('Version', false),
+                'template_dir_text' => __('The template files are located in', 'open-source-event-calendar'),
                 'template_dir' => $theme_dir,
-                'tags_title' => esc_html__('Tags:', 'open-source-event-calendar'),
-                'tags' => esc_html(implode(', ', $theme['Tags'])),
-                'activate_text' => esc_attr__('Activate', 'open-source-event-calendar'),
+                'tags_title' => __('Tags:', 'open-source-event-calendar'),
+                'tags' => implode(', ', $theme['Tags']),
+                'activate_text' => __('Activate', 'open-source-event-calendar'),
                 'theme_id' => $theme_name,
                 'activate_link' => add_query_arg(
                     [
@@ -334,7 +335,9 @@ class AdminThemeList extends WP_List_Table
                     ],
                     admin_url(OSEC_ADMIN_BASE_URL . '&page=' . AdminPageManageThemes::MENU_SLUG)
                 ),
-                'screenshot_uri' => esc_url($theme_root_uri . '/' . $theme['Stylesheet'] . '/' . $theme['Screenshot']),
+                'screenshot_uri' => esc_url_raw(
+                    $theme_root_uri . '/' . $theme['Stylesheet'] . '/' . $theme['Screenshot']
+                ),
             ];
             ThemeLoader::factory($this->app)
                        ->get_file('theme_row.twig', $args, true)

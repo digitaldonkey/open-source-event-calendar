@@ -17,6 +17,7 @@ use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\Model\PostTypeEvent\EventTaxonomy;
 use Osec\App\View\Event\EventAvatarView;
 use Osec\App\View\Event\EventContentView;
+use Osec\App\View\PlainText;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
@@ -1335,7 +1336,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $post_excerpt = $post_excerpt ? '<p><strong>' . $post_excerpt . '</strong></p>' : '';
                 $link = '<p><a href="' . esc_url($event_url) . '">' . esc_url($event_url) . '</a></p>';
                 // Doctype is added after escaping
-                //   @see RenderIcal->render_escped_with_doctype()
+                //   @see RenderIcal->render_with_doctype()
                 $html = "###DOCTYPE_PLACEHOLDER###\n"
                         . '<html ' . get_language_attributes() . '>'
                         . '<body>'
@@ -1455,7 +1456,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $event->get('post_id')
             ) as $cat
         ) {
-            $categories[] = $cat->name;
+            // Stored HTML-encoded ("Arts &amp; Culture"); iCalendar text is plain.
+            $categories[] = PlainText::decode($cat->name);
         }
         $e->setCategories(implode(',', $categories), ['LANGUAGE' => $language]);
 
@@ -1463,7 +1465,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         foreach (
             $this->taxonomyAdapter->get_post_tags($event->get('post_id')) as $tag
         ) {
-            $tags[] = $tag->name;
+            $tags[] = PlainText::decode($tag->name);
         }
         if (! empty($tags)) {
             $e->setXprop(
