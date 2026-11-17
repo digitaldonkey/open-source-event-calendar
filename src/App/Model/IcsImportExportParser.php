@@ -1381,6 +1381,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         if ($use_html) {
             if (! empty($content) || !empty($post_excerpt)) {
                 $post_excerpt = $post_excerpt ? '<p><strong>' . $post_excerpt . '</strong></p>' : '';
+                $event_url    = (string)get_permalink($event->get('post_id'));
                 $link = '<p><a href="' . esc_url($event_url) . '">' . esc_url($event_url) . '</a></p>';
                 $html = '<html ' . get_language_attributes() . '>'
                         . '<body>'
