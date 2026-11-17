@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import makeAnimated from "react-select/animated";
 import Select from 'react-select';
 import {__, sprintf} from '@wordpress/i18n';
+import {decodeEntities} from '@wordpress/html-entities';
 
 const animatedComponents = makeAnimated();
 
@@ -19,7 +20,8 @@ export default function TaxonomySelect ({taxonomy, defaultValue = [], onChange})
 		}
 		const terms = await response.json();
 		const termsOptions = await terms.map(term => ({
-			label: term.name,
+			// WordPress stores term names HTML-encoded ("Arts &amp; Culture").
+			label: decodeEntities(term.name),
 			value: term.id,
 		}));
 		setOptions(
@@ -34,7 +36,7 @@ export default function TaxonomySelect ({taxonomy, defaultValue = [], onChange})
 
 				if (label && label.name) {
 					return {
-						label: label.name,
+						label: decodeEntities(label.name),
 						value: option,
 					}
 				}

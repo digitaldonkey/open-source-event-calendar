@@ -16,35 +16,25 @@ class RenderIcal extends RenderStrategyAbstract
     {
         $this->cleanOutputBuffers();
         header('Content-type: text/calendar; charset=utf-8');
-        $this->render_escped_with_doctype($params['data']);
+        // A browser must not read the feed as HTML.
+        header('X-Content-Type-Options: nosniff');
+        $this->render_with_doctype($params['data']);
         ResponseHelper::stop();
     }
 
-    protected function render_escped_with_doctype(string $str): void {
-        // There is no way to escape the doctype so we use a static placeholder.
-        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        echo str_replace(
-            '###DOCTYPE_PLACEHOLDER###',
-            '<!DOCTYPE html>',
-            wp_kses(
-                $str,
-                [
-                    'html' => [
-                        'lang' => true,
-                    ],
-                    'head' => true,
-                    'title' => true,
-                    'body' => true,
-                    'p' => true,
-                    'strong' => true,
-                    'em' => true,
-                    'a' => [
-                        'href' => true,
-                        'title' => true,
-                    ],
-                    'br' => true,
-                ]
-            )
-        );
+    /**
+     * Prints the iCalendar text, with the HTML description's doctype in place of its placeholder.
+     *
+     * The text is iCalendar, escaped by iCalcreator for that format, not HTML: running it through wp_kses() turned
+     * every "&" into "&amp;" in titles, locations, contacts and categories of every subscribed calendar.
+     *
+     * @param  string  $str  The iCalendar text.
+     *
+     * @return void
+     */
+    protected function render_with_doctype(string $str): void
+    {
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- text/calendar, escaped by iCalcreator.
+        echo str_replace('###DOCTYPE_PLACEHOLDER###', '<!DOCTYPE html>', $str);
     }
 }

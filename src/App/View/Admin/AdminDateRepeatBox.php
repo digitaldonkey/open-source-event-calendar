@@ -76,19 +76,19 @@ class AdminDateRepeatBox extends OsecBaseClass
         $freq = strtolower($rc->getFreq());
 
         $args = [
-            'title'             => esc_html__('Select recurrence pattern:', 'open-source-event-calendar'),
-            'label_daily'       => esc_html__('Daily', 'open-source-event-calendar'),
+            'title'             => __('Select recurrence pattern:', 'open-source-event-calendar'),
+            'label_daily'       => __('Daily', 'open-source-event-calendar'),
             'row_daily'         => $this->row_daily(
                 $freq === 'daily',
                 $rc->getInterval() ?: 1
             ),
-            'label_weekly'      => esc_html__('Weekly', 'open-source-event-calendar'),
+            'label_weekly'      => __('Weekly', 'open-source-event-calendar'),
             'row_weekly'        => $this->row_weekly(
                 $freq === 'weekly',
                 $rc->getInterval() ?: 1,
                 is_array($rc->getByDay()) ? $rc->getByDay() : []
             ),
-            'label_monthly'     => esc_html__('Monthly', 'open-source-event-calendar'),
+            'label_monthly'     => __('Monthly', 'open-source-event-calendar'),
             'row_monthly'       => $this->row_monthly(
                 $freq === 'monthly',
                 $rc->getInterval() ?: 1,
@@ -96,27 +96,27 @@ class AdminDateRepeatBox extends OsecBaseClass
                 $rc->getByMonthDay() ?: [],
                 $rc->getByDay() ?: []
             ),
-            'label_yearly'      => esc_html__('Yearly', 'open-source-event-calendar'),
+            'label_yearly'      => __('Yearly', 'open-source-event-calendar'),
             'row_yearly'        => $this->row_yearly(
                 $freq === 'yearly',
                 $rc->getInterval() ?: 1,
                 is_array($rc->getByMonth()) ? $rc->getByMonth() : []
             ),
-            'label_custom'      => esc_html__('Custom', 'open-source-event-calendar'),
+            'label_custom'      => __('Custom', 'open-source-event-calendar'),
             'row_custom'        => $this->row_custom(false, $this->get_date_array_from_rule($rule)),
-            'label_event_count' => esc_html__('Ending after', 'open-source-event-calendar'),
+            'label_event_count' => __('Ending after', 'open-source-event-calendar'),
             'count'             => $this->create_count_input('osec_count', $count)
                                         . __('times', 'open-source-event-calendar'),
-            'label_endtime'     => esc_html__('End:', 'open-source-event-calendar'),
+            'label_endtime'     => __('End:', 'open-source-event-calendar'),
             'end'               => $this->create_end_dropdown($end),
-            'until_label'       => esc_html__('On date:', 'open-source-event-calendar'),
+            'until_label'       => __('On date:', 'open-source-event-calendar'),
             'until_value'       => ! is_null($until) && $until > 0 ? esc_attr($until) : '',
-            'repeat'            => esc_attr($repeat),
+            'repeat'            => $repeat,
             'loading_text'      => esc_html__('Please wait&#8230;', 'open-source-event-calendar'),
-            'ending_type'       => esc_attr($end),
+            'ending_type'       => $end,
             'selected_tab'      => $rc->getFreq() ? strtolower((string)$rc->getFreq()) : 'custom',
-            'label_submit'      => esc_html__('Apply', 'open-source-event-calendar'),
-            'label_cancel'      => esc_html__('Cancel', 'open-source-event-calendar'),
+            'label_submit'      => __('Apply', 'open-source-event-calendar'),
+            'label_cancel'      => __('Cancel', 'open-source-event-calendar'),
         ];
         RenderJson::factory($this->app)->render([
             'data' => [
@@ -137,7 +137,7 @@ class AdminDateRepeatBox extends OsecBaseClass
     protected function row_daily($visible = false, $selected = 1): string
     {
         $args = [
-            'label' => esc_html__('Every', 'open-source-event-calendar'),
+            'label' => __('Every', 'open-source-event-calendar'),
             'count'   => $this->create_count_input(
                 'osec_daily_count',
                 $selected,
@@ -205,7 +205,7 @@ class AdminDateRepeatBox extends OsecBaseClass
         $args = [
             'count'     => $this->create_count_input('osec_weekly_count', $count, 52)
                              . __('week(s)', 'open-source-event-calendar'),
-            'count_label' => esc_html__('Every', 'open-source-event-calendar'),
+            'count_label' => __('Every', 'open-source-event-calendar'),
             'on_days_label' => _x('On', 'Recurrence editor - weekly tab', 'open-source-event-calendar'),
             'week_days' => $this->create_list_element(
                 'osec_weekly_date_select',
@@ -331,15 +331,15 @@ class AdminDateRepeatBox extends OsecBaseClass
         $options_dn['-1'] = __('last', 'open-source-event-calendar');
 
         $args = [
-            'label_every' => esc_html__('Every', 'open-source-event-calendar'),
+            'label_every' => __('Every', 'open-source-event-calendar'),
             'count'               => $this->create_count_input(
                 'osec_monthly_count',
                 $count,
                 12
             ) . __('month(s)', 'open-source-event-calendar'),
             'bymonthday' => (bool) $bymonthday,
-            'on_day_label' => esc_html__('On day of the month', 'open-source-event-calendar'),
-            'on_weekday_label' => esc_html__('On day of the week', 'open-source-event-calendar'),
+            'on_day_label' => __('On day of the month', 'open-source-event-calendar'),
+            'on_weekday_label' => __('On day of the week', 'open-source-event-calendar'),
             'month' => $this->create_monthly_date_select(
                 $month
             ),
@@ -463,7 +463,7 @@ class AdminDateRepeatBox extends OsecBaseClass
     protected function row_yearly($visible = false, $count = 1, $year = [], $first = false, $second = false): string
     {
         $args = [
-            'label' => esc_html__('Every', 'open-source-event-calendar'),
+            'label' => __('Every', 'open-source-event-calendar'),
             'count_input' => $this->create_count_input(
                 'osec_yearly_count',
                 $count,
@@ -553,8 +553,8 @@ class AdminDateRepeatBox extends OsecBaseClass
     protected function row_custom($visible = false, $dates = []): string
     {
         $args = [
-            'label' => esc_html__('Custom dates:', 'open-source-event-calendar'),
-            'selected_dates' => esc_attr(implode(',', $dates)),
+            'label' => __('Custom dates:', 'open-source-event-calendar'),
+            'selected_dates' => implode(',', $dates),
         ];
 
         return ThemeLoader::factory($this->app)

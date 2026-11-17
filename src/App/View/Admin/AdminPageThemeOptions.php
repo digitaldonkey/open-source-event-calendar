@@ -159,8 +159,8 @@ class AdminPageThemeOptions extends AdminPageAbstract
                 'id'    => self::RESET_ID,
                 'value' => __('Reset to theme Defaults', 'open-source-event-calendar'),
             ],
-            'export_text_1'   => esc_html__('Export', 'open-source-event-calendar'),
-            'export_text_2'   => esc_html__('Exports saved variables only.', 'open-source-event-calendar'),
+            'export_text_1'   => __('Export', 'open-source-event-calendar'),
+            'export_text_2'   => __('Exports saved variables only.', 'open-source-event-calendar'),
             'export' => $this->get_export(),
         ];
         $less_variables = LessController::factory($this->app)->get_saved_variables();
@@ -258,7 +258,7 @@ class AdminPageThemeOptions extends AdminPageAbstract
     {
         $variables = LessController::factory($this->app)->get_saved_variables();
         $args      = [
-            'export_text_3' => esc_html__(
+            'export_text_3' => __(
                 'Import via browser console. Color pickers will update after saving form.',
                 'open-source-event-calendar'
             ),

@@ -5,6 +5,7 @@ namespace Osec\App\View\Event;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\Model\PostTypeEvent\EventTaxonomy;
 use Osec\App\Model\TaxonomyAdapter;
+use Osec\App\View\PlainText;
 use Osec\Bootstrap\App;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Settings\HtmlFactory;
@@ -231,7 +232,7 @@ class EventTaxonomyView extends OsecBaseClass
             'category-color-swatch.twig',
             [
                 'color' => $color,
-                'name'  => $category->name,
+                'name'  => PlainText::decode($category->name),
             ]
         );
     }
@@ -356,8 +357,8 @@ class EventTaxonomyView extends OsecBaseClass
         foreach ($categories as $category) {
             $args[] = [
                 'term_id'      => $category->term_id,
-                'name'         => $category->name,
-                'description'  => $category->description,
+                'name'         => PlainText::decode($category->name),
+                'description'  => PlainText::from_html($category->description),
                 'href'         => HtmlFactory::factory($this->app)
                                              ->create_href_helper_instance(['cat_ids' => $category->term_id])
                                              ->generate_href(),
@@ -394,8 +395,8 @@ class EventTaxonomyView extends OsecBaseClass
         foreach ($tags as $tag) {
             $args[] = [
                 'term_id'     => $tag->term_id,
-                'name'        => $tag->name,
-                'description' => $tag->description,
+                'name'        => PlainText::decode($tag->name),
+                'description' => PlainText::from_html($tag->description),
                 'href'        => HtmlFactory::factory($this->app)
                                             ->create_href_helper_instance(['tag_ids' => $tag->term_id])
                                             ->generate_href(),

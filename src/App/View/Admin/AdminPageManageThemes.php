@@ -38,36 +38,36 @@ class AdminPageManageThemes extends AdminPageAbstract
                 esc_url(get_permalink($this->app->settings->get('calendar_page_id')))
             ),
             'deleted'       => $deleted,
-            'deleted_message' => esc_html__('Theme deleted.', 'open-source-event-calendar'),
-            'page_title' => esc_html__(
+            'deleted_message' => __('Theme deleted.', 'open-source-event-calendar'),
+            'page_title' => __(
                 'Open Source Event Calendar: Themes',
                 'open-source-event-calendar'
             ),
-            'current_theme_label' => esc_html__('Current Calendar Theme', 'open-source-event-calendar'),
+            'current_theme_label' => __('Current Calendar Theme', 'open-source-event-calendar'),
             'current_theme' => [
                 'has_screenshot' => (bool) $osec_current_theme->screenshot,
                 'screenshot_uri' => $osec_current_theme->theme_root_uri . '/'
                     . $osec_current_theme->stylesheet . '/' . $osec_current_theme->screenshot,
-                'screenshot_alt' => esc_attr__(
+                'screenshot_alt' => __(
                     'Current theme preview',
                     'open-source-event-calendar'
                 ),
                 'title' => sprintf(
                     /* translators: 1: theme title, 2: theme version */
                     __('%1$s %2$s', 'open-source-event-calendar'),
-                    esc_html($osec_current_theme->title),
-                    esc_html($osec_current_theme->version),
+                    $osec_current_theme->title,
+                    $osec_current_theme->version,
                 ),
-                'theme_id' => esc_attr($osec_current_theme->stylesheet),
+                'theme_id' => $osec_current_theme->stylesheet,
                 'description' => $osec_current_theme->description,
                 'has_tags' => (bool) $osec_current_theme->tags,
-                'tags' => esc_html__('Tags:', 'open-source-event-calendar')
+                'tags' => __('Tags:', 'open-source-event-calendar')
                         . implode(', ', $osec_current_theme->tags),
-                'template_dir_text' => esc_html__('The template files are located in', 'open-source-event-calendar'),
-                'template_dir' => esc_attr($osec_current_theme->template_dir),
+                'template_dir_text' => __('The template files are located in', 'open-source-event-calendar'),
+                'template_dir' => $osec_current_theme->template_dir,
             ],
             'display_theme_list' => (current_user_can('switch_themes') || current_user_can('switch_osec_themes')),
-            'available_themes_label' => esc_html__('Available Calendar Themes', 'open-source-event-calendar'),
+            'available_themes_label' => __('Available Calendar Themes', 'open-source-event-calendar'),
             'available_themes' => $_list_table->get_display(),
         ];
 

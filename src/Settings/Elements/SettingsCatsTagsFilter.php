@@ -2,6 +2,7 @@
 
 namespace Osec\Settings\Elements;
 
+use Osec\App\View\PlainText;
 use Osec\Theme\ThemeLoader;
 
 /**
@@ -69,7 +70,7 @@ class SettingsCatsTagsFilter extends SettingsAbstract
         foreach ($terms as $term) {
             $option = [
                 'value' => $term->term_id,
-                'text'  => $term->name,
+                'text'  => PlainText::decode($term->name),
             ];
             if (isset($this->args['value'][$type])) {
                 if (in_array($term->term_id, $this->args['value'][$type], true)) {
