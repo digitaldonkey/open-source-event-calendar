@@ -115,6 +115,12 @@ class EventSingleEntitiesTest extends TestBase
         if ('plana' === $theme) {
             $this->assertSame('Tom &amp; Jerry’s show', $this->inner_html($xpath, '//h2[@itemprop="name"]'));
         }
+        if ('vortex' === $theme) {
+            // Schema.org name: plain text in an attribute (striptags kept the_title()'s entities, escaped again).
+            $meta = $xpath->query('//meta[@itemprop="name"]')->item(0);
+            $this->assertNotNull($meta, 'meta itemprop name');
+            $this->assertSame('Tom & Jerry’s show', $meta->getAttribute('content'));
+        }
     }
 
     /**

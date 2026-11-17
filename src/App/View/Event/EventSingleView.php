@@ -6,6 +6,7 @@ use Osec\App\Controller\MapsController;
 use Osec\App\Model\Date\Timezones;
 use Osec\App\Model\PostTypeEvent\Event;
 use Osec\App\View\Calendar\CalendarSubscribeView;
+use Osec\App\View\PlainText;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Theme\ThemeLoader;
@@ -199,17 +200,20 @@ class EventSingleView extends OsecBaseClass
          */
         do_action('osec_alter_single_event_page_before_render', $event);
 
-        $args = [
-            // HTML, as the_title() prints it: the templates print it |raw (escaped once more, it showed its entities).
-            'title' => wp_kses(
-                apply_filters(
-                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                    'the_title',
-                    $event->get('post')->post_title,
-                    $event->get('post_id')
-                ),
-                $this->app->kses->allowed_html_inline()
+        // HTML, as the_title() prints it: the templates print it |raw (escaped once more, it showed its entities).
+        $title = wp_kses(
+            apply_filters(
+                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                'the_title',
+                $event->get('post')->post_title,
+                $event->get('post_id')
             ),
+            $this->app->kses->allowed_html_inline()
+        );
+        $args = [
+            'title'                  => $title,
+            // The same as plain text, for attributes (schema.org name): the template escapes it.
+            'title_text'             => PlainText::from_html($title),
             'event'                  => $event, // Deprecated. Leaving for legacy.
             'is_multiday_event'      => $event->is_multiday(),
             'is_allday_event'      => $event->is_allday(),
