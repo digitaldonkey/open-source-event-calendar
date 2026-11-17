@@ -92,6 +92,13 @@ class KsesHelper extends OsecBaseClass
                     'data-*'           => true,
                     'href'                => true,
                     'id'                  => true,
+                    // nofollow on the event term links (event-categories.twig, event-tags.twig).
+                    'rel'                 => true,
+                    // Filter toggles (vortex categories.twig, tags.twig).
+                    'role'                => true,
+                    'tabindex'            => true,
+                    'aria-haspopup'       => true,
+                    'aria-expanded'       => true,
                     'style'               => true,
                     'target'              => true,
                     'title'               => true,
@@ -105,10 +112,14 @@ class KsesHelper extends OsecBaseClass
                     'style' => true,
                     'title' => true,
                     'class' => true,
+                    // Decorative icons next to a labelled control (filter-menu.twig, categories.twig, tags.twig).
+                    'aria-hidden' => true,
                 ],
                 'span'   => [
                     'class'       => true,
                     'data-*' => true,
+                    // The filter toggles' caret (vortex categories.twig, tags.twig).
+                    'aria-hidden' => true,
                     'role'        => true,
                     'itemprop'    => true,
                     'itemscope'   => true,
@@ -152,6 +163,8 @@ class KsesHelper extends OsecBaseClass
                     // The agenda's disabled pagination button (pagination.twig).
                     'aria-label'          => true,
                     'disabled'            => true,
+                    // Clear filter buttons (vortex categories.twig, tags.twig).
+                    'type'                => true,
                 ],
                 'td'     => [
                     'class' => true,
@@ -241,6 +254,23 @@ class KsesHelper extends OsecBaseClass
                 'meta'  => [
                     'itemprop'    => true,
                     'content'    => true,
+                ],
+                // Category and tag filters (taxonomy-filter-select.twig).
+                'label'  => [
+                    'class' => true,
+                    'for'   => true,
+                ],
+                'select' => [
+                    'class'      => true,
+                    'id'         => true,
+                    'multiple'   => true,
+                    'aria-label' => true,
+                    'data-*'     => true,
+                ],
+                'option' => [
+                    'value'    => true,
+                    'selected' => true,
+                    'data-*'   => true,
                 ],
             ];
         }

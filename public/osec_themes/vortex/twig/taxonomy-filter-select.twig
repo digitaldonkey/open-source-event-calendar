@@ -1,0 +1,48 @@
+{#
+ # Category or tag filter: a <select multiple> that public/js/osec-taxonomy-filter.js turns into a searchable
+ # Tom Select widget. There is no link per term (each was another URL for crawlers); the script builds the view
+ # URL from data-href-template when the selection changes.
+ #
+ # Usage, from categories.twig / tags.twig (which also provide href_template, href_placeholder, clear_filter,
+ # data_type, select_id, text_calendar_updated, text_filtered_by, text_no_results and, above the search threshold,
+ # search_url, search_taxonomy and text_type_to_search from CalendarTaxonomyView):
+ #   {% include 'taxonomy-filter-select.twig' with {terms: ..., selected_ids: ..., label: ..., a11y_label: ...} %}
+ #
+ # Required:
+ #   label           the visible placeholder ("Categories")
+ #   a11y_label      the accessible name ("Filter by category"), on a visually hidden <label> that Tom Select
+ #                   ties to its combobox and list
+ # Optional (plana sets them; vortex keeps Tom Select's defaults and its pill's own clear icon):
+ #   clear_label     adds a clear-all button with this tooltip
+ #   remove_label    "Remove %s" (%s = term name): the selected terms' remove buttons get the calendar's remove
+ #                   icon and this name
+ #   search_in_list  true: the search field is the first line of the list, so the field keeps its width
+ #   load_on_close   true: the list stays open for several picks; the view loads when it closes. Needs
+ #                   apply_label ("Apply (%d)", the list's apply bar) and not_applied_label (status for screen
+ #                   readers while picks are not applied)
+ #}
+<label for="{{ select_id }}" class="osec-screen-reader-text">{{ a11y_label }}</label>
+<select multiple
+        id="{{ select_id }}"
+        class="osec-taxonomy-filter--select"
+        aria-label="{{ a11y_label }}"
+        data-placeholder="{{ label }}"
+        {%- if clear_label is defined %} data-clear-label="{{ clear_label }}"{% endif %}
+        {%- if remove_label is defined %} data-remove-label="{{ remove_label }}"{% endif %}
+        {%- if search_in_list is defined and search_in_list %} data-search-in-list="1"{% endif %}
+        {%- if load_on_close is defined and load_on_close %} data-load-on-close="1" data-apply-label="{{ apply_label }}" data-not-applied-label="{{ not_applied_label }}"{% endif %}
+        data-no-results-label="{{ text_no_results }}"
+        {%- if search_url is defined and search_url is not empty %} data-search-url="{{ search_url }}" data-search-taxonomy="{{ search_taxonomy }}" data-type-to-search-label="{{ text_type_to_search }}"{% endif %}
+        data-updated-label="{{ text_calendar_updated }}"
+        data-filtered-label="{{ text_filtered_by }}"
+        data-href-template="{{ href_template }}"
+        data-href-placeholder="{{ href_placeholder }}"
+        data-href-empty="{{ clear_filter }}"
+        {{ data_type | raw }}>
+    {% for term in terms %}
+        <option value="{{ term.term_id }}"
+            {%- if term.color_value is not empty %} data-color="{{ term.color_value }}"{% endif %}
+            {%- if term.description_text is not empty %} data-description="{{ term.description_text }}"{% endif %}
+            {%- if term.term_id in selected_ids %} selected{% endif %}>{{ term.name_text }}</option>
+    {% endfor %}
+</select>

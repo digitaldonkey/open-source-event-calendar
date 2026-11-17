@@ -3,6 +3,7 @@
     <a class="ai1ec-category{% if format == 'inline' %}-inline{% endif %} ai1ec-term-id-{{ category.term_id }} p-category"
         {%- if category.description %} title="{{ category.description }}"{% endif -%}
         {%- if format == 'inline' and category.color %} style="color: {{ category.color }};"{% endif %}
+        rel="nofollow"
         href="{{ category.href }}">
         {%- if format == 'blocks' -%}
             {{ category.color_swatch | raw }}

@@ -505,6 +505,46 @@ function osec_initiate_constants($osec_base_dir, $osec_base_url)
         );
     }
 
+    /**
+     * Tom Select version
+     *
+     * Bundled in public/js/external_libs/tom-select (the calendar's category
+     * and tag filters). Bump this, then run bin/update-tom-select.sh to
+     * refresh the files.
+     */
+    if (! defined('OSEC_TOM_SELECT_VERSION')) {
+        define(
+            'OSEC_TOM_SELECT_VERSION',
+            '2.7.0'
+        );
+    }
+
+    /**
+     * Legacy term arguments for the category and tag filters
+     *
+     * The calendar's filters are selects (taxonomy-filter-select.twig); they
+     * print no link per term. Theme overrides of categories.twig / tags.twig
+     * written for the former term lists may still print term.href (a link to
+     * the calendar filtered by that term) and term.color (the colour swatch
+     * markup). Building them costs a URL and a template render per term on
+     * every view load, so they are only built when this is true.
+     */
+    if (! defined('OSEC_BUILD_LEGACY_TERM_ARGS')) {
+        define('OSEC_BUILD_LEGACY_TERM_ARGS', false);
+    }
+
+    /**
+     * Search threshold of the category and tag filters
+     *
+     * Up to this many terms (in use) per taxonomy, the filter lists them all
+     * in the page and searches as you type in the browser. Above it, the page
+     * holds only the selected terms, and the filter searches the server
+     * (REST osec/v1/terms) as you type. 0 always lists all terms.
+     */
+    if (! defined('OSEC_TAXONOMY_FILTER_SEARCH_THRESHOLD')) {
+        define('OSEC_TAXONOMY_FILTER_SEARCH_THRESHOLD', 300);
+    }
+
 
     /**
      * Experimental.

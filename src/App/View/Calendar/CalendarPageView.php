@@ -3,6 +3,7 @@
 namespace Osec\App\View\Calendar;
 
 use Osec\App\Controller\Router;
+use Osec\App\Controller\ScriptsFrontendController;
 use Osec\App\Model\Date\DateValidator;
 use Osec\App\Model\Date\DT;
 use Osec\App\Model\Notifications\NotificationAdmin;
@@ -255,6 +256,7 @@ class CalendarPageView extends OsecBaseClass
                     $filter_args,
                     false
                 )->get_content();
+                ScriptsFrontendController::factory($this->app)->enqueue_taxonomy_filter();
             }
 
             $calendar_args = [

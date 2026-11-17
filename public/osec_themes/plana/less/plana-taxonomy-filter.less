@@ -1,0 +1,156 @@
+// Category and tag filters (plana): the "Filter by:" row above the toolbar (filter-menu.twig, categories.twig,
+// tags.twig), each filter a frame with its icon, the Tom Select field (public/js/osec-taxonomy-filter.js), the
+// caret and, with terms selected, a clear-all segment. The widget's own structure: tom-select.less (plana's,
+// in place of the library's CSS). Colours only from plana's settings, sizes in em.
+
+.osec-taxonomy-filters {
+  margin-bottom: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4em 0;
+
+  .osec-taxonomy-filters--label {
+    margin-right: .5em;
+  }
+  .osec-taxonomy-filters--filters {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: .4em 0;
+  }
+  // One square frame around the icon and its field, in the toolbar colour (the icon and clear-all sit on it).
+  .osec-taxonomy-filters--item {
+    display: inline-flex;
+    // Stretch: the field and the clear-all segment's line run the frame's full height.
+    align-items: stretch;
+    // The toolbar controls' height (pagination, print, view switcher), border included; the former filter
+    // buttons had it too. Those resolve @toolbarControlHeight (em) against their own font size, the normal
+    // text size; the frame keeps the inherited one, so the factor is applied to that size here.
+    @controlHeightFactor: unit(@toolbarControlHeight);
+    box-sizing: border-box;
+    min-height: calc(~"var(--osec-font-size-normal) * @{controlHeightFactor}");
+    gap: .4em;
+    margin-right: 1.2em;
+    padding-left: .5em;
+    border: 1px solid var(--osec-line);
+    background-color: var(--osec-toolbar-background);
+    // The whole frame opens the list (osec-taxonomy-filter.js).
+    cursor: pointer;
+
+    > .ai1ec-fa {
+      align-self: center;
+    }
+    // Keyboard focus on the field shows on the frame; no ring after a mouse click.
+    &:has(.ts-control:focus-visible) {
+      outline: 2px solid currentColor;
+      outline-offset: -1px;
+    }
+  }
+}
+
+.osec-taxonomy-filter {
+  // The field, then the clear-all segment (moved here by osec-taxonomy-filter.js).
+  display: inline-flex;
+  align-items: stretch;
+  // Minimum width of the field and the clear-all segment together: the field narrows when clear-all appears,
+  // the filter keeps its width; it grows only when the selected terms need more room.
+  min-width: 13em;
+  max-width: 100%;
+  // The calendar's small text size (a Theme Options setting); field, list, search and icons follow it.
+  font-size: var(--osec-font-size-small);
+  line-height: 1.4;
+
+  // The field fills the filter's width (next to clear-all, when shown).
+  .ts-wrapper {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  // Fills the frame's height, also empty with the list open; room on the right for the caret.
+  .ts-control {
+    flex: 1 1 auto;
+    min-height: 2.4em;
+    padding: .3em 2em .3em .5em;
+    cursor: pointer;
+    &:focus {
+      outline: none;
+    }
+  }
+  // The caret: shows that the field opens a list. Centred in its room, so it has space on both sides, like
+  // the clear-all icon in its segment. Empty alternative text: screen readers do not read the triangle.
+  .ts-control::after {
+    content: ~'"▾" / ""';
+    position: absolute;
+    right: 0;
+    width: 2em;
+    text-align: center;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  // Clear all: the last segment, after the caret, behind a line the frame's full height. Shown whenever terms
+  // are selected.
+  > .clear-button {
+    display: none;
+    align-items: center;
+    padding: 0 .6em;
+    border-left: 1px solid var(--osec-line);
+    cursor: pointer;
+  }
+  &:has(.ts-wrapper.has-items) > .clear-button {
+    display: flex;
+  }
+
+  // The terms' remove buttons and clear-all: the same icon, the same size, the same hover. Hover and keyboard
+  // focus invert them, like the other toolbar buttons.
+  .plugin-remove_button .item .remove,
+  > .clear-button {
+    .ai1ec-fa-remove {
+      font-size: 1.1em;
+    }
+    &:hover,
+    &:focus-visible {
+      background: var(--osec-toolbar-text);
+      color: var(--osec-toolbar-contrast);
+    }
+  }
+
+  // Picked but not applied yet (the list is open; the view loads when it closes): a dashed outline, which
+  // does not change the term's size.
+  .ts-control > .item.osec-taxonomy-filter--pending {
+    outline: 1px dashed var(--osec-text);
+    outline-offset: -1px;
+  }
+  // The list's last line while picks are not applied: a button the list's full width that closes the list and
+  // so applies them.
+  .osec-taxonomy-filter--apply {
+    display: none;
+    border-top: 1px solid var(--osec-line);
+    &.is-shown {
+      display: flex;
+    }
+  }
+  // As the toolbar's buttons: toolbar colours, inverted on hover and focus.
+  .osec-taxonomy-filter--apply-button {
+    flex: 1 1 auto;
+    padding: .5em .9em;
+    border: 0;
+    border-radius: 0;
+    background: var(--osec-toolbar-background);
+    color: var(--osec-toolbar-text);
+    font: inherit;
+    cursor: pointer;
+    &:hover,
+    &:focus-visible {
+      background: var(--osec-toolbar-text);
+      color: var(--osec-toolbar-contrast);
+    }
+  }
+
+  // Colour dots: the same gap to the name in the list and on the selected terms.
+  .ai1ec-color-swatch,
+  .ai1ec-color-swatch-empty {
+    margin: 0 .45em 0 0;
+    vertical-align: baseline;
+  }
+}

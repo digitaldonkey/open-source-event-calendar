@@ -1,0 +1,153 @@
+// Tom Select for plana: the structure the category and tag filters need (public/js/osec-taxonomy-filter.js),
+// in place of the library's tom-select.css (vortex/less/tom-select.less imports that one). Written for plana
+// after what tom-select.css v2.7.0 (Apache-2.0) does; only the parts the filters use: a multiselect with the
+// remove_button, clear_button and dropdown_input plugins. Colours only from plana's settings, sizes in em.
+//
+// Scoped to .osec-taxonomy-filter, so another plugin's Tom Select on the same page keeps its own styles.
+// Plana's look of the filters (frame, caret, clear-all segment, focus): plana-taxonomy-filter.less.
+
+.osec-taxonomy-filter {
+  // The original <select>: hidden, but still in the page for the form value and the label.
+  .ts-hidden-accessible {
+    border: 0 !important;
+    clip-path: inset(50%) !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    position: absolute !important;
+    width: 1px !important;
+    white-space: nowrap !important;
+    // The WordPress theme's select background would be the one colour not from plana (not visible anyway).
+    background: none !important;
+  }
+
+  .ts-wrapper {
+    position: relative;
+  }
+
+  // The field: selected terms, then the label while nothing is selected.
+  .ts-control {
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+    color: var(--osec-text);
+    background: var(--osec-background);
+  }
+
+  // The label shown in the field while nothing is selected (dropdown_input's placeholder input).
+  // No width of its own (a text input is about 20 characters wide): it fills the field. The filter's minimum
+  // width (plana-taxonomy-filter.less) holds once terms replace it.
+  .ts-control > input {
+    flex: 1 1 0;
+    width: 0;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    color: inherit;
+    font: inherit;
+    cursor: inherit;
+    &::placeholder {
+      color: var(--osec-text-muted);
+      opacity: 1;
+    }
+  }
+  // tom-select.css hides it also while the list is open (the search moves into the list), and the empty field
+  // then collapsed; here only once terms are selected.
+  .plugin-dropdown_input.has-items .items-placeholder {
+    display: none;
+  }
+
+  // A selected term, with its remove button.
+  .ts-wrapper.multi .ts-control > .item {
+    display: inline-flex;
+    align-items: center;
+    margin: .1em .3em .1em 0;
+    padding: 0 0 0 .45em;
+    cursor: pointer;
+    background: var(--osec-background-subtle);
+    color: var(--osec-text);
+    // Keyboard-selected term (arrow keys in the field).
+    &.active {
+      background: color-mix(in srgb, var(--osec-text) 15%, var(--osec-background-subtle));
+    }
+  }
+  .plugin-remove_button .item .remove {
+    display: inline-flex;
+    align-items: center;
+    align-self: stretch;
+    margin-left: .45em;
+    padding: 0 .35em;
+    border-left: 1px solid var(--osec-line);
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  // The list: under the field, as wide as the field.
+  .ts-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 10;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    border: 1px solid var(--osec-line);
+    background: var(--osec-background);
+    color: var(--osec-text);
+  }
+  .ts-dropdown-content {
+    overflow: hidden auto;
+    max-height: 15em;
+    scroll-behavior: smooth;
+  }
+  .ts-dropdown .option,
+  .ts-dropdown .no-results {
+    padding: .35em .6em;
+  }
+  .ts-dropdown [data-selectable] {
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .ts-dropdown .no-results {
+    color: var(--osec-text-muted);
+  }
+  // Highlighted entry (mouse or arrow keys): as the toolbar.
+  .ts-dropdown .active {
+    background: var(--osec-toolbar-background);
+    color: var(--osec-toolbar-text);
+  }
+  // The searched letters in the entries.
+  .ts-dropdown [data-selectable] .highlight {
+    background: color-mix(in srgb, var(--osec-link) 25%, transparent);
+  }
+
+  // The search field, first line of the list (dropdown_input). The site's focus ring inside it.
+  .dropdown-input {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: .5em .6em;
+    border: 0;
+    border-bottom: 1px solid var(--osec-line);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--osec-text);
+    font: inherit;
+    outline-offset: -2px;
+    &::placeholder {
+      color: var(--osec-text-muted);
+      opacity: 1;
+    }
+  }
+}
