@@ -745,6 +745,36 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
     }
 
     /**
+     * Removes the tags of an HTML description and keeps its line breaks, for the plain-text DESCRIPTION.
+     *
+     * `<br>` becomes a newline; the end of a paragraph, heading, div, blockquote, list, table or pre a blank line;
+     * the end of a list item or table row a newline. Newlines in the HTML source are whitespace, except inside
+     * <pre>. Never more than one blank line. Entities are left encoded: the caller decodes
+     * them after the tags are gone, so text written as "&lt;b&gt;" is not taken for a tag.
+     *
+     * @param  string  $html  Filtered content (and excerpt).
+     *
+     * @return string Text with line breaks.
+     */
+    protected function html_to_text(string $html): string
+    {
+        // A newline in HTML source is whitespace (wpautop adds them between list items); <pre> keeps its own.
+        $html = preg_replace_callback(
+            '#<pre\b.*?</pre>#is',
+            fn($pre) => str_replace("\n", '<br>', $pre[0]),
+            $html
+        );
+        $html = preg_replace('/\s*\n\s*/', ' ', $html);
+        $html = preg_replace('#<br\s*/?>#i', "\n", $html);
+        $html = preg_replace('#</(p|h[1-6]|div|blockquote|ul|ol|table|pre)\s*>#i', "\n\n", $html);
+        $html = preg_replace('#</(li|tr)\s*>#i', "\n", $html);
+        $text = wp_strip_all_tags($html);
+        $text = preg_replace("/[ \t]*\n[ \t]*/", "\n", $text);
+
+        return trim(preg_replace("/\n{3,}/", "\n\n", $text));
+    }
+
+    /**
      * Percent-encodes the non-ASCII characters of a URL (IRI to URI), as iCalendar URI values must be ASCII.
      *
      * @param  string  $url  URL as WordPress returns it, e.g. "https://example.org/événement/".
@@ -1261,8 +1291,9 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // as they would create a new calendar in outlook.
         // a user reported this in AIOEC-982 and said this would fix it
         if (true === $arguments['do_not_export_as_calendar']) {
-            $c->setXprop('X-WR-CALNAME', get_bloginfo('name'));
-            $c->setXprop('X-WR-CALDESC', get_bloginfo('description'));
+            // Stored HTML-encoded (esc_html() on save); iCalendar text is plain.
+            $c->setXprop('X-WR-CALNAME', PlainText::decode(get_bloginfo('name')));
+            $c->setXprop('X-WR-CALDESC', PlainText::decode(get_bloginfo('description')));
         }
 
         // Timezone setup
@@ -1373,11 +1404,12 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         // ===============================
         // = DESCRIPTION plain text
         // ===============================
-        $description = $post_excerpt ? $post_excerpt . "\n\n" . $content : $content;
+        // The excerpt is plain text with typed line breaks; wpautop() as on the site, so they survive html_to_text().
+        $description = $post_excerpt ? wpautop($post_excerpt) . $content : $content;
         $e->setDescription(
             $this->sanitizeValue(
                 html_entity_decode(
-                    wp_strip_all_tags(strip_shortcodes($description)),
+                    $this->html_to_text(strip_shortcodes($description)),
                     ENT_QUOTES,
                     'UTF-8'
                 )

@@ -27,6 +27,26 @@ class IcsExportDescriptionTest extends TestBase
     }
 
     /**
+     * Layout tags become line breaks in the plain text: <br> a newline; paragraphs, headings, divs and quotes
+     * a blank line; list items and table rows a newline; never more than one blank line. Source newlines are
+     * whitespace, except in <pre>.
+     */
+    public function test_description_keeps_line_breaks()
+    {
+        $event = $this->export(
+            '<h2>Programme</h2><p>First line<br>second line<br />third</p>'
+            . '<ul><li>One</li><li>Two</li></ul><div>Box</div><blockquote>Quote</blockquote>'
+            . "<p>Last</p>\n\n\n<p>End</p><pre>a\nb</pre>"
+        );
+
+        // getDescription() returns the iCalendar text: a line break is written "\n".
+        self::assertSame(
+            str_replace("\n", '\n', "Programme\n\nFirst line\nsecond line\nthird\n\nOne\nTwo\n\nBox\n\nQuote\n\nLast\n\nEnd\n\na\nb"),
+            $event->getDescription()
+        );
+    }
+
+    /**
      * Actual formatting is removed while entities become plain text.
      */
     public function test_description_strips_markup_before_decoding_entities()
@@ -41,10 +61,10 @@ class IcsExportDescriptionTest extends TestBase
      */
     public function test_description_decodes_the_included_excerpt()
     {
-        $event = $this->export('<p>Bring a guest.</p>', 'Ages &lt;18 &amp; families.');
+        $event = $this->export('<p>Bring a guest.</p>', "Ages &lt;18 &amp; families.\nSecond line.");
 
-        self::assertStringContainsString('Ages <18 & families.', $event->getDescription());
-        self::assertStringContainsString('Bring a guest.', $event->getDescription());
+        // Excerpt and content separated by a blank line; the excerpt's own line break kept ("\n" in iCalendar).
+        self::assertSame('Ages <18 & families.\nSecond line.\n\nBring a guest.', $event->getDescription());
     }
 
     /**

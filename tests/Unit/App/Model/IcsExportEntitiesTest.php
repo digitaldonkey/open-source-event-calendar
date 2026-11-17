@@ -64,4 +64,26 @@ class IcsExportEntitiesTest extends TestBase
         $this->assertStringContainsString('X-TICKETS-URL:https://example.org/tickets?a=1&b=2', $feed);
         $this->assertDoesNotMatchRegularExpression('/&(amp|quot|lt|gt|#\d+);/', $feed);
     }
+
+    /**
+     * The single-event export names the calendar after the site. WordPress stores title and tagline HTML-encoded
+     * (esc_html() on save): "Bob&#039;s Calendar" showed as the calendar's name.
+     */
+    public function test_calendar_name_and_description_are_plain_text()
+    {
+        global $osec_app;
+
+        update_option('blogname', 'Bob\'s Calendar & <b>more</b>');
+        // No double quotes: iCalcreator writes every " in iCalendar text as ' (library behaviour).
+        update_option('blogdescription', 'Jazz & <i>live</i>');
+        $this->assertSame('Bob&#039;s Calendar &amp; &lt;b&gt;more&lt;/b&gt;', get_option('blogname'), 'stored encoded');
+
+        $ics = IcsImportExportParser::factory($osec_app)->export([
+            'events'                    => [],
+            'do_not_export_as_calendar' => true,
+        ]);
+
+        $this->assertStringContainsString('X-WR-CALNAME:Bob\'s Calendar & <b>more</b>', $ics);
+        $this->assertStringContainsString('X-WR-CALDESC:Jazz & <i>live</i>', $ics);
+    }
 }
