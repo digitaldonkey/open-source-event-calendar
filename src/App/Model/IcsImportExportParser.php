@@ -1383,6 +1383,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 // The akward newline and spacing is necessary to keep
                 // iclal 75 chars per line limit rendered correcctly.
                 $post_excerpt = $post_excerpt ? '<p><strong>' . $post_excerpt . '</strong></p>' : '';
+                $event_url    = (string)get_permalink($event->get('post_id'));
                 $link = '<p><a href="' . esc_url($event_url) . '">' . esc_url($event_url) . '</a></p>';
                 // Doctype is added after escaping
                 //   @see RenderIcal->render_with_doctype()
