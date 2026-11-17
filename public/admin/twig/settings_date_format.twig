@@ -5,12 +5,12 @@
     {% for format in time_formats %}
         <label>
             <input type='radio' name="{{ id }}"
-                   value="{{format.escaped}}"
+                   value="{{ format.raw }}"
                    {%~ if current_format == format.raw ~%}checked="checked"{%~ endif ~%}
                    data-osec-format="{{ format.raw }}"
             />
             &nbsp;<span class="date-time-text">{{ format.example }}</span>
-            <code>{{ format.escaped }}</code>
+            <code>{{ format.raw }}</code>
         </label>
         <br />
     {% endfor %}

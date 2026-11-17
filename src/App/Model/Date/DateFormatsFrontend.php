@@ -161,9 +161,8 @@ class DateFormatsFrontend extends OsecBaseInitialized
         $def = self::$default[$format];
         foreach ($def as $id => $fmt) {
             $def[$id] = [
+                // The template escapes it.
                 'raw'     => $fmt,
-                // Kept for template overrides; the template escapes it (esc_attr() here showed "&amp;" etc.).
-                'escaped' => $fmt,
                 'example' => date_i18n($fmt),
             ];
         }
