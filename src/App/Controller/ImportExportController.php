@@ -194,7 +194,7 @@ class ImportExportController
         $className = $this->engines[$engine];
         $engine    = $className::factory($this->app);
 
-        // The export runs unauthenticated, so a rule it has to leave out is
+        // The export runs unauthenticated, so a rule or URL it has to leave out is
         // recorded for the next admin page load instead of being answered to
         // whoever fetched the feed.
         $listener = function ($rule, $message, $event) {
@@ -215,11 +215,32 @@ class ImportExportController
                 true
             );
         };
+        $url_listener = function ($url, $message, $event) {
+            NotificationAdmin::factory($this->app)->store(
+                sprintf(
+                    /* translators: 1: event title, 2: event URL, 3: reason. */
+                    __(
+                        'The address of "%1$s" (%2$s) cannot be written to the iCalendar feed and was left out of it.
+                        Reason: %3$s',
+                        'open-source-event-calendar'
+                    ),
+                    esc_html((string)get_the_title($event->get('post_id'))),
+                    esc_html((string)$url),
+                    esc_html((string)$message)
+                ),
+                'error',
+                0,
+                [NotificationAdmin::RCPT_ADMIN],
+                true
+            );
+        };
         add_action('osec_recurrence_rule_not_exportable', $listener, 10, 3);
+        add_action('osec_event_url_not_exportable', $url_listener, 10, 3);
         try {
             return $engine->export($args, $this->params);
         } finally {
             remove_action('osec_recurrence_rule_not_exportable', $listener, 10);
+            remove_action('osec_event_url_not_exportable', $url_listener, 10);
         }
     }
 }
