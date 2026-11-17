@@ -93,6 +93,31 @@ class IcsExportUrlTest extends TestBase
         $this->assertStringContainsString('URL:' . get_permalink($valid->get('post_id')), $this->unfold($ics));
     }
 
+    /**
+     * A URL Iri cannot parse (its uri is false, not null) went to iCalcreator as '' instead of being refused.
+     */
+    public function test_unparseable_url_is_left_out_and_reported()
+    {
+        $reported = [];
+        $listener = function ($url) use (&$reported) {
+            $reported[] = $url;
+        };
+        add_action('osec_event_url_not_exportable', $listener, 10, 3);
+
+        $event = $this->create_event('Lesung');
+        $this->permalinks[$event->get('post_id')] = '://';
+
+        try {
+            $ics = $this->unfold($this->export([$event]));
+        } finally {
+            remove_action('osec_event_url_not_exportable', $listener, 10);
+        }
+
+        $this->assertStringContainsString('SUMMARY:Lesung', $ics);
+        $this->assertDoesNotMatchRegularExpression('/^URL:/m', $ics, 'No URL line, also no empty one.');
+        $this->assertSame(['://'], $reported);
+    }
+
     public function test_left_out_url_is_reported_to_admins()
     {
         global $osec_app;

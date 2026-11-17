@@ -734,7 +734,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
              *
              * The event is exported without its URL.
              *
-             * @since 1.2.0
+             * @since 1.2.2
              *
              * @param  string  $url  Permalink that was left out.
              * @param  string  $message  Why iCalcreator rejected it.
@@ -754,7 +754,10 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
      */
     protected function to_uri(string $url): string
     {
-        return (new Iri($url))->uri ?? $url;
+        // Iri gives false (not null) for a value it cannot parse: keep the URL then, iCalcreator judges it.
+        $uri = (new Iri($url))->uri;
+
+        return is_string($uri) && '' !== $uri ? $uri : $url;
     }
 
     /**
@@ -1359,9 +1362,12 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         if ($img_url || $content_image_uri) {
             // Use featured image if available or fall back to content image if exists.
             $img_url = $img_url ? $avatar_view->get_post_attachment_url($event, ['full'], $size) : $content_image_uri;
-            $e->setAttach(
-                $this->sanitizeValue($this->to_uri((string)$img_url)),
-            );
+            // An empty value would write an empty ATTACH (or end the feed, if iCalcreator refuses empty values).
+            if ('' !== (string)$img_url) {
+                $e->setAttach(
+                    $this->sanitizeValue($this->to_uri((string)$img_url)),
+                );
+            }
         }
 
         // ===============================

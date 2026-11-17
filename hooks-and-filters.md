@@ -1230,7 +1230,7 @@ The event is exported without its URL.
  *
  * The event is exported without its URL.
  *
- * @since 1.2.0
+ * @since 1.2.2
  *
  * @param  string  $url  Permalink that was left out.
  * @param  string  $message  Why iCalcreator rejected it.
@@ -6585,7 +6585,7 @@ The event is exported without its URL.
  *
  * The event is exported without its URL.
  *
- * @since 1.2.0
+ * @since 1.2.2
  *
  * @param  string  $url  Permalink that was left out.
  * @param  string  $message  Why iCalcreator rejected it.
