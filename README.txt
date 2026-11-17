@@ -197,6 +197,31 @@ add_filter('http_request_args', function ($args, $url) {
 
 == Changelog ==
 
+= 1.2.2 =
+
+**Highlights**
+
+* Category and tag filters are searchable multiselects: Plana picks several terms and applies them together, Vortex applies each pick; with more than 300 terms in use the filter searches on the server (#86)
+* Filtered calendar views are no longer indexed by search engines; category and tag links on events are nofollow
+
+**Fixes**
+
+* Names and labels show their text once, not `Arts &amp; Culture` or `l&#039;événement`: categories, tags, translated labels, ticket links, the event name for search engines
+* ICS feeds: `&` no longer arrives as `&amp;`, long lines stay correctly folded (#76)
+* ICS feeds: text written with angle brackets stays in the description (#78), and its line breaks are kept
+* ICS feeds: excluded dates in one EXDATE property, without the invalid leading comma (#77)
+* ICS feeds: an event address with accents (translated `/événement/` slug) no longer breaks the whole feed
+* Single event export: the calendar name shows the site title as text ("Bob's Calendar")
+* Event page: a wrong date in the URL is a "400 Bad Request" instead of an error page; a date no longer on the event leads to the event with a notice (#74)
+* Feeds: a deleted category no longer adds a category named after its number to imported events, nor breaks the feed form
+* Feed imports with ACF or SCF active no longer end in a fatal error when they create new events (#82)
+
+**Developers**
+
+* Custom calendar themes with their own `categories.twig` / `tags.twig` from 1.2.1 or earlier: `term.href` and `term.color` are only built with `OSEC_BUILD_LEGACY_TERM_ARGS`; an admin notice names affected templates. New template `taxonomy-filter-select.twig`
+* Frontend Select2 removed; Tom Select 2.7.0 bundled (Apache-2.0)
+* New: REST route `osec/v1/terms`, action `osec_event_url_not_exportable`, constants `OSEC_TAXONOMY_FILTER_SEARCH_THRESHOLD` and `OSEC_BUILD_LEGACY_TERM_ARGS`
+
 = 1.2.1 =
 
 **Fixes**
@@ -240,6 +265,10 @@ add_filter('http_request_args', function ($args, $url) {
 All changes and older versions: [CHANGELOG.md](https://github.com/digitaldonkey/open-source-event-calendar/blob/master/CHANGELOG.md)
 
 == Upgrade Notice ==
+
+= 1.2.2 =
+
+New searchable category and tag filters. Custom calendar themes with their own categories.twig or tags.twig: update them (an admin notice names them). Fixes ICS feeds (ampersands, line folding, excluded dates) and names showing HTML entities. Recommended for all sites.
 
 = 1.2.1 =
 

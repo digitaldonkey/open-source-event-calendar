@@ -289,6 +289,10 @@ Those wishing to contribute to the development of this project, please see the [
 
 ## Upgrade Notice
 
+= 1.2.2 =
+
+New searchable category and tag filters. Custom calendar themes with their own categories.twig or tags.twig: update them (an admin notice names them). Fixes ICS feeds (ampersands, line folding, excluded dates) and names showing HTML entities. Recommended for all sites.
+
 = 1.2.1 =
 
 Fixes repeating events that lost their dates after excluding a date (1.1.15 to 1.2.0): check the notice in wp-admin and repair them there. Also fixes permission checks. Recommended for all sites.
