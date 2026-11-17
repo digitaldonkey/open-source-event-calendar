@@ -50,7 +50,7 @@ class IcsExportEntitiesTest extends TestBase
             public function output(string $ics): string
             {
                 ob_start();
-                $this->render_with_doctype($ics);
+                $this->render_calendar($ics);
 
                 return (string)ob_get_clean();
             }
