@@ -617,7 +617,7 @@ class Event extends OsecBaseClass
             // ===================
             // = Insert new post =
             // ===================
-            $post_id = wp_insert_post($this->get('post'), false);
+            $post_id = wp_insert_post((array) $this->get('post'), false);
             if (0 === $post_id) {
                 return false;
             }
