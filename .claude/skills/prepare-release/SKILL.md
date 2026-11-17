@@ -61,10 +61,10 @@ still expected.
    environment's live WordPress install). If they agree, run it, then go
    back to step 2.
 
-4. **If the failure says "'Tested up to' ... is behind the latest WordPress version":**
-   Ask the user before editing. If they agree, update the `Tested up to:`
-   line in `open-source-event-calendar.php`'s plugin header docblock to the
-   major.minor version named in the error message, then go back to step 2.
+4. **If the failure says "'Tested up to' ... in README.txt is behind the latest WordPress version":**
+   README.txt takes "Tested up to" from the installed WordPress (`wp osec make_readme`); after step 3 that is the
+   latest. Regenerate it (step 6 does it too), then go back to step 2. The plugin header must not carry
+   "Tested up to" (plugin-check 2.2.0: `plugin_header_tested_up_to_not_allowed`; removed 2026-11-17).
 
 5. **If the failure says "version mismatch - OSEC_VERSION: ..."** (or the
    user is bumping to a new release version even without this failure):

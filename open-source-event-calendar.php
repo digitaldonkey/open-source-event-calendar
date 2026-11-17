@@ -10,7 +10,6 @@
  * Contributors: digitaldonkey, hubrik, vtowel, yaniiliev, nicolapeluchetti, jbutkus, lpawlik, bangelov
  * Tags: iCal, ics, ical importer, events calendar, open-source-event-calendar
  * Requires at least: 6.7
- * Tested up to: 7.1
  * Requires PHP: 8.2
  * Stable Tag: 1.2.1
  * License: GPL-3.0-or-later

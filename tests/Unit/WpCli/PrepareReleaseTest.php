@@ -94,10 +94,19 @@ class PrepareReleaseTest extends TestBase
         $this->invoke($instance, 'assert_core_not_outdated', [$future]);
     }
 
+    /**
+     * plugin-check 2.2.0 (plugin_header_tested_up_to_not_allowed): "Tested up to" belongs in the readme only.
+     */
+    public function test_plugin_header_has_no_tested_up_to()
+    {
+        $data = get_file_data(dirname(__DIR__, 3) . '/open-source-event-calendar.php', ['Tested up to'], 'plugin');
+        $this->assertSame('', $data[0]);
+    }
+
     public function test_assert_tested_up_to_current_passes_when_matching()
     {
         $instance = new PrepareRelease();
-        $tested_up_to = $this->invoke($instance, 'get_plugin_header_value', ['Tested up to']);
+        $tested_up_to = $this->invoke($instance, 'get_readme_value', ['Tested up to']);
 
         // No exception expected.
         $this->invoke($instance, 'assert_tested_up_to_current', [$tested_up_to]);
