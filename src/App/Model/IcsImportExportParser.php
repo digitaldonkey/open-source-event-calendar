@@ -1342,7 +1342,6 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             EventContentView::factory($this->app)->get_filtered_content($event->get('post'))
         );
         $content = str_replace(']]>', ']]&gt;', $content);
-        $content = html_entity_decode($content, ENT_QUOTES, 'UTF-8');
 
 
         // Prepend featured image if available.
@@ -1371,7 +1370,11 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         $description = $post_excerpt ? $post_excerpt . "\n\n" . $content : $content;
         $e->setDescription(
             $this->sanitizeValue(
-                wp_strip_all_tags(strip_shortcodes($description))
+                html_entity_decode(
+                    wp_strip_all_tags(strip_shortcodes($description)),
+                    ENT_QUOTES,
+                    'UTF-8'
+                )
             )
         );
 
