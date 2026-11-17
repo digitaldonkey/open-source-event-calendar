@@ -1,31 +1,14 @@
-<div class="plana-flyout-menu plana-flyout-menu--taxonomy ai1ec-tag-filter ai1ec-dropdown {% if selected_tag_ids is not empty %} ai1ec-active{% endif %}">
-    <button class="plana-flyout-menu--button ai1ec-dropdown-toggle">
-        <span class="ai1ec-clear-filter ai1ec-tooltip-trigger"
-              data-href="{{ clear_filter }}"
-            {{ data_type | raw }}
-            title="{{ text_clear_tag_filter }}">
-            <i class="ai1ec-fa ai1ec-fa-remove"></i>
-        </span>
-        {{ text_tags }}
-        <span class="caret">▾</span>
-    </button>
-    <ul class="plana-flyout-menu--menu" role="menu">
-        <li>
-            {% for term in tags %}
-                <span data-term="{{ term.term_id }}" class="link-wrapper{% if term.term_id in selected_tag_ids %} term-is-selected{% endif %}">
-                        <a class="link ai1ec-load-view"
-                            {% if term.description is not empty %}
-                                title="{{ term.description | e('html_attr') }}"
-                            {% endif %}
-                                {{ data_type | raw }}
-                            href="{{ term.href | e('html_attr') }}">
-                            {% if term.term_id in selected_tag_ids %}
-                                <i class="ai1ec-fa ai1ec-fa-remove"></i>
-                            {% endif %}
-                            {{ term.name | raw }}
-                        </a>
-                    </span>
-            {% endfor %}
-        </li>
-    </ul>
+<div class="osec-taxonomy-filter ai1ec-tag-filter{% if selected_tag_ids is not empty %} ai1ec-active{% endif %}">
+    {% include 'taxonomy-filter-select.twig' with {
+        terms: tags,
+        selected_ids: selected_tag_ids,
+        label: text_tags,
+        a11y_label: text_filter_by_tag,
+        clear_label: text_clear_all_tags,
+        remove_label: text_remove_term,
+        search_in_list: true,
+        load_on_close: true,
+        apply_label: text_apply,
+        not_applied_label: text_not_applied
+    } %}
 </div>

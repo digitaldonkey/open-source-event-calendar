@@ -4,7 +4,7 @@
 # release-context.sh (read from $RELEASE_ENV):
 #
 #   dev     trunk
-#   tagged  tags/X.Y.Z, and trunk when RELEASE_UPDATE_TRUNK is true
+#   tagged  tags/X.Y.Z and trunk, in one commit
 #   dryrun  like tagged, but prints what it would commit
 #   none    nothing
 #
@@ -12,9 +12,14 @@
 # only uploads what differs from trunk. Uploading a whole tag (~1,500 files)
 # timed out on "Committing transaction..." in 2026-09.
 #
-# An existing tags/X.Y.Z is never touched. Trunk is only replaced while the
-# pipeline's commit is still master's HEAD (checked again here, since master
-# can move on while the tests run).
+# An existing tags/X.Y.Z is never touched. A dev build only replaces trunk while
+# the pipeline's commit is still master's HEAD (checked again here, since master
+# can move on while the tests run). A release always replaces trunk: its Stable
+# Tag only goes live there, and trunk cannot be newer, as master only deploys
+# that Stable Tag once tags/X.Y.Z exists.
+#
+# Every failure exits 1, also a commit that reports no revision. A rerun is
+# safe: an existing tags/X.Y.Z ends it, a trunk equal to the zip commits nothing.
 
 set -Eeuo pipefail
 set +o history
@@ -49,18 +54,14 @@ fi
 
 tag_path="tags/${RELEASE_VERSION:-}"
 
-if [[ "${RELEASE_UPDATE_TRUNK:-false}" == "true" ]]; then
+if [[ "$RELEASE_MODE" == "dev" ]]; then
     head_rc=0
     "$script_dir/still-master-head.sh" || head_rc=$?
     case $head_rc in
         0) ;;
         1)
-            if [[ "$RELEASE_MODE" == "dev" ]]; then
-                note "master has moved on, trunk is left to the newer pipeline"
-                exit 0
-            fi
-            note "master has moved on, trunk stays: only $tag_path is deployed"
-            RELEASE_UPDATE_TRUNK=false
+            note "master has moved on, trunk is left to the newer pipeline"
+            exit 0
             ;;
         *) fail "could not check whether this commit is still master's HEAD" ;;
     esac
@@ -70,7 +71,7 @@ if [[ "$RELEASE_MODE" != "dev" ]] && svn ls "$SVN_URL/$tag_path" > /dev/null 2>&
     exit 0
 fi
 
-note "mode:        $RELEASE_MODE${RELEASE_VERSION:+ $RELEASE_VERSION}, replace trunk: ${RELEASE_UPDATE_TRUNK:-false}"
+note "mode:        $RELEASE_MODE${RELEASE_VERSION:+ $RELEASE_VERSION}"
 note "SVN:         $SVN_URL"
 note "release zip: $RELEASE_ZIP"
 
@@ -101,11 +102,9 @@ if [[ "$RELEASE_MODE" == "dev" ]]; then
     message="Deploy development build $sha"
 else
     # Copy of the updated trunk: carries trunk's local changes, so only the
-    # difference to the committed trunk is uploaded. Committing tags/X.Y.Z
-    # without trunk leaves trunk as it is on the server.
+    # difference to the committed trunk is uploaded.
     svn copy --quiet trunk "$tag_path"
-    targets=("$tag_path")
-    [[ "${RELEASE_UPDATE_TRUNK:-false}" == "true" ]] && targets+=(trunk)
+    targets=("$tag_path" trunk)
     message="Release $RELEASE_VERSION ($sha)"
 fi
 
@@ -142,7 +141,11 @@ if ! printf '%s' "$WP_ORG_SVN_PASSWORD" | svn commit --non-interactive --no-auth
     fail "svn commit failed"
 fi
 revision=$(sed -nE 's/^Committed revision ([0-9]+)\./\1/p' "$WORK/commit.log")
-note "committed revision ${revision:-?}: https://plugins.trac.wordpress.org/changeset/${revision:-}"
+if [[ -z "$revision" ]]; then
+    cat "$WORK/commit.log" >&2
+    fail "svn commit reported no revision, check ${targets[*]} on WordPress.org"
+fi
+note "committed revision $revision: https://plugins.trac.wordpress.org/changeset/$revision"
 
 if [[ "$RELEASE_MODE" == "tagged" ]]; then
     released=$(svn cat "$SVN_URL/$tag_path/$WP_ORG_PLUGIN_NAME.php" | sed -nE 's/^[[:space:]]*\*[[:space:]]*Version:[[:space:]]*([^[:space:]]+).*/\1/p')

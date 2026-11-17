@@ -45,7 +45,11 @@ class LessController extends OsecBaseClass
 
         $this->default_theme_url = $this->sanitize_default_theme_url($default_theme_url);
         $this->parsed_css        = '';
-        $this->files             = ['style.less', 'event.less', 'calendar.less'];
+        // Each is looked up in the active theme first, then in vortex (ThemeLoader), so a theme can replace one:
+        // plana has its own tom-select.less instead of vortex's import of the library's tom-select.css. An
+        // @import inside these files cannot be replaced that way (less.php looks next to the importing file
+        // first). tom-select.less before calendar.less, whose filter rules build on it.
+        $this->files = ['style.less', 'event.less', 'tom-select.less', 'calendar.less'];
     }
 
     /**

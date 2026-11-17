@@ -3,7 +3,7 @@ cache/*
 /vendor/
 /hookster_markdown
 .claude/settings.local.json
-
+.claude/plans/*
 # From Block Editor gitignore.
 *.log
 .DS_Store

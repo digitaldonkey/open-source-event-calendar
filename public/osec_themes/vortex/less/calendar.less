@@ -164,9 +164,6 @@
 }
 
 // View filters.
-.ai1ec-category-filter .ai1ec-category {
-  display: block;
-}
 .ai1ec-filters {
   .ai1ec-color-swatch {
     height: 7px;
@@ -181,36 +178,115 @@
     padding: 1px 2px;
   }
 }
-.ai1ec-tag-filter .ai1ec-dropdown-menu {
-  max-height: 250px;
-  min-width: 200px;
-  overflow: auto;
-}
-// Select2 filters.
-.ai1ec-select2-filters {
-  clear: both;
-  .select2-container {
-    margin: 2px 0;
-    width: 100%;
-  }
+// Accessible name of a filter (taxonomy-filter-select.twig): read by screen readers, not shown. Own class, as
+// not every WordPress theme defines .screen-reader-text.
+.osec-screen-reader-text {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
+// Category and tag filters: the Tom Select widget of public/js/osec-taxonomy-filter.js inside the
+// pill's dropdown frame (categories.twig, tags.twig). The search field with the selected terms on top,
+// the term list below it, always shown while the frame is open, as the former list of term links.
+.ai1ec-dropdown-menu.osec-taxonomy-filter {
+  min-width: 220px;
+  padding: 4px;
+
+  .ts-control,
+  .ts-control input,
+  .ts-dropdown {
+    font-size: inherit;
+    line-height: @line-height-base;
+  }
+  .ts-control {
+    border-color: @input-border;
+    border-radius: @border-radius-base;
+    padding: 2px 6px;
+  }
+  .ts-wrapper.multi.has-items .ts-control {
+    padding: 2px 6px;
+  }
+  .ts-wrapper.multi .ts-control > .item {
+    margin: 1px 3px 1px 0;
+    padding: 0 0 0 5px;
+    border-radius: @border-radius-base;
+    background: @dropdown-link-active-bg;
+    color: @dropdown-link-active-color;
+  }
+  .ts-wrapper.plugin-remove_button .item .remove {
+    border-left-color: fade(@dropdown-link-active-color, 50%);
+    color: inherit;
+    text-decoration: none;
+  }
+  // In the frame, not floating below it: shown whenever the frame is.
+  .ts-dropdown {
+    display: block !important;
+    position: static;
+    margin: 4px 0 0;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+  .ts-dropdown-content {
+    max-height: 250px;
+  }
+  .ts-dropdown .option {
+    padding: 3px 16px 3px 8px;
+    color: @dropdown-link-color;
+    white-space: nowrap;
+  }
+  .ts-dropdown .active {
+    background: @dropdown-link-hover-bg;
+    color: @dropdown-link-hover-color;
+  }
+  // Colour dots: the same gap to the name in the list and on the selected terms.
+  .ai1ec-color-swatch,
+  .ai1ec-color-swatch-empty {
+    margin: 0 5px 0 0;
+  }
+}
 // Expand / collapse all (agenda).
 .ai1ec-agenda-buttons .ai1ec-fa {
   margin-right: .3em;
 }
 
-// Clear filter buttons.
+// Clear filter buttons (categories.twig, tags.twig): a button next to the active filter's toggle, laid over the
+// toggle's icon (kept invisible, so the toggle keeps its width). Not inside the toggle: a button in a button.
 .ai1ec-clear-filter {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  // The toggle's left padding (@nav-link-padding), where its icon starts.
+  left: 15px;
+  transform: translateY(-50%);
+  padding: 0;
+  border: 0;
+  background: none;
+  // The active toggle's text colour (the icon is drawn in currentColor).
+  color: @nav-pills-active-link-hover-color;
+  font: inherit;
+  line-height: 1;
   cursor: pointer;
-  display: none !important;
 }
-.ai1ec-dropdown.ai1ec-active > .ai1ec-dropdown-toggle {
-  > i {
-    display: none !important;
-  }
-  .ai1ec-clear-filter {
-    display: inline !important;
+.ai1ec-dropdown.ai1ec-active > .ai1ec-dropdown-toggle > i {
+  visibility: hidden;
+  // The room of the clear icon, which used to replace it.
+  font-size: 1em;
+}
+// Keyboard focus on the filters (bootstrap removes the toggle's outline; osec-taxonomy-filter.js makes the toggle
+// focusable).
+.ai1ec-filters {
+  .ai1ec-dropdown-toggle:focus-visible,
+  .ai1ec-clear-filter:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
   }
 }
 

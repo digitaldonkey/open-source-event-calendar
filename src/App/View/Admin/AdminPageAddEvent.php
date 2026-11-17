@@ -9,6 +9,7 @@ use Osec\App\Model\PostTypeEvent\EventEditing;
 use Osec\App\Model\PostTypeEvent\EventNotFoundException;
 use Osec\App\Model\PostTypeEvent\EventParent;
 use Osec\App\View\Event\EventTimeView;
+use Osec\App\View\PlainText;
 use Osec\App\View\RepeatRuleToText;
 use Osec\App\WpmlHelper;
 use Osec\Bootstrap\OsecBaseClass;
@@ -149,14 +150,15 @@ class AdminPageAddEvent extends OsecBaseClass
             ];
 
             $args['children'] = [
-                'action' => esc_html__('Edit', 'open-source-event-calendar'),
+                'action' => __('Edit', 'open-source-event-calendar'),
                 'items' => [],
             ];
             foreach ($children as $child) {
                 $args['children']['items'][] = [
                     'view_url' => get_post_permalink($child->get('post_id')),
                     'edit_url' => get_edit_post_link($child->get('post_id')),
-                    'title'    => $child->get('post')->post_title,
+                    // Text: box_event_children.twig escapes it (stored titles may hold entities).
+                    'title'    => PlainText::from_html(get_the_title($child->get('post'))),
                     'time' => EventTimeView::factory($this->app)->get_timespan_html($child, 'backend'),
                 ];
             }
@@ -301,23 +303,23 @@ class AdminPageAddEvent extends OsecBaseClass
             'timezones_list'  => Timezones::factory($this->app)->get_timezones(true),
             'all_day_event' => [
                 'checked' => $event->is_allday() ? 'checked' : '',
-                'label' => esc_html__('All-day event', 'open-source-event-calendar'),
+                'label' => __('All-day event', 'open-source-event-calendar'),
             ],
             'instant_event' => [
                 'checked' => $event->is_instant() ? 'checked' : '',
-                'label' => esc_html__('No end time', 'open-source-event-calendar'),
+                'label' => __('No end time', 'open-source-event-calendar'),
             ],
             'start_date' => [
-                'label' => esc_html__('Start date / time', 'open-source-event-calendar'),
+                'label' => __('Start date / time', 'open-source-event-calendar'),
                 'input_value' => $event->get('start')->format_to_javascript(true),
             ],
             'end_date' => [
-                'label' => esc_html__('End date / time', 'open-source-event-calendar'),
+                'label' => __('End date / time', 'open-source-event-calendar'),
                 'input_value' => $event->get('end')->format_to_javascript(true),
             ],
             'timezone' => [
-                'label' => esc_html__('Time zone', 'open-source-event-calendar'),
-                'empty_text' => esc_html__('Choose your time zone', 'open-source-event-calendar'),
+                'label' => __('Time zone', 'open-source-event-calendar'),
+                'empty_text' => __('Choose your time zone', 'open-source-event-calendar'),
                 'timezones_list'  => Timezones::factory($this->app)->get_timezones(true),
                 'current_timezone' => $event->get('timezone_name', $default_tz),
             ],
@@ -325,7 +327,7 @@ class AdminPageAddEvent extends OsecBaseClass
             'recurrence' => [
                 'checked' => !empty($event->get('recurrence_rules')) ? 'checked' : '',
                 'rrule_value' => $event->get('recurrence_rules'),
-                'label' => esc_html__('Repeat', 'open-source-event-calendar') . ($is_repeating_event ? ':' : ' ... '),
+                'label' => __('Repeat', 'open-source-event-calendar') . ($is_repeating_event ? ':' : ' ... '),
                 'rrule_text' => $rrule_text,
             ],
             'excludes' => [
@@ -333,7 +335,7 @@ class AdminPageAddEvent extends OsecBaseClass
                          && !empty($event->get('exception_rules')) ? 'checked="checked"' : '',
                 'disabled' => $is_repeating_event || $event->get('recurrence_rules') ? '' : ' disabled="disabled"',
                 'exrule_value' => $event->get('exception_rules'),
-                'label' => esc_html__('Exclude', 'open-source-event-calendar') . ($has_excluded_events ? ':' : '...' ),
+                'label' => __('Exclude', 'open-source-event-calendar') . ($has_excluded_events ? ':' : '...' ),
                 'exrule_text' => $exrule_text,
             ],
         ];
@@ -375,19 +377,19 @@ class AdminPageAddEvent extends OsecBaseClass
              */
             'post_venue_html'  => apply_filters('osec_post_form_after_venue_html', ''),
             'show_coordinates_checkbox' => (bool) $show_coordinates,
-            'venue_label'      => esc_html__('Venue name:', 'open-source-event-calendar'),
+            'venue_label'      => __('Venue name:', 'open-source-event-calendar'),
             'venue'            => $event->get('venue'),
-            'address_label'    => esc_html__('Address:', 'open-source-event-calendar'),
+            'address_label'    => __('Address:', 'open-source-event-calendar'),
             'address'          => $event->get('address'),
             'show_coordinates' => $show_coordinates,
-            'coordinates_title'   => esc_html__('Coordinates', 'open-source-event-calendar'),
-            'coordinates_label' => esc_html__('Use your own coordinates', 'open-source-event-calendar'),
-            'latitude_label'   => esc_html__('Latitude:', 'open-source-event-calendar'),
+            'coordinates_title'   => __('Coordinates', 'open-source-event-calendar'),
+            'coordinates_label' => __('Use your own coordinates', 'open-source-event-calendar'),
+            'latitude_label'   => __('Latitude:', 'open-source-event-calendar'),
             'latitude'         => (float) $event->get('latitude', ''),
-            'longitude_label'   => esc_html__('Longitude:', 'open-source-event-calendar'),
+            'longitude_label'   => __('Longitude:', 'open-source-event-calendar'),
             'longitude'        => (float) $event->get('longitude', ''),
             'show_map'         => (bool) $event->get('show_map'),
-            'show_map_label'   => esc_html__('Show Map on event', 'open-source-event-calendar'),
+            'show_map_label'   => __('Show Map on event', 'open-source-event-calendar'),
             'city'             => $event->get('city', ''),
             'province'         => $event->get('province', ''),
             'postal_code'      => $event->get('postal_code', ''),
@@ -405,10 +407,10 @@ class AdminPageAddEvent extends OsecBaseClass
     {
         $event = $this->get_event();
         $args    = [
-            'cost_label' => esc_html__('Cost', 'open-source-event-calendar'),
+            'cost_label' => __('Cost', 'open-source-event-calendar'),
             'cost' => $event->get('cost'),
-            'is_free_event_label' => esc_html__('Free event', 'open-source-event-calendar'),
-            'hide_cost_label' => esc_html__('Hide event cost', 'open-source-event-calendar'),
+            'is_free_event_label' => __('Free event', 'open-source-event-calendar'),
+            'hide_cost_label' => __('Hide event cost', 'open-source-event-calendar'),
             'is_free' => $event->is_free(),
             'hide_cost' => $event->get('hide_cost'),
             'ticket_url_label' => (!$event->is_free()) ?
@@ -429,13 +431,13 @@ class AdminPageAddEvent extends OsecBaseClass
     {
         $event = $this->get_event();
         $args    = [
-            'contact_name_label' => esc_html__('Contact name:', 'open-source-event-calendar'),
+            'contact_name_label' => __('Contact name:', 'open-source-event-calendar'),
             'contact_name'  => $event->get('contact_name'),
-            'contact_phone_label' => esc_html__('Phone:', 'open-source-event-calendar'),
+            'contact_phone_label' => __('Phone:', 'open-source-event-calendar'),
             'contact_phone' => $event->get('contact_phone'),
-            'contact_email_label' => esc_html__('E-mail:', 'open-source-event-calendar'),
+            'contact_email_label' => __('E-mail:', 'open-source-event-calendar'),
             'contact_email' => $event->get('contact_email'),
-            'contact_url_label' => esc_html__('Website URL:', 'open-source-event-calendar'),
+            'contact_url_label' => __('Website URL:', 'open-source-event-calendar'),
             'contact_url'   => $event->get('contact_url'),
             'event'         => $event,
         ];
@@ -451,17 +453,12 @@ class AdminPageAddEvent extends OsecBaseClass
     {
         $parent = $this->get_parent();
         $args = [
-            'action' => esc_html__('Edit', 'open-source-event-calendar'),
+            'action' => __('Edit', 'open-source-event-calendar'),
             'parent' => [
                 'view_url' => get_post_permalink($parent->get('post_id')),
                 'edit_url'       => get_edit_post_link($parent->get('post_id')),
                 'time' => EventTimeView::factory($this->app)->get_timespan_html($parent, 'backend'),
-                'title'     => apply_filters(
-                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                    'the_title',
-                    $parent->get('post')->post_title,
-                    $parent->get('post_id')
-                ),
+                'title'     => PlainText::from_html(get_the_title($parent->get('post'))),
             ],
         ];
         ThemeLoader::factory($this->app)->get_file('box_event_children.twig', $args, true)->render();

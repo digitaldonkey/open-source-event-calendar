@@ -4,6 +4,7 @@ namespace Osec\App\Controller;
 
 use Osec\App\Model\DatabaseCharset;
 use Osec\App\Model\Date\DateValidator;
+use Osec\App\View\Calendar\CalendarTaxonomyView;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Theme\ThemeLoader;
 use WP_REST_Request;
@@ -28,6 +29,39 @@ class RestController extends OsecBaseClass
                         'permission_callback' => function () {
                             return current_user_can('read');
                         },
+                    ],
+                );
+                // The category and tag filters' server search (above OSEC_TAXONOMY_FILTER_SEARCH_THRESHOLD terms).
+                // Public like the calendar and WordPress's own term endpoints: names of terms in use only.
+                register_rest_route(
+                    'osec/v1',
+                    '/terms',
+                    [
+                        'methods'             => 'GET',
+                        'callback'            => function (WP_REST_Request $request) use ($app) {
+                            return RestController::factory($app)->searchTerms($request);
+                        },
+                        'permission_callback' => '__return_true',
+                        'args'                => [
+                            'taxonomy' => [
+                                'type'     => 'string',
+                                'enum'     => ['osec_events_categories', 'osec_events_tags'],
+                                'required' => true,
+                            ],
+                            'search'   => [
+                                'type'              => 'string',
+                                'required'          => true,
+                                'minLength'         => 1,
+                                'maxLength'         => 100,
+                                'sanitize_callback' => 'sanitize_text_field',
+                            ],
+                            'per_page' => [
+                                'type'    => 'integer',
+                                'default' => 50,
+                                'minimum' => 1,
+                                'maximum' => 100,
+                            ],
+                        ],
                     ],
                 );
                 register_rest_route(
@@ -57,6 +91,20 @@ class RestController extends OsecBaseClass
                     ],
                 );
             }
+        );
+    }
+
+    /**
+     * Terms matching a search, for the category and tag filters (CalendarTaxonomyView::search_terms()).
+     */
+    public function searchTerms(WP_REST_Request $request): \WP_REST_Response
+    {
+        return new \WP_REST_Response(
+            CalendarTaxonomyView::factory($this->app)->search_terms(
+                (string)$request->get_param('taxonomy'),
+                (string)$request->get_param('search'),
+                (int)$request->get_param('per_page')
+            )
         );
     }
 

@@ -17,6 +17,7 @@ use Osec\App\Model\PostTypeEvent\EventSearch;
 use Osec\App\Model\PostTypeEvent\EventTaxonomy;
 use Osec\App\View\Event\EventAvatarView;
 use Osec\App\View\Event\EventContentView;
+use Osec\App\View\PlainText;
 use Osec\App\View\RepeatRuleToText;
 use Osec\Bootstrap\OsecBaseClass;
 use Osec\Exception\BootstrapException;
@@ -24,6 +25,7 @@ use Osec\Exception\Exception;
 use Osec\Exception\ImportExportParseException;
 use Osec\Exception\InvalidArgumentException;
 use Osec\Exception\TimezoneException;
+use WpOrg\Requests\Iri;
 
 /**
  * The ics import/export engine.
@@ -707,6 +709,55 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
     }
 
     /**
+     * Writes the event's permalink as URL, or leaves it out if iCalcreator refuses it.
+     *
+     * The permalink can hold non-ASCII characters, as the translated rewrite slug is used as typed ("/événement/").
+     * iCalcreator accepts only URIs, so these are percent-encoded first. A URL it still refuses (a non-ASCII host)
+     * would end the whole feed; it is left out and reported instead.
+     *
+     * @param  Vevent  $component  Component to write to.
+     * @param  Event  $event  Event being exported.
+     *
+     * @return void
+     */
+    protected function export_event_url(Vevent $component, Event $event): void
+    {
+        $url = (string)get_permalink($event->get('post_id'));
+        if ('' === $url) {
+            return;
+        }
+        try {
+            $component->setUrl($this->to_uri($url));
+        } catch (\InvalidArgumentException $exception) {
+            /**
+             * Fired when an event's URL cannot be written to the iCalendar export.
+             *
+             * The event is exported without its URL.
+             *
+             * @since 1.2.0
+             *
+             * @param  string  $url  Permalink that was left out.
+             * @param  string  $message  Why iCalcreator rejected it.
+             * @param  Event  $event  Event being exported.
+             */
+            do_action('osec_event_url_not_exportable', $url, $exception->getMessage(), $event);
+        }
+    }
+
+    /**
+     * Percent-encodes the non-ASCII characters of a URL (IRI to URI), as iCalendar URI values must be ASCII.
+     *
+     * @param  string  $url  URL as WordPress returns it, e.g. "https://example.org/événement/".
+     *
+     * @return string The URI ("https://example.org/%C3%A9v%C3%A9nement/"), or the URL unchanged if it cannot be
+     *                parsed.
+     */
+    protected function to_uri(string $url): string
+    {
+        return (new Iri($url))->uri ?? $url;
+    }
+
+    /**
      * Empties the in-memory object cache during a long import.
      *
      * Saving an event caches its post and five term queries, which nothing
@@ -1261,8 +1312,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         /* @var string $uid Unique ID */
         $uid = addcslashes((string)$event->get_uid(), "\\;,\n");
         $e->setUid($this->sanitizeValue($uid));
-        $event_url = get_permalink($event->get('post_id'));
-        $e->setUrl($event_url);
+        $this->export_event_url($e, $event);
 
         // =========================
         // = Summary & description =
@@ -1311,7 +1361,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
             // Use featured image if available or fall back to content image if exists.
             $img_url = $img_url ? $avatar_view->get_post_attachment_url($event, ['full'], $size) : $content_image_uri;
             $e->setAttach(
-                $this->sanitizeValue($img_url),
+                $this->sanitizeValue($this->to_uri((string)$img_url)),
             );
         }
 
@@ -1467,7 +1517,8 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 $event->get('post_id')
             ) as $cat
         ) {
-            $categories[] = $cat->name;
+            // Stored HTML-encoded ("Arts &amp; Culture"); iCalendar text is plain.
+            $categories[] = PlainText::decode($cat->name);
         }
         $e->setCategories(implode(',', $categories), ['LANGUAGE' => $language]);
 
@@ -1475,7 +1526,7 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
         foreach (
             $this->taxonomyAdapter->get_post_tags($event->get('post_id')) as $tag
         ) {
-            $tags[] = $tag->name;
+            $tags[] = PlainText::decode($tag->name);
         }
         if (! empty($tags)) {
             $e->setXprop(
@@ -1701,17 +1752,16 @@ class IcsImportExportParser extends OsecBaseClass implements ImportExportParserI
                 'TZID'  => $tz,
             ];
             $dt_suffix = $event->get('start')->format('\THis');
+            $exdates = [];
             foreach (
                 explode(',', $exception_dates) as $exdate
             ) {
                 // date-time string in EXDATES is formatted as 'Ymd\THis\Z', that
                 // means - in UTC timezone, thus we use `format_to_gmt` here.
                 $exdate = new DT($exdate);
-                $e->setExdate(
-                    [$exdate->format_to_gmt('Ymd') . $dt_suffix],
-                    $params
-                );
+                $exdates[] = $exdate->format_to_gmt('Ymd') . $dt_suffix;
             }
+            $e->setExdate($exdates, $params);
         }
         return $calendar;
     }

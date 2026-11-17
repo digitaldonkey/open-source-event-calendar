@@ -200,11 +200,15 @@ class EventSingleView extends OsecBaseClass
         do_action('osec_alter_single_event_page_before_render', $event);
 
         $args = [
-            'title' => apply_filters(
-                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                'the_title',
-                $event->get('post')->post_title,
-                $event->get('post_id')
+            // HTML, as the_title() prints it: the templates print it |raw (escaped once more, it showed its entities).
+            'title' => wp_kses(
+                apply_filters(
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                    'the_title',
+                    $event->get('post')->post_title,
+                    $event->get('post_id')
+                ),
+                $this->app->kses->allowed_html_inline()
             ),
             'event'                  => $event, // Deprecated. Leaving for legacy.
             'is_multiday_event'      => $event->is_multiday(),
@@ -248,7 +252,8 @@ class EventSingleView extends OsecBaseClass
                 'text_cost'              => __('Cost:', 'open-source-event-calendar'),
                 'text_free'              => __('Free', 'open-source-event-calendar'),
                 'tickets_url_label'      => $event->get_runtime('tickets_url_label'),
-                'ticket_url'             => $event->get('ticket_url') ? esc_url($event->get('ticket_url')) : '',
+                // Sanitized, not HTML-escaped: the templates escape it (esc_url() gave "&#038;" in the link).
+                'ticket_url'             => $event->get('ticket_url') ? esc_url_raw($event->get('ticket_url')) : '',
                 'cost_number'            => $event->get_runtime('cost_number'),
                 'cost_iso_4217_currency' => $event->get_runtime('cost_iso_4217_currency'),
             ]);
@@ -360,11 +365,15 @@ class EventSingleView extends OsecBaseClass
             )
         );
         $args = [
-            'title'         => apply_filters(
-                // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-                'the_title',
-                $event->get('post')->post_title,
-                $event->get('post_id')
+            // HTML, as the_title() prints it: the templates print it |raw (escaped once more, it showed its entities).
+            'title'         => wp_kses(
+                apply_filters(
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                    'the_title',
+                    $event->get('post')->post_title,
+                    $event->get('post_id')
+                ),
+                $this->app->kses->allowed_html_inline()
             ),
             'event_details' => $this->get_content($event),
             'content'       => $theContent,

@@ -16,12 +16,18 @@ class RenderIcal extends RenderStrategyAbstract
     {
         $this->cleanOutputBuffers();
         header('Content-type: text/calendar; charset=utf-8');
+        // A browser must not read the feed as HTML.
+        header('X-Content-Type-Options: nosniff');
         $this->render_calendar($params['data']);
         ResponseHelper::stop();
     }
 
     /**
      * Output the serialized calendar without changing its text or line folding.
+     *
+     * The text is iCalendar, escaped by iCalcreator for that format, not HTML: running it through wp_kses() turned
+     * every "&" into "&amp;" in titles, locations, contacts and categories of every subscribed calendar. The HTML
+     * description (X-ALT-DESC) is filtered before serialization, in IcsImportExportParser.
      *
      * @param string $str Calendar with HTML sanitized before serialization.
      *

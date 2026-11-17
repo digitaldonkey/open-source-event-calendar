@@ -1199,6 +1199,51 @@ do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
 </details>
 
 
+### osec_event_url_not_exportable <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Fired when an event's URL cannot be written to the iCalendar export.
+
+```php
+do_action('osec_event_url_not_exportable', $url $message $event);
+```
+
+#### Description
+
+
+The event is exported without its URL.
+
+#### Parameters
+
+
+ - **$url** <span style="color:crimson"> </span> Permalink that was left out.
+ - **$message** <span style="color:crimson"> </span> Why iCalcreator rejected it.
+ - **$event** <span style="color:crimson"> </span> Event being exported.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Fired when an event's URL cannot be written to the iCalendar export.
+ *
+ * The event is exported without its URL.
+ *
+ * @since 1.2.0
+ *
+ * @param  string  $url  Permalink that was left out.
+ * @param  string  $message  Why iCalcreator rejected it.
+ * @param  Event  $event  Event being exported.
+ *
+ * @file src/App/Model/IcsImportExportParser.php
+ */
+do_action('osec_event_url_not_exportable', $url $message $event);
+```
+
+</details>
+
+
 ---
 
 
@@ -6504,6 +6549,51 @@ do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
  * @file src/App/Model/IcsImportExportParser.php
  */
 do_action('osec_recurrence_rule_not_exportable', $rrule $message $event);
+```
+
+</details>
+
+
+### osec_event_url_not_exportable <span style="text-transform: uppercase; font-size: small; color: darkgray"> action</span>
+
+
+Fired when an event's URL cannot be written to the iCalendar export.
+
+```php
+do_action('osec_event_url_not_exportable', $url $message $event);
+```
+
+#### Description
+
+
+The event is exported without its URL.
+
+#### Parameters
+
+
+ - **$url** <span style="color:crimson"> </span> Permalink that was left out.
+ - **$message** <span style="color:crimson"> </span> Why iCalcreator rejected it.
+ - **$event** <span style="color:crimson"> </span> Event being exported.
+
+<details markdown="1">
+<summary>Source</summary>
+
+
+```php
+/**
+ * Fired when an event's URL cannot be written to the iCalendar export.
+ *
+ * The event is exported without its URL.
+ *
+ * @since 1.2.0
+ *
+ * @param  string  $url  Permalink that was left out.
+ * @param  string  $message  Why iCalcreator rejected it.
+ * @param  Event  $event  Event being exported.
+ *
+ * @file src/App/Model/IcsImportExportParser.php
+ */
+do_action('osec_event_url_not_exportable', $url $message $event);
 ```
 
 </details>
