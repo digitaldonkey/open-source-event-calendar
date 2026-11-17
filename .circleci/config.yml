@@ -624,15 +624,14 @@ jobs:
           app-dir: integration_tests/
           override-ci-command: npm ci --include=dev
       - run:
-          name: Debug Tools
+          name: Enable WP_DEBUG
           command: |
-            sudo apt-get update && sudo apt-get install -y lynx && sudo rm -rf /var/lib/apt/lists/*
             sudo sed -i "s/'WP_DEBUG', false/'WP_DEBUG', true/g" /var/www/html/wp-config.php
       - run:
           name: Debug osec_apcu_test.php
           command: |
             echo "<?php echo 'Testing apcu on Apache config: '; var_dump(function_exists('apcu_enabled') && apcu_enabled()); " > $WP_CORE_DIR/osec_apcu_test.php
-            lynx -dump $WP_HOST/osec_apcu_test.php
+            curl -fsS "http://$WP_HOST/osec_apcu_test.php"
       - run:
           name: Release integratiion test
           command: |
